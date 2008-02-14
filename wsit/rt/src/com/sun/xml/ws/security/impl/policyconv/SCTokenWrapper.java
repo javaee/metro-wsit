@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
+import com.sun.xml.ws.security.policy.Claims;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.IssuerName;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -135,6 +136,10 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     
     public IssuerName getIssuerName() {
         return this.scToken.getIssuerName();
+    }
+    
+    public Claims getClaims(){
+        return this.scToken.getClaims();
     }
     
     public NestedPolicy getBootstrapPolicy() {

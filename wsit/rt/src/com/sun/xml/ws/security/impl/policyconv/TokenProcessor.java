@@ -187,6 +187,10 @@ public class TokenProcessor {
                 sab.setIssuer(samlToken.getIssuerName().getIssuerName());
             }
             
+            if(samlToken.getClaims() != null){
+                sab.setClaims(samlToken.getClaims().getClaimsAsBytes());
+            }
+            
             if(samlToken.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
@@ -210,6 +214,10 @@ public class TokenProcessor {
                 itkb.setIssuer(it.getIssuerName().getIssuerName());
             }
             
+            if(it.getClaims() != null){
+                itkb.setClaims(it.getClaims().getClaimsAsBytes());
+            }
+            
             if(it.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(itkb);
@@ -228,6 +236,10 @@ public class TokenProcessor {
                     sct.setIssuer(addr.getURI().toString());
             } else if(sctPolicy.getIssuerName() != null){
                 sct.setIssuer(sctPolicy.getIssuerName().getIssuerName());
+            }
+            
+            if(sctPolicy.getClaims() != null){
+                sct.setClaims(sctPolicy.getClaims().getClaimsAsBytes());
             }
             
             if(sctPolicy.isRequireDerivedKeys()){
@@ -309,6 +321,19 @@ public class TokenProcessor {
             if(!ut.hasPassword()){
                 key.setNoPassword(true);
             }
+            
+            if(ut.getIssuer() != null){
+                Address addr = ut.getIssuer().getAddress();
+                if(addr != null)
+                    key.setIssuer(addr.getURI().toString());
+            } else if(ut.getIssuerName() != null){
+                key.setIssuer(ut.getIssuerName().getIssuerName());
+            }
+            
+            if(ut.getClaims() != null){
+                key.setClaims(ut.getClaims().getClaimsAsBytes());
+            }
+            
             //key.setPolicyToken(token);
             return key;
         }else if(PolicyUtil.isSamlToken((PolicyAssertion) token, spVersion)){
@@ -319,18 +344,60 @@ public class TokenProcessor {
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             key.setSTRID(token.getTokenId());
+            
+            SamlToken samlToken = (SamlToken)token;
+            if(samlToken.getIssuer() != null){
+                Address addr = samlToken.getIssuer().getAddress();
+                if(addr != null)
+                    key.setIssuer(addr.getURI().toString());
+            } else if(samlToken.getIssuerName() != null){
+                key.setIssuer(samlToken.getIssuerName().getIssuerName());
+            }
+            
+            if(samlToken.getClaims() != null){
+                key.setClaims(samlToken.getClaims().getClaimsAsBytes());
+            }
+            
             return key;
         }else if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)){
             IssuedTokenKeyBinding key = new IssuedTokenKeyBinding();
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
+            
+            IssuedToken it = (IssuedToken)token;
+            if(it.getIssuer() != null){
+                Address addr = it.getIssuer().getAddress();
+                if(addr != null)
+                    key.setIssuer(addr.getURI().toString());
+            } else if(it.getIssuerName() != null){
+                key.setIssuer(it.getIssuerName().getIssuerName());
+            }
+            
+            if(it.getClaims() != null){
+                key.setClaims(it.getClaims().getClaimsAsBytes());
+            }
+            
             return key;
         }else if(PolicyUtil.isSecureConversationToken((PolicyAssertion) token, spVersion)){
             SecureConversationTokenKeyBinding key =  new SecureConversationTokenKeyBinding();
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
+            
+            SecureConversationToken sct = (SecureConversationToken)token;
+            if(sct.getIssuer() != null){
+                Address addr = sct.getIssuer().getAddress();
+                if(addr != null)
+                    key.setIssuer(addr.getURI().toString());
+            } else if(sct.getIssuerName() != null){
+                key.setIssuer(sct.getIssuerName().getIssuerName());
+            }
+            
+            if(sct.getClaims() != null){
+                key.setClaims(sct.getClaims().getClaimsAsBytes());
+            }
+            
             return key;
         }else if(PolicyUtil.isX509Token((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding  xt =  new AuthenticationTokenPolicy.X509CertificateBinding();
@@ -338,6 +405,20 @@ public class TokenProcessor {
             //xt.setPolicyToken(token);
             setTokenInclusion(xt,token);
             setX509TokenRefType(xt, (X509Token) token);
+            
+            X509Token x509Token = (X509Token)token;
+            if(x509Token.getIssuer() != null){
+                Address addr = x509Token.getIssuer().getAddress();
+                if(addr != null)
+                    xt.setIssuer(addr.getURI().toString());
+            } else if(x509Token.getIssuerName() != null){
+                xt.setIssuer(x509Token.getIssuerName().getIssuerName());
+            }
+            
+            if(x509Token.getClaims() != null){
+                xt.setClaims(x509Token.getClaims().getClaimsAsBytes());
+            }
+            
             return xt;
         }
         if(logger.isLoggable(Level.SEVERE)){

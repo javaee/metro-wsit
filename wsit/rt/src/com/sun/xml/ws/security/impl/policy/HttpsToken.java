@@ -68,6 +68,7 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private static QName rccQname;
     private Issuer issuer = null;
     private IssuerName issuerName = null;
+    private Claims claims = null;
     /**
      * Creates a new instance of HttpsToken
      */
@@ -118,6 +119,11 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
         return issuerName;
     }
     
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -164,6 +170,9 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
                         issuer = (Issuer)assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
+                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                            SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
+                        claims = (Claims)assertion;
                     }
                 }
             }

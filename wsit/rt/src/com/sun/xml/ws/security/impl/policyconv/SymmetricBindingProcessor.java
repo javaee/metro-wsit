@@ -225,6 +225,10 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 kerberosBinding.setIssuer(kerberosToken.getIssuerName().getIssuerName());
             }
             
+            if(kerberosToken.getClaims() != null){
+                kerberosBinding.setClaims(kerberosToken.getClaims().getClaimsAsBytes());
+            }
+            
             if(kerberosToken.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 skb.setKeyBinding(kerberosBinding);
@@ -251,6 +255,10 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 sab.setIssuer(samlToken.getIssuerName().getIssuerName());
             }
             
+            if(samlToken.getClaims() != null){
+                sab.setClaims(samlToken.getClaims().getClaimsAsBytes());
+            }
+            
             if(samlToken.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sab);
@@ -274,6 +282,10 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 itkb.setIssuer(it.getIssuerName().getIssuerName());
             }
             
+            if(it.getClaims() != null){
+                itkb.setClaims(it.getClaims().getClaimsAsBytes());
+            }
+            
             if(it.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(itkb);
@@ -292,6 +304,10 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                     sct.setIssuer(addr.getURI().toString());
             } else if(sctPolicy.getIssuerName() != null){
                 sct.setIssuer(sctPolicy.getIssuerName().getIssuerName());
+            }
+            
+            if(sctPolicy.getClaims() != null){
+                sct.setClaims(sctPolicy.getClaims().getClaimsAsBytes());
             }
             
             if(sctPolicy.isRequireDerivedKeys()){

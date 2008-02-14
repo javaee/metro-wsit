@@ -66,4 +66,10 @@ public interface UserNameToken extends Token{
      */
     public IssuerName getIssuerName();
     
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
+    
 }

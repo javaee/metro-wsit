@@ -66,6 +66,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private String includeToken;
     private Issuer issuer = null;
     private IssuerName issuerName = null;
+    private Claims claims = null;
     
     /**
      * Creates a new instance of UsernameToken
@@ -124,6 +125,11 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
         return issuerName;
     }
     
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -167,6 +173,9 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                         issuer = (Issuer)assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
+                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                            SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
+                        claims = (Claims)assertion;
                     }
                 }
             }

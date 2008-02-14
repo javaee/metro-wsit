@@ -73,5 +73,11 @@ public interface KerberosToken extends Token{
      * @return the issuer name for Kerberos token
      */
     public IssuerName getIssuerName();
+    
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
   
 }

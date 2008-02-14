@@ -70,6 +70,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeToken;
+    private Claims claims = null;
     
     /**
      * Creates a new instance of IssuedToken
@@ -123,6 +124,11 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
         return issuerName;
     }  
     
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
+    
     public boolean isRequireDerivedKeys() {
         populate();
         return reqDK;
@@ -151,6 +157,9 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                         this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
+                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                            SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
+                        claims = (Claims)assertion;
                     } else{
                         if(!assertion.isOptional()){
                             log_invalid_assertion(assertion, isServer,IssuedToken);

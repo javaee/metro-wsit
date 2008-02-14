@@ -78,6 +78,12 @@ public interface SecureConversationToken extends Token {
      * @return the issuer name for SecureConversation token
      */
     public IssuerName getIssuerName();
+    
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
   
     /**
      * returns {@link com.sun.xml.ws.policy.Policy } which represents Bootstrap Policy

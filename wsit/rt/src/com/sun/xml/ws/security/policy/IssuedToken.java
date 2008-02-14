@@ -58,6 +58,12 @@ public interface IssuedToken extends Token{
      * @return the issuer name for Issued token
      */
     public IssuerName getIssuerName();
+    
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
    
     /**
      * returns {@link RequestSecurityTokenTemplate }

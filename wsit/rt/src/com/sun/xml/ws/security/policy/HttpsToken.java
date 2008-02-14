@@ -73,4 +73,10 @@ public interface HttpsToken extends Token {
      * @return the issuer name for X509 token
      */
     public IssuerName getIssuerName();
+    
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
 }

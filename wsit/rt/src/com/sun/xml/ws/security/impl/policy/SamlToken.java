@@ -76,6 +76,7 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
     private String includeTokenType;
     private Issuer issuer = null;
     private IssuerName issuerName = null;
+    private Claims claims = null;
     
     /** Creates a new instance of SamlToken */
     
@@ -129,6 +130,11 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
         return issuerName;
     }
     
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -179,6 +185,9 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
                         issuer = (Issuer)assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
+                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                            SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
+                        claims = (Claims)assertion;
                     }
                 }
             }

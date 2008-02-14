@@ -73,5 +73,11 @@ public interface SamlToken extends Token {
      * @return the issuer name for SAML token
      */
     public IssuerName getIssuerName();
+    
+    /**
+     * 
+     * @return Claims
+     */ 
+    public Claims getClaims();
  
 }

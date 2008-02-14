@@ -71,6 +71,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeToken;
+    private Claims claims = null;
     /**
      * Creates a new instance of SecureConversationToken
      */
@@ -121,6 +122,10 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
         return issuerName;
     }
     
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
     
     public String getIncludeToken() {
         populate();
@@ -196,6 +201,9 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                         issuer = (Issuer)assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
+                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                            SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
+                        claims = (Claims)assertion;
                     }
                 }
             }
