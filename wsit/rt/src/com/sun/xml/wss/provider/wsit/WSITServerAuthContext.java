@@ -413,7 +413,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         try{
             
             if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
-                if(!optimized || msg.isFault()) {
+                if(!optimized) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
                     msg = Messages.create(soapMessage);
@@ -478,9 +478,6 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
-                if(optimized){
-                    ctx = new ProcessingContextImpl( packet.invocationProperties);
-                }
             } else if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -564,36 +561,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         if(cachedOp != null){
             WSDLOperation operation = cachedOp.getOperation();
-            try{
-                SOAPBody body = packet.getMessage().readAsSOAPMessage().getSOAPBody();
-                NodeList nodes = body.getElementsByTagName("detail");
-                if(nodes.getLength() == 0){
-                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
-                }
-                if(nodes.getLength() >0){
-                    Node node = nodes.item(0);
-                    Node faultNode = node.getFirstChild();
-                    if(faultNode == null){
-                        return null;
-                    }
-                    String uri = faultNode.getNamespaceURI();
-                    QName faultDetail = null;
-                    if(uri != null && uri.length() >0){
-                        faultDetail = new QName(faultNode.getNamespaceURI(),faultNode.getLocalName());
-                    }else{
-                        faultDetail = new QName(faultNode.getNodeName());
-                    }
-                    WSDLFault fault = operation.getFault(faultDetail);
-                    SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOp);
-                    SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
-                    MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
-                    return faultPolicy;
-                    
-                }
-            }catch(SOAPException sx){
-                //sx.printStackTrace();
-                //log error
+            QName faultDetail = packet.getMessage().getFirstDetailEntryName();
+            if(faultDetail == null){
+                return null;
             }
+            WSDLFault fault = operation.getFault(faultDetail);
+            SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOp);
+            SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
+            MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
+            return faultPolicy;
         }
         return null;
         
