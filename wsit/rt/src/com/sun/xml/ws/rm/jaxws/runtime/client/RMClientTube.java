@@ -192,10 +192,6 @@ public final class RMClientTube extends TubeBase {
                 //make this available to the client
                 //FIXME - Can this work?
                 packet.proxy.getRequestContext().put(Constants.sequenceProperty, outboundSequence);
-
-                //set a Session object in BindingProvider property allowing user to close the sequence
-                // TODO do we need this? remove?
-                proxy.getRequestContext().put(ClientSession.SESSION_PROPERTY_KEY, new ClientSession(outboundSequence.getId(), this));
             }
         }
     }
