@@ -49,7 +49,6 @@ import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import javax.xml.ws.WebServiceException;
 
 /**
