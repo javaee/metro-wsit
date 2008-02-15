@@ -44,6 +44,7 @@ import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import java.io.IOException;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -94,7 +95,11 @@ public class PacketFilteringTube extends AbstractFilterTubeImpl {
         if (isClientSide) {
             try {
                 for (PacketFilter filter : filters) {
-                    request = filter.filterClientRequest(request);
+                    if (request != null) {
+                        request = filter.filterClientRequest(request);
+                    } else {
+                        break;
+                    }
                 }
             } catch (Exception ex) {
                 LOGGER.logSevereException(ex);
@@ -106,7 +111,8 @@ public class PacketFilteringTube extends AbstractFilterTubeImpl {
             }
 
             if (request == null) {
-                return doReturnWith(request); // TODO: is this ok?
+                // simulate IO error
+                return doThrow(new WebServiceException(new IOException("Simulated IO error while sending request")));
             }
         }
         return super.processRequest(request);
@@ -117,7 +123,11 @@ public class PacketFilteringTube extends AbstractFilterTubeImpl {
         if (!isClientSide) {
             try {
                 for (PacketFilter filter : filters) {
-                    response = filter.filterServerResponse(response);
+                    if (response != null) {
+                        response = filter.filterServerResponse(response);
+                    } else {
+                        break;
+                    }
                 }
             } catch (Exception ex) {
                 LOGGER.logSevereException(ex);
