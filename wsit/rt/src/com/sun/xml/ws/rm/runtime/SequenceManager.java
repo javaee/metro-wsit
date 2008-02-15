@@ -74,6 +74,16 @@ public interface SequenceManager {
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
+     * Provides information on whether the sequence identifier is a valid identifier that belongs to an existing 
+     * sequence registered with the sequence manager.
+     * 
+     * @param sequenceId sequence identifier to be checked
+     * 
+     * @return {@code true} in case the sequence identifier is valid, {@code false} otherwise
+     */
+    public boolean isValid(String sequenceId);
+    
+    /**
      * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
      * 
      * @param sequenceId the unique sequence identifier

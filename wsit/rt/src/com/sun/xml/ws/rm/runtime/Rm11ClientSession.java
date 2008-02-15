@@ -135,7 +135,6 @@ final class Rm11ClientSession extends ClientSession {
         }
         sequenceManager.createOutboudSequence(outboundSequenceId, expirationTime);
 
-
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
             // TODO : make sure we are sending acknowledgements to the proper acksTo endpoint
@@ -228,39 +227,44 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     protected void terminateOutboundSequence() throws RmException {
-        //TODO piggyback an acknowledgement if one is pending
-        //seq.processAcknowledgement(new RMMessage(request));
         final Message request = Messages.create(
                 configuration.getRmVersion().jaxbContext,
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 configuration.getSoapVersion());
 
-        Message response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
-        if (response == null) {
-            // TODO L10N
-            throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
-        }
-
-        processInboundMessageHeaders(response.getHeaders(), false);
-
-        if (response.isFault()) {
-            // TODO L10N
-            throw new TerminateSequenceException("There was an error during the sequence termination", response);
-        }
-
-        String responseAction = communicator.getAction(response);
-        if (configuration.getRmVersion().terminateSequenceAction.equals(responseAction)) {
-            TerminateSequenceElement tsElement = unmarshallResponse(response);
-            sequenceManager.terminateSequence(tsElement.getIdentifier().toString());
-        } else if (configuration.getRmVersion().terminateSequenceResponseAction.equals(responseAction)) {
-            TerminateSequenceResponseElement tsrElement = unmarshallResponse(response); // consuming message here
-            if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
+        Message response = null;
+        try {
+            response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
+            if (response == null) {
                 // TODO L10N
-                throw new TerminateSequenceException("The sequence identifier in the terminate sequence response message [" + tsrElement.getIdentifier().getValue() + "]" +
-                        " does not correspond to the terminating outbound sequence identifier [" + outboundSequenceId + "]");
+                throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
             }
-        } else {
-            response.consume(); // TODO consume even if exception thrown...
+
+            processInboundMessageHeaders(response.getHeaders(), false);
+
+            if (response.isFault()) {
+                // TODO L10N
+                throw new TerminateSequenceException("There was an error during the sequence termination", response);
+            }
+
+            String responseAction = communicator.getAction(response);
+            if (configuration.getRmVersion().terminateSequenceAction.equals(responseAction)) {
+                TerminateSequenceElement tsElement = unmarshallResponse(response);
+                response = null; // marking response as consumed...
+                sequenceManager.terminateSequence(tsElement.getIdentifier().toString());
+            } else if (configuration.getRmVersion().terminateSequenceResponseAction.equals(responseAction)) {
+                TerminateSequenceResponseElement tsrElement = unmarshallResponse(response);
+                response = null; // marking response as consumed...
+                if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
+                    // TODO L10N
+                    throw new TerminateSequenceException("The sequence identifier in the terminate sequence response message [" + tsrElement.getIdentifier().getValue() + "]" +
+                            " does not correspond to the terminating outbound sequence identifier [" + outboundSequenceId + "]");
+                }
+            }
+        } finally {
+            if (response != null) {
+                response.consume();
+            }
         }
     }
 
@@ -319,8 +323,6 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     protected void processAckRequestedHeader(HeaderList inboundMessageHeaders) throws RmException {
-        //dispatch to InboundSequence to construct response.
-        //TODO handle error condition no such sequence
         AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(inboundMessageHeaders, "AckRequested");
         if (ackRequestedElement != null) {
             String sequenceId = ackRequestedElement.getId();

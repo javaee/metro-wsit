@@ -222,43 +222,43 @@ abstract class ClientSession {
      * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
     final void close() {
-        // TODO rewrite closing and terminating inbound sequence
-        // TODO refactor protocol message response handling: base it on action (or check action at least)
         try {
-            closeOutboundSequence();
-        } catch (RmException ex) {
-            LOGGER.logException(ex, Level.WARNING);
-        } finally {
             try {
-                sequenceManager.closeSequence(outboundSequenceId);
-            } catch (UnknownSequenceException ex) {
+                closeOutboundSequence();
+            } catch (RmException ex) {
                 LOGGER.logException(ex, Level.WARNING);
+            } finally {
+                try {
+                    sequenceManager.closeSequence(outboundSequenceId);
+                } catch (UnknownSequenceException ex) {
+                    LOGGER.logException(ex, Level.WARNING);
+                }
             }
-        }
 
-        try {
-            waitUntilAllRequestsAckedOrTimeout();
-            terminateOutboundSequence();
-        } catch (RmException ex) {
-            LOGGER.logException(ex, Level.WARNING);
-        } finally {
             try {
-                sequenceManager.terminateSequence(outboundSequenceId);
-            } catch (UnknownSequenceException ex) {
+                waitUntilAllRequestsAckedOrTimeout();
+                terminateOutboundSequence();
+            } catch (RmException ex) {
                 LOGGER.logException(ex, Level.WARNING);
+            } finally {
+                try {
+                    sequenceManager.terminateSequence(outboundSequenceId);
+                } catch (UnknownSequenceException ex) {
+                    LOGGER.logException(ex, Level.WARNING);
+                }
             }
-        }
 
-        try {
-            sequenceManager.closeSequence(inboundSequenceId);
-        } catch (UnknownSequenceException ex) {
-            LOGGER.logException(ex, Level.WARNING);
-        }
-        try {
-            // TODO wait for an external event?
-            sequenceManager.terminateSequence(inboundSequenceId);
-        } catch (UnknownSequenceException ex) {
-            LOGGER.logException(ex, Level.WARNING);
+            if (inboundSequenceId != null && sequenceManager.isValid(inboundSequenceId)) {
+                try {
+                    if (!sequenceManager.getSequence(inboundSequenceId).isClosed()) {
+                        sequenceManager.closeSequence(inboundSequenceId);
+                    }
+                    // TODO wait for an external event?
+                    sequenceManager.terminateSequence(inboundSequenceId);
+                } catch (UnknownSequenceException ex) {
+                    LOGGER.logException(ex, Level.WARNING);
+                }
+            }
         } finally {
             scheduledTaskManager.stopAll();
         }
@@ -396,7 +396,7 @@ abstract class ClientSession {
                     "does not match the sequence id bound to this session [" + expected + "]"));
         }
     }
-    
+
     private boolean checkPendingAckRequest() throws UnknownSequenceException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();

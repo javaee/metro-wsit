@@ -63,6 +63,15 @@ public class InMemorySequenceManager implements SequenceManager {
         }
     }
 
+    public boolean isValid(String sequenceId) {
+        try {
+            sequenceLock.readLock().lock();
+            return sequences.containsKey(sequenceId);
+        } finally {
+            sequenceLock.readLock().unlock();
+        }
+    }
+    
     public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
         return registerSequence(new OutboundSequence(sequenceId, expirationTime));
     }

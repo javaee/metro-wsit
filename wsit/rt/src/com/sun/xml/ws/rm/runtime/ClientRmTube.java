@@ -181,7 +181,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             return true;
         } else if (throwable instanceof WebServiceException) {
             //Unwrap exception and see if it makes sense to retry this request (no need to check for null).
-            if (throwable.getCause() instanceof IOException || throwable.getCause() instanceof SocketTimeoutException) {
+            if (throwable.getCause() instanceof IOException) {
                 return true;
             }
         }
