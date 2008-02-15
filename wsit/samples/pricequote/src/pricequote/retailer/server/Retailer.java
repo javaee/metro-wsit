@@ -34,7 +34,7 @@
  * holder.
  */
 /*
- $Id: Retailer.java,v 1.5 2007-05-29 22:12:27 ofung Exp $
+ $Id: Retailer.java,v 1.6 2008-02-15 11:27:22 m_potociar Exp $
 */
 
 package pricequote.retailer.server;
@@ -46,11 +46,9 @@ import javax.annotation.Resource;
 import javax.jws.WebService;
 import javax.servlet.ServletContext;
 import javax.xml.namespace.QName;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import com.sun.xml.ws.rm.jaxws.runtime.client.ClientSession;
 import pricequote.wholesaler.client.WholesalerClient;
 
 /**
@@ -75,20 +73,16 @@ public class Retailer implements RetailerPortType {
         logger.log(level, "Invoking WSIT's Wholesaler ...");
         pricequote.wholesaler.client.Quote sunQuote = sunClient.getQuote(pid);
         float sunPrice = sunQuote.getPrice();
-        ClientSession session = ClientSession.getSession((BindingProvider)sunClient.getBindingProvider());
-        if (session != null)
-            session.close();
         logger.log(level, "Sun's wholesaler response received.");
+        sunClient.close();
 
         logger.log(level, "Configuring WSIT#2 client ...");
         WholesalerClient msClient = new WholesalerClient(getMSEndpointAddress(sc), new QName(WQS_NAMESPACE_URI, getMSServiceName(sc)));
         logger.log(level, "Invoking WSIT#2's Wholesaler ...");
         pricequote.wholesaler.client.Quote msQuote = msClient.getQuote(pid);
-        session = ClientSession.getSession((BindingProvider)msClient.getBindingProvider());
-        if (session != null)
-            session.close();
         float msPrice = msQuote.getPrice();
         logger.log(level, "WSIT#2's wholesaler response received.");
+        msClient.close();
 
         pricequote.wholesaler.client.Quote quote = sunPrice <= msPrice ? sunQuote : msQuote;
         logger.log(level, "Got a better price from \"{0}\" Wholesaler ...",

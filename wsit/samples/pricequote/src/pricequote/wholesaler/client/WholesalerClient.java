@@ -34,11 +34,12 @@
  * holder.
  */
 /*
- $Id: WholesalerClient.java,v 1.6 2007-05-29 22:12:28 ofung Exp $
+ $Id: WholesalerClient.java,v 1.7 2008-02-15 11:27:23 m_potociar Exp $
 */
 
 package pricequote.wholesaler.client;
 
+import java.io.Closeable;
 import javax.annotation.Resource;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceContext;
@@ -88,7 +89,10 @@ public class WholesalerClient {
         return port.getQuote(pid);
     }
 
-    public WholesalerPortType getBindingProvider() {
-        return port;
+    public void close() {
+        if (port != null) {
+            ((Closeable) port).close();
+            port = null;
+        }
     }
 }
