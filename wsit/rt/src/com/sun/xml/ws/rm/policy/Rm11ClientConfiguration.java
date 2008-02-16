@@ -55,8 +55,8 @@ class Rm11ClientConfiguration implements Configuration {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
 
-    public Rm11ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion) throws RmWsException {
-        destinationConfig = new Rm11ServiceConfiguration(alternative, soapVersion, addressingVersion);
+    public Rm11ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmWsException {
+        destinationConfig = new Rm11ServiceConfiguration(alternative, soapVersion, addressingVersion, requestResponseDetected);
 
         AckRequestIntervalClientAssertion ackIntervalAssertion = ConfigurationManager.extractAssertion(alternative, AckRequestIntervalClientAssertion.NAME, AckRequestIntervalClientAssertion.class);
         ackRequestInterval = (ackIntervalAssertion != null) ? ackIntervalAssertion.getInterval() : DEFAULT_ACKNOWLEDGEMENT_REQUEST_INTERVAL;
@@ -97,6 +97,10 @@ class Rm11ClientConfiguration implements Configuration {
 
     public AddressingVersion getAddressingVersion() {
         return destinationConfig.getAddressingVersion();
+    }
+
+    public boolean requestResponseOperationsDetected() {
+        return destinationConfig.requestResponseOperationsDetected();
     }
 
     public long getInactivityTimeout() {

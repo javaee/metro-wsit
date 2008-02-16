@@ -53,10 +53,12 @@ class Rm10ServiceConfiguration implements Configuration {
     private final boolean orderedDelivery;
     private final DeliveryAssurance deliveryAssurance;
     private final long acknowledgementInterval;
+    private final boolean requestResponseDetected;
 
-    public Rm10ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
+    public Rm10ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
+        this.requestResponseDetected = requestResponseDetected;
         
         Rm10Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm10Assertion.NAME, Rm10Assertion.class);
         inactivityTimeout = rmAssertion.getInactivityTimeout();
@@ -84,6 +86,10 @@ class Rm10ServiceConfiguration implements Configuration {
         return addressingVersion;
     }
 
+    public boolean requestResponseOperationsDetected() {
+        return requestResponseDetected;
+    }
+    
     public long getInactivityTimeout() {
         return inactivityTimeout;
     }

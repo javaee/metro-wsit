@@ -76,18 +76,24 @@ public interface Configuration {
 
     /**
      * Provides information about the SOAP protocol version used on the RM-enabled endpoint.
-     * TODO: probably should not be here...
+     * 
      * @return the SOAP protocol version used on the RM-enabled endpoint
      */
     public SOAPVersion getSoapVersion();
 
     /**
      * Provides information about the WS-Addressing protocol version used on the RM-enabled endpoint.
-     * TODO: probably should not be here...
+     * 
      * @return the WS-Addressing protocol version used on the RM-enabled endpoint
      */
     public AddressingVersion getAddressingVersion();
-
+    
+    /**
+     * Provides information if the port, which this configuration belongs to, has any request/response operations 
+     * @return {@code true} in case the port has any request/response operations; {@code false} otherwise
+     */
+    public boolean requestResponseOperationsDetected();
+    
     /**
      * Specifies a period of inactivity for the sequence (in miliseconds).
      * 

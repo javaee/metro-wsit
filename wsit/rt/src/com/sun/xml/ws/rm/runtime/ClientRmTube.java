@@ -47,6 +47,8 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.policy.ConfigurationManager;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
@@ -81,10 +83,12 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             // TODO remove this condition and remove context.getScInitiator() method
             scInitiator = context.getScInitiator();
         }
+        
+        // TODO don't take the first config alternative automatically...
+        Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];
         this.session = ClientSession.create(
-                context.getWsdlPort(),
-                context.getBinding(),
-                new ProtocolCommunicator(super.next, scInitiator, context.getBinding().getSOAPVersion(), context.getBinding().getAddressingVersion()));
+                configuration,
+                new ProtocolCommunicator(super.next, scInitiator, configuration));
         this.wsdlPort = context.getWsdlPort();
 
         this.requestPacketCopy = null;

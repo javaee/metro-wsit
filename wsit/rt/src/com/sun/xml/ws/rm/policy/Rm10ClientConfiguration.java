@@ -54,8 +54,8 @@ class Rm10ClientConfiguration implements Configuration {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
 
-    public Rm10ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
-        destinationConfig = new Rm10ServiceConfiguration(alternative, soapVersion, addressingVersion);
+    public Rm10ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+        destinationConfig = new Rm10ServiceConfiguration(alternative, soapVersion, addressingVersion, requestResponseDetected);
 
         Rm10Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm10Assertion.NAME, Rm10Assertion.class);
         exponentialBackoff = rmAssertion.useExponentialBackoffAlgorithm();
@@ -102,7 +102,11 @@ class Rm10ClientConfiguration implements Configuration {
     public AddressingVersion getAddressingVersion() {
         return destinationConfig.getAddressingVersion();
     }
-
+    
+    public boolean requestResponseOperationsDetected() {
+        return destinationConfig.requestResponseOperationsDetected();
+    }
+    
     public long getInactivityTimeout() {
         return destinationConfig.getInactivityTimeout();
     }

@@ -35,7 +35,11 @@
  */
 package com.sun.xml.ws.rm.policy;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
@@ -63,12 +67,13 @@ public abstract class ConfigurationManager {
 
     public static ConfigurationManager createServiceConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmWsException {
         return new ConfigurationManager(wsdlPort, binding) {
+
             @Override
-            protected void addNewConfiguration(AssertionSet set, WSBinding binding) throws RmWsException {
+            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException {                
                 if (set.contains(Rm11Assertion.NAME)) {
-                    configurations.add(new Rm11ServiceConfiguration(set, binding.getSOAPVersion(), binding.getAddressingVersion()));
+                    configurations.add(new Rm11ServiceConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 } else if (set.contains(Rm10Assertion.NAME)) {
-                    configurations.add(new Rm10ServiceConfiguration(set, binding.getSOAPVersion(), binding.getAddressingVersion()));
+                    configurations.add(new Rm10ServiceConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 }
             }
         };
@@ -76,12 +81,13 @@ public abstract class ConfigurationManager {
 
     public static ConfigurationManager createClientConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmWsException {
         return new ConfigurationManager(wsdlPort, binding) {
+
             @Override
-            protected void addNewConfiguration(AssertionSet set, WSBinding binding) throws RmWsException {
+            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException {                
                 if (set.contains(Rm11Assertion.NAME)) {
-                    configurations.add(new Rm11ClientConfiguration(set, binding.getSOAPVersion(), binding.getAddressingVersion()));
+                    configurations.add(new Rm11ClientConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 } else if (set.contains(Rm10Assertion.NAME)) {
-                    configurations.add(new Rm10ClientConfiguration(set, binding.getSOAPVersion(), binding.getAddressingVersion()));
+                    configurations.add(new Rm10ClientConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 }
             }
         };
@@ -105,7 +111,11 @@ public abstract class ConfigurationManager {
             if (policy != null) {
                 for (AssertionSet set : policy) {
                     if (!set.isEmpty()) {
-                        addNewConfiguration(set, binding);
+                        addNewConfiguration(
+                                set,
+                                binding.getSOAPVersion(),
+                                binding.getAddressingVersion(),
+                                checkForRequestResponseOperations(wsdlPort));
                     }
                 }
             }
@@ -114,6 +124,29 @@ public abstract class ConfigurationManager {
 
     public Configuration[] getConfigurationAlternatives(/*TODO: define arguments*/) {
         return configurations.toArray(new Configuration[configurations.size()]);
+    }
+
+    protected abstract void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException;
+
+    /**
+     * Determine whether wsdl port contains any two-way operations.
+     * 
+     * @param port WSDL port to check
+     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
+     */
+    private boolean checkForRequestResponseOperations(WSDLPort port) {
+        WSDLBoundPortType portType;
+        if (port == null || null == (portType = port.getBinding())) {
+            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
+            return false;
+        }
+
+        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
+            if (!boundOperation.getOperation().isOneWay()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static <T extends PolicyAssertion> T extractAssertion(AssertionSet alternative, QName assertionName, Class<T> assertionClass) {
@@ -126,6 +159,4 @@ public abstract class ConfigurationManager {
                 return assertionClass.cast(assertions.get(0));
         }
     }
-
-    protected abstract void addNewConfiguration(AssertionSet set, WSBinding binding) throws RmWsException;
 }

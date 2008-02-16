@@ -35,42 +35,58 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
 
 /**
- * Transmits standalone protocol messages over the wire.
+ * Transmits standalone protocol messages over the wire. Provides also some additional utility mehtods for creating and
+ * unmarshalling JAXWS {@link Message} and {@link Header} objects.
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class ProtocolCommunicator {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
-    private final Tube tubeline;
-    private final AddressingVersion addressingVersion;
-    private final SOAPVersion soapVersion;
-    private Packet musterRequestPacket;
-    private final SecureConversationInitiator scInitiator;
     private volatile Engine fiberEngine;
     private final ReadWriteLock fiberEngineLock = new ReentrantReadWriteLock();
+    private final AtomicReference<Packet> musterRequestPacket;
+    public final QName soapMustUnderstandAttributeName;
+    private final Tube tubeline;
+    private final SecureConversationInitiator scInitiator;
+    private final Configuration configuration;
 
-    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
+    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, Configuration configuration) {
         this.tubeline = tubeline;
         this.scInitiator = scInitiator;
-        this.soapVersion = soapVersion;
-        this.addressingVersion = addressingVersion;
+        if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
+            this.configuration = configuration;
+        } else {
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException("Unsupported addressing version"));
+        }
+        this.soapMustUnderstandAttributeName = new QName(configuration.getSoapVersion().nsUri, "mustUnderstand");
+        this.musterRequestPacket = new AtomicReference<Packet>();
     }
 
     /**
@@ -79,32 +95,7 @@ public class ProtocolCommunicator {
      * @param muster a packet that will be used as a muster for creating new request packets used to carry the messages.
      */
     public void registerMusterRequestPacket(Packet muster) {
-        musterRequestPacket = muster;
-    }
-
-    /**
-     * Creates a new request packet and wraps a {@link Message} instance into it
-     * 
-     * @param message nullable, {@link Message} instance to be wrapped into the packet
-     * @return a new request packet that wraps given {@link Message} instance
-     */
-    private Packet createPacket(Message message, String action) {
-        Packet newPacket = musterRequestPacket.copy(false);
-        newPacket.setMessage(message);
-
-        /*ADDRESSING FIX_ME
-        Current API does not allow assignment of non-anon reply to, if we
-        need to support non-anon acksTo.
-         */
-        message.assertOneWay(false); // TODO do we really need to call this assert here?
-        message.getHeaders().fillRequestAddressingHeaders(
-                newPacket,
-                addressingVersion,
-                soapVersion,
-                false,
-                action);
-
-        return newPacket;
+        musterRequestPacket.set(muster);
     }
 
     /**
@@ -116,7 +107,7 @@ public class ProtocolCommunicator {
         JAXBElement<SecurityTokenReferenceType> strElement = null;
         if (scInitiator != null) {
             try {
-                strElement = scInitiator.startSecureConversation(musterRequestPacket.copy(false));
+                strElement = scInitiator.startSecureConversation(musterRequestPacket.get().copy(false));
             } catch (WSSecureConversationException ex) {
                 // TODO L10N
                 LOGGER.severe("Unable to start secure conversation", ex);
@@ -126,7 +117,84 @@ public class ProtocolCommunicator {
     }
 
     /**
-     * Sends protocol request message and returns the corresponding response message.
+     * Creates a new JAX-WS {@link Message} object backed by a JAXB bean using JAXB context of a configured RM version.
+     *
+     * @param jaxbObject
+     *      The JAXB object that represents the payload. must not be null. This object
+     *      must be bound to an element (which means it either is a {@link JAXBElement} or
+     *      an instanceof a class with {@link XmlRootElement}).
+     * 
+     * @return new JAX-WS {@link Message} object backed by a JAXB bean
+     */
+    public Message createMessage(Object jaxbElement) {
+        return Messages.create(configuration.getRmVersion().jaxbContext, jaxbElement, configuration.getSoapVersion());
+    }
+
+    /**
+     * Creates a new JAX-WS {@link Message} object that doesn't have any payload.
+     * 
+     * @return new JAX-WS {@link Message} object with no payload
+     */
+    public Message createEmptyMessage() {
+        return Messages.createEmpty(configuration.getSoapVersion());
+    }
+
+    /**
+     * Utility method which creates a RM {@link Header} with the specified JAXB bean content
+     * 
+     * @param jaxbHeaderContent content of the newly created {@link Header}
+     * 
+     * @return created RM {@link Header} with the specified JAXB bean content
+     */
+    protected final Header createHeader(Object jaxbHeaderContent) {
+        return Headers.create(configuration.getRmVersion().jaxbContext, jaxbHeaderContent);
+    }
+
+    /**
+     * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
+     * {@link HeaderList) in the form of JAXB element and marks the header as understood.
+     * 
+     * @param headers list of message headers; must not be {@code null}
+     * 
+     * @param name the name of the {@link com.sun.xml.ws.api.message.Header} to find.
+     * 
+     * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
+     */
+    public final <T> T readHeaderAsUnderstood(HeaderList headers, String name) throws RmException {
+        Header header = headers.get(configuration.getRmVersion().namespaceUri, name, true);
+        if (header == null) {
+            return (T) null;
+        }
+
+        try {
+            return (T) header.readAsJAXB(configuration.getRmVersion().jaxbUnmarshaller);
+        } catch (JAXBException ex) {
+            // TODO L10N
+            throw LOGGER.logSevereException(
+                    new RmException("Unable to unmarshall RM header [" + configuration.getRmVersion().namespaceUri + "#" + name + "]", ex));
+        }
+    }
+
+    /**
+     * Unmarshalls given JAXWS {@link Message} using JAXB context of a configured RM version
+     * 
+     * @param message JAXWS {@link Message} to be unmarshalled
+     * 
+     * @return message content unmarshalled JAXB bean
+     * 
+     * @throws com.sun.xml.ws.rm.RmException in case the message unmarshalling failed
+     */
+    public final <T> T unmarshallMessage(Message message) throws RmException {
+        try {
+            return (T) message.readPayloadAsJAXB(configuration.getRmVersion().jaxbUnmarshaller);
+        } catch (JAXBException e) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new RmException("Unable to unmarshall message", e));
+        }
+    }
+
+    /**
+     * Sends the request message and returns the corresponding response message.
      * 
      * @param requestMessage message to send
      * @return response message received
@@ -144,9 +212,43 @@ public class ProtocolCommunicator {
      * @return addressing {@code Action} header of the message
      */
     public String getAction(Message message) {
-        return message.getHeaders().getAction(addressingVersion, soapVersion);
+        return message.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion());
     }
-    
+
+    /**
+     * Provides the destination endpoint reference this {@link ProtocolCommunicator} is pointing to. May return {@code null} 
+     * in case the {@link ProtocolCommunicator} instance has not yet been initialized by a call to 
+     * {@link #registerMusterRequestPacket(Packet)} method.
+     * 
+     * @return destination endpoint reference or {@code null} in case the {@link ProtocolCommunicator} instance has not 
+     *         been initialized yet
+     */
+    public WSEndpointReference getDestination() {
+        Packet packet = musterRequestPacket.get();
+        return (packet != null) ? new WSEndpointReference(packet.endpointAddress.toString(), configuration.getAddressingVersion()) : null;
+    }
+
+    /**
+     * Creates a new request packet and wraps a {@link Message} instance into it
+     * 
+     * @param message nullable, {@link Message} instance to be wrapped into the packet
+     * @return a new request packet that wraps given {@link Message} instance
+     */
+    private Packet createPacket(Message message, String action) {
+        Packet newPacket = musterRequestPacket.get().copy(false);
+        newPacket.setMessage(message);
+
+        message.assertOneWay(false); // TODO do we really need to call this assert here?
+        message.getHeaders().fillRequestAddressingHeaders(
+                newPacket,
+                configuration.getAddressingVersion(),
+                configuration.getSoapVersion(),
+                false,
+                action);
+
+        return newPacket;
+    }
+
     private Engine getFiberEngine() {
         try {
             fiberEngineLock.readLock().lock();

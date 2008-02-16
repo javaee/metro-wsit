@@ -35,15 +35,14 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -76,20 +75,14 @@ final class Rm10ClientSession extends ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ClientSession.class);
 
-    public Rm10ClientSession(WSDLPort wsdlPort, ProtocolCommunicator communicator, Configuration configuration) {
-        super(wsdlPort, communicator, configuration);
+    public Rm10ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+        super(configuration, communicator);
     }
 
     @Override
     protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException {
         CreateSequenceElement csElement = new CreateSequenceElement();
-
-        if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
-            csElement.setAcksTo(new W3CEndpointReference(AddressingVersion.W3C.anonymousEpr.asSource("AcksTo")));
-        } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException("Unsupported addressing version [" + configuration.getAddressingVersion() + "]"));
-        }
+        csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
         if (offerInboundSequenceId != null) {
             Identifier offerIdentifier = new Identifier();
@@ -103,9 +96,9 @@ final class Rm10ClientSession extends ClientSession {
             csElement.setSecurityTokenReference(strType);
         }
 
-        Message csMessage = Messages.create(configuration.getRmVersion().jaxbContext, csElement, configuration.getSoapVersion());
+        Message csMessage = communicator.createMessage(csElement);
 
-        Message csResponseMessage = communicator.send(csMessage, configuration.getRmVersion().createSequenceAction);
+        Message csResponseMessage = communicator.send(csMessage, RmVersion.WSRM10.createSequenceAction);
         if (csResponseMessage == null) {
             // TODO L10N
             throw LOGGER.logSevereException(new CreateSequenceException("CreateSequenceResponse was 'null'"));
@@ -115,7 +108,7 @@ final class Rm10ClientSession extends ClientSession {
             throw LOGGER.logSevereException(new CreateSequenceException("CreateSequence was refused by the RMDestination", csResponseMessage));
         }
 
-        CreateSequenceResponseElement csrElement = unmarshallResponse(csResponseMessage);
+        CreateSequenceResponseElement csrElement = communicator.unmarshallMessage(csResponseMessage);
         outboundSequenceId = csrElement.getIdentifier().getValue();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -127,11 +120,12 @@ final class Rm10ClientSession extends ClientSession {
 
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
-            // TODO : make sure we are sending acknowledgements to the proper acksTo endpoint
-//            if (!configuration.getAddressingVersion().anonymousEpr.equals(accept.getAcksTo())) {
-//                // TODO L10N
-//                throw new CreateSequenceException("Addressable \"AcksTo\" endpoint not supported for inbound sequence", inboundSequenceId);
-//            }
+            if (accept == null || !communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
+                // TODO L10N
+                throw new CreateSequenceException(
+                        "Unsupported \"AcksTo\" destination. Inbound sequence \"AcksTo\" destination [" + accept.getAcksTo().toString() + "] " +
+                        "must be the same as the service endpoint destination [" + communicator.getDestination() + "]", inboundSequenceId);
+            }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, Configuration.UNSPECIFIED);
         }
@@ -145,7 +139,7 @@ final class Rm10ClientSession extends ClientSession {
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(outboundSequenceId);
 
-        outboundMessage.getHeaders().add(createHeader(sequenceHeaderElement));
+        outboundMessage.getHeaders().add(communicator.createHeader(sequenceHeaderElement));
     }
 
     @Override
@@ -153,7 +147,7 @@ final class Rm10ClientSession extends ClientSession {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(outboundSequenceId);
 
-        outboundMessage.getHeaders().add(createHeader(ackRequestedElement));
+        outboundMessage.getHeaders().add(communicator.createHeader(ackRequestedElement));
     }
 
     @Override
@@ -177,12 +171,12 @@ final class Rm10ClientSession extends ClientSession {
 //            ackElement.setBufferRemaining(-1/*calculate remaining quota*/);
 //        }
 
-        outboundMessage.getHeaders().add(createHeader(ackElement));
+        outboundMessage.getHeaders().add(communicator.createHeader(ackElement));
     }
 
     @Override
     protected void closeOutboundSequence() throws RmException {
-        Message lastMessage = Messages.createEmpty(configuration.getSoapVersion());
+        Message lastMessage = communicator.createEmptyMessage();
 
         appendSequenceAcknowledgementHeader(lastMessage);
 
@@ -191,10 +185,10 @@ final class Rm10ClientSession extends ClientSession {
         sequenceElement.setNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
         sequenceElement.setLastMessage(new LastMessage());
 
-        lastMessage.getHeaders().add(Headers.create(configuration.getRmVersion().jaxbContext, sequenceElement));
+        lastMessage.getHeaders().add(Headers.create(RmVersion.WSRM10.jaxbContext, sequenceElement));
         Message response = null;
         try {
-            response = communicator.send(lastMessage, configuration.getRmVersion().lastAction);
+            response = communicator.send(lastMessage, RmVersion.WSRM10.lastAction);
             if (response != null) {
                 processInboundMessageHeaders(response.getHeaders(), false);
                 if (response.isFault()) {
@@ -211,16 +205,13 @@ final class Rm10ClientSession extends ClientSession {
 
     @Override
     protected void terminateOutboundSequence() throws RmException {
-        final Message request = Messages.create(
-                configuration.getRmVersion().jaxbContext,
-                new TerminateSequenceElement(outboundSequenceId),
-                configuration.getSoapVersion());
+        final Message request = communicator.createMessage(new TerminateSequenceElement(outboundSequenceId));
 
         appendSequenceAcknowledgementHeader(request);
 
         Message response = null;
         try {
-            response = communicator.send(request, configuration.getRmVersion().terminateSequenceAction);
+            response = communicator.send(request, RmVersion.WSRM10.terminateSequenceAction);
             if (response == null) {
                 // TODO L10N
                 throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
@@ -234,12 +225,12 @@ final class Rm10ClientSession extends ClientSession {
             }
 
             String responseAction = communicator.getAction(response);
-            if (configuration.getRmVersion().terminateSequenceAction.equals(responseAction)) {
-                TerminateSequenceElement tsElement = unmarshallResponse(response);
+            if (RmVersion.WSRM10.terminateSequenceAction.equals(responseAction)) {
+                TerminateSequenceElement tsElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
                 sequenceManager.terminateSequence(tsElement.getIdentifier().toString());
-            } else if (configuration.getRmVersion().terminateSequenceResponseAction.equals(responseAction)) {
-                TerminateSequenceResponseElement tsrElement = unmarshallResponse(response);
+            } else if (RmVersion.WSRM10.terminateSequenceResponseAction.equals(responseAction)) {
+                TerminateSequenceResponseElement tsrElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
                 if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
                     // TODO L10N
@@ -256,7 +247,7 @@ final class Rm10ClientSession extends ClientSession {
 
     @Override
     protected void processSequenceHeader(HeaderList inboundMessageHeaders) throws RmException {
-        SequenceElement sequenceElement = readHeaderAsUnderstood(inboundMessageHeaders, "Sequence");
+        SequenceElement sequenceElement = communicator.readHeaderAsUnderstood(inboundMessageHeaders, "Sequence");
         if (sequenceElement != null) {
             assertSequenceIdInInboundHeader(inboundSequenceId, sequenceElement.getId());
             sequenceManager.getSequence(sequenceElement.getId()).acknowledgeMessageId(sequenceElement.getMessageNumber());
@@ -268,7 +259,7 @@ final class Rm10ClientSession extends ClientSession {
 
     @Override
     protected void processAcknowledgementHeader(HeaderList inboundMessageHeaders) throws RmException {
-        SequenceAcknowledgementElement ackElement = readHeaderAsUnderstood(inboundMessageHeaders, "SequenceAcknowledgement");
+        SequenceAcknowledgementElement ackElement = communicator.readHeaderAsUnderstood(inboundMessageHeaders, "SequenceAcknowledgement");
 
         if (ackElement != null) {
             assertSequenceIdInInboundHeader(outboundSequenceId, ackElement.getId());
@@ -310,7 +301,7 @@ final class Rm10ClientSession extends ClientSession {
 
     @Override
     protected void processAckRequestedHeader(HeaderList inboundMessageHeaders) throws RmException {
-        AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(inboundMessageHeaders, "AckRequested");
+        AckRequestedElement ackRequestedElement = communicator.readHeaderAsUnderstood(inboundMessageHeaders, "AckRequested");
         if (ackRequestedElement != null) {
             String sequenceId = ackRequestedElement.getId();
             assertSequenceIdInInboundHeader(inboundSequenceId, sequenceId);

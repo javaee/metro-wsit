@@ -61,10 +61,12 @@ public class Rm11ServiceConfiguration implements Configuration {
     private final DeliveryAssurance deliveryAssurance;
     private final SecurityBinding securityBinding;
     private final long acknowledgementInterval;
+    private final boolean requestResponseDetected;
 
-    public Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion) throws RmWsException {
+    public Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmWsException {
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
+        this.requestResponseDetected = requestResponseDetected;
         
         if (alternative.contains(Rm10Assertion.NAME)) {
             // TODO L10N
@@ -94,6 +96,10 @@ public class Rm11ServiceConfiguration implements Configuration {
 
     public AddressingVersion getAddressingVersion() {
         return addressingVersion;
+    }
+
+    public boolean requestResponseOperationsDetected() {
+        return requestResponseDetected;
     }
 
     public long getInactivityTimeout() {
