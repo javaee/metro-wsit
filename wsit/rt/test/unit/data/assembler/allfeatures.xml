@@ -104,7 +104,7 @@
                 </sp:Trust10>
                 
                 <wspe:OptimizedMimeSerialization xmlns:wspe="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" />
-                <wsa:UsingAddressing xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"/>
+                <wsa:UsingAddressing xmlns:wsa="http://www.w3.org/2006/05/addressing/wsdl"/>
                 <wsrm:RMAssertion xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"/>
                 <wsat:ATAssertion xmlns:wsat="http://schemas.xmlsoap.org/ws/2004/10/wsat"/>
                 <sunfi:OptimizedFastInfosetSerialization enabled="true" xmlns:sunfi="http://java.sun.com/xml/ns/wsit/2006/09/policy/fastinfoset/service"/>

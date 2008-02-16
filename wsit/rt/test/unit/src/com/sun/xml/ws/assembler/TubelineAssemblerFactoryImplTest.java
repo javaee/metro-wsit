@@ -58,6 +58,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
+import javax.xml.ws.soap.AddressingFeature;
 import junit.framework.TestCase;
 
 /**
@@ -166,8 +167,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final WSDLPolicyMapWrapper mapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
         final PolicyMap map = mapWrapper.getPolicyMap();
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
-        final PolicyFeature feature = new PolicyFeature(map, clientModel, portInfo);
-        final WSBinding binding = bindingId.createBinding(feature);
+        final WSBinding binding = bindingId.createBinding(new PolicyFeature(map, clientModel, portInfo), new AddressingFeature(true));
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
                 address, port, serviceDelegate, binding, container);
