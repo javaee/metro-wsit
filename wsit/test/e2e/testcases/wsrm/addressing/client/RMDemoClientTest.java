@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,62 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.addressing.server;
+package wsrm.addressing.client;
 
-import com.sun.xml.ws.runtime.util.Session;
+import junit.framework.TestCase;
+import java.io.Closeable;
 
-import javax.annotation.Resource;
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-import javax.xml.ws.WebServiceContext;
-import java.util.Hashtable;
+/**
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
+public class RMDemoClientTest extends TestCase {
 
+    public void testAddressingVersionSupport() throws Exception {
+        boolean foundError = false;
+        wsrm.addressing.client.RMDemo port = null;
+        try {
+            wsrm.addressing.client.RMDemoService service = new RMDemoService();
+            port = service.getRMDemoPort();
+            port.addString("hello");
+        } catch (IllegalStateException e) {
+            if (e.getMessage().contains("addressing")) {
+                foundError = true;
+            }
 
-@WebService(endpointInterface="wsrm.addressing.server.RMDemo")
-@javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
-public class RMDemoImpl {
+            e.printStackTrace();
+        } catch (Exception e) {
+            if (e.getMessage().contains("Member")) {
+                foundError = true;
+            }
 
-
-    /* JAX-WS initializes context for each request */
-    @Resource
-    private WebServiceContext context;
-
-    /* Get Sesssion using well-known key in MessageContext */
-    private Hashtable getSession() {
-        return (Hashtable)context.getMessageContext()
-                .get("com.sun.xml.ws.session");
+            e.printStackTrace();
+        } finally {
+            assertTrue(foundError);
+            if (port != null) {
+                ((Closeable) port).close();
+            }
+        }
     }
-
-    /* Get String associated with SessionID for current request */
-
-    private String getSessionData() {
-	Hashtable sess = getSession();
-        String ret = (String)sess.get("request_record");
-        return ret != null ? ret : "";
-
-    }
-
-    /* Store String associated with SessionID for current request */
-    private void setSessionData(String data) {
-        Hashtable session = getSession();
-        session.put("request_record", data);
-    }
-
-    /* RMDemo Methods */
-
-    @WebMethod
-    public void addString(String s ) {
-        /* append string to session data */
-        setSessionData(getSessionData() + " " + s);
-    }
-
-
-
-    @WebMethod
-    public String getResult() {
-        /* return session data */
-        return getSessionData();
-    }
-
 }
-

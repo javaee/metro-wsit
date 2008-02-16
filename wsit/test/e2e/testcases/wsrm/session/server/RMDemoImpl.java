@@ -35,7 +35,7 @@
  */
 package wsrm.session.server;
 
-import com.sun.xml.ws.rm.jaxws.runtime.Session;
+import com.sun.xml.ws.runtime.util.Session;
 
 import javax.annotation.Resource;
 import javax.jws.WebMethod;
