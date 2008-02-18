@@ -996,6 +996,30 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isAttachmentCompleteTransform(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        // sp:AttachmentCompleteSignatureTransform assertion is allowed only in 1.2  namespace
+        if(assertion.getName().getLocalPart().equals(AttachmentCompleteSignatureTransform) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isAttachmentContentTransform(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        // sp:ContentSignatureTransform assertion is allowed only in 1.2  namespace
+        if(assertion.getName().getLocalPart().equals(ContentSignatureTransform) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isRequireDerivedKeys(PolicyAssertion assertion, SecurityPolicyVersion spVersion ) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;

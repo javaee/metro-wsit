@@ -282,6 +282,7 @@ public class SupportingTokensProcessor {
         if ( uid != null ) {
             SignatureTargetCreator stc = iAP.getTargetCreator();
             SignatureTarget st = stc.newURISignatureTarget(uid);
+            stc.addTransform(st);
             SecurityPolicyUtil.setName(st, token);
             stc.addSTRTransform(st);
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();

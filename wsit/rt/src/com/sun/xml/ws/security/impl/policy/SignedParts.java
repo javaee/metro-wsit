@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.Header;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.wss.impl.MessageConstants;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,6 +59,7 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean body;
     private boolean attachments;
+    private String attachmentProtectionType = MessageConstants.ATTACHMENT_COMPLETE_TRANSFORM_URI;
     private boolean populated = false;
     private Set<PolicyAssertion> targets = new HashSet<PolicyAssertion>();
     private SecurityPolicyVersion spVersion;
@@ -89,6 +91,11 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
         return attachments;
     }
     
+    public String attachmentProtectionType(){
+        populate();
+        return attachmentProtectionType;
+    }
+    
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
@@ -108,6 +115,17 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
                         // break;
                     } else if(PolicyUtil.isAttachments(as, spVersion)){
                         attachments = true;
+                        if(as.hasParameters()){
+                            Iterator <PolicyAssertion> attachIter = as.getParametersIterator();
+                            while(attachIter.hasNext()){
+                                PolicyAssertion attachType = attachIter.next();
+                                if(PolicyUtil.isAttachmentCompleteTransform(attachType, spVersion)){
+                                    attachmentProtectionType = MessageConstants.ATTACHMENT_COMPLETE_TRANSFORM_URI;
+                                } else if(PolicyUtil.isAttachmentContentTransform(attachType, spVersion)){
+                                    attachmentProtectionType = MessageConstants.ATTACHMENT_CONTENT_ONLY_TRANSFORM_URI;
+                                }
+                            }
+                        }
                     } else{
                         targets.add(as);
                     }

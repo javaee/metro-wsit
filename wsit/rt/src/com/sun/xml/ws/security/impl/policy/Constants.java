@@ -181,6 +181,8 @@ public class Constants {
     public final static String RequireRequestSecurityTokenCollection = "RequireRequestSecurityTokenCollection";
     public final static String RequireAppliesTo = "RequireAppliesTo";
     public final static String Attachments = "Attachments";
+    public final static String ContentSignatureTransform = "Content-Signature-Transform";
+    public final static String AttachmentCompleteSignatureTransform = "Attachment-Complete-Signature-Transform";
     // End of new assertions from WS-SecurityPolicy 1.2
     
     public final static String Body = "Body";

@@ -66,7 +66,7 @@ public class SignatureTargetCreator {
             target.setType(SignatureTarget.TARGET_TYPE_VALUE_URI);
             target.setDigestAlgorithm(algorithmSuite.getDigestAlgorithm());
             target.setValue("#"+uid);
-            addEXC14n(target);
+            addTransform(target);
             target.setEnforce(enforce);
             return target;
         }
@@ -77,7 +77,6 @@ public class SignatureTargetCreator {
         SignatureTarget target = new SignatureTarget();
         target.setType(SignatureTarget.TARGET_TYPE_VALUE_XPATH);
         target.setDigestAlgorithm(algorithmSuite.getDigestAlgorithm());
-        addEXC14n(target);
         target.setValue(xpathTarget);
         target.setContentOnly(contentOnly);
         target.setEnforce(enforce);
@@ -91,11 +90,10 @@ public class SignatureTargetCreator {
         target.setContentOnly(contentOnly);
         target.setEnforce(enforce);
         target.setQName(name);
-        addEXC14n(target);
         return target;
     }
     
-    public void addEXC14n(SignatureTarget target){
+    public void addTransform(SignatureTarget target){
         SignatureTarget.Transform tr = target.newSignatureTransform();
         if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14N)){
             tr.setTransform(CanonicalizationMethod.INCLUSIVE);
@@ -116,5 +114,11 @@ public class SignatureTargetCreator {
         tr.setTransform(MessageConstants.STR_TRANSFORM_URI);
         target.addTransform(tr);
         tr.setAlgorithmParameters(new Parameter("CanonicalizationMethod",CanonicalizationMethod.EXCLUSIVE));
+    }
+
+    void addAttachmentTransform(SignatureTarget target, String transformURI) {
+        SignatureTarget.Transform tr = target.newSignatureTransform();
+        tr.setTransform(transformURI);
+        target.addTransform(tr);
     }
 }

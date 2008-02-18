@@ -129,6 +129,7 @@ public abstract class BindingProcessor {
     
     protected void protectTimestamp(TimestampPolicy tp){
         SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+        iAP.getTargetCreator().addTransform(target);
         SecurityPolicyUtil.setName(target, tp);
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
         spFB.addTargetBinding(target);
@@ -159,6 +160,7 @@ public abstract class BindingProcessor {
             if ( uid != null ) {
                 SignatureTargetCreator stc = iAP.getTargetCreator();
                 SignatureTarget st = stc.newURISignatureTarget(uid);
+                stc.addTransform(st);
                 stc.addSTRTransform(st);
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
                 fb.addTargetBinding(st);
@@ -177,6 +179,7 @@ public abstract class BindingProcessor {
             } else {
                 st = stc.newURISignatureTarget(token.getUUID());
             }
+            stc.addTransform(st);
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
             fb.addTargetBinding(st);
         }

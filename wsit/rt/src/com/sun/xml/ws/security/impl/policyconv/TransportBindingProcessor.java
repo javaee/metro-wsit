@@ -124,6 +124,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+                iAP.getTargetCreator().addTransform(target);
                 SecurityPolicyUtil.setName(target, tp);
                 // there is no primary signature in Transport Binding
                 //spFB.isEndorsingSignature(true);
@@ -164,6 +165,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             
             if(tp != null){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+                iAP.getTargetCreator().addTransform(target);
                 SecurityPolicyUtil.setName(target, tp);
                 //SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
                 //spFB.isEndorsingSignature(true);

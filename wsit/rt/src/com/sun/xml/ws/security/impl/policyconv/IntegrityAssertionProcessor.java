@@ -81,6 +81,7 @@ public class IntegrityAssertionProcessor {
         if(SecurityPolicyUtil.isSignedPartsEmpty(signedParts)){
             if(!allHeaders){
                 SignatureTarget target = targetCreator.newURISignatureTarget("");
+                targetCreator.addTransform(target);
                 target.setValue(SignatureTarget.ALL_MESSAGE_HEADERS);
                 target.isSOAPHeadersOnly(true);
                 binding.addTargetBinding(target);
@@ -89,6 +90,7 @@ public class IntegrityAssertionProcessor {
             }
             if(!seenBody){
                 SignatureTarget target = targetCreator.newQNameSignatureTarget(Target.BODY_QNAME);
+                targetCreator.addTransform(target);
                 binding.addTargetBinding(target);
                 target.setContentOnly(contentOnly);
                 seenBody = true;
@@ -98,6 +100,7 @@ public class IntegrityAssertionProcessor {
                 Header ht = (Header)tv.next();
                 if(!allHeaders && !seenSignTarget(ht)){
                     SignatureTarget target = targetCreator.newQNameSignatureTarget(new QName(ht.getURI(),ht.getLocalName()));
+                    targetCreator.addTransform(target);
                     target.isSOAPHeadersOnly(true);
                     target.setContentOnly(contentOnly);
                     binding.addTargetBinding(target);
@@ -106,6 +109,7 @@ public class IntegrityAssertionProcessor {
             if(signedParts.hasBody()){
                 if(!seenBody){
                     SignatureTarget target = targetCreator.newQNameSignatureTarget(Target.BODY_QNAME);
+                    targetCreator.addTransform(target);
                     target.setContentOnly(contentOnly);
                     binding.addTargetBinding(target);
                     seenBody = true;
@@ -115,6 +119,7 @@ public class IntegrityAssertionProcessor {
                 if(!seenAttachments){
                     SignatureTarget target = targetCreator.newURISignatureTarget("");
                     target.setValue(MessageConstants.PROCESS_ALL_ATTACHMENTS);
+                    targetCreator.addAttachmentTransform(target, signedParts.attachmentProtectionType());
                     binding.addTargetBinding(target);
                     seenAttachments = true;
                 }
@@ -127,6 +132,7 @@ public class IntegrityAssertionProcessor {
         while(itr.hasNext()){
             String xpathTarget = itr.next();
             SignatureTarget target = targetCreator.newXpathSignatureTarget(xpathTarget);
+            targetCreator.addTransform(target);
             target.setContentOnly(contentOnly);
             //  target.setXPathVersion(signedElements.)
             binding.addTargetBinding(target);
@@ -150,6 +156,7 @@ public class IntegrityAssertionProcessor {
     
     public void process(QName targetName,SignaturePolicy.FeatureBinding binding){
         SignatureTarget target = targetCreator.newQNameSignatureTarget(targetName);
+        targetCreator.addTransform(target);
         binding.addTargetBinding(target);
     }
 }
