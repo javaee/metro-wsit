@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.10 2007-11-15 21:54:23 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.11 2008-02-19 15:20:02 shyam_rao Exp $
  */
 
 /*
@@ -103,6 +103,7 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.impl.wssx.elements.RenewTargetImpl;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import java.util.logging.Level;
 
@@ -269,6 +270,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public  RequestSecurityToken createRSTForRenew(URI tokenType, URI requestType, URI context, RenewTarget target, AllowPostdating apd, Renewing renewingInfo) {
         return new RequestSecurityTokenImpl(tokenType, requestType, context, target, apd, renewingInfo);
+    }
+    
+    public RenewTarget createRenewTarget(final SecurityTokenReference str){
+        return new RenewTargetImpl(str);
     }
     
     public CancelTarget createCancelTarget(SecurityTokenReference str){

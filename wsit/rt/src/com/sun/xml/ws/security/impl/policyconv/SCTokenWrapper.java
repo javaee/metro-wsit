@@ -125,6 +125,13 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
         return this.scToken.isRequireDerivedKeys();
     }
     
+    public boolean isMustNotSendCancel() {
+        return this.scToken.isMustNotSendCancel();
+    }
+    
+    public boolean isMustNotSendRenew() {
+        return this.scToken.isMustNotSendRenew();
+    }
     
     public String getTokenType() {
         return this.scToken.getTokenType();

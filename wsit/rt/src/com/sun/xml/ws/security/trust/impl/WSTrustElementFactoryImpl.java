@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.20 2007-11-02 19:12:25 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.21 2008-02-19 15:20:00 shyam_rao Exp $
  */
 
 /*
@@ -43,7 +43,6 @@ package com.sun.xml.ws.security.trust.impl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
@@ -123,6 +122,7 @@ import javax.xml.bind.JAXBException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseCollectionType;
+import com.sun.xml.ws.security.trust.impl.elements.RenewTargetImpl;
 import javax.xml.bind.util.JAXBSource;
 
 import javax.xml.bind.Marshaller;
@@ -202,6 +202,16 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     }
     
     /**
+     * Create an RSTR for Renew from the given arguments. TokenType should be Issue.
+     * Any of the arguments can be null since they are all optional, but one of RequestedSecurityToken or RequestedProofToken should be returned
+     */
+    public  RequestSecurityTokenResponse createRSTRForRenew(URI tokenType, final URI context, RequestedSecurityToken token, final RequestedAttachedReference attachedReference, final RequestedUnattachedReference unattachedRef, final RequestedProofToken proofToken, final Entropy entropy, final Lifetime lifetime) throws WSTrustException {
+        final RequestSecurityTokenResponse rstr =
+                new RequestSecurityTokenResponseImpl(tokenType, context, token, null, attachedReference, unattachedRef, proofToken, entropy, lifetime, null);
+        return rstr;
+    }
+    
+    /**
      * Create a wst:IssuedTokens object
      */
     public  IssuedTokens createIssuedTokens(final RequestSecurityTokenResponseCollection issuedTokens) {
@@ -258,6 +268,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         return new DirectReferenceImpl(valueType, uri);
     }
     
+    public DirectReference createDirectReference(final String valueType, final String uri, final String instanceId){
+        return new DirectReferenceImpl(valueType, uri, instanceId);
+    }
+    
     public KeyIdentifier createKeyIdentifier(final String valueType, final String encodingType){
         return new KeyIdentifierImpl(valueType, encodingType);
     }
@@ -307,6 +321,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public  RequestSecurityToken createRSTForRenew(final URI tokenType, final URI requestType, final URI context, final RenewTarget target, final AllowPostdating apd, final Renewing renewingInfo) {
         return new RequestSecurityTokenImpl(tokenType, requestType, context, target, apd, renewingInfo);
+    }
+    
+    public RenewTarget createRenewTarget(final SecurityTokenReference str){
+        return new RenewTargetImpl(str);
     }
     
     public CancelTarget createCancelTarget(final SecurityTokenReference str){

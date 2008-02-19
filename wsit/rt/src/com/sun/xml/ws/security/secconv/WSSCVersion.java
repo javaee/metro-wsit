@@ -49,6 +49,16 @@ public abstract class WSSCVersion {
 
     public static final WSSCVersion WSSC_13 = new WSSCVersion13();
     
+    public static final String WSSC_10_NS_URI = "http://schemas.xmlsoap.org/ws/2005/02/sc";
+    public static final String WSSC_13_NS_URI = "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512";
+    
+    public static WSSCVersion getInstance(String nsURI){
+        if (nsURI.equals(WSSC_13.getNamespaceURI())){
+            return WSSC_13;
+        }        
+        return WSSC_10;
+    }
+    
     public abstract String getNamespaceURI();
 
     public abstract String getSCTTokenTypeURI();

@@ -1,5 +1,5 @@
 /*
- * $Id: DirectReference.java,v 1.2 2007-05-29 22:11:32 ofung Exp $
+ * $Id: DirectReference.java,v 1.3 2008-02-19 15:20:01 shyam_rao Exp $
  */
 
 /*
@@ -50,4 +50,5 @@ public interface DirectReference extends Reference {
     public URI getURIAttr();
 
     public URI getValueTypeURI();
+        
 }

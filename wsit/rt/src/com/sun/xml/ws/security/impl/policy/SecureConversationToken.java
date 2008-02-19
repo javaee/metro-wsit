@@ -71,7 +71,10 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeToken;
+    private PolicyAssertion mustNotSendCancel = null;
+    private PolicyAssertion mustNotSendRenew = null;
     private Claims claims = null;
+
     /**
      * Creates a new instance of SecureConversationToken
      */
@@ -102,6 +105,23 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     public boolean isRequireDerivedKeys() {
         populate();
         if( rdKey != null){
+            return true;
+        }
+        return false;
+    }
+    
+    
+        public boolean isMustNotSendCancel() {
+        populate();
+        if( mustNotSendCancel != null){
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean isMustNotSendRenew() {
+        populate();
+        if( mustNotSendRenew != null){
             return true;
         }
         return false;
@@ -185,6 +205,10 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
                     referenceType.add(assertion.getName().getLocalPart().intern());
                 }else if(PolicyUtil.isSC10SecurityContextToken(assertion, spVersion)){
                     tokenType = assertion.getName().getLocalPart();
+                }else if(PolicyUtil.isMustNotSendCancel(assertion, spVersion)){
+                    mustNotSendCancel = assertion;
+                }else if(PolicyUtil.isMustNotSendRenew(assertion, spVersion)){
+                    mustNotSendRenew = assertion;
                 }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,SecureConversationToken);

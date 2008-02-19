@@ -232,7 +232,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         
         if (isAddressingEnabled()) {
             action = getAction(packet);
-            if (wsscVer.getSCTRequestAction().equals(action)) {
+            if (wsscVer.getSCTRequestAction().equals(action) || wsscVer.getSCTRenewRequestAction().equals(action)) {
                 isSCIssueMessage = true;
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
@@ -248,6 +248,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 //set the callbackhandler
                 packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
                 packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
+                IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustContext();
+                if(ictx != null && ictx.getAuthnContextClass() != null){                    
+                    packet.invocationProperties.put(WSTrustConstants.AUTHN_CONTEXT_CLASS, ictx.getAuthnContextClass());
+                }                
             }
             
             if (isSCIssueMessage){
@@ -435,6 +439,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
+            if(isTrustMessage(packet)){
+                ctx.isTrustMessage(true);
+            }
             // set the policy, issued-token-map, and extraneous properties
             //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -522,20 +529,14 @@ public class SecurityServerPipe extends SecurityPipeBase {
             Subject subject = SubjectAccessor.getRequesterSubject(ctx);
             
             ictx.setRequestorSubject(subject);                       
+                        
+            WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(wsscVer);
             
-            WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
-            WSSCElementFactory13 eleFac13 = WSSCElementFactory13.newInstance();
             JAXBElement rstEle = msg.readPayloadAsJAXB(WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller());
             BaseSTSRequest rst = null;
             
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                rst = eleFac13.createRSTFrom(rstEle);
-            }else{                
-                rst = eleFac.createRSTFrom(rstEle);
-            }
-            
-            URI requestType = ((RequestSecurityToken)rst).getRequestType();
-            //RequestSecurityTokenResponse rstr = null;
+            rst = wsscEleFac.createRSTFrom(rstEle);
+            URI requestType = ((RequestSecurityToken)rst).getRequestType();            
             BaseSTSResponse rstr = null;
             WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
@@ -561,6 +562,10 @@ public class SecurityServerPipe extends SecurityPipeBase {
            
                 //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);                
                 
+            } else if (requestType.toString().equals(wsTrustVer.getRenewRequestTypeURI())) {
+                List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
+                retAction = wsscVer.getSCTRenewResponseAction();
+                rstr =  scContract.renew(rst, ictx,(SecureConversationToken)policies.get(0));
             } else if (requestType.toString().equals(wsTrustVer.getCancelRequestTypeURI())) {
                 retAction = wsscVer.getSCTCancelResponseAction();
                 rstr =  scContract.cancel(rst, ictx);
@@ -573,11 +578,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac13.toJAXBElement(rstr), soapVersion);    
-            }else{
-                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
-            }
+            retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), wsscEleFac.toJAXBElement(rstr), soapVersion);    
         } catch (com.sun.xml.wss.XWSSecurityException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);  
             throw new RuntimeException(LogStringsMessages.WSSPIPE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
@@ -749,7 +750,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
             //IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
             //IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
-            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sct.getIdentifier().toString());
+            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sct.getIdentifier().toString(), true);
             if (itctx != null) {
                 Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);

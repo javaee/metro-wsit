@@ -60,7 +60,18 @@ public interface SecureConversationToken extends Token {
      */
     public boolean isRequireDerivedKeys();
    
-  
+    /**
+     * returns true if isMustNotSendCancel element is present under SecureConversationToken
+     * @return true if isMustNotSendCancel element is present under SecureConversationToken or false.
+     */
+    public boolean isMustNotSendCancel();
+    
+    /**
+     * returns true if isMustNotSendRenew element is present under SecureConversationToken
+     * @return true if isMustNotSendRenew element is present under SecureConversationToken or false.
+     */
+    public boolean isMustNotSendRenew();
+    
     /**
      * returns the type of the token.
      * @return one of SC10_SECURITYCONTEXT_TOKEN

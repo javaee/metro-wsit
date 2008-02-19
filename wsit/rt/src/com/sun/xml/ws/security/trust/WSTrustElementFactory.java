@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.16 2007-11-04 17:07:00 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.17 2008-02-19 15:20:02 shyam_rao Exp $
  */
 
 /*
@@ -75,8 +75,8 @@ import com.sun.xml.ws.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
-import java.security.PublicKey;
 import java.util.List;
 
 import javax.xml.transform.Source;
@@ -131,7 +131,7 @@ public abstract class WSTrustElementFactory {
     private static WSTrustElementFactory trustElemFactory 
             = new WSTrustElementFactoryImpl();
     private static WSTrustElementFactory trustElemFactory13 
-            = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();
+            = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();        
 
     public static JAXBContext getContext() {
         return jaxbContext;
@@ -141,7 +141,6 @@ public abstract class WSTrustElementFactory {
         if (wstVer instanceof com.sun.xml.ws.security.trust.impl.wssx.WSTrustVersion13){
                 return jaxbContext13;
         }
-
         return jaxbContext;
     }
 
@@ -150,12 +149,17 @@ public abstract class WSTrustElementFactory {
     }
     
     public static WSTrustElementFactory newInstance(WSTrustVersion wstVer) {
-        
-            if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
-                return trustElemFactory13;
-            }
-            
-            return trustElemFactory;
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
+            return trustElemFactory13;
+        }        
+        return trustElemFactory;
+    }
+    
+    public static WSTrustElementFactory newInstance(WSSCVersion wsscVer) {
+        if (wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            return com.sun.xml.ws.security.secconv.WSSCElementFactory13.newInstance();            
+        }
+        return com.sun.xml.ws.security.secconv.WSSCElementFactory.newInstance();        
     }
     
     /** 
@@ -244,6 +248,8 @@ public abstract class WSTrustElementFactory {
      *Create an RST for a Renewal Request
      */
     public abstract RequestSecurityToken createRSTForRenew(URI tokenType, URI requestType, URI context, RenewTarget target, AllowPostdating apd, Renewing renewingInfo);
+    
+    public abstract RenewTarget createRenewTarget(SecurityTokenReference str);
     
     public abstract CancelTarget createCancelTarget(SecurityTokenReference str);
     /**

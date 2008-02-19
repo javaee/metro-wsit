@@ -55,6 +55,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
@@ -82,8 +83,10 @@ import javax.xml.ws.BindingProvider;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.IssuedToken;
+import com.sun.xml.ws.security.policy.SecureConversationToken;
 
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
+import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
@@ -114,19 +117,22 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     // Plugin instances for Trust and SecureConversation invocation
     //private static TrustPlugin trustPlugin = WSTrustFactory.newTrustPlugin(null);
     private IssuedTokenManager itm = IssuedTokenManager.getInstance();
-    private WSSCPlugin scPlugin;
+
+    //private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
+    private Set wsscConfig = null;
 
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(WsitClientTubeAssemblyContext wsitContext, Pipe nextPipe) {
         super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextPipe);
-        scPlugin = new WSSCPlugin(null, wsscVer);
+        //scPlugin = new WSSCPlugin(null, wsscVer);        
         CallbackHandler handler = null;
         try {
             Iterator it = outMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
+            wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
             Properties props = new Properties();
             handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
@@ -144,7 +150,8 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     protected SecurityClientPipe(SecurityClientPipe that) {
         super(that);
         trustConfig = that.trustConfig;
-        scPlugin = that.scPlugin;
+        wsscConfig = that.wsscConfig;
+        //scPlugin = that.scPlugin;
     }
 
     public Packet process(Packet packet) {
@@ -174,11 +181,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
 
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
-        ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.isClient(true);
-        try {
-            if (hasKerberosTokenPolicy()) {
-                populateKerberosContext(packet, (ProcessingContextImpl) ctx, isSCMessage);
+        try{
+            if(hasKerberosTokenPolicy()){
+                populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
             }
         } catch (XWSSecurityException xwsse) {
             log.log(Level.SEVERE,
@@ -187,6 +194,18 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
         }
 
+        if(isSCRenew(packet)){
+            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (MessagePolicy)ctx.getSecurityPolicy());
+            IssuedTokenContext itc =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());                    
+            try{
+                itm.renewIssuedToken(itc);
+            }catch(WSTrustException se){
+                log.log(Level.SEVERE,
+                            LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+            }
+        }
+        
         try {
             if (!optimized) {
                 if (!isSCMessage) {
@@ -203,10 +222,63 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
             throw new WebServiceException(
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
+        }catch(Exception e){
+            if(ctx.isExpired()){
+                renewSecurityContextToken(packet);                
+                msg = packet.getMessage();
+                invokeTrustPlugin(packet, isSCMessage);
+                ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
+                ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+                ctx.isClient(true);
+                try{
+                    if(hasKerberosTokenPolicy()){
+                        populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
+                    }
+                } catch (XWSSecurityException xwsse) {
+                    log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
+                    throw new WebServiceException(
+                        LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwsse);
+                }
+                //TODO: replace this code with calls to the Module now
+                try{
+                    if(!optimized) {
+                        if(!isSCMessage){
+                            cacheOperation(msg);
+                        }
+                        SOAPMessage soapMessage = msg.readAsSOAPMessage();
+                        soapMessage = secureOutboundMessage(soapMessage, ctx);
+                        msg = Messages.create(soapMessage);
+                    }else{
+                        msg = secureOutboundMessage(msg, ctx);
+                    }
+                } catch(SOAPException se){
+                    log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
+                    throw new WebServiceException(
+                        LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
+                }
+            }else{
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), e);
+                throw new WebServiceException(
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), e);
+            }
         }
 
         packet.setMessage(msg);
-
+        if(isSCRenew(packet)){
+            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
+            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), getOutgoingXWSBootstrapPolicy(scToken), false);
+            IssuedTokenContext itc =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+            try{
+                itm.renewIssuedToken(itc);
+            }catch(WSTrustException se){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+            }
+        }
         //--------INVOKE NEXT PIPE------------
         Packet ret = nextPipe.process(packet);
         // Could be OneWay
@@ -285,16 +357,54 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         // get the secure conversation policies pertaining to this operation
         List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
 
+        PolicyAssertion scClientAssertion = null;
+        if (wsscConfig != null) {
+            Iterator it = wsscConfig.iterator();
+            while (it != null && it.hasNext()) {
+                scClientAssertion = (PolicyAssertion) it.next();
+            }
+        }
+        
         for (PolicyAssertion scAssertion : policies) {
             Token scToken = (Token) scAssertion;
-            if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
-
-                IssuedTokenContext ctx = scPlugin.process(
-                        scAssertion, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
-                issuedTokenContextMap.put(((Token) scAssertion).getTokenId(), ctx);
+            if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {                
+                try{
+                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);
+                    
+                    IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                    itm.getIssuedToken(ctx);
+                    issuedTokenContextMap.put(
+                            ((Token)scToken).getTokenId(), ctx);
+                }catch(WSTrustException se){
+                    log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                    throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                }
             }
         }
     }
+    
+    
+    private void renewSecurityContextToken(Packet packet) {
+        
+        // get the secure conversation policies pertaining to this operation
+        List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());        
+        for (PolicyAssertion scAssertion : policies) {
+            Token scToken = (Token)scAssertion;
+            if (issuedTokenContextMap.get(scToken.getTokenId()) != null) {
+                try{                                        
+                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), scToken.getTokenId(), true, false);
+                    IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                    itm.renewIssuedToken(ctx);
+                    issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);                
+                  }catch(WSTrustException se){
+                    log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                    throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                }
+            }
+        }
+    }        
 
     // returns a list of IssuedTokenPolicy Assertions contained in the
     // service policy
@@ -334,12 +444,26 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         IssuedTokenContext ctx =
                 (IssuedTokenContext) issuedTokenContextMap.get(tok.getTokenId());
 
+        PolicyAssertion scClientAssertion = null;
+        if (wsscConfig != null) {
+            Iterator it = wsscConfig.iterator();
+            while (it != null && it.hasNext()) {
+                scClientAssertion = (PolicyAssertion) it.next();
+            }
+        }
+
         if (ctx == null) {
-            ctx = scPlugin.process(
-                    (PolicyAssertion) tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(),
-                    this, marshaller, unmarshaller, packet.endpointAddress.toString(), packet, addVer);
-            ctx.setEndpointAddress(packet.endpointAddress.toString());
-            issuedTokenContextMap.put(((Token) tok).getTokenId(), ctx);
+            try{
+                SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);
+                
+                ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
+                itm.getIssuedToken(ctx);
+                issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+            }catch(WSTrustException se){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+            }
         }
 
         SecurityTokenReference str = (SecurityTokenReference) ctx.getUnAttachedSecurityTokenReference();
@@ -352,12 +476,17 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         while (keys.hasMoreElements()) {
             String id = (String) keys.nextElement();
             IssuedTokenContext ctx =
-                    (IssuedTokenContext) issuedTokenContextMap.get(id);
-
-            if (ctx.getSecurityToken() instanceof SecurityContextToken) {
-                ctx = scPlugin.processCancellation(
-                        ctx, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, marshaller, unmarshaller, ctx.getEndpointAddress(), addVer);
-                issuedTokenContextMap.remove(id);
+                    (IssuedTokenContext)issuedTokenContextMap.get(id);
+            
+            if (ctx.getSecurityToken() instanceof SecurityContextToken){
+                try{
+                    itm.cancelIssuedToken(ctx);
+                    issuedTokenContextMap.remove(id);
+                }catch(WSTrustException se){
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                    throw new WebServiceException(LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                }
             }
         }
     }

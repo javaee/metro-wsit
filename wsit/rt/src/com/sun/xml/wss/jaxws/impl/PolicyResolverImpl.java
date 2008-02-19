@@ -298,7 +298,9 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     private boolean isSCMessage(){
         if (wsscVer.getSCTRequestAction().equals(action) || 
-                wsscVer.getSCTResponseAction().equals(action)){
+              wsscVer.getSCTResponseAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action) || 
+                  wsscVer.getSCTRenewResponseAction().equals(action)){
             return true;
         }
         return false;

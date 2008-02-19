@@ -521,6 +521,9 @@ public abstract class SecurityPipeBase implements Pipe {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if(isSCRenew(packet)){            
+            ctx.isExpired(true);            
+        }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         ctx.setTimestampTimeout(this.timestampTimeOut);
@@ -531,7 +534,9 @@ public abstract class SecurityPipeBase implements Pipe {
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         ctx.isInboundMessage(true);
-        
+        if(isTrustMessage(packet)){
+            ctx.isTrustMessage(true);
+        }
         return ctx;
     }
     
@@ -579,6 +584,9 @@ public abstract class SecurityPipeBase implements Pipe {
                     holder = outProtocolPM.get("RM");
                 }
                 policy = holder.getMessagePolicy();
+            }else if(isSCRenew(packet)){
+                policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
+                ctx.isExpired(true);                
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
             }
@@ -1095,7 +1103,8 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         
         String action = getAction(packet);
-        if (wsscVer.getSCTRequestAction().equals(action)){
+        if (wsscVer.getSCTRequestAction().equals(action) || 
+                wsscVer.getSCTRenewRequestAction().equals(action)){
             return true;
         }
         return false;
@@ -1119,6 +1128,24 @@ public abstract class SecurityPipeBase implements Pipe {
         return false;
     }
     
+    protected boolean isSCRenew(Packet packet){
+        
+        if (!bindingHasSecureConversationPolicy()) {
+            return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        
+        String action = getAction(packet);
+        if(wsscVer.getSCTRenewResponseAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action)) {
+            return true;
+        }
+        return false;
+    }
+        
     protected boolean isAddressingEnabled() {
         return (addVer != null);
     }

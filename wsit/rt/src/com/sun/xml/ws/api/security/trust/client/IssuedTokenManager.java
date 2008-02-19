@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.api.security.trust.client;
 
+import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 
@@ -99,6 +100,8 @@ public class IssuedTokenManager {
     private void addDefaultProviders(){
         itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
         itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
+        itpClassMap.put(SCTokenConfiguration.PROTOCOL_10, com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl.class);
+        itpClassMap.put(SCTokenConfiguration.PROTOCOL_13, com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl.class);
     }
 
     private IssuedTokenProvider getIssuedTokenProvider(String protocol) throws WSTrustException {

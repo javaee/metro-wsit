@@ -47,7 +47,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
 import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
@@ -65,6 +64,7 @@ import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -142,6 +142,23 @@ public class WSTrustUtil {
         return secret;
     }
     
+   public static SecurityContextToken createSecurityContextToken(final WSTrustElementFactory wsscEleFac) throws WSSecureConversationException{
+       final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
+       URI idURI;
+       try{
+           idURI = new URI(identifier);
+       }catch (URISyntaxException ex){
+           throw new WSSecureConversationException(ex.getMessage(), ex);
+       }
+       final String wsuId = "uuid-" + UUID.randomUUID().toString();
+       if(wsscEleFac instanceof com.sun.xml.ws.security.secconv.WSSCElementFactory){
+           return ((WSSCElementFactory)wsscEleFac).createSecurityContextToken(idURI, null, wsuId);
+       }else if(wsscEleFac instanceof com.sun.xml.ws.security.secconv.WSSCElementFactory13){
+           return ((WSSCElementFactory13)wsscEleFac).createSecurityContextToken(idURI, null, wsuId);
+       }
+       return null;
+   }
+   
    public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory eleFac) throws WSSecureConversationException{
        final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
        URI idURI;
@@ -155,6 +172,7 @@ public class WSTrustUtil {
        return eleFac.createSecurityContextToken(idURI, null, wsuId);
    }
    
+   /*
    public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory13 eleFac) throws WSSecureConversationException{
        final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
        URI idURI;
@@ -166,6 +184,37 @@ public class WSTrustUtil {
        final String wsuId = "uuid-" + UUID.randomUUID().toString();
        
        return eleFac.createSecurityContextToken(idURI, null, wsuId);
+   }*/
+   
+   public static SecurityContextToken createSecurityContextToken(final WSTrustElementFactory wsscEleFac, final String identifier) throws WSSecureConversationException{       
+       URI idURI;
+       try{
+           idURI = new URI(identifier);
+       }catch (URISyntaxException ex){
+           throw new WSSecureConversationException(ex.getMessage(), ex);
+       }
+       final String wsuId = "uuid-" + UUID.randomUUID().toString();
+       final String wsuInstance = "uuid-" + UUID.randomUUID().toString();
+
+       if(wsscEleFac instanceof com.sun.xml.ws.security.secconv.WSSCElementFactory){
+           return ((WSSCElementFactory)wsscEleFac).createSecurityContextToken(idURI, wsuInstance, wsuId);
+       }else if(wsscEleFac instanceof com.sun.xml.ws.security.secconv.WSSCElementFactory13){
+           return ((WSSCElementFactory13)wsscEleFac).createSecurityContextToken(idURI, wsuInstance, wsuId);
+       }
+       return null;       
+   }
+   
+   public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory eleFac, final String identifier) throws WSSecureConversationException{       
+       URI idURI;
+       try{
+           idURI = new URI(identifier);
+       }catch (URISyntaxException ex){
+           throw new WSSecureConversationException(ex.getMessage(), ex);
+       }
+       final String wsuId = "uuid-" + UUID.randomUUID().toString();
+       final String wsuInstance = "uuid-" + UUID.randomUUID().toString();
+       
+       return eleFac.createSecurityContextToken(idURI, wsuInstance, wsuId);
    }
    
    public static AppliesTo createAppliesTo(final String appliesTo){

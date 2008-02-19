@@ -90,9 +90,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.RenewTarget;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,15 +109,20 @@ public class WSSCContract {
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
     //private Configuration config;
+   
+    private long currentTime;    
+    private SymmetricBinding symBinding = null;
+    private boolean reqServerEntr = true;
+    private boolean reqClientEntr=false;    
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
-    private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
-    private static WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
-    private static WSSCElementFactory13 eleFac13 = WSSCElementFactory13.newInstance();
-    
+    private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;    
+    private static WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10);
     private static final int DEFAULT_KEY_SIZE = 128;
     
     // ToDo: Should read from the configuration
-    private static final long TIMEOUT = 36000000;
+    private long TIMEOUT = 36000000;        
+    private static final SimpleDateFormat calendarFormatter
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
     public WSSCContract(){
         //Empty default constructor
@@ -128,7 +136,8 @@ public class WSSCContract {
         //this.config = config;        
         if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
             this.wsscVer = wsscVer;
-            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;            
+            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;
+            this.wsscEleFac = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_13);
         }
     }
     
@@ -155,13 +164,7 @@ public class WSSCContract {
         // AppliesTo
         final AppliesTo scopes = ((RequestSecurityToken)request).getAppliesTo();
         
-        final RequestedProofToken proofToken;
-        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            proofToken = eleFac13.createRequestedProofToken();
-        }else{
-            proofToken = eleFac.createRequestedProofToken();
-        }
-        
+        final RequestedProofToken proofToken = wsscEleFac.createRequestedProofToken();
         // Get client entropy
         byte[] clientEntr = null;
         final Entropy clientEntropy = ((RequestSecurityToken)request).getEntropy();
@@ -189,13 +192,10 @@ public class WSSCContract {
         }
         return response;
     }
-
-    private BaseSTSResponse createRSTR(final URI computeKeyAlgo, final SecureConversationToken scToken, final BaseSTSRequest request, final AppliesTo scopes, final byte[] clientEntr, final RequestedProofToken proofToken, final URI tokenType, final Entropy clientEntropy, final IssuedTokenContext context, final URI con) throws WSSecureConversationException, WSSecureConversationException {
-        
+    
+    private void parseAssertion(final SecureConversationToken scToken, final Entropy clientEntropy)  throws WSSecureConversationException, WSSecureConversationException {
         Trust10 trust10 = null;
-        Trust13 trust13 = null;
-        SymmetricBinding symBinding = null;
-        
+        Trust13 trust13 = null;        
         final NestedPolicy wsPolicy = scToken.getBootstrapPolicy();
         final AssertionSet assertionSet = wsPolicy.getAssertionSet();
         for(PolicyAssertion policyAssertion : assertionSet){
@@ -208,8 +208,7 @@ public class WSSCContract {
                 symBinding = (SymmetricBinding)policyAssertion;
             }
         }
-        boolean reqServerEntr = true;
-        boolean reqClientEntr=false;
+        
         if(trust10 != null){
             final Set trustReqdProps = trust10.getRequiredProperties();
             reqServerEntr = trustReqdProps.contains(Constants.REQUIRE_SERVER_ENTROPY);
@@ -229,7 +228,12 @@ public class WSSCContract {
                 reqServerEntr = true;
             }
         }
+    }
+
+    private BaseSTSResponse createRSTR(final URI computeKeyAlgo, final SecureConversationToken scToken, final BaseSTSRequest request, final AppliesTo scopes, final byte[] clientEntr, final RequestedProofToken proofToken, final URI tokenType, final Entropy clientEntropy, final IssuedTokenContext context, final URI con) throws WSSecureConversationException, WSSecureConversationException {        
                
+        parseAssertion(scToken, clientEntropy);
+        
         int keySize = (int)((RequestSecurityToken)request).getKeySize();
         if (keySize < 1 && symBinding!=null ){
             final AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
@@ -242,24 +246,16 @@ public class WSSCContract {
         log.log(Level.FINE,
                 LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, DEFAULT_KEY_SIZE));
         }
-        
-        byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
+                
+        byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);  
         final String proofTokenType = (clientEntr == null ||clientEntr.length ==0)
         ? wsTrustVer.getSymmetricKeyTypeURI() :wsTrustVer.getNonceBinarySecretTypeURI();
         Entropy serverEntropy = null;
         if(reqServerEntr){
-            final BinarySecret serverBS;
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                serverBS = eleFac13.createBinarySecret(secret, proofTokenType);
-            }else{
-                serverBS = eleFac.createBinarySecret(secret, proofTokenType);
-            }
+            final BinarySecret serverBS = wsscEleFac.createBinarySecret(secret, proofTokenType);
+            
             if (proofTokenType.equals(wsTrustVer.getNonceBinarySecretTypeURI())){
-                if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                    serverEntropy = eleFac13.createEntropy(serverBS);
-                }else{
-                    serverEntropy = eleFac.createEntropy(serverBS);
-                }
+                serverEntropy = wsscEleFac.createEntropy(serverBS);
                 proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
                 proofToken.setComputedKey(computeKeyAlgo);
                 
@@ -282,24 +278,30 @@ public class WSSCContract {
             proofToken.setBinarySecret(clientEntropy.getBinarySecret());
         }
         
-        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            return createResponseFor13NS(serverEntropy, con, scopes, secret, proofToken, context, tokenType);    
-        }else{
-            return createResponse(serverEntropy, con, scopes, secret, proofToken, context, tokenType);
+        Lifetime lifetime = (Lifetime)((RequestSecurityToken)request).getLifetime();
+        
+        if(lifetime != null){
+            long timeout = getTimeoutFromRequest(lifetime);
+            if(timeout > 0){
+                TIMEOUT = timeout;
+            }
         }
+        
+       return createResponse(serverEntropy, con, scopes, secret, proofToken, context, tokenType);
     }
 
     private BaseSTSResponse createResponse(final Entropy serverEntropy, final URI con, final AppliesTo scopes, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
 
         // Create Security Context and SecurityContextToken
-        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(eleFac);
-        final RequestedSecurityToken rst = eleFac.createRequestedSecurityToken(token);
+
+        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(wsscEleFac);
+        final RequestedSecurityToken rst = wsscEleFac.createRequestedSecurityToken(token);
         
         // Create references
         final SecurityTokenReference attachedReference = createSecurityTokenReference(token.getWsuId(),false);
-        final RequestedAttachedReference rar = eleFac.createRequestedAttachedReference(attachedReference);
+        final RequestedAttachedReference rar = wsscEleFac.createRequestedAttachedReference(attachedReference);
         final SecurityTokenReference unattachedRef = createSecurityTokenReference(token.getIdentifier().toString(), true);
-        final RequestedUnattachedReference rur = eleFac.createRequestedUnattachedReference(unattachedRef);
+        final RequestedUnattachedReference rur = wsscEleFac.createRequestedUnattachedReference(unattachedRef);
         
         // Create Lifetime
         long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
@@ -307,8 +309,11 @@ public class WSSCContract {
         
         BaseSTSResponse response = null;
         try {
-            response =
-                    eleFac.createRSTRForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
+            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+                response = wsscEleFac.createRSTRCollectionForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);                
+            }else{
+                response = wsscEleFac.createRSTRForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
+            }
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
@@ -326,17 +331,18 @@ public class WSSCContract {
         return response;
     }
     
+    /*
     private BaseSTSResponse createResponseFor13NS(final Entropy serverEntropy, final URI con, final AppliesTo scopes, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
 
         // Create Security Context and SecurityContextToken
-        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(eleFac13);
-        final RequestedSecurityToken rst = eleFac13.createRequestedSecurityToken(token);
+        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(wsscEleFac);
+        final RequestedSecurityToken rst = wsscEleFac.createRequestedSecurityToken(token);
         
         // Create references
         final SecurityTokenReference attachedReference = createSecurityTokenReference(token.getWsuId(),false);
-        final RequestedAttachedReference rar = eleFac13.createRequestedAttachedReference(attachedReference);
+        final RequestedAttachedReference rar = wsscEleFac.createRequestedAttachedReference(attachedReference);
         final SecurityTokenReference unattachedRef = createSecurityTokenReference(token.getIdentifier().toString(), true);
-        final RequestedUnattachedReference rur = eleFac13.createRequestedUnattachedReference(unattachedRef);
+        final RequestedUnattachedReference rur = wsscEleFac.createRequestedUnattachedReference(unattachedRef);
         
         // Create Lifetime
         long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
@@ -345,7 +351,7 @@ public class WSSCContract {
         BaseSTSResponse response = null;
         try {
             response =
-                    eleFac13.createRSTRCollectionForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
+                    wsscEleFac.createRSTRCollectionForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
         } catch (WSTrustException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
@@ -361,7 +367,7 @@ public class WSSCContract {
         populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
         SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
         return response;
-    }
+    }*/
     
 
     private void populateITC(final long currentTime, final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
@@ -385,6 +391,31 @@ public class WSSCContract {
         session.setSecurityInfo(sctinfo);
     }
     
+    private void populateRenewedITC(final Session session, final byte[] secret, final SecurityContextToken token, final IssuedTokenContext context, final SecurityTokenReference attachedReference) {        
+        // Populate the IssuedTokenContext
+        context.setSecurityToken(token);
+        //context.setProofKey(secret);
+        context.setAttachedSecurityTokenReference(attachedReference);
+        context.setCreationTime(new Date(currentTime));
+        context.setExpirationTime(new Date(currentTime + TIMEOUT));
+                
+        final SecurityContextTokenInfo sctInfoForSession = session.getSecurityInfo();
+                        
+        sctInfoForSession.setExternalId(token.getWsuId());
+        sctInfoForSession.setExternalId(token.getInstance());
+        sctInfoForSession.setCreationTime(new Date(currentTime));
+        sctInfoForSession.setExpirationTime(new Date(currentTime + TIMEOUT));        
+        session.setSecurityInfo(sctInfoForSession);
+        
+        final SecurityContextTokenInfo sctInfoForItc =
+                new SecurityContextTokenInfoImpl();
+        sctInfoForItc.setIdentifier(token.getIdentifier().toString());
+        sctInfoForItc.setInstance(token.getInstance());
+        sctInfoForItc.setExternalId(token.getWsuId());
+        sctInfoForItc.addInstance(token.getInstance(), secret);
+        context.setSecurityContextTokenInfo(sctInfoForItc);
+    }
+    
     
     /** Issue a Collection of Token(s) possibly for different scopes */
     public RequestSecurityTokenResponseCollection issueMultiple(
@@ -393,11 +424,162 @@ public class WSSCContract {
     }
     
     /** Renew a SecurityContextToken */
-    public RequestSecurityTokenResponse renew(
-            final RequestSecurityToken request, final IssuedTokenContext context)
-            throws WSSecureConversationException {
-        return null;
+    public BaseSTSResponse renew(final BaseSTSRequest request, final IssuedTokenContext context, final SecureConversationToken scToken)
+    throws WSSecureConversationException {
+        
+        if(scToken.isMustNotSendRenew()){
+            throw new WSSecureConversationException("Service doesn't support Token Renewal, as MustNotSendRenew is enabled in the service policy");
+        }
+        
+        URI tokenType = URI.create(wsscVer.getSCTTokenTypeURI());
+        URI con = null;
+        URI computeKeyAlgo = URI.create(wsTrustVer.getCKPSHA1algorithmURI());
+        final RenewTarget renewTgt = ((RequestSecurityToken)request).getRenewTarget();
+        final SecurityTokenReference str = renewTgt.getSecurityTokenReference();
+        String id = null;
+        final Reference ref = str.getReference();
+        if (ref.getType().equals("Reference")){
+            id = ((DirectReference)ref).getURIAttr().toString();
+        }
+        final String conStr = ((RequestSecurityToken)request).getContext();
+        if (conStr != null) {
+            try {
+                con = new URI(conStr);
+            } catch (URISyntaxException ex){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(((RequestSecurityToken)request).getContext()), ex);
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0008_URISYNTAX_EXCEPTION(((RequestSecurityToken)request).getContext()), ex);
+            }
+        }
+                
+        // AppliesTo
+        final AppliesTo scopes = ((RequestSecurityToken)request).getAppliesTo();
+        
+        final RequestedProofToken proofToken = wsscEleFac.createRequestedProofToken();
+        
+        // Get client entropy
+        byte[] clientEntr = null;
+        final Entropy clientEntropy = ((RequestSecurityToken)request).getEntropy();
+        if (clientEntropy != null){
+            final BinarySecret clientBS = clientEntropy.getBinarySecret();
+            if (clientBS == null){
+                //ToDo
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,
+                            LogStringsMessages.WSSC_0009_CLIENT_ENTROPY_VALUE("null"));
+                }
+            }else {
+                clientEntr = clientBS.getRawValue();
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,
+                            LogStringsMessages.WSSC_0009_CLIENT_ENTROPY_VALUE(clientEntropy.toString()));
+                }
+            }
+        }
+        parseAssertion(scToken, clientEntropy);
+               
+        int keySize = (int)((RequestSecurityToken)request).getKeySize();
+        if (keySize < 1 && symBinding!=null ){
+            final AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
+            keySize = algoSuite.getMinSKLAlgorithm();
+        }
+        if (keySize < 1){
+            keySize = DEFAULT_KEY_SIZE;
+        }
+        if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE,
+                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, this.DEFAULT_KEY_SIZE));
+        }
+        
+        byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
+        final String proofTokenType = (clientEntr == null ||clientEntr.length ==0)
+        ? wsTrustVer.getSymmetricKeyTypeURI() :wsTrustVer.getNonceBinarySecretTypeURI();
+        Entropy serverEntropy = null;
+        if(reqServerEntr){
+            final BinarySecret serverBS = wsscEleFac.createBinarySecret(secret, proofTokenType);
+            if (proofTokenType.equals(wsTrustVer.getNonceBinarySecretTypeURI())){
+                serverEntropy = wsscEleFac.createEntropy(serverBS);
+                proofToken.setProofTokenType(RequestedProofToken.COMPUTED_KEY_TYPE);
+                proofToken.setComputedKey(computeKeyAlgo);
+                
+                // compute the secret key
+                try {
+                    secret = SecurityUtil.P_SHA1(clientEntr, secret, keySize/8);
+                } catch (Exception ex){
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSSC_0012_COMPUTE_SECKEY(), ex);
+                    throw new WSSecureConversationException(LogStringsMessages.WSSC_0012_COMPUTE_SECKEY(), ex);
+                }
+                
+            } else {
+                proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
+                proofToken.setBinarySecret(serverBS);
+            }
+        }else if (clientEntropy != null){
+            secret = clientEntr;
+            proofToken.setProofTokenType(RequestedProofToken.BINARY_SECRET_TYPE);
+            proofToken.setBinarySecret(clientEntropy.getBinarySecret());
+        }
+                
+        final BaseSTSResponse rstr = createRenewResponse(renewTgt, serverEntropy, con, secret, proofToken, context, tokenType);
+        return rstr;
     }
+    
+    private BaseSTSResponse createRenewResponse(final RenewTarget renewTgt, final Entropy serverEntropy, final URI con, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
+
+        final SecurityTokenReference str = renewTgt.getSecurityTokenReference();
+        String id = null;
+        final Reference ref = str.getReference();
+        if (ref.getType().equals("Reference")){
+            id = ((DirectReference)ref).getURIAttr().toString();
+        }
+        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(wsscEleFac, id);
+        final RequestedSecurityToken rst = wsscEleFac.createRequestedSecurityToken(token);
+        
+        final SecurityTokenReference attachedReference = createSecurityTokenReferenceForRenew(token.getWsuId(),false, token.getInstance());
+        final RequestedAttachedReference rar = wsscEleFac.createRequestedAttachedReference(attachedReference);
+        
+        
+        final IssuedTokenContext ctx = SessionManager.getSessionManager().getSecurityContext(id, false);
+        
+        if (ctx == null || ctx.getSecurityToken() == null){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
+        }
+        // Create Lifetime
+        final Lifetime lifetime = createLifetime();
+        
+        final BaseSTSResponse rstr;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+            RequestSecurityTokenResponse resp = wsscEleFac.createRSTRForCancel(); 
+            List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
+            list.add(resp);
+            try{
+                rstr = ((WSSCElementFactory13)wsscEleFac).createRSTRCollectionForIssue(list);
+            }catch(WSTrustException ex){
+                throw new WSSecureConversationException(ex);
+            }
+        }else{        
+            try{
+                rstr = ((WSSCElementFactory)wsscEleFac).createRSTRForRenew(tokenType, con, rst, rar, null, proofToken, serverEntropy, lifetime);
+            }catch (WSTrustException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            }
+        }
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(((RequestSecurityTokenResponse)rstr))));
+        }
+        final Session session =
+                SessionManager.getSessionManager().getSession(token.getIdentifier().toString());
+        populateRenewedITC(session, secret, token, ctx, attachedReference);
+        SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), ctx);
+        return rstr;
+    }
+    
     
     /** Cancel a SecurityContextToken */
     public BaseSTSResponse cancel(
@@ -411,7 +593,7 @@ public class WSSCContract {
             id = ((DirectReference)ref).getURIAttr().toString();
         }
                 
-        final IssuedTokenContext cxt = SessionManager.getSessionManager().getSecurityContext(id);
+        final IssuedTokenContext cxt = SessionManager.getSessionManager().getSecurityContext(id, true);
         if (cxt == null || cxt.getSecurityToken() == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
@@ -420,16 +602,16 @@ public class WSSCContract {
         
         final BaseSTSResponse rstr;
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            RequestSecurityTokenResponse resp = eleFac13.createRSTRForCancel(); 
+            RequestSecurityTokenResponse resp = wsscEleFac.createRSTRForCancel(); 
             List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
             list.add(resp);
             try{
-                rstr = eleFac13.createRSTRCollectionForIssue(list);
+                rstr = ((WSSCElementFactory13)wsscEleFac).createRSTRCollectionForIssue(list);
             }catch(WSTrustException ex){
                 throw new WSSecureConversationException(ex);
             }
         }else{        
-            rstr = eleFac.createRSTRForCancel();
+            rstr = wsscEleFac.createRSTRForCancel();
         }
          if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
@@ -481,13 +663,76 @@ public class WSSCContract {
     
     private SecurityTokenReference createSecurityTokenReference(final String id, final boolean unattached){
         final String uri = (unattached?id:"#"+id);
-        final Reference ref;
-        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            ref = eleFac13.createDirectReference(wsscVer.getSCTTokenTypeURI(), uri);
-            return eleFac13.createSecurityTokenReference(ref);
-        }else{
-            ref = eleFac.createDirectReference(wsscVer.getSCTTokenTypeURI(), uri);
-            return eleFac.createSecurityTokenReference(ref);
+        final Reference ref = wsscEleFac.createDirectReference(wsscVer.getSCTTokenTypeURI(), uri);
+        
+        return wsscEleFac.createSecurityTokenReference(ref);
+    }
+    
+    private SecurityTokenReference createSecurityTokenReferenceForRenew(final String id, final boolean unattached, final String instanceId){
+        final String uri = (unattached?id:"#"+id);
+        final Reference ref = wsscEleFac.createDirectReference(wsscVer.getSCTTokenTypeURI(), uri);
+
+        return wsscEleFac.createSecurityTokenReference(ref);
+    }    
+    
+    private Lifetime createLifetime() {
+        final Calendar cal = new GregorianCalendar();
+        int offset = cal.get(Calendar.ZONE_OFFSET);
+        if (cal.getTimeZone().inDaylightTime(cal.getTime())) {
+            offset += cal.getTimeZone().getDSTSavings();
+        }
+        synchronized (calendarFormatter) {
+            calendarFormatter.setTimeZone(cal.getTimeZone());
+            
+            // always send UTC/GMT time
+            final long beforeTime = cal.getTimeInMillis();
+            currentTime = beforeTime - offset;
+            cal.setTimeInMillis(currentTime);
+            
+            final AttributedDateTime created = new AttributedDateTime();
+            created.setValue(calendarFormatter.format(cal.getTime()));
+            
+            final AttributedDateTime expires = new AttributedDateTime();
+            cal.setTimeInMillis(currentTime + TIMEOUT);
+            expires.setValue(calendarFormatter.format(cal.getTime()));
+            
+            final Lifetime lifetime = wsscEleFac.createLifetime(created, expires);
+
+            return lifetime;
+        }
+    }
+    
+    private long getTimeoutFromRequest(Lifetime lifetime)  throws WSSecureConversationException {
+        long timeout = 0;
+        try{            
+            final AttributedDateTime created = lifetime.getCreated();
+            final AttributedDateTime expires = lifetime.getExpires();
+            synchronized (calendarFormatter){
+                final Date dateCreated = calendarFormatter.parse(created.getValue());
+                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+                
+                timeout = dateExpires.getTime() - dateCreated.getTime();          
+            }
+        }catch(ParseException ex){
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
+            throw new WSSecureConversationException(LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
+        }
+        return timeout;
+    }
+    
+    private String elemToString(final RequestSecurityTokenResponse rstr){
+        try {
+            final javax.xml.bind.Marshaller marshaller = wsscEleFac.getContext(wsTrustVer).createMarshaller();
+            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
+            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            final java.io.StringWriter writer = new java.io.StringWriter();
+            marshaller.marshal(rstrElement, writer);
+            return writer.toString();
+        } catch (Exception e) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG());
+            throw new RuntimeException(LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG(), e);
         }
     }
     
@@ -500,6 +745,5 @@ public class WSSCContract {
             spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;            
         }        
         return spVersion;
-    }
-    
+    }   
 }

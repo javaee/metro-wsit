@@ -180,9 +180,12 @@ public class Constants {
     public final static String SignedEndorsingEncryptedSupportingTokens = "SignedEndorsingEncryptedSupportingTokens";
     public final static String RequireRequestSecurityTokenCollection = "RequireRequestSecurityTokenCollection";
     public final static String RequireAppliesTo = "RequireAppliesTo";
+    public final static String MustNotSendCancel = "MustNotSendCancel";
+    public final static String MustNotSendRenew = "MustNotSendRenew";
     public final static String Attachments = "Attachments";
     public final static String ContentSignatureTransform = "Content-Signature-Transform";
     public final static String AttachmentCompleteSignatureTransform = "Attachment-Complete-Signature-Transform";
+
     // End of new assertions from WS-SecurityPolicy 1.2
     
     public final static String Body = "Body";

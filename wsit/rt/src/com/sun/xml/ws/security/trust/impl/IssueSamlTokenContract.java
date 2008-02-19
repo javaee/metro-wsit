@@ -122,6 +122,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     
     protected STSConfiguration stsConfig;
     protected WSTrustVersion wstVer;
+    protected String authnCtxClass;
     protected WSTrustElementFactory eleFac = 
             WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_10);
     
@@ -131,6 +132,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     public void init(final STSConfiguration stsConfig) {
         this.stsConfig = stsConfig;
         this.wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
+        this.authnCtxClass = (String)stsConfig.getOtherOptions().get(WSTrustConstants.AUTHN_CONTEXT_CLASS);
         eleFac = WSTrustElementFactory.newInstance(wstVer);
     }
     

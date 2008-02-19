@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.6 2008-01-17 20:01:13 jdg6688 Exp $
+ * $Id: RequestSecurityToken.java,v 1.7 2008-02-19 15:20:03 shyam_rao Exp $
  */
 
 /*
@@ -141,6 +141,8 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
       * Get the participants sharing the token if specified, null otherwise 
       */
      Participants getParticipants();
+     
+     RenewTarget getRenewTarget();
      
      CancelTarget getCancelTarget();
      

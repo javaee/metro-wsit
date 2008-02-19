@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustConstants.java,v 1.12 2007-11-20 00:10:46 jdg6688 Exp $
+ * $Id: WSTrustConstants.java,v 1.13 2008-02-19 15:20:02 shyam_rao Exp $
  */
 
 /*
@@ -55,6 +55,8 @@ public class WSTrustConstants {
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
     
     public static final String WST_VERSION = "WSTrustVersion";
+    
+    public static final String AUTHN_CONTEXT_CLASS = "AuthnContextClass";
     
     public static final String SECURITY_ENVIRONMENT = "SecurityEnvironment";
     

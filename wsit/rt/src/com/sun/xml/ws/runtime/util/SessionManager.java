@@ -130,14 +130,16 @@ public abstract class SessionManager {
      * Return the valid SecurityContext for matching key
      *
      * @param key The key of the security context to be looked
+     * @param expiryCheck indicates whether to check the token expiry or not, 
+     *                    As in case of renew we don't need to check token expiry
      * @returns IssuedTokenContext for security context key
      */
-    public abstract IssuedTokenContext getSecurityContext(String key);
+    public abstract IssuedTokenContext getSecurityContext(String key, boolean checkExpiry);
     
     /**
      * Add the SecurityContext with key in local cache
      *
-     * @param key The key of the security context to be stored
+     * @param key The key of the security context to be stored     
      * @param itctx The IssuedTokenContext to be stored
      */
     public abstract void addSecurityContext(String key, IssuedTokenContext itctx);

@@ -479,7 +479,7 @@ public class NewWSSCPlugin {
     
     private void processRequestSecurityTokenResponse(final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
     throws WSSecureConversationException {
-        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config, wsscVer);
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
             contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);
         }else{

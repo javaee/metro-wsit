@@ -538,7 +538,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             if (attrs.isEmpty()){
                 // To Do: create AuthnContext with proper content. Currently what 
                 // we have is a place holder.
-                AuthnContext ctx = samlFac.createAuthnContext();
+                //AuthnContext ctx = samlFac.createAuthnContext();
+                AuthnContext ctx = samlFac.createAuthnContext(this.authnCtxClass, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
                 statements.add(statement); 
             }else{

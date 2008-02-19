@@ -54,6 +54,7 @@ import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
@@ -325,7 +326,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         if (isAddressingEnabled()) {
             action = getAction(packet);
-            if (wsscVer.getSCTRequestAction().equals(action)) {
+            if (wsscVer.getSCTRequestAction().equals(action) || wsscVer.getSCTRenewRequestAction().equals(action)) {
                 isSCIssueMessage = true;
                 sharedState.put("IS_SC_ISSUE", TRUE);
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
@@ -343,6 +344,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 
                 //set the SecurityEnvironment
                 packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
+                packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
+                IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustContext();
+                if(ictx != null && ictx.getAuthnContextClass() != null){                    
+                    packet.invocationProperties.put(WSTrustConstants.AUTHN_CONTEXT_CLASS, ictx.getAuthnContextClass());
+                }                
             }
             
             if (isSCIssueMessage){
@@ -496,7 +502,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
-            
+            if(isTrustMessage(packet)){
+                ctx.isTrustMessage(true);
+            }
             // set the policy, issued-token-map, and extraneous properties
             //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -631,20 +639,12 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             // Set the requestor authenticated Subject in the IssuedTokenContext
             Subject subject = SubjectAccessor.getRequesterSubject(ctx);
             ictx.setRequestorSubject(subject);
-            
-            WSSCElementFactory eleFac = WSSCElementFactory.newInstance();
-            WSSCElementFactory13 eleFac13 = WSSCElementFactory13.newInstance();
+                        
+            WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(wsscVer);
             JAXBElement rstEle = msg.readPayloadAsJAXB(WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller());
-            BaseSTSRequest rst = null;
-            
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                rst = eleFac13.createRSTFrom(rstEle);
-            }else{                
-                rst = eleFac.createRSTFrom(rstEle);
-            }
+            BaseSTSRequest rst = wsscEleFac.createRSTFrom(rstEle);
             
             URI requestType = ((RequestSecurityToken)rst).getRequestType();
-            //RequestSecurityTokenResponse rstr = null;
             BaseSTSResponse rstr = null;
             WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
@@ -674,6 +674,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 itctx.setRequestorSubject(ictx.getRequestorSubject());
                 //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
                 
+            } else if (requestType.toString().equals(wsTrustVer.getRenewRequestTypeURI())) {
+                List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
+                retAction = wsscVer.getSCTRenewResponseAction();
+                rstr =  scContract.renew(rst, ictx,(SecureConversationToken)policies.get(0));
             } else if (requestType.toString().equals(wsTrustVer.getCancelRequestTypeURI())) {
                 retAction = wsscVer.getSCTCancelResponseAction();
                 rstr =  scContract.cancel(rst, ictx);
@@ -686,11 +690,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.     
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac13.toJAXBElement(rstr), soapVersion);
-            }else{
-                retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), eleFac.toJAXBElement(rstr), soapVersion);
-            }
+            retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), wsscEleFac.toJAXBElement(rstr), soapVersion);
             
         } catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0001_PROBLEM_MAR_UNMAR(), ex);
@@ -796,6 +796,5 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         }
         return null;
-    }    
-    
+    }            
 }

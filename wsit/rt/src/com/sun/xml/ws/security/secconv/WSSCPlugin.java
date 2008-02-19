@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
@@ -66,6 +67,10 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.impl.policy.Trust13;
+import com.sun.xml.ws.security.impl.policyconv.PolicyID;
+import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyUtil;
+import com.sun.xml.ws.security.policy.Binding;
+import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -91,8 +96,15 @@ import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.Lifetime;
+import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
+import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import java.io.StringWriter;
+import javax.xml.bind.JAXBContext;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -120,19 +132,18 @@ public class WSSCPlugin {
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
     private static final String FOR_CANCEL = "For Cancel";
+    private static SignaturePolicy renewSignaturePolicy = null;
+    private static PolicyID pid = new PolicyID();    
+    private static Binding binding = null;
     
     private Packet packet = null;
     
     /** Creates a new instance of WSSCPlugin */
-    public WSSCPlugin(Configuration config, final WSSCVersion wsscVer) {
+    public WSSCPlugin(Configuration config) {
         this.config = config;        
-        if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
-            this.wsscVer = wsscVer;
-            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;
-            this.eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
-        }
     }
     
+    /*
     public IssuedTokenContext process(final PolicyAssertion token, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final String endPointAddress, final Packet packet, final AddressingVersion addVer){
         
         this.packet = packet;
@@ -189,11 +200,7 @@ public class WSSCPlugin {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
             throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
-        }/* catch (WSTrustException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
-            throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
-        }*/
+        }
         
         final BaseSTSResponse rstr = sendRequest(token, wsdlPort, binding, securityPipe, marshaller, unmarshaller, rst, wsscVer.getSCTRequestAction(), endPointAddress, addVer);
         
@@ -208,11 +215,211 @@ public class WSSCPlugin {
         
         return context;
     }
+    */
+
+    public void process(IssuedTokenContext itc){
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        this.packet = sctConfig.getPacket();
+        //==============================
+        // Get Required policy assertions
+        //==============================        
+        
+        int skl = DEFAULT_KEY_SIZE;        
+        if(sctConfig.isSymmetricBinding()){            
+            skl = sctConfig.getKeySize();
+            if(skl<1){
+                skl = DEFAULT_KEY_SIZE;
+            }
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,
+                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
+            }
+        }                
+        
+        //==============================
+        // Create RequestSecurityToken
+        //==============================
+        BaseSTSRequest rst = null;
+        try{
+            rst = createRequestSecurityToken(sctConfig, sctConfig.getReqClientEntropy(),skl);
+        } catch (WSSecureConversationException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+        }/* catch (WSTrustException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+        }*/
+        
+        final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTRequestAction());
+        
+        // Handle the RequestSecurityTokenResponse
+        //final IssuedTokenContext context = new IssuedTokenContextImpl();
+        try {
+            processRequestSecurityTokenResponse(sctConfig, rst, rstr, itc);
+        } catch (WSSecureConversationException ex){
+            throw new RuntimeException(ex);
+        }                
+    }
+    
+    public void processRenew(final IssuedTokenContext itc){
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
+        //==============================
+        // Get Required policy assertions
+        //==============================        
+        
+        int skl = DEFAULT_KEY_SIZE;        
+        if(sctConfig.isSymmetricBinding()){            
+            skl = sctConfig.getKeySize();
+            if(skl<1){
+                skl = DEFAULT_KEY_SIZE;
+            }
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE,
+                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
+            }
+        }                
+        
+        //======================================
+        // Create RequestSecurityToken for Renew
+        //======================================
+        BaseSTSRequest rst = null;
+        try{
+            rst = createRequestSecurityTokenForRenew(itc, sctConfig.getReqClientEntropy(),skl);
+        } catch (WSSecureConversationException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(""), ex);
+        }/* catch (WSTrustException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0021_PROBLEM_CREATING_RST_TRUST(), ex);
+        }*/
+        createRenewSignaturePolicy(sctConfig.getSCToken());
+        
+        final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTRenewRequestAction());
+                
+        try {
+            processRequestSecurityTokenResponse(sctConfig, rst, rstr, itc);
+        } catch (WSSecureConversationException ex){
+            throw new RuntimeException(ex);
+        }                
+    }
+    
+    private BaseSTSResponse sendRequest(final SCTokenConfiguration sctConfig, final BaseSTSRequest rst, final String endPointAddress, final String action) {
+        Marshaller marshaller;
+        Unmarshaller unmarshaller;
+        final JAXBContext jaxbContext;   
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
+        WSTrustVersion wsTrustVer = null;        
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
+        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
+        jaxbContext = WSTrustElementFactory.getContext(wsTrustVer);        
+         try {
+           marshaller = jaxbContext.createMarshaller();
+           unmarshaller = jaxbContext.createUnmarshaller();
+        } catch (JAXBException ex){
+           log.log(Level.SEVERE,"WSSC0016.problem.mar.unmar", ex);
+          throw new RuntimeException("Problem creating JAXB Marshaller/Unmarshaller", ex);
+        }
+        
+        final Message request = Messages.create(marshaller, eleFac.toJAXBElement(rst), sctConfig.getWSBinding().getSOAPVersion());    
+        
+        // Log Request created
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1009_SEND_REQ_MESSAGE(printMessageAsString(request)));
+        }
+        Packet reqPacket = new Packet(request);
+        if (sctConfig.getSCToken() != null){
+            reqPacket.invocationProperties.put(SC_ASSERTION, sctConfig.getSCToken());
+        }
+        if (sctConfig.getPacket() != null){
+            for(WSTrustConstants.STS_PROPERTIES stsProperty : WSTrustConstants.STS_PROPERTIES.values()) {
+                reqPacket.invocationProperties.put(stsProperty.toString(),sctConfig.getPacket().invocationProperties.get(stsProperty.toString()));
+            }
+        }
+        
+        reqPacket.setEndPointAddressString(endPointAddress);
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE,
+                    LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
+        }
+        
+        // Add addressing headers to the message
+        try{
+            reqPacket = addAddressingHeaders(reqPacket, sctConfig.getWSDLPort(), sctConfig.getWSBinding(), action, sctConfig.getAddressingVersion());
+        }catch (WSSecureConversationException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0017_PROBLEM_ADD_ADDRESS_HEADERS(), ex);
+        }
+        
+        // Ideally this property for enabling FI or not should be available to the pipeline.
+        // As a workaround for now, we
+        // copy the property for the client packet to the reqPacket mananually here.
+        if (sctConfig.getPacket() != null){
+            reqPacket.contentNegotiation = sctConfig.getPacket().contentNegotiation;
+        }
+        
+        copyStandardSecurityProperties(sctConfig.getPacket(),reqPacket);
+        
+        // Send the message
+        Packet respPacket = null;
+        if(sctConfig.getClientPipe() != null){
+            respPacket = sctConfig.getClientPipe().process(reqPacket);
+        }else if(sctConfig.getWSITClientAuthContext() != null){
+            try{
+                respPacket = sctConfig.getWSITClientAuthContext().secureRequest(reqPacket, null, true);            
+            } catch (XWSSecurityException e) {                
+                throw new RuntimeException( e);
+            }
+        }
+        
+        // Obtain the RequestSecurtyTokenResponse
+        final Message response = respPacket.getMessage();
+        BaseSTSResponse rstr = null;
+        if (!response.isFault()){
+            JAXBElement rstrEle = null;
+            try {
+                rstrEle = (JAXBElement)response.readPayloadAsJAXB(unmarshaller);
+            }catch (JAXBException ex){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
+            }
+            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+                rstr = eleFac.createRSTRCollectionFrom(rstrEle);    
+            }else{
+                rstr = eleFac.createRSTRFrom(rstrEle);
+            }
+        } else {
+            try{
+                // SOAPFaultBuilder builder = SOAPFaultBuilder.create(response);
+                //throw (SOAPFaultException)builder.createException(null, response);
+                throw new SOAPFaultException(response.readAsSOAPMessage().getSOAPBody().getFault());
+            } catch (SOAPException ex){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
+                throw new RuntimeException(LogStringsMessages.WSSC_0022_PROBLEM_CREATING_FAULT(), ex);
+            }
+        }
+        
+        return rstr;
+    }
     
     private AssertionSet getAssertions(final SecureConversationToken scToken) {
         return scToken.getBootstrapPolicy().getAssertionSet();
     }
     
+    /*
     public IssuedTokenContext processCancellation(final IssuedTokenContext ctx, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final String endPointAddress, final AddressingVersion addVer){
         
         //==============================
@@ -239,8 +446,35 @@ public class WSSCPlugin {
         }
         
         return ctx;
-    }
+    }*/
     
+    public void processCancellation(final IssuedTokenContext itc){
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        //==============================
+        // Create RequestSecurityToken
+        //==============================
+        BaseSTSRequest rst = null;
+        try{
+            rst = createRequestSecurityTokenForCancel(sctConfig, itc);
+        } catch (WSSecureConversationException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
+        }
+        
+        final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTCancelRequestAction());        
+        // Handle the RequestSecurityTokenResponse
+        try {
+            processRequestSecurityTokenResponse(sctConfig, rst, rstr, itc);
+        } catch (WSSecureConversationException ex){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+            throw new RuntimeException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+        }                
+    }
+        
+    /*
     private BaseSTSResponse sendRequest(final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final Pipe securityPipe, final Marshaller marshaller, final Unmarshaller unmarshaller, final BaseSTSRequest rst, final String action, final String endPointAddress, final AddressingVersion addVer) {
         // Marshaller marshaller;
         //Unmarshaller unmarshaller;
@@ -327,8 +561,9 @@ public class WSSCPlugin {
         }
         
         return rstr;
-    }
+    }*/
     
+    /*
     private RequestSecurityToken createRequestSecurityToken(final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
         
         final URI tokenType = URI.create(wsscVer.getSCTTokenTypeURI());
@@ -350,11 +585,95 @@ public class WSSCPlugin {
         }
         
         return rst;
+    }*/
+    
+    private RequestSecurityToken createRequestSecurityToken(final SCTokenConfiguration sctConfig, final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
+        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
+        final URI tokenType = URI.create(wsscVer.getSCTTokenTypeURI());
+        final URI requestType = URI.create(wsTrustVer.getIssueRequestTypeURI());
+        final SecureRandom random = new SecureRandom();
+        final byte[] rawValue = new byte[skl/8];
+        random.nextBytes(rawValue);
+        final BinarySecret secret = eleFac.createBinarySecret(rawValue, wsTrustVer.getNonceBinarySecretTypeURI());
+        final Entropy entropy = reqClientEntropy?eleFac.createEntropy(secret):null;
+        Lifetime lifetime = null;
+        if(sctConfig.getSCTokenTimeout() > 0){
+            // Create Lifetime
+            long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+            lifetime = WSTrustUtil.createLifetime(currentTime, sctConfig.getSCTokenTimeout(), wsTrustVer);
+        }
+        RequestSecurityToken rst = null;
+        try {
+            rst = eleFac.createRSTForIssue(tokenType, requestType, null, null, null, entropy, lifetime);
+            rst.setKeySize(skl);
+            rst.setKeyType(URI.create(wsTrustVer.getSymmetricKeyTypeURI()));
+            rst.setComputedKeyAlgorithm(URI.create(wsTrustVer.getCKPSHA1algorithmURI()));            
+        } catch (WSTrustException ex){
+            throw new WSSecureConversationException(ex);
+        }
+        
+        return rst;
     }
     
-    private RequestSecurityToken createRequestSecurityTokenForCancel(final IssuedTokenContext ctx) throws WSSecureConversationException{
-        URI requestType = null;
-        requestType = URI.create(wsTrustVer.getCancelRequestTypeURI());
+    private RequestSecurityToken createRequestSecurityTokenForRenew( final IssuedTokenContext itc, final boolean reqClientEntropy,final int skl) throws WSSecureConversationException{
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
+        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
+        final URI tokenType = URI.create(wsscVer.getSCTTokenTypeURI());                
+        final URI requestType = URI.create(wsTrustVer.getRenewRequestTypeURI());   
+        final SecureRandom random = new SecureRandom();
+        final byte[] rawValue = new byte[skl/8];
+        random.nextBytes(rawValue);
+        final BinarySecret secret = eleFac.createBinarySecret(rawValue, wsTrustVer.getNonceBinarySecretTypeURI());
+        final Entropy entropy = reqClientEntropy?eleFac.createEntropy(secret):null;
+        final RenewTarget target = eleFac.createRenewTarget((SecurityTokenReference)itc.getUnAttachedSecurityTokenReference());
+        
+        RequestSecurityToken rst = null;
+        try {
+            rst = eleFac.createRSTForRenew(tokenType, requestType, null, target, null, null);
+            rst.setEntropy(entropy);
+            rst.setKeySize(skl);
+            rst.setKeyType(URI.create(wsTrustVer.getSymmetricKeyTypeURI()));
+            rst.setComputedKeyAlgorithm(URI.create(wsTrustVer.getCKPSHA1algorithmURI()));
+        } catch (WSTrustException ex){
+            throw new WSSecureConversationException(ex);
+        }
+        Lifetime lifetime = null;
+        if(sctConfig.getSCTokenTimeout() > 0){
+            // Create Lifetime
+            long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+            lifetime = WSTrustUtil.createLifetime(currentTime, sctConfig.getSCTokenTimeout(), wsTrustVer);
+            rst.setLifetime(lifetime);
+        }
+        
+        //final RequestSecurityToken rst = eleFac.createRSTForRenew(null, requestType, null, target, null, null);        
+        
+        return rst;
+    }
+    
+    private RequestSecurityToken createRequestSecurityTokenForCancel(final SCTokenConfiguration sctConfig, final IssuedTokenContext ctx) throws WSSecureConversationException{
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){            
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
+        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wsTrustVer);
+        URI requestType = URI.create(wsTrustVer.getCancelRequestTypeURI());
         
         final CancelTarget target = eleFac.createCancelTarget((SecurityTokenReference)ctx.getUnAttachedSecurityTokenReference());
         final RequestSecurityToken rst = eleFac.createRSTForCancel(requestType, target);
@@ -362,9 +681,34 @@ public class WSSCPlugin {
         return rst;
     }
     
+    /*
+    private RequestSecurityToken createRequestSecurityTokenForCancel(final IssuedTokenContext ctx) throws WSSecureConversationException{        
+        URI requestType = null;
+        requestType = URI.create(wsTrustVer.getCancelRequestTypeURI());
+        
+        final CancelTarget target = eleFac.createCancelTarget((SecurityTokenReference)ctx.getUnAttachedSecurityTokenReference());
+        final RequestSecurityToken rst = eleFac.createRSTForCancel(requestType, target);
+        
+        return rst;
+    }*/
+    
+    /*
     private void processRequestSecurityTokenResponse(final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
     throws WSSecureConversationException {
-        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config, wsscVer);
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)context.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
+            contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);    
+        }else{
+            contract.handleRSTR((RequestSecurityToken)rst, (RequestSecurityTokenResponse)rstr, context);
+        }
+    }*/
+    
+    private void processRequestSecurityTokenResponse(final SCTokenConfiguration sctConfig, final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
+    throws WSSecureConversationException {
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
             contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);    
         }else{
@@ -403,6 +747,42 @@ public class WSSCPlugin {
         if (password != null) {
             requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
         }
+    }
+    
+    private void createRenewSignaturePolicy(final Token token){        
+        renewSignaturePolicy = new SignaturePolicy();
+        //renewSignaturePolicy.setUUID(pid.generateID());
+        renewSignaturePolicy.setUUID("_99");
+        SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
+        SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
+        SecureConversationToken scToken = (SecureConversationToken)token;
+        renewSignaturePolicy.setKeyBinding(sct);
+        if(spVersion == SecurityPolicyVersion.SECURITYPOLICY200507){
+            sct.setIncludeToken(((Token)token).getIncludeToken());
+        } else{
+            // SecurityPolicy 1.2
+            sct.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlwaysToRecipient);            
+        }
+        sct.setUUID(((Token)token).getTokenId());
+        
+        final AssertionSet assertions = getAssertions(scToken);                
+        for(PolicyAssertion policyAssertion : assertions){            
+            if(PolicyUtil.isBinding(policyAssertion, spVersion)){
+                binding =(Binding) policyAssertion;
+            }
+        }
+        //SignaturePolicy sp = scPlugin.getRenewSignaturePolicy();
+        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)renewSignaturePolicy.getFeatureBinding();
+        AlgorithmSuite as = binding.getAlgorithmSuite();
+        SecurityPolicyUtil.setCanonicalizationMethod(spFB, as);        
+    }
+    
+    public SignaturePolicy getRenewSignaturePolicy(){
+        return this.renewSignaturePolicy;
+    }
+    
+    public AlgorithmSuite getAlgorithmSuite(){
+        return binding.getAlgorithmSuite();
     }
     
     private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){

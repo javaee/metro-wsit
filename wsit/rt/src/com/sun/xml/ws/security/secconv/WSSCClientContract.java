@@ -37,11 +37,11 @@
 
 package com.sun.xml.ws.security.secconv;
 
+import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.Configuration;
-import com.sun.xml.ws.security.trust.WSTrustClientContract;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -70,6 +70,8 @@ import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.util.Iterator;
 import java.util.List;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 
 public class WSSCClientContract {
     
@@ -104,6 +106,14 @@ public class WSSCClientContract {
      */
     public void handleRSTR(
             final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)context.getSecurityPolicy().get(0);
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
         if (rst.getRequestType().toString().equals(wsTrustVer.getIssueRequestTypeURI())){
             // ToDo
             //final AppliesTo requestAppliesTo = rst.getAppliesTo();
@@ -145,8 +155,32 @@ public class WSSCClientContract {
             if (unattachedRef != null){
                 context.setUnAttachedSecurityTokenReference(unattachedRef.getSTR());
             }
+        }if (rst.getRequestType().toString().equals(wsTrustVer.getRenewRequestTypeURI())){
+            final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
+            // RequestedProofToken
+            final RequestedProofToken proofToken = rstr.getRequestedProofToken();
             
-            
+            // Obtain the secret key for the context
+            final byte[] key = getKey(rstr, proofToken, rst);
+                        
+            //get the creation time and expires time and set it in the context
+            setLifetime(rstr, context);
+            if (securityToken != null){
+                context.setSecurityToken(securityToken.getToken());
+            }
+            SecurityContextTokenInfo sctInfo = null;
+            if(context.getSecurityContextTokenInfo() == null){
+                sctInfo = new SecurityContextTokenInfoImpl();                
+            }else{
+                sctInfo = context.getSecurityContextTokenInfo();
+            }
+            sctInfo.setIdentifier(((SecurityContextToken)context.getSecurityToken()).getIdentifier().toString());
+            sctInfo.setInstance(((SecurityContextToken)context.getSecurityToken()).getInstance());
+            sctInfo.setExternalId(((SecurityContextToken)context.getSecurityToken()).getWsuId());
+            if(key != null){
+                sctInfo.addInstance(((SecurityContextToken)context.getSecurityToken()).getInstance(), key);                
+            }            
+            context.setSecurityContextTokenInfo(sctInfo);
         }else if (rst.getRequestType().toString().equals(wsTrustVer.getCancelRequestTypeURI())){
             
             // Check if the rstr contains the RequestTedTokenCancelled element

@@ -1,5 +1,5 @@
 /*
- * $Id: DirectReferenceImpl.java,v 1.4 2007-05-29 22:11:36 ofung Exp $
+ * $Id: DirectReferenceImpl.java,v 1.5 2008-02-19 15:20:01 shyam_rao Exp $
  */
 
 /*
@@ -40,19 +40,34 @@
 
 package com.sun.xml.ws.security.trust.impl.elements.str;
 
+import com.sun.xml.ws.security.secconv.impl.WSSCVersion10;
+import com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13;
 import com.sun.xml.ws.security.secext10.ReferenceType;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 
 import java.net.URI;
+import javax.xml.namespace.QName;
 
 /**
  * Reference Interface
  */
 public class DirectReferenceImpl extends ReferenceType implements DirectReference {
-
+    private final static QName _WSC_INSTANCE_10_Type_QNAME = new QName(WSSCVersion10.WSSC_10_NS_URI, "Instance");
+    private final static QName _WSC_INSTANCE_13_Type_QNAME = new QName(WSSCVersion13.WSSC_13_NS_URI, "Instance");
+    private final static String WSC_INSTANCE = "wsc:Instance";
     public DirectReferenceImpl(String valueType, String uri){
         setValueType(valueType);
         setURI(uri);
+    }
+    
+    public DirectReferenceImpl(String valueType, String uri, String instance){
+        setValueType(valueType);
+        setURI(uri);
+        if(WSSCVersion10.WSSC_10.getSCTTokenTypeURI().equals(valueType)){
+            getOtherAttributes().put(_WSC_INSTANCE_10_Type_QNAME, instance);
+        }else if(WSSCVersion13.WSSC_13.getSCTTokenTypeURI().equals(valueType)){
+            getOtherAttributes().put(_WSC_INSTANCE_13_Type_QNAME, instance);
+        }        
     }
     
     public DirectReferenceImpl(ReferenceType refType){

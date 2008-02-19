@@ -973,6 +973,32 @@ public class PolicyUtil {
         return false;
     }
     
+        public static boolean isMustNotSendCancel(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        // MustNotSendCancel assertion is allowed only in 1.2  namespace     
+        if(assertion.getName().getLocalPart().equals(MustNotSendCancel) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isMustNotSendRenew(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+        
+        // MustNotSendCancel assertion is allowed only in 1.2  namespace     
+        if(assertion.getName().getLocalPart().equals(MustNotSendRenew) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isBody(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;

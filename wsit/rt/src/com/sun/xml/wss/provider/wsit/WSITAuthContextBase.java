@@ -179,11 +179,14 @@ import javax.security.auth.message.MessageInfo;
 import javax.xml.soap.SOAPMessage;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -258,8 +261,8 @@ public abstract class WSITAuthContextBase  {
     protected Policy bpMSP = null;
     //protected WSDLBoundOperation cachedOperation = null;
     // store as instance variable
-    //protected Marshaller marshaller =null;
-    //protected Unmarshaller unmarshaller =null;
+    protected Marshaller marshaller =null;
+    protected Unmarshaller unmarshaller =null;
     //store instance variable(s): Binding has IssuedToken/RM/SC Policy
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
@@ -322,18 +325,18 @@ public abstract class WSITAuthContextBase  {
         soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
-        //unmarshaller as instance variable of the pipe
-//        try {
-//           // this.marshaller = jaxbContext.createMarshaller();
-//           // this.unmarshaller = jaxbContext.createUnmarshaller();
-//        }catch (javax.xml.bind.JAXBException ex) {
-//            throw new RuntimeException(ex);
-//        }
-        
         
         if(wsPolicyMap != null){
             collectPolicies();
         }
+        
+        //unmarshaller as instance variable of the pipe
+        try {
+           this.marshaller = jaxbContext.createMarshaller();
+           this.unmarshaller = jaxbContext.createUnmarshaller();
+        }catch (javax.xml.bind.JAXBException ex) {
+            throw new RuntimeException(ex);
+        }                        
         
         // check whether Service Port has RM
         hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
@@ -814,6 +817,24 @@ public abstract class WSITAuthContextBase  {
         return false;
     }
     
+    protected boolean isSCRenew(Packet packet){
+        
+        if (!bindingHasSecureConversationPolicy()) {
+            return false;
+        }
+        
+        if (!isAddressingEnabled()) {
+            return false;
+        }
+        
+        String action = getAction(packet);
+        if(wsscVer.getSCTRenewResponseAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action)) {
+            return true;
+        }
+        return false;
+    }
+        
     protected boolean isSCCancel(Packet packet){
         
         if (!bindingHasSecureConversationPolicy()) {
@@ -1103,7 +1124,9 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        
+        if(isSCRenew(packet)){            
+            ctx.isExpired(true);            
+        }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         
@@ -1116,7 +1139,9 @@ public abstract class WSITAuthContextBase  {
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         ctx.isInboundMessage(true);
-        
+        if(isTrustMessage(packet)){
+            ctx.isTrustMessage(true);
+        }
         return ctx;
     }
     
@@ -1413,7 +1438,10 @@ public abstract class WSITAuthContextBase  {
             }else if(isSCCancel(packet)){
                 SecurityPolicyHolder holder = outProtocolPM.get("SC");
                 policy = holder.getMessagePolicy();
-            }else {
+            }else if(isSCRenew(packet)){
+                policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
+                ctx.isExpired(true);                
+            }else{
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
             }
             if (debug) {
@@ -1619,7 +1647,7 @@ public abstract class WSITAuthContextBase  {
     @SuppressWarnings("unchecked")
     protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
         messageInfo.getMap().put(RES_PACKET, ret);
-    }
+    }        
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     

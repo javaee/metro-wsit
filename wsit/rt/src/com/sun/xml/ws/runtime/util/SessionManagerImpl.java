@@ -42,6 +42,7 @@
 package com.sun.xml.ws.runtime.util;
 
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,6 +68,12 @@ public class SessionManagerImpl extends SessionManager {
      */
     private Hashtable<String, IssuedTokenContext> issuedTokenContextMap
             = new Hashtable<String, IssuedTokenContext>();    
+    /**
+     * Map of wsu:Instance --> SecurityContextTokenInfo
+     */
+    private Hashtable<String, SecurityContextTokenInfo> securityContextTokenInfoMap
+            = new Hashtable<String, SecurityContextTokenInfo>();    
+    
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl() {
         
@@ -171,7 +178,7 @@ public class SessionManagerImpl extends SessionManager {
      * @returns IssuedTokenContext for security context key
      */
     
-    public IssuedTokenContext getSecurityContext(String key){
+    public IssuedTokenContext getSecurityContext(String key, boolean checkExpiry){
         IssuedTokenContext ctx = issuedTokenContextMap.get(key);        
         if(ctx == null){
             // recovery of security context in case of crash
@@ -187,7 +194,7 @@ public class SessionManagerImpl extends SessionManager {
             }
         }        
 
-        if (ctx != null){
+        if (ctx != null && checkExpiry){
             // Expiry check of security context token
             Calendar c = new GregorianCalendar();
             long offset = c.get(Calendar.ZONE_OFFSET);
@@ -204,7 +211,13 @@ public class SessionManagerImpl extends SessionManager {
                 && currentTimeInDateFormat.before(ctx.getExpirationTime()))){
                 throw new WebServiceException("SecureConversation session for session Id:" + key +"has expired.");
             }            
-        }        
+        }
+        if(((SecurityContextToken)ctx.getSecurityToken()).getInstance() != null){
+            String sctInfoKey = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString()+"_"+
+                            ((SecurityContextToken)ctx.getSecurityToken()).getInstance();                    
+            //ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(((SecurityContextToken)ctx.getSecurityToken()).getInstance()));
+            ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(sctInfoKey));
+        }
         return ctx;
     }
 
@@ -216,5 +229,12 @@ public class SessionManagerImpl extends SessionManager {
      */
     public void addSecurityContext(String key, IssuedTokenContext itctx){
         issuedTokenContextMap.put(key, itctx);
+        if(((SecurityContextToken)itctx.getSecurityToken()).getInstance() != null){
+            String sctInfoKey = ((SecurityContextToken)itctx.getSecurityToken()).getIdentifier().toString()+"_"+
+                            ((SecurityContextToken)itctx.getSecurityToken()).getInstance();                    
+            //securityContextTokenInfoMap.put(((SecurityContextToken)itctx.getSecurityToken()).getInstance(), itctx.getSecurityContextTokenInfo());
+            securityContextTokenInfoMap.put(sctInfoKey, itctx.getSecurityContextTokenInfo());
+            itctx.setSecurityContextTokenInfo(null);
+        }
     }
 }

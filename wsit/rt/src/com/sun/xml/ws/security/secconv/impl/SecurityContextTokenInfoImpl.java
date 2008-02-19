@@ -67,6 +67,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     
     String identifier = null;
     String extId = null;
+    String instance = null;
     byte[] secret = null;
     Map<String, byte[]> secretMap = new HashMap<String, byte[]>();
     Date creationTime = null;
@@ -96,6 +97,14 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     
     public void setExternalId(final String externalId) {
         this.extId = externalId;
+    }
+    
+    public String getInstance() {
+        return instance;
+    }
+    
+    public void setInstance(final String instance) {
+        this.instance = instance;
     }
     
     public byte[] getSecret() {

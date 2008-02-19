@@ -212,6 +212,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
         //final CallbackHandler handler = (CallbackHandler)msgCtx.get(WSTrustConstants.STS_CALL_BACK_HANDLER);
         final SecurityEnvironment secEnv = (SecurityEnvironment)msgCtx.get(WSTrustConstants.SECURITY_ENVIRONMENT);
         WSTrustVersion wstVersion = (WSTrustVersion)msgCtx.get(WSTrustConstants.WST_VERSION);
+        String authnCtxClass = (String)msgCtx.get(WSTrustConstants.AUTHN_CONTEXT_CLASS);
         if (wstVersion != null){
             wstVer = wstVersion;
         }
@@ -297,6 +298,10 @@ public abstract class BaseSTSImpl implements BaseSTS {
             }
         }
         config.getOtherOptions().put(WSTrustConstants.WST_VERSION, wstVer);
+        
+        if(authnCtxClass != null){
+            config.getOtherOptions().put(WSTrustConstants.AUTHN_CONTEXT_CLASS, authnCtxClass);
+        }
       
         return config;
     }
@@ -310,7 +315,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
                 appliesTo);
         final IssuedTokenContext context = new IssuedTokenContextImpl();
         try {
-            context.setRequestorSubject(SubjectAccessor.getRequesterSubject(getMessageContext()));
+            context.setRequestorSubject(SubjectAccessor.getRequesterSubject(getMessageContext()));            
         } catch (XWSSecurityException ex) {
             throw new WSTrustException("error getting subject",ex);
         }
