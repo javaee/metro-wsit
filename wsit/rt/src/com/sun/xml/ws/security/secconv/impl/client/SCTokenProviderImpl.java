@@ -116,8 +116,7 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
             ctx = issuedTokenContextMap.get(sctConfig.getTokenId());
             SCTokenConfiguration origSCTConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-            if(sctConfig.isExpired() && origSCTConfig.isRenewExpiredSCT() != null){
-                //ctx = issuedTokenContextMap.get(sctConfig.getTokenId());
+            if(sctConfig.isExpired() && origSCTConfig.isRenewExpiredSCT()){                
                 scp.processRenew(ctx);
                 String sctInfoKey = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString()+"_"+
                         ((SecurityContextToken)ctx.getSecurityToken()).getInstance();                

@@ -59,9 +59,9 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     
     protected String protocol;    
     
-    protected String renewExpiredSCT = null;
+    protected boolean renewExpiredSCT = false;
     
-    protected String requireCancelSCT = null;
+    protected boolean requireCancelSCT = false;
     
     protected long scTokenTimeout = -1;
     
@@ -79,11 +79,11 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
         return protocol;
     }                 
     
-    public String isRenewExpiredSCT(){
+    public boolean isRenewExpiredSCT(){
         return renewExpiredSCT;
     }
     
-    public String isRequireCancelSCT(){
+    public boolean isRequireCancelSCT(){
         return requireCancelSCT;
     }
     

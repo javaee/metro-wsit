@@ -169,8 +169,8 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         if(localToken != null){
             if (SC_CLIENT_CONFIGURATION.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
-                this.renewExpiredSCT = attrs.get(new QName(CONFIG_NAMESPACE, RENEW_EXPIRED_SCT));
-                this.requireCancelSCT = attrs.get(new QName(CONFIG_NAMESPACE, REQUIRE_CANCEL_SCT));
+                this.renewExpiredSCT = Boolean.parseBoolean(attrs.get(new QName(CONFIG_NAMESPACE, RENEW_EXPIRED_SCT)));
+                this.requireCancelSCT = Boolean.parseBoolean(attrs.get(new QName(CONFIG_NAMESPACE, REQUIRE_CANCEL_SCT)));
             }
             final Iterator<PolicyAssertion> sctConfig = localToken.getNestedAssertionsIterator();
             while(sctConfig.hasNext()){
