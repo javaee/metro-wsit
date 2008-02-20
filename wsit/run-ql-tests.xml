@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
- $Id: run-ql-tests.xml,v 1.7 2007-05-29 22:11:01 ofung Exp $
+ $Id: run-ql-tests.xml,v 1.8 2008-02-20 14:38:21 ritzmann Exp $
 -->
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
@@ -55,7 +55,7 @@
 -->
     <property name="gf.dir" value="/mnt/hdd2/hudson/server/jobs/wsit-javanet-ql"/>
     <property name="gf.install.home" value="${gf.dir}/glassfish"/>
-    <property name="wsit.name" value="jax-ws-latest-wsit"/>
+    <property name="wsit.name" value="metro"/>
     <property name="wsit.zip" value="${basedir}/dist/${wsit.name}.zip"/>
     <property name="qltests.home" value="${basedir}/qltests"/>
     <property name="wsit.install.home" value="${basedir}/wsit-install"/>
@@ -68,7 +68,7 @@
 
     <!-- ************ end props for the Quick Look tests ********************** -->
 
-    <target name="runtests" description="Runs quick look tests after jax-ws-latest-wsit.zip has been generated">
+    <target name="runtests" description="Runs quick look tests after metro.zip has been generated">
       <delete dir="${qltests.home}" includeemptydirs="true" failonerror="false"/>
       <mkdir dir="${qltests.home}"/>
       <mkdir dir="${wsit.install.home}"/>
