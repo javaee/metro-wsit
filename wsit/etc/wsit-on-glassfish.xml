@@ -149,7 +149,7 @@
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>
         <echo message="Usage:"/>
-        <echo message="  ant -f wsit-on-glassfish.xml {install,uninstall}"/>
+        <echo message="  ant -f metro-on-glassfish.xml {install,uninstall}"/>
         <antcall target="jdk6-message"/>
     </target>
 </project>

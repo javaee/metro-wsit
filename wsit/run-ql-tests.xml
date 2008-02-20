@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
- $Id: run-ql-tests.xml,v 1.8 2008-02-20 14:38:21 ritzmann Exp $
+ $Id: run-ql-tests.xml,v 1.9 2008-02-20 14:46:44 ritzmann Exp $
 -->
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
@@ -95,7 +95,7 @@
     <target name="install.wsit">
       <!-- expects the dist.zip target in main build.xml has been run -->
       <unzip src="${wsit.zip}" dest="${wsit.install.home}"/>
-      <ant dir="${wsit.install.home}/${wsit.name}" antfile="${wsit.install.home}/${wsit.name}/wsit-on-glassfish.xml" target="install">
+      <ant dir="${wsit.install.home}/${wsit.name}" antfile="${wsit.install.home}/${wsit.name}/metro-on-glassfish.xml" target="install">
          <property name="as.home" value="${gf.install.home}"/>
       </ant>
     </target>
