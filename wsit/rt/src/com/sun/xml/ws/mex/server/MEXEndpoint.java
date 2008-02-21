@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.mex.server;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -45,12 +46,22 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.developer.JAXWSProperties;
+import com.sun.xml.ws.fault.SOAPFaultBuilder;
+import com.sun.xml.ws.message.ProblemActionHeader;
+import com.sun.xml.ws.mex.MetadataConstants;
+import com.sun.xml.ws.mex.MessagesMessages;
 import com.sun.xml.ws.transport.http.servlet.ServletModule;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
@@ -62,9 +73,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.ServiceMode;
 import javax.xml.ws.WebServiceProvider;
 import javax.xml.ws.soap.Addressing;
-import com.sun.xml.ws.mex.MetadataConstants;
-import javax.servlet.http.HttpServletRequest;
-import com.sun.xml.ws.mex.MessagesMessages;
 
 import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
@@ -113,7 +121,9 @@ public class MEXEndpoint implements Provider<Message> {
             return processGetRequest(requestMsg, toAddress, wsaVersion, soapVersion);
         }
         else if (action.equals(GET_MDATA_REQUEST)) {
-            final Message faultMessage = Messages.create(GET_MDATA_REQUEST,
+            String faultText = MessagesMessages.MEX_0017_GET_METADATA_NOT_IMPLEMENTED(GET_MDATA_REQUEST, GET_REQUEST);
+            logger.warning(faultText);
+            final Message faultMessage = createFaultMessage(faultText, GET_MDATA_REQUEST,
                 wsaVersion, soapVersion);
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
@@ -132,46 +142,14 @@ public class MEXEndpoint implements Provider<Message> {
         final SOAPVersion soapVersion) {
         
         try {
-            final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
-            final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
-
-            WSEndpoint wsEndpoint = (WSEndpoint) wsContext.getMessageContext().get(JAXWSProperties.WSENDPOINT);
-            HttpServletRequest servletRequest = (HttpServletRequest)wsContext.getMessageContext().get(MessageContext.SERVLET_REQUEST);
-            if (servletRequest == null) {
-                // TODO: better error message
-                throw new WebServiceException("MEX: no ServletRequest can be found");
-            }
+            WSEndpoint ownerEndpoint = findEndpoint();
             
-            // Derive the address of the owner endpoint.
-            // e.g. http://localhost/foo/mex --> http://localhost/foo
-            WSEndpoint ownerEndpoint = null;
-            ServletModule module = (ServletModule) wsEndpoint.getContainer().getSPI(ServletModule.class);
-            String baseAddress = module.getContextPath(servletRequest);
-            String ownerEndpointAddress = null;
-            List<BoundEndpoint> boundEndpoints = module.getBoundEndpoints();
-            for (BoundEndpoint endpoint : boundEndpoints) {
-                if (wsEndpoint == endpoint.getEndpoint()) {
-                    ownerEndpointAddress = endpoint.getAddress(baseAddress).toString();                
-                    break;
-                }
-            }
-            ownerEndpointAddress = ownerEndpointAddress.substring(0,ownerEndpointAddress.length() - "/mex".length());
-
-            boundEndpoints = module.getBoundEndpoints();
-            for (BoundEndpoint endpoint : boundEndpoints) {
-                //compare ownerEndpointAddress with this endpoints address
-                //   if matches, set ownerEndpoint to the corresponding WSEndpoint
-                String endpointAddress = endpoint.getAddress(baseAddress).toString();
-                if (endpointAddress.equals(ownerEndpointAddress)) {
-                    ownerEndpoint = endpoint.getEndpoint();
-                    break;
-                }
-            }
-            
-
             // If the owner endpoint has been found, then
             // get its metadata and write it to the response message
             if (ownerEndpoint != null) {
+                final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
+                final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
+
                 address = address.substring(0 , address.length() - 4);
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
@@ -191,9 +169,8 @@ public class MEXEndpoint implements Provider<Message> {
             }
 
             // If we get here there was no metadata for the owner endpoint
-            // TODO: This should probably be something other than unsupported action for clarity
-            final Message faultMessage = Messages.create(GET_REQUEST,
-                wsaVersion, soapVersion);
+            WebServiceException exception = new WebServiceException(MessagesMessages.MEX_0016_NO_METADATA());
+            final Message faultMessage = Messages.create(exception, soapVersion);
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
         } catch (XMLStreamException streamE) {
@@ -202,6 +179,53 @@ public class MEXEndpoint implements Provider<Message> {
             logger.log(Level.SEVERE, exceptionMessage, streamE);
             throw new WebServiceException(exceptionMessage, streamE);
         }
+    }
+
+    /**
+     * Find the endpoint that this MEX endpoint is serving.
+     * 
+     * This method is searching for an endpoint that has the same address as the MEX endpoint
+     * with the suffix "/mex" removed. If the MEX endpoint has an HTTPS address,
+     * it will first look for an endpoint on HTTP and then HTTPS.
+     * 
+     * @return The endpoint that owns the actual service or null.
+     */
+    private WSEndpoint findEndpoint() {
+
+        WSEndpoint wsEndpoint = (WSEndpoint) wsContext.getMessageContext().get(JAXWSProperties.WSENDPOINT);
+        HttpServletRequest servletRequest = (HttpServletRequest)wsContext.getMessageContext().get(MessageContext.SERVLET_REQUEST);
+        if (servletRequest == null) {
+            // TODO: better error message
+            throw new WebServiceException("MEX: no ServletRequest can be found");
+        }
+
+        // Derive the address of the owner endpoint.
+        // e.g. http://localhost/foo/mex --> http://localhost/foo
+        WSEndpoint ownerEndpoint = null;
+        ServletModule module = (ServletModule) wsEndpoint.getContainer().getSPI(ServletModule.class);
+        String baseAddress = module.getContextPath(servletRequest);
+        String ownerEndpointAddress = null;
+        List<BoundEndpoint> boundEndpoints = module.getBoundEndpoints();
+        for (BoundEndpoint endpoint : boundEndpoints) {
+            if (wsEndpoint == endpoint.getEndpoint()) {
+                ownerEndpointAddress = endpoint.getAddress(baseAddress).toString();
+                break;
+            }
+        }
+        ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
+
+        boundEndpoints = module.getBoundEndpoints();
+        for (BoundEndpoint endpoint : boundEndpoints) {
+            //compare ownerEndpointAddress with this endpoints address
+            //   if matches, set ownerEndpoint to the corresponding WSEndpoint
+            String endpointAddress = endpoint.getAddress(baseAddress).toString();
+            if (endpointAddress.equals(ownerEndpointAddress)) {
+                ownerEndpoint = endpoint.getEndpoint();
+                break;
+            }
+        }
+
+        return ownerEndpoint;
     }
 
     private void writeStartEnvelope(final XMLStreamWriter writer,
@@ -223,5 +247,36 @@ public class MEXEndpoint implements Provider<Message> {
         writer.writeStartElement(MetadataConstants.MEX_PREFIX, "Metadata", MetadataConstants.MEX_NAMESPACE);
     }
     
+    private Message createFaultMessage(@NotNull final String faultText, @NotNull final String unsupportedAction,
+            @NotNull final AddressingVersion av, @NotNull final SOAPVersion sv) {
+        final QName subcode = av.actionNotSupportedTag;
+        Message faultMessage;
+        SOAPFault fault;
+        try {
+            if (sv == SOAPVersion.SOAP_12) {
+                fault = SOAPVersion.SOAP_12.saajSoapFactory.createFault();
+                fault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                fault.appendFaultSubcode(subcode);
+                Detail detail = fault.addDetail();
+                SOAPElement se = detail.addChildElement(av.problemActionTag);
+                se = se.addChildElement(av.actionTag);
+                se.addTextNode(unsupportedAction);
+            } else {
+                fault = SOAPVersion.SOAP_11.saajSoapFactory.createFault();
+                fault.setFaultCode(subcode);
+            }
+            fault.setFaultString(faultText);
+
+            faultMessage = SOAPFaultBuilder.createSOAPFaultMessage(sv, fault);
+            if (sv == SOAPVersion.SOAP_11) {
+                faultMessage.getHeaders().add(new ProblemActionHeader(unsupportedAction, av));
+            }
+        } catch (SOAPException e) {
+            throw new WebServiceException(e);
+        }
+
+        return faultMessage;
+    }
+
 }
 
