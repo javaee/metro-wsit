@@ -36,13 +36,6 @@
  holder.
 -->
 
-<!--
- $Id: build.xml,v 1.33 2007-09-14 15:29:28 m_potociar Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
-
 <project name="wsit.dev.java.net main" default="main" basedir=".">
     <property file="${basedir}/build.properties"/>
     <import file="properties.xml"/>
@@ -68,12 +61,12 @@
     </target>   
     
     <target name="setup-emma-remote" description="internal: overrides local setup for emma">
-        <property name="wsit.image" value="${basedir}/wsit-image/jax-ws-latest-wsit"/>   
+        <property name="wsit.image" value="${basedir}/wsit-image/metro"/>   
         <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
     </target>
 
     <target name="setup-emma-local" description="internal: overrides local setup for emma">
-        <property name="wsit.image" value="${wsit.dir}/dist/image/jax-ws-latest-wsit"/>
+        <property name="wsit.image" value="${wsit.dir}/dist/image/metro"/>
         <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
     </target>
 
@@ -102,9 +95,9 @@
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/jax-ws-latest-wsit.zip"
-             dest="wsit-image/jax-ws-latest-wsit.zip"/>
-        <unzip src="wsit-image/jax-ws-latest-wsit.zip" dest="wsit-image"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
+             dest="wsit-image/metro.zip"/>
+        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
         
         <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
              dest="wsit-image/webservices-src.zip"/>
@@ -118,9 +111,9 @@
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/jax-ws-latest-wsit.zip"
-             dest="wsit-image/jax-ws-latest-wsit.zip"/>
-        <unzip src="wsit-image/jax-ws-latest-wsit.zip" dest="wsit-image"/>
+        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
+             dest="wsit-image/metro.zip"/>
+        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
         
         <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
              dest="wsit-image/webservices-src.zip"/>
@@ -260,7 +253,7 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="wsit-image/jax-ws-latest-wsit" />
+                <arg path="wsit-image/metro" />
                 <arg value="-transport" />
                 <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
             </arguments>
@@ -276,7 +269,7 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="wsit-image/jax-ws-latest-wsit" />
+                <arg path="wsit-image/metro" />
                 <arg value="-transport" />
                 <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
             </arguments>

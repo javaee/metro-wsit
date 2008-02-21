@@ -43,13 +43,13 @@
 
 
     <property file="build.properties"/>
-    <property name="WSIT_HOME" value="${basedir}/../../../../dist/image/jax-ws-latest-wsit"/>
+    <property name="WSIT_HOME" value="${basedir}/../../../../dist/image/metro"/>
     <property name="lib.home" value="${WSIT_HOME}/lib"/>
     <!--<property name="dist.home" value="${WSIT_HOME}/dist/image"/>-->
     <property name="build.home" value="${basedir}/build"/>
     <property name="build.classes.home" value="${build.home}/classes"/>
     <property name="build.war.home" value="${build.home}/war"/>
-    <!--<property name="wsit.dir" value="${WSIT_HOME}/jax-ws-latest-wsit"/>-->
+    <!--<property name="wsit.dir" value="${WSIT_HOME}/metro"/>-->
     <property name="wsit.dir" value="${WSIT_HOME}"/>
 
      <!-- Test Execution Defaults -->
@@ -63,7 +63,7 @@
         <fileset dir="${lib.home}">
             <include name="*.jar"/>
         </fileset>
-         <!--<fileset dir="${dist.home}/jax-ws-latest-wsit/lib">
+         <!--<fileset dir="${dist.home}/metro/lib">
             <include name="*.jar"/>
         </fileset>-->
     </path>
@@ -201,7 +201,7 @@
      <!-- install WSRM & other needed JAXWS-related files -->
      <!--todo save the installation file-->
      <ant dir="${wsit.dir}"
-           antfile="wsit-on-glassfish.xml" target="install"
+           antfile="metro-on-glassfish.xml" target="install"
           inheritAll="false"/>
      </target>
 
@@ -214,7 +214,7 @@
      <!-- install WSRM & other needed JAXWS-related files -->
      <!--todo save the installation file-->
      <ant dir="${wsit.dir}"
-           antfile="wsit-on-tomcat.xml" target="install"
+           antfile="metro-on-tomcat.xml" target="install"
            inheritAll="false"/>
      </target>
 
