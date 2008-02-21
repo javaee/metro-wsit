@@ -48,6 +48,7 @@ import com.sun.xml.ws.security.impl.policyconv.SignatureTargetCreator;
 import com.sun.xml.ws.security.secconv.WSSCFactory;
 import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
@@ -61,6 +62,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -69,6 +72,10 @@ import java.util.Map;
 public class SCTokenProviderImpl implements IssuedTokenProvider {
     
     private final static WSSCPlugin scp = WSSCFactory.newSCPlugin(null);
+    private static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSSC_IMPL_DOMAIN,
+            LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     /**
      * Map of SecurityContextId --> IssuedTokenContext
      */
@@ -79,11 +86,27 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
      */
     private Map<String, SecurityContextTokenInfo> securityContextTokenMap
             = new HashMap<String, SecurityContextTokenInfo>();    
-        
+    private boolean tokenExpired = false;    
+    
     public void issue(IssuedTokenContext ctx)throws WSTrustException{        
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){            
-            IssuedTokenContext tmpCtx = getSecurityContextToken(sctConfig.getTokenId(), sctConfig.checkTokenExpiry());
+        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){       
+            IssuedTokenContext tmpCtx = null;
+            try{
+                tmpCtx = getSecurityContextToken(sctConfig.getTokenId(), sctConfig.checkTokenExpiry());
+            }catch(WSSecureConversationException ex){
+                if(sctConfig.isClientOutboundMessage()){
+                    if(log.isLoggable(Level.FINE)){
+                        log.log(Level.FINE, "SecureConversationToken expired");
+                    }
+                    tokenExpired = true;
+                    renew(ctx);
+                    tokenExpired = false;                    
+                    tmpCtx = issuedTokenContextMap.get(sctConfig.getTokenId());
+                }else{
+                    throw new WSSecureConversationException(ex);
+                }
+            }
             if(tmpCtx != null){
                 ctx.setCreationTime(tmpCtx.getCreationTime());
                 ctx.setExpirationTime(tmpCtx.getExpirationTime());
@@ -115,12 +138,14 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
         if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
             ctx = issuedTokenContextMap.get(sctConfig.getTokenId());
-            SCTokenConfiguration origSCTConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-            if(sctConfig.isExpired() && origSCTConfig.isRenewExpiredSCT()){                
+            SCTokenConfiguration origSCTConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);            
+            if(this.tokenExpired && origSCTConfig.isRenewExpiredSCT()){
                 scp.processRenew(ctx);
                 String sctInfoKey = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString()+"_"+
                         ((SecurityContextToken)ctx.getSecurityToken()).getInstance();                
                 addSecurityContextTokenInfo(sctInfoKey, ctx.getSecurityContextTokenInfo());
+            }else{
+                throw new WSSecureConversationException("SecureConversation session for session Id:" + sctConfig.getTokenId() +"has expired.");
             }
         }else if(sctConfig.getMessagePolicy() != null ){
             try{

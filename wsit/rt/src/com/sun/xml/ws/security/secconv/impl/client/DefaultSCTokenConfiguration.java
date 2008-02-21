@@ -78,6 +78,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private boolean reqClientEntropy = true;
     private boolean isExpired = false;
     private boolean checkTokenExpiry = true;
+    private boolean clientOutboundMessage = false;
     private WSDLPort wsdlPort = null;
     private WSBinding wsBinding = null;
     private Pipe clientSecurityPipe = null;
@@ -113,13 +114,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.addVer = addVer;
         this.tokenId = ((Token)scToken).getTokenId();
         parseAssertions(scToken, localToken);
-    }
-    
-    public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry){
-        super(protocol);
-        this.tokenId = tokenId;        
-        this.checkTokenExpiry = checkTokenExpiry;
-    }
+    }         
     
     public DefaultSCTokenConfiguration(String protocol, final MessagePolicy messagePolicy){
         super(protocol);
@@ -131,11 +126,15 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.addRenewPolicy = addRenewPolicy;
     }
     
-    public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean isExpired, boolean checkTokenExpiry){
-        super(protocol);        
-        this.tokenId = tokenId;
-        this.isExpired = isExpired;
+    public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry){
+        super(protocol);
+        this.tokenId = tokenId;        
         this.checkTokenExpiry = checkTokenExpiry;
+    }
+    
+     public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry, boolean clientOutboundMessage){
+        this(protocol, tokenId, checkTokenExpiry);                
+        this.clientOutboundMessage = clientOutboundMessage;
     }
     
     private void parseAssertions(SecureConversationToken scToken, PolicyAssertion localToken){
@@ -191,6 +190,10 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         return this.checkTokenExpiry;
     }
     
+    public boolean isClientOutboundMessage(){
+        return this.clientOutboundMessage;
+    }
+    
     public MessagePolicy getMessagePolicy(){
         return this.messagePolicy;
     }
@@ -213,11 +216,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     public int getKeySize(){
         return this.skl;
     }                
-    
-    public boolean isExpired(){
-        return this.isExpired;
-    }
-    
+        
     public Token getSCToken(){
         return this.scToken;
     }
@@ -246,5 +245,4 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         return this.addVer;
     }
 }
-
 

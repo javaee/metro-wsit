@@ -521,6 +521,15 @@ public class WSSCContract {
             proofToken.setBinarySecret(clientEntropy.getBinarySecret());
         }
                 
+        Lifetime lifetime = (Lifetime)((RequestSecurityToken)request).getLifetime();
+        
+        if(lifetime != null){
+            long timeout = getTimeoutFromRequest(lifetime);
+            if(timeout > 0){
+                TIMEOUT = timeout;
+            }
+        }
+        
         final BaseSTSResponse rstr = createRenewResponse(renewTgt, serverEntropy, con, secret, proofToken, context, tokenType);
         return rstr;
     }

@@ -95,6 +95,8 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     
     public abstract boolean checkTokenExpiry();
     
+    public abstract boolean isClientOutboundMessage();
+    
     public abstract MessagePolicy getMessagePolicy();
     
     public abstract boolean addRenewPolicy();
@@ -104,9 +106,7 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     public abstract boolean isSymmetricBinding();
     
     public abstract int getKeySize();
-    
-    public abstract boolean isExpired();
-    
+        
     public abstract Token getSCToken();
             
     public abstract Packet getPacket();

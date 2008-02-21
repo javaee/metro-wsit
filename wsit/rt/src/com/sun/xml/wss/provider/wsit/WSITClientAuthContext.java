@@ -292,38 +292,6 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
             throw new WebServiceException(
                     LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
-        }catch(Exception e){
-            if(ctx.isExpired()){
-                renewSecurityContextToken(packet);                
-                msg = packet.getMessage();
-                invokeTrustPlugin(packet, isSCMessage);
-                ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
-                ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
-                ctx.isClient(true);
-                if(hasKerberosTokenPolicy()){
-                    populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);                    
-                }
-                //TODO: replace this code with calls to the Module now
-                try{
-                    if(!optimized) {
-                        if(!isSCMessage){
-                            cacheOperation(msg, packet);
-                        }
-                        SOAPMessage soapMessage = msg.readAsSOAPMessage();
-                        soapMessage = secureOutboundMessage(soapMessage, ctx);
-                        msg = Messages.create(soapMessage);
-                    }else{
-                        msg = secureOutboundMessage(msg, ctx);
-                    }
-                } catch(SOAPException se){
-                    log.log(Level.SEVERE,
-                            LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
-                    throw new WebServiceException(
-                            LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
-                }
-            }else{
-                throw new XWSSecurityException(e);
-            }
         }
         packet.setMessage(msg);
         if(isSCMessage){
@@ -336,8 +304,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 }catch(WSTrustException se){
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
-                }
-                //deleteRenewPolicy(getOutgoingXWSBootstrapPolicy(scToken));
+                }                
             }
             Packet responsePacket = nextPipe.process(packet);
             packet = validateResponse(responsePacket, null, null);
@@ -657,8 +624,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
                 try{
                     //create RST for Issue         
-                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion); 
-                    
+                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);                     
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
@@ -670,27 +636,6 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             }
         }
     }        
-    
-    private void renewSecurityContextToken(Packet packet) {
-        
-        // get the secure conversation policies pertaining to this operation
-        List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());        
-        for (PolicyAssertion scAssertion : policies) {
-            Token scToken = (Token)scAssertion;
-            if (issuedTokenContextMap.get(scToken.getTokenId()) != null) {
-                try{                                        
-                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), scToken.getTokenId(), true, false);
-                    IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
-                    itm.renewIssuedToken(ctx);
-                    issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);                
-                  }catch(WSTrustException se){
-                    log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
-                    throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
-                }
-            }
-        }
-    }        
-    
 
     private void cancelSecurityContextToken() {
         Enumeration keys = issuedTokenContextMap.keys();
