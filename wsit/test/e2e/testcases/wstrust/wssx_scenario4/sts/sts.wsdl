@@ -80,7 +80,7 @@
 				</sc:ValidatorConfiguration>
 				<tc:STSConfiguration wspp:visibility="private" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="true">
 					<tc:LifeTime>36000</tc:LifeTime>
-					<tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
+					<tc:Contract>com.sun.xml.ws.security.trust.impl.WSTrustContractImpl</tc:Contract>
 					<tc:Issuer>SunSTS</tc:Issuer>
                                         <tc:ServiceProviders>
 						<tc:ServiceProvider endPoint="http://localhost:8080/jaxws-s4/simple">
