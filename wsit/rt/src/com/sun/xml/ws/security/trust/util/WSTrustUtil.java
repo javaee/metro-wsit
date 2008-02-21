@@ -79,8 +79,29 @@ import java.util.GregorianCalendar;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
+import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
+import java.security.PublicKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
+
+import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
+import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
+import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
+import com.sun.xml.wss.impl.MessageConstants;
+
+import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import java.security.cert.X509Certificate;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 /**
  *
@@ -108,32 +129,6 @@ public class WSTrustUtil {
         throw new UnsupportedOperationException("To Do");
     }
     
-    /*public static String getSecurityContext(final Message msg){
-        
-        try {
-            final SOAPMessage soapMessage = msg.readAsSOAPMessage();
-            final SOAPHeader header = soapMessage.getSOAPHeader();
-            if (header != null){
-                final NodeList list = header.getElementsByTagNameNS(WSSCConstants.WSC_NAMESPACE, 
-                                                  WSSCConstants.SECURITY_CONTEXT_TOKEN);
-                SOAPElement sctElement = null;
-                if (list.getLength() > 0) {
-                    sctElement = (SOAPElement)list.item(0);
-                }
-        
-                if (sctElement != null){
-                    final SecurityContextToken sct = new SecurityContextTokenImpl(sctElement);
-        
-                    return sct.getIdentifier().toString();   
-                }
-            }
-        }catch (Exception ex){
-            throw new RuntimeException(ex);
-        }
-        
-        return null;
-    } */
-
     public static byte[] generateRandomSecret(final int keySize) {        
         // Create binary secret
         final SecureRandom random = new SecureRandom();
@@ -171,21 +166,7 @@ public class WSTrustUtil {
        
        return eleFac.createSecurityContextToken(idURI, null, wsuId);
    }
-   
-   /*
-   public static SecurityContextToken createSecurityContextToken(final WSSCElementFactory13 eleFac) throws WSSecureConversationException{
-       final String identifier = "urn:uuid:" + UUID.randomUUID().toString();
-       URI idURI;
-       try{
-           idURI = new URI(identifier);
-       }catch (URISyntaxException ex){
-           throw new WSSecureConversationException(ex.getMessage(), ex);
-       }
-       final String wsuId = "uuid-" + UUID.randomUUID().toString();
-       
-       return eleFac.createSecurityContextToken(idURI, null, wsuId);
-   }*/
-   
+    
    public static SecurityContextToken createSecurityContextToken(final WSTrustElementFactory wsscEleFac, final String identifier) throws WSSecureConversationException{       
        URI idURI;
        try{
@@ -216,6 +197,13 @@ public class WSTrustUtil {
        
        return eleFac.createSecurityContextToken(idURI, wsuInstance, wsuId);
    }
+   
+   public static SecurityTokenReference createSecurityTokenReference(final String id, final String valueType){
+       WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(); 
+       final KeyIdentifier ref = eleFac.createKeyIdentifier(valueType, null);
+        ref.setValue(id);
+        return eleFac.createSecurityTokenReference(ref);
+    }
    
    public static AppliesTo createAppliesTo(final String appliesTo){
        final AttributedURI uri = new AttributedURI();
@@ -423,5 +411,28 @@ public class WSTrustUtil {
             
             return lifetime;
         }
+    }
+    
+    public static EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert) throws Exception{
+        final PublicKey pubKey = cert.getPublicKey();
+        final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+        cipher.init(XMLCipher.WRAP_MODE, pubKey);
+
+        EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
+        final KeyInfo keyinfo = new KeyInfo(doc);
+
+        byte[] skid = X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert);
+        if (skid != null && skid.length > 0){
+            final KeyIdentifier keyIdentifier = new KeyIdentifierImpl(MessageConstants.X509SubjectKeyIdentifier_NS,null);
+            keyIdentifier.setValue(Base64.encode(skid));
+            final SecurityTokenReference str = new SecurityTokenReferenceImpl(keyIdentifier);
+            keyinfo.addUnknownElement((Element)doc.importNode(WSTrustElementFactory.newInstance().toElement(str,null), true));
+        }else{
+            final X509Data x509data = new X509Data(doc);
+            x509data.addCertificate(cert);
+        }
+        encKey.setKeyInfo(keyinfo);
+        
+        return encKey;
     }
 }

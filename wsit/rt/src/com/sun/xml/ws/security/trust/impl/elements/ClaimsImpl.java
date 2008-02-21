@@ -1,5 +1,5 @@
 /*
- * $Id: ClaimsImpl.java,v 1.11 2007-05-29 22:11:33 ofung Exp $
+ * $Id: ClaimsImpl.java,v 1.12 2008-02-21 22:48:11 jdg6688 Exp $
  */
 
 /*
@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.trust.impl.elements;
 
 
 
+import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -55,6 +56,7 @@ import java.util.logging.Logger;
 
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import java.util.ArrayList;
 
 /**
  * Implementation class for Claims.
@@ -63,6 +65,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
  */
 public class ClaimsImpl extends ClaimsType implements Claims {
     
+    List<Object> supportingInfo = new ArrayList<Object>();
     private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
@@ -93,6 +96,10 @@ public class ClaimsImpl extends ClaimsType implements Claims {
                     LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
             throw new WSTrustException(LogStringsMessages.WST_0021_ERROR_UNMARSHAL_DOM_ELEMENT(), ex);
         }
+    }
+
+    public List<Object> getSupportingProperties() {
+        return supportingInfo;
     }
     
 }

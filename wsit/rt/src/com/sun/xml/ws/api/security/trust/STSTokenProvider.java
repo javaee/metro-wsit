@@ -37,12 +37,15 @@
 package com.sun.xml.ws.api.security.trust;
 
 import com.sun.xml.ws.security.IssuedTokenContext;
-
 /**
  *
  * @author Jiandong Guo
  */
-public interface IssuedTokenGenerator {
+public interface STSTokenProvider {
     
-    void generate(IssuedTokenContext context);
+    void generateToken(IssuedTokenContext ctx) throws WSTrustException;
+    void isValideToken(IssuedTokenContext ctx) throws WSTrustException;
+    void renewToken(IssuedTokenContext ctx)throws WSTrustException;
+    void invalidateToken(IssuedTokenContext ctx)throws WSTrustException;
+    
 }

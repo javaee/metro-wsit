@@ -43,10 +43,8 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
-import com.sun.xml.ws.api.security.trust.IssuedTokenGenerator;
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
-import com.sun.xml.ws.security.trust.sts.BaseSTSImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +55,6 @@ import javax.security.auth.callback.CallbackHandler;
  * @author Jiandong Guo
  */
 public class DefaultSTSConfiguration implements STSConfiguration{
-    private Map<String, IssuedTokenGenerator> itgMap = new HashMap<String, IssuedTokenGenerator>(); 
     private Map<String, TrustSPMetadata> spMap = new HashMap<String, TrustSPMetadata>();
     private String type;
     private String issuer;
@@ -76,14 +73,6 @@ public class DefaultSTSConfiguration implements STSConfiguration{
     
     public TrustSPMetadata getTrustSPMetadata(final String spEndpoint){
         return (TrustSPMetadata)spMap.get(spEndpoint);
-    }
-    
-    public void addTokenGenerator(IssuedTokenGenerator tokenGen, String tokenType){
-        itgMap.put(tokenType, tokenGen);
-    }
-    
-    public IssuedTokenGenerator getTokenGenerator(String tokenType){
-        return (IssuedTokenGenerator)itgMap.get(tokenType);
     }
     
     public void setType(String type){

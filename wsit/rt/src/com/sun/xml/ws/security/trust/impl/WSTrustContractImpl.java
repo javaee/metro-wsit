@@ -37,9 +37,9 @@
 package com.sun.xml.ws.security.trust.impl;
 
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.api.security.trust.IssuedTokenGenerator;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
+import com.sun.xml.ws.api.security.trust.STSTokenProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustContract;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
@@ -47,6 +47,7 @@ import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
@@ -66,38 +67,60 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-import com.sun.xml.ws.security.wsu10.AttributedDateTime;
+import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.callback.EncryptionKeyCallback;
+import com.sun.xml.wss.impl.callback.SignatureKeyCallback;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
+import java.io.IOException;
 import java.net.URI;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.PrivateKey;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
 import java.security.cert.X509Certificate;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.Subject;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
+
+import com.sun.xml.wss.SecurityEnvironment;
+import javax.crypto.spec.SecretKeySpec;
+import org.w3c.dom.Document;
+
+import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedData;
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
+import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
+import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  *
  * @author Jiandong Guo
  */
 public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, BaseSTSResponse> {
-   private static final Logger log =
+    private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
+    protected static final String SAML_SENDER_VOUCHES_1_0 = "urn:oasis:names:tc:SAML:1.0:cm::sender-vouches";
+    protected static final String SAML_SENDER_VOUCHES_2_0 = "urn:oasis:names:tc:SAML:2.0:cm:sender-vouches";
+    
+   
     protected STSConfiguration stsConfig;
     protected WSTrustVersion wstVer;
     protected WSTrustElementFactory eleFac;
@@ -113,6 +136,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
     public BaseSTSResponse issue(BaseSTSRequest request, IssuedTokenContext context) throws WSTrustException {
         RequestSecurityToken rst = (RequestSecurityToken)request;
         SecondaryParameters secParas = null;
+        context.getOtherProperties().put(IssuedTokenContext.WS_TRUST_VERSION, wstVer);
         if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
             secParas = rst.getSecondaryParameters();
         }
@@ -123,6 +147,11 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         if(applies != null){
             appliesTo = WSTrustUtil.getAppliesToURI(applies);
         }
+        context.setAppliesTo(appliesTo);
+        
+        // Get token issuer
+        String issuer = stsConfig.getIssuer();
+        context.setTokenIssuer(issuer);
         
         // Get the metadata for the SP as identified by the AppliesTo
         TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);
@@ -135,10 +164,22 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                     LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0004_UNKNOWN_SERVICEPROVIDER(appliesTo));
         }
-
+        
+        // Get service certificate
+        X509Certificate serCert = this.getServiceCertificate(spMd, appliesTo);
+        context.getOtherProperties().put(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE, serCert);
+        
+        // Get STS certificate and private key
+        Object[] certAndKey = this.getSTSCertAndPrivateKey();
+        context.getOtherProperties().put(IssuedTokenContext.STS_CERTIFICATE, (X509Certificate)certAndKey[0]);
+        context.getOtherProperties().put(IssuedTokenContext.STS_PRIVATE_KEY, (PrivateKey)certAndKey[1]);
+        
         // Get TokenType
-        String tokenType = null;
-        final URI tokenTypeURI = rst.getTokenType();
+         String tokenType = null;
+        URI tokenTypeURI = rst.getTokenType();
+        if (tokenTypeURI == null && secParas != null){
+            tokenTypeURI = secParas.getTokenType();
+        }
         if (tokenTypeURI != null){
             tokenType = tokenTypeURI.toString();
         }else{
@@ -147,25 +188,30 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         if (tokenType == null){
             tokenType = WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE;
         }
+        context.setTokenType(tokenType);
         
         // Get KeyType
-        String keyType = null;
-        final URI keyTypeURI = rst.getKeyType();
+       String keyType = null;
+        URI keyTypeURI = rst.getKeyType();
+        if (keyTypeURI == null && secParas != null){
+            keyTypeURI = secParas.getKeyType();
+        }
         if (keyTypeURI != null){
             keyType = keyTypeURI.toString();
         }else{
             keyType = spMd.getKeyType();
         }
         if (keyType == null){
-            // Using symmetric key by default
-            keyType = WSTrustConstants.SYMMETRIC_KEY;
+            keyType = wstVer.getSymmetricKeyTypeURI();
         }
+        context.setKeyType(keyType);
         
         // Get authenticaed client Subject 
         Subject subject = context.getRequestorSubject();
         if (subject == null){
             AccessControlContext acc = AccessController.getContext();
             subject = Subject.getSubject(acc);
+            context.setRequestorSubject(subject);
         }
         if(subject == null){
             log.log(Level.SEVERE,
@@ -180,6 +226,15 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             Object oboToken = obo.getAny();
             if (oboToken != null){
                 subject.getPublicCredentials().add((Element)oboToken);
+                String confirMethod = null;
+                if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)){
+                    confirMethod = SAML_SENDER_VOUCHES_1_0;
+                } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
+                    confirMethod = SAML_SENDER_VOUCHES_2_0;
+                }
+                if (confirMethod != null){
+                    context.getOtherProperties().put(IssuedTokenContext.CONFIRMATION_METHOD, confirMethod);
+                }
             }
         }
         
@@ -194,7 +249,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                     user, tokenType, appliesTo));
         }
         
-         // Get claimed attributes
+        // Get claimed attributes from the RST
         Claims claims = rst.getClaims();
         if (claims == null && secParas != null){
             claims = secParas.getClaims();
@@ -203,16 +258,17 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         // Get claimed attributes from the STSAttributeProvider
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
+        context.getOtherProperties().put(IssuedTokenContext.CLAIMED_ATTRUBUTES, claimedAttrs);
         
         //==========================================
         // Create proof key and RequestedProofToken 
         //==========================================
-            
-        // ToDo
+           
         RequestedProofToken proofToken = null;
         Entropy serverEntropy = null;
         int keySize = 0;
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
+            proofToken = eleFac.createRequestedProofToken();
              // Get client entropy
             byte[] clientEntr = null;
             final Entropy clientEntropy = rst.getEntropy();
@@ -228,6 +284,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 }
             }
             
+            // Get KeySize
             keySize = (int)rst.getKeySize();
             if (keySize < 1 && secParas != null){
                 keySize = (int) secParas.getKeySize();
@@ -260,21 +317,16 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 throw new WSTrustException(LogStringsMessages.WST_0013_ERROR_SECRET_KEY(wstVer.getCKPSHA1algorithmURI(), keySize, appliesTo), ex);
             }
             
+            // put the generated secret key into the IssuedTokenContext
             context.setProofKey(key);
         }else if(wstVer.getPublicKeyTypeURI().equals(keyType)){
-            // Get UseKey
+            // Get UseKey from the RST
             UseKey useKey = rst.getUseKey();
             if (useKey != null){
                 Element keyInfo = (Element)useKey.getToken().getTokenValue();
-                stsConfig.getOtherOptions().put("ConfirmationKeyInfo", keyInfo);
+                context.getOtherProperties().put("ConfirmationKeyInfo", keyInfo);
             }
             final Set certs = context.getRequestorSubject().getPublicCredentials();
-            if(certs == null){
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-                throw new WSTrustException(
-                        LogStringsMessages.WST_0034_UNABLE_GET_CLIENT_CERT());
-            }
             boolean addedClientCert = false;
             for(Object o : certs){
                 if(o instanceof X509Certificate){
@@ -296,17 +348,37 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             throw new WSTrustException(LogStringsMessages.WST_0025_INVALID_KEY_TYPE(keyType, appliesTo));
         }
         
-        //========================================
-        // Create RequestedSecurityToken
-        //========================================
+        // Create Lifetime
+        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+        long lifeSpan = stsConfig.getIssuedTokenTimeout();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, lifeSpan, wstVer);
+        context.setCreationTime(new Date(currentTime));
+        context.setExpirationTime(new Date(currentTime + lifeSpan));
+        
+        //==============================================
+        // Create RequestedSecurityToken and references
+        //==============================================
+        
+        // Get STSTokenProvider
+        STSTokenProvider tokenProvider = WSTrustFactory.getSTSTokenProvider();
+        tokenProvider.generateToken(context);
+        
         // Create RequestedSecurityToken 
         final RequestedSecurityToken reqSecTok = eleFac.createRequestedSecurityToken();
-        final Token issuedToken = null; //ToDo
+        Token issuedToken = context.getSecurityToken();
+        
+        // Encrypt the token if required
+        if (stsConfig.getEncryptIssuedToken()){
+            Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo);
+            issuedToken = new GenericToken(encTokenEle);
+        }
         reqSecTok.setToken(issuedToken);
         
         // Create RequestedAttachedReference and RequestedUnattachedReference
-        final RequestedAttachedReference raRef =  null;
-        final RequestedUnattachedReference ruRef = null;
+        final SecurityTokenReference raSTR = (SecurityTokenReference)context.getAttachedSecurityTokenReference();
+        final SecurityTokenReference ruSTR = (SecurityTokenReference)context.getUnAttachedSecurityTokenReference();
+        final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(raSTR);
+        final RequestedUnattachedReference ruRef = eleFac.createRequestedUnattachedReference(ruSTR);
         
         //======================================
         // Create RequestSecurityTokenResponse
@@ -318,11 +390,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         if (rstCtx != null){
             ctx = URI.create(rstCtx);
         }
-   
-        // Create Lifetime
-        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
-        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, stsConfig.getIssuedTokenTimeout(), wstVer);
-        
+      
         // Create RequestSecurityTokenResponse
         final RequestSecurityTokenResponse rstr =
                 eleFac.createRSTRForIssue(URI.create(tokenType), ctx, reqSecTok, applies, raRef, ruRef, proofToken, serverEntropy, lifetime);
@@ -331,21 +399,21 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             rstr.setKeySize(keySize);
         }
         
-         if(log.isLoggable(Level.FINE)) {
+        if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, 
                         LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
                 log.log(Level.FINE, 
                         LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wstVer)));
-         }
+        }
         
-        // Populate IssuedTokenContext
-        //ToDo
-        //context.setSecurityToken(samlToken);
-        //context.setAttachedSecurityTokenReference(samlReference);
-        //context.setUnAttachedSecurityTokenReference(samlReference);
-        //context.setCreationTime(new Date(currentTime));
-        //context.setExpirationTime(new Date(currentTime + stsConfig.getIssuedTokenTimeout()));
-        
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
+            list.add(rstr);
+            RequestSecurityTokenResponseCollection rstrc = eleFac.createRSTRC(list);
+
+            return rstrc;
+        }
+           
         return rstr;
     }
 
@@ -363,5 +431,122 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
 
     public void handleUnsolicited(BaseSTSResponse rstr, IssuedTokenContext context) throws WSTrustException {
         throw new UnsupportedOperationException("Unsupported operation: handleUnsolicited");
+    }
+    
+    private X509Certificate getServiceCertificate(TrustSPMetadata spMd, String appliesTo)throws WSTrustException{
+        String certAlias = spMd.getCertAlias();
+        X509Certificate cert = null;
+        CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
+        if (callbackHandler != null){
+            // Get the service certificate
+            final EncryptionKeyCallback.AliasX509CertificateRequest req = new EncryptionKeyCallback.AliasX509CertificateRequest(spMd.getCertAlias());
+            final EncryptionKeyCallback callback = new EncryptionKeyCallback(req);
+            final Callback[] callbacks = {callback};
+            try{
+                callbackHandler.handle(callbacks);
+            }catch(IOException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);            
+            }catch(UnsupportedCallbackException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+            }
+        
+            cert = req.getX509Certificate();
+        }else{
+            SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
+            try{
+                cert = secEnv.getCertificate(new HashMap(), certAlias, false);
+            }catch( XWSSecurityException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
+            }
+        }
+        
+        return cert;
+    }
+    
+    private Object[] getSTSCertAndPrivateKey() throws WSTrustException{
+        X509Certificate stsCert = null;
+        PrivateKey stsPrivKey = null;
+        CallbackHandler callbackHandler = stsConfig.getCallbackHandler();
+        if (callbackHandler != null){
+            final SignatureKeyCallback.DefaultPrivKeyCertRequest request =
+                    new SignatureKeyCallback.DefaultPrivKeyCertRequest();
+            final Callback skc = new SignatureKeyCallback(request);
+            final Callback[] callbacks = {skc};
+            try{
+                callbackHandler.handle(callbacks);
+            }catch(IOException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);            
+            }catch(UnsupportedCallbackException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
+            }
+                
+            stsPrivKey = request.getPrivateKey();
+            stsCert = request.getX509Certificate();
+        }else{
+            SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
+            try{
+                stsCert = secEnv.getDefaultCertificate(new HashMap());
+                stsPrivKey = secEnv.getPrivateKey(new HashMap(), stsCert);
+            }catch( XWSSecurityException ex){
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
+                throw new WSTrustException(
+                    LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
+            }
+        }
+        
+        Object[] results = new Object[2];
+        results[0] = stsCert;
+        results[1] = stsPrivKey;
+        return results;
+    }
+    
+     private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo) throws WSTrustException{
+        Element encDataEle = null;
+        // Create the encryption key
+        try{
+            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            final int keysizeInBytes = 32;
+            final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
+            cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));
+                
+            // Encrypt the assertion and return the Encrypteddata
+            final Document owner = assertion.getOwnerDocument();
+            final EncryptedData encData = cipher.encryptData(owner, assertion);
+            final String id = "uuid-" + UUID.randomUUID().toString();
+            encData.setId(id);
+                
+            final KeyInfo encKeyInfo = new KeyInfo(owner);
+            final EncryptedKey encKey = WSTrustUtil.encryptKey(owner, skey, serCert);
+            encKeyInfo.add(encKey);
+            encData.setKeyInfo(encKeyInfo);
+            
+            encDataEle = cipher.martial(encData);
+         } catch (XMLEncryptionException ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0044_ERROR_ENCRYPT_ISSUED_TOKEN(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        } catch (Exception ex) {
+            log.log(Level.SEVERE,
+                            LogStringsMessages.WST_0044_ERROR_ENCRYPT_ISSUED_TOKEN(appliesTo), ex);
+            throw new WSTrustException( LogStringsMessages.WST_0040_ERROR_ENCRYPT_PROOFKEY(appliesTo), ex);
+        }
+        
+        return encDataEle;
     }
 }

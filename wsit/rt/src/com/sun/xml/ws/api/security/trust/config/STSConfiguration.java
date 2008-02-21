@@ -53,6 +53,7 @@ import java.util.Map;
  * @author Jiandong Guo
  */
 public interface STSConfiguration {
+
     
     /**
      * Gets the implementation class of <code>WSTrustContract</code> for this STS.

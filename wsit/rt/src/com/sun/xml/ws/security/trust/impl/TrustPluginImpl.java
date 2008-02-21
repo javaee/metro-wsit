@@ -61,7 +61,6 @@ import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
-import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
 import java.net.URI;
@@ -69,8 +68,6 @@ import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -92,24 +89,14 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
-import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.security.KeyException;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PublicKey;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
-import java.util.UUID;
-import javax.xml.crypto.MarshalException;
-import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory; 
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
 /**
  *
  * @author hr124446

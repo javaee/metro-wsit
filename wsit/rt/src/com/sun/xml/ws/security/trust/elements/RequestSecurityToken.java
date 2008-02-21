@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.7 2008-02-19 15:20:03 shyam_rao Exp $
+ * $Id: RequestSecurityToken.java,v 1.8 2008-02-21 22:48:27 jdg6688 Exp $
  */
 
 /*
@@ -47,20 +47,12 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 
 /**
  * @author Kumar Jayanti
  */
 public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest {
     
-    /**
-     * Predefined constants for the Type of Key desired in the Security Token
-     * Values for the wst:KeyType parameter
-     */
-    public static final String PUBLIC_KEY_TYPE = WSTrustConstants.WST_NAMESPACE + "/PublicKey";
-    public static final String SYMMETRIC_KEY_TYPE = WSTrustConstants.WST_NAMESPACE + "/SymmetricKey";
-   
     /**
      * Gets the value of the any property.
      * 
@@ -150,6 +142,5 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
      
      SecondaryParameters getSecondaryParameters(); 
 
-     List<Object> getExtendedElements();
 }
 

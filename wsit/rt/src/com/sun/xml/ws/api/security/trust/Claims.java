@@ -1,5 +1,5 @@
 /*
-* $Id: Claims.java,v 1.2 2007-05-29 22:11:10 ofung Exp $
+* $Id: Claims.java,v 1.3 2008-02-21 22:48:10 jdg6688 Exp $
  */
 
 /*
@@ -50,7 +50,7 @@ import javax.xml.namespace.QName;
  */
 public interface Claims {
     /**
-     * Gets the value of the any property.
+     * Gets the value of the any property for all the claim types.
      */
     List<Object> getAny();
 
@@ -78,4 +78,6 @@ public interface Claims {
      *     
      */
     void setDialect(String value);  
+    
+    List<Object> getSupportingProperties();
 }

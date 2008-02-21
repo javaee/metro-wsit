@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.13 2007-10-30 13:13:36 shyam_rao Exp $
+ * $Id: WSTrustFactory.java,v 1.14 2008-02-21 22:48:11 jdg6688 Exp $
  */
 
 /*
@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.trust;
 
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
+import com.sun.xml.ws.api.security.trust.STSTokenProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustContract;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
@@ -49,6 +50,7 @@ import com.sun.xml.ws.api.security.trust.config.STSConfigurationProvider;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 
+import com.sun.xml.ws.security.trust.impl.DefaultSAMLTokenProvider;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAttributeProvider;
 import com.sun.xml.ws.security.trust.impl.DefaultSTSAuthorizationProvider;
 import com.sun.xml.ws.security.trust.impl.WSTrustClientContractImpl;
@@ -130,8 +132,7 @@ public class WSTrustFactory {
         
         return contract;
     }
-    
-    
+   
     /**
      * return a concrete implementor for WS-Trust Client Contract
      */
@@ -179,6 +180,20 @@ public class WSTrustFactory {
             attrProvider = new DefaultSTSAttributeProvider();
         }
         return attrProvider;
+    }
+    
+    public static STSTokenProvider getSTSTokenProvider() {
+        
+        STSTokenProvider tokenProvider = null;
+        final ServiceFinder<STSTokenProvider> finder = 
+                ServiceFinder.find(STSTokenProvider.class);
+	java.util.Iterator it = finder.iterator();
+        if(it.hasNext()){
+            tokenProvider = (STSTokenProvider)it.next();
+        } else {
+            tokenProvider = new DefaultSAMLTokenProvider();
+        }
+        return tokenProvider;
     }
     
     public static STSConfiguration getRuntimeSTSConfiguration(){

@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.1 2007-08-23 12:40:56 shyam_rao Exp $
+* $Id: ClaimsImpl.java,v 1.2 2008-02-21 22:48:27 jdg6688 Exp $
  */
 
 /*
@@ -38,6 +38,7 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ClaimsType;
+import java.util.ArrayList;
 
 /**
  * Implementation class for Claims.
@@ -46,6 +47,8 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.ClaimsType;
  */
 public class ClaimsImpl extends ClaimsType implements Claims {
 
+    List<Object> supportingInfo = new ArrayList<Object>();
+    
     public ClaimsImpl() {
         // default constructor
     }
@@ -70,4 +73,7 @@ public class ClaimsImpl extends ClaimsType implements Claims {
         }
     }
 
+    public List<Object> getSupportingProperties() {
+        return supportingInfo;
+    }
 }
