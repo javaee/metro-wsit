@@ -4,58 +4,58 @@
     <wsp:Policy wsu:Id="WSHttpBinding_ISecurityTokenService_policy">
         <wsp:ExactlyOne>
             <wsp:All>
-		 <!--<sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/server"/>-->
-                <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                    <wsp:Policy>
-                        <sp:ProtectionToken>
-                            <wsp:Policy>
-                                <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
-                                    <wsp:Policy>
-                                        <sp:RequireDerivedKeys /> 
-                                        <sp:RequireThumbprintReference /> 
-                                        <sp:WssX509V3Token10 /> 
-                                    </wsp:Policy>
-                                </sp:X509Token>
-                            </wsp:Policy>
-                        </sp:ProtectionToken>
-                        <sp:AlgorithmSuite>
-                            <wsp:Policy>
-                                <sp:Basic128 /> 
-                            </wsp:Policy>
-                        </sp:AlgorithmSuite>
-                        <sp:Layout>
-                            <wsp:Policy>
-                                <sp:Strict /> 
-                            </wsp:Policy>
-                        </sp:Layout>
-                        <sp:IncludeTimestamp /> 
-                        <sp:EncryptSignature /> 
-                        <sp:OnlySignEntireHeadersAndBody /> 
-                    </wsp:Policy>
-                </sp:SymmetricBinding>
-                <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                    <wsp:Policy>
-                        <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
-                            <wsp:Policy>
-                                <sp:RequireThumbprintReference /> 
-                                <sp:WssX509V3Token10 /> 
-                            </wsp:Policy>
-                        </sp:X509Token>
-                    </wsp:Policy>
-                </sp:EndorsingSupportingTokens>
-                <sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                    <wsp:Policy>
-                        <sp:MustSupportRefKeyIdentifier /> 
-                        <sp:MustSupportRefIssuerSerial /> 
-                        <sp:MustSupportRefThumbprint /> 
-                        <sp:MustSupportRefEncryptedKey /> 
-                        <sp:RequireSignatureConfirmation /> 
-                    </wsp:Policy>
-                </sp:Wss11>
+		<!--<sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/server"/>-->
+				<sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:InitiatorToken>
+							<wsp:Policy>
+								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+									<wsp:Policy>
+										<sp:WssX509V3Token10/>
+									</wsp:Policy>
+								</sp:X509Token>
+							</wsp:Policy>
+						</sp:InitiatorToken>
+						<sp:RecipientToken>
+							<wsp:Policy>
+								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+									<wsp:Policy>
+										<sp:WssX509V3Token10/>
+									</wsp:Policy>
+								</sp:X509Token>
+							</wsp:Policy>
+						</sp:RecipientToken>
+						<sp:AlgorithmSuite>
+							<wsp:Policy>
+								<sp:Basic128/>
+							</wsp:Policy>
+						</sp:AlgorithmSuite>
+						<sp:Layout>
+							<wsp:Policy>
+								<sp:Lax/>
+							</wsp:Policy>
+						</sp:Layout>
+						<sp:IncludeTimestamp/>
+						<sp:OnlySignEntireHeadersAndBody/>
+					</wsp:Policy>
+				</sp:AsymmetricBinding>
+				<sp:Wss10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:MustSupportRefKeyIdentifier/>
+						<sp:MustSupportRefIssuerSerial/>
+					</wsp:Policy>
+				</sp:Wss10>
+				<sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+					<wsp:Policy>
+						<sp:MustSupportIssuedTokens/>
+						<sp:RequireClientEntropy/>
+						<sp:RequireServerEntropy/>
+					</wsp:Policy>
+				</sp:Trust10>
                 <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-keystore.jks" storepass="changeit" alias="wssip's oasis interop test ca id"/>
                 <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-truststore.jks" storepass="changeit"/>
                 <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
-                    <sc:Validator name="usernameValidator"  classname="wstrust.scenario5n.sts.PlainTextPasswordValidator"/>  
+                    <sc:Validator name="usernameValidator"  classname="wstrust.publickeyn.sts.PlainTextPasswordValidator"/>  
                 </sc:ValidatorConfiguration>
                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
                     <tc:LifeTime>36000</tc:LifeTime>
@@ -133,7 +133,7 @@
             <wsdl:output wsap10:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue" message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
         </wsdl:operation>
     </wsdl:portType>
-    
+
     <wsdl:binding name="WSHttpBinding_ISecurityTokenService" type="tns:ISecurityTokenService">
         <wsp:PolicyReference URI="#WSHttpBinding_ISecurityTokenService_policy" /> 
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" /> 

@@ -18,14 +18,13 @@
     <wsp:Policy wsu:Id="Scenario_5_IssuedTokenForCertificate_MutualCertificate11_policy">
         <wsp:ExactlyOne>
             <wsp:All>
-		<!-- <sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/server"/>-->
+		<!--<sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/server"/>-->
                 <sp:SymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                     <wsp:Policy>
                         <sp:ProtectionToken>
                             <wsp:Policy>
                                 <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
                                     <wsp:Policy>
-                                        <sp:RequireDerivedKeys/>
                                         <sp:RequireThumbprintReference/>
                                         <sp:WssX509V3Token10/>
                                     </wsp:Policy>
@@ -66,11 +65,9 @@
                             </Issuer-->
                             <sp:RequestSecurityTokenTemplate>
                                 <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
-                                <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
-                                <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">128</t:KeySize>
+                                <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/PublicKey</t:KeyType>
                             </sp:RequestSecurityTokenTemplate>
                             <wsp:Policy>
-                                <sp:RequireDerivedKeys/>
                                 <sp:RequireInternalReference/>
                             </wsp:Policy>
                         </sp:IssuedToken>
