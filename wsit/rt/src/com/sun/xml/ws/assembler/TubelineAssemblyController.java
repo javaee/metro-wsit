@@ -348,7 +348,6 @@ public class TubelineAssemblyController {
         // private static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
         private static final String WSDL_MODEL = "WSDL_MODEL";
         private static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
-        private Boolean securityEnabled = null;
 
         public void prepareContext(WsitClientTubeAssemblyContext context) throws WebServiceException {
             if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
@@ -452,12 +451,8 @@ public class TubelineAssemblyController {
          * @return true if Security is enabled, false otherwise
          */
         private boolean isSecurityEnabled(PolicyMap policyMap, WSDLPort wsdlPort) {
-            if (securityEnabled != null) {
-                return securityEnabled; // we have already called this method before
-            }
-
             if (policyMap == null || wsdlPort == null) {
-                return securityEnabled = false;
+                return false;
             }
 
             try {
@@ -469,7 +464,7 @@ public class TubelineAssemblyController {
                         (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
                         policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri) ||
                         policy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri))) {
-                    return securityEnabled = true;
+                    return true;
                 }
 
                 for (WSDLBoundOperation wbo : wsdlPort.getBinding().getBindingOperations()) {
@@ -480,35 +475,35 @@ public class TubelineAssemblyController {
                     if ((policy != null) &&
                             (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
                             policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
-                        return securityEnabled = true;
+                        return true;
                     }
 
                     policy = policyMap.getInputMessageEffectivePolicy(operationKey);
                     if ((policy != null) &&
                             (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
                             policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
-                        return securityEnabled = true;
+                        return true;
                     }
 
                     policy = policyMap.getOutputMessageEffectivePolicy(operationKey);
                     if ((policy != null) &&
                             (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
                             policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
-                        return securityEnabled = true;
+                        return true;
                     }
 
                     policy = policyMap.getFaultMessageEffectivePolicy(operationKey);
                     if ((policy != null) &&
                             (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri) ||
                             policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri))) {
-                        return securityEnabled = true;
+                        return true;
                     }
                 }
             } catch (PolicyException e) {
                 throw new WebServiceException(e);
             }
 
-            return securityEnabled = false;
+            return false;
         }
 
         private Codec createSecurityCodec(WSBinding binding) {
