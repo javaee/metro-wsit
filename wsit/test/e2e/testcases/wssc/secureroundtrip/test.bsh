@@ -3,7 +3,9 @@
 PingService service = new PingService();
 
 IPingService port = service.getPingPort();
-IPingService anotherPort = service.getPingPort();
+
+PingService service1 = new PingService();
+IPingService anotherPort = service1.getPingPort();
 
 String response1 = ""; 
 for (i = 0 ; i <2; i++) {
