@@ -125,6 +125,7 @@ import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -434,8 +435,15 @@ public abstract class SecurityPipeBase implements Pipe {
                 throw new XWSSecurityException(LogStringsMessages.WSSPIPE_0003_PROBLEM_PRINTING_MSG(), ex);
             }
         }
-        com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient =
-                new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(((LazyStreamBasedMessage)message).readMessage(),soapVersion);
+        LazyStreamBasedMessage lazyStreamMessage = (LazyStreamBasedMessage)message;
+        AttachmentSet attachSet = lazyStreamMessage.getAttachments();
+        com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient = null;
+        if(attachSet == null || attachSet.isEmpty()){
+            recipient =
+                      new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion);
+        } else{
+            recipient = new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion, attachSet);
+        }
         
         return recipient.validateMessage(context);
     }

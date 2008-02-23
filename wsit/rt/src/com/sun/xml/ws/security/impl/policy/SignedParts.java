@@ -59,7 +59,7 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean body;
     private boolean attachments;
-    private String attachmentProtectionType = MessageConstants.ATTACHMENT_COMPLETE_TRANSFORM_URI;
+    private String attachmentProtectionType = MessageConstants.SWA11_ATTACHMENT_CONTENT_SIGNATURE_TRANSFORM;
     private boolean populated = false;
     private Set<PolicyAssertion> targets = new HashSet<PolicyAssertion>();
     private SecurityPolicyVersion spVersion;
@@ -120,9 +120,9 @@ public class SignedParts extends PolicyAssertion implements com.sun.xml.ws.secur
                             while(attachIter.hasNext()){
                                 PolicyAssertion attachType = attachIter.next();
                                 if(PolicyUtil.isAttachmentCompleteTransform(attachType, spVersion)){
-                                    attachmentProtectionType = MessageConstants.ATTACHMENT_COMPLETE_TRANSFORM_URI;
+                                    attachmentProtectionType = MessageConstants.SWA11_ATTACHMENT_COMPLETE_SIGNATURE_TRANSFORM;
                                 } else if(PolicyUtil.isAttachmentContentTransform(attachType, spVersion)){
-                                    attachmentProtectionType = MessageConstants.ATTACHMENT_CONTENT_ONLY_TRANSFORM_URI;
+                                    attachmentProtectionType = MessageConstants.SWA11_ATTACHMENT_CONTENT_SIGNATURE_TRANSFORM;
                                 }
                             }
                         }
