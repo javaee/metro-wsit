@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.11 2008-02-19 15:20:02 shyam_rao Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.12 2008-02-23 23:23:41 shyam_rao Exp $
  */
 
 /*
@@ -177,6 +177,16 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         }
          return rstrc;
      }
+    
+     /**
+     * Create an RSTR for Renew from the given arguments. TokenType should be Issue.
+     * Any of the arguments can be null since they are all optional, but one of RequestedSecurityToken or RequestedProofToken should be returned
+     */
+    public  RequestSecurityTokenResponse createRSTRForRenew(URI tokenType, final URI context, RequestedSecurityToken token, final RequestedAttachedReference attachedReference, final RequestedUnattachedReference unattachedRef, final RequestedProofToken proofToken, final Entropy entropy, final Lifetime lifetime) throws WSTrustException {
+        final RequestSecurityTokenResponse rstr =
+                new RequestSecurityTokenResponseImpl(tokenType, context, token, null, attachedReference, unattachedRef, proofToken, entropy, lifetime, null);
+        return rstr;
+    }
     
     /**
      * Create a wst:IssuedTokens object

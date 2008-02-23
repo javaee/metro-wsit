@@ -97,6 +97,7 @@ import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -116,11 +117,14 @@ public class WSSCContract {
     private boolean reqClientEntr=false;    
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;    
-    private static WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10);
+    private WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10);
+    private Iterator wsscConfig = null;
     private static final int DEFAULT_KEY_SIZE = 128;
+    public static final String LIFETIME = "LifeTime";
+    public static final String SC_CONFIGURATION = "SCConfiguration";
     
     // ToDo: Should read from the configuration
-    private long TIMEOUT = 36000000;        
+    private long TIMEOUT = 36000000;    
     private static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
     
@@ -283,7 +287,7 @@ public class WSSCContract {
         if(lifetime != null){
             long timeout = getTimeoutFromRequest(lifetime);
             if(timeout > 0){
-                TIMEOUT = timeout;
+                setSCTokenTimeout(timeout);
             }
         }
         
@@ -305,7 +309,7 @@ public class WSSCContract {
         
         // Create Lifetime
         long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
-        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, TIMEOUT, wsTrustVer);
+        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, this.getSCTokenTimeout(), wsTrustVer);
         
         BaseSTSResponse response = null;
         try {
@@ -378,7 +382,7 @@ public class WSSCContract {
         context.setUnAttachedSecurityTokenReference(unattachedRef);
         context.setProofKey(secret);
         context.setCreationTime(new Date(currentTime));
-        context.setExpirationTime(new Date(currentTime + TIMEOUT));
+        context.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));
         
         final SecurityContextTokenInfo sctinfo =
                 new SecurityContextTokenInfoImpl();
@@ -387,7 +391,7 @@ public class WSSCContract {
         sctinfo.addInstance(null, secret);
         
         sctinfo.setCreationTime(new Date(currentTime));
-        sctinfo.setExpirationTime(new Date(currentTime + TIMEOUT));        
+        sctinfo.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));        
         session.setSecurityInfo(sctinfo);
     }
     
@@ -397,14 +401,14 @@ public class WSSCContract {
         //context.setProofKey(secret);
         context.setAttachedSecurityTokenReference(attachedReference);
         context.setCreationTime(new Date(currentTime));
-        context.setExpirationTime(new Date(currentTime + TIMEOUT));
+        context.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));
                 
         final SecurityContextTokenInfo sctInfoForSession = session.getSecurityInfo();
                         
         sctInfoForSession.setExternalId(token.getWsuId());
         sctInfoForSession.setExternalId(token.getInstance());
         sctInfoForSession.setCreationTime(new Date(currentTime));
-        sctInfoForSession.setExpirationTime(new Date(currentTime + TIMEOUT));        
+        sctInfoForSession.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));        
         session.setSecurityInfo(sctInfoForSession);
         
         final SecurityContextTokenInfo sctInfoForItc =
@@ -526,7 +530,7 @@ public class WSSCContract {
         if(lifetime != null){
             long timeout = getTimeoutFromRequest(lifetime);
             if(timeout > 0){
-                TIMEOUT = timeout;
+                setSCTokenTimeout(timeout);
             }
         }
         
@@ -560,18 +564,20 @@ public class WSSCContract {
         final Lifetime lifetime = createLifetime();
         
         final BaseSTSResponse rstr;
-        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            RequestSecurityTokenResponse resp = wsscEleFac.createRSTRForCancel(); 
-            List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
-            list.add(resp);
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){                        
             try{
+                RequestSecurityTokenResponse resp = wsscEleFac.createRSTRForRenew(tokenType, con, rst, rar, null, proofToken, serverEntropy, lifetime);
+                List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
+                list.add(resp);
                 rstr = ((WSSCElementFactory13)wsscEleFac).createRSTRCollectionForIssue(list);
             }catch(WSTrustException ex){
-                throw new WSSecureConversationException(ex);
+                log.log(Level.SEVERE,
+                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
+                throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
             }
         }else{        
             try{
-                rstr = ((WSSCElementFactory)wsscEleFac).createRSTRForRenew(tokenType, con, rst, rar, null, proofToken, serverEntropy, lifetime);
+                rstr = wsscEleFac.createRSTRForRenew(tokenType, con, rst, rar, null, proofToken, serverEntropy, lifetime);
             }catch (WSTrustException ex){
                 log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
@@ -661,7 +667,7 @@ public class WSSCContract {
         context.setSecurityToken(token);
         final long curTime = System.currentTimeMillis();
         final Date creationTime = new Date(curTime);
-        final Date expirationTime = new Date(curTime + TIMEOUT);
+        final Date expirationTime = new Date(curTime + this.getSCTokenTimeout());
         context.setCreationTime(creationTime);
         context.setExpirationTime(expirationTime);
         if (log.isLoggable(Level.FINER)) {
@@ -702,7 +708,7 @@ public class WSSCContract {
             created.setValue(calendarFormatter.format(cal.getTime()));
             
             final AttributedDateTime expires = new AttributedDateTime();
-            cal.setTimeInMillis(currentTime + TIMEOUT);
+            cal.setTimeInMillis(currentTime + this.getSCTokenTimeout());
             expires.setValue(calendarFormatter.format(cal.getTime()));
             
             final Lifetime lifetime = wsscEleFac.createLifetime(created, expires);
@@ -754,5 +760,31 @@ public class WSSCContract {
             spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;            
         }        
         return spVersion;
-    }   
+    }
+    
+    public void setWSSCServerConfig(Iterator wsscConfigIterator){
+        if(wsscConfigIterator != null){
+            while(wsscConfigIterator.hasNext()){
+                final PolicyAssertion assertion = (PolicyAssertion)wsscConfigIterator.next();
+                if (!SC_CONFIGURATION.equals(assertion.getName().getLocalPart())) {
+                    continue;
+                }
+                final Iterator<PolicyAssertion> wsscConfig = assertion.getNestedAssertionsIterator();
+                while(wsscConfig.hasNext()){
+                    final PolicyAssertion serviceSCPolicy = wsscConfig.next();
+                    if(LIFETIME.equals(serviceSCPolicy.getName().getLocalPart())){
+                        setSCTokenTimeout(Integer.parseInt(serviceSCPolicy.getValue()));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+        
+    private void setSCTokenTimeout(long scTokenTimeout){
+        this.TIMEOUT = scTokenTimeout;
+    }
+    private long getSCTokenTimeout(){
+        return this.TIMEOUT;
+    }
 }

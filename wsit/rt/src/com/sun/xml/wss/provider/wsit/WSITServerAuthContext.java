@@ -109,6 +109,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     //******************Instance Variables*********
     private Set trustConfig = null;
+    private Set wsscConfig = null;
     private CallbackHandler handler = null;
     
     //****************Variables passed to Context CTOR********
@@ -135,6 +136,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         Set configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
         trustConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+        wsscConfig = holder.getConfigAssertions(
+                com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
         
         String isGF = System.getProperty("com.sun.aas.installRoot");
         if (isGF != null) {
@@ -330,6 +333,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (wsscVer.getSCTRequestAction().equals(action) || wsscVer.getSCTRenewRequestAction().equals(action)) {
                 isSCIssueMessage = true;
                 sharedState.put("IS_SC_ISSUE", TRUE);
+                if(wsscConfig != null){
+                    packet.invocationProperties.put(
+                            com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, wsscConfig.iterator());
+                }
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
                 sharedState.put("IS_SC_CANCEL", TRUE);
@@ -655,6 +662,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             URI requestType = ((RequestSecurityToken)rst).getRequestType();
             BaseSTSResponse rstr = null;
             WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
+            scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
+                    com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));

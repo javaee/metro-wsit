@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.17 2008-02-19 15:20:02 shyam_rao Exp $
+ * $Id: WSTrustElementFactory.java,v 1.18 2008-02-23 23:23:40 shyam_rao Exp $
  */
 
 /*
@@ -248,6 +248,11 @@ public abstract class WSTrustElementFactory {
      *Create an RST for a Renewal Request
      */
     public abstract RequestSecurityToken createRSTForRenew(URI tokenType, URI requestType, URI context, RenewTarget target, AllowPostdating apd, Renewing renewingInfo);
+    
+    /**
+     *Create an RSTR for a Renewal Response
+     */
+    public  abstract RequestSecurityTokenResponse createRSTRForRenew(URI tokenType, URI context, RequestedSecurityToken token, RequestedAttachedReference attachedReference, RequestedUnattachedReference unattachedRef, RequestedProofToken proofToken, Entropy entropy, Lifetime lifetime) throws WSTrustException;;
     
     public abstract RenewTarget createRenewTarget(SecurityTokenReference str);
     

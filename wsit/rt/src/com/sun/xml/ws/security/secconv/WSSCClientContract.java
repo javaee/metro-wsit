@@ -90,15 +90,7 @@ public class WSSCClientContract {
     
     public WSSCClientContract(Configuration config) {
         //this.config = config;                
-    }
-    
-    public WSSCClientContract(Configuration config, final WSSCVersion wsscVer) {
-        //this.config = config;        
-        if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
-            this.wsscVer = wsscVer;
-            this.wsTrustVer = WSTrustVersion.WS_TRUST_13;            
-        }        
-    }
+    }    
     
     /**
      * Handle an RSTR returned by the Issuer and update Token information into the
@@ -107,12 +99,9 @@ public class WSSCClientContract {
     public void handleRSTR(
             final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)context.getSecurityPolicy().get(0);
-        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
-        WSTrustVersion wsTrustVer = null;
+        wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
             wsTrustVer = WSTrustVersion.WS_TRUST_13;
-        }else{
-            wsTrustVer = WSTrustVersion.WS_TRUST_10;
         }
         if (rst.getRequestType().toString().equals(wsTrustVer.getIssueRequestTypeURI())){
             // ToDo

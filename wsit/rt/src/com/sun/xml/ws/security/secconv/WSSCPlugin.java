@@ -127,8 +127,8 @@ public class WSSCPlugin {
     
     private WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();    
     
-    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
-    private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
+    //private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+    //private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     private static final int DEFAULT_KEY_SIZE = 256;
     private static final String SC_ASSERTION = "SecureConversationAssertion";
     private static final String FOR_CANCEL = "For Cancel";

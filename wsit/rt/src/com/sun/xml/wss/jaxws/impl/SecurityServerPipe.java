@@ -122,6 +122,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             SessionManager.getSessionManager();
     //private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
+    private Set wsscConfig = null;
     private CallbackHandler handler = null;
     
     // Creates a new instance of SecurityServerPipe
@@ -133,6 +134,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
             Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+            wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
@@ -149,6 +151,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
         super(that);
         sessionManager = that.sessionManager;
         trustConfig = that.trustConfig;
+        wsscConfig = that.wsscConfig;
         handler = that.handler;
     }
     
@@ -234,6 +237,9 @@ public class SecurityServerPipe extends SecurityPipeBase {
             action = getAction(packet);
             if (wsscVer.getSCTRequestAction().equals(action) || wsscVer.getSCTRenewRequestAction().equals(action)) {
                 isSCIssueMessage = true;
+                if(wsscConfig != null){
+                    packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS,wsscConfig.iterator());
+                }
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
             } else if (wsTrustVer.getIssueRequestAction().equals(action)) {
@@ -242,7 +248,6 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
-
                 }
                 
                 //set the callbackhandler
@@ -539,6 +544,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
             URI requestType = ((RequestSecurityToken)rst).getRequestType();            
             BaseSTSResponse rstr = null;
             WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
+            scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
+                    Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
