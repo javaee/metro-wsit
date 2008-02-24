@@ -38,7 +38,7 @@
 
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
-    <property name="install.name" value="metro"/>
+    <property name="install.name" value="jax-ws-latest-wsit"/>
     <property name="lib.dir" value="lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>

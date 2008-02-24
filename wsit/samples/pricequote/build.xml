@@ -35,6 +35,9 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
+<!--
+ $Id: build.xml,v 1.9.4.2 2008-02-24 22:34:51 mmatula Exp $
+-->
 
 <!--
   =======================================================================
@@ -49,7 +52,7 @@
 
     <property name="src.dir" value="src"/>
     <property name="etc.dir" value="etc"/>
-    <property name="lib.dir" value="../../dist/image/metro/lib"/>
+    <property name="lib.dir" value="../../dist/image/jax-ws-latest-wsit/lib"/>
 
     <property name="certs.dir" value="${etc.dir}/certs"/>
     <property name="build.dir" value="build"/>

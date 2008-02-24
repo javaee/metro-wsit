@@ -211,8 +211,8 @@ terms under that WSIT is distributed.<br>
       </td>
       <td style="vertical-align: top;">Created during WSIT build
 process.&nbsp; Contains the primary build artifacts: <span
- style="font-family: monospace;">metro-installer.jar</span>,
-      <span style="font-family: monospace;">metro.zip</span>,
+ style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>,
+      <span style="font-family: monospace;">jax-ws-latest-wsit.zip</span>,
 and under its <span style="font-family: monospace;">image</span>
 sub-directory, an
 unjarred
@@ -375,21 +375,21 @@ files are found in the <span style="font-family: monospace;">dist</span>
 sub-directory.<br>
 <ul>
   <li>The <span style="font-family: monospace;">image</span> directory
-contains a sub-directory named <span style="font-family: monospace;">metro</span>.
-The <span style="font-family: monospace;">image/metro</span>
+contains a sub-directory named <span style="font-family: monospace;">jax-ws-latest-wsit</span>.
+The <span style="font-family: monospace;">image/jax-ws-latest-wsit</span>
 sub-directory contains
 the directory image users would see after executing the <span
- style="font-family: monospace;">metro-installer.jar</span>
+ style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>
 mentioned in
 the table above.</li>
-  <li><span style="font-family: monospace;">metro.zip</span>
+  <li><span style="font-family: monospace;">jax-ws-latest-wsit.zip</span>
 holds the
 bundled contents of the <span style="font-family: monospace;">image</span>
 directory.</li>
-  <li><span style="font-family: monospace;">metro-installer.jar</span>
+  <li><span style="font-family: monospace;">jax-ws-latest-wsit-installer.jar</span>
 is
 a self-extracting jar file. It wraps <span
- style="font-family: monospace;">metro.zip</span> with a
+ style="font-family: monospace;">jax-ws-latest-wsit.zip</span> with a
 basic installer.<br>
   </li>
 </ul>
@@ -401,7 +401,7 @@ binary artifacts need to be installed into the web container.&nbsp;
 There are two
 signficant WSIT jar files: <span style="font-family: monospace;">webservices-rt.jar</span>
 and <span style="font-family: monospace;">webservices-tools.jar</span>.
-Both of these files live in <span style="font-family: monospace;">dist/image/metro/lib</span>.
+Both of these files live in <span style="font-family: monospace;">dist/image/jax-ws-latest-wsit/lib</span>.
 The <span style="font-family: monospace;">webservices-rt.jar</span>
 file
 contains the classes required by the hosting web container at run-time
@@ -413,7 +413,7 @@ and <span style="font-family: monospace;">wsimport</span>, to create
 the web
 application archive (WAR) file.<br>
 <br>
-The <span style="font-family: monospace;">metro</span>
+The <span style="font-family: monospace;">jax-ws-latest-wsit</span>
 directory also
 contains two <span style="font-family: monospace;">ant</span> files, <span
  style="font-family: monospace;">wsit-on-glassfish.xml</span> and <span
@@ -440,7 +440,7 @@ commands:<br>
  style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;"><a name="Installing_On_GlassFish">asadmin
 stop-domain domain1<br>
-cd dist/image/metro<br>
+cd dist/image/jax-ws-latest-wsit<br>
 </a></span><span style="font-family: monospace;"><a
  name="Installing_On_GlassFish">ant
 -Das.home=&lt;GlassFish install
@@ -472,7 +472,7 @@ these commands:<br>
 <div style="margin-left: 40px;"><span style="font-family: monospace;"><a
  name="Installing_On_Tomcat">catalina.sh
 stop<br>
-cd dist/image/metro</a></span><a
+cd dist/image/jax-ws-latest-wsit</a></span><a
  name="Installing_On_Tomcat"><br>
 </a></div>
 <div style="margin-left: 40px;"><span
@@ -516,7 +516,7 @@ in before WSIT installation.<br>
 <br>
 <div style="margin-left: 40px;"><span style="font-family: monospace;">asadmin
 stop-domain domain1</span><br>
-<span style="font-family: monospace;">cd dist/image/metro</span><br>
+<span style="font-family: monospace;">cd dist/image/jax-ws-latest-wsit</span><br>
 <span style="font-family: monospace;"></span><span
  style="font-family: monospace;">ant
 -Das.home=&lt;GlassFish install
@@ -530,7 +530,7 @@ directory&gt; -f wsit-on-glassfish.xml uninstall</span><br>
 <br>
 <div style="margin-left: 40px;"><span style="font-family: monospace;">catalina.sh
 stop<br>
-cd dist/image/metro</span><br>
+cd dist/image/jax-ws-latest-wsit</span><br>
 </div>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span

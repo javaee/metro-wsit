@@ -133,7 +133,7 @@
 
     <target name="help">
         <echo message="Usage:"/>
-        <echo message="  ant -f metro-on-tomcat.xml {install,uninstall}"/>
+        <echo message="  ant -f wsit-on-tomcat.xml {install,uninstall}"/>
         <echo/>
         <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
         <echo/>

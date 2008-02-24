@@ -71,7 +71,7 @@
         <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
         <copy todir="${dist.image.wsit.dir}" filtering="true">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
-            <fileset dir="${etc.dir}" includes="metro-on-*.*"/>
+            <fileset dir="${etc.dir}" includes="wsit-on-*.*"/>
         </copy>
         <generate-release-notes target="${dist.image.wsit.dir}/docs"/>
         <!-- generate samples -->
