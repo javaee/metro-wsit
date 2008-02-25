@@ -321,7 +321,7 @@
  </target>
 
 <target name="deploy-sts-glassfish" if="glassfish.home">
-    <copy file="${build.war.home}/jaxws-sts.war"
+    <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war"
         todir="${glassfish.home}/domains/${domain}/autodeploy"/>
 </target>
 
