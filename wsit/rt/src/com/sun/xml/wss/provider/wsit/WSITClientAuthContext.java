@@ -70,7 +70,6 @@ import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
-import com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
@@ -90,7 +89,6 @@ import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
-import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
@@ -129,7 +127,6 @@ import javax.xml.ws.soap.SOAPFaultException;
 import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.util.ListIterator;
-import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -692,13 +689,13 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     ((Token) issuedTokenAssertion).getTokenId()) == null) {
                 try {
                     STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
-                    String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
-                    String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+                    String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+                    String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
                     if (userName != null) {
-                        config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
                     }
                     if (password != null) {
-                        config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
                     }
                     IssuedTokenContext ctx = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
@@ -801,13 +798,13 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     }
 
     private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
-        String username = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+        String username = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
         if (username != null) {
-            requestPacket.invocationProperties.put(BindingProvider.USERNAME_PROPERTY, username);
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, username);
         }
-        String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+        String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
         if (password != null) {
-            requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
         }
     }    
 }

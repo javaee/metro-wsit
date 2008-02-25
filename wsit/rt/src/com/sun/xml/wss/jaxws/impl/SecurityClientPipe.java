@@ -75,11 +75,9 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.secconv.WSSCPlugin;
 import com.sun.xml.ws.security.policy.Token;
 import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
-import javax.xml.ws.BindingProvider;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.IssuedToken;
@@ -473,13 +471,13 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     ((Token) issuedTokenAssertion).getTokenId()) == null) {
                 try {
                     STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
-                    String userName = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
-                    String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+                    String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+                    String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
                     if (userName != null) {
-                        config.getOtherOptions().put(BindingProvider.USERNAME_PROPERTY, userName);
+                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
                     }
                     if (password != null) {
-                        config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
                     }
                     IssuedTokenContext ctx = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);

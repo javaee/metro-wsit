@@ -430,13 +430,13 @@ public class TrustPluginImpl implements TrustPlugin {
         dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
         
         // Pass the keys and/or username, password to the message context
-        String userName = (String) stsConfig.getOtherOptions().get(BindingProvider.USERNAME_PROPERTY);
-        String password = (String) stsConfig.getOtherOptions().get(BindingProvider.PASSWORD_PROPERTY);
+        String userName = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+        String password = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
         if (userName != null){
-            dispatch.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, userName);
+            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
         }
         if (password != null){
-            dispatch.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, password);
+            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
         }
         KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
         String id = (String)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_SIGNATURE_ID);

@@ -49,24 +49,18 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
-import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.security.impl.policy.Trust13;
 import com.sun.xml.ws.security.impl.policyconv.PolicyID;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
@@ -80,7 +74,6 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import java.net.URI;
 import java.security.SecureRandom;
-import java.util.Set;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.soap.SOAPFaultException;
 
@@ -108,7 +101,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -739,13 +731,13 @@ public class WSSCPlugin {
     }
     
     private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
-        String username = (String) packet.invocationProperties.get(BindingProvider.USERNAME_PROPERTY);
+        String username = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
         if (username != null) {
-            requestPacket.invocationProperties.put(BindingProvider.USERNAME_PROPERTY, username);
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, username);
         }
-        String password = (String) packet.invocationProperties.get(BindingProvider.PASSWORD_PROPERTY);
+        String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
         if (password != null) {
-            requestPacket.invocationProperties.put(BindingProvider.PASSWORD_PROPERTY, password);
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
         }
     }
     
