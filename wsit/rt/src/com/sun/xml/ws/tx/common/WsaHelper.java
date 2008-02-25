@@ -71,6 +71,7 @@ import java.util.Locale;
  * @author Ryan.Shoemaker@Sun.COM
  */
 public class WsaHelper {
+    static final private TxLogger logger = TxLogger.getLogger(WsaHelper.class);
 
     static HeaderList getInboundHeaderList(@NotNull WebServiceContext wsContext) {
         MessageContext msgContext = wsContext.getMessageContext();
@@ -155,7 +156,11 @@ public class WsaHelper {
         d.getRequestContext().put(BindingProvider.SOAPACTION_USE_PROPERTY, Boolean.TRUE);
         d.getRequestContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, fault.actionURI);
         
-        d.invokeOneWay(new DOMSource(createFault(soapVer, fault, message)));
+        try {
+            d.invokeOneWay(new DOMSource(createFault(soapVer, fault, message)));
+        } catch (WebServiceException e) {
+            logger.finer("sendFault", e.getLocalizedMessage());
+        }
     }
 
     public static void sendFault(@NotNull WebServiceContext wsContext,
