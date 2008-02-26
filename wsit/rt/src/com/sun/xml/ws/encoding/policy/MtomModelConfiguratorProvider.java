@@ -84,7 +84,7 @@ public class MtomModelConfiguratorProvider implements ModelConfiguratorProvider{
                         Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
                         while(policyAssertion.hasNext()){
                             PolicyAssertion assertion = policyAssertion.next();
-                            if(OPTIMIZED_MIME_SERIALIZATION_ASSERTION.equals(assertion.getName()) && !assertion.isOptional()){
+                            if(OPTIMIZED_MIME_SERIALIZATION_ASSERTION.equals(assertion.getName())){
                                 port.getBinding().addFeature(new MTOMFeature(true));
                             } // end-if non optional mtom assertion found
                         } // next assertion
