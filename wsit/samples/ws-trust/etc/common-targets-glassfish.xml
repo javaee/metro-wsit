@@ -40,6 +40,7 @@
     <pathelement location="${glassfish.home}/lib/activation.jar"/>
     <pathelement location="${glassfish.home}/lib/javaee.jar"/>
     <pathelement location="${glassfish.home}/lib/endorsed/webservices-api.jar"/>
+    <pathelement location="${basedir}/../../am/amclientsdk.jar"/>
     <pathelement location="${basedir}/../../etc"/>
     <pathelement location="etc/client-config"/>
 </path>

@@ -454,9 +454,7 @@
         <sysproperty key="sts.host" value="${sts.host}"/>
         <sysproperty key="sts.port" value="${sts.port}"/>
         <sysproperty key="sts.url" value="${sts.url}"/>
-        <!-- sysproperty key="DebugSecurity" value="true"/ -->
-        <!--sysproperty key="com.sun.xml.ws.runtime.client.wss.before" value="true"/>
-        <sysproperty key="com.sun.xml.ws.runtime.client.wss.after" value="true"/-->
+        <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
