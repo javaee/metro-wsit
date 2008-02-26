@@ -166,7 +166,7 @@ From this point on, all paths arerelative to the /wsit/wsit/samples/ws-trust dir
                            prefix="WEB-INF/classes"/>
                 <zipfileset
                             dir="../../etc/sts/services"
-                            includes="com.sun.*"
+                            includes="com.sun.xml.ws.api.security.trust.STSAuthorizationProvider"
                             prefix="WEB-INF/classes/META-INF/services"/>
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**, AMConfig.properties"/>
