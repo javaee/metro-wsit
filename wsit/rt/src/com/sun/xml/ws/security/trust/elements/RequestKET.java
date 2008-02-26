@@ -1,11 +1,11 @@
 /*
- * $Id: RequestKET.java,v 1.2 2007-05-29 22:11:30 ofung Exp $
+ * $Id: RequestKET.java,v 1.3 2008-02-26 06:33:19 ofung Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development

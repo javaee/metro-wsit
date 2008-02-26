@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -58,7 +58,7 @@ import java.util.logging.Level;
  * <p/>
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  */
 public final class CoordinationManager {

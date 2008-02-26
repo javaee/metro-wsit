@@ -1,11 +1,11 @@
 /*
-* $Id: Claims.java,v 1.3 2008-02-21 22:48:10 jdg6688 Exp $
+* $Id: Claims.java,v 1.4 2008-02-26 06:32:48 ofung Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development

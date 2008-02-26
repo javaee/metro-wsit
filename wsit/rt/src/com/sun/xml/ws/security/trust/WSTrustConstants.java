@@ -1,11 +1,11 @@
 /*
- * $Id: WSTrustConstants.java,v 1.13 2008-02-19 15:20:02 shyam_rao Exp $
+ * $Id: WSTrustConstants.java,v 1.14 2008-02-26 06:33:16 ofung Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development

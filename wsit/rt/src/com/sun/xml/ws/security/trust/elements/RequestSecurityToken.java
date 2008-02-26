@@ -1,11 +1,11 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.8 2008-02-21 22:48:27 jdg6688 Exp $
+ * $Id: RequestSecurityToken.java,v 1.9 2008-02-26 06:33:19 ofung Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development

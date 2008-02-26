@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -37,7 +37,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.35 2008-02-20 14:38:22 ritzmann Exp $
+ $Id: build.xml,v 1.36 2008-02-26 06:35:41 ofung Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.

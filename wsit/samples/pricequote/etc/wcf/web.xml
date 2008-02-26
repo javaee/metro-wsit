@@ -2,7 +2,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -35,7 +35,7 @@
  holder.
 -->
 <!--
- $Id: web.xml,v 1.5 2007-07-20 11:11:23 shyam_rao Exp $
+ $Id: web.xml,v 1.6 2008-02-26 06:35:05 ofung Exp $
 -->
 
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,7 +34,7 @@
  * holder.
  */
 /*
- $Id: WholesalerClient.java,v 1.7 2008-02-15 11:27:23 m_potociar Exp $
+ $Id: WholesalerClient.java,v 1.8 2008-02-26 06:35:06 ofung Exp $
 */
 
 package pricequote.wholesaler.client;
