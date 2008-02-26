@@ -159,7 +159,7 @@ public class WsaHelper {
         try {
             d.invokeOneWay(new DOMSource(createFault(soapVer, fault, message)));
         } catch (WebServiceException e) {
-            logger.finer("sendFault", e.getLocalizedMessage());
+            logger.finer("sendFault", e.getLocalizedMessage(), e);
         }
     }
 
