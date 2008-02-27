@@ -37,17 +37,15 @@
 package com.sun.xml.ws.encoding.policy;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.MTOMFeature;
+import junit.framework.TestCase;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
-import javax.xml.ws.WebServiceFeature;
 
 
 /**
@@ -63,7 +61,6 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureMtomAssertionPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtom.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
 
         WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
         assertNotNull(service);
@@ -86,7 +83,6 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureMtomAssertionNotPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtomPolicyNotPresent.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
         
         WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
         assertNotNull(service);
@@ -99,6 +95,28 @@ public class MtomModelConfiguratorProviderTest extends TestCase {
         
         WebServiceFeature feature = binding.getFeature(MTOMFeature.class);
         assertNull(feature);
+    }
+    
+    /**
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.encoding.MtomModelConfiguratorProvider.
+     * policy assertion present and optional
+     */
+    public void testConfigureMtomAssertionOptional() throws Exception {
+        WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderMtomOptional.wsdl");
+        
+        WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
+        assertNotNull(service);
+        
+        WSDLPort port = service.getFirstPort();
+        assertNotNull(port);
+        
+        WSDLBoundPortType binding = port.getBinding();
+        assertNotNull(binding);
+        
+        WebServiceFeature feature = binding.getFeature(MTOMFeature.class);
+        assertNotNull(feature);
+        
+        assertTrue(feature.isEnabled());
     }
     
 }
