@@ -62,12 +62,12 @@ public class RmTubeAppender implements TubeAppender {
      */
     public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new RMClientTube(
-                    context.getWsdlPort(),
-                    context.getBinding(),
-                    context.getScInitiator(),
-                    context.getTubelineHead());
-            // return new ClientRmTube(context);
+//            return new RMClientTube(
+//                    context.getWsdlPort(),
+//                    context.getBinding(),
+//                    context.getScInitiator(),
+//                    context.getTubelineHead());
+             return new ClientRmTube(context);
         } else {
             return context.getTubelineHead();
         }
