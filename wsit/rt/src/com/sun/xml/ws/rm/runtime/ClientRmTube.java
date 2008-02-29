@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
 import com.sun.xml.ws.rm.localization.RmLogger;
@@ -83,7 +82,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             // TODO remove this condition and remove context.getScInitiator() method
             scInitiator = context.getScInitiator();
         }
-        
+
         // TODO don't take the first config alternative automatically...
         Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];
         this.session = ClientSession.create(
@@ -132,7 +131,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         try {
             boolean responseToOneWayRequest = requestPacketCopy.getMessage().isOneWay(wsdlPort);
             responsePacket = session.processIncommingPacket(responsePacket, responseToOneWayRequest);
-            
+
             //check for empty body response to two-way message.  WCF will return
             //one when it drops the request message.  In this case we also need to retry.
             Message responseMessage = responsePacket.getMessage();
@@ -141,14 +140,15 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 LOGGER.fine("Resending dropped message");
                 return doResend();
             } else {
-                return super.processResponse(responsePacket);           
+                clearResendFlag();
+                return super.processResponse(responsePacket);
             }
 
         } catch (RmException ex) {
             LOGGER.logSevereException(ex);
+            clearResendFlag();
             return doThrow(ex);
         } finally {
-            clearResendFlag();
             LOGGER.exiting();
         }
     }
@@ -180,7 +180,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     }
 
     private boolean checkResendPossibility(Throwable throwable) {
-        if (throwable instanceof ClientTransportException) {
+        if (throwable instanceof IOException) {
             return true;
         } else if (throwable instanceof WebServiceException) {
             //Unwrap exception and see if it makes sense to retry this request (no need to check for null).
