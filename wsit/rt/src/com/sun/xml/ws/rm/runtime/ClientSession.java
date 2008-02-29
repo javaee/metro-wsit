@@ -144,7 +144,7 @@ abstract class ClientSession {
             processAckRequestedHeader(responseHeaders);
         }
     }
-    
+
     protected final void assertSequenceIdInInboundHeader(String expected, String actual) {
         if (expected != null && !expected.equals(actual)) {
             // TODO L10N
@@ -172,8 +172,9 @@ abstract class ClientSession {
 
     final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
         Message responseMessage = responsePacket.getMessage();
-        processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest);
-
+        if (responseMessage != null) {
+            processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest);
+        }
 // WE DON'T NEED TO TAKE CARE OF SOAP FAULTS HERE... (?)
 //                        if (responseMessage != null && responseMessage.isFault()) {
 //                            //don't want to resend
