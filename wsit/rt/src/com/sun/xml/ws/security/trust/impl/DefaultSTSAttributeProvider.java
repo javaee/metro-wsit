@@ -59,12 +59,12 @@ import com.sun.xml.wss.saml.util.SAMLUtil;
  * @author Jiandong Guo
  */
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
-    private static final String SAML_1_0_NS = "urn:ossis:names:tc:SAML:1.0:assertion";
-    private static final String SAML_2_0_NS = "urn:ossis:names:tc:SAML:2.0:assertion";
+    private static final String SAML_1_0_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
+    private static final String SAML_2_0_NS = "urn:oasis:names:tc:SAML:2.0:assertion";
     public Map<QName, List<String>> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
         final Set<Principal> principals = subject.getPrincipals();
         final Map<QName, List<String>> attrs = new HashMap<QName, List<String>>();
-        if (principals != null){
+        if (principals != null && !principals.isEmpty()){
             final Iterator iterator = principals.iterator();
             while (iterator.hasNext()){
                 final String name = principals.iterator().next().getName();
