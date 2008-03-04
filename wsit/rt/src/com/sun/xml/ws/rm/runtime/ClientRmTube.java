@@ -173,8 +173,11 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             session.close();
-            super.preDestroy();
+        } catch (Exception ex) {
+            // TODO L10N
+            LOGGER.warning("Unable to terminate RM sequence normally due to an unexpected exception", ex);
         } finally {
+            super.preDestroy();
             LOGGER.exiting();
         }
     }
