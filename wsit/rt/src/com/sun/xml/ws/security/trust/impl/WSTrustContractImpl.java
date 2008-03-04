@@ -377,8 +377,14 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         // Create RequestedAttachedReference and RequestedUnattachedReference
         final SecurityTokenReference raSTR = (SecurityTokenReference)context.getAttachedSecurityTokenReference();
         final SecurityTokenReference ruSTR = (SecurityTokenReference)context.getUnAttachedSecurityTokenReference();
-        final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(raSTR);
-        final RequestedUnattachedReference ruRef = eleFac.createRequestedUnattachedReference(ruSTR);
+        RequestedAttachedReference raRef =  null;
+        if (raSTR != null){
+            raRef = eleFac.createRequestedAttachedReference(raSTR);
+        }
+        RequestedUnattachedReference ruRef = null;
+        if (ruSTR != null){
+            ruRef = eleFac.createRequestedUnattachedReference(ruSTR);
+        }
         
         //======================================
         // Create RequestSecurityTokenResponse

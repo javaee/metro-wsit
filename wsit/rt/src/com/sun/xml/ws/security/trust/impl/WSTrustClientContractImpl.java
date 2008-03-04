@@ -97,7 +97,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
     //private final Configuration config;
     
     private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());
     
     /**
      * Creates a new instance of WSTrustClientContractImpl

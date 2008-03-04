@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.3 2008-02-26 06:33:29 ofung Exp $
+* $Id: ClaimsImpl.java,v 1.4 2008-03-04 20:37:11 jdg6688 Exp $
  */
 
 /*
@@ -41,12 +41,9 @@
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
 import java.util.List;
-import java.util.Map;
 
-import org.w3c.dom.Element;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 

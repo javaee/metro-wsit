@@ -378,8 +378,8 @@ public class WSTrustUtil {
         return writer.toString();
     }      
     
-    private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
+    public static final SimpleDateFormat calendarFormatter
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
     
     public static long getCurrentTimeWithOffset(){
         final Calendar cal = new GregorianCalendar();

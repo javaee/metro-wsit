@@ -126,7 +126,7 @@ public class WSSCContract {
     // ToDo: Should read from the configuration
     private long TIMEOUT = 36000000;    
     private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());
     
     public WSSCContract(){
         //Empty default constructor

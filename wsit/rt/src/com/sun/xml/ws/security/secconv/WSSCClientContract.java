@@ -82,7 +82,7 @@ public class WSSCClientContract {
     
     //private final Configuration config;
     private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'",Locale.getDefault());
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
