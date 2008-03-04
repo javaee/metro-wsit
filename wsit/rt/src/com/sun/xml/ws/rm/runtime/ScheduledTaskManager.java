@@ -83,6 +83,7 @@ class ScheduledTaskManager {
         while ((handle = scheduledTaskHandles.poll()) != null) {
             handle.cancel(false);
         }
+        scheduler.shutdown();
     }
 
     /**
