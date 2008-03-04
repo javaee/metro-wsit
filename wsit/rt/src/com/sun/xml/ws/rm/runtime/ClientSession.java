@@ -53,6 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+import javax.xml.ws.WebServiceException;
 
 /**
  * <p>
@@ -68,6 +69,7 @@ import java.util.logging.Level;
 abstract class ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
+    private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
 
     static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
@@ -254,9 +256,24 @@ abstract class ClientSession {
             if (!isInitialized()) {
                 communicator.registerMusterRequestPacket(requestPacket.copy(false));
 
-                openRmSession(
-                        (configuration.requestResponseOperationsDetected()) ? sequenceManager.generateSequenceUID() : null,
-                        communicator.tryStartSecureConversation());
+                int numberOfInitiateSessionAttempts = 0;
+                while (true) {
+                    try {
+                        openRmSession(
+                                (configuration.requestResponseOperationsDetected()) ? sequenceManager.generateSequenceUID() : null,
+                                communicator.tryStartSecureConversation());
+                        break;
+                    } catch (RuntimeException ex) {
+                        // TODO L10N
+                        LOGGER.warning("Attempt to initiate RM session failed with an exception", ex);
+                    } finally {
+                        if (++numberOfInitiateSessionAttempts > MAX_INITIATE_SESSION_ATTEMPTS) {
+                            // TODO L10N
+                            throw LOGGER.logSevereException(new CreateSequenceException("Unable to initiate RM Session: Maximum attempts to initiate RM session reached"));
+                        }
+                    }
+                }
+
 
                 scheduledTaskManager.startTasks(
                         new Runnable() {
