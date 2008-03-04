@@ -59,7 +59,7 @@ class ScheduledTaskManager {
      * TODO javadoc
      */
     public ScheduledTaskManager() {
-        scheduler = Executors.newScheduledThreadPool(0);
+        scheduler = Executors.newScheduledThreadPool(1);
         scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
     }
 
