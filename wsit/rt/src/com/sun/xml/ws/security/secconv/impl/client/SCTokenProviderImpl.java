@@ -198,9 +198,10 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
             c.setTimeInMillis(currentTime);
             
             Date currentTimeInDateFormat = c.getTime();
-            if(!(currentTimeInDateFormat.after(ctx.getCreationTime())
-                && currentTimeInDateFormat.before(ctx.getExpirationTime()))){
-                throw new WSSecureConversationException("SecureConversation session for session Id:" + key +"has expired.");
+           // if(!(currentTimeInDateFormat.after(ctx.getCreationTime())
+              //  && currentTimeInDateFormat.before(ctx.getExpirationTime())))
+            if(!currentTimeInDateFormat.before(ctx.getExpirationTime())){
+                throw new WSSecureConversationException("SecureConversation session for session Id: " + key +" has expired.");
             }            
         }        
         return ctx;
