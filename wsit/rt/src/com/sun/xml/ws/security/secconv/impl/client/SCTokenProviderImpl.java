@@ -122,6 +122,7 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
             }else{
                 throw new WSTrustException("IssuedTokenContext for Token id "+sctConfig.getTokenId() +" not found in the client cache.");
             }
+        }else if(!sctConfig.isClientOutboundMessage()){
             ctx.getSecurityPolicy().clear();
         }else{
             scp.process(ctx);

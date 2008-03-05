@@ -78,7 +78,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private boolean reqClientEntropy = true;
     private boolean isExpired = false;
     private boolean checkTokenExpiry = true;
-    private boolean clientOutboundMessage = false;
+    private boolean clientOutboundMessage = true;
     private WSDLPort wsdlPort = null;
     private WSBinding wsBinding = null;
     private Pipe clientSecurityPipe = null;
