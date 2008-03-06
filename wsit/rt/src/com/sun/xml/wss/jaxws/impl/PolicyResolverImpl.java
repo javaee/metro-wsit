@@ -121,24 +121,22 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     public MessagePolicy resolvePolicy(ProcessingContext ctx){
-        Message msg = (Message)ctx.getExtraneousProperty(JAXWS_21_MESSAGE);
+        Message msg = null;
+        SOAPMessage soapMsg = null;
+        if(ctx instanceof JAXBFilterProcessingContext){
+            msg = ((JAXBFilterProcessingContext)ctx).getJAXWSMessage();
+        } else{
+            soapMsg = ctx.getSOAPMessage();
+            msg = Messages.create(soapMsg);
+        }
         if(((ProcessingContextImpl)ctx).getSecurityPolicyVersion().equals(
                 SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
             wstVer = WSTrustVersion.WS_TRUST_13;
             wsscVer = WSSCVersion.WSSC_13;
         }
-        Packet packet = null;
+        
         MessagePolicy mp = null;
-        SOAPMessage soapMsg = null;
-        if(msg == null){
-            if(ctx instanceof JAXBFilterProcessingContext){
-                msg = ((JAXBFilterProcessingContext)ctx).getJAXWSMessage();
-            } else{
-                soapMsg = ctx.getSOAPMessage();
-                msg = Messages.create(soapMsg);
-            }
-            ctx.setExtraneousProperty(JAXWS_21_MESSAGE,msg);
-        }
+
         action = getAction(msg);
         if (isRMMessage()) {
             SecurityPolicyHolder holder = inProtocolPM.get("RM");
