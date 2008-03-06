@@ -219,6 +219,12 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             throw new WSTrustException(LogStringsMessages.WST_0030_REQUESTOR_NULL());
         }
         
+        // Get client authentication context
+        String authnCtx = (String)stsConfig.getOtherOptions().get(WSTrustConstants.AUTHN_CONTEXT_CLASS);
+        if (authnCtx != null){
+             context.getOtherProperties().put(IssuedTokenContext.AUTHN_CONTEXT, authnCtx);
+        }
+        
         // Get the OnBehalfOf token and put it in the Subject public credentails
         // ToDo: to identify the OBO token properly
         OnBehalfOf obo = rst.getOnBehalfOf();

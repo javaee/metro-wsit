@@ -137,7 +137,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
             assertion = createSAML11Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
         } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
-            assertion = createSAML20Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
+            String authnCtx = (String)ctx.getOtherProperties().get(IssuedTokenContext.AUTHN_CONTEXT);
+            assertion = createSAML20Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType, authnCtx);
         } else{
             log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
@@ -268,7 +269,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         return assertion;
     }
     
-    protected Assertion createSAML20Assertion(final WSTrustVersion wstVer, final int lifeSpan, String confirMethod, final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs, String keyType) throws WSTrustException{
+    protected Assertion createSAML20Assertion(final WSTrustVersion wstVer, final int lifeSpan, String confirMethod, final String assertionId, final String issuer, final String appliesTo, final KeyInfo keyInfo, final  Map<QName, List<String>> claimedAttrs, String keyType, String authnCtx) throws WSTrustException{
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
@@ -326,7 +327,10 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             if (attrs.isEmpty()){
                 // To Do: create AuthnContext with proper content. Currently what 
                 // we have is a place holder.
-                AuthnContext ctx = samlFac.createAuthnContext();
+                 // To Do: create AuthnContext with proper content. Currently what 
+                // we have is a place holder.
+                //AuthnContext ctx = samlFac.createAuthnContext();
+                AuthnContext ctx = samlFac.createAuthnContext(authnCtx, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
                 statements.add(statement); 
             }else{
