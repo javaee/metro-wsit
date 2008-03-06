@@ -43,11 +43,9 @@ import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
-import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
-import com.sun.xml.ws.api.server.PortAddressResolver;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -117,7 +115,7 @@ public class WSDLRetriever {
      * wsdl, schema, etc. when parsed.
      */
     private void writeDoc(final XMLStreamWriter writer, final SDDocument doc,
-        final String add) throws XMLStreamException {
+        final String address) throws XMLStreamException {
         
         try {
             writer.writeStartElement(MEX_PREFIX,
@@ -131,32 +129,15 @@ public class WSDLRetriever {
                 writer.writeAttribute("Identifier",
                     ((SDDocument.Schema) doc).getTargetNamespace());
             }
-            doc.writeTo(new PortAddressResolverImpl(add), dar, writer);
+            doc.writeTo(new MEXAddressResolver(endpoint.getServiceName(), endpoint.getPortName(), address), dar, writer);
             writer.writeEndElement();
         } catch (IOException ioe) {
             // this should be very rare
             String exceptionMessage =
-                MessagesMessages.MEX_0015_IOEXCEPTION_WHILE_WRITING_RESPONSE(add);
+                MessagesMessages.MEX_0015_IOEXCEPTION_WHILE_WRITING_RESPONSE(address);
             logger.log(Level.SEVERE, exceptionMessage, ioe);
             throw new WebServiceException(exceptionMessage, ioe);
         }
     }
 
-    /*
-     * This object is passed to the jax-ws runtime to give
-     * the address to be included in the wsdl.
-     */
-    static class PortAddressResolverImpl extends PortAddressResolver {
-
-        private final String address;
-        
-        PortAddressResolverImpl(String address) {
-            this.address = address;
-        }
-        
-        public String getAddressFor(QName serviceName, final String portName) {
-            return address;
-        }
-        
-    }
 }
