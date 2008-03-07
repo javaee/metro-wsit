@@ -241,19 +241,20 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             return ret;
         }
 
+        // Not required, commenting
         /* TODO:this piece of code present since payload should be read once*/
-        if (!optimized) {
-            try {
-                SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
-                Message newMsg = Messages.create(sm);
-                ret.setMessage(newMsg);
-            } catch (SOAPException ex) {
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
-                throw new WebServiceException(
-                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
-            }
-        }
+//        if (!optimized) {
+//            try {
+//                SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
+//                Message newMsg = Messages.create(sm);
+//                ret.setMessage(newMsg);
+//            } catch (SOAPException ex) {
+//                log.log(Level.SEVERE,
+//                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
+//                throw new WebServiceException(
+//                        LogStringsMessages.WSSPIPE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
+//            }
+//        }
         //---------------INBOUND SECURITY VERIFICATION----------
 
 

@@ -700,18 +700,19 @@ public abstract class WSITAuthContextBase  {
     }
     
     protected void cacheMessage(Packet packet){
-        Message message = null;
-        if(!optimized){
-            try{
-                message = packet.getMessage();
-                message= Messages.create(message.readAsSOAPMessage());
-                packet.setMessage(message);
-            }catch(SOAPException se){
-                // internal error
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
-                throw new WebServiceException(LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
-            }
-        }
+        // Not required, commenting
+//        Message message = null;
+//        if(!optimized){
+//            try{
+//                message = packet.getMessage();
+//                message= Messages.create(message.readAsSOAPMessage());
+//                packet.setMessage(message);
+//            }catch(SOAPException se){
+//                // internal error
+//                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
+//                throw new WebServiceException(LogStringsMessages.WSITPVD_0005_PROBLEM_PROC_SOAP_MESSAGE(), se);
+//            }
+//        }
     }
     
     private boolean hasTargets(NestedPolicy policy){

@@ -223,10 +223,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         Packet packet = getRequestPacket(messageInfo);
         Packet ret = null;
-        
-        if (!optimized) {
-            cacheMessage(packet);
-        }
+
+        // Not required, commenting
+//        if (!optimized) {
+//            cacheMessage(packet);
+//        }
         
         try {
             ret = validateRequest(packet, clientSubject, serviceSubject, messageInfo.getMap());

@@ -317,18 +317,19 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         try {
             Packet ret = getResponsePacket(messageInfo);
 
-            if (!optimized) {
-                try {
-                    SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
-                    Message newMsg = Messages.create(sm);
-                    ret.setMessage(newMsg);
-                } catch (SOAPException ex) {
-                    log.log(Level.SEVERE,
-                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
-                    throw new WebServiceException(
-                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
-                }
-            }
+            // Not required, commeting
+//            if (!optimized) {
+//                try {
+//                    SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
+//                    Message newMsg = Messages.create(sm);
+//                    ret.setMessage(newMsg);
+//                } catch (SOAPException ex) {
+//                    log.log(Level.SEVERE,
+//                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
+//                    throw new WebServiceException(
+//                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
+//                }
+//            }
             ret = validateResponse(ret, clientSubject, serviceSubject);
             resetCachedOperation(ret);
 

@@ -173,10 +173,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
     //Note: There is an Assumption that the STS is distinct from the WebService in case of
     // WS-Trust and the STS and WebService are the same entity for SecureConversation
     public Packet process(Packet packet) {
-        
-        if (!optimized) {
-            cacheMessage(packet);
-        }
+
+// Not required, Commenting
+//        if (!optimized) {
+//            cacheMessage(packet);
+//        }
         
         Message msg = packet.getMessage();
         
