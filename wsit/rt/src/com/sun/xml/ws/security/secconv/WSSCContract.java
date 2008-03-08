@@ -100,7 +100,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.security.auth.Subject;
+import javax.security.auth.Subject;
 import javax.xml.bind.JAXBElement;
+import org.w3c.dom.Element;
+import javax.xml.stream.XMLStreamReader;
+import com.sun.xml.wss.saml.util.SAMLUtil;
+import com.sun.xml.wss.XWSSecurityException;
+import javax.xml.stream.XMLStreamException;
 
 public class WSSCContract {
     
@@ -194,6 +201,10 @@ public class WSSCContract {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)response, wsTrustVer)));
         }
+        
+        // update subject
+        updateSubject(context);
+        
         return response;
     }
     
@@ -786,5 +797,31 @@ public class WSSCContract {
     }
     private long getSCTokenTimeout(){
         return this.TIMEOUT;
+    }
+
+    // mainly convert SAML assertion in the requstor Subject from XMLStreamReader to Element
+    // so that it is available to the service during the whole session
+    private void updateSubject(IssuedTokenContext context) throws WSSecureConversationException{
+        Subject subj =  context.getRequestorSubject();
+                
+        try {
+            if (subj != null){
+                Set<Object> set = subj.getPublicCredentials();
+                Element samlAssertion = null;
+                for (Object obj : set) {
+                    if (obj instanceof XMLStreamReader) {
+                        XMLStreamReader reader = (XMLStreamReader) obj;
+                        //To create a DOM Element representing the Assertion :
+                        samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+                    }
+                    set.remove(obj);
+                    set.add(samlAssertion);
+                }
+            }
+       }catch (XWSSecurityException ex){
+            throw new WSSecureConversationException(ex.getMessage(), ex);
+       }catch (XMLStreamException ex){
+            throw new WSSecureConversationException(ex.getMessage(), ex);
+       }
     }
 }
