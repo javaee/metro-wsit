@@ -87,7 +87,7 @@ public class Rm11ServiceConfiguration implements Configuration {
     }
 
     public RmVersion getRmVersion() {
-        return RmVersion.WSRM10;
+        return RmVersion.WSRM11;
     }
 
     public SOAPVersion getSoapVersion() {
