@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -53,7 +54,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
-import javax.xml.ws.WebServiceException;
 
 /**
  * <p>
@@ -175,7 +175,7 @@ abstract class ClientSession {
     final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
         Message responseMessage = responsePacket.getMessage();
         if (responseMessage != null) {
-            processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest);
+            processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest && !isProtocolMessage(responseMessage));
         }
 // WE DON'T NEED TO TAKE CARE OF SOAP FAULTS HERE... (?)
 //                        if (responseMessage != null && responseMessage.isFault()) {
@@ -296,6 +296,12 @@ abstract class ClientSession {
 
     private boolean isInitialized() {
         return outboundSequenceId != null;
+    }
+
+    private boolean isProtocolMessage(@NotNull Message responseMessage) {
+        HeaderList headers = responseMessage.getHeaders();
+
+        return headers != null && !configuration.getRmVersion().isRMAction(headers.getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     /**
