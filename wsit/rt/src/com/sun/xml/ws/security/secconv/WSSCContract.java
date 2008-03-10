@@ -807,14 +807,17 @@ public class WSSCContract {
         try {
             if (subj != null){
                 Set<Object> set = subj.getPublicCredentials();
+                XMLStreamReader samlReader = null;
                 Element samlAssertion = null;
                 for (Object obj : set) {
                     if (obj instanceof XMLStreamReader) {
-                        XMLStreamReader reader = (XMLStreamReader) obj;
+                        samlReader = (XMLStreamReader) obj;
                         //To create a DOM Element representing the Assertion :
-                        samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+                        samlAssertion = SAMLUtil.createSAMLAssertion(samlReader);
                     }
-                    set.remove(obj);
+                }
+                if (samlReader != null && samlAssertion != null){
+                    set.remove(samlReader);
                     set.add(samlAssertion);
                 }
             }
