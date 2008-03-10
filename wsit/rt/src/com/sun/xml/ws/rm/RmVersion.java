@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.bind.api.JAXBRIContext;
@@ -161,7 +160,8 @@ public enum RmVersion {
     }
 
     public boolean isRMAction(String action) {
-        return ackRequestedAction.equals(action) ||
+        return (action != null) &&
+                (ackRequestedAction.equals(action) ||
                 createSequenceAction.equals(action) ||
                 createSequenceResponseAction.equals(action) ||
                 closeSequenceAction.equals(action) ||
@@ -170,6 +170,6 @@ public enum RmVersion {
                 makeConnectionAction.equals(action) ||
                 sequenceAcknowledgementAction.equals(action) ||
                 terminateSequenceAction.equals(action) ||
-                terminateSequenceResponseAction.equals(action);
+                terminateSequenceResponseAction.equals(action));
     }
 }
