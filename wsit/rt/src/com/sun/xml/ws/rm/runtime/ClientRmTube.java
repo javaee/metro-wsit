@@ -132,10 +132,12 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             boolean responseToOneWayRequest = requestPacketCopy.getMessage().isOneWay(wsdlPort);
             responsePacket = session.processIncommingPacket(responsePacket, responseToOneWayRequest);
 
-            //check for empty body response to two-way message.  WCF will return
-            //one when it drops the request message.  In this case we also need to retry.
+            // Check for empty body response to two-way message. WCF as well as our implementation 
+            // will return empty message with a sequence acknowledgement header when a duplicate 
+            // request message was received but response is not available yet (due to a long processing). 
+            // In such case we also need to retry.
             Message responseMessage = responsePacket.getMessage();
-            if (responseMessage != null && !responseToOneWayRequest && responseMessage.getPayloadNamespaceURI() == null) {
+            if (!responseToOneWayRequest && responseMessage != null && !responseMessage.hasPayload()) {
                 // TODO L10N
                 LOGGER.fine("Resending dropped message");
                 return doResend();
