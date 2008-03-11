@@ -301,7 +301,7 @@ abstract class ClientSession {
     private boolean isProtocolMessage(@NotNull Message responseMessage) {
         HeaderList headers = responseMessage.getHeaders();
 
-        return headers != null && !configuration.getRmVersion().isRMAction(headers.getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+        return headers != null && configuration.getRmVersion().isRMAction(headers.getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     /**
