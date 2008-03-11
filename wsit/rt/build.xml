@@ -84,7 +84,8 @@
             <delete dir="${rtjar-tmpdir}"/>
             <mkdir dir="${rtjar-tmpdir}"/>
             <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
-            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF" class-path="webservices-api.jar webservices-extra.jar"/>
+            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF"
+            class-path="webservices-api.jar webservices-extra.jar webservices-rt_l10n.jar webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar"/>
             <concatmanifest tempdir="${rtjar-tmpdir}" manifest="${rtjar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
