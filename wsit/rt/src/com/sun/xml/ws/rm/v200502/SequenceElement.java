@@ -163,6 +163,17 @@ public class SequenceElement extends AbstractSequence {
     }
 
     /**
+     * Accessor for the Number property which maps to the MessageNumber property in
+     * the underlying JAXB class.
+     * 
+     * @return The Message number.
+     */
+    @Override
+    public long getNumber() {
+        return getMessageNumber();
+    }
+    
+    /**
      * Gets the value of the lastMessage property.
      * 
      * @return The value of the property

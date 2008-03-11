@@ -83,7 +83,7 @@ public abstract class AbstractSequence {
      *
      * @return The Message number.
      */
-    public long getNumber() {
+    protected long getNumber() {
         return getMessageNumber();
     }
 
