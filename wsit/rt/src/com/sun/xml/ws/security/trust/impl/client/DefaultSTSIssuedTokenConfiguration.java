@@ -376,7 +376,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         }
         
         if (address != null){
-            return address.getURI().toString();
+            URI addURI = address.getURI();
+            if (addURI != null){
+                return address.getURI().toString();
+            }
         }
         
         return null;
