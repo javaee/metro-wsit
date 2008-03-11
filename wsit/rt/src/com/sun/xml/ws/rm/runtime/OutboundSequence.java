@@ -57,12 +57,12 @@ public class OutboundSequence extends AbstractSequence {
 
     public OutboundSequence(String id, long expirationTime) {
         super(id, expirationTime, new LinkedList<Long>());
-        this.lastMessageId = new AtomicLong(AbstractSequence.MIN_MESSAGE_ID);
+        this.lastMessageId = new AtomicLong(AbstractSequence.MIN_MESSAGE_ID - 1);
     }
 
     @Override
     public long getNextMessageId() throws MessageNumberRolloverException {
-        long nextId = lastMessageId.getAndIncrement();
+        long nextId = lastMessageId.incrementAndGet();
         if (nextId > MAX_MESSAGE_ID) {
             // TODO L10N
             throw LOGGER.logSevereException(new MessageNumberRolloverException(this.getId(), nextId));
