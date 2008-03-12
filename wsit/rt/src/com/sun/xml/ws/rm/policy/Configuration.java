@@ -52,7 +52,7 @@ public interface Configuration {
 //    public static final DeliveryAssurance DEFAULT_DELIVERY_ASSURANCE = DeliveryAssurance.EXACTLY_ONCE;
     public static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
     public static final long DEFAULT_ACKNOWLEDGEMENT_REQUEST_INTERVAL = Configuration.UNSPECIFIED;
-    public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 0;
+    public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
     public static final long DEFAULT_RETRANSMISSION_INTERVAL = Configuration.UNSPECIFIED;
 
     public static enum SecurityBinding {
