@@ -243,7 +243,7 @@ final class Rm11ClientSession extends ClientSession {
             if (RmVersion.WSRM11.terminateSequenceAction.equals(responseAction)) {
                 TerminateSequenceElement tsElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
-                sequenceManager.terminateSequence(tsElement.getIdentifier().toString());
+                sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
             } else if (RmVersion.WSRM11.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseElement tsrElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
