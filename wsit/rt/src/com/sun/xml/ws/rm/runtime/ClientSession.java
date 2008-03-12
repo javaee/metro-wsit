@@ -298,7 +298,8 @@ abstract class ClientSession {
         return outboundSequenceId != null;
     }
 
-    private boolean isProtocolMessage(@NotNull Message responseMessage) {
+    private boolean isProtocolMessage(
+            @NotNull Message responseMessage) {
         HeaderList headers = responseMessage.getHeaders();
 
         return headers != null && configuration.getRmVersion().isRMAction(headers.getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
@@ -377,10 +378,14 @@ abstract class ClientSession {
             }
         });
         try {
-            boolean waitResult = doneSignal.await(configuration.getCloseSequenceOperationTimeout(), TimeUnit.MILLISECONDS);
-            if (!waitResult) {
-                // TODO L10N
-                LOGGER.info("Close sequence operation timed out for outbound sequence [" + outboundSequenceId + "]");
+            if (configuration.getCloseSequenceOperationTimeout() > 0) {
+                boolean waitResult = doneSignal.await(configuration.getCloseSequenceOperationTimeout(), TimeUnit.MILLISECONDS);
+                if (!waitResult) {
+                    // TODO L10N
+                    LOGGER.info("Close sequence operation timed out for outbound sequence [" + outboundSequenceId + "]");
+                }
+            } else {
+                doneSignal.await();
             }
         } catch (InterruptedException ex) {
             // TODO L10N
