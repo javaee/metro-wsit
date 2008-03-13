@@ -233,7 +233,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             if (oboToken != null){
                 subject.getPublicCredentials().add((Element)oboToken);
                 String confirMethod = null;
-                if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)){
+                if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
+                    tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){
                     confirMethod = SAML_SENDER_VOUCHES_1_0;
                 } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
                     confirMethod = SAML_SENDER_VOUCHES_2_0;
