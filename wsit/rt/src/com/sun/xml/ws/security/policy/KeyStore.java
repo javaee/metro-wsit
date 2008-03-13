@@ -53,4 +53,6 @@ public interface KeyStore {
     
     public String getAliasSelectorClassName();
     
+    public String getKeyStoreCallbackHandler();
+    
 }

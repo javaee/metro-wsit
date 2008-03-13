@@ -51,6 +51,7 @@ public class TrustStore extends KeyStore implements com.sun.xml.ws.security.poli
     private static QName  stsAlias = new QName("stsalias");
     private static QName  serviceAlias = new QName("servicealias");
     private static QName certSelector = new QName("certSelector");
+    private static QName callbackHandler = new QName("callbackHandler");
     /** Creates a new instance of TrustStore */
     public TrustStore() {
     }
@@ -72,5 +73,9 @@ public class TrustStore extends KeyStore implements com.sun.xml.ws.security.poli
     
     public String getCertSelectorClassName() {
         return this.getAttributeValue(certSelector);
+    }
+
+    public String getTrustStoreCallbackHandler() {
+        return this.getAttributeValue(callbackHandler);
     }
 }

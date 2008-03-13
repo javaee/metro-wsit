@@ -48,4 +48,6 @@ public interface TrustStore extends KeyStore{
     public String getServiceAlias();
     
     public String getCertSelectorClassName();
+    
+    public String getTrustStoreCallbackHandler();
 }

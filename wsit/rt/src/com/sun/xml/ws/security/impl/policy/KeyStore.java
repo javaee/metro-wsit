@@ -54,6 +54,7 @@ public class KeyStore extends PolicyAssertion implements com.sun.xml.ws.security
     private static QName alias = new QName("alias");
     private static QName keypass = new QName("keypass");
     private static QName aliasSelector = new QName("aliasSelector");
+    private static QName callbackHandler = new QName("callbackHandler");
     
     private char [] password = null;
     /** Creates a new instance of KeyStore */
@@ -91,5 +92,9 @@ public class KeyStore extends PolicyAssertion implements com.sun.xml.ws.security
     
     public String getAliasSelectorClassName() {
         return this.getAttributeValue(aliasSelector);
+    }
+
+    public String getKeyStoreCallbackHandler() {
+        return this.getAttributeValue(callbackHandler);
     }
 }

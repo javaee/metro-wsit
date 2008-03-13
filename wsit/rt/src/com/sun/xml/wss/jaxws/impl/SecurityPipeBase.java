@@ -1360,6 +1360,14 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {
+        
+        if (store.getKeyStoreCallbackHandler() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CBH, store.getKeyStoreCallbackHandler());
+            if (store.getAlias() != null) {
+                props.put(DefaultCallbackHandler.MY_ALIAS, store.getAlias());
+            }
+            return;
+        }
         if (store.getLocation() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
@@ -1400,6 +1408,13 @@ public abstract class SecurityPipeBase implements Pipe {
     }
     
     private void populateTruststoreProps(Properties props, TrustStore store) {
+        if (store.getTrustStoreCallbackHandler() != null) {
+            props.put(DefaultCallbackHandler.TRUSTSTORE_CBH, store.getTrustStoreCallbackHandler());
+            if (store.getPeerAlias() != null) {
+                props.put(DefaultCallbackHandler.PEER_ENTITY_ALIAS, store.getPeerAlias());
+            }
+            return;
+        }
         if (store.getLocation() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
