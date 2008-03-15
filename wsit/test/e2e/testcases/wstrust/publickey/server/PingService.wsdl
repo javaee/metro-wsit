@@ -103,6 +103,7 @@
                             <sp:RequestSecurityTokenTemplate>
                                 <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
                                 <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/PublicKey</t:KeyType>
+                                <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">512</t:KeySize>
                             </sp:RequestSecurityTokenTemplate>
                             <wsp:Policy>
                                 <sp:RequireInternalReference/>

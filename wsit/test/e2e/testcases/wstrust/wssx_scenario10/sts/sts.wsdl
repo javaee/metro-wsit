@@ -94,6 +94,11 @@
 						</sp:X509Token>
 					</wsp:Policy>
 				</sp:EndorsingSupportingTokens>
+                                <sp:EndorsingSupportingTokens xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+					<wsp:Policy>
+						<sp:KeyValueToken sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never"/>
+					</wsp:Policy>
+				</sp:EndorsingSupportingTokens>
 				<sp:Wss11 xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 					<wsp:Policy>
 						<sp:MustSupportRefKeyIdentifier/>
