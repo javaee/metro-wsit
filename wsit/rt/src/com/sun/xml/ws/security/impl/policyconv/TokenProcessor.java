@@ -64,6 +64,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
+import com.sun.xml.ws.security.policy.KeyValueToken;
+import com.sun.xml.ws.security.policy.RsaToken;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -253,6 +255,18 @@ public class TokenProcessor {
             setTokenInclusion(sct,(Token) tokenAssertion);
             //sct.setPolicyToken((Token)tokenAssertion);
             sct.setUUID(((Token)tokenAssertion).getTokenId());
+        }else if(PolicyUtil.isRsaToken((PolicyAssertion) token, spVersion)){
+            AuthenticationTokenPolicy.KeyValueTokenBinding rsaTB =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
+            RsaToken rsaToken = (RsaToken)tokenAssertion;
+            rsaTB.setUUID(token.getTokenId());                        
+            setTokenInclusion(rsaTB,(Token) tokenAssertion);
+            policy.setKeyBinding(rsaTB);
+        }else if (PolicyUtil.isKeyValueToken((PolicyAssertion) token, spVersion)){
+            AuthenticationTokenPolicy.KeyValueTokenBinding rsaTB =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
+            KeyValueToken rsaToken = (KeyValueToken)tokenAssertion;
+            rsaTB.setUUID(token.getTokenId());                        
+            setTokenInclusion(rsaTB,(Token) tokenAssertion);
+            policy.setKeyBinding(rsaTB);
         }else{
             throw new UnsupportedOperationException("addKeyBinding for "+ token + "is not supported");
         }
@@ -420,6 +434,12 @@ public class TokenProcessor {
             }
             
             return xt;
+        }else if(PolicyUtil.isRsaToken((PolicyAssertion) token, spVersion) || PolicyUtil.isKeyValueToken((PolicyAssertion) token, spVersion)){
+            AuthenticationTokenPolicy.KeyValueTokenBinding rsaToken =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
+            rsaToken.setUUID(token.getTokenId());
+            setTokenInclusion(rsaToken,token);
+            
+            return rsaToken;
         }
         if(logger.isLoggable(Level.SEVERE)){
             logger.log(Level.SEVERE,LogStringsMessages.SP_0107_UNKNOWN_TOKEN_TYPE(token));

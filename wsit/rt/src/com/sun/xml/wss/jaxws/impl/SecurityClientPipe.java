@@ -237,7 +237,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         //--------INVOKE NEXT PIPE------------
         Packet ret = nextPipe.process(packet);
         // Could be OneWay
-        if (ret == null || ret.getMessage() == null) {
+            if (ret == null || ret.getMessage() == null) {
             return ret;
         }
 

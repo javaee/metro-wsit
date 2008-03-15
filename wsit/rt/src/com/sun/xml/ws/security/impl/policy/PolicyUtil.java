@@ -53,7 +53,8 @@ public class PolicyUtil {
     }
     
     public static boolean isSecurityPolicyNS(PolicyAssertion pa, SecurityPolicyVersion spVersion) {
-        if ( spVersion.namespaceUri.equals(pa.getName().getNamespaceURI()) ) {
+        if ( spVersion.namespaceUri.equals(pa.getName().getNamespaceURI()) ||
+                MS_SP_NS.equalsIgnoreCase(pa.getName().getNamespaceURI())) {
             return true;
         }
         return false;
@@ -109,7 +110,7 @@ public class PolicyUtil {
     }
     
     public static boolean isToken(PolicyAssertion pa, SecurityPolicyVersion spVersion){
-        if ( !isSecurityPolicyNS(pa, spVersion) ) {
+        if ( !isSecurityPolicyNS(pa, spVersion)) {            
             return false;
         }
         
@@ -142,6 +143,10 @@ public class PolicyUtil {
         }else if(pa.getName().getLocalPart().equals(SecureConversationToken)) {
             return true;
         }else if(pa.getName().getLocalPart().equals(TransportToken)) {
+            return true;
+        }else if(pa.getName().getLocalPart().equals(RsaToken)){
+            return true;
+        }else if(pa.getName().getLocalPart().equals(KeyValueToken)){
             return true;
         }
         return false;
@@ -650,6 +655,18 @@ public class PolicyUtil {
         return false;
     }
     
+    // RsaToken is Microsoft's proprietary assertion
+    public static boolean isRsaToken(PolicyAssertion policyAssertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(policyAssertion, spVersion)) {
+            return false;
+        }
+        if(policyAssertion.getName().getLocalPart().equals(RsaToken) && SecurityPolicyVersion.MS_SECURITYPOLICY200507.namespaceUri.equals(
+                spVersion.namespaceUri)) {
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isAsymmetricBinding(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
@@ -858,6 +875,7 @@ public class PolicyUtil {
     public static boolean isRequireServerEntropy(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
+
 
         }
         
@@ -1703,7 +1721,9 @@ public class PolicyUtil {
             spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
         } else if (SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri.equals(nsUri)) {
             spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
-        }
+        }else if (SecurityPolicyVersion.MS_SECURITYPOLICY200507.namespaceUri.equals(nsUri)) {
+            spVersion = SecurityPolicyVersion.MS_SECURITYPOLICY200507;
+        }        
         return spVersion;
     }
 }

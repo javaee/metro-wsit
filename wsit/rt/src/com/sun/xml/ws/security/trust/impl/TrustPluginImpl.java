@@ -90,13 +90,23 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.UseKey;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory; 
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
 /**
  *
  * @author hr124446
@@ -338,7 +348,7 @@ public class TrustPluginImpl implements TrustPlugin {
             rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
         }else if (wstVer.getPublicKeyTypeURI().equals(keyType) && keySize > 1 ){
             // Create a RSA key pairs for use with UseKey
-         /*   KeyPairGenerator kpg;
+            KeyPairGenerator kpg;            
             try{
                 kpg = KeyPairGenerator.getInstance("RSA");
                 RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
