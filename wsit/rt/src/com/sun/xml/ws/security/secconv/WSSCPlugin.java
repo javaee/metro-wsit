@@ -97,6 +97,8 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -731,13 +733,18 @@ public class WSSCPlugin {
     }
     
     private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
-        String username = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+        /*String username = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
         if (username != null) {
             requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, username);
         }
         String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
         if (password != null) {
             requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+        }*/
+        Set<String> set = packet.invocationProperties.keySet();        
+        for (Iterator it = set.iterator(); it.hasNext();) {
+                String key = (String)it.next();
+                requestPacket.invocationProperties.put(key, packet.invocationProperties.get(key));
         }
     }
     
