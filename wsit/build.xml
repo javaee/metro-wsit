@@ -358,6 +358,41 @@
               basedir="${ws.source.dir}"
                  />
      </target>
+
+   
+
+    <target name="push-to-maven-prepare" depends="dist">
+        <taskdef resource="maven-repository-importer.properties">
+            <classpath>
+                <pathelement path="${etc.lib.dir}/maven-repository-importer-1.0.jar" />
+            </classpath>
+        </taskdef>
+        <delete dir="build/maven-repo" /><!-- clean it -->
+        <maven-repository-importer destdir="build/maven-repo" version="1.2-SNAPSHOT">
+            <artifact jar="${dist.image.wsit.lib.dir}/webservices-api.jar"  pom="webservices-api.pom"  />
+            <!--This is taken from dist.image.wsit.v3.dir because we decided for TP2
+                to have webservices-rt without jaxrpc-spi and jaxrpc-impl.jar
+            -->
+            <artifact jar="${dist.image.wsit.v3.dir}/webservices-rt.jar"  pom="webservices-rt.pom"  />
+            <artifact jar="${dist.image.wsit.lib.dir}/webservices-tools.jar"  pom="webservices-tools.pom"  />
+        </maven-repository-importer>
+    </target>
+
+    <target name="push-to-maven" depends="push-to-maven-prepare">
+        <!-- import to CVS-->
+        <tstamp />
+        <echo>importing to CVS...</echo>
+        <cvs dest="build/maven-repo">
+            <commandline>
+                <argument value="-d:pserver:${user.name}@java-net-cvs:/cvs" />
+                <argument line="-z9 import -ko -W *.jar -kb -m" />
+                <argument value="deploying new jars to the java.net maven repository" />
+
+                <argument value="metro/repo" />
+                <argument line="deployment-to-maven-repository t${DSTAMP}${TSTAMP}" />
+            </commandline>
+        </cvs>
+    </target>
    
 
 </project>
