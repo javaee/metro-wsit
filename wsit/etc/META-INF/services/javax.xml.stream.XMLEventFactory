@@ -1,1 +1,1 @@
-com.sun.xml.stream.events.ZephyrEventFactory
+com.ctc.wstx.stax.WstxEventFactory

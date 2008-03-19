@@ -79,14 +79,16 @@
 
     <macrodef name="expand-jars-macro">
         <attribute name="libdir"/>
+        <attribute name="tmpdirtowork"/>
+        <attribute name="excludejar" default=""/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${rtjar-tmpdir}"/>
-            <mkdir dir="${rtjar-tmpdir}"/>
-            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="${rtjar-tmpdir}"/>
-            <updateManifestWithVersion file="${rtjar-tmpdir}/MANIFEST.MF" 
+            <delete dir="@{tmpdirtowork}"/>
+            <mkdir dir="@{tmpdirtowork}"/>
+            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{tmpdirtowork}"/>
+            <updateManifestWithVersion file="@{tmpdirtowork}/MANIFEST.MF"
             class-path="webservices-api.jar webservices-extra.jar webservices-rt_l10n.jar webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar"/>
-            <concatmanifest tempdir="${rtjar-tmpdir}" manifest="${rtjar-tmpdir}/MANIFEST.MF">
+            <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <exclude name="*javadocs*.jar"/>
@@ -95,9 +97,10 @@
                     <exclude name="activation.jar"/>
                     <exclude name="http.jar"/>
                     <exclude name="mail-1.4.jar"/>
+                    <exclude name="@{excludejar}"/>
                 </fileset>
             </concatmanifest>
-            <delete dir="${rtjar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <delete dir="@{tmpdirtowork}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -168,9 +171,10 @@
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
         <attribute name="jar-tmpdir"/>
+        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
         <element name="services" optional="true"/>
         <sequential>
-            <jar destfile="../${dist.image.wsit.lib.dir}/@{jarname}.jar" manifest="@{jar-tmpdir}/MANIFEST.MF">
+            <jar destfile="../@{dist-image-dir}/@{jarname}.jar" manifest="@{jar-tmpdir}/MANIFEST.MF">
                 <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
@@ -180,7 +184,9 @@
     <target name="-do-jar-without-manifest">
         <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
+        <antcall target="expand-jars-v3-runtime"/>
         <antcall target="combine-jars-runtime"/>
+        <antcall target="combine-jars-v3-runtime"/>
         <antcall target="expand-jars-api"/>
         <antcall target="combine-jars-api"/>
         <antcall target="expand-jars-extra"/>
@@ -214,7 +220,7 @@
     </macrodef>
 
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
-         <expand-jars-macro libdir="../${lib.runtime.dir}" >
+         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
             <!--The wsit/etc/META-INF/services folder
             has entries for
             javax.xml.stream.XMLEventFactory
@@ -252,6 +258,41 @@
         </copy>
     </target>
 
+    <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
+         <!--This is because we decided for TP2
+                to have webservices-rt without jaxrpc-spi and jaxrpc-impl.jar
+            -->
+         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}"
+                 excludejar="jaxrpc*.jar">
+
+            <!--The wsit/etc/META-INF/services folder
+            has entries for
+            javax.xml.stream.XMLEventFactory
+            javax.xml.stream.XMLInputFactory
+            javax.xml.stream.XMLOutputFactory
+            which are currently pointing to woodstox implementation classes
+            if we have to change these to sjsxp this is the place where it
+            needs to be replaced
+            -->
+            <metainf>
+                <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
+                    <fileset dir="../etc/META-INF/services">
+                        <include name="*.*"/>
+                    </fileset>
+                </copy>
+            </metainf>
+        </expand-jars-macro>
+
+        <!-- include wsdl files for wstx resource lookups -->
+        <include-wstx-resources/>
+        <mkdir dir="${rtjar-tmpdir-v3}/WEB-INF"/>
+        <copy todir="${rtjar-tmpdir-v3}/WEB-INF" overwrite="true">
+            <fileset dir="${tx.tmp.webinf}"/>
+        </copy>
+
+        
+    </target>
+
     <target name="expand-jars-api" unless="runtime.jars.expanded">
         <expand-api-jars-macro libdir="../${lib.runtime.dir}" >
 
@@ -286,6 +327,22 @@
             </services>
         </combine-jars-macro>
     </target>
+
+    <target name="combine-jars-v3-runtime">
+        <mkdir dir="../${dist.image.wsit.v3.dir}"/>
+        <combine-jars-macro jarname="${name}-rt" classesdir="build/classes" jar-tmpdir="${rtjar-tmpdir-v3}"
+                dist-image-dir="${dist.image.wsit.v3.dir}">
+            <services>
+                <fileset dir="${rtjar-tmpdir-v3}">
+                    <include name="**/*.*"/>
+                    <include name="**/version.properties"/>
+                    <exclude name="**/*.TWSDL*"/>
+                    <exclude name="**/*.TJava*"/>
+                </fileset>
+            </services>
+        </combine-jars-macro>
+        </target>
+
 
     <target name="combine-jars-api">
         <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir}" jar-tmpdir="${apijar-tmpdir}"/>

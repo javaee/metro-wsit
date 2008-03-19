@@ -39,6 +39,7 @@
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
     <property name="install.name" value="metro"/>
+    <property name="v3.install.name" value="for_v3"/>
     <property name="lib.dir" value="lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
@@ -47,6 +48,7 @@
     <property name="dist.dir" value="dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/${install.name}"/>
+    <property name="dist.image.wsit.v3.dir" value="${dist.image.dir}/${install.name}/${v3.install.name}"/>
     <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
     <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
     
@@ -74,6 +76,7 @@
    <property name="tmpdir" value="${basedir}/build/tmp"/>
    <property name="apijar-tmpdir" value="${tmpdir}/apijars"/>
    <property name="rtjar-tmpdir" value="${tmpdir}/rtjars"/>
+   <property name="rtjar-tmpdir-v3" value="${tmpdir}/rtjars-v3"/>
    <property name="toolsjar-tmpdir" value="${tmpdir}/toolsjars"/>
    <property name="extrajar-tmpdir" value="${tmpdir}/extrajars"/>
    <property name="extraapijar-tmpdir" value="${tmpdir}/extraapijars"/>

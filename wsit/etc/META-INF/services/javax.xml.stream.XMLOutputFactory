@@ -1,1 +1,1 @@
-com.sun.xml.stream.ZephyrWriterFactory
+com.ctc.wstx.stax.WstxOutputFactory
