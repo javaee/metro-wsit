@@ -168,38 +168,37 @@ public class MetadataClient {
     
     /**
      * Used to retrieve the service and port names and port addresses
-     * from metadata. If there is more than one wsdl section in the metadata,
-     * only the first is parsed by this method.
+     * from metadata. 
      *
      * @see com.sun.xml.ws.mex.client.PortInfo
      * @return A list of PortInfo objects
      */
     public List<PortInfo> getServiceInformation(@NotNull final Metadata data) {
+        List<PortInfo> portInfos = new ArrayList<PortInfo>();
         for (MetadataSection section : data.getMetadataSection()) {
             if (section.getDialect().equals(WSDL_DIALECT)) {
                 if (section.getAny() != null) {
-                    return getServiceInformationFromNode(section.getAny());
+                    getServiceInformationFromNode(portInfos, section.getAny());
                 }
                 if (section.getMetadataReference() != null) {
                     final Metadata newMetadata =
                         retrieveMetadata(section.getMetadataReference());
-                    return getServiceInformation(newMetadata);
+                    List<PortInfo> newPortInfos = getServiceInformation(newMetadata);
+                    portInfos.addAll(newPortInfos);
                 }
                 if (section.getLocation() != null) {
                     final Metadata newMetadata =
                         retrieveMetadata(section.getLocation());
-                    return getServiceInformation(newMetadata);
+                    List<PortInfo> newPortInfos = getServiceInformation(newMetadata);
+                    portInfos.addAll(newPortInfos);
                 }
             }
         }
-        return null;
+        return portInfos;
     }
 
-    private List<PortInfo> getServiceInformationFromNode(final Object node) {
-        if (node == null) {
-            return null;
-        }
-        final List<PortInfo> portInfos = new ArrayList<PortInfo>();
+    private void getServiceInformationFromNode(List<PortInfo> portInfos, final Object node) {
+        
         final Node wsdlNode = (Node) node;
         final String namespace = getAttributeValue(wsdlNode, "targetNamespace");
         final NodeList nodes = wsdlNode.getChildNodes();
@@ -226,7 +225,6 @@ public class MetadataClient {
                 }
             }
         }
-        return portInfos;
     }
     
     /*
