@@ -1,13 +1,54 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"> 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>webservices</groupId>
+    <groupId>com.sun.xml.ws</groupId>
     <artifactId>webservices</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>HK2 module for metro</name>
+    <name>HK2 modules for metro</name>
+
+    <url>https://metro.dev.java.net/</url>
+    <organization>
+        <name>Sun Microsystems, Inc</name>
+        <url>http://www.sun.com/</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0</name>
+            <url>http://www.opensource.org/licenses/cddl1.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <hk2.version>0.2-SNAPSHOT</hk2.version>
     </properties>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.jvnet.wagon-svn</groupId>
+                <artifactId>wagon-svn</artifactId>
+                <version>1.8</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.enterprise</groupId>
+                <artifactId>hk2-maven-plugin</artifactId>
+                <version>${hk2.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sun.enterprise</groupId>
+            <artifactId>hk2</artifactId>
+            <version>${hk2.version}</version>
+        </dependency>
+    </dependencies>
+    
     <repositories>
         <repository>
             <id>GlassFish</id>
@@ -27,6 +68,7 @@
             <layout>default</layout>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>GlassFish</id>
@@ -34,10 +76,19 @@
             <url>http://download.java.net/maven/glassfish/</url>
         </pluginRepository>
     </pluginRepositories>
+
     <modules>
         <module>webservices-api</module>
         <module>webservices-rt</module>
         <module>webservices-tools</module>
     </modules>
+
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>java.net-maven2-repository</id>
+            <url>java-net:/maven2-repository/trunk/www/repository/</url>
+        </repository>
+    </distributionManagement>
 </project>
 

@@ -1,49 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-     <parent>
-         <groupId>webservices</groupId>
-    <artifactId>webservices</artifactId>
-    <version>1.0-SNAPSHOT</version>
-     
-      <relativePath>../pom.xml</relativePath>
-  </parent>
-  
-  <groupId>javax.xml</groupId>
-  <artifactId>webservices-api</artifactId>
-  <packaging>hk2-jar</packaging>
-  <version>1.2</version>
-  <name>Metro Implementation</name>
-    <build>
-      <plugins>
-          <plugin>
-              <groupId>com.sun.enterprise</groupId>
-              <artifactId>hk2-maven-plugin</artifactId>
-              <version>${hk2.version}</version>
-              <extensions>true</extensions>
-          </plugin>
-      </plugins>
-</build>
-     <dependencies>
-   <dependency>
-           <groupId>com.sun.enterprise</groupId>
-           <artifactId>hk2</artifactId>
-           <version>${hk2.version}</version>
-   </dependency>
- </dependencies>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.sun.xml.ws</groupId>
+        <artifactId>webservices</artifactId>
+        <version>1.2-SNAPSHOT</version>
 
-  <url>https://metro.dev.java.net/</url>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <organization>
-    <name>Sun Microsystems, Inc</name>
-    <url>http://www.sun.com/</url>
-  </organization>
+    <groupId>com.sun.tools.ws</groupId>
+    <artifactId>webservices-tools</artifactId>
+    <packaging>hk2-jar</packaging>
+    <name>Metro Implementation</name>
 
-  <licenses>
-    <license>
-      <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0</name>
-      <url>http://www.opensource.org/licenses/cddl1.php</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
+    <dependencies>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-rt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
