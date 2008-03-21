@@ -398,16 +398,12 @@
 
 
 
-    <target name="package-for-hk2" depends="dist" >
+    <target name="package-for-hk2" depends="dist">
         <property name="mavendir" value="maven-hk2"/>
-        <property name="target.dir" value="target"/>
-        <property name="target.classes.dir" value="${target.dir}/classes"/>
-        <property name="webservices.rt.target.dir" value="${mavendir}/webservices-rt/${target.classes.dir}"/>
-        <property name="webservices.api.target.dir" value="${mavendir}/webservices-api/${target.classes.dir}"/>
-        <property name="webservices.tools.target.dir" value="${mavendir}/webservices-tools/${target.classes.dir}"/>
-        <delete dir="${mavendir}"/>
+        <property name="webservices.rt.target.dir" value="${mavendir}/webservices-rt/target/classes"/>
+        <property name="webservices.api.target.dir" value="${mavendir}/webservices-api/target/classes"/>
+        <property name="webservices.tools.target.dir" value="${mavendir}/webservices-tools/target/classes"/>
 
-        <mkdir dir="${mavendir}"/>
         <mkdir dir="${webservices.rt.target.dir}"/>
         <mkdir dir="${webservices.api.target.dir}"/>
         <mkdir dir="${webservices.tools.target.dir}"/>
@@ -418,15 +414,8 @@
             dest="${webservices.api.target.dir}"/>
         <unjar src="${dist.image.wsit.lib.dir}/webservices-tools.jar"
             dest="${webservices.tools.target.dir}"/>
-        
-        <copy file="webservices-api.pom" tofile="${mavendir}/webservices-api/pom.xml"/>
-        <copy file="webservices-rt.pom" tofile="${mavendir}/webservices-rt/pom.xml"/>
-        <copy file="webservices-tools.pom" tofile="${mavendir}/webservices-tools/pom.xml"/>
-        <copy file="pom.xml" tofile="${mavendir}/pom.xml"/>
 
-
-
-
+        <exec command="mvn -U install" dir="maven-hk2" />
     </target>
    
 
