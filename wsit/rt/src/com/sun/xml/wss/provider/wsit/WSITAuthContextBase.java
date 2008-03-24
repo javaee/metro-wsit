@@ -1544,11 +1544,13 @@ public abstract class WSITAuthContextBase  {
         } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
         } catch (XWSSecurityException xwse) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), xwse);
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            throw wsfe;
         }
     }
     
@@ -1563,11 +1565,13 @@ public abstract class WSITAuthContextBase  {
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), xwse);
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            throw wsfe;
         }
     }
     

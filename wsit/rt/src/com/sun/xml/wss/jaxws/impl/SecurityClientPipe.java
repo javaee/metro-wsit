@@ -89,6 +89,7 @@ import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.WssSoapFaultException;
 import javax.xml.ws.soap.SOAPFaultException;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
@@ -215,6 +216,11 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             } else {
                 msg = secureOutboundMessage(msg, ctx);
             }
+        } catch (WssSoapFaultException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), ex);
+            throw new WebServiceException(
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), getSOAPFaultException(ex));
         } catch (SOAPException se) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);

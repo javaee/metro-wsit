@@ -352,11 +352,13 @@ public abstract class SecurityPipeBase implements Pipe {
         } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
         } catch (XWSSecurityException xwse) {
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwse); 
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            throw wsfe;
         }
     }
     
@@ -390,11 +392,13 @@ public abstract class SecurityPipeBase implements Pipe {
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
+            log.log(Level.SEVERE, 
+                    LogStringsMessages.WSSPIPE_0024_ERROR_SECURING_OUTBOUND_MSG(), xwse);
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
                     xwse.getMessage(), xwse);
-            throw getSOAPFaultException(wsfe);
+            throw wsfe;
         }
     }
     

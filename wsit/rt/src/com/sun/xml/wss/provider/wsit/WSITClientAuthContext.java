@@ -285,6 +285,11 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             } else {
                 msg = secureOutboundMessage(msg, ctx);
             }
+        } catch (WssSoapFaultException ex) {
+             log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), ex);
+             throw new  WebServiceException(
+                    LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), getSOAPFaultException(ex));
         } catch (SOAPException se) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WSITPVD_0029_ERROR_SECURING_OUTBOUND_MSG(), se);
