@@ -351,13 +351,14 @@ public class TrustPluginImpl implements TrustPlugin {
             KeyPairGenerator kpg;            
             try{
                 kpg = KeyPairGenerator.getInstance("RSA");
-                RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
-                kpg.initialize(rsaSpec);
+                //RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
+                //kpg.initialize(rsaSpec);
             }catch (NoSuchAlgorithmException ex){
                 throw new WSTrustException("Unable to create key pairs for UseKey", ex);
-            }catch (InvalidAlgorithmParameterException ex){
-                throw new WSTrustException("Unable to create key pairs for UseKey", ex);
             }
+            //catch (InvalidAlgorithmParameterException ex){
+            //    throw new WSTrustException("Unable to create key pairs for UseKey", ex);
+            //}
             kpg.initialize((int)keySize);
             KeyPair keyPair = kpg.generateKeyPair();
             

@@ -97,9 +97,11 @@ public class WSSCClientContract {
      * IssuedTokenContext.
      */
     public void handleRSTR(
-            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
-        SCTokenConfiguration sctConfig = (SCTokenConfiguration)context.getSecurityPolicy().get(0);
-        wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
+            final RequestSecurityToken rst, final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {        
+        if(!context.getSecurityPolicy().isEmpty()){
+            SCTokenConfiguration sctConfig = (SCTokenConfiguration)context.getSecurityPolicy().get(0);
+            wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
+        }
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
             wsTrustVer = WSTrustVersion.WS_TRUST_13;
         }
