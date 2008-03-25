@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<TerminateSequence xmlns="http://docs.oasis-open.org/ws-rx/wsrm/200702">
+    <Identifier>uuid:839aabc1-fcfd-4402-9f88-0462c01a01ed</Identifier>
+    <LastMsgNumber>3</LastMsgNumber>
+</TerminateSequence>
