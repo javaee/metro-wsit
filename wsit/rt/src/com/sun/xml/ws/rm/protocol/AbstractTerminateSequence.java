@@ -50,6 +50,10 @@ import java.util.Map;
  */
 public abstract class AbstractTerminateSequence {
 
+    public String getLocalPart() {
+        return "TerminateSequence";
+    }
+
     /**
      * Gets the value of the any property.
      *

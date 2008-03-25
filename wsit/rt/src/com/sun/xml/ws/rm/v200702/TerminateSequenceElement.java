@@ -77,7 +77,7 @@ import javax.xml.bind.annotation.XmlType;
 "lastMsgNumber",
 "any"
 })
-@XmlRootElement(name = "TerminateSequenceElement", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
+@XmlRootElement(name = "TerminateSequence", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
 public class TerminateSequenceElement extends AbstractTerminateSequence {
 
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")

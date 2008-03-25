@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.v200702;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
+import javax.xml.ws.wsaddressing.W3CEndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,13 +81,13 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class OfferType {
 
-    @XmlElement(name = "Identifier", required = true)
+    @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
-    @XmlElement(name = "Endpoint", required = true)
-    protected EndpointReference endpoint;
-    @XmlElement(name = "Expires")
+    @XmlElement(name = "Endpoint", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
+    protected W3CEndpointReference endpoint;
+    @XmlElement(name = "Expires", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Expires expires;
-    @XmlElement(name = "IncompleteSequenceBehavior")
+    @XmlElement(name = "IncompleteSequenceBehavior", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected IncompleteSequenceBehaviorType incompleteSequenceBehavior;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
@@ -126,7 +126,7 @@ public class OfferType {
      *     {@link EndpointReferenceType }
      *     
      */
-    public EndpointReference getEndpoint() {
+    public W3CEndpointReference getEndpoint() {
         return endpoint;
     }
 
@@ -138,7 +138,7 @@ public class OfferType {
      *     {@link EndpointReferenceType }
      *     
      */
-    public void setEndpoint(EndpointReference value) {
+    public void setEndpoint(W3CEndpointReference value) {
         this.endpoint = value;
     }
 

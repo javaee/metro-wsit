@@ -73,7 +73,7 @@ import javax.xml.bind.annotation.XmlType;
 "identifier",
 "any"
 })
-@XmlRootElement(name = "TerminateSequenceResponseElement", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
+@XmlRootElement(name = "TerminateSequenceResponse", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
 public class TerminateSequenceResponseElement {
 
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
