@@ -634,22 +634,22 @@ public final class RMServerTube extends TubeBase {
         } catch (JAXBException e) {
             throw LOGGER.logSevereException(new TerminateSequenceException(LocalizationMessages.WSRM_3007_TERMINATE_SEQUENCE_EXCEPTION(), e));
         }
-        String id;
+        String terminateSequenceId;
         if (tsElement instanceof com.sun.xml.ws.rm.v200502.TerminateSequenceElement) {
-            id = ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement) tsElement).getIdentifier().getValue();
+            terminateSequenceId = ((com.sun.xml.ws.rm.v200502.TerminateSequenceElement) tsElement).getIdentifier().getValue();
         } else {
-            id = ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement) tsElement).getIdentifier().getValue();
+            terminateSequenceId = ((com.sun.xml.ws.rm.v200702.TerminateSequenceElement) tsElement).getIdentifier().getValue();
         }
 
-        InboundSequence seq = RMDestination.getRMDestination().getInboundSequence(id);
+        InboundSequence seq = RMDestination.getRMDestination().getInboundSequence(terminateSequenceId);
         if (seq == null) {
-            throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id));
+            throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(terminateSequenceId), terminateSequenceId));
         }
 
         //end the session if we own its lifetime..i.e. SC is not
         //present
         endSession(seq);
-        RMDestination.getRMDestination().terminateSequence(id);
+        RMDestination.getRMDestination().terminateSequence(terminateSequenceId);
 
         //formulate response if required
         Packet ret = null;
@@ -678,7 +678,7 @@ public final class RMServerTube extends TubeBase {
                             getConfig().getAddressingVersion(),
                             getConfig().getSoapVersion(), tsAction);
 
-                    AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
+                    AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(true);
 
                     Header header = Headers.create(getConfig().getRMVersion().jaxbContext, element);
                     response.getHeaders().add(header);
@@ -693,7 +693,7 @@ public final class RMServerTube extends TubeBase {
                 tsAction = RmVersion.WSRM11.terminateSequenceResponseAction;
                 com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement terminateSeqResponse = new com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement();
                 com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
-                id2.setValue(outboundSequence.getId());
+                id2.setValue(terminateSequenceId);
 
                 terminateSeqResponse.setIdentifier(id2);
                 response = Messages.create(
@@ -706,7 +706,7 @@ public final class RMServerTube extends TubeBase {
                         getConfig().getAddressingVersion(),
                         getConfig().getSoapVersion(), tsAction);
 
-                AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
+                AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(true);
 
                 Header header = Headers.create(getConfig().getRMVersion().jaxbContext, element);
                 response.getHeaders().add(header);
