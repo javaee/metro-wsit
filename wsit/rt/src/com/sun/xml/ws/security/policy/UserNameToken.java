@@ -55,6 +55,11 @@ public interface UserNameToken extends Token{
     public boolean hasPassword();
     
     /**
+     * @return true if password hash should be used instead of plaintext password
+     */
+    public boolean useHashPassword();
+    
+    /**
      * returns the issuer for the Username token.
      * @return returns the issuer
      */

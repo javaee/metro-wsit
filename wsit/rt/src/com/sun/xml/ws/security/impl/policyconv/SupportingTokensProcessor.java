@@ -198,7 +198,9 @@ public class SupportingTokensProcessor {
     }
     
     protected void encryptToken(Token token, SecurityPolicyVersion spVersion)throws PolicyException{
-        if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && ((UserNameToken)token).hasPassword()){
+        if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && 
+                ((UserNameToken)token).hasPassword() && 
+                !((UserNameToken)token).useHashPassword()){
             if ( token.getTokenId()!= null ) {
                 EncryptionPolicy.FeatureBinding fb =(EncryptionPolicy.FeatureBinding) encryptionPolicy.getFeatureBinding();
                 EncryptionTarget et = etc.newURIEncryptionTarget(token.getTokenId());

@@ -61,6 +61,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private boolean populated;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean hasPassword = true;
+    private boolean useHashPassword = false;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private static QName itQname;
     private String includeToken;
@@ -139,6 +140,11 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     public boolean hasPassword(){
         return hasPassword;
     }
+    
+    public boolean useHashPassword(){
+        return useHashPassword;
+    }
+    
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if(this.getAttributeValue(itQname) != null){
@@ -158,7 +164,9 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     tokenType = assertion.getName().getLocalPart();
                 }else if(PolicyUtil.hasPassword(assertion, spVersion)){
                     hasPassword = false;
-                }else{
+                } else if(PolicyUtil.isHashPassword(assertion, spVersion)){
+                    useHashPassword = true;
+                } else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,"UsernameToken");
                         fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;

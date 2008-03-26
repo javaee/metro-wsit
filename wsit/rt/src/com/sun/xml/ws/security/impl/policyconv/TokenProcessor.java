@@ -334,6 +334,9 @@ public class TokenProcessor {
             UserNameToken ut = (UserNameToken)token;
             if(!ut.hasPassword()){
                 key.setNoPassword(true);
+            } else if(ut.useHashPassword()){
+                key.setDigestOn(true);
+                key.setUseNonce(true);
             }
             
             if(ut.getIssuer() != null){

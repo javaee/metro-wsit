@@ -1707,6 +1707,18 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isHashPassword(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
+        if(!isSecurityPolicyNS(assertion, spVersion)){
+            return false;
+        }
+        
+        if(assertion.getName().getLocalPart().equals(HashPassword) &&
+                assertion.getName().getNamespaceURI().equals(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+            return true;
+        }
+        return false;
+    }
+    
     public static String randomUUID() {
          UUID uid = UUID.randomUUID();
          String id= "uuid_" + uid.toString();
