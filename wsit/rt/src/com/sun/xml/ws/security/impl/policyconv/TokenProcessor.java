@@ -160,6 +160,7 @@ public class TokenProcessor {
                 x509CB.setClaims(x509Token.getClaims().getClaimsAsBytes());
             }
             
+            
             //x509CB.setPolicyToken(token);
             if(!ignoreDK && x509Token.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
@@ -258,13 +259,15 @@ public class TokenProcessor {
         }else if(PolicyUtil.isRsaToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.KeyValueTokenBinding rsaTB =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
             RsaToken rsaToken = (RsaToken)tokenAssertion;
+            rsaTB.isOptional(tokenAssertion.isOptional());
             rsaTB.setUUID(token.getTokenId());                        
             setTokenInclusion(rsaTB,(Token) tokenAssertion);
             policy.setKeyBinding(rsaTB);
         }else if (PolicyUtil.isKeyValueToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.KeyValueTokenBinding rsaTB =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
             KeyValueToken rsaToken = (KeyValueToken)tokenAssertion;
-            rsaTB.setUUID(token.getTokenId());                        
+            rsaTB.setUUID(token.getTokenId());   
+            rsaTB.isOptional(tokenAssertion.isOptional());
             setTokenInclusion(rsaTB,(Token) tokenAssertion);
             policy.setKeyBinding(rsaTB);
         }else{
