@@ -80,7 +80,7 @@ public class HttpPoster {
         conn.setDoInput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", contentType);
-        conn.setRequestProperty("SOAPAction", GET_REQUEST);
+        conn.setRequestProperty("SOAPAction", "\"" + GET_REQUEST + "\"");
 
         final Writer writer = new OutputStreamWriter(conn.getOutputStream());
         writer.write(request);
