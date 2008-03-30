@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.5 2008-02-26 06:33:29 ofung Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.6 2008-03-30 07:25:56 jdg6688 Exp $
  */
 
 /*
@@ -677,7 +677,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         }
     }
 
-    public List<Object> getExtendedElements() {
+    public List<Object> getExtensionElements() {
         return extendedElements;
     }
 }

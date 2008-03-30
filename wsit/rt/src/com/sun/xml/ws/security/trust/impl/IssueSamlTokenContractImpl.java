@@ -132,7 +132,10 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         if (spMd == null){
             spMd = stsConfig.getTrustSPMetadata("default");
         }
-        final X509Certificate serCert = getServiceCertificate(spMd, appliesTo);
+        X509Certificate serCert = (X509Certificate)context.getOtherProperties().get(IssuedTokenContext.STS_CERTIFICATE);
+        if (serCert == null){
+            serCert = getServiceCertificate(spMd, appliesTo);
+        }
             
         // Create the KeyInfo for SubjectConfirmation
         final KeyInfo keyInfo = createKeyInfo(keyType, serCert, context, appliesTo);

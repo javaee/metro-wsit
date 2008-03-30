@@ -136,11 +136,23 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         }
         //WSTrustVersion wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
 
-        // Get AppliesTo
+        // Get token scope
         final AppliesTo applies = rst.getAppliesTo();
         String appliesTo = null;
+        X509Certificate serCert = null;
         if(applies != null){
-            appliesTo = WSTrustUtil.getAppliesToURI(applies);
+            List<Object> at = WSTrustUtil.parseAppliesTo(applies);
+            for (int i = 0; i < at.size(); i++){
+                Object obj = at.get(i);
+                if (obj instanceof String){
+                    appliesTo = (String)obj;
+                }else if (obj instanceof X509Certificate){
+                    serCert = (X509Certificate)obj;
+                }
+            }
+        }
+        if (serCert != null){
+            context.getOtherProperties().put(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE, serCert);
         }
         
         TrustSPMetadata spMd = stsConfig.getTrustSPMetadata(appliesTo);

@@ -144,8 +144,18 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
        // Get token scope
         final AppliesTo applies = rst.getAppliesTo();
         String appliesTo = null;
+        X509Certificate serCert = null;
+        List<Object> at = null;
         if(applies != null){
-            appliesTo = WSTrustUtil.getAppliesToURI(applies);
+            at = WSTrustUtil.parseAppliesTo(applies);
+            for (int i = 0; i < at.size(); i++){
+                Object obj = at.get(i);
+                if (obj instanceof String){
+                    appliesTo = (String)obj;
+                }else if (obj instanceof X509Certificate){
+                    serCert = (X509Certificate)obj;
+                }
+            }
         }
         context.setAppliesTo(appliesTo);
         
@@ -166,8 +176,12 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }
         
         // Get service certificate
-        X509Certificate serCert = this.getServiceCertificate(spMd, appliesTo);
-        context.getOtherProperties().put(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE, serCert);
+        if (serCert == null){
+            serCert = this.getServiceCertificate(spMd, appliesTo);
+        }
+        if (serCert != null){
+            context.getOtherProperties().put(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE, serCert);
+        }
         
         // Get STS certificate and private key
         Object[] certAndKey = this.getSTSCertAndPrivateKey();
@@ -260,6 +274,14 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         Claims claims = rst.getClaims();
         if (claims == null && secParas != null){
             claims = secParas.getClaims();
+        }
+        if (claims != null){
+            // Add supporting information
+            List<Object> si = rst.getExtensionElements();
+            claims.getSupportingProperties().addAll(si);
+            if (at != null){
+                claims.getSupportingProperties().addAll(at);
+            }
         }
         
         // Get claimed attributes from the STSAttributeProvider
@@ -374,8 +396,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         final RequestedSecurityToken reqSecTok = eleFac.createRequestedSecurityToken();
         Token issuedToken = context.getSecurityToken();
         
-        // Encrypt the token if required
-        if (stsConfig.getEncryptIssuedToken()){
+        // Encrypt the token if required and the service certificate is available
+        if (stsConfig.getEncryptIssuedToken()&& serCert != null){
             Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo);
             issuedToken = new GenericToken(encTokenEle);
         }
@@ -412,6 +434,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             rstr.setKeySize(keySize);
         }
         
+        this.handleExtension(rst, rstr, context);
+        
         if(log.isLoggable(Level.FINE)) {
                 log.log(Level.FINE, 
                         LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
@@ -428,6 +452,10 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }
            
         return rstr;
+    }
+    
+    protected void handleExtension(BaseSTSRequest request, BaseSTSResponse response, IssuedTokenContext context) throws WSTrustException{
+    
     }
 
     public BaseSTSResponse renew(BaseSTSRequest rst, IssuedTokenContext context) throws WSTrustException {

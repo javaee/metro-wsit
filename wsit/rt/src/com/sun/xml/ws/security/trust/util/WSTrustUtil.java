@@ -103,6 +103,7 @@ import java.security.cert.X509Certificate;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
+
 /**
  *
  * @author ws-trust-implementation-team
@@ -219,6 +220,7 @@ public class WSTrustUtil {
    public static List<Object> parseAppliesTo(final AppliesTo appliesTo){
        final List<Object> list = appliesTo.getAny();
        EndpointReference epr = null;
+       List<Object> result = new ArrayList<Object>();
        if (!list.isEmpty()){
             for (int i = 0; i < list.size(); i++) {
                 final Object obj = list.get(i);
@@ -232,7 +234,6 @@ public class WSTrustUtil {
                     }
                 }
                 
-                List<Object> result = new ArrayList<Object>();
                 if (epr != null){
                     final AttributedURI uri = epr.getAddress();
                     if (uri != null){
@@ -243,17 +244,29 @@ public class WSTrustUtil {
                         final Object obj2 = content.get(j);
                         if (obj2 instanceof Element){
                             Element ele = (Element)obj2;
-                            NodeList nodeList = ele.getElementsByTagName("Identity");
+                            NodeList nodeList = ele.getElementsByTagNameNS("*", "Identity");
                             if (nodeList.getLength() > 0){
                                 Element identity = (Element)nodeList.item(0);
-                                result.add(identity); 
+                                result.add(identity);
+                                NodeList kis = identity.getElementsByTagNameNS("*", "KeyInfo");
+                                if (kis.getLength() > 0){
+                                    try{
+                                        KeyInfo ki = new KeyInfo((Element)kis.item(0), null);
+                                        X509Certificate cer = ki.getX509Certificate();
+                                        if (cer != null){
+                                            result.add(cer);
+                                        }
+                                    }catch(Exception ex){
+                                        ex.printStackTrace();
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        return null;
+        return result;
    }
    
    public static String getAppliesToURI(final AppliesTo appliesTo){

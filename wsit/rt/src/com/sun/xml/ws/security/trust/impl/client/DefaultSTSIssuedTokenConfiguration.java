@@ -114,6 +114,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     private static final String REQUEST_SECURITY_TOKEN_TEMPLATE = "RequestSecurityTokenTemplate";
     private static final String CLAIMS = "Claims";
     private static final String DIALECT = "Dialect";
+    private static final String IDENTITY = "Identity";
 
     private String tokenType = null;
     
@@ -265,7 +266,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             this.stsMEXAddress = getAddressFromMetadata(issuedToken);
             
             if(stsMEXAddress == null){
-                stsMEXAddress = stsEndpoint;
+                stsMEXAddress = stsEndpoint + "/mex";
             }
         }else if (localToken != null){
             // Get STS information from local configuration
@@ -315,7 +316,14 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                     final PolicyAssertion assertion = iterator.next();
                     if ( WSTrustUtil.isAddressingMetadata(assertion)) {
                         addressingMetadata = assertion;
-                        break;
+                    }else if (IDENTITY.equals(assertion.getName().getLocalPart())){
+                        try{
+                                Document doc = this.policyAssertionToDoc(assertion);
+                                Element identityEle = (Element)doc.getElementsByTagNameNS("*", IDENTITY).item(0);
+                                this.getOtherOptions().put(IDENTITY, identityEle);
+                        }catch (Exception e){
+                            throw new WebServiceException(e);
+                        }
                     }
                 }
             }
@@ -378,7 +386,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         if (address != null){
             URI addURI = address.getURI();
             if (addURI != null){
-                return address.getURI().toString();
+                return addURI.toString();
             }
         }
         
@@ -398,24 +406,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                     final PolicyAssertion gToken = cTokens.next();
                     if (CLAIMS.equals(gToken.getName().getLocalPart())){
                         try{
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-                            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
-                           
-                            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {gToken}));
-                            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
-                            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
-                            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
-                            pm.marshal(sourceModel, writer);
-                            
-                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                            dbf.setNamespaceAware(true);
-                            DocumentBuilder db = dbf.newDocumentBuilder();
-                            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
+                            Document doc = this.policyAssertionToDoc(gToken);
                             Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
                             
-                            claims = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
-                            writer.close();
+                            cs = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
                         }catch (Exception e){
                             throw new WebServiceException(e);
                         }
@@ -423,7 +417,31 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                 }          
             }
         }
-        return claims;
+        return cs;
+    }
+     
+    private Document policyAssertionToDoc(final PolicyAssertion token){
+        try{
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            XMLOutputFactory xof = XMLOutputFactory.newInstance();
+            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
+                           
+            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {token}));
+            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
+            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
+            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
+            pm.marshal(sourceModel, writer);
+                            
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
+                            
+            writer.close();
+            return doc;
+        }catch (Exception e){
+            throw new WebServiceException(e);
+        }
     }
 
     private void copy(RequestSecurityTokenTemplate rstt){

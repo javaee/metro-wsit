@@ -78,7 +78,7 @@ import static com.sun.xml.ws.mex.MetadataConstants.SCHEMA_DIALECT;
  */
 public class MetadataClient {
     
-    enum Protocol { SOAP_1_2, SOAP_1_1 };
+    enum Protocol { SOAP_1_1, SOAP_1_2 };
     
     private final String [] suffixes = { "" , "/mex" };
     private final MetadataUtil mexUtil;

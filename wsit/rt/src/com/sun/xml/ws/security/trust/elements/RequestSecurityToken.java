@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.9 2008-02-26 06:33:19 ofung Exp $
+ * $Id: RequestSecurityToken.java,v 1.10 2008-03-30 07:25:56 jdg6688 Exp $
  */
 
 /*
@@ -52,7 +52,6 @@ import com.sun.xml.ws.api.security.trust.Claims;
  * @author Kumar Jayanti
  */
 public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest {
-    
     /**
      * Gets the value of the any property.
      * 
@@ -141,6 +140,8 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
      void setSecondaryParameters(SecondaryParameters sp);
      
      SecondaryParameters getSecondaryParameters(); 
+     
+     public List<Object> getExtensionElements();
 
 }
 

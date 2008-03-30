@@ -120,20 +120,6 @@ public class TrustPluginImpl implements TrustPlugin {
     
     private final Configuration config;
     
-    private static final String PRE_CONFIGURED_STS = "PreconfiguredSTS";
-    private static final String NAMESPACE = "namespace";
-    private static final String CONFIG_NAMESPACE = "";
-    private static final String ENDPOINT = "endPoint";
-    private static final String METADATA = "metadata";
-    private static final String WSDL_LOCATION = "wsdlLocation";
-    private static final String SERVICE_NAME = "serviceName";
-    private static final String PORT_NAME = "portName";
-    private static final String REQUEST_SECURITY_TOKEN_TEMPLATE = "RequestSecurityTokenTemplate";
-    private static final String CLAIMS = "Claims";
-    private static final String DIALECT = "Dialect";
-    
-
-    
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl(Configuration config) {
         this.config = config;
@@ -207,6 +193,9 @@ public class TrustPluginImpl implements TrustPlugin {
         AppliesTo applTo = null;
         if (appliesTo != null){
             applTo = WSTrustUtil.createAppliesTo(appliesTo);
+            if (stsConfig.getOtherOptions().containsKey("Identity")){
+                applTo.getAny().add(stsConfig.getOtherOptions().get("Identity"));
+            }
         }
 
         final RequestSecurityToken rst= fact.createRSTForIssue(null,requestType, null,applTo,null,null,null);
