@@ -94,6 +94,7 @@ import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import java.io.StringWriter;
@@ -754,8 +755,15 @@ public class WSSCPlugin {
         renewSignaturePolicy.setUUID("_99");
         SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
         SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
-        SecureConversationToken scToken = (SecureConversationToken)token;
-        renewSignaturePolicy.setKeyBinding(sct);
+        SecureConversationToken scToken = (SecureConversationToken)token;        
+        if(scToken.isRequireDerivedKeys()){
+                DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
+                dtKB.setOriginalKeyBinding(sct);
+                renewSignaturePolicy.setKeyBinding(dtKB);
+                dtKB.setUUID("_100");
+            }else{
+                renewSignaturePolicy.setKeyBinding(sct);
+            }
         if(spVersion == SecurityPolicyVersion.SECURITYPOLICY200507){
             sct.setIncludeToken(((Token)token).getIncludeToken());
         } else{
