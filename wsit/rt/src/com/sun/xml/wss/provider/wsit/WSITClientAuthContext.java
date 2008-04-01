@@ -44,6 +44,7 @@
  */
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -56,6 +57,7 @@ import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -155,10 +157,15 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     private CallbackHandler handler = null;
     //***************AuthModule Instance**********
     WSITClientAuthModule authModule = null;
+    private Container container = null;
 
     /** Creates a new instance of WSITClientAuthContext */
     public WSITClientAuthContext(String operation, Subject subject, Map map, CallbackHandler callbackHandler) {
         super(map);
+        WSService service = (WSService)map.get("SERVICE");
+        if(service != null){
+            container = service.getContainer();
+        }
         //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
@@ -702,6 +709,9 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     }
                     if (password != null) {
                         config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+                    }
+                    if(container != null){
+                        config.getOtherOptions().put("CONTAINER", container);
                     }
                     IssuedTokenContext ctx = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);

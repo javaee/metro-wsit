@@ -45,6 +45,8 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.WSService.InitParams;
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
@@ -89,15 +91,14 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.UseKey;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dom.DOMStructure;
@@ -410,7 +411,18 @@ public class TrustPluginImpl implements TrustPlugin {
             //   int index = url.lastIndexOf("/mex");
             //  url = url.substring(0, index);
             //}
-            service = Service.create(new URL(url), serviceName);
+
+            /* Fix of JCAPS Issue 866 (Fix is : use the container got from JCAPS 
+             * through JAX-WS and pass that into the client for the STS )
+             */
+            Container container = (Container) stsConfig.getOtherOptions().get("CONTAINER");
+            if(container != null){
+                InitParams initParams = new InitParams();
+                initParams.setContainer(container);
+                service = WSService.create(new URL(url), serviceName, initParams);
+            }else{
+                service = Service.create(new URL(url), serviceName);
+            }
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
