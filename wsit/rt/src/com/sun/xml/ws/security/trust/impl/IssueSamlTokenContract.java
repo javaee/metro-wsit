@@ -311,7 +311,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
                 Element keyInfo = (Element)useKey.getToken().getTokenValue();
                 stsConfig.getOtherOptions().put("ConfirmationKeyInfo", keyInfo);
             }
-            final Set certs = context.getRequestorSubject().getPublicCredentials();
+            final Set certs = subject.getPublicCredentials();
             boolean addedClientCert = false;
             for(Object o : certs){
                 if(o instanceof X509Certificate){

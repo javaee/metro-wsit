@@ -355,7 +355,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 Element keyInfo = (Element)useKey.getToken().getTokenValue();
                 context.getOtherProperties().put("ConfirmationKeyInfo", keyInfo);
             }
-            final Set certs = context.getRequestorSubject().getPublicCredentials();
+            final Set certs = subject.getPublicCredentials();
             boolean addedClientCert = false;
             for(Object o : certs){
                 if(o instanceof X509Certificate){
