@@ -236,7 +236,7 @@
     </javac>
 </target>
 
-<target name="create-sts-war">
+<!--target name="create-sts-war">
     <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war" webxml="../../etc/sts/web.xml">
 	<webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
 	<zipfileset
@@ -245,10 +245,10 @@
             prefix="WEB-INF/wsdl"/>
 	<classes dir="${build.classes.home}" includes="**/sts/**, **/com/**, **/common/**"/>
     </war>
-</target>
+</target-->
 
-<!--target name="create-sts-war">
-        <war warfile="${build.war.home}/jaxws-sts.war"
+<target name="create-sts-war">
+        <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
                 webxml="../../etc/sts/web.xml">
                 <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
                 <zipfileset
@@ -266,11 +266,11 @@
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**"/>
         </war>
-   </target-->
+   </target>
 
 <!--target name="create-sts-war">
         <antcall target="copy-am-files" />
-        <war warfile="${build.war.home}/jaxws-sts.war"
+        <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
                 webxml="../../etc/sts/web.xml">
                 <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
                 <zipfileset
@@ -396,7 +396,6 @@
         <sysproperty key="endpoint.host" value="${endpoint.host}"/>
         <sysproperty key="endpoint.port" value="${endpoint.port}"/>
         <sysproperty key="service.url" value="${service.url}"/>
-        <sysproperty key="DebugSecurity" value="true"/>
         <sysproperty key="javax.net.ssl.keyStore" value="${javax.net.ssl.keyStore}"/>
         <sysproperty key="javax.net.ssl.keyStoreType" value="${javax.net.ssl.keyStoreType}"/>
         <sysproperty key="javax.net.ssl.keyStorePassword" value="${javax.net.ssl.keyStorePassword}"/>
@@ -427,9 +426,7 @@
         <sysproperty key="sts.host" value="${sts.host}"/>
         <sysproperty key="sts.port" value="${sts.port}"/>
         <sysproperty key="sts.url" value="${sts.url}"/>
-        <sysproperty key="DebugSecurity" value="true"/>
-        <!--sysproperty key="com.sun.xml.ws.runtime.client.wss.before" value="true"/>
-        <sysproperty key="com.sun.xml.ws.runtime.client.wss.after" value="true"/-->
+        <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
@@ -479,7 +476,7 @@
         <sysproperty key="sts.host" value="${sts.host}"/>
         <sysproperty key="sts.port" value="${sts.port}"/>
         <sysproperty key="sts.url" value="${sts.url}"/>
-        <sysproperty key="DebugSecurity" value="true"/>
+          <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
         <classpath>
             <path refid="jaxws.classpath"/>
             <pathelement location="${build.classes.home}"/>
