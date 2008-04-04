@@ -215,6 +215,12 @@ public class WSSCPlugin {
     public void process(IssuedTokenContext itc){
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
         WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
         this.packet = sctConfig.getPacket();
         //==============================
         // Get Required policy assertions
@@ -250,6 +256,11 @@ public class WSSCPlugin {
         
         final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTRequestAction());
         
+        if(log.isLoggable(Level.FINE)){            
+            log.log(Level.FINE, 
+                    LogStringsMessages.WSSC_1012_RECEIVED_SCT_RSTR_ISSUE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+        }
+        
         // Handle the RequestSecurityTokenResponse
         //final IssuedTokenContext context = new IssuedTokenContextImpl();
         try {
@@ -261,7 +272,13 @@ public class WSSCPlugin {
     
     public void processRenew(final IssuedTokenContext itc){
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
-        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());        
+        WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
         //==============================
         // Get Required policy assertions
         //==============================        
@@ -297,6 +314,11 @@ public class WSSCPlugin {
         
         final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTRenewRequestAction());
                 
+        if(log.isLoggable(Level.FINE)){            
+            log.log(Level.FINE, 
+                    LogStringsMessages.WSSC_1014_RECEIVED_SCT_RSTR_RENEW(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+        }
+        
         try {
             processRequestSecurityTokenResponse(sctConfig, rst, rstr, itc);
         } catch (WSSecureConversationException ex){
@@ -446,6 +468,12 @@ public class WSSCPlugin {
     public void processCancellation(final IssuedTokenContext itc){
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)itc.getSecurityPolicy().get(0);
         WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
+        WSTrustVersion wsTrustVer = null;
+        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
+            wsTrustVer = WSTrustVersion.WS_TRUST_13;
+        }else{
+            wsTrustVer = WSTrustVersion.WS_TRUST_10;
+        }
         //==============================
         // Create RequestSecurityToken
         //==============================
@@ -458,7 +486,12 @@ public class WSSCPlugin {
             throw new RuntimeException(LogStringsMessages.WSSC_0024_ERROR_CREATING_RST(FOR_CANCEL), ex);
         }
         
-        final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTCancelRequestAction());        
+        final BaseSTSResponse rstr = sendRequest(sctConfig, rst, itc.getEndpointAddress(), wsscVer.getSCTCancelRequestAction());
+        
+        if(log.isLoggable(Level.FINE)){            
+            log.log(Level.FINE, 
+                    LogStringsMessages.WSSC_1016_RECEIVED_SCT_RSTR_CANCEL(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+        }
         // Handle the RequestSecurityTokenResponse
         try {
             processRequestSecurityTokenResponse(sctConfig, rst, rstr, itc);
@@ -614,6 +647,10 @@ public class WSSCPlugin {
             throw new WSSecureConversationException(ex);
         }
         
+        if(log.isLoggable(Level.FINE)){
+            log.log(Level.FINE, LogStringsMessages.WSSC_1011_CREATED_SCT_RST_ISSUE(WSTrustUtil.elemToString(rst, wsTrustVer)));
+        }
+        
         return rst;
     }
     
@@ -656,6 +693,9 @@ public class WSSCPlugin {
         
         //final RequestSecurityToken rst = eleFac.createRSTForRenew(null, requestType, null, target, null, null);        
         
+        if(log.isLoggable(Level.FINE)){
+            log.log(Level.FINE, LogStringsMessages.WSSC_1013_CREATED_SCT_RST_RENEW(WSTrustUtil.elemToString(rst, wsTrustVer)));
+        }
         return rst;
     }
     
@@ -672,6 +712,10 @@ public class WSSCPlugin {
         
         final CancelTarget target = eleFac.createCancelTarget((SecurityTokenReference)ctx.getUnAttachedSecurityTokenReference());
         final RequestSecurityToken rst = eleFac.createRSTForCancel(requestType, target);
+        
+        if(log.isLoggable(Level.FINE)){
+            log.log(Level.FINE, LogStringsMessages.WSSC_1015_CREATED_SCT_RST_CANCEL(WSTrustUtil.elemToString(rst, wsTrustVer)));
+        }
         
         return rst;
     }
