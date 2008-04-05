@@ -281,7 +281,10 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             serverEntropyBytes = serverBinarySecret.getRawValue();
         }
         
-        final int keySize = (int)rstr.getKeySize()/8;
+        int keySize = (int)rstr.getKeySize()/8;
+        if (keySize == 0){
+            keySize = (int)rst.getKeySize()/8;
+        }
         byte[] key = null;
         if(computedKey.toString().equals(wstVer.getCKPSHA1algorithmURI())){
             try {
