@@ -317,7 +317,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                         subj = samlFac.createSubject(nameId, subjectConfirm);
                     }
                     else{
-                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), values);
+                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
                         attrs.add(attr);
                     }
                 }
