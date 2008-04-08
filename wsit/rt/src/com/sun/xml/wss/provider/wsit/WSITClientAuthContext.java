@@ -45,6 +45,8 @@
 
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
@@ -148,6 +150,7 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     
     private Set trustConfig = null;
     private CallbackHandler handler = null;
+    private Container container = null;
     
     //***************AuthModule Instance**********
     WSITClientAuthModule  authModule = null;
@@ -155,6 +158,10 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
     /** Creates a new instance of WSITClientAuthContext */
     public WSITClientAuthContext(String operation, Subject subject, Map map) {
         super(map);
+        WSService service = (WSService)map.get("SERVICE");
+        if(service != null){
+            container = service.getContainer();
+        }
         //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
@@ -693,6 +700,9 @@ public class WSITClientAuthContext  extends WSITAuthContextBase
                     }
                     if (password != null){
                         config.getOtherOptions().put(BindingProvider.PASSWORD_PROPERTY, password);
+                    }
+                    if(container != null){
+                        config.getOtherOptions().put("CONTAINER", container);
                     }
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);

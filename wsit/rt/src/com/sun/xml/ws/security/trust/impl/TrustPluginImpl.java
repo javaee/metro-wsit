@@ -45,6 +45,9 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.WSService.InitParams;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
@@ -422,7 +425,14 @@ public class TrustPluginImpl implements TrustPlugin {
             //   int index = url.lastIndexOf("/mex");
             //  url = url.substring(0, index);
             //}
-            service = Service.create(new URL(url), serviceName);
+            Container container = (Container) stsConfig.getOtherOptions().get("CONTAINER");
+            if(container != null){
+                InitParams initParams = new InitParams();
+                initParams.setContainer(container);
+                service = WSService.create(new URL(url), serviceName, initParams);
+            }else{
+                service = Service.create(new URL(url), serviceName);
+            }
         }catch (MalformedURLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
