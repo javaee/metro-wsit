@@ -388,10 +388,6 @@ public final class RMServerTube extends TubeBase {
                 packet.setMessage(emptyMessage);
             }
 
-            //If ordered delivery is configured, unblock the next message in the sequence
-            //if it is waiting for this one to be delivered.
-            inboundSequence.releaseNextMessage(currentRequestMessage);
-
             //Let Outbound sequence do its bookkeeping work, which consists of writing
             //outbound RM headers.
             //need to handle any error caused by
@@ -419,11 +415,29 @@ public final class RMServerTube extends TubeBase {
                 // MS client expects SequenceAcknowledgement action incase of oneway messages
                 if (responseMessage == null && packet.getMessage() != null) {
                     HeaderList headerList = packet.getMessage().getHeaders();
+
+                    String requestMessageId = packet.getMessage().getID(getConfig().getAddressingVersion(), getConfig().getSoapVersion());
+                    if (requestMessageId != null) {
+                        headerList.add(Headers.create(
+                                getConfig().getAddressingVersion().messageIDTag,
+                                requestMessageId));
+                    }
+
+                    headerList.add(Headers.create(
+                            getConfig().getAddressingVersion().relatesToTag,
+                            currentRequestMessage.getHeaders().getMessageID(getConfig().getAddressingVersion(), getConfig().getSoapVersion())));
+
                     headerList.add(Headers.create(
                             getConfig().getAddressingVersion().actionTag,
                             getConfig().getRMVersion().sequenceAcknowledgementAction));
                 }
             }
+
+
+            //If ordered delivery is configured, unblock the next message in the sequence
+            //if it is waiting for this one to be delivered.
+            inboundSequence.releaseNextMessage(currentRequestMessage);
+
         } catch (RmException e) {
             //see if a RM Fault type has been assigned to this exception type.  If so, let
             //the exception generate a fault message.  Otherwise, wrap as WebServiceException and
@@ -659,8 +673,7 @@ public final class RMServerTube extends TubeBase {
         String tsAction = null;
         //If there is an "real" outbound sequence, client expects us to terminate it.
         switch (getConfig().getRMVersion()) {
-            case WSRM10:
-            {
+            case WSRM10: {
                 // There is no TSR. We just close client-side sequence if it is a two-way communication
                 tsAction = RmVersion.WSRM10.terminateSequenceAction;
                 if (outboundSequence.isSaveMessages()) {
@@ -688,8 +701,7 @@ public final class RMServerTube extends TubeBase {
                 }
                 break;
             }
-            case WSRM11:
-            {
+            case WSRM11: {
                 tsAction = RmVersion.WSRM11.terminateSequenceResponseAction;
                 com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement terminateSeqResponse = new com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement();
                 com.sun.xml.ws.rm.v200702.Identifier id2 = new com.sun.xml.ws.rm.v200702.Identifier();
@@ -910,18 +922,18 @@ public final class RMServerTube extends TubeBase {
         //construct empty non-application message to be used as a conduit for
         //this SequenceAcknowledgement header.
         Message message = Messages.createEmpty(getConfig().getSoapVersion());
-        Packet outbound = new Packet(message);
+        Packet outbound = inbound.createServerResponse(
+                message,
+                getConfig().getAddressingVersion(),
+                getConfig().getSoapVersion(),
+                action);
+
         outbound.invocationProperties.putAll(inbound.invocationProperties);
 
         //construct the SequenceAcknowledgement header and  add it to thge message.
-        AbstractSequenceAcknowledgement element = seq.generateSequenceAcknowledgement(false);
-        //Header header = Headers.create(getConfig().getSoapVersion(),getMarshaller(),element);
-        Header header = Headers.create(getConfig().getRMVersion().jaxbContext, element);
+        AbstractSequenceAcknowledgement sequenceAckElement = seq.generateSequenceAcknowledgement(false);
+        Header header = Headers.create(getConfig().getRMVersion().jaxbContext, sequenceAckElement);
         message.getHeaders().add(header);
-        if (action != null) {
-            Header actionHeader = Headers.create(getConfig().getAddressingVersion().actionTag, action);
-            message.getHeaders().add(actionHeader);
-        }
 
         return outbound;
     }
