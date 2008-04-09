@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.encoding;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Codec;
@@ -63,6 +65,10 @@ public class LazyStreamCodec implements StreamSOAPCodec{
     }
     
     public Message decode(XMLStreamReader reader) {
+        return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec);
+    }
+    
+    public  @NotNull Message decode(@NotNull XMLStreamReader reader, AttachmentSet att){
         return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec);
     }
     
