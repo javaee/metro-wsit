@@ -52,7 +52,7 @@ public class RMDemoClientTest extends TestCase {
             port = service.getRMDemoPort();
             port.addString("hello");
         } catch (IllegalStateException e) {
-            if (e.getMessage().contains("addressing")) {
+            if (e.getMessage().contains("Addressing")) {
                 foundError = true;
             }
 
