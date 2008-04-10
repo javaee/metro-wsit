@@ -112,6 +112,8 @@ public class WSITClientSecurityPipe implements Pipe {
 
     @SuppressWarnings("unchecked")
     public Packet process(Packet packet) {
+        return null;
+        /*
         MessageInfo messageInfo = new PacketMessageInfo();
         try {
             messageInfo.getMap().put("REQ_PACKET",packet);
@@ -131,6 +133,7 @@ public class WSITClientSecurityPipe implements Pipe {
                     LogStringsMessages.WSITPVD_0039_ERROR_PROCESSING_INCOMING_PACKET(), e);
         }
         return (Packet)messageInfo.getMap().get("RES_PACKET");
+         */
     }
 
     public void preDestroy() {

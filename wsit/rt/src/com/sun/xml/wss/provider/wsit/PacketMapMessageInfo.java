@@ -36,25 +36,71 @@
 
 package com.sun.xml.wss.provider.wsit;
 
+import java.util.Map;
+
 import javax.security.auth.message.MessageInfo;
 
+import javax.xml.soap.SOAPMessage;
+
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+
 
 /**
  * 
  */
-public interface PacketMessageInfo extends MessageInfo {
+public class PacketMapMessageInfo implements PacketMessageInfo {
 
-    public SOAPAuthParam getSOAPAuthParam();
+    private SOAPAuthParam soapAuthParam;
 
-    public Packet getRequestPacket();
+    private Map infoMap;
 
-    public Packet getResponsePacket();
+    public PacketMapMessageInfo(Packet reqPacket, Packet resPacket) {
+	soapAuthParam = new SOAPAuthParam(reqPacket,resPacket,0);
+    }
 
-    public void setRequestPacket(Packet p);
+    public Map getMap() {
+	if (this.infoMap == null) {
+	    this.infoMap = soapAuthParam.getMap();
+	}
+	return this.infoMap;
+    }
 
-    public void setResponsePacket(Packet p);
+    public Object getRequestMessage() {
+	return soapAuthParam.getRequest();
+    }
 
+    public Object getResponseMessage() {
+	return soapAuthParam.getResponse();
+    }
+
+    public void setRequestMessage(Object request) {
+	soapAuthParam.setRequest((SOAPMessage)request);
+    }
+
+    public void setResponseMessage(Object response) {
+	soapAuthParam.setResponse((SOAPMessage)response);
+    }
+
+    public SOAPAuthParam getSOAPAuthParam() {
+	return soapAuthParam;
+    }
+
+    public Packet getRequestPacket() {
+	return (Packet) soapAuthParam.getRequestPacket();
+    }
+
+    public Packet getResponsePacket() {
+	return (Packet) soapAuthParam.getResponsePacket();
+    }
+
+    public void setRequestPacket(Packet p) {
+	soapAuthParam.setRequestPacket(p);
+    }
+
+    public void setResponsePacket(Packet p) {
+	soapAuthParam.setResponsePacket(p);
+    }
 }
 
 

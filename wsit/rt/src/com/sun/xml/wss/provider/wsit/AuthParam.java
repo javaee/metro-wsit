@@ -36,34 +36,13 @@
 
 package com.sun.xml.wss.provider.wsit;
 
-import javax.security.auth.message.MessageInfo;
-
-import com.sun.xml.ws.api.message.Packet;
-
 /**
- * 
+ * An authentication parameter used to encapsulate a
+ * request and response objects.
+ *
+ * <p> This is a marker interface for container-specific
+ * authentication parameters.
+ *
+ * @version %I%, %G%
  */
-public interface PacketMessageInfo extends MessageInfo {
-
-    public SOAPAuthParam getSOAPAuthParam();
-
-    public Packet getRequestPacket();
-
-    public Packet getResponsePacket();
-
-    public void setRequestPacket(Packet p);
-
-    public void setResponsePacket(Packet p);
-
-}
-
-
-
-
-
-
-
-
-
-
-
+public interface AuthParam { }

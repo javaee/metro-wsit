@@ -36,34 +36,60 @@
 
 package com.sun.xml.wss.provider.wsit;
 
-import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.config.AuthConfigFactory.RegistrationContext;
 
-import com.sun.xml.ws.api.message.Packet;
-
-/**
- * 
+/*
+ * Class used by GFAuthConfigFactory and EntryInfo.
+ *
+ * This class will not be used outside of its package.
  */
-public interface PacketMessageInfo extends MessageInfo {
+final class RegistrationContextImpl implements RegistrationContext {
+    private final String messageLayer;
+    private final String appContext;
+    private final String description;
+    private final boolean isPersistent;
 
-    public SOAPAuthParam getSOAPAuthParam();
+    RegistrationContextImpl(String messageLayer, String appContext,
+        String description, boolean persistent) {
+        
+        this.messageLayer = messageLayer;
+        this.appContext = appContext;
+        this.description = description;
+        this.isPersistent = persistent;
+    }
 
-    public Packet getRequestPacket();
+    // helper method to create impl class
+    RegistrationContextImpl(RegistrationContext ctx) {
+        this.messageLayer = ctx.getMessageLayer();
+        this.appContext = ctx.getAppContext();
+        this.description = ctx.getDescription();
+        this.isPersistent = ctx.isPersistent();
+    }
+    
+    public String getMessageLayer() {
+        return messageLayer;
+    }
 
-    public Packet getResponsePacket();
+    public String getAppContext() {
+        return appContext;
+    }
 
-    public void setRequestPacket(Packet p);
+    public String getDescription() {
+        return description;
+    }
 
-    public void setResponsePacket(Packet p);
-
+    public boolean isPersistent() {
+        return isPersistent;
+    }
+ 
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof RegistrationContext)) {
+            return false;
+        }
+        RegistrationContext target = (RegistrationContext) o;
+        return ( EntryInfo.matchStrings(
+            messageLayer, target.getMessageLayer()) &&
+            EntryInfo.matchStrings(appContext, target.getAppContext()) &&
+            EntryInfo.matchStrings(description, target.getDescription()) );
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

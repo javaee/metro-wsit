@@ -110,6 +110,8 @@ public class WSITServerSecurityPipe implements Pipe {
 
     @SuppressWarnings("unchecked")
     public Packet process(Packet packet) {
+        return null;
+        /*
         MessageInfo messageInfo = new PacketMessageInfo();
         
         try {
@@ -134,7 +136,7 @@ public class WSITServerSecurityPipe implements Pipe {
             throw new WebServiceException(
                     LogStringsMessages.WSITPVD_0039_ERROR_PROCESSING_INCOMING_PACKET(), e);            
         }
-        return (Packet)messageInfo.getMap().get("RES_PACKET");
+        return (Packet)messageInfo.getMap().get("RES_PACKET");*/
     }
 
     public void preDestroy() {

@@ -36,34 +36,26 @@
 
 package com.sun.xml.wss.provider.wsit;
 
-import javax.security.auth.message.MessageInfo;
-
-import com.sun.xml.ws.api.message.Packet;
-
 /**
- * 
+ * This pipe is used to do client side security for app server
  */
-public interface PacketMessageInfo extends MessageInfo {
+public interface PipeConstants {
 
-    public SOAPAuthParam getSOAPAuthParam();
-
-    public Packet getRequestPacket();
-
-    public Packet getResponsePacket();
-
-    public void setRequestPacket(Packet p);
-
-    public void setResponsePacket(Packet p);
-
+    static final String BINDING = "BINDING";
+    static final String CLIENT_SUBJECT = "CLIENT_SUBJECT";
+    static final String ENDPOINT = "ENDPOINT";
+    static final String ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
+    static final String NEXT_PIPE = "NEXT_PIPE";
+    static final String POLICY = "POLICY";
+    static final String SEI_MODEL = "SEI_MODEL";
+    static final String SECURITY_TOKEN = "SECURITY_TOKEN";
+    static final String SECURITY_PIPE = "SECURITY_PIPE";
+    static final String SERVER_SUBJECT = "SERVER_SUBJECT";
+    static final String SERVICE = "SERVICE";
+    static final String SERVICE_REF = "SERVICE_REF";
+    static final String SOAP_LAYER = "SOAP";
+    static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
+    static final String WSDL_MODEL = "WSDL_MODEL";
+    static final String WSDL_SERVICE = "WSDL_SERVICE";
+    static final String CONTAINER = "CONTAINER";
 }
-
-
-
-
-
-
-
-
-
-
-

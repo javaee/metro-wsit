@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.api.server.Container;
@@ -42,6 +41,8 @@ import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -75,18 +76,26 @@ import com.sun.xml.ws.tx.service.TxServerPipe;
 import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
 import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+import com.sun.xml.wss.provider.wsit.JMACAuthConfigFactory;
 import com.sun.xml.xwss.XWSSClientPipe;
 import com.sun.xml.xwss.XWSSServerPipe;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import javax.security.auth.message.config.AuthConfigFactory;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class TubelineAssemblyController {
+
     private static final String BEFORE_SUFFIX = ".before";
     private static final String AFTER_SUFFIX = ".after";
     private static final String TRANSPORT_SUFFIX = ".transport";
@@ -356,27 +365,42 @@ public class TubelineAssemblyController {
         }
 
         public void prepareContext(WsitServerTubeAssemblyContext context) throws WebServiceException {
-            if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                context.setCodec(createSecurityCodec(context.getEndpoint().getBinding()));
-            }
+                if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+                    context.setCodec(createSecurityCodec(context.getEndpoint().getBinding()));
+                }
         }
 
         public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
-            ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+            //TEMP: uncomment this ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+            ServerPipelineHook[] hooks =  getserverTubeLineHooks();
+            ServerPipelineHook hook = null;
+            if (hooks != null && hooks.length > 0 && hooks[0] instanceof com.sun.xml.wss.provider.wsit.ServerPipeCreator) {
+                //we let it override GF defaults
+                hook = hooks[0];
+                //set the Factory to JMACAuthConfigFactory if it is not already set to 
+                //something else.
+                initializeJMAC();
+            } else {
+                hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
+            }
+            
             if (hook != null) {
                 // TODO ask security to implement the hook.createSecurityTube(context);
                 Pipe securityPipe = hook.createSecurityPipe(
-                        context.getPolicyMap(), 
-                        context.getSEIModel(), 
+                        context.getPolicyMap(),
+                        context.getSEIModel(),
                         context.getWsdlPort(),
                         context.getEndpoint(),
                         context.getAdaptedTubelineHead());
                 return PipeAdapter.adapt(securityPipe);
-                // THIS IS A NEW CODE THAT SHOULD REPLACE THE PIPE-BASED CODE
-                // return hook.createSecurityTube(context);
+            // THIS IS A NEW CODE THAT SHOULD REPLACE THE PIPE-BASED CODE
+            // return hook.createSecurityTube(context);
             } else if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                if (serverTubeLineHookExists()) {
+      
+                if (hooks != null && hooks.length == 0) {
                     return createSecurityTube(context);
+                } else if (hooks != null && hooks.length > 0) {
+                    
                 } else {
                     //TODO: Log a FINE message indicating could not use Unified Tube.
                     return PipeAdapter.adapt(new SecurityServerPipe(context, context.getAdaptedTubelineHead()));
@@ -389,7 +413,7 @@ public class TubelineAssemblyController {
                         return initializeXWSSServerTube(context);
                     }
                 } catch (NoClassDefFoundError err) {
-                    // do nothing
+                // do nothing
                 }
             }
 
@@ -404,6 +428,11 @@ public class TubelineAssemblyController {
                 ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
                 if (hooks != null && hooks.length > 0) {
                     hook = hooks[0];
+                    if (hook instanceof com.sun.xml.wss.provider.wsit.ClientPipeCreator) {
+                        //set the Factory to JMACAuthConfigFactory if it is not already set to
+                        //something else.
+                        initializeJMAC();
+                    }
                 }
             }
             //If either mechanism for finding a ClientPipelineHook has found one, use it.
@@ -414,21 +443,20 @@ public class TubelineAssemblyController {
                         context.getWsdlPort(),
                         context.getService(),
                         context.getBinding(),
-                        context.getContainer()
-                        );
+                        context.getContainer());
                 Pipe securityPipe = hook.createSecurityPipe(context.getPolicyMap(), pipeContext, context.getAdaptedTubelineHead());
-                 if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                     context.setScInitiator((SecureConversationInitiator) securityPipe);
-                 }
+                if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+                    context.setScInitiator((SecureConversationInitiator) securityPipe);
+                }
                 return PipeAdapter.adapt(securityPipe);
-                // THIS IS A NEW CODE THAT SHOULD REPLACE THE PIPE-BASED CODE
-                // Tube securityTube = hook.createSecurityTube(context); 
-                // if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-                //     // TODO remove when RM is able to use the context.getImplementation() method, 
-                //     // this will be possible once Security pipe is converted to a tube
-                //     context.setScInitiator((SecureConversationInitiator) securityTube);
-                // }
-                // return securityTube;
+            // THIS IS A NEW CODE THAT SHOULD REPLACE THE PIPE-BASED CODE
+            // Tube securityTube = hook.createSecurityTube(context); 
+            // if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+            //     // TODO remove when RM is able to use the context.getImplementation() method, 
+            //     // this will be possible once Security pipe is converted to a tube
+            //     context.setScInitiator((SecureConversationInitiator) securityTube);
+            // }
+            // return securityTube;
             } else if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
                 //Use the default WSIT Client Security Pipe
                 Pipe securityPipe = new SecurityClientPipe(context, context.getAdaptedTubelineHead());
@@ -516,23 +544,23 @@ public class TubelineAssemblyController {
             return ServiceFinder.find(svcClass).toArray();
         }
 
-        private boolean serverTubeLineHookExists() {
+        private ServerPipelineHook[] getserverTubeLineHooks() {
             // The ServerPipeline Hook in GF fails to create the Pipe because GF ServerPipeCreator does not have a
             // Default CTOR.
             //TODO: change this method impl later.
             try {
                 ServerPipelineHook[] hooks = loadSPs(ServerPipelineHook.class);
                 if (hooks != null && hooks.length > 0) {
-                    return true;
+                    return hooks;
                 }
             } catch (ServiceConfigurationError ex) {
                 //workaround since GF ServerPipeCreator has no Default CTOR.
                 if (ex.getCause() instanceof InstantiationException) {
-                    return true;
+                    return new ServerPipelineHook[0];
                 }
-                return false;
+                return null;
             }
-            return false;
+            return null;
         }
 
         private boolean isSecurityConfigPresent(WsitClientTubeAssemblyContext context) {
@@ -554,7 +582,7 @@ public class TubelineAssemblyController {
                     final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                     ctxt = container.getSPI(contextClass);
                 } catch (ClassNotFoundException e) {
-                    //log here that the ServletContext was not found
+                //log here that the ServletContext was not found
                 }
             }
             String serverName = "server";
@@ -647,6 +675,26 @@ public class TubelineAssemblyController {
                 throw new WebServiceException(ex);
             }
         }
+
+        private void initializeJMAC() {
+            // define default factory if it is not already defined
+            // factory will be constructed on first getFactory call.
+            AccessController.doPrivileged(new PrivilegedAction() {
+
+                public Object run() {
+                    /*String defaultFactory = Security.getProperty(AuthConfigFactory.DEFAULT_FACTORY_SECURITY_PROPERTY);
+                    if (defaultFactory == null || !(JMACAuthConfigFactory.class.getName().equals(defaultFactory))) {
+                        Security.setProperty(AuthConfigFactory.DEFAULT_FACTORY_SECURITY_PROPERTY,
+                                JMACAuthConfigFactory.class.getName());
+                    }*/
+                    AuthConfigFactory factory = AuthConfigFactory.getFactory();
+                    if (factory == null || !(factory instanceof JMACAuthConfigFactory)) {
+                        AuthConfigFactory.setFactory(new JMACAuthConfigFactory());
+                    }
+                    return null; // nothing to return
+                }
+            });
+        }
     }
 
     public static class MonitoringTubeAppender implements TubeAppender {
@@ -681,7 +729,7 @@ public class TubelineAssemblyController {
             return context.getWrappedContext().createValidationTube(context.getTubelineHead());
         }
     }
-    
+
     public static class HandlerTubeAppender implements TubeAppender {
 
         public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
@@ -692,7 +740,7 @@ public class TubelineAssemblyController {
             return context.getWrappedContext().createHandlerTube(context.getTubelineHead());
         }
     }
-    
+
     public static class TerminalTubeAppender implements TubeAppender {
 
         public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
@@ -703,10 +751,9 @@ public class TubelineAssemblyController {
             return context.getWrappedContext().getTerminalTube();
         }
     }
-    
     private static final TubeAppender transportAppender = new TransportTubeAppender();
     private static final TubeAppender messageDumpingAppender = new MessageDumpingTubeAppender();
-    private static final TubeAppender packetFilteringAppender = new PacketFilteringTubeAppender();    
+    private static final TubeAppender packetFilteringAppender = new PacketFilteringTubeAppender();
     private static final TubeAppender actionDumpAppender = new ActionDumpTubeAppender();
     private static final TubeAppender securityAppender = new SecurityTubeAppender();
     private static final TubeAppender reliableMessagingAppender = new RmTubeAppender();
@@ -717,7 +764,6 @@ public class TubelineAssemblyController {
     private static final TubeAppender validationAppender = new ValidationTubeAppender();
     private static final TubeAppender handlerAppender = new HandlerTubeAppender();
     private static final TubeAppender terminalAppender = new TerminalTubeAppender();
-    
     private static final TubeAppender[] clientAppenders = new TubeAppender[]{
         transportAppender,
         messageDumpingAppender,
@@ -742,9 +788,9 @@ public class TubelineAssemblyController {
         mustUnderstandAppender,
         validationAppender,
         handlerAppender/*,
-        terminalAppender*/
+    terminalAppender*/
+
     };
-    
     private static final TubeAppender[] serverAppenders = new TubeAppender[]{
         terminalAppender,
         validationAppender,
@@ -769,14 +815,15 @@ public class TubelineAssemblyController {
         new DumpTubeAppender(""),
         packetFilteringAppender,
         messageDumpingAppender /*,
-        transportAppender*/
+    transportAppender*/
+
     };
-    
+
     Collection<TubeAppender> getClientSideAppenders() {
         return Arrays.asList(clientAppenders);
     }
 
     Collection<TubeAppender> getServerSideAppenders() {
-        return Arrays.asList(serverAppenders);        
+        return Arrays.asList(serverAppenders);
     }
 }
