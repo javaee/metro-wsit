@@ -37,12 +37,9 @@ package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.rm.Sequence;
-import com.sun.xml.ws.rm.BufferFullException;
 import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RMMessage;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.jaxws.util.ProcessingFilter;
 import com.sun.xml.ws.rm.protocol.AbstractAckRequested;

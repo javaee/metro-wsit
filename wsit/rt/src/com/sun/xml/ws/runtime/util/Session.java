@@ -33,9 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.runtime.util;
-import com.sun.xml.ws.rm.Sequence;
+
+import com.sun.xml.ws.rm.jaxws.runtime.Sequence;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 
 /**
@@ -48,20 +48,18 @@ import com.sun.xml.ws.security.SecurityContextTokenInfo;
  * @author Bhakti Mehta
  * @author Mike Grogan
  */
-public  class Session {
-    
+public class Session {
+
     /**
      * Well-known invocationProperty names
      */
     public static final String SESSION_ID_KEY = "com.sun.xml.ws.sessionid";
     public static final String SESSION_KEY = "com.sun.xml.ws.session";
-
     /**
      * Session manager that can handle Sessions of this exact type.
      * (Different SessionManagers might use different subclasses of this Class)
      */
     private final SessionManager manager;
-    
     /*
      * These fields might be persisted
      */
@@ -69,22 +67,18 @@ public  class Session {
      * Unique key based either on the SCT or RM sequence id for the session
      */
     private final String key;
-    
     /**
      * A container for user-defined data that will be exposed in WebServiceContext.
      */
     private final Object userData;
-    
-    
     private SecurityContextTokenInfo securityInfo;
     private Sequence sequence;
-    
     /*
      * These fields are for internal use
      */
     private final long creationTime;
     private long lastAccessedTime;
-    
+
     /**
      * Public constructor
      *
@@ -97,10 +91,9 @@ public  class Session {
         this.manager = manager;
         this.userData = userData;
         this.key = key;
-        creationTime = lastAccessedTime = 
-              System.currentTimeMillis();
+        creationTime = lastAccessedTime =
+                System.currentTimeMillis();
     }
-    
 
     /**
      * Accessor for Session Key.
@@ -110,7 +103,7 @@ public  class Session {
     public String getSessionKey() {
         return key;
     }
-    
+
     /**
      * Accessor for the <code>userData</code> field.
      *
@@ -119,51 +112,49 @@ public  class Session {
     public Object getUserData() {
         return userData;
     }
-    
-    
+
     /**
-    * Accessor for the <code>securityInfo</code> field.
-    * 
-    * @returns The value of the field.
-    */
+     * Accessor for the <code>securityInfo</code> field.
+     * 
+     * @returns The value of the field.
+     */
     public SecurityContextTokenInfo getSecurityInfo() {
         return securityInfo;
     }
-    
-   /**
-    * Mutator for the <code>securityInfo</code> field.
-    * 
-    * @returns The value of the field.
-    */
+
+    /**
+     * Mutator for the <code>securityInfo</code> field.
+     * 
+     * @returns The value of the field.
+     */
     public void setSecurityInfo(SecurityContextTokenInfo securityInfo) {
         this.securityInfo = securityInfo;
     }
-    
-    
-   /**
-    * Accessor for the <code>sequence</code> field.
-    * 
-    * @return The value of the field.
-    */
+
+    /**
+     * Accessor for the <code>sequence</code> field.
+     * 
+     * @return The value of the field.
+     */
     public Sequence getSequence() {
         return sequence;
     }
-    
+
     /**
-    * Mutator for the <code>securityInfo</code> field.
-    * 
-    * @returns The value of the field.
-    */
+     * Mutator for the <code>sequence</code> field.
+     * 
+     * @returns The value of the field.
+     */
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
     }
-    
+
     /**
      * Accessor for creation time.
      *
      * @returns The creation time.
      */
-    public  long getCreationTime() {
+    public long getCreationTime() {
         return creationTime;
     }
 
@@ -173,17 +164,17 @@ public  class Session {
      *
      * @returns The lastAccessedTime
      */
-    public  long getLastAccessedTime() {
+    public long getLastAccessedTime() {
         return lastAccessedTime;
     }
-    
+
     /**
      * Resets the lastAccessedTime to the current time.
      */
     public void resetLastAccessedTime() {
         lastAccessedTime = System.currentTimeMillis();
     }
-    
+
     /**
      * Saves the state of the session using whatever persistence mechanism the
      * <code>SessionManager</code> offers.
@@ -191,6 +182,5 @@ public  class Session {
     public void save() {
         manager.saveSession(getSessionKey());
     }
-
 }
 

@@ -45,6 +45,7 @@ import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
@@ -111,12 +112,10 @@ final class Rm11ClientSession extends ClientSession {
 
         Message csResponseMessage = communicator.send(csMessage, RmVersion.WSRM11.createSequenceAction);
         if (csResponseMessage == null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequenceResponse was 'null'"));
+            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
         }
         if (csResponseMessage.isFault()) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new CreateSequenceException("CreateSequence was refused by the RMDestination", csResponseMessage));
+            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CreateSequence"), csResponseMessage));
         }
 
         CreateSequenceResponseElement csrElement = communicator.unmarshallMessage(csResponseMessage);
@@ -131,10 +130,9 @@ final class Rm11ClientSession extends ClientSession {
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
             if (accept == null || !communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
-                // TODO L10N
                 throw new CreateSequenceException(
-                        "Unsupported \"AcksTo\" destination. Inbound sequence \"AcksTo\" destination [" + accept.getAcksTo().toString() + "] " +
-                        "must be the same as the service endpoint destination [" + communicator.getDestination() + "]", inboundSequenceId);
+                        LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()),
+                        inboundSequenceId);
             }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, Configuration.UNSPECIFIED);
@@ -192,65 +190,62 @@ final class Rm11ClientSession extends ClientSession {
     @Override
     protected void closeOutboundSequence() throws RmException {
         final Message request = communicator.createMessage(new CloseSequenceElement(
-                outboundSequenceId, 
+                outboundSequenceId,
                 sequenceManager.getSequence(outboundSequenceId).getLastMessageId()));
 
         appendSequenceAcknowledgementHeader(request);
 
         Message response = communicator.send(request, RmVersion.WSRM11.closeSequenceAction);
         if (response == null) {
-            // TODO L10N
-            throw new CloseSequenceException("CloseSequenceResponse was 'null'");
+            throw new CloseSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CloseSequenceResponse"));
         }
 
         processInboundMessageHeaders(response.getHeaders(), false);
 
         if (response.isFault()) {
-            // TODO L10N
-            throw new CloseSequenceException("CloseSequence was refused by the RMDestination", response);
+            throw new CloseSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CloseSequence"), response);
         }
 
         CloseSequenceResponseElement csrElement = communicator.unmarshallMessage(response); // consuming message here
+
         if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
-            // TODO L10N
-            throw new CloseSequenceException("The sequence identifier in the close sequence response message [" + csrElement.getIdentifier().getValue() + "]" +
-                    " does not correspond to the closing outbound sequence identifier [" + outboundSequenceId + "]");
+            throw new CloseSequenceException(
+                    LocalizationMessages.WSRM_1119_UNEXPECTED_SEQUENCE_ID_IN_CLOSE_SR(csrElement.getIdentifier().getValue(), outboundSequenceId));
         }
     }
 
     @Override
     protected void terminateOutboundSequence() throws RmException {
         final Message request = communicator.createMessage(new TerminateSequenceElement(
-                outboundSequenceId, 
+                outboundSequenceId,
                 sequenceManager.getSequence(outboundSequenceId).getLastMessageId()));
 
         Message response = null;
         try {
             response = communicator.send(request, RmVersion.WSRM11.terminateSequenceAction);
             if (response == null) {
-                // TODO L10N
-                throw new TerminateSequenceException("TerminateSequenceResponse was 'null'");
+                throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequenceResponse"));
             }
 
             processInboundMessageHeaders(response.getHeaders(), false);
 
             if (response.isFault()) {
-                // TODO L10N
-                throw new TerminateSequenceException("There was an error during the sequence termination", response);
+                throw new TerminateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("TerminateSequence"), response);
             }
 
             String responseAction = communicator.getAction(response);
             if (RmVersion.WSRM11.terminateSequenceAction.equals(responseAction)) {
                 TerminateSequenceElement tsElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
+
                 sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
             } else if (RmVersion.WSRM11.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseElement tsrElement = communicator.unmarshallMessage(response);
                 response = null; // marking response as consumed...
+
                 if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
-                    // TODO L10N
-                    throw new TerminateSequenceException("The sequence identifier in the terminate sequence response message [" + tsrElement.getIdentifier().getValue() + "]" +
-                            " does not correspond to the terminating outbound sequence identifier [" + outboundSequenceId + "]");
+                    throw new TerminateSequenceException(
+                            LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(tsrElement.getIdentifier().getValue(), outboundSequenceId));
                 }
             }
         } finally {
@@ -267,8 +262,7 @@ final class Rm11ClientSession extends ClientSession {
             assertSequenceIdInInboundHeader(inboundSequenceId, sequenceElement.getId());
             sequenceManager.getSequence(sequenceElement.getId()).acknowledgeMessageId(sequenceElement.getMessageNumber());
         } else {
-            // TODO L10N
-            throw new RmException("Mandatory <Sequence ... /> header not present on the response message");
+            throw new RmException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
         }
     }
 

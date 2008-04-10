@@ -40,7 +40,7 @@
  * Created on August 20, 2007, 12:51 PM
  * @author Mike Grogan
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.jaxws.runtime;
 
 /**
  * 

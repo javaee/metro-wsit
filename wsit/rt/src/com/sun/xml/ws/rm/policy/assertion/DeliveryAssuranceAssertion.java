@@ -44,6 +44,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 
@@ -118,8 +119,7 @@ public class DeliveryAssuranceAssertion extends ComplexAssertion {
         if (successCondition) {
             return daOnSuccess;
         } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new AssertionCreationException(data, "Inconsistent RM policy: Multiple delivery assurance types specified."));
+            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1003_MUTLIPLE_DA_TYPES_IN_POLICY()));
         }
     }
 }

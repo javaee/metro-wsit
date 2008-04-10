@@ -51,7 +51,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.RMMessage;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBContext;

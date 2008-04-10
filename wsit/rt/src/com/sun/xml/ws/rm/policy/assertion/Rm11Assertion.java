@@ -44,6 +44,7 @@ import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
 import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
@@ -107,8 +108,7 @@ public final class Rm11Assertion extends ComplexAssertion {
         }
         
         if (_deliveryAssuranceAssertion == null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new AssertionCreationException(data, "Inconsistent RM policy: Expected delivery assurance not specified in RM1.1 assertion."));
+            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1004_EXPECTED_DA_NOT_SPECIFIED_IN_POLICY()));
         }
 
         securityBinding = _securityBinding;
@@ -131,8 +131,7 @@ public final class Rm11Assertion extends ComplexAssertion {
         if (successCondition) {
             return bindingOnSuccess;
         } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new AssertionCreationException(data, "Inconsistent RM policy: Multiple security binding types specified."));
+            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1005_MULTIPLE_SECURITY_BINDINGS_IN_POLICY()));
         }
     }
 }

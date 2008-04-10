@@ -57,7 +57,7 @@ import com.sun.xml.ws.client.ContentNegotiation;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundMessageProcessor;

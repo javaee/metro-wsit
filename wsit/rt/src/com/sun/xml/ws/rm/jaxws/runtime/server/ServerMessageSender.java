@@ -52,7 +52,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.rm.MessageSender;
+import com.sun.xml.ws.rm.jaxws.runtime.MessageSender;
 import com.sun.xml.ws.rm.localization.RmLogger;
 
 public class ServerMessageSender implements MessageSender, Fiber.CompletionCallback {

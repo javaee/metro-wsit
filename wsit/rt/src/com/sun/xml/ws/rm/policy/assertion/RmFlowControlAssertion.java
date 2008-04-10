@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Collection;
@@ -95,8 +96,7 @@ public class RmFlowControlAssertion extends ComplexAssertion {
         if (successCondition) {
             return Long.parseLong(valueOnSuccess);
         } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new AssertionCreationException(data, "Inconsistent RM policy: Multiple flow control buffer sizes specified."));
+            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1006_MULTIPLE_BUFFER_SIZES_IN_POLICY()));
         }
     }
 }

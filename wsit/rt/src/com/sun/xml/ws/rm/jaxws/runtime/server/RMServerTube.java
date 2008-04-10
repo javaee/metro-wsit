@@ -58,16 +58,16 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.rm.BufferFullException;
+import com.sun.xml.ws.rm.jaxws.runtime.BufferFullException;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
-import com.sun.xml.ws.rm.MessageSender;
+import com.sun.xml.ws.rm.jaxws.runtime.MessageSender;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
 import com.sun.xml.ws.rm.RmSecurityException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
@@ -423,10 +423,13 @@ public final class RMServerTube extends TubeBase {
                                 requestMessageId));
                     }
 
-                    headerList.add(Headers.create(
-                            getConfig().getAddressingVersion().relatesToTag,
-                            currentRequestMessage.getHeaders().getMessageID(getConfig().getAddressingVersion(), getConfig().getSoapVersion())));
-
+                    String relatestToId = currentRequestMessage.getHeaders().getMessageID(getConfig().getAddressingVersion(), getConfig().getSoapVersion());
+                    if (relatestToId != null) {
+                        headerList.add(Headers.create(
+                                getConfig().getAddressingVersion().relatesToTag,
+                                relatestToId));
+                    }
+                    
                     headerList.add(Headers.create(
                             getConfig().getAddressingVersion().actionTag,
                             getConfig().getRMVersion().sequenceAcknowledgementAction));

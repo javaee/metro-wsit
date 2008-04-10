@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
@@ -105,8 +106,7 @@ public abstract class ConfigurationManager {
             try {
                 policy = policyMap.getEndpointEffectivePolicy(endpointScopeKey);
             } catch (PolicyException ex) {
-                // TODO L10N (same as above)
-                throw LOGGER.logSevereException(new WebServiceException("Unable to initialize sequence configuration due to an unexpected exception", ex));
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSRM_1001_UNEXPECTED_CONFIG_INIT_ERROR(), ex));
             }
             if (policy != null) {
                 for (AssertionSet set : policy) {

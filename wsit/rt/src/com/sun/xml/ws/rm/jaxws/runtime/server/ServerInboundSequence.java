@@ -46,7 +46,7 @@ package com.sun.xml.ws.rm.jaxws.runtime.server;
 import com.sun.xml.ws.api.rm.SequenceSettings;
 import com.sun.xml.ws.api.rm.server.ServerSequence;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
-import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.jaxws.runtime.InboundSequence;
 import com.sun.xml.ws.rm.jaxws.runtime.OutboundSequence;

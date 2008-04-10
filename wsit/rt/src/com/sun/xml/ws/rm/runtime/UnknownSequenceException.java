@@ -37,6 +37,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  * Inicates that the sequence with given sequence identifier is not available.
@@ -69,7 +70,6 @@ public class UnknownSequenceException extends RmException {
     }        
     
     private static String createErrorMessage(String sequenceId) {
-        // TODO: L10N
-        return "No sequence registered with id [" + sequenceId + "]";
+        return LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(sequenceId);
     } 
 }

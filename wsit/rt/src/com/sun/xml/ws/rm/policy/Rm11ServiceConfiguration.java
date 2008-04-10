@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
@@ -69,8 +70,7 @@ public class Rm11ServiceConfiguration implements Configuration {
         this.requestResponseDetected = requestResponseDetected;
         
         if (alternative.contains(Rm10Assertion.NAME)) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RmWsException("Multiple WS-ReliableMessaging Policy versions specified in a single policy alternative."));
+            throw LOGGER.logSevereException(new RmWsException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY()));
         }
         
         Rm11Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm11Assertion.NAME, Rm11Assertion.class);

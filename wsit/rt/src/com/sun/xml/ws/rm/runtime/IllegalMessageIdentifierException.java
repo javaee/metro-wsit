@@ -37,6 +37,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  *
@@ -46,8 +47,7 @@ class IllegalMessageIdentifierException extends RmException {
     private final long messageId;
     
     public IllegalMessageIdentifierException(long messageIdentifier) {
-        // TODO L10N
-        super("Illegally used message identifier [" + messageIdentifier + "]");
+        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(messageIdentifier));
         this.messageId = messageIdentifier;
     }
 

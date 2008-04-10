@@ -1,5 +1,5 @@
 /*
- * $Id: RMMessage.java,v 1.10 2008-02-26 06:32:54 ofung Exp $
+ * $Id: RMMessage.java,v 1.1 2008-04-10 18:35:43 m_potociar Exp $
  */
 
 /*
@@ -37,7 +37,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;

@@ -43,6 +43,8 @@
  */
 package com.sun.xml.ws.rm;
 
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
+
 /**
  * RMException subclasss caused by attempt to add a duplicate
  * to a sequence

@@ -45,6 +45,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.policy.ConfigurationManager;
@@ -138,8 +139,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             // In such case we also need to retry.
             Message responseMessage = responsePacket.getMessage();
             if (!responseToOneWayRequest && responseMessage != null && !responseMessage.hasPayload()) {
-                // TODO L10N
-                LOGGER.fine("Resending dropped message");
+                LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
                 return doResend();
             } else {
                 clearResendFlag();
@@ -176,8 +176,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         try {
             session.close();
         } catch (Exception ex) {
-            // TODO L10N
-            LOGGER.warning("Unable to terminate RM sequence normally due to an unexpected exception", ex);
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         } finally {
             super.preDestroy();
             LOGGER.exiting();

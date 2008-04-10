@@ -36,14 +36,14 @@
 package com.sun.xml.ws.rm.jaxws.runtime;
 
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.rm.BufferFullException;
+import com.sun.xml.ws.rm.jaxws.runtime.BufferFullException;
 import com.sun.xml.ws.rm.CloseSequenceException;
 import com.sun.xml.ws.rm.DuplicateMessageException;
 import com.sun.xml.ws.rm.InvalidMessageNumberException;
 import com.sun.xml.ws.rm.InvalidSequenceException;
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;

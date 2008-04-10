@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rm.jaxws.util;
 
-import com.sun.xml.ws.rm.RMMessage;
+import com.sun.xml.ws.rm.jaxws.runtime.RMMessage;
 
 /**
  * Implementing classes provide access to all RM headers on Inbound and

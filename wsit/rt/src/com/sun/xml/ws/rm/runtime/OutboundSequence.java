@@ -64,7 +64,6 @@ public class OutboundSequence extends AbstractSequence {
     public long getNextMessageId() throws MessageNumberRolloverException {
         long nextId = lastMessageId.incrementAndGet();
         if (nextId > MAX_MESSAGE_ID) {
-            // TODO L10N
             throw LOGGER.logSevereException(new MessageNumberRolloverException(this.getId(), nextId));
         }
 

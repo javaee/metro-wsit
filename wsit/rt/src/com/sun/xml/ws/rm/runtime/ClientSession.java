@@ -42,6 +42,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
@@ -78,8 +79,7 @@ abstract class ClientSession {
             case WSRM11:
                 return new Rm11ClientSession(configuration, communicator);
             default:
-                // TODO L10N
-                throw new IllegalStateException("Unsupported WS-ReliableMessaging version [ " + configuration.getRmVersion().namespaceUri + "]");
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
     }
 
@@ -149,10 +149,7 @@ abstract class ClientSession {
 
     protected final void assertSequenceIdInInboundHeader(String expected, String actual) {
         if (expected != null && !expected.equals(actual)) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException(
-                    "Sequence id in the inbound message header [" + actual + " ] " +
-                    "does not match the sequence id bound to this session [" + expected + "]"));
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_INBOUND_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
         }
     }
 
@@ -177,14 +174,7 @@ abstract class ClientSession {
         if (responseMessage != null) {
             processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest && !isProtocolMessage(responseMessage));
         }
-// WE DON'T NEED TO TAKE CARE OF SOAP FAULTS HERE... (?)
-//                        if (responseMessage != null && responseMessage.isFault()) {
-//                            //don't want to resend
-//                            //WSRM2004: Marking faulted message {0} as acked.
-//                            LOGGER.fine(LocalizationMessages.WSRM_2004_ACKING_FAULTED_MESSAGE(requestMessage.getMessageNumber()));
-//                            outboundSequence.acknowledge(requestMessage.getMessageNumber());
-//                        }
-//
+
         return responsePacket;
     }
 
@@ -264,12 +254,10 @@ abstract class ClientSession {
                                 communicator.tryStartSecureConversation());
                         break;
                     } catch (RuntimeException ex) {
-                        // TODO L10N
-                        LOGGER.warning("Attempt to initiate RM session failed with an exception", ex);
+                        LOGGER.warning(LocalizationMessages.WSRM_1106_RM_SESSION_INIT_ATTEMPT_FAILED(), ex);
                     } finally {
                         if (++numberOfInitiateSessionAttempts > MAX_INITIATE_SESSION_ATTEMPTS) {
-                            // TODO L10N
-                            throw LOGGER.logSevereException(new CreateSequenceException("Unable to initiate RM Session: Maximum attempts to initiate RM session reached"));
+                            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1107_MAX_RM_SESSION_INIT_ATTEMPTS_REACHED()));
                         }
                     }
                 }
@@ -319,7 +307,7 @@ abstract class ClientSession {
     }
 
     /**
-     * Send Message with empty body and a AckRequestedElement (with Last child) down the pipe.  Process the response,
+     * Send Message with empty body and a AckRequestedElement (with Last child) down the pipe. Process the response,
      * which may contain a SequenceAcknowledgementElement.
      *
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
@@ -335,20 +323,17 @@ abstract class ClientSession {
 
                 ackResponse = communicator.send(ackRequestMessage, configuration.getRmVersion().ackRequestedAction);
                 if (ackResponse == null) {
-                    // TODO L10N
-                    throw new RmException("Response for the acknowledgement request is 'null'");
+                    throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
                 }
 
                 processInboundMessageHeaders(ackResponse.getHeaders(), false);
 
                 if (ackResponse.isFault()) {
-                    // TODO L10N
-                    throw new RmException("Acknowledgement request ended in a SOAP fault", ackResponse);
+                    throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), ackResponse);
                 }
             }
         } catch (RmException ex) {
-            // TODO L10N
-            LOGGER.warning("Acknowledgement request failed", ex);
+            LOGGER.warning(LocalizationMessages.WSRM_1110_ACK_REQUEST_FAILED(), ex);
         } finally {
             if (ackResponse != null) {
                 ackResponse.consume();
@@ -371,8 +356,7 @@ abstract class ClientSession {
                         doneSignal.countDown();
                     }
                 } catch (UnknownSequenceException ex) {
-                    // TODO L10N
-                    LOGGER.severe("Unexpected exception occured while waiting for sequence acknowledgements", ex);
+                    LOGGER.severe(LocalizationMessages.WSRM_1111_UNEXPECTED_EXCEPTION_WHILE_WAITING_FOR_SEQ_ACKS(), ex);
                     doneSignal.countDown();
                 }
             }
@@ -381,15 +365,13 @@ abstract class ClientSession {
             if (configuration.getCloseSequenceOperationTimeout() > 0) {
                 boolean waitResult = doneSignal.await(configuration.getCloseSequenceOperationTimeout(), TimeUnit.MILLISECONDS);
                 if (!waitResult) {
-                    // TODO L10N
-                    LOGGER.info("Close sequence operation timed out for outbound sequence [" + outboundSequenceId + "]");
+                    LOGGER.info(LocalizationMessages.WSRM_1112_CLOSE_OUTBOUND_SEQUENCE_TIMED_OUT(outboundSequenceId));
                 }
             } else {
                 doneSignal.await();
             }
         } catch (InterruptedException ex) {
-            // TODO L10N
-            LOGGER.fine("Got interrupted while waiting for close sequence operation", ex);
+            LOGGER.fine(LocalizationMessages.WSRM_1113_CLOSE_OUTBOUND_SEQUENCE_INTERRUPTED(outboundSequenceId), ex);
         } finally {
             taskHandle.cancel(true);
         }

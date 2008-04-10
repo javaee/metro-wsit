@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Arrays;
@@ -85,8 +86,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public long getNextMessageId() throws MessageNumberRolloverException {
-        // TODO L10N
-        throw new UnsupportedOperationException("This operation is not supported in this Sequence implementation.");
+        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
     }
 
     public List<AckRange> getAcknowledgedMessageIds() {

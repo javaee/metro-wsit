@@ -47,6 +47,7 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -82,8 +83,7 @@ public class ProtocolCommunicator {
         if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
             this.configuration = configuration;
         } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalStateException("Unsupported addressing version"));
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION()));
         }
         this.soapMustUnderstandAttributeName = new QName(configuration.getSoapVersion().nsUri, "mustUnderstand");
         this.musterRequestPacket = new AtomicReference<Packet>();
@@ -109,8 +109,7 @@ public class ProtocolCommunicator {
             try {
                 strElement = scInitiator.startSecureConversation(musterRequestPacket.get().copy(false));
             } catch (WSSecureConversationException ex) {
-                // TODO L10N
-                LOGGER.severe("Unable to start secure conversation", ex);
+                LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
             }
         }
         return (strElement != null) ? strElement.getValue() : null;
@@ -169,9 +168,7 @@ public class ProtocolCommunicator {
         try {
             return (T) header.readAsJAXB(configuration.getRmVersion().jaxbUnmarshaller);
         } catch (JAXBException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(
-                    new RmException("Unable to unmarshall RM header [" + configuration.getRmVersion().namespaceUri + "#" + name + "]", ex));
+            throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(configuration.getRmVersion().namespaceUri + "#" + name), ex));
         }
     }
 
@@ -188,8 +185,7 @@ public class ProtocolCommunicator {
         try {
             return (T) message.readPayloadAsJAXB(configuration.getRmVersion().jaxbUnmarshaller);
         } catch (JAXBException e) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RmException("Unable to unmarshall message", e));
+            throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
         }
     }
 

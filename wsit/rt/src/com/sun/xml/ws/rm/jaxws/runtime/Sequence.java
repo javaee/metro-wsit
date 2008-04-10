@@ -1,5 +1,5 @@
 /*
- * $Id: Sequence.java,v 1.20 2008-02-26 06:32:55 ofung Exp $
+ * $Id: Sequence.java,v 1.1 2008-04-10 18:35:44 m_potociar Exp $
  */
 
 /*
@@ -37,8 +37,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.jaxws.runtime;
 
+import com.sun.xml.ws.rm.*;
+import com.sun.xml.ws.rm.jaxws.runtime.BufferFullException;
 import com.sun.xml.ws.rm.jaxws.runtime.SequenceConfig;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 

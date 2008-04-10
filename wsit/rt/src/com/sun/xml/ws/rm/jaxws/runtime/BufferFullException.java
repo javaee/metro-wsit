@@ -41,11 +41,15 @@
  * Created on February 13, 2006, 3:23 PM
  *
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.jaxws.runtime;
+
+import com.sun.xml.ws.rm.*;
 
 /**
  * Exception thrown for flow-control enabled sequences when an
  * attempt is made to add a message.
+ * 
+ * TODO: old runtime code - remove or reuse
  */
 public class BufferFullException extends RmException {
 
