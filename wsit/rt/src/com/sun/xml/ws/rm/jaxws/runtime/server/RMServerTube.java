@@ -423,10 +423,13 @@ public final class RMServerTube extends TubeBase {
                                 requestMessageId));
                     }
 
-                    headerList.add(Headers.create(
-                            getConfig().getAddressingVersion().relatesToTag,
-                            currentRequestMessage.getHeaders().getMessageID(getConfig().getAddressingVersion(), getConfig().getSoapVersion())));
-
+                    String relatestToId = currentRequestMessage.getHeaders().getMessageID(getConfig().getAddressingVersion(), getConfig().getSoapVersion());
+                    if (relatestToId != null) {
+                        headerList.add(Headers.create(
+                                getConfig().getAddressingVersion().relatesToTag,
+                                relatestToId));
+                    }
+                    
                     headerList.add(Headers.create(
                             getConfig().getAddressingVersion().actionTag,
                             getConfig().getRMVersion().sequenceAcknowledgementAction));
