@@ -679,6 +679,7 @@ public class TubelineAssemblyController {
         private void initializeJMAC() {
             // define default factory if it is not already defined
             // factory will be constructed on first getFactory call.
+            final ClassLoader loader = Thread.currentThread().getContextClassLoader();
             AccessController.doPrivileged(new PrivilegedAction() {
 
                 public Object run() {
@@ -689,7 +690,7 @@ public class TubelineAssemblyController {
                     }*/
                     AuthConfigFactory factory = AuthConfigFactory.getFactory();
                     if (factory == null || !(factory instanceof JMACAuthConfigFactory)) {
-                        AuthConfigFactory.setFactory(new JMACAuthConfigFactory());
+                        AuthConfigFactory.setFactory(new JMACAuthConfigFactory(loader));
                     }
                     return null; // nothing to return
                 }

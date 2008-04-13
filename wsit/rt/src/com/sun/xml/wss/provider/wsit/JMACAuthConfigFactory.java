@@ -84,7 +84,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
     
     private static final String CONF_FILE_NAME = "auth.conf";
     private static  RegStoreFileParser regStore;
-
+    private ClassLoader loader;
     static {
 	rwLock = new ReentrantReadWriteLock(true);
 	rLock = rwLock.readLock();
@@ -95,8 +95,8 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
 
     // XXX read declarative persistent repository construct an
     // register AuthConfigProviders as appropriate.
-    public JMACAuthConfigFactory() {
-        
+    public JMACAuthConfigFactory(ClassLoader loader) {
+        this.loader = loader;
         regStore = new RegStoreFileParser(System.getProperty("user.dir"),
               CONF_FILE_NAME, false);
 	_loadFactory();
@@ -521,14 +521,15 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
         return new String[] { layer, appContext };
     }
 
-    private static AuthConfigProvider _constructProvider
+    private AuthConfigProvider _constructProvider
     (String className, Map properties, AuthConfigFactory factory) {
         //XXX do we need doPrivilege here
         AuthConfigProvider provider = null;
 	if (className != null) {
 	    try {
-		ClassLoader loader = 
-		    Thread.currentThread().getContextClassLoader();
+                if (loader == null) {
+                    loader = Thread.currentThread().getContextClassLoader();
+                }
 		Class c = Class.forName(className, true, loader);
 		Constructor<AuthConfigProvider> constr =
 		    c.getConstructor(Map.class, AuthConfigFactory.class);
