@@ -172,6 +172,14 @@
         <get src="http://kohsuke.sfbay.sun.com/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
              dest="lib/runtime/xws-security.src.zip" />
     </target>
+
+    <target name="integrate-jaxrpc" 
+            description="integrate the last successful jaxrpc with jcaps fixes build">
+        <get src="http://kohsuke.sfbay/hudson/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-impl.jar"
+             dest="lib/runtime/jaxrpc-impl.jar" />
+        <get src="http://kohsuke.sfbay/hudson/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-spi.jar"
+             dest="lib/runtime/jaxrpc-spi.jar" />
+    </target>
     
     <target name="integrate-policy-hudson"
             description="integrates the last successful policy Hudson build">
