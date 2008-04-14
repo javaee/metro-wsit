@@ -1322,6 +1322,9 @@ public abstract class SecurityPipeBase implements Pipe {
         if(kerbConfig.getServicePrincipal() != null){
             props.put(DefaultCallbackHandler.KRB5_SERVICE_PRINCIPAL, kerbConfig.getServicePrincipal());
         }
+        if(kerbConfig.getCredentialDelegation() != null){
+            props.put(DefaultCallbackHandler.KRB5_CREDENTIAL_DELEGATION, kerbConfig.getCredentialDelegation());
+        }
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {

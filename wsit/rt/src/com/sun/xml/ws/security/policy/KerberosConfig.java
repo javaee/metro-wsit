@@ -47,4 +47,7 @@ public interface KerberosConfig {
     // Only required for client
     String getServicePrincipal();
     
+    // Only required for client 
+    String getCredentialDelegation();
+    
 }
