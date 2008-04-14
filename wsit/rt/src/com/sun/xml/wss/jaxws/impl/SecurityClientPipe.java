@@ -53,8 +53,11 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
@@ -100,7 +103,6 @@ import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import java.util.Properties;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
-import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 
 import java.util.logging.Level;
@@ -119,13 +121,15 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
 
     //private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
-    private Set wsscConfig = null;
-
+    private Set wsscConfig = null;    
+    private Engine fiberEngine;
+    private Tube tubeline;
     // Creates a new instance of SecurityClientPipe
     public SecurityClientPipe(WsitClientTubeAssemblyContext wsitContext, Pipe nextPipe) {
         super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextPipe);
         //scPlugin = new WSSCPlugin(null, wsscVer);        
         CallbackHandler handler = null;
+        tubeline = wsitContext.getTubelineHead();
         try {
             Iterator it = outMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
@@ -241,7 +245,16 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             }
         }
         //--------INVOKE NEXT PIPE------------
-        Packet ret = nextPipe.process(packet);
+        Packet ret = null;
+        Fiber fiber = null;
+        if(isSCCancel(packet) && fiberEngine != null && tubeline != null){
+            fiber = fiberEngine.createFiber();         
+        }
+        if(fiber != null){
+            ret = fiber.runSync(tubeline, packet);
+        }else{
+            ret = nextPipe.process(packet);
+        }
         // Could be OneWay
             if (ret == null || ret.getMessage() == null) {
             return ret;
@@ -336,6 +349,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
                             ((Token)scToken).getTokenId(), ctx);
+                    fiberEngine = Fiber.current().owner;
                 }catch(WSTrustException se){
                     log.log(Level.SEVERE,
                         LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -398,6 +412,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
                 issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+                fiberEngine = Fiber.current().owner;
             }catch(WSTrustException se){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WSSPIPE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
