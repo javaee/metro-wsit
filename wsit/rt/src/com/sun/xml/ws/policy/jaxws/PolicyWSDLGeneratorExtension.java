@@ -223,7 +223,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     @Override
     public void addOperationExtension(final TypedXmlWriter operation, final JavaMethod method) {
         LOGGER.entering();
-        selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, method);
+        selectAndProcessSubject(operation, WSDLOperation.class, ScopeType.OPERATION, (String)null);
         LOGGER.exiting();
     }
 
