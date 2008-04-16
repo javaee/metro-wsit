@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2008-04-15 17:55:01 $ by $Author: haroldcarr $</pre>
+<pre>Last Modified : $Date: 2008-04-16 15:17:21 $ by $Author: m_potociar $</pre>
 
 <h5>Updated: ??, 2008</h5>
 
@@ -239,38 +239,39 @@ services.</p>
 <hr>
 <h2><a name="rm"></a>Reliable Messaging Status</h2>
 
-<p><code> Updated: ??, 2008</code></p>
+<p><code> Updated: April 16, 2008</code></p>
 
 <p><b>New in this release</b></p>
 <ul>
-<li>...</li>
+    <li>New client-side RM code</li>
+    <li>New policy handling in RM (client side)</li>
+    <li>Improved generation of WS-Addressing headers in protocol messages (server side)</li>
 </ul>
 
 <p><b>Fixed in this release</b></p>
 <ul>
-    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=714">Issue 714</a>: Memory leak in the RM sequence.</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=550">Issue 550</a>: Disregarded HTTP500 error response on client side</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=734">Issue 734</a>: In RM1.0 the client does not automatically send ACK for the last message.</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=841">Issue 841</a>: The new client code does not include mandatory &lt;Sequence .../&gt; header in reqest/response communication.</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=850">Issue 850</a>: Close sequence operation expires immediately instead of never.</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=851">Issue 851</a>: A bug in the new client-side code causing the sequence in the message was not recognized</li>
+    <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=750">Issue 750</a>: Client side part of the problem is fixed.</li>
 </ul>
 
 <p><b>Known Issues</b></p>
 <ul>
     <li>
-        <a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=734">Issue 734</a>: RM client fails does not
-        send message acknowledgement for the response of the last messsage request.
-    </li>
-    <li>
-        <a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=750">Issue 750</a>: Performance problems 
-        that may be caused by sending too many messages within a single RM session.
-    </li>
-    <li>
-        <a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=763">Issue 763</a>: RM with SOAP/TCP enabled 
-        might get stuck after several rounds under some very specific conditions.
+        <a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=750">Issue 750</a>: 
+        Performance problems that may be caused by sending too many messages within a single RM session. Still possible on the server side.
     </li>
 </ul>
 
 <p><b>What is Not Implemented</b></p>
 <ul>
-<li><p>The RM implementation does not support the use of Member Submission
-WS-Addressing.</li>
+    <li>The RM implementation does not support the use of Member Submission WS-Addressing.</li>
+    <li>Make connection support</li>
+    <li>Make connection annonymous URIs support in protocol messages</li>
+    <li>Persistent RM sequences</li>
 </ul>
 
 
