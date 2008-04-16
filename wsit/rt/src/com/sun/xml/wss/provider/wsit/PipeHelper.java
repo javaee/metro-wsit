@@ -220,6 +220,7 @@ public class PipeHelper extends ConfigHelper {
     
     private static String getAppCtxt(Map map) {
         String rvalue = null;
+        /*
         WSEndpoint wse = 
             (WSEndpoint) map.get(PipeConstants.ENDPOINT);
         // endpoint
@@ -228,7 +229,7 @@ public class PipeHelper extends ConfigHelper {
         // client reference
         } else {
             rvalue = null;
-        }
+        }*/
         return rvalue;
     }
 
