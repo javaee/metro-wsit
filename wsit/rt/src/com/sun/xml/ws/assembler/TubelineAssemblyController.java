@@ -372,7 +372,7 @@ public class TubelineAssemblyController {
 
         public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
             //TEMP: uncomment this ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
-            ServerPipelineHook[] hooks =  getserverTubeLineHooks();
+            ServerPipelineHook[] hooks =  getServerTubeLineHooks();
             ServerPipelineHook hook = null;
             if (hooks != null && hooks.length > 0 && hooks[0] instanceof com.sun.xml.wss.provider.wsit.ServerPipeCreator) {
                 //we let it override GF defaults
@@ -421,20 +421,25 @@ public class TubelineAssemblyController {
         }
 
         public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
-            //Look for pipe-creation hook exposed in contaner.
-            ClientPipelineHook hook = context.getContainer().getSPI(ClientPipelineHook.class);
-            if (hook == null) {
-                //If not found, look for pipe-creation hook using services
-                ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
-                if (hooks != null && hooks.length > 0) {
-                    hook = hooks[0];
-                    if (hook instanceof com.sun.xml.wss.provider.wsit.ClientPipeCreator) {
+            ClientPipelineHook hook = null;
+            ClientPipelineHook[] hooks = getClientTublineHooks(context);
+            if (hooks != null && hooks.length > 0) {
+                for (ClientPipelineHook h : hooks) {
+                    if (h instanceof com.sun.xml.wss.provider.wsit.ClientPipeCreator) {
+                        //give it preference
+                        hook = h;
                         //set the Factory to JMACAuthConfigFactory if it is not already set to
                         //something else.
                         initializeJMAC();
+                        break;
                     }
                 }
             }
+            if (hook == null) {
+                //Look for pipe-creation hook exposed in contaner.
+                hook = context.getContainer().getSPI(ClientPipelineHook.class);
+            }
+            
             //If either mechanism for finding a ClientPipelineHook has found one, use it.
             if (hook != null) {
                 // TODO ask security to implement the hook.createSecurityTube(context);
@@ -469,6 +474,21 @@ public class TubelineAssemblyController {
             } else {
                 return context.getTubelineHead();
             }
+        }
+
+        private ClientPipelineHook[] getClientTublineHooks(WsitClientTubeAssemblyContext context) {
+              try {
+                ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
+                if (hooks != null && hooks.length > 0) {
+                    return hooks;
+                }
+            } catch (ServiceConfigurationError ex) {
+                if (ex.getCause() instanceof InstantiationException) {
+                    return new ClientPipelineHook[0];
+                }
+                return null;
+            }
+            return null;
         }
 
         /**
@@ -544,7 +564,7 @@ public class TubelineAssemblyController {
             return ServiceFinder.find(svcClass).toArray();
         }
 
-        private ServerPipelineHook[] getserverTubeLineHooks() {
+        private ServerPipelineHook[] getServerTubeLineHooks() {
             // The ServerPipeline Hook in GF fails to create the Pipe because GF ServerPipeCreator does not have a
             // Default CTOR.
             //TODO: change this method impl later.

@@ -219,8 +219,16 @@ public class PipeHelper extends ConfigHelper {
     
     
     private static String getAppCtxt(Map map) {
-
         String rvalue = null;
+        WSEndpoint wse = 
+            (WSEndpoint) map.get(PipeConstants.ENDPOINT);
+        // endpoint
+        if (wse != null) {
+            rvalue = getServerName(wse) + ":" + getEndpointURI(wse);
+        // client reference
+        } else {
+            rvalue = null;
+        }
         return rvalue;
     }
 
@@ -231,4 +239,13 @@ public class PipeHelper extends ConfigHelper {
             info.getMap().put(PipeConstants.WSDL_MODEL,model);
         }
     }
+     private static String getServerName(WSEndpoint wse) {
+         //TODO: FIXME
+        return "localhost";
+    }
+     
+    private static String getEndpointURI(WSEndpoint wse) {
+        return wse.getPort().getAddress().getURI().toASCIIString();
+    }
+
 }
