@@ -139,7 +139,7 @@
             <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${extrajar-tmpdir}"/>
             <updateManifestWithVersion file="${extrajar-tmpdir}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
             <concatmanifest tempdir="${extrajar-tmpdir}" manifest="${extrajar-tmpdir}/MANIFEST.MF">
-                <fileset dir="@{libdir}" includes="activation.jar,http.jar,jsr250-api.jar,mail-1.4.jar">
+                <fileset dir="@{libdir}" includes="jmac-api.jar,activation.jar,http.jar,jsr250-api.jar,mail-1.4.jar">
                     <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
