@@ -58,6 +58,7 @@ import java.util.logging.Logger;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.security.auth.message.config.AuthConfigProvider;
 import javax.security.auth.message.config.RegistrationListener;
+import javax.xml.ws.WebServiceException;
     
 /**
  * This class implements methods in the abstract class AuthConfigFactory.
@@ -439,6 +440,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
 
             } catch (IOException ex) {
                 Logger.getLogger(JMACAuthConfigFactory.class.getName()).log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
             } finally {
                 try {
                     is.close();
