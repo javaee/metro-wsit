@@ -102,7 +102,7 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
     /**
      * Creates a new instance of WSTrustClientContractImpl
      */
-    public WSTrustClientContractImpl(Configuration config) {
+    public WSTrustClientContractImpl() {
         //this.config = config;
     }
     
