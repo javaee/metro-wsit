@@ -49,7 +49,7 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenProvider;
 public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
     
     public void issue(IssuedTokenContext ctx)throws WSTrustException{
-        TrustPlugin tp = WSTrustFactory.newTrustPlugin(null);
+        TrustPlugin tp = WSTrustFactory.newTrustPlugin();
         tp.process(ctx);
     } 
     

@@ -119,11 +119,9 @@ public class TrustPluginImpl implements TrustPlugin {
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
-    private final Configuration config;
-    
     /** Creates a new instance of TrustPluginImpl */
-    public TrustPluginImpl(Configuration config) {
-        this.config = config;
+    public TrustPluginImpl() {
+        
     }
     
     public void process(IssuedTokenContext itc) throws WSTrustException{
@@ -170,7 +168,7 @@ public class TrustPluginImpl implements TrustPlugin {
              
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
        
-            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract(config);
+            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();
             contract.handleRSTR(request, result, itc);
             KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
             if (keyPair != null){
@@ -185,6 +183,10 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
             throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
+    }
+    
+    public void processValidate(IssuedTokenContext itc) throws WSTrustException{
+        // Get STS address and MEX address or service name, port name and namespace
     }
      
     private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException{

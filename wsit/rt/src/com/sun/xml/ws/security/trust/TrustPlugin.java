@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.8 2008-02-26 06:33:16 ofung Exp $
+ * $Id: TrustPlugin.java,v 1.9 2008-04-20 17:04:31 jdg6688 Exp $
  */
 
 /*
@@ -40,7 +40,6 @@
 
 package com.sun.xml.ws.security.trust;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.IssuedTokenContext;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
@@ -48,4 +47,5 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 public interface TrustPlugin {
     public void process(IssuedTokenContext ctx) throws WSTrustException;
+    public void processValidate(IssuedTokenContext ctx) throws WSTrustException;
 }

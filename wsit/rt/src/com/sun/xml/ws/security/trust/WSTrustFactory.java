@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.15 2008-02-26 06:33:16 ofung Exp $
+ * $Id: WSTrustFactory.java,v 1.16 2008-04-20 17:04:31 jdg6688 Exp $
  */
 
 /*
@@ -77,8 +77,8 @@ public class WSTrustFactory {
     /**
      * return a concrete implementation for the TrustPlugin.
      */
-    public static TrustPlugin newTrustPlugin(final Configuration config) {
-        return new TrustPluginImpl(config);
+    public static TrustPlugin newTrustPlugin() {
+        return new TrustPluginImpl();
     }
     
     /**
@@ -136,8 +136,8 @@ public class WSTrustFactory {
     /**
      * return a concrete implementor for WS-Trust Client Contract
      */
-    public  static WSTrustClientContract createWSTrustClientContract(final Configuration config) {
-        return new WSTrustClientContractImpl(config);
+    public  static WSTrustClientContract createWSTrustClientContract() {
+        return new WSTrustClientContractImpl();
     }
     
      /**

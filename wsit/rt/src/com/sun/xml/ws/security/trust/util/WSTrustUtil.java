@@ -48,10 +48,12 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
 import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
 
 
+import com.sun.xml.wss.saml.assertion.saml20.jaxb20.Attribute;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
@@ -62,6 +64,7 @@ import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
 
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
@@ -102,6 +105,19 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import java.security.cert.X509Certificate;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import java.util.Iterator;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Text;
+
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+
+import java.util.Map;
+import java.util.Set;
+import javax.xml.bind.JAXBContext;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Node;
 
 
 /**
@@ -447,5 +463,38 @@ public class WSTrustUtil {
         encKey.setKeyInfo(keyinfo);
         
         return encKey;
+    }
+    
+    public static Element addAttributes(Element assertion, Map<QName, List<String>> claimedAttrs)throws WSTrustException {
+        try {
+            Document doc = assertion.getOwnerDocument();
+            String samlNS = assertion.getNamespaceURI();
+            String samlPrefix = assertion.getPrefix();
+            NodeList asList = assertion.getElementsByTagNameNS(samlNS, "AttributeStatement");
+            if (asList.getLength() > 0){
+               Node as = asList.item(0);
+                final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
+                for(Map.Entry<QName, List<String>> entry : entries){
+                    final QName attrKey = entry.getKey();
+                    final List<String> values = entry.getValue();
+                    Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
+                    attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
+                    attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
+  
+                    Iterator valueIt = values.iterator();
+                    while (valueIt.hasNext()){
+                        Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+                        Text text = doc.createTextNode((String)valueIt.next());
+                        attrValueEle.appendChild(text);
+                        attrEle.appendChild(attrValueEle);
+                    }
+                    as.appendChild(attrEle);
+                }
+            }
+            return assertion;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            throw new WSTrustException(ex.getMessage());
+        }
     }
 }

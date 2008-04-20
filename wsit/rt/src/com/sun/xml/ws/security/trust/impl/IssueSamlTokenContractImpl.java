@@ -435,7 +435,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             final Advice advice = samlFac.createAdvice(null, null, null);
             
             com.sun.xml.wss.saml.Subject subj = null;
-            final List<Attribute> attrs = new ArrayList<Attribute>();
+            //final List<Attribute> attrs = new ArrayList<Attribute>();
+            QName idName = null;
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
@@ -444,23 +445,34 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
                         final NameIdentifier nameId = samlFac.createNameIdentifier(values.get(0), attrKey.getNamespaceURI(), null);
                         subj = samlFac.createSubject(nameId, subjectConfirm);
-                    }else{
-                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
-                        attrs.add(attr);
-                    }
+                        idName = attrKey;
+                    }//else{
+                       // final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
+                        //attrs.add(attr);
+                    //}
                 }
             }
             
+            if (idName != null){
+                claimedAttrs.remove(idName);
+            }
+            
             final List<Object> statements = new ArrayList<Object>();
-            if (attrs.isEmpty()){
+           //if (attrs.isEmpty()){
+            if (claimedAttrs.isEmpty()){
                 final AuthenticationStatement statement = samlFac.createAuthenticationStatement(null, issuerInst, subj, null, null);
                 statements.add(statement); 
             }else{
-                final AttributeStatement statement = samlFac.createAttributeStatement(subj, attrs);
+                final AttributeStatement statement = samlFac.createAttributeStatement(subj, null);
                 statements.add(statement);
             }
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
+            if (!claimedAttrs.isEmpty()){
+                Element assertionEle = assertion.toElement(null);
+                assertionEle = WSTrustUtil.addAttributes(assertionEle, claimedAttrs);
+                return samlFac.createAssertion(assertionEle);
+            }
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
