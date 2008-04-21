@@ -36,27 +36,19 @@
 
 package com.sun.xml.wss.provider.wsit;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.rmi.UnmarshalException;
 
 import java.security.AccessController;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
 
 import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
-import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ClientAuthConfig;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.WebServiceException;
 
 //import com.sun.ejb.Container;
@@ -83,15 +75,16 @@ import javax.xml.ws.WebServiceException;
 //import com.sun.enterprise.util.LocalStringManagerImpl;
 //import com.sun.enterprise.util.io.FileUtils;
 
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+
 
 public class PipeHelper extends ConfigHelper {
 //    private static AuditManager auditManager =
@@ -220,16 +213,19 @@ public class PipeHelper extends ConfigHelper {
     
     private static String getAppCtxt(Map map) {
         String rvalue = null;
-        /*
         WSEndpoint wse = 
             (WSEndpoint) map.get(PipeConstants.ENDPOINT);
         // endpoint
         if (wse != null) {
-            rvalue = getServerName(wse) + ":" + getEndpointURI(wse);
-        // client reference
+            rvalue = wse.getPortName().toString();
         } else {
-            rvalue = null;
-        }*/
+             // client reference
+            WSService service = (WSService)map.get(PipeConstants.SERVICE);
+            if (service != null) {
+                rvalue = service.getServiceName().toString();
+            } 
+            
+        }
         return rvalue;
     }
 
