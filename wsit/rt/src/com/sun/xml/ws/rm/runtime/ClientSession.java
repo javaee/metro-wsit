@@ -35,6 +35,9 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
+import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
+import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;

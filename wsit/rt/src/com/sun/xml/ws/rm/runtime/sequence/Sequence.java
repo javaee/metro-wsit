@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import java.util.List;
@@ -44,13 +44,21 @@ import java.util.List;
  */
 public interface Sequence {
 
+    public static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly
+    public static final long MIN_MESSAGE_ID = 1;
+    public static final long MAX_MESSAGE_ID = 9223372036854775807L;
+    
     public enum Status {
 
         CREATING,
         CREATED,
         CLOSING,
         CLOSED,
-        TERMINATING
+        TERMINATING;
+
+        public static Status ordinalToStatus(int ordinal) {
+            return Status.values()[ordinal];
+        }
     }
 
     public class AckRange {
@@ -141,7 +149,7 @@ public interface Sequence {
      * @return {@code true} if the AckRequested flag is set, {@code false} otherwise
      */
     public boolean isAckRequested();
-    
+
     /**
      * Closes the session. Subsequent calls to this method have no effect.
      * <p>

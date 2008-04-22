@@ -33,10 +33,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.rm.runtime.sequence.Sequence.Status;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -45,7 +48,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class InMemorySequenceManager implements SequenceManager {
+public class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();
     private final ReadWriteLock sequenceLock = new ReentrantReadWriteLock();
@@ -73,11 +76,15 @@ public class InMemorySequenceManager implements SequenceManager {
     }
     
     public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        return registerSequence(new OutboundSequence(sequenceId, expirationTime));
+        SequenceData data = new InMemorySequenceData(new LinkedList<Long>(), sequenceId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
+        
+        return registerSequence(new OutboundSequence(data));
     }
 
     public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        return registerSequence(new InboundSequence(sequenceId, expirationTime));
+        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
+        
+        return registerSequence(new InboundSequence(data));
     }
 
     public String generateSequenceUID() {

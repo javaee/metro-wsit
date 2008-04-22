@@ -33,11 +33,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
@@ -50,14 +49,13 @@ import java.util.TreeSet;
 public class InboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
-    private long lastAckedIndex = AbstractSequence.UNSPECIFIED_MESSAGE_ID;
 
-    public InboundSequence(String id, long expirationTime) {
-        super(id, expirationTime, new TreeSet<Long>());
+    public InboundSequence(SequenceData data) {
+        super(data);
     }
 
     public long getLastMessageId() {
-        return lastAckedIndex;
+        return data.getLastMessageId();
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
@@ -71,24 +69,27 @@ public class InboundSequence extends AbstractSequence {
     }
 
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
-        if (messageId > lastAckedIndex) {
-            // new message - note that this will work even for the first message that arrives
-            if (lastAckedIndex + 1 != messageId) {
-                // some message(s) got lost...
-                for (long lostIndex = lastAckedIndex + 1; lostIndex < messageId; lostIndex++) {
-                    unackedIndexes.add(lostIndex);
+        try {
+            data.acquireMessageIdDataReadWriteLock();
+            
+            if (messageId > data.getLastMessageId()) {
+                // new message - note that this will work even for the first message that arrives
+                if (data.getLastMessageId() + 1 != messageId) {
+                    // some message(s) got lost...
+                    for (long lostMessageId = data.getLastMessageId() + 1; lostMessageId < messageId; lostMessageId++) {
+                        data.addUnackedMessageId(lostMessageId);
+                    }
+                }
+                data.updateLastMessageId(messageId);
+            } else if (data.getLastMessageId() == messageId) {
+                // resent message
+                if (!data.removeUnackedMessageId(messageId)) {
+                    // duplicate message
+                    throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
                 }
             }
-            lastAckedIndex = messageId;
-        } else if (lastAckedIndex == messageId) {
-            // resent message
-            if (unackedIndexes.contains(messageId)) {
-                // lost message arrived
-                unackedIndexes.remove(messageId);
-            } else {
-                // duplicate message
-                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
-            }
+        } finally {
+            data.releaseMessageIdDataReadWriteLock();
         }
     }
 }

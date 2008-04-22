@@ -34,42 +34,24 @@
  * holder.
  */
 
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
- * Inicates that the sequence with given sequence identifier is not available.
- * 
- * This exceptions is used under the following conditions:
- *  <ul>
- *      <li>sequence with such {@code sequenceId} is not registered with a given sequence manager</li>
- *  </ul>
- * 
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class UnknownSequenceException extends RmException {
-    private final String sequenceId;
+public class IllegalMessageIdentifierException extends RmException {
+    private final long messageId;
     
-    /**
-     * Constructs an instance of <code>NoSuchSequenceException</code> for the sequence with {@code sequenceId} identifier.
-     * @param sequenceId the identifier of the unknown sequence.
-     */
-    public UnknownSequenceException(String sequenceId) {
-        super(UnknownSequenceException.createErrorMessage(sequenceId));
-        this.sequenceId = sequenceId;
+    public IllegalMessageIdentifierException(long messageIdentifier) {
+        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(messageIdentifier));
+        this.messageId = messageIdentifier;
     }
 
-    /**
-     * Returns the identifier of the unknown sequence
-     * @return the unknown sequence identifier
-     */
-    public String getSequenceId() {
-        return sequenceId;
-    }        
-    
-    private static String createErrorMessage(String sequenceId) {
-        return LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(sequenceId);
-    } 
+    public long getMessageId() {
+        return messageId;
+    }
 }

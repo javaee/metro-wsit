@@ -33,13 +33,20 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface SequenceManager {
+    
+    /**
+     * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
+     * 
+     * @param sequenceId the unique sequence identifier
+     */
+    public void closeSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
      * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
@@ -61,6 +68,13 @@ public interface SequenceManager {
      * means that this sequence never expires.
      */
     public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
+    
+    /**
+     * Generates a unique identifier of a sequence
+     * 
+     * @return new unique sequence identifier which can be used to construct a new sequence.
+     */
+    public String generateSequenceUID();
 
     /**
      * Retrieves an existing sequence from the internal sequence storage
@@ -84,24 +98,10 @@ public interface SequenceManager {
     public boolean isValid(String sequenceId);
     
     /**
-     * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     */
-    public void closeSequence(String sequenceId) throws UnknownSequenceException;
-    
-    /**
      * Terminates an existing sequence by calling the {@link Sequence#preDestroy()} method. In addition to this, the terminated
      * sequence is removed from the internal sequence storage
      * 
      * @param sequenceId the unique sequence identifier
      */
     public void terminateSequence(String sequenceId) throws UnknownSequenceException;
-    
-    /**
-     * Generates a unique identifier of a sequence
-     * 
-     * @return new unique sequence identifier which can be used to construct a new sequence.
-     */
-    public String generateSequenceUID();
 }

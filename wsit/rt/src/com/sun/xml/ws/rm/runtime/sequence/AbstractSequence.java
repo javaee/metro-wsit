@@ -33,11 +33,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,19 +49,10 @@ import java.util.List;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractSequence implements Sequence {
-    private static final RmLogger LOGGER = RmLogger.getLogger(AbstractSequence.class);
+public abstract class AbstractSequence implements Sequence {    
     
-    protected static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly
-    protected static final long MIN_MESSAGE_ID = 1;
-    protected static final long MAX_MESSAGE_ID = 9223372036854775807L;
-    
-    protected final Collection<Long> unackedIndexes;
-    private final String id;
-    private final long expirationTime;
-    private Status status;
-    private boolean ackRequestedFlag;
-    
+    protected final SequenceData data;
+        
     /**
      * Initializes instance fields.
      * 
@@ -75,14 +65,12 @@ public abstract class AbstractSequence implements Sequence {
      *        for keeping the storage sorted! Otherwise a call to {@link #getAcknowledgedMessageIds()} may return undefined
      *        results.</b>
      */
-    protected AbstractSequence(String id, long expirationTime, Collection<Long> unackedMessageIdentifiersStorage) {
-        this.id = id;
-        this.expirationTime = expirationTime;
-        this.unackedIndexes = unackedMessageIdentifiersStorage;
+    protected AbstractSequence(SequenceData data) {
+        this.data = data;
     }
 
     public String getId() {
-        return id;
+        return data.getSequenceId();
     }
 
     public long getNextMessageId() throws MessageNumberRolloverException {
@@ -90,19 +78,21 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public List<AckRange> getAcknowledgedMessageIds() {
-         if (getLastMessageId() == UNSPECIFIED_MESSAGE_ID) {
+         if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
             // nothing acknowledged yet
             return Collections.emptyList();
-        } else if (unackedIndexes.isEmpty()) {
+        } else if (data.noUnackedMessageIds()) {
             // no unacked indexes - we have a single acked range
-            return Arrays.asList(new AckRange(MIN_MESSAGE_ID, getLastMessageId()));
+            return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, getLastMessageId()));
         } else {
             // need to calculate ranges from the unacked indexes
             List<AckRange> result = new LinkedList<Sequence.AckRange>();
 
+            Collection<Long> unackedIndexes = data.getAllUnackedIndexes();
+            
             long lastUnacked = unackedIndexes.iterator().next();
-            if (lastUnacked > MIN_MESSAGE_ID) {
-                result.add(new AckRange(MIN_MESSAGE_ID, lastUnacked - 1));
+            if (lastUnacked > Sequence.MIN_MESSAGE_ID) {
+                result.add(new AckRange(Sequence.MIN_MESSAGE_ID, lastUnacked - 1));
             }
             for (long unackedIndex : unackedIndexes) {
                 if (unackedIndex > lastUnacked + 1) {
@@ -116,39 +106,39 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean hasPendingAcknowledgements() {
-        return !unackedIndexes.isEmpty();
+        return !data.noUnackedMessageIds();
     }
 
     public Status getStatus() {
-        return status;
+        return data.getStatus();
     }
 
     protected void setStatus(Status newStatus) {
-        status = newStatus;
+        data.setStatus(newStatus);
     }
 
-    public final void setAckRequestedFlag() {
-        ackRequestedFlag = true;
+    public void setAckRequestedFlag() {
+        data.setAckRequestedFlag(true);
     }
 
-    protected final void clearAckRequestedFlag() {
-        ackRequestedFlag = false;        
+    protected void clearAckRequestedFlag() {
+        data.setAckRequestedFlag(false);        
     }
     
     public boolean isAckRequested() {
-        return ackRequestedFlag;
+        return data.isAckRequestedFlag();
     }
 
     public void close() {
-        setStatus(Status.CLOSED);
+        data.setStatus(Status.CLOSED);
     }
 
     public boolean isClosed() {
-        return status == Status.CLOSING || status == Status.CLOSED || status == Status.TERMINATING;
+        return data.getStatus() == Status.CLOSING || data.getStatus() == Status.CLOSED || data.getStatus() == Status.TERMINATING;
     }
 
     public boolean isExpired() {
-        return (expirationTime == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < expirationTime;
+        return (data.getExpirationTime() == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < data.getExpirationTime();
     }
 
     public void preDestroy() {

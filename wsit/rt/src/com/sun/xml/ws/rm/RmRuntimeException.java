@@ -33,28 +33,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+
+package com.sun.xml.ws.rm;
+
+import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class SequenceManagerFactory {
+public class RmRuntimeException extends WebServiceException {
 
-    private static SequenceManagerFactory INSTANCE;
-
-    public static SequenceManagerFactory getInstance() {
-        // TODO: load from external configuration and revert to default if not present
-        return new SequenceManagerFactory() {
-            @Override
-            public SequenceManager getSequenceManager() {
-                return new InMemorySequenceManager();
-            }
-        };
+    public RmRuntimeException(Throwable cause) {
+        super(cause);
     }
 
-    protected SequenceManagerFactory() {
+    public RmRuntimeException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public abstract SequenceManager getSequenceManager();
+    public RmRuntimeException(String message) {
+        super(message);
+    }
 }

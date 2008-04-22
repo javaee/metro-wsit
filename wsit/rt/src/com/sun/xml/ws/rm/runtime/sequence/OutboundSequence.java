@@ -33,17 +33,15 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * TODO javadoc
@@ -53,63 +51,74 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OutboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
-    private final AtomicLong lastMessageId;
 
-    public OutboundSequence(String id, long expirationTime) {
-        super(id, expirationTime, new LinkedList<Long>());
-        this.lastMessageId = new AtomicLong(AbstractSequence.MIN_MESSAGE_ID - 1);
+    public OutboundSequence(SequenceData data) {
+        super(data);
     }
 
     @Override
     public long getNextMessageId() throws MessageNumberRolloverException {
-        long nextId = lastMessageId.incrementAndGet();
-        if (nextId > MAX_MESSAGE_ID) {
-            throw LOGGER.logSevereException(new MessageNumberRolloverException(this.getId(), nextId));
-        }
+        try {
+            data.acquireMessageIdDataReadWriteLock();
+            
+            long nextId = data.incrementAndGetLastMessageId();
+            if (nextId > Sequence.MAX_MESSAGE_ID) {
+                throw LOGGER.logSevereException(new MessageNumberRolloverException(data.getSequenceId(), nextId));
+            }
 
-        unackedIndexes.add(nextId);
-        return nextId;
+            data.addUnackedMessageId(nextId);
+            return nextId;
+        } finally {
+            data.releaseMessageIdDataReadWriteLock();
+        }
     }
 
     public long getLastMessageId() {
-        return lastMessageId.longValue();
+        return data.getLastMessageId();
     }
 
     public void acknowledgeMessageId(long messageId) {
         // NOTE: This method will most likely not be used in our implementation as we expect range-based 
         //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
-        unackedIndexes.remove(messageId);
+        data.removeUnackedMessageId(messageId);
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
-        if (ranges == null || ranges.isEmpty() || unackedIndexes.isEmpty()) {
-            return;
-        }
+        try {
+            data.acquireMessageIdDataReadWriteLock();
+            
+            if (ranges == null || ranges.isEmpty() || data.noUnackedMessageIds()) {
+                return;
+            }
 
-        if (ranges.size() > 1) {
-            Collections.sort(ranges, new Comparator<AckRange>() {
+            if (ranges.size() > 1) {
+                Collections.sort(ranges, new Comparator<AckRange>() {
 
-                public int compare(AckRange range1, AckRange range2) {
-                    if (range1.lower <= range2.lower) {
-                        return -1;
-                    } else {
-                        return 1;
+                    public int compare(AckRange range1, AckRange range2) {
+                        if (range1.lower <= range2.lower) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
                     }
+                });
+            }
+            Iterator<Long> unackedIterator = data.getAllUnackedIndexes().iterator();
+            Iterator<AckRange> rangeIterator = ranges.iterator();
+            AckRange currentRange = rangeIterator.next();
+            while (unackedIterator.hasNext()) {
+                long unackedIndex = unackedIterator.next();
+                if (unackedIndex >= currentRange.lower && unackedIndex <= currentRange.upper) {
+                    unackedIterator.remove();
+                } else if (rangeIterator.hasNext()) {
+                    currentRange = rangeIterator.next();
+                } else {
+                    break; // no more acked ranges
+
                 }
-            });
-        }
-        Iterator<Long> unackedIterator = unackedIndexes.iterator();
-        Iterator<AckRange> rangeIterator = ranges.iterator();
-        AckRange currentRange = rangeIterator.next();
-        while (unackedIterator.hasNext()) {
-            long unackedIndex = unackedIterator.next();
-            if (unackedIndex >= currentRange.lower && unackedIndex <= currentRange.upper) {
-                unackedIterator.remove();
-            } else if (rangeIterator.hasNext()) {
-                currentRange = rangeIterator.next();
-            } else {
-                break; // no more acked ranges
-            }           
+            }
+        } finally {
+            data.releaseMessageIdDataReadWriteLock();
         }
     }
 }

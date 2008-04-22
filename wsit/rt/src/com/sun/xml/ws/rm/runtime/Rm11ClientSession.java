@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
@@ -48,7 +49,8 @@ import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.runtime.Sequence.AckRange;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rm.v200702.AcceptType;
 import com.sun.xml.ws.rm.v200702.AckRequestedElement;
 import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
