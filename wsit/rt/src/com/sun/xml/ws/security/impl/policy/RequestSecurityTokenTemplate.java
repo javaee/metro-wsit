@@ -201,17 +201,17 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                     }else if(PolicyUtil.isTrustTokenType(assertion)){
                         this.tokenType = assertion.getValue();
                     }else if(PolicyUtil.isRequestType(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.requestType = assertion.getValue();
                     }else if(PolicyUtil.isAuthenticationType(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.authenticationType = assertion.getValue();
                     }else if(PolicyUtil.isSignatureAlgorithm(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.sigAlgo = assertion.getValue();
                     }else if(PolicyUtil.isEncryptionAlgorithm(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.encAlgo = assertion.getValue();
                     }else if(PolicyUtil.isCanonicalizationAlgorithm(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.canonAlgo = assertion.getValue();
                     }else if(PolicyUtil.isComputedKeyAlgorithm(assertion)){
-                        this.tokenType = assertion.getValue();
+                        this.computedKeyAlgo = assertion.getValue();
                     }else if(PolicyUtil.isEncryption(assertion)){
                         isEncRequired = true;
                     }else if(PolicyUtil.isClaimsElement(assertion)) {
