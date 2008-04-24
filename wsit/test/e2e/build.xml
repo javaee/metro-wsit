@@ -37,7 +37,7 @@
 -->
 
 <!--
- $Id: build.xml,v 1.36 2008-02-26 06:35:41 ofung Exp $
+ $Id: build.xml,v 1.37 2008-04-24 16:04:34 m_potociar Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
@@ -219,7 +219,7 @@
                 
                 <!-->
                 <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
-		        <jvmarg value="-Xdebug"/>
+		<jvmarg value="-Xdebug"/>
                 <!-->
             </java>
             
