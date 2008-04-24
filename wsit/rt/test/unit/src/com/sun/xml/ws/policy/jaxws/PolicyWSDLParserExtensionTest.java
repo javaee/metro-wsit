@@ -763,4 +763,38 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         assertTrue(assertionSet.contains(new QName("http://wsit.test/", "Echo2Exception")));
         
     }
+    
+    public void testNamespaceImport() throws PolicyException {
+        PolicyMap map = getPolicyMap("parser/testNamespaceImport.wsdl", false);
+
+        Policy policy = map.getEndpointEffectivePolicy(PolicyMap.createWsdlEndpointScopeKey(
+                new QName("STSUserAuth_svc_app", "casaService1"),
+                new QName("STSUserAuth_svc_app", "SecuredEchoPort")));
+        assertEquals("casaBinding1Policy", policy.getId());
+        
+        policy = map.getOperationEffectivePolicy(PolicyMap.createWsdlOperationScopeKey(
+                new QName("STSUserAuth_svc_app", "casaService1"),
+                new QName("STSUserAuth_svc_app", "SecuredEchoPort"),
+                new QName("STSUserAuth_svc_app", "EchoServiceOperation")));
+        assertEquals("casaBinding1_operation_Policy", policy.getId());
+        
+        policy = map.getInputMessageEffectivePolicy(PolicyMap.createWsdlMessageScopeKey(
+                new QName("STSUserAuth_svc_app", "casaService1"),
+                new QName("STSUserAuth_svc_app", "SecuredEchoPort"),
+                new QName("STSUserAuth_svc_app", "EchoServiceOperation")));
+        assertEquals("casaBinding1_input1_Policy", policy.getId());
+
+        policy = map.getOutputMessageEffectivePolicy(PolicyMap.createWsdlMessageScopeKey(
+                new QName("STSUserAuth_svc_app", "casaService1"),
+                new QName("STSUserAuth_svc_app", "SecuredEchoPort"),
+                new QName("STSUserAuth_svc_app", "EchoServiceOperation")));
+        assertEquals("casaBinding1_output1_Policy", policy.getId());
+
+        policy = map.getFaultMessageEffectivePolicy(PolicyMap.createWsdlFaultMessageScopeKey(
+                new QName("STSUserAuth_svc_app", "casaService1"),
+                new QName("STSUserAuth_svc_app", "SecuredEchoPort"),
+                new QName("STSUserAuth_svc_app", "EchoServiceOperation"),
+                new QName("STSUserAuth_svc_app", "fault1")));
+        assertEquals("casaBinding1_fault1_Policy", policy.getId());
+    }
 }

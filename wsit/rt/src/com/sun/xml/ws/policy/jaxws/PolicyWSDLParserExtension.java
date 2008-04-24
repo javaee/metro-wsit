@@ -853,6 +853,8 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                         for (WSDLBoundOperation boundOperation : port.getBinding().getBindingOperations()) {
 
                             final WSDLOperation operation = boundOperation.getOperation();
+                            final QName operationName = new QName(boundOperation.getBoundPortType().getName().getNamespaceURI(), boundOperation.getName().getLocalPart());
+                            // We store the message and portType/operation under the same namespace as the binding/operation so that we can match them up later
                             if ( // handler for operation scope -- by boundOperation
                                     getHandlers4BoundOperationMap().containsKey(boundOperation)) {
                                 getPolicyMapBuilder()
@@ -863,7 +865,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,boundOperation
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()));
+                                        ,operationName));
                             } // endif handler for binding:operation scope
                             if ( // handler for operation scope -- by operation map
                                     getHandlers4OperationMap().containsKey(operation)) {
@@ -875,7 +877,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,operation
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()));
+                                        ,operationName));
                             } // endif for portType:operation scope
                             // end operation scope
 
@@ -891,7 +893,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,BuilderHandlerMessageScope.Scope.InputMessageScope
                                             ,service.getName()
                                             ,port.getName()
-                                            ,operation.getName()
+                                            ,operationName
                                             ,null)
                                     );
                                 }
@@ -907,7 +909,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,BuilderHandlerMessageScope.Scope.InputMessageScope
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()
+                                        ,operationName
                                         ,null));
                             } // endif binding op input msg
                             if ( null != input    // portType op input msg
@@ -921,7 +923,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,BuilderHandlerMessageScope.Scope.InputMessageScope
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()
+                                        ,operationName
                                         ,null));
                             } // endif portType op input msg
                             // end input message scope
@@ -938,7 +940,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,BuilderHandlerMessageScope.Scope.OutputMessageScope
                                             ,service.getName()
                                             ,port.getName()
-                                            ,operation.getName()
+                                            ,operationName
                                             ,null)
                                     );
                                 }
@@ -954,7 +956,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,BuilderHandlerMessageScope.Scope.OutputMessageScope
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()
+                                        ,operationName
                                         ,null));
                             } // endif binding op output msg
                             if ( null != output // portType op output msg
@@ -968,15 +970,16 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                         ,BuilderHandlerMessageScope.Scope.OutputMessageScope
                                         ,service.getName()
                                         ,port.getName()
-                                        ,operation.getName()
+                                        ,operationName
                                         ,null));
                             } // endif portType op output msg
                             // end output message scope
                             
                             for (WSDLBoundFault boundFault : boundOperation.getFaults()) {
-                                final QName faultName = new QName(boundOperation.getName().getNamespaceURI(), boundFault.getName());
                                 final WSDLFault fault = boundFault.getFault();
                                 final WSDLMessage faultMessage = fault.getMessage();
+                                final QName faultName = new QName(boundOperation.getBoundPortType().getName().getNamespaceURI(), boundFault.getName());
+                                // We store the message and portType/fault under the same namespace as the binding/fault so that we can match them up later
                                 if (faultMessage != null && getHandlers4MessageMap().containsKey(faultMessage)) {
                                     messageSet.add(
                                         new BuilderHandlerMessageScope(
@@ -986,7 +989,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
-                                            ,operation.getName()
+                                            ,operationName
                                             ,faultName)
                                         );
                                 }
@@ -999,7 +1002,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
-                                            ,operation.getName()
+                                            ,operationName
                                             ,faultName)
                                         );
                                 }
@@ -1012,7 +1015,7 @@ final public class PolicyWSDLParserExtension extends WSDLParserExtension {
                                             ,BuilderHandlerMessageScope.Scope.FaultMessageScope
                                             ,service.getName()
                                             ,port.getName()
-                                            ,operation.getName()
+                                            ,operationName
                                             ,faultName)
                                         );
                                 }
