@@ -162,6 +162,10 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     protected void appendSequenceAcknowledgementHeader(Message outboundMessage) throws UnknownSequenceException {
+        if (inboundSequenceId == null) {
+            return; // we do not append sequence acknowledgement if there's no inbound sequence.
+        }
+
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
         identifier.setValue(inboundSequenceId);

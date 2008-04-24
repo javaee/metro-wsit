@@ -164,10 +164,7 @@ abstract class ClientSession {
             appendAckRequestedHeader(requestPacket.getMessage());
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
-        if (inboundSequenceId != null) {
-            // we are always sending acknowledgements if there is an inbound sequence
-            appendSequenceAcknowledgementHeader(requestPacket.getMessage());
-        }
+        appendSequenceAcknowledgementHeader(requestPacket.getMessage());
 
         return requestPacket;
     }
