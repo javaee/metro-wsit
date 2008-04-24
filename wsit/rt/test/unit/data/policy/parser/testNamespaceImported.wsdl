@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="EchoService"
+    targetNamespace="http://j2ee.netbeans.org/wsdl/EchoService"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://j2ee.netbeans.org/wsdl/EchoService">
+    <types/>
+    <message name="EchoServiceOperationRequest">
+        <part name="part1" type="xsd:string"/>
+    </message>
+    <message name="EchoServiceOperationResponse">
+        <part name="part1" type="xsd:string"/>
+    </message>
+    <message name="EchoServiceFault">
+        <part name="part1" type="xsd:string"/>
+    </message>
+    <portType name="EchoServicePortType">
+        <operation name="EchoServiceOperation">
+            <input name="input1" message="tns:EchoServiceOperationRequest"/>
+            <output name="output1" message="tns:EchoServiceOperationResponse"/>
+            <fault name="fault1" message="tns:EchoServiceFault"/>
+        </operation>
+    </portType>
+</definitions>
