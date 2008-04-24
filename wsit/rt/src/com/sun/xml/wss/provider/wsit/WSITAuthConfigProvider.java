@@ -96,6 +96,7 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
         this.wLock = rwLock.writeLock(); 
     }
 
+    @SuppressWarnings("unchecked")
     public  ClientAuthConfig getClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         
         ClientAuthConfig clientConfig = null;
@@ -123,6 +124,7 @@ public class WSITAuthConfigProvider implements AuthConfigProvider {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public  ServerAuthConfig getServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) throws AuthException {
         ServerAuthConfig serverConfig = null;
         this.rLock.lock();

@@ -66,7 +66,7 @@ public class ServerPipeCreator extends ServerPipelineHook {
     public Pipe createSecurityPipe(PolicyMap map, SEIModel sei,
             WSDLPort port, WSEndpoint owner, Pipe tail) {
 
-	HashMap props = new HashMap();
+	HashMap<Object, Object> props = new HashMap<Object, Object>();
 
         boolean httpBinding = BindingID.XML_HTTP.equals(owner.getBinding().getBindingId());
 	props.put(PipeConstants.POLICY,map);
@@ -81,7 +81,7 @@ public class ServerPipeCreator extends ServerPipelineHook {
     @Override
     public @NotNull Tube createSecurityTube(WsitServerTubeAssemblyContext context) {
 
-        HashMap props = new HashMap();
+        HashMap<Object, Object> props = new HashMap<Object, Object>();
         boolean httpBinding = BindingID.XML_HTTP.equals(context.getEndpoint().getBinding().getBindingId());
 	props.put(PipeConstants.POLICY, context.getPolicyMap());
 	props.put(PipeConstants.SEI_MODEL,context.getSEIModel());

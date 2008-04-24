@@ -89,9 +89,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
     static {
 	rwLock = new ReentrantReadWriteLock(true);
 	rLock = rwLock.readLock();
-	wLock = rwLock.writeLock();
-        
-        
+	wLock = rwLock.writeLock();   
     }
 
     // XXX read declarative persistent repository construct an
@@ -263,6 +261,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
      * @exception AuthException if the provider 
      *          construction or registration fails.
      */
+    @SuppressWarnings("unchecked")
     public String registerConfigProvider(String className,
 					 Map properties, 
 					 String layer, String appContext, 
@@ -457,11 +456,11 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
     }
     
     public static URL loadFromClasspath(final String configFileName) {
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
             return ClassLoader.getSystemResource(configFileName);
         } else {
-            return cl.getResource(configFileName);
+            return loader.getResource(configFileName);
         }
     }
     
@@ -523,6 +522,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
         return new String[] { layer, appContext };
     }
 
+    @SuppressWarnings("unchecked")
     private AuthConfigProvider _constructProvider
     (String className, Map properties, AuthConfigFactory factory) {
         //XXX do we need doPrivilege here
@@ -553,7 +553,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
      
     //XXX need to update persistent state and notify effected listeners
     private static String _register(AuthConfigProvider provider,
-				    Map properties,
+				    Map<String, String> properties,
 				    String layer, 
 				    String appContext, 
 				    String description, 
@@ -685,7 +685,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
     }
 
     private static void _storeRegistration(String regId,
-        RegistrationContext ctx, AuthConfigProvider p, Map properties) {
+        RegistrationContext ctx, AuthConfigProvider p, Map<String, String> properties) {
         
 	String className = null;
 	if (p != null) {

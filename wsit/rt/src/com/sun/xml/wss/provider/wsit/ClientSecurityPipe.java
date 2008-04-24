@@ -76,10 +76,9 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
             LogDomainConstants.WSIT_PVD_DOMAIN,
             LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
 
-    public ClientSecurityPipe(Map props, Pipe next) {
+    public ClientSecurityPipe(Map<Object, Object> props, Pipe next) {
 
         super(next);
-
 	props.put(PipeConstants.SECURITY_PIPE,this);
 
         WSDLPort wsdlModel = (WSDLPort)props.get(PipeConstants.WSDL_MODEL);
@@ -108,7 +107,7 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
         return helper;
     }
     
-
+    @SuppressWarnings("unchecked")
     public Packet process(Packet request) {
 
 	/*
@@ -235,7 +234,7 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
 
 	    // put MessageInfo in properties map, since MessageInfo 
 	    // is not passed to getAuthContext, key idicates function
-	    HashMap map = new HashMap();
+	    HashMap<Object, Object> map = new HashMap<Object, Object>();
 	    map.put(PipeConstants.SECURITY_TOKEN,info);
 
 	    helper.getSessionToken(map,info,clientSubject);

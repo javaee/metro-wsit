@@ -61,7 +61,7 @@ import com.sun.xml.ws.api.message.Packet;
   */
 public class SOAPAuthParam implements AuthParam {
     
-    private HashMap infoMap;
+    private HashMap<Object, Object> infoMap;
 
     private boolean requestInPacket;
     private boolean responseInPacket;
@@ -115,7 +115,7 @@ public class SOAPAuthParam implements AuthParam {
 	 } 
 	 if ((request == null || request instanceof Packet) &&
 	     (response == null || response instanceof Packet)) {
-	     this.infoMap = new HashMap();
+	     this.infoMap = new HashMap<Object, Object>();
 	     this.infoMap.put(REQ_PACKET,request);
 	     this.infoMap.put(RES_PACKET,response);
 	     this.requestInPacket = (request == null ? false : true);
@@ -131,9 +131,9 @@ public class SOAPAuthParam implements AuthParam {
       *
       * @return the SOAP request object, which may be null.
       */
-     public Map getMap() {
+     public Map<Object, Object> getMap() {
 	 if (this.infoMap == null) {
-	     this.infoMap = new HashMap();
+	     this.infoMap = new HashMap<Object, Object>();
 	 }
          return this.infoMap;
      }

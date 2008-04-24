@@ -70,17 +70,13 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 
     private PipeHelper helper;
 
-    public ServerSecurityPipe(Map props, final Pipe next, 
+    public ServerSecurityPipe(Map<Object, Object> props, final Pipe next, 
 			     boolean isHttpBinding) {
-
         super(next);
 
 	props.put(PipeConstants.SECURITY_PIPE,this);
-
 	this.helper = new PipeHelper(PipeConstants.SOAP_LAYER,props,null);
-
         this.isHttpBinding = isHttpBinding;
-       
     }    
     
     protected ServerSecurityPipe(ServerSecurityPipe that,

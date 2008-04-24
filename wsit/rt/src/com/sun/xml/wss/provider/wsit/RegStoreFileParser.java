@@ -143,7 +143,7 @@ public final class RegStoreFileParser {
      * present, creates the configuration file if necessary, and
      * writes the entries to the file.
      */
-    void store(String className, RegistrationContext ctx, Map properties) {
+    void store(String className, RegistrationContext ctx, Map<String, String> properties) {
         synchronized (this) {
             if (checkAndAddToList(className, ctx, properties)) {
                 try {
@@ -178,7 +178,7 @@ public final class RegStoreFileParser {
      * configuration file should be written.
      */
     private boolean checkAndAddToList(String className,
-        RegistrationContext ctx, Map props) {
+        RegistrationContext ctx, Map<String, String> props) {
 
         // convention is to use null for empty properties
         if (props != null && props.isEmpty()) {

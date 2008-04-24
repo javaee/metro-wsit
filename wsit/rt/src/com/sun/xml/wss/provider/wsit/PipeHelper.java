@@ -95,7 +95,7 @@ public class PipeHelper extends ConfigHelper {
     private SEIModel seiModel;
     private SOAPVersion soapVersion;
     
-    public PipeHelper(String layer, Map map, CallbackHandler cbh) {
+    public PipeHelper(String layer, Map<Object, Object> map, CallbackHandler cbh) {
         init(layer, getAppCtxt(map), map, cbh);
 
 	this.seiModel = (SEIModel) map.get(PipeConstants.SEI_MODEL);
@@ -139,7 +139,7 @@ public class PipeHelper extends ConfigHelper {
 	return s;
     }
 
-    public void getSessionToken(Map m, 
+    public void getSessionToken(Map<Object, Object> m, 
 				MessageInfo info, 
 				Subject s) throws AuthException {
 	ClientAuthConfig c = (ClientAuthConfig) getAuthConfig(false);    
@@ -229,8 +229,8 @@ public class PipeHelper extends ConfigHelper {
         return rvalue;
     }
 
-   
-    private static void addModel(MessageInfo info, Map map) {
+    @SuppressWarnings("unchecked")
+    private static void addModel(MessageInfo info, Map<Object, Object> map) {
         Object model = map.get(PipeConstants.WSDL_MODEL);
         if (model != null) {
             info.getMap().put(PipeConstants.WSDL_MODEL,model);

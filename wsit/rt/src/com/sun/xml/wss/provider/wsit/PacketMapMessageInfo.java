@@ -53,7 +53,7 @@ public class PacketMapMessageInfo implements PacketMessageInfo {
 
     private SOAPAuthParam soapAuthParam;
 
-    private Map infoMap;
+    private Map<Object, Object> infoMap;
 
     public PacketMapMessageInfo(Packet reqPacket, Packet resPacket) {
 	soapAuthParam = new SOAPAuthParam(reqPacket,resPacket,0);

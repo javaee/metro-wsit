@@ -91,12 +91,12 @@ public abstract class ConfigHelper /*implements RegistrationListener*/ {
 	
     protected String layer;
     protected String appCtxt;
-    protected Map map;
+    protected Map<Object, Object> map;
     protected CallbackHandler cbh;
     protected AuthConfigRegistrationWrapper listenerWrapper = null;
 
     protected void init(String layer, String appContext,
-            Map map, CallbackHandler cbh) {
+            Map<Object, Object> map, CallbackHandler cbh) {
 
         factory = AuthConfigFactory.getFactory();
 	this.layer = layer;
@@ -271,6 +271,7 @@ public abstract class ConfigHelper /*implements RegistrationListener*/ {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public  CallbackHandler getDefaultCallbackHandler() {
         // get the default handler class
         try {
