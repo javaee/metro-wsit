@@ -62,6 +62,7 @@ import java.util.UUID;
 import javax.xml.soap.SOAPFault;
 import javax.xml.bind.JAXBElement;
 
+import com.sun.xml.wss.saml.SAMLAssertionFactory;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
@@ -95,6 +96,7 @@ import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
+import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
@@ -102,7 +104,17 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import java.security.cert.X509Certificate;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import java.util.Iterator;
+import org.w3c.dom.Text;
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+
+import java.util.Map;
+import java.util.Set;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Node;
 
 /**
  *
@@ -447,5 +459,69 @@ public class WSTrustUtil {
         encKey.setKeyInfo(keyinfo);
         
         return encKey;
+    }
+    
+    public static Assertion addSamlAttributes(Assertion assertion, Map<QName, List<String>> claimedAttrs)throws WSTrustException {
+        try {
+            String version = assertion.getVersion();
+            if ("2.0".equals(version)){
+                assertion.getStatements().add(createAttributeStatement(null, claimedAttrs, "urn:oasis:names:tc:SAML:2.0:assertion", "saml2"));
+            }else{
+                SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
+                Element assertionEle = assertion.toElement(null);
+                Document doc = assertionEle.getOwnerDocument();
+                String samlNS = assertionEle.getNamespaceURI();
+                String samlPrefix = assertionEle.getPrefix();
+                NodeList asList = assertionEle.getElementsByTagNameNS(samlNS, "AttributeStatement");
+                Node as = null;
+                if (asList.getLength() > 0){
+                    as = asList.item(0);
+                }
+                createAttributeStatement(as, claimedAttrs, samlNS, samlPrefix);
+               
+                assertion = samlFac.createAssertion(assertionEle);
+            }
+                
+            return assertion;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            throw new WSTrustException(ex.getMessage());
+        }
+    }
+    
+    private static Node createAttributeStatement(Node as, Map<QName, List<String>> claimedAttrs, String samlNS, String samlPrefix)throws WSTrustException{
+        try{
+            Document doc = null;
+            if (as != null){
+                doc = as.getOwnerDocument();
+            }else{
+                DocumentBuilderFactory docBuilderFac = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docBuilderFac.newDocumentBuilder();
+                doc = docBuilder.newDocument();
+                as = doc.createElementNS(samlNS, samlPrefix+":AttributeStatement");
+                doc.appendChild(as);
+            }
+            final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
+            for(Map.Entry<QName, List<String>> entry : entries){
+                final QName attrKey = entry.getKey();
+                final List<String> values = entry.getValue();
+                Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
+                attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
+                attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
+  
+                Iterator valueIt = values.iterator();
+                while (valueIt.hasNext()){
+                    Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+                    Text text = doc.createTextNode((String)valueIt.next());
+                    attrValueEle.appendChild(text);
+                    attrEle.appendChild(attrValueEle);
+                }
+                as.appendChild(attrEle);
+            }
+            
+            return as;
+        }catch (Exception ex){
+            throw new WSTrustException(ex.getMessage());
+        }
     }
 }
