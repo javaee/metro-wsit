@@ -261,10 +261,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             }
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
-            if (!claimedAttrs.isEmpty()){
-                Element assertionEle = assertion.toElement(null);
-                assertionEle = WSTrustUtil.addAttributes(assertionEle, claimedAttrs);
-                return samlFac.createAssertion(assertionEle);
+             if (!claimedAttrs.isEmpty()){
+                return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
             }
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
@@ -318,7 +316,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     null, keyInfoConfData, confirMethod);
             
             com.sun.xml.wss.saml.Subject subj = null;
-            final List<Attribute> attrs = new ArrayList<Attribute>();
+            //final List<Attribute> attrs = new ArrayList<Attribute>();
+            QName idName = null;
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
@@ -327,34 +326,38 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
                         final NameID nameId = samlFac.createNameID(values.get(0), attrKey.getNamespaceURI(), null);
                         subj = samlFac.createSubject(nameId, subjectConfirm);
+                        idName = attrKey;
                     }
-                    else{
-                        final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
-                        attrs.add(attr);
-                    }
+                    //else{
+                      //  final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
+                      //  attrs.add(attr);
+                    //}
                 }
+            }
+            
+            if (idName != null){
+                claimedAttrs.remove(idName);
             }
         
             final List<Object> statements = new ArrayList<Object>();
-            if (attrs.isEmpty()){
-                // To Do: create AuthnContext with proper content. Currently what 
-                // we have is a place holder.
-                 // To Do: create AuthnContext with proper content. Currently what 
-                // we have is a place holder.
-                //AuthnContext ctx = samlFac.createAuthnContext();
+            //if (attrs.isEmpty()){
+            if (claimedAttrs.isEmpty()){
                 AuthnContext ctx = samlFac.createAuthnContext(authnCtx, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
                 statements.add(statement); 
-            }else{
-                final AttributeStatement statement = samlFac.createAttributeStatement(attrs);
-                statements.add(statement);
-            }
+            }//else{
+               // final AttributeStatement statement = samlFac.createAttributeStatement(null);
+               // statements.add(statement);
+            //}
             
             final NameID issuerID = samlFac.createNameID(issuer, null, null);
             
             // Create Assertion
             assertion =
                     samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
+             if (!claimedAttrs.isEmpty()){
+                return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
+            }
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
