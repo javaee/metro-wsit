@@ -207,12 +207,13 @@ public class XWSSPolicyContainer {
         if ( xwssPolicy == null ) {
             return false;
         }
-        //UsernameToken, SAML Token Policy, X509Certificate
+        //UsernameToken, SAML Token Policy, X509Certificate, issued token
         if ( PolicyTypeUtil.authenticationTokenPolicy(xwssPolicy)) {
             MLSPolicy binding = ((AuthenticationTokenPolicy)xwssPolicy).getFeatureBinding();
             if ( PolicyTypeUtil.usernameTokenPolicy(binding) ||
                     PolicyTypeUtil.samlTokenPolicy(binding) ||
-                    PolicyTypeUtil.x509CertificateBinding(binding)) {
+                    PolicyTypeUtil.x509CertificateBinding(binding) || 
+                    PolicyTypeUtil.issuedTokenKeyBinding(binding)) {
                 return true;
             }
         }

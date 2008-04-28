@@ -207,6 +207,7 @@ public class TokenProcessor {
             setTokenInclusion(itkb,(Token) tokenAssertion);
             //itkb.setPolicyToken((Token) tokenAssertion);
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
+            itkb.setSTRID(token.getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
             
             if(it.getIssuer() != null){
@@ -384,6 +385,7 @@ public class TokenProcessor {
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
+            key.setSTRID(token.getTokenId());
             
             IssuedToken it = (IssuedToken)token;
             if(it.getIssuer() != null){

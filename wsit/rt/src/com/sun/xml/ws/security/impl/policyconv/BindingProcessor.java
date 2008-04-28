@@ -56,6 +56,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
+import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
@@ -153,6 +154,12 @@ public abstract class BindingProcessor {
             if(uid == null){
                 uid = pid.generateID();
                 ((AuthenticationTokenPolicy.SAMLAssertionBinding)token).setSTRID(uid);
+            }
+        } else if(PolicyTypeUtil.issuedTokenKeyBinding(token)){
+            uid = ((IssuedTokenKeyBinding)token).getSTRID();
+            if(uid == null){
+                uid = pid.generateID();
+                ((IssuedTokenKeyBinding)token).setSTRID(uid);
             }
         }
         //TODO:: Handle DTK and IssuedToken.

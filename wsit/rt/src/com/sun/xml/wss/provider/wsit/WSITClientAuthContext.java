@@ -718,7 +718,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
                     
-                    updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
+                    //updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
                     
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);

@@ -491,7 +491,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
                     
-                    updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());                    
+                    //updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());                    
 
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE,
