@@ -12,7 +12,7 @@
 <!--
 Created       : 2007 Mar 01 (Tue) 11:32:31 by Harold Carr.
 -->
-<pre>Last Modified : $Date: 2008-04-29 13:57:31 $ by $Author: oleksiys $</pre>
+<pre>Last Modified : $Date: 2008-04-29 18:58:29 $ by $Author: jdg6688 $</pre>
 
 <h5>Updated: ??, 2008</h5>
 
@@ -780,11 +780,13 @@ supported in this release.</p>
 <p><b>New in this release</b></p>
 <ul>
 <li>Renewing of Security Context</li>
+<li>IssuedTokenManager with security context on the client side</li>
 </ul>
 
 <p><b>Fixed in this release</b></p>
 <ul>
-<li>...</li>
+<li>Support for Lifetime of the secuirty context.We ignored Lifetime before when using security context in securing
+    application messages</li>
 </ul>
 
 <p><b>Known Issues</b></p>
@@ -808,12 +810,22 @@ supported in this release.</p>
 <ul>
 <li>Support of issuing SAML2.0 assertion with AuthnContext for authentication type.</li>
 <li>Support of issuing SAML assertion of bearer type.</li>
-<li>For issuing Public Key type, we assume that the client is authenticated to the STS with its certificate. We support UseKey attribute for this. </li>  
+<li>Support for issuing tokens with ephemeral RSA public keys</li> 
+<li>Plugin of Token Provider and trust layer for handling protocol messages in general</li>
+<li>Support for Cardspace extension elemets including dispaly tokens</li>
 </ul>
 
 <p><b>Fixed in this release</b></p>
 <ul>
-<li>...</li>
+<li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=681">Fixed
+Issue 681</a> : STS configuration should support token implementation class per Service Provider. <br>
+</li>   
+<li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=684">Fixed
+Issue 684</a> : WS-Trust contract implementation should be up leveled to encapsulate all common WS-Trust request / response <br>
+</li>   
+<li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=767">Fixed
+Issue 767</a> : The KeyInfo of the signature of the STS issued SAML assertion should contain X509Data or KeyValue instead of SecurityTokenReference <br>
+</li> 
 </ul>
 
 <p><b>Known Issues</b></p>
@@ -823,10 +835,12 @@ supported in this release.</p>
 
 <p><b>What is Not Implemented</b></p>
 <ul>
+  <li>Mixed Versions of Trust </li>
+  <li>Token Cache and SSO</li>
   <li>Token Validation protocol. </li>
   <li>Token Cancellation Protocol. </li>
   <li>Token Renewing Protocol </li>
-  <li>Any profile on top of Negotiation and Challenge Extensions</li>    
+  <li>Any profiles on top of Negotiation and Challenge Extensions</li>    
 </ul>
 
 <!-- ================================================== -->
