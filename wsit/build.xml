@@ -54,11 +54,11 @@
     <target name="-do-jar-without-manifest" depends="image">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
+        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
     
     <target name="installer">
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="CDDLv1.0.1.txt" zipFile="${dist.dir}/${install.name}.zip"/>
+        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
 
     <target name="dist" depends="jar"/>
@@ -71,6 +71,7 @@
         <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
         <copy todir="${dist.image.wsit.dir}" filtering="true">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
+            <fileset dir="${basedir}" includes="LICENSE.txt"/>
             <fileset dir="${etc.dir}" includes="metro-on-*.*"/>
         </copy>
         <generate-release-notes target="${dist.image.wsit.dir}/docs"/>
