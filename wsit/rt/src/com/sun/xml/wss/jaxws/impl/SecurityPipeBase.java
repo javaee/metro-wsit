@@ -538,7 +538,6 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
-        ctx.setTimestampTimeout(this.timestampTimeOut);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         
@@ -581,6 +580,7 @@ public abstract class SecurityPipeBase implements Pipe {
         }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
+        ctx.setTimestampTimeout(this.timestampTimeOut);
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
