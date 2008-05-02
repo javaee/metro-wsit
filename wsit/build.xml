@@ -403,10 +403,6 @@
         </cvs>
     </target>
 
-
-
-
-
     <target name="package-for-hk2" depends="dist">
         <!-- run it with "-Dmaven-target=deploy" to deploy to the repository -->
         <!-- run it with "-Dmaven-target=deploy -DupdateReleaseInfo=true" to deploy releases -->
@@ -430,5 +426,47 @@
         <exec command="mvn -U ${maven-target}" dir="maven-hk2" />
     </target>
    
+    <!-- GlassFish Update Center Tasks -->
 
+    <!-- TODO: refactor properties -->
+    <property name="module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
+    <property name="makepkgs.path" value="/Users/m_potociar/sandbox/java.net/uc2/project/tools"/>
+    <property name="module.revision" value="1" />
+    <!--property name="uc2.repo" value="http://localhost:10000/"/-->
+    <!--property name="uc2.repo" value="http://iasengsol10.red.iplanet.com:10003/"/-->
+    <property name="uc2.repo" value="http://eflat.sfbay.sun.com:10000"/>
+
+    <!-- 
+    cdmetro
+    export DIST=/Users/m_potociar/sandbox/java.net/uc2/project/build/dist/darwin-universal
+    export LD_LIBRARY_PATH=$DIST/pkg/python2.4-minimal/lib
+    export PYTHONPATH=$DIST/pkg/vendor-packages:`pwd`
+    -->
+
+     <target name="_clean-uc2" description="Clean UC related things">
+      <delete dir="${basedir}/ucmodule"/>
+    </target>
+    
+    <target name="_prepare-uc2" depends="_clean-uc2" description="Prepare GlassFish Update Center Module"> 
+    
+      <mkdir dir="${module.dir}"/>
+      
+      <get src="http://download.java.net/maven/2/com/sun/tools/ws/webservices-tools/1.2-SNAPSHOT/webservices-tools-1.2-SNAPSHOT.jar"
+        dest="${module.dir}/webservices-tools.jar" />
+      <get src="http://download.java.net/maven/2/com/sun/xml/ws/webservices-rt/1.2-SNAPSHOT/webservices-rt-1.2-SNAPSHOT.jar"
+        dest="${module.dir}/webservices-rt.jar" />
+      <get src="http://download.java.net/maven/2/javax/xml/webservices-api/1.2-SNAPSHOT/webservices-api-1.2-SNAPSHOT.jar"
+        dest="${module.dir}/webservices-api.jar" />
+      <get src="http://javaweb.sfbay.sun.com/~bhakti/v3-metro/jsr109-impl-10.0-SNAPSHOT.jar"
+        dest="${module.dir}/jsr109-impl.jar" />
+
+    </target>
+    
+    <target name="_publish-uc2">
+        <exec executable="python">
+            <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${module.revision} -b ${basedir}/ucmodule uc2"/>
+        </exec>
+    </target>    
+    
+    <target name="uc2" depends="_prepare-uc2,_publish-uc2" />
 </project>
