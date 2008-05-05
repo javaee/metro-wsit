@@ -251,7 +251,7 @@ public abstract class SecurityPipeBase implements Pipe {
     
     // Security Policy version
     protected SecurityPolicyVersion spVersion = null;
-    
+    protected static final String WSDLPORT="WSDLPort";
     //flag used as temporary variable for each run
     //boolean isTrustOrSCMessage = false;
     
@@ -284,7 +284,6 @@ public abstract class SecurityPipeBase implements Pipe {
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         //unmarshaller as instance variable of the pipe
-
         if(wsPolicyMap != null){
             collectPolicies();
         }
@@ -334,7 +333,6 @@ public abstract class SecurityPipeBase implements Pipe {
         this.hasReliableMessaging = that.hasReliableMessaging;
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
-        
         try {            
             this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
             this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
@@ -547,6 +545,9 @@ public abstract class SecurityPipeBase implements Pipe {
         ctx.isInboundMessage(true);
         if(isTrustMessage(packet)){
             ctx.isTrustMessage(true);
+        }
+        if (pipeConfig.getWSDLPort() != null) {
+            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
         }
         return ctx;
     }

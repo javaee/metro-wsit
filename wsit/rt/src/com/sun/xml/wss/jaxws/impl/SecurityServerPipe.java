@@ -108,7 +108,6 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
-
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -467,6 +466,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
+            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
         } catch (XWSSecurityException e) {
             log.log(
                     Level.SEVERE, LogStringsMessages.WSSPIPE_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
