@@ -282,6 +282,7 @@ public abstract class WSITAuthContextBase  {
     protected static final String RES_PACKET = "RES_PACKET";
     
     protected static final String DEFAULT_JMAC_HANDLER = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
+    protected static final String WSDLPORT="WSDLPort";
     
     static {
         try {
@@ -1142,6 +1143,9 @@ public abstract class WSITAuthContextBase  {
         ctx.isInboundMessage(true);
         if(isTrustMessage(packet)){
             ctx.isTrustMessage(true);
+        }
+        if (pipeConfig.getWSDLPort() != null) {
+            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
         }
         return ctx;
     }

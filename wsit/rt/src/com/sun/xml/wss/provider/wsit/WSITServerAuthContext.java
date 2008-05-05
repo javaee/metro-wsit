@@ -552,6 +552,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
+            ctx.getExtraneousProperties().put(this.WSDLPORT,pipeConfig.getWSDLPort());
         } catch (XWSSecurityException e) {
             log.log(
                     Level.SEVERE, LogStringsMessages.WSITPVD_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
