@@ -8,5 +8,6 @@ easy-to-use web service stack. It is a one-stop shop for all your web service \
 needs, from the simplest hello world web service to reliable, secured, and \
 transacted web service that involves .NET services."
       },
+    "depends"       : { "pkg:/glassfishv3-web" : {"type" : "require" } },
     "dirtrees"      : [ "glassfish" ],
 }
