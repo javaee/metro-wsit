@@ -72,20 +72,6 @@ import java.util.logging.Level;
  */
 abstract class ClientSession {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
-    private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
-
-    static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
-        switch (configuration.getRmVersion()) {
-            case WSRM10:
-                return new Rm10ClientSession(configuration, communicator);
-            case WSRM11:
-                return new Rm11ClientSession(configuration, communicator);
-            default:
-                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
-        }
-    }
-
     private static class FiberRegistration {
 
         private final long timestamp;
@@ -102,6 +88,19 @@ abstract class ClientSession {
             return System.currentTimeMillis() - timestamp >= period;
         }
     }
+
+    static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
+        switch (configuration.getRmVersion()) {
+            case WSRM10:
+                return new Rm10ClientSession(configuration, communicator);
+            case WSRM11:
+                return new Rm11ClientSession(configuration, communicator);
+            default:
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
+        }
+    }
+    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
+    private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
     protected String inboundSequenceId;
     protected String outboundSequenceId;
     protected final SequenceManager sequenceManager;
@@ -153,6 +152,29 @@ abstract class ClientSession {
     protected final void assertSequenceIdInInboundHeader(String expected, String actual) {
         if (expected != null && !expected.equals(actual)) {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_INBOUND_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
+        }
+    }
+
+    protected final void requestAcknowledgement() throws RmException {
+        Message ackResponse = null;
+        try {
+            Message ackRequestMessage = communicator.createEmptyMessage();
+            appendAckRequestedHeader(ackRequestMessage);
+
+            ackResponse = communicator.send(ackRequestMessage, configuration.getRmVersion().ackRequestedAction);
+            if (ackResponse == null) {
+                throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
+            }
+
+            processInboundMessageHeaders(ackResponse.getHeaders(), false);
+
+            if (ackResponse.isFault()) {
+                throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), ackResponse);
+            }
+        } finally {
+            if (ackResponse != null) {
+                ackResponse.consume();
+            }
         }
     }
 
@@ -263,19 +285,7 @@ abstract class ClientSession {
                 }
 
 
-                scheduledTaskManager.startTasks(
-                        new Runnable() {
-
-                            public void run() {
-                                resend();
-                            }
-                        },
-                        new Runnable() {
-
-                            public void run() {
-                                sendAckRequested();
-                            }
-                        });
+                scheduledTaskManager.startTasks(createResendTask(), createAckRequesterTask());
             }
         } finally {
             initLock.unlock();
@@ -296,14 +306,19 @@ abstract class ClientSession {
     /**
      * Resumes all suspended fibers registered for a resend which have an expired retransmission inteval.
      */
-    private void resend() {
-        while (!fibersToResend.isEmpty() && fibersToResend.peek().expired(configuration.getMessageRetransmissionInterval())) {
-            FiberRegistration registration;
-            synchronized (fibersToResend) {
-                registration = fibersToResend.poll();
+    private Runnable createResendTask() {
+        return new Runnable() {
+
+            public void run() {
+                while (!fibersToResend.isEmpty() && fibersToResend.peek().expired(configuration.getMessageRetransmissionInterval())) {
+                    FiberRegistration registration;
+                    synchronized (fibersToResend) {
+                        registration = fibersToResend.poll();
+                    }
+                    registration.fiber.resume(registration.packet);
+                }
             }
-            registration.fiber.resume(registration.packet);
-        }
+        };
     }
 
     /**
@@ -313,32 +328,20 @@ abstract class ClientSession {
      * @param seq Outbound sequence to which SequenceHeaderElement will belong.
      *
      */
-    private void sendAckRequested() {
-        Message ackResponse = null;
-        try {
-            if (checkPendingAckRequest()) {
-                Message ackRequestMessage = communicator.createEmptyMessage();
-                appendAckRequestedHeader(ackRequestMessage);
-                lastAckRequestedTime.set(System.currentTimeMillis());
+    private Runnable createAckRequesterTask() {
+        return new Runnable() {
 
-                ackResponse = communicator.send(ackRequestMessage, configuration.getRmVersion().ackRequestedAction);
-                if (ackResponse == null) {
-                    throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
-                }
-
-                processInboundMessageHeaders(ackResponse.getHeaders(), false);
-
-                if (ackResponse.isFault()) {
-                    throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), ackResponse);
+            public void run() {
+                try {
+                    if (checkPendingAckRequest()) {
+                        requestAcknowledgement();
+                        lastAckRequestedTime.set(System.currentTimeMillis());
+                    }
+                } catch (RmException ex) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1110_ACK_REQUEST_FAILED(), ex);
                 }
             }
-        } catch (RmException ex) {
-            LOGGER.warning(LocalizationMessages.WSRM_1110_ACK_REQUEST_FAILED(), ex);
-        } finally {
-            if (ackResponse != null) {
-                ackResponse.consume();
-            }
-        }
+        };
     }
 
     private boolean checkPendingAckRequest() throws UnknownSequenceException {
