@@ -49,6 +49,13 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     
     public static final String PROTOCOL_10 = "http://schemas.xmlsoap.org/ws/2005/02/trust";
     public static final String PROTOCOL_13 = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
+     
+    public static final String STS_ENDPOINT = "sts-endpoint";
+    public static final String STS_MEX_ADDRESS = "sts-mex-address";
+    public static final String STS_WSDL_LOCATION ="sts-wsdlLocation";
+    public static final String STS_SERVICE_NAME ="sts-service-name";
+    public static final String STS_PORT_NAME ="sts-port-name";
+    public static final String STS_NAMESPACE ="sts-namespace";
     
     protected String protocol;
     

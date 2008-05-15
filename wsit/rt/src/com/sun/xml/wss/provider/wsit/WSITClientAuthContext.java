@@ -701,15 +701,33 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             if (issuedTokenContextMap.get(
                     ((Token) issuedTokenAssertion).getTokenId()) == null) {
                 try {
-                    STSIssuedTokenConfiguration config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
-                    String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
-                    String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
-                    if (userName != null) {
-                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
+                   STSIssuedTokenConfiguration config = null;
+                    // Get STS information from Run time configuration
+                    String stsEndpoint = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_ENDPOINT);
+                    if (stsEndpoint != null){
+                        String stsMEXAddress = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_MEX_ADDRESS);
+                        if (stsMEXAddress == null){
+                            String stsNamespace = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_NAMESPACE);
+                            String stsWSDLLocation = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_WSDL_LOCATION);
+                            String stsServiceName = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_SERVICE_NAME);
+                            String stsPortName = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_PORT_NAME);
+                            config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), stsEndpoint, stsWSDLLocation, stsServiceName, stsPortName, stsNamespace);
+                        }else{
+                            config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), stsEndpoint, stsMEXAddress);
+                        }
                     }
-                    if (password != null) {
-                        config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+                    if (config == null){ 
+                        config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
                     }
+                    //String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+                    //String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
+                    //if (userName != null) {
+                      //  config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
+                    //}
+                    //if (password != null) {
+                      //  config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+                    //}
+                    config.getOtherOptions().putAll(packet.invocationProperties);
                     if(container != null){
                         config.getOtherOptions().put("CONTAINER", container);
                     }
