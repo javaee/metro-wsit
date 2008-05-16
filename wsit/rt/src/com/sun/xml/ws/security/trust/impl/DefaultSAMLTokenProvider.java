@@ -150,8 +150,9 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             
         // Sign the assertion with STS's private key
         Element signedAssertion = null;
-        try{
-            signedAssertion = assertion.sign(stsCert, stsPrivKey, true);
+        try{            
+            signedAssertion = assertion.sign(stsCert, stsPrivKey, true, ctx.getSignatureAlgorithm(), ctx.getCanonicalizationAlgorithm());            
+            //signedAssertion = assertion.sign(stsCert, stsPrivKey, true);            
             //signedAssertion = assertion.sign(stsCert, stsPrivKey);
         }catch (SAMLException ex){
             log.log(Level.SEVERE,

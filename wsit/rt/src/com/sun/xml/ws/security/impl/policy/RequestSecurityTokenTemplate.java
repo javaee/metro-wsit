@@ -67,6 +67,7 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     private boolean isEncRequired = false;
     private String signWith;
     private String encryptWith;
+    private String keyWrapAlgo;
     
     /**
      * Creates a new instance of RequestSecurityTokenTemplate
@@ -142,7 +143,10 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
         return computedKeyAlgo;
     }
     
-    
+    public String getKeyWrapAlgorithm() {
+        populate();
+        return keyWrapAlgo;
+    }    
     
     public boolean getEncryptionRequired() {
         populate();
@@ -212,6 +216,8 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                         this.canonAlgo = assertion.getValue();
                     }else if(PolicyUtil.isComputedKeyAlgorithm(assertion)){
                         this.computedKeyAlgo = assertion.getValue();
+                    }else if(PolicyUtil.isKeyWrapAlgorithm(assertion)){
+                        this.keyWrapAlgo = assertion.getValue();
                     }else if(PolicyUtil.isEncryption(assertion)){
                         isEncRequired = true;
                     }else if(PolicyUtil.isClaimsElement(assertion)) {

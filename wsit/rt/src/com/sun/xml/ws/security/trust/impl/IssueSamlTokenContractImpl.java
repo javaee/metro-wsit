@@ -159,8 +159,9 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             
         // Sign the assertion with STS's private key
         Element signedAssertion = null;
-        try{
-            signedAssertion = assertion.sign(stsCert, stsPrivKey, true);
+        try{            
+            signedAssertion = assertion.sign(stsCert, stsPrivKey, true, context.getSignatureAlgorithm(), context.getCanonicalizationAlgorithm());            
+            //signedAssertion = assertion.sign(stsCert, stsPrivKey, true);            
             //signedAssertion = assertion.sign(stsCert, stsPrivKey);
         }catch (SAMLException ex){
             log.log(Level.SEVERE,
@@ -175,7 +176,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         //token = new GenericToken(signedAssertion);
             
         if (stsConfig.getEncryptIssuedToken()){
-            Element encData = encryptToken(signedAssertion, serCert, appliesTo);
+            Element encData = encryptToken(signedAssertion, serCert, appliesTo, context.getEncryptionAlgorithm());
             token = new GenericToken(encData);
                 //JAXBElement<EncryptedDataType> eEle = u.unmarshal(cipher.martial(encData), EncryptedDataType.class);
                 //return eEle.getValue();
@@ -225,11 +226,16 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return encKey;
     }
     
-    private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo) throws WSTrustException{
+    private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm) throws WSTrustException{
         Element encDataEle = null;
         // Create the encryption key
         try{
-            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            final XMLCipher cipher;
+            if(encryptionAlgorithm != null){
+                cipher = XMLCipher.getInstance(encryptionAlgorithm);
+            }else{
+                cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            }
             final int keysizeInBytes = 32;
             final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
             cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));

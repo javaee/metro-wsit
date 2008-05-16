@@ -125,6 +125,8 @@ public class TrustPluginImpl implements TrustPlugin {
     }
     
     public void process(IssuedTokenContext itc) throws WSTrustException{
+        String signWith = null;
+        String encryptWith = null;
         String appliesTo = itc.getEndpointAddress();
         STSIssuedTokenConfiguration stsConfig = (STSIssuedTokenConfiguration)itc.getSecurityPolicy().get(0);
         String stsURI = stsConfig.getSTSEndpoint();
@@ -167,13 +169,24 @@ public class TrustPluginImpl implements TrustPlugin {
             final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
              
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
-       
+            
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();
             contract.handleRSTR(request, result, itc);
             KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
             if (keyPair != null){
                 itc.setProofKeyPair(keyPair);   
             }
+            
+            encryptWith = stsConfig.getEncryptWith();
+            if (encryptWith != null) {
+                itc.setEncryptWith(encryptWith);                
+            }
+            
+            signWith = stsConfig.getSignWith();
+            if (signWith != null) {
+                itc.setSignWith(signWith);
+            }
+            
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
@@ -214,6 +227,7 @@ public class TrustPluginImpl implements TrustPlugin {
         String encryptWith = null;
         String signatureAlgorithm = null;
         String encryptionAlgorithm = null;
+        String keyWrapAlgorithm = null;
         String canonicalizationAlgorithm = null;
         Claims claims = null;
         if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
@@ -232,6 +246,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 if (keySize > 0){
                     sp.setKeySize(keySize);
                 }
+                /*
                 encryptWith = sitp.getEncryptWith();
                 if (encryptWith != null){
                     sp.setEncryptWith(URI.create(encryptWith));
@@ -240,6 +255,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 if (signWith != null){
                     sp.setSignWith(URI.create(signWith));
                 }
+                 */ 
                 signatureAlgorithm = sitp.getSignatureAlgorithm();
                 if (signatureAlgorithm != null){
                     sp.setSignatureAlgorithm(URI.create(signatureAlgorithm));
@@ -252,6 +268,11 @@ public class TrustPluginImpl implements TrustPlugin {
                 canonicalizationAlgorithm = sitp.getCanonicalizationAlgorithm();
                 if (canonicalizationAlgorithm != null){
                     sp.setCanonicalizationAlgorithm(URI.create(canonicalizationAlgorithm));
+                }
+                
+                keyWrapAlgorithm = sitp.getKeyWrapAlgorithm();
+                if(keyWrapAlgorithm != null){
+                    sp.setKeyWrapAlgorithm(URI.create(keyWrapAlgorithm));
                 }
 
                 claims = sitp.getClaims();
@@ -283,7 +304,8 @@ public class TrustPluginImpl implements TrustPlugin {
             }
          }
          
-         if (encryptWith == null){
+        /* 
+        if (encryptWith == null){
             encryptWith = stsConfig.getEncryptWith();
             if (encryptWith != null){
                 rst.setEncryptWith(URI.create(encryptWith));
@@ -295,7 +317,8 @@ public class TrustPluginImpl implements TrustPlugin {
             if (signWith != null){
                 rst.setSignWith(URI.create(signWith));
             }
-         }  
+         }
+         */  
 
          if (signatureAlgorithm == null){
             signatureAlgorithm = stsConfig.getSignatureAlgorithm();

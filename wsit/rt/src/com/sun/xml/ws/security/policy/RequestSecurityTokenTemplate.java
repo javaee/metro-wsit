@@ -152,6 +152,11 @@ public interface RequestSecurityTokenTemplate {
      */
     String getEncryptWith();
     
+    /**
+     * Get the KeyWrap Algorithm used for key wrapping when STS encrypts the issued token 
+     * for the relying party using an asymmetric key.     
+     */
+    String getKeyWrapAlgorithm();
       
 }
 

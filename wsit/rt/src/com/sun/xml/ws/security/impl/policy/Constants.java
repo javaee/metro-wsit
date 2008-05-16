@@ -225,6 +225,7 @@ public class Constants {
     public final static String SignatureAlgorithm ="SignatureAlgorithm";
     public final static String EncryptionAlgorithm ="EncryptionAlgorithm";
     public final static String ComputedKeyAlgorithm ="ComputedKeyAlgorithm";
+    public final static String KeyWrapAlgorithm ="KeyWrapAlgorithm";
     public static final String WS_SECURITY_POLICY_DOMAIN = "javax.enterprise.resource.xml.webservices.security.policy";
     public static final String WS_SECURITY_POLICY_PACKAGE_ROOT = "com.sun.xml.ws.security.impl.policy";
     public static final String WS_SECURITY_POLICY_DOMAIN_BUNDLE = WS_SECURITY_POLICY_PACKAGE_ROOT + ".LogStrings";

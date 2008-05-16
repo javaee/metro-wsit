@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.6 2008-02-26 06:33:29 ofung Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.7 2008-05-16 12:54:36 shyam_rao Exp $
  */
 
 /*
@@ -121,6 +121,7 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     
     private URI signWith = null;
     private URI encryptWith = null;
+    private URI keyWrapAlgorithm = null;
     private URI authenticationType = null;
     
     private SignChallenge signChallenge = null;
@@ -441,6 +442,17 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     
     public URI getEncryptWith() {
         return encryptWith;
+    }
+    
+    public void setKeyWrapAlgorithm(URI algorithm) {
+        keyWrapAlgorithm = algorithm;
+        JAXBElement<String> keyWrapElement =
+                (new ObjectFactory()).createKeyWrapAlgorithm(algorithm.toString());
+        getAny().add(keyWrapElement);
+    }
+    
+    public URI getKeyWrapAlgorithm() {
+        return keyWrapAlgorithm;
     }
     
     public void setDelegateTo(DelegateTo to) {

@@ -452,7 +452,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         this.setEncryptWith(rstt.getEncryptWith());
         this.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
         this.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
-        this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());  
+        this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
     }
 
     private void copy(RequestSecurityTokenTemplate rstt, SecondaryIssuedTokenParametersImpl sitp){
@@ -464,6 +464,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         sitp.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
         sitp.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
         sitp.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
+        sitp.setKeyWrapAlgorithm(rstt.getKeyWrapAlgorithm());
     }
 }
 

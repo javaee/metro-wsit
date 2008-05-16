@@ -1589,6 +1589,16 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isKeyWrapAlgorithm(PolicyAssertion assertion) {
+        if(!Constants.TRUST13_NS.equals(assertion.getName().getNamespaceURI())){
+            return false;
+        }
+        if(KeyWrapAlgorithm.equals(assertion.getName().getLocalPart())){
+            return true;
+        }
+        return false;
+    }
+    
     public static boolean isSC10SecurityContextToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion){
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;

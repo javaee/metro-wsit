@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.6 2008-03-30 07:25:56 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.7 2008-05-16 12:54:36 shyam_rao Exp $
  */
 
 /*
@@ -100,6 +100,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     private URI signWith = null;
     private URI encryptWith = null;
+    private URI keyWrapAlgorithm = null;
     private URI authenticationType = null;
     private URI signatureAlgorithm = null;
     private URI encryptionAlgorithm = null;
@@ -508,6 +509,17 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public URI getEncryptWith() {
         return encryptWith;
+    }
+    
+    public void setKeyWrapAlgorithm(URI algorithm) {
+        keyWrapAlgorithm = algorithm;
+        JAXBElement<String> keyWrapElement =
+                (new ObjectFactory()).createKeyWrapAlgorithm(algorithm.toString());
+        getAny().add(keyWrapElement);
+    }
+    
+    public URI getKeyWrapAlgorithm() {
+        return keyWrapAlgorithm;
     }
     
     public void setDelegateTo(DelegateTo to) {

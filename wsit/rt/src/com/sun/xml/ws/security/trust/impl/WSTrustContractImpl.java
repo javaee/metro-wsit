@@ -189,7 +189,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         context.getOtherProperties().put(IssuedTokenContext.STS_PRIVATE_KEY, (PrivateKey)certAndKey[1]);
         
         // Get TokenType
-         String tokenType = null;
+        String tokenType = null;
         URI tokenTypeURI = rst.getTokenType();
         if (tokenTypeURI == null && secParas != null){
             tokenTypeURI = secParas.getTokenType();
@@ -219,6 +219,45 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             keyType = wstVer.getSymmetricKeyTypeURI();
         }
         context.setKeyType(keyType);
+        
+        String encryptionAlgorithm = null;
+        URI encryptionAlgorithmURI = rst.getEncryptionAlgorithm();
+        if(encryptionAlgorithmURI == null && secParas != null){
+            encryptionAlgorithmURI = secParas.getEncryptionAlgorithm();
+        }
+        if(encryptionAlgorithmURI != null){
+            encryptionAlgorithm = encryptionAlgorithmURI.toString();
+        }
+        context.setEncryptionAlgorithm(encryptionAlgorithm);
+        
+        String signatureAlgorithm = null;
+        URI signatureAlgorithmURI = rst.getSignatureAlgorithm();
+        if(signatureAlgorithmURI == null && secParas != null){
+            signatureAlgorithmURI = secParas.getSignatureAlgorithm();
+        }
+        if(signatureAlgorithmURI != null){
+            signatureAlgorithm = signatureAlgorithmURI.toString();
+        }
+        context.setSignatureAlgorithm(signatureAlgorithm);
+        
+        String canonicalizationAlgorithm = null;
+        URI canonicalizationAlgorithmURI = rst.getCanonicalizationAlgorithm();
+        if(canonicalizationAlgorithmURI == null && secParas != null){
+            canonicalizationAlgorithmURI = secParas.getCanonicalizationAlgorithm();
+        }
+        if(canonicalizationAlgorithmURI != null){
+            canonicalizationAlgorithm = canonicalizationAlgorithmURI.toString();
+        }
+        context.setCanonicalizationAlgorithm(canonicalizationAlgorithm);
+        
+        // Get KeyWrap Algorithm, which is the part of WS-Trust wssx versaion
+        URI keyWrapAlgorithmURI = null;        
+        if(secParas != null){
+            keyWrapAlgorithmURI = secParas.getKeyWrapAlgorithm();            
+        }        
+        if(keyWrapAlgorithmURI != null){
+            context.getOtherProperties().put(IssuedTokenContext.KEY_WRAP_ALGORITHM, keyWrapAlgorithmURI.toString());
+        }                
         
         // Get authenticaed client Subject 
         Subject subject = context.getRequestorSubject();
@@ -398,7 +437,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         
         // Encrypt the token if required and the service certificate is available
         if (stsConfig.getEncryptIssuedToken()&& serCert != null){
-            Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo);
+            Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo, encryptionAlgorithm);
             issuedToken = new GenericToken(encTokenEle);
         }
         reqSecTok.setToken(issuedToken);
@@ -557,11 +596,16 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         return results;
     }
     
-     private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo) throws WSTrustException{
+     private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm) throws WSTrustException{
         Element encDataEle = null;
         // Create the encryption key
         try{
-            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            final XMLCipher cipher;
+            if(encryptionAlgorithm != null){
+                cipher = XMLCipher.getInstance(encryptionAlgorithm);
+            }else{
+                cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+            }
             final int keysizeInBytes = 32;
             final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
             cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));

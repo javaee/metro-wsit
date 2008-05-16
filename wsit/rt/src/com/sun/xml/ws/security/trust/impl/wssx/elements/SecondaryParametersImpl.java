@@ -88,6 +88,7 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
     private URI signatureAlgorithm = null;
     private URI encryptionAlgorithm = null;
     private URI canonAlgorithm = null;
+    private URI keyWrapAlgorithm = null;
     
     private Lifetime lifetime = null;
     private Entropy entropy = null;
@@ -365,6 +366,17 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
     
     public URI getEncryptWith() {
         return encryptWith;
+    }
+    
+    public void setKeyWrapAlgorithm(URI algorithm) {
+        keyWrapAlgorithm = algorithm;
+        JAXBElement<String> keyWrapElement =
+                (new ObjectFactory()).createKeyWrapAlgorithm(algorithm.toString());
+        getAny().add(keyWrapElement);
+    }
+    
+    public URI getKeyWrapAlgorithm() {
+        return keyWrapAlgorithm;
     }
     
     public void setDelegateTo(DelegateTo to) {

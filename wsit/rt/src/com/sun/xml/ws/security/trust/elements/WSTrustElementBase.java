@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementBase.java,v 1.4 2008-02-26 06:33:19 ofung Exp $
+ * $Id: WSTrustElementBase.java,v 1.5 2008-05-16 12:54:36 shyam_rao Exp $
  */
 
 /*
@@ -272,6 +272,16 @@ public interface WSTrustElementBase {
      * Get the Encryption Algorithm to be used with the token if set, null otherwise
      */
     URI getEncryptWith();
+    
+    /**
+     * set KeyWrapAlgorithm
+     */
+    void setKeyWrapAlgorithm(URI algorithm);
+    
+    /**
+     * get KeyWrapAlgorithm value if set, return default otherwise
+     */
+    URI getKeyWrapAlgorithm();
 
     /**
      * set the Delegate to which the issued token be delegated

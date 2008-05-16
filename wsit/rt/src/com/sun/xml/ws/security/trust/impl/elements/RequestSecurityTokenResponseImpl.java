@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.15 2008-02-26 06:33:25 ofung Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.16 2008-05-16 12:54:37 shyam_rao Exp $
  */
 
 /*
@@ -432,6 +432,14 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
     
     public URI getEncryptWith() {
         return encryptWith;
+    }
+    
+    public void setKeyWrapAlgorithm(URI algorithm) {
+        throw new UnsupportedOperationException("KeyWrapAlgorithm element in WS-Trust Standard version(1.0) is not supported");
+    }
+    
+    public URI getKeyWrapAlgorithm() {
+        throw new UnsupportedOperationException("KeyWrapAlgorithm element in WS-Trust Standard version(1.0) is not supported");
     }
     
     public final void setDelegateTo(final DelegateTo to) {

@@ -196,6 +196,44 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             keyType = wstVer.getSymmetricKeyTypeURI();
         }
         
+        String encryptionAlgorithm = null;
+        URI encryptionAlgorithmURI = rst.getEncryptionAlgorithm();
+        if(encryptionAlgorithmURI == null && secParas != null){
+            encryptionAlgorithmURI = secParas.getEncryptionAlgorithm();
+        }
+        if(encryptionAlgorithmURI != null){
+            encryptionAlgorithm = encryptionAlgorithmURI.toString();
+        }
+        context.setEncryptionAlgorithm(encryptionAlgorithm);
+        
+        String signatureAlgorithm = null;
+        URI signatureAlgorithmURI = rst.getSignatureAlgorithm();
+        if(signatureAlgorithmURI == null && secParas != null){
+            signatureAlgorithmURI = secParas.getSignatureAlgorithm();
+        }
+        if(signatureAlgorithmURI != null){
+            signatureAlgorithm = signatureAlgorithmURI.toString();
+        }
+        context.setSignatureAlgorithm(signatureAlgorithm);
+        
+        String canonicalizationAlgorithm = null;
+        URI canonicalizationAlgorithmURI = rst.getCanonicalizationAlgorithm();
+        if(canonicalizationAlgorithmURI == null && secParas != null){
+            canonicalizationAlgorithmURI = secParas.getCanonicalizationAlgorithm();
+        }
+        if(canonicalizationAlgorithmURI != null){
+            canonicalizationAlgorithm = canonicalizationAlgorithmURI.toString();
+        }
+        context.setCanonicalizationAlgorithm(canonicalizationAlgorithm);
+        
+        // Get KeyWrap Algorithm, which is the part of WS-Trust wssx versaion
+        URI keyWrapAlgorithmURI = null;        
+        if(secParas != null){
+            keyWrapAlgorithmURI = secParas.getKeyWrapAlgorithm();            
+        }        
+        if(keyWrapAlgorithmURI != null){
+            context.getOtherProperties().put(IssuedTokenContext.KEY_WRAP_ALGORITHM, keyWrapAlgorithmURI.toString());
+        }                
         
         // Get authenticaed client Subject 
         Subject subject = context.getRequestorSubject();

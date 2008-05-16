@@ -441,7 +441,7 @@ public class WSTrustUtil {
     
     public static EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert) throws Exception{
         final PublicKey pubKey = cert.getPublicKey();
-        final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+        final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);        
         cipher.init(XMLCipher.WRAP_MODE, pubKey);
 
         EncryptedKey encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
