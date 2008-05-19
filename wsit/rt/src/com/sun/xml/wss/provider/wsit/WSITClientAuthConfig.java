@@ -63,6 +63,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.util.WeakHashMap;
 
 /**
  *
@@ -87,6 +88,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private String secDisabled = null;
     private static final String TRUE="true";
     private static final String FALSE="false";
+    private WeakHashMap<PolicyMap, WSITClientAuthContext> policyMaptoClientAuthContextHash = new WeakHashMap<PolicyMap, WSITClientAuthContext>();
     
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
@@ -106,11 +108,11 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         }
         
         //now check if security is enabled
-        //if the policy has changed due to redeploy recheck if security is enabled
-        if (this.secDisabled == null || (policyMap != pMap)) {
+        //if the policy has changed due to redeploy recheck if security is enabled        
+        if (this.secDisabled == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {            
             this.wLock.lock();
-            try {
-                if (this.secDisabled == null || (policyMap != pMap)) {
+            try {                
+                if (this.secDisabled == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {
                     if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
                         this.secDisabled = TRUE;
                         return null;
@@ -134,8 +136,13 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             if (clientAuthContext != null) {
                //probably the app was redeployed
                //if so reacquire the AuthContext
-                if (pMap == policyMap) {
-                    authContextInitialized = true;
+                if (policyMaptoClientAuthContextHash.containsKey(pMap)) {
+                    authContextInitialized = true;                    
+                    clientAuthContext = (WSITClientAuthContext)policyMaptoClientAuthContextHash.get(pMap);
+                    if(policyMaptoClientAuthContextHash.size()>1){
+                        policyMaptoClientAuthContextHash.clear();                    
+                        policyMaptoClientAuthContextHash.put(pMap, clientAuthContext);
+                    }
                 }
             }
         } finally {
@@ -145,10 +152,10 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         if (!authContextInitialized) {
             this.wLock.lock();
             try {
-                // recheck the precondition, since the rlock was released.
-                if (clientAuthContext == null || (policyMap != pMap)) {
-                    clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);
-                    policyMap = pMap;
+                // recheck the precondition, since the rlock was released.                
+                if (clientAuthContext == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {
+                    clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);                    
+                    policyMaptoClientAuthContextHash.put(pMap, clientAuthContext);                    
                 }
             } finally {
                 this.wLock.unlock();
