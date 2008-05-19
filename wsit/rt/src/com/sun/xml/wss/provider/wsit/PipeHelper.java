@@ -83,7 +83,12 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.server.BoundEndpoint;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.Module;
+import java.lang.Object;
+import java.lang.Object;
+import java.util.List;
 
 
 public class PipeHelper extends ConfigHelper {
@@ -215,9 +220,25 @@ public class PipeHelper extends ConfigHelper {
         String rvalue = null;
         WSEndpoint wse = 
             (WSEndpoint) map.get(PipeConstants.ENDPOINT);
+        Container container = (Container)map.get(PipeConstants.CONTAINER);
         // endpoint
         if (wse != null) {
-            rvalue = wse.getPortName().toString();
+            if (container != null) {
+                Module module = container.getSPI(Module.class);
+                if (module != null) {
+                    List<BoundEndpoint> beList = module.getBoundEndpoints();
+                    for (BoundEndpoint be : beList) {
+                        WSEndpoint wsep = be.getEndpoint();
+                        if (wse.getPortName().equals(wsep.getPortName())) {
+                            rvalue = be.getAddress().toASCIIString();
+                        }
+                    }
+                }
+            }
+            //fallback to default
+            if (rvalue == null) {
+                rvalue = wse.getPortName().toString();
+            }
         } else {
              // client reference
             WSService service = (WSService)map.get(PipeConstants.SERVICE);
