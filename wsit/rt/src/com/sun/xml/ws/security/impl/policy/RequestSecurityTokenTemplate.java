@@ -68,6 +68,7 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     private String signWith;
     private String encryptWith;
     private String keyWrapAlgo;
+    private String wstVer;
     
     /**
      * Creates a new instance of RequestSecurityTokenTemplate
@@ -169,7 +170,8 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     
     
     public String getTrustVersion() {
-        throw new UnsupportedOperationException();
+        populate();
+        return wstVer;
     }
     
     
@@ -187,6 +189,9 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                 Iterator <PolicyAssertion> it =this.getNestedAssertionsIterator();
                 while( it.hasNext() ) {
                     PolicyAssertion assertion = (PolicyAssertion) it.next();
+                    if (this.wstVer == null){
+                        this.wstVer = assertion.getName().getNamespaceURI();
+                    }
                     //TODO: Support all RequestSecurityTokenTemplate elements
                     if ( PolicyUtil.isKeyType(assertion) ) {
                         this.keyType = assertion.getValue();

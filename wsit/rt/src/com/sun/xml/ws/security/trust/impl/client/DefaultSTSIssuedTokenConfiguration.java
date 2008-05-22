@@ -115,6 +115,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     private static final String CLAIMS = "Claims";
     private static final String DIALECT = "Dialect";
     private static final String IDENTITY = "Identity";
+    private static final String WST_VERSION ="wstVersion";
 
     private String tokenType = null;
     
@@ -139,7 +140,9 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     private Claims claims = null;
     
     public DefaultSTSIssuedTokenConfiguration(String protocol, IssuedToken issuedToken, PolicyAssertion localToken){
-        this.protocol = protocol;
+        if (protocol != null){
+            this.protocol = protocol;
+        }
         parseAssertions(issuedToken, localToken);
     }
     public DefaultSTSIssuedTokenConfiguration(String stsEndpoint, String stsMEXAddress){
@@ -268,27 +271,39 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             if(stsMEXAddress == null){
                 stsMEXAddress = stsEndpoint + "/mex";
             }
-        }else if (localToken != null){
+        }
+          
+        if (localToken != null){
             // Get STS information from local configuration
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
-                this.stsNamespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                this.stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
-                if (stsEndpoint == null){
-                    stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase()));
-                }
-                this.stsMEXAddress = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                this.protocol = attrs.get(new QName(CONFIG_NAMESPACE, WST_VERSION));
                 
-                if (stsMEXAddress == null){
-                    this.stsWSDLLocation = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
-                    this.stsServiceName = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
-                    this.stsPortName = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                if (stsURI == null){
+                    this.stsNamespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
+                    this.stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                    if (stsEndpoint == null){
+                        stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase()));
+                    }
+                    this.stsMEXAddress = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                
+                    if (stsMEXAddress == null){
+                        this.stsWSDLLocation = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
+                        this.stsServiceName = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
+                        this.stsPortName = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                    }
                 }
             }
         }
         RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
         if (rstt != null){
-            if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            String serviceWstVersion = rstt.getTrustVersion();
+            if (protocol == null){
+                protocol = serviceWstVersion;
+            }
+            if (!serviceWstVersion.equals(protocol)){
+                copy(rstt, protocol, serviceWstVersion);
+            }else if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
                 SecondaryIssuedTokenParametersImpl sitp = new SecondaryIssuedTokenParametersImpl();
                 copy(rstt, sitp);
                 sitp.setClaims(getClaims((PolicyAssertion)issuedToken));
@@ -465,6 +480,27 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         sitp.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
         sitp.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
         sitp.setKeyWrapAlgorithm(rstt.getKeyWrapAlgorithm());
+    }
+    
+    private void copy(RequestSecurityTokenTemplate rstt, String stsWstProtocol, String serviceWstProtocol){
+        // Convert KeyType
+        WSTrustVersion stsWstVer = WSTrustVersion.getInstance(stsWstProtocol);
+        WSTrustVersion serviceWstVer = WSTrustVersion.getInstance(serviceWstProtocol);
+        String rsttKeyType = rstt.getKeyType();
+        if (serviceWstVer.getPublicKeyTypeURI().equals(rsttKeyType)){
+            setKeyType(stsWstVer.getPublicKeyTypeURI());
+        }else if (serviceWstVer.getSymmetricKeyTypeURI().equals(rsttKeyType)){
+            setKeyType(stsWstVer.getSymmetricKeyTypeURI());
+        }else if (serviceWstVer.getBearerKeyTypeURI().equals(rsttKeyType)){
+            setKeyType(stsWstVer.getBearerKeyTypeURI());
+        }
+        this.setTokenType(rstt.getTokenType());
+        this.setKeySize(rstt.getKeySize());
+        this.setSignWith(rstt.getSignWith());
+        this.setEncryptWith(rstt.getEncryptWith());
+        this.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
+        this.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
+        this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
     }
 }
 
