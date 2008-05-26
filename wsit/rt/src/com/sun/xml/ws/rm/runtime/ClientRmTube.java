@@ -44,7 +44,8 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RmSoapFaultException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -76,7 +77,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         this.requestPacketCopy = null;
     }
 
-    public ClientRmTube(WsitClientTubeAssemblyContext context) throws RmWsException {
+    public ClientRmTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {
@@ -114,10 +115,13 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 return doSuspend(next);
             } else { // this is a first-time processing
                 // we do not modify original packet in case we wanted to reuse it later                
+
                 requestPacket = session.processOutgoingPacket(requestPacket);
                 requestPacketCopy = requestPacket.copy(true);
                 return super.processRequest(requestPacket);
             }
+        } catch (RmSoapFaultException ex) {
+            return doReturnWith(ex.getSoapFaultResponse());
         } catch (RmException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(new WebServiceException(ex)); // the input argument has to be a runtime exception
@@ -170,7 +174,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             session.close();
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         } finally {
             super.preDestroy();

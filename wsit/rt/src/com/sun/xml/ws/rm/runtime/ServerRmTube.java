@@ -35,12 +35,15 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.policy.ConfigurationManager;
 
 /**
  *
@@ -48,17 +51,20 @@ import com.sun.xml.ws.rm.localization.RmLogger;
  */
 public class ServerRmTube extends AbstractFilterTubeImpl {
     private static final RmLogger LOGGER = RmLogger.getLogger(ServerRmTube.class);
+    private final Configuration configuration;
 
     public ServerRmTube(ServerRmTube original, TubeCloner cloner) {
         super(original, cloner);
         
+        this.configuration = original.configuration;
         // TODO: initialize all instance variables
     }
 
     public ServerRmTube(WsitServerTubeAssemblyContext context) {
         super(context.getTubelineHead());
         
-        // TODO initialize all instance variables
+        this.configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
+        // TODO initialize all instance variables        
     }
 
     @Override
@@ -72,30 +78,40 @@ public class ServerRmTube extends AbstractFilterTubeImpl {
     }
 
     @Override
-    public NextAction processException(Throwable arg0) {
+    public NextAction processException(Throwable throwable) {
         LOGGER.entering();
         try {
-            return super.processException(arg0);
+            return super.processException(throwable);
         } finally {
             LOGGER.exiting();
         }
     }
 
     @Override
-    public NextAction processRequest(Packet arg0) {
+    public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
         try {
-            return super.processRequest(arg0);
+            if (isProtocolMessage(requestPacket.getMessage())) {
+                Packet protocolResponsePacket = processProtocolRequest(requestPacket);
+                return doReturnWith(protocolResponsePacket);
+            } else {
+                requestPacket = processApplicationRequest(requestPacket);
+                // TODO: process RM headers
+                if (configuration.isOrderedDelivery()) {                    
+                    // TODO: ordered case processing (suspend until it's this message's turn)
+                }
+                return super.processRequest(requestPacket);
+            }
         } finally {
             LOGGER.exiting();
         }
     }
 
     @Override
-    public NextAction processResponse(Packet arg0) {
+    public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            return super.processResponse(arg0);
+            return super.processResponse(responsePacket);
         } finally {
             LOGGER.exiting();
         }
@@ -109,5 +125,21 @@ public class ServerRmTube extends AbstractFilterTubeImpl {
         } finally {
             LOGGER.exiting();
         }
+    }
+
+    private boolean isProtocolMessage(Message message) {
+        return configuration.getRmVersion().isRmAction(
+                message.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion())
+                );
+    }
+
+    private Packet processApplicationRequest(Packet requestPacket) {
+        // TODO: implement
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private Packet processProtocolRequest(Packet requestPacket) {
+        // TODO: implement
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

@@ -105,23 +105,31 @@ public enum RmVersion {
     public final String lastAction;
     public final String makeConnectionAction;
     public final String sequenceAcknowledgementAction;
+    public final String wsrmFaultAction;
     public final String terminateSequenceAction;
     public final String terminateSequenceResponseAction;
     /**
      * QName constants
      */
     public final QName ackRequestedQName;
-    public final QName closedSequenceQname;
-    public final QName createSequenceRefusedQname;
     public final QName inactivityTimeoutAssertionQName;
-    public final QName messageNumberRolloverQname;
     public final QName rmPolicyAssertionQName;
     public final QName sequenceAcknowledgementQName;
     public final QName sequenceQName;
     public final QName sequenceSTRAssertionQName;
-    public final QName sequenceTerminatedQname;
     public final QName sequenceTransportSecurityAssertionQName;
-    public final QName unknownSequenceQname;
+
+    /**
+     * Fault codes
+     */
+    public final QName sequenceTerminatedFaultCode;
+    public final QName unknownSequenceFaultCode;
+    public final QName invalidAcknowledgementFaultCode;
+    public final QName messageNumberRolloverFaultCode;    
+    public final QName lastMessageNumberExceededFaultCode; // WS-RM 1.0 only
+    public final QName createSequenceRefusedFaultCode;
+    public final QName sequenceClosedFaultCode; // since WS-RM 1.1
+    public final QName wsrmRequiredFaultCode; // since WS-RM 1.1
 
     private RmVersion(String nsUri, String policynsuri, Class<?>... classes) {
         this.namespaceUri = nsUri;
@@ -135,21 +143,26 @@ public enum RmVersion {
         this.lastAction = namespaceUri + "/LastMessage";
         this.makeConnectionAction = namespaceUri + "/MakeConnection";
         this.sequenceAcknowledgementAction = namespaceUri + "/SequenceAcknowledgement";
+        this.wsrmFaultAction = namespaceUri + "/fault";
         this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
         this.terminateSequenceResponseAction = namespaceUri + "/TerminateSequenceResponse";
 
         this.ackRequestedQName = new QName(namespaceUri, "AckRequested");
-        this.closedSequenceQname = new QName(namespaceUri, "SequenceClosed");
-        this.createSequenceRefusedQname = new QName(namespaceUri, "CreateSequenceRefused");
         this.inactivityTimeoutAssertionQName = new QName(policyNamespaceUri, "InactivityTimeout");
-        this.messageNumberRolloverQname = new QName(namespaceUri, "MessageNumberRollover");
         this.rmPolicyAssertionQName = new QName(policyNamespaceUri, "RMAssertion");
         this.sequenceAcknowledgementQName = new QName(namespaceUri, "SequenceAcknowledgement");
         this.sequenceQName = new QName(namespaceUri, "Sequence");
         this.sequenceSTRAssertionQName = new QName(policyNamespaceUri, "SequenceSTR");
-        this.sequenceTerminatedQname = new QName(namespaceUri, "SequenceTerminated");
         this.sequenceTransportSecurityAssertionQName = new QName(policyNamespaceUri, "SequenceTransportSecurity");
-        this.unknownSequenceQname = new QName(namespaceUri, "UnknownSequence");
+
+        this.sequenceTerminatedFaultCode = new QName(namespaceUri, "SequenceTerminated");
+        this.unknownSequenceFaultCode = new QName(namespaceUri, "UnknownSequence");
+        this.invalidAcknowledgementFaultCode = new QName(namespaceUri, "InvalidAcknowledgement");
+        this.messageNumberRolloverFaultCode = new QName(namespaceUri, "MessageNumberRollover");
+        this.lastMessageNumberExceededFaultCode = new QName(namespaceUri, "LastMessageNumberExceeded"); // WS-RM 1.0 only
+        this.createSequenceRefusedFaultCode = new QName(namespaceUri, "CreateSequenceRefused");
+        this.sequenceClosedFaultCode = new QName(namespaceUri, "SequenceClosed"); // since WS-RM 1.1
+        this.wsrmRequiredFaultCode = new QName(namespaceUri, "WSRMRequired"); // since WS-RM 1.1
 
         try {
             this.jaxbContext = JAXBRIContext.newInstance(classes, null, null, null, false, null);
@@ -159,17 +172,40 @@ public enum RmVersion {
         }
     }
 
-    public boolean isRMAction(String action) {
-        return (action != null) &&
-                (ackRequestedAction.equals(action) ||
-                createSequenceAction.equals(action) ||
-                createSequenceResponseAction.equals(action) ||
-                closeSequenceAction.equals(action) ||
-                closeSequenceResponseAction.equals(action) ||
-                lastAction.equals(action) ||
-                makeConnectionAction.equals(action) ||
-                sequenceAcknowledgementAction.equals(action) ||
-                terminateSequenceAction.equals(action) ||
-                terminateSequenceResponseAction.equals(action));
+    /**
+     * @deprecated Use {@link #isRmAction()} instead.
+     */
+    @Deprecated
+    public boolean isRMAction(String wsaAction) {
+        return isRmAction(wsaAction);
+    }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isRmAction(String wsaAction) {
+        return (wsaAction != null) &&
+                (ackRequestedAction.equals(wsaAction) ||
+                createSequenceAction.equals(wsaAction) ||
+                createSequenceResponseAction.equals(wsaAction) ||
+                closeSequenceAction.equals(wsaAction) ||
+                closeSequenceResponseAction.equals(wsaAction) ||
+                lastAction.equals(wsaAction) ||
+                makeConnectionAction.equals(wsaAction) ||
+                sequenceAcknowledgementAction.equals(wsaAction) ||
+                wsrmFaultAction.equals(wsaAction) ||
+                terminateSequenceAction.equals(wsaAction) ||
+                terminateSequenceResponseAction.equals(wsaAction));        
+    }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isRmFault(String wsaAction) {
+        return wsrmFaultAction.equals(wsaAction);
     }
 }

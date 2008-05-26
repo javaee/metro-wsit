@@ -55,7 +55,7 @@ public class DuplicateMessageException extends RmException {
      * Store original of Duplicate message if passed using the ctor
      * taking a Message parameter.
      */
-    private final RMMessage rmMessage;
+    private final transient RMMessage rmMessage;
 
     public DuplicateMessageException(String info, RMMessage message) {
         super(info);

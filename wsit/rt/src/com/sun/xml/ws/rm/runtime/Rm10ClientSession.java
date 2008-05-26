@@ -197,6 +197,7 @@ final class Rm10ClientSession extends ClientSession {
             if (response != null) {
                 processInboundMessageHeaders(response.getHeaders(), false);
                 if (response.isFault()) {
+                    // FIXME: refactor the exception creation - we should not pass the SOAP fault directly into the exception
                     throw new RmException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("Last message"), response);
                 }
             }

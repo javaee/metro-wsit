@@ -93,7 +93,9 @@ class ScheduledTaskManager {
      */
     public ScheduledFuture<?> startTask(Runnable task) {
         final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, DELAY, PERIOD, TimeUnit.MILLISECONDS);
-        scheduledTaskHandles.offer(taskHandle);
+        if (!scheduledTaskHandles.offer(taskHandle)) {
+            // TODO: handle error condition
+        }
         return taskHandle;
     }
 }

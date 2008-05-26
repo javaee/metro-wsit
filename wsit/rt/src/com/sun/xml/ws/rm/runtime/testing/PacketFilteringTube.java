@@ -42,7 +42,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
-import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
@@ -63,13 +63,13 @@ public class PacketFilteringTube extends AbstractFilterTubeImpl {
         this.filters = original.filters;
     }
 
-    public PacketFilteringTube(WsitClientTubeAssemblyContext context) throws RmWsException {
+    public PacketFilteringTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = true;
         this.filters = getFilters(context.getBinding());
     }
 
-    public PacketFilteringTube(WsitServerTubeAssemblyContext context) throws RmWsException {
+    public PacketFilteringTube(WsitServerTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = false;
         this.filters = getFilters(context.getEndpoint().getBinding());

@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rm.policy.spi_impl;
 
-import com.sun.xml.ws.rm.policy.*;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;

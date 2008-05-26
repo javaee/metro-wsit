@@ -145,15 +145,15 @@ public final class RMServerTube extends TubeBase {
                 protocolResponsePacket = handleProtocolMessage(requestPacket);
             } catch (CreateSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().createSequenceRefusedQname,
+                        getConfig().getRMVersion().createSequenceRefusedFaultCode,
                         LocalizationMessages.WSRM_3027_CREATE_SEQUENCE_REFUSED(e.getMessage()));
             } catch (TerminateSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().sequenceTerminatedQname,
+                        getConfig().getRMVersion().sequenceTerminatedFaultCode,
                         LocalizationMessages.WSRM_3028_SEQUENCE_TERMINATED_ON_ERROR(e.getMessage()));
             } catch (InvalidSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().unknownSequenceQname,
+                        getConfig().getRMVersion().unknownSequenceFaultCode,
                         LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(e.getSequenceId()));
             }
 
@@ -169,19 +169,18 @@ public final class RMServerTube extends TubeBase {
                 message = handleInboundMessage(requestPacket, RMDestination.getRMDestination());
             } catch (MessageNumberRolloverException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().messageNumberRolloverQname,
+                        getConfig().getRMVersion().messageNumberRolloverFaultCode,
                         LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(e.getSequenceId(), e.getMessageNumber()));
             } catch (InvalidSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().unknownSequenceQname,
+                        getConfig().getRMVersion().unknownSequenceFaultCode,
                         LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(e.getSequenceId()));
             } catch (CloseSequenceException e) {
                 soapFault = createSoapFault(
-                        getConfig().getRMVersion().closedSequenceQname,
+                        getConfig().getRMVersion().sequenceClosedFaultCode,
                         LocalizationMessages.WSRM_3029_SEQUENCE_CLOSED(e.getSequenceId()));
             }
 
-            Packet retPacket = null;
             if (soapFault != null) {
                 Message soapFaultMessage = Messages.create(soapFault);
 
@@ -192,7 +191,7 @@ public final class RMServerTube extends TubeBase {
                     soapFaultMessage.getHeaders().add(header);
                 }
 
-                retPacket = requestPacket.createServerResponse(
+                Packet retPacket = requestPacket.createServerResponse(
                         soapFaultMessage,
                         getConfig().getAddressingVersion(),
                         getConfig().getSoapVersion(),

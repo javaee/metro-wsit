@@ -51,7 +51,21 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * <p>Java class to handle SequenceFaults </p>
  * 
+ * <p>The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;xs:complexType name="SequenceFaultType"&gt;
+ *   &lt;xs:sequence&gt;
+ *     &lt;xs:element name="FaultCode" type="xs:QName"/&gt;
+ *     &lt;xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/&gt;
+ *   &lt;/xs:sequence&gt;
+ *   &lt;xs:anyAttribute namespace="##any" processContents="lax"/&gt;
+ * &lt;/xs:complexType&gt;
+ * &lt;xs:element name="SequenceFault" type="wsrm:SequenceFaultType"/&gt;
+ * </pre>
+ * 
  * @author Bhakti Mehta
+ * @author Marek Potociar
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -69,6 +83,14 @@ public class SequenceFaultElement {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public SequenceFaultElement() {
+        // empty
+    }
+    
+    public SequenceFaultElement(QName faultCode) {
+        this.faultCode = faultCode;
+    }
+    
     /**
      * Gets the value of the faultCode property.
      * 

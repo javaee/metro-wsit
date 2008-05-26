@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
@@ -47,18 +49,25 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 
 /**
  * Transmits standalone protocol messages over the wire. Provides also some additional utility mehtods for creating and
@@ -69,6 +78,16 @@ import javax.xml.namespace.QName;
 public class ProtocolCommunicator {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
+    /**
+     * SOAP 1.1 Sender Fault
+     */
+    private static final QName SOAP_1_1_SENDER_FAULT =
+            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Client", SOAPConstants.SOAP_ENV_PREFIX);
+    /**
+     * SOAP 1.2 Receiver Fault
+     */
+    private static final QName SOAP_1_1_RECEIVER_FAULT =
+            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Server", SOAPConstants.SOAP_ENV_PREFIX);
     private volatile Engine fiberEngine;
     private final ReadWriteLock fiberEngineLock = new ReentrantReadWriteLock();
     private final AtomicReference<Packet> musterRequestPacket;
@@ -197,6 +216,7 @@ public class ProtocolCommunicator {
      */
     public Message send(Message requestMessage, String action) {
         Fiber fiber = getFiberEngine().createFiber(); // TODO: could we possibly reuse the same fiber?
+
         Packet responsePacket = fiber.runSync(tubeline, createPacket(requestMessage, action));
         return responsePacket.getMessage();
     }
@@ -225,6 +245,133 @@ public class ProtocolCommunicator {
     }
 
     /**
+     * Creates a SOAP fault response that occured while processing the RM headers of a request
+     * 
+     * @param requestPacket the request that caused the fault
+     * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
+     * @param reason English language reason element
+     * @return response packet filled with a generated SOAP fault
+     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
+     */
+    public Packet createHeaderProcessingSoapFaultResponse(Packet requestPacket, QName subcode, String reason) throws RmRuntimeException {
+        try {
+            SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
+
+            // common SOAP1.1 and SOAP1.2 Fault settings 
+            if (reason != null) {
+                soapFault.setFaultString(reason, Locale.ENGLISH);
+            }
+
+            // SOAP version-specific SOAP Fault settings
+            // FIXME: check if the code we generate is allways a Sender.
+            switch (configuration.getSoapVersion()) {
+                case SOAP_11:
+                    soapFault.setFaultCode(SOAP_1_1_SENDER_FAULT);
+                    break;
+                case SOAP_12:
+                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                    soapFault.appendFaultSubcode(subcode);
+                    break;
+                default:
+                    throw new RmRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
+            }
+
+            Message soapFaultMessage = Messages.create(soapFault);
+            if (configuration.getSoapVersion() == SOAPVersion.SOAP_11) {
+                Header header;
+                if (configuration.getRmVersion() == RmVersion.WSRM10) {
+                    header = Headers.create(configuration.getRmVersion().jaxbContext, new com.sun.xml.ws.rm.v200502.SequenceFaultElement(subcode));
+                } else {
+                    header = Headers.create(configuration.getRmVersion().jaxbContext, new com.sun.xml.ws.rm.v200702.SequenceFaultElement(subcode));
+                }
+                soapFaultMessage.getHeaders().add(header);
+            }
+            return requestPacket.createServerResponse(
+                    soapFaultMessage,
+                    configuration.getAddressingVersion(),
+                    configuration.getSoapVersion(),
+                    getProperFaultActionForAddressingVersion());
+        } catch (SOAPException ex) {
+            throw new RmRuntimeException("Error creating a SOAP fault", ex);
+        }
+    }
+
+    /**
+     * Creates a SOAP fault response that occured while processing the CreateSequence request message
+     * 
+     * @param requestPacket the request that caused the fault
+     * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
+     * @param reason English language reason element
+     * @return response packet filled with a generated SOAP fault
+     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
+     */
+    public Packet createCreateSequenceProcessingSoapFaultResponse(Packet requestPacket, QName subcode, String reason) throws RmRuntimeException {
+        try {
+            SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
+
+            // common SOAP1.1 and SOAP1.2 Fault settings 
+            if (reason != null) {
+                soapFault.setFaultString(reason, Locale.ENGLISH);
+            }
+
+            // SOAP version-specific SOAP Fault settings
+            // FIXME: check if the code we generate is allways a Sender.
+            switch (configuration.getSoapVersion()) {
+                case SOAP_11:
+                    soapFault.setFaultCode(subcode);
+                    break;
+                case SOAP_12:
+                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                    soapFault.appendFaultSubcode(subcode);
+                    break;
+                default:
+                    throw new RmRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
+            }
+
+            Message soapFaultMessage = Messages.create(soapFault);
+            return requestPacket.createServerResponse(
+                    soapFaultMessage,
+                    configuration.getAddressingVersion(),
+                    configuration.getSoapVersion(),
+                    getProperFaultActionForAddressingVersion());
+        } catch (SOAPException ex) {
+            throw new RmRuntimeException("Error creating a SOAP fault", ex);
+        }
+    }
+
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public String getProperFaultActionForAddressingVersion() {
+        AddressingVersion av = configuration.getAddressingVersion();
+        return (av == AddressingVersion.MEMBER) ? av.getDefaultFaultAction() : configuration.getRmVersion().wsrmFaultAction;
+    }
+
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isProtocolMessage(@NotNull Message message) {
+        return configuration.getRmVersion().isRmAction(
+                message.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion())
+                );
+    }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isRmFault(@NotNull Message message) {
+        return configuration.getRmVersion().isRmFault(
+                message.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion())
+                );        
+    }
+    
+    /**
      * Creates a new request packet and wraps a {@link Message} instance into it
      * 
      * @param message nullable, {@link Message} instance to be wrapped into the packet
@@ -235,6 +382,7 @@ public class ProtocolCommunicator {
         newPacket.setMessage(message);
 
         message.assertOneWay(false); // TODO do we really need to call this assert here?
+
         message.getHeaders().fillRequestAddressingHeaders(
                 newPacket,
                 configuration.getAddressingVersion(),

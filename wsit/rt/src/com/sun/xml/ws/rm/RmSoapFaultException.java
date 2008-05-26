@@ -36,19 +36,21 @@
 
 package com.sun.xml.ws.rm;
 
-import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.api.message.Packet;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author m_potociar
  */
-public class RmWsException extends WebServiceException {
-
-    public RmWsException(String message, Throwable cause) {
-        super(message, cause);
+public class RmSoapFaultException extends RmException {    
+    private final transient Packet soapFaultResponse;
+    
+    public RmSoapFaultException(Packet soapFaultResponse) {
+        super("Processing exception");
+        this.soapFaultResponse = soapFaultResponse;                
     }
 
-    public RmWsException(String message) {
-        super(message);
-    }    
+    public Packet getSoapFaultResponse() {
+        return soapFaultResponse;
+    } 
 }

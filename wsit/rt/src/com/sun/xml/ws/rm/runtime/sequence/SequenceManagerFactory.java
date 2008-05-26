@@ -44,7 +44,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public abstract class SequenceManagerFactory {
 
-    private static SequenceManagerFactory INSTANCE;
+    private static volatile SequenceManagerFactory INSTANCE;
     private static ReadWriteLock INIT_LOCK = new ReentrantReadWriteLock();
 
     /**

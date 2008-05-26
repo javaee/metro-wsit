@@ -48,7 +48,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
@@ -66,11 +66,11 @@ public abstract class ConfigurationManager {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ConfigurationManager.class);
 
-    public static ConfigurationManager createServiceConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmWsException {
+    public static ConfigurationManager createServiceConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmRuntimeException {
         return new ConfigurationManager(wsdlPort, binding) {
 
             @Override
-            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException {                
+            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmRuntimeException {                
                 if (set.contains(Rm11Assertion.NAME)) {
                     configurations.add(new Rm11ServiceConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 } else if (set.contains(Rm10Assertion.NAME)) {
@@ -80,11 +80,11 @@ public abstract class ConfigurationManager {
         };
     }
 
-    public static ConfigurationManager createClientConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmWsException {
+    public static ConfigurationManager createClientConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmRuntimeException {
         return new ConfigurationManager(wsdlPort, binding) {
 
             @Override
-            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException {                
+            protected void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmRuntimeException {                
                 if (set.contains(Rm11Assertion.NAME)) {
                     configurations.add(new Rm11ClientConfiguration(set, soapVersion, addressingVersion, requestResponseOperationsDetected));
                 } else if (set.contains(Rm10Assertion.NAME)) {
@@ -97,7 +97,7 @@ public abstract class ConfigurationManager {
     // TODO: improve the naive implementation - in the future we might want handle also message scope RM settings
     protected List<Configuration> configurations = new ArrayList<Configuration>();
 
-    private ConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmWsException {
+    private ConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmRuntimeException {
         PolicyMap policyMap = (wsdlPort != null) ? wsdlPort.getBinding().getOwner().getExtension(WSDLPolicyMapWrapper.class).getPolicyMap() : null;
         if (policyMap != null) {
             PolicyMapKey endpointScopeKey = PolicyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(), wsdlPort.getName());
@@ -126,7 +126,7 @@ public abstract class ConfigurationManager {
         return configurations.toArray(new Configuration[configurations.size()]);
     }
 
-    protected abstract void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmWsException;
+    protected abstract void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmRuntimeException;
 
     /**
      * Determine whether wsdl port contains any two-way operations.

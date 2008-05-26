@@ -1,5 +1,5 @@
 /*
- * $Id: RmException.java,v 1.4 2008-02-26 06:32:54 ofung Exp $
+ * $Id: RmException.java,v 1.5 2008-05-26 15:34:43 m_potociar Exp $
  */
 
 /*
@@ -45,7 +45,7 @@ import com.sun.xml.ws.api.message.Message;
  * Wrapper class for exceptions thrown by RM Methods.
  */
 public class RmException extends Exception {
-    private final Message fault;
+    private final transient Message fault;
     
     public RmException(String message, Throwable cause) {
         super(message, cause);

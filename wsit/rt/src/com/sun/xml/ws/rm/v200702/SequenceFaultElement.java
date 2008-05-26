@@ -54,17 +54,17 @@ import javax.xml.namespace.QName;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SequenceFaultType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="FaultCode" type="{http://docs.oasis-open.org/ws-rx/wsrm/200702}FaultCodes"/>
- *         &lt;element name="Detail" type="{http://docs.oasis-open.org/ws-rx/wsrm/200702}DetailType" minOccurs="0"/>
- *         &lt;any/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="SequenceFaultType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="FaultCode" type="{http://docs.oasis-open.org/ws-rx/wsrm/200702}FaultCodes"/&gt;
+ *         &lt;element name="Detail" type="{http://docs.oasis-open.org/ws-rx/wsrm/200702}DetailType" minOccurs="0"/&gt;
+ *         &lt;any/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -87,6 +87,14 @@ public class SequenceFaultElement {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public SequenceFaultElement() {
+        // empty
+    }
+    
+    public SequenceFaultElement(QName faultCode) {
+        this.faultCode = faultCode;
+    }
+  
     /**
      * Gets the value of the faultCode property.
      * 

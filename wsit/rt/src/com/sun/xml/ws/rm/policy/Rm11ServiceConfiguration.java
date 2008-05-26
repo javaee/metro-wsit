@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.RmWsException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
@@ -64,13 +64,13 @@ public class Rm11ServiceConfiguration implements Configuration {
     private final long acknowledgementInterval;
     private final boolean requestResponseDetected;
 
-    public Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmWsException {
+    public Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmRuntimeException {
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
         
         if (alternative.contains(Rm10Assertion.NAME)) {
-            throw LOGGER.logSevereException(new RmWsException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY()));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY()));
         }
         
         Rm11Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm11Assertion.NAME, Rm11Assertion.class);

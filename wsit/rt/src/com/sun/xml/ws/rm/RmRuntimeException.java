@@ -44,15 +44,11 @@ import javax.xml.ws.WebServiceException;
  */
 public class RmRuntimeException extends WebServiceException {
 
-    public RmRuntimeException(Throwable cause) {
-        super(cause);
-    }
-
     public RmRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public RmRuntimeException(String message) {
         super(message);
-    }
+    }    
 }
