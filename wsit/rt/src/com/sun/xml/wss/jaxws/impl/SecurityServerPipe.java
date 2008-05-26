@@ -494,7 +494,11 @@ public class SecurityServerPipe extends SecurityPipeBase {
         if(isTrustMessage(packet)){
             cachedOperation = getWSDLOpFromAction(packet,false);
         }
-        
+
+        if(cachedOperation == null) {                
+            cachedOperation = getWSDLOpFromAction(packet, false);                    
+        }
+
         SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(cachedOperation);
         if(sph == null){
             return new MessagePolicy();
