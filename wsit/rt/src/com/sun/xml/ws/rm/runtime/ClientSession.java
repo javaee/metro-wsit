@@ -38,8 +38,6 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
-import com.sun.xml.ws.api.message.HeaderList;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.rm.CreateSequenceException;
@@ -122,82 +120,89 @@ abstract class ClientSession {
 
     protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException;
 
-    protected abstract void appendSequenceHeader(Message outboundMessage) throws RmException;
-
-    protected abstract void appendAckRequestedHeader(Message outboundMessage) throws RmException;
-
-    protected abstract void appendSequenceAcknowledgementHeader(Message outboundMessage) throws RmException;
-
-    protected abstract void processSequenceHeader(HeaderList inboundMessageHeaders) throws RmException;
-
-    protected abstract void processAcknowledgementHeader(HeaderList inboundMessageHeaders) throws RmException;
-
-    protected abstract void processAckRequestedHeader(HeaderList inboundMessageHeaders) throws RmException;
-
     protected abstract void closeOutboundSequence() throws RmException;
 
     protected abstract void terminateOutboundSequence() throws RmException;
 
-    protected final void processInboundMessageHeaders(HeaderList responseHeaders, boolean expectSequenceHeader) throws RmException {
-        if (responseHeaders != null) {
-            if (expectSequenceHeader) {
-                processSequenceHeader(responseHeaders);
+    protected final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmException {
+        if (expectSequenceHeader) {
+            String sequenceId = responseAdapter.getSequenceId();
+            if (sequenceId != null) {
+                assertSequenceId(inboundSequenceId, sequenceId);
+                sequenceManager.getSequence(sequenceId).acknowledgeMessageId(responseAdapter.getMessageNumber());
+            } else {
+                throw new RmException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
             }
-            processAcknowledgementHeader(responseHeaders);
-            processAckRequestedHeader(responseHeaders);
         }
+
+        String ackRequestedSequenceId = responseAdapter.getAckRequestedHeaderSequenceId();
+        if (ackRequestedSequenceId != null) {
+            assertSequenceId(inboundSequenceId, ackRequestedSequenceId);
+            sequenceManager.getSequence(ackRequestedSequenceId).setAckRequestedFlag();
+        }
+
+        responseAdapter.processAcknowledgements(sequenceManager, outboundSequenceId);
     }
 
-    protected final void assertSequenceIdInInboundHeader(String expected, String actual) {
+    /**
+     * TODO javadoc
+     */
+    protected final void assertSequenceId(String expected, String actual) {
         if (expected != null && !expected.equals(actual)) {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_INBOUND_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
         }
     }
 
     protected final void requestAcknowledgement() throws RmException {
-        Message ackResponse = null;
+        PacketAdapter responseAdapter = PacketAdapter.create(configuration);
         try {
-            Message ackRequestMessage = communicator.createEmptyMessage();
-            appendAckRequestedHeader(ackRequestMessage);
 
-            ackResponse = communicator.send(ackRequestMessage, configuration.getRmVersion().ackRequestedAction);
-            if (ackResponse == null) {
+            PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
+            requestAdapter.setEmptyRequestMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
+
+            responseAdapter.attach(communicator.send(requestAdapter.detach()));
+            if (!responseAdapter.containsMessage()) {
                 throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
             }
 
-            processInboundMessageHeaders(ackResponse.getHeaders(), false);
+            processInboundMessageHeaders(responseAdapter, false);
 
-            if (ackResponse.isFault()) {
+            if (responseAdapter.isFault()) {
                 // FIXME: refactor the exception creation - we should not pass the SOAP fault directly into the exception
-                throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), ackResponse);
+                throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), responseAdapter.message);
             }
         } finally {
-            if (ackResponse != null) {
-                ackResponse.consume();
-            }
+            responseAdapter.consumeAndDetach();
         }
     }
 
     final Packet processOutgoingPacket(Packet requestPacket) throws RmException {
-        initializeIfNecessary(requestPacket);
+        PacketAdapter requestAdapter = PacketAdapter.create(configuration, requestPacket);
+        initializeIfNecessary(requestAdapter);
 
-        appendSequenceHeader(requestPacket.getMessage());
+        requestAdapter.appendSequenceHeader(
+                outboundSequenceId,
+                sequenceManager.getSequence(outboundSequenceId).getNextMessageId());
         if (checkPendingAckRequest()) {
-            appendAckRequestedHeader(requestPacket.getMessage());
+            requestAdapter.appendAckRequestedHeader(outboundSequenceId);
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
-        appendSequenceAcknowledgementHeader(requestPacket.getMessage());
+        if (inboundSequenceId != null) {
+            requestAdapter.appendSequenceAcknowledgementHeader(
+                    inboundSequenceId,
+                    sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
+        }
 
-        return requestPacket;
+        return requestAdapter.detach();
     }
 
     final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
-        Message responseMessage = responsePacket.getMessage();
-        if (responseMessage != null) {
-            processInboundMessageHeaders(responseMessage.getHeaders(), !responseToOneWayRequest && !communicator.isProtocolMessage(responseMessage));
+        PacketAdapter responseAdapter = PacketAdapter.create(configuration, responsePacket);
+        if (responseAdapter.containsMessage()) {
+            processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
         }
 
-        return responsePacket;
+        return responseAdapter.detach();
     }
 
     /**
@@ -262,11 +267,11 @@ abstract class ClientSession {
      * Performs late initialization of sequences and timer task, provided those have not yet been initialized.
      * The actual initialization thus happens only once in the lifetime of each client RM session object.
      */
-    private void initializeIfNecessary(Packet requestPacket) throws CreateSequenceException, RmException {
+    private void initializeIfNecessary(PacketAdapter request) throws CreateSequenceException, RmException {
         initLock.lock();
         try {
             if (!isInitialized()) {
-                communicator.registerMusterRequestPacket(requestPacket.copy(false));
+                communicator.registerMusterRequestPacket(request.copyPacket(false));
 
                 int numberOfInitiateSessionAttempts = 0;
                 while (true) {
