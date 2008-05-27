@@ -57,7 +57,6 @@ import java.util.logging.Level;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import java.io.ByteArrayOutputStream;
 
-import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
@@ -71,7 +70,6 @@ import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
 import com.sun.xml.ws.security.trust.*;
-import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -256,7 +254,6 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     }
 
     private void parseAssertions(IssuedToken issuedToken, PolicyAssertion localToken){        
-        
         Issuer issuer = issuedToken.getIssuer();
         URI stsURI = null;
         if (issuer != null){
@@ -273,12 +270,12 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             }
         }
           
+        String stsProtocol = null;
         if (localToken != null){
             // Get STS information from local configuration
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
-                this.protocol = attrs.get(new QName(CONFIG_NAMESPACE, WST_VERSION));
-                
+                stsProtocol = attrs.get(new QName(CONFIG_NAMESPACE, WST_VERSION));
                 if (stsURI == null){
                     this.stsNamespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
                     this.stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
@@ -295,22 +292,24 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                 }
             }
         }
+        if (stsProtocol == null){
+            stsProtocol = protocol;
+        }
         RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
         if (rstt != null){
-            String serviceWstVersion = rstt.getTrustVersion();
-            if (protocol == null){
-                protocol = serviceWstVersion;
-            }
-            if (!serviceWstVersion.equals(protocol)){
-                copy(rstt, protocol, serviceWstVersion);
+            Claims claims = getClaims((PolicyAssertion)issuedToken, stsProtocol);
+            if (!protocol.equals(stsProtocol)){
+                copy(rstt, stsProtocol, protocol);
+                setClaims(claims);
+                protocol = stsProtocol;
             }else if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
                 SecondaryIssuedTokenParametersImpl sitp = new SecondaryIssuedTokenParametersImpl();
                 copy(rstt, sitp);
-                sitp.setClaims(getClaims((PolicyAssertion)issuedToken));
+                sitp.setClaims(claims);
                 this.sisPara = sitp;
             }else{
                 copy(rstt);
-                setClaims(getClaims((PolicyAssertion)issuedToken));
+                setClaims(claims);
             }
         }
     }
@@ -408,7 +407,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         return null;
     }
     
-     private Claims getClaims(final PolicyAssertion token){
+     private Claims getClaims(final PolicyAssertion token, String stsWstProtocol){
         Claims cs = null;
         final Iterator<PolicyAssertion> tokens =
                     token.getNestedAssertionsIterator();
@@ -423,8 +422,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                         try{
                             Document doc = this.policyAssertionToDoc(gToken);
                             Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
-                            
-                            cs = new ClaimsImpl(ClaimsImpl.fromElement(claimsEle));
+                            cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(claimsEle);
                         }catch (Exception e){
                             throw new WebServiceException(e);
                         }

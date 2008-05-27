@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.22 2008-02-26 06:33:24 ofung Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.23 2008-05-27 22:19:57 jdg6688 Exp $
  */
 
 /*
@@ -67,6 +67,7 @@ import com.sun.xml.ws.security.trust.elements.UseKey;
 
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.impl.elements.CancelTargetImpl;
+import com.sun.xml.ws.security.trust.impl.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.impl.elements.EntropyImpl;
 import com.sun.xml.ws.security.trust.impl.elements.IssuedTokensImpl;
 import com.sun.xml.ws.security.trust.impl.elements.LifetimeImpl;
@@ -248,6 +249,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public Lifetime createLifetime(final AttributedDateTime created,  final AttributedDateTime expires) {
         return new LifetimeImpl(created, expires);
+    }
+    
+    public Claims createClaims(Element elem) throws WSTrustException {
+        return new ClaimsImpl(ClaimsImpl.fromElement(elem));
     }
     
     /**

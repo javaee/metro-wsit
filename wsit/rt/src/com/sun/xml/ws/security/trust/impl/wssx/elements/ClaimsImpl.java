@@ -1,5 +1,5 @@
 /*
-* $Id: ClaimsImpl.java,v 1.4 2008-03-04 20:37:11 jdg6688 Exp $
+* $Id: ClaimsImpl.java,v 1.5 2008-05-27 22:19:55 jdg6688 Exp $
  */
 
 /*
@@ -43,13 +43,18 @@ package com.sun.xml.ws.security.trust.impl.wssx.elements;
 import java.util.List;
 
 
-import javax.xml.bind.JAXBContext;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ClaimsType;
 import java.util.ArrayList;
+
+import javax.xml.bind.JAXBElement;
+import org.w3c.dom.Element;
+
 
 /**
  * Implementation class for Claims.
@@ -68,17 +73,17 @@ public class ClaimsImpl extends ClaimsType implements Claims {
         setDialect(dialect);
     }
     
-    public ClaimsImpl(ClaimsType clType)throws Exception{
+    public ClaimsImpl(ClaimsType clType)throws WSTrustException{
         setDialect(clType.getDialect());
+        getAny().addAll(clType.getAny());
+        getOtherAttributes().putAll(clType.getOtherAttributes());
     }
-
-    public static ClaimsType fromElement(org.w3c.dom.Element element)
+    
+    public static ClaimsType fromElement(Element element)
         throws WSTrustException {
         try {
-            JAXBContext jc =
-                JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.wssx.elements");
-            javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
-            return (ClaimsType)u.unmarshal(element);
+            final javax.xml.bind.Unmarshaller unmarshaller = WSTrustElementFactory.getContext(WSTrustVersion.WS_TRUST_13).createUnmarshaller();
+            return (ClaimsType)((JAXBElement)unmarshaller.unmarshal(element)).getValue();
         } catch ( Exception ex) {
             throw new WSTrustException(ex.getMessage(), ex);
         }

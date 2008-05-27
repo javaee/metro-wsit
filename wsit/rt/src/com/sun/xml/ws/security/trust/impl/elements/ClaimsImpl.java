@@ -1,5 +1,5 @@
 /*
- * $Id: ClaimsImpl.java,v 1.13 2008-02-26 06:33:24 ofung Exp $
+ * $Id: ClaimsImpl.java,v 1.14 2008-05-27 22:19:55 jdg6688 Exp $
  */
 
 /*
@@ -56,7 +56,9 @@ import java.util.logging.Logger;
 
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import java.util.ArrayList;
+
 
 /**
  * Implementation class for Claims.
@@ -80,7 +82,7 @@ public class ClaimsImpl extends ClaimsType implements Claims {
         setDialect(dialect);
     }
     
-    public ClaimsImpl(ClaimsType clType){
+    public ClaimsImpl(ClaimsType clType)throws WSTrustException{
         setDialect(clType.getDialect());
         getAny().addAll(clType.getAny());
         getOtherAttributes().putAll(clType.getOtherAttributes());

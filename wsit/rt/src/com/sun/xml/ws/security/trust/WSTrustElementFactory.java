@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.19 2008-02-26 06:33:16 ofung Exp $
+ * $Id: WSTrustElementFactory.java,v 1.20 2008-05-27 22:19:58 jdg6688 Exp $
  */
 
 /*
@@ -324,6 +324,8 @@ public abstract class WSTrustElementFactory {
      * Create RSTR Collection from Element
      */
     public abstract RequestSecurityTokenResponseCollection createRSTRCollectionFrom(Element elem);
+    
+    public abstract Claims createClaims(Element elem)throws WSTrustException;
     
     
     /**

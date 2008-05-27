@@ -510,7 +510,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                         }
                     }
                     if (config == null){ 
-                        config = new DefaultSTSIssuedTokenConfiguration(null, (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
+                        config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
                     }
                     //String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
                     //String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
