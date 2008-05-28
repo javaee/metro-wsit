@@ -110,14 +110,14 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
         try {
-            if (isResend()) {
+            if (isResendAttempt()) {
                 session.registerForResend(Fiber.current(), requestPacket);
                 return doSuspend(next);
             } else { // this is a first-time processing
                 // we do not modify original packet in case we wanted to reuse it later                
-
+                
                 requestPacket = session.processOutgoingPacket(requestPacket);
-                requestPacketCopy = requestPacket.copy(true);
+                prepareForResend(requestPacket);
                 return super.processRequest(requestPacket);
             }
         } catch (RmSoapFaultException ex) {
@@ -141,13 +141,13 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
                 return doResend();
             } else {
-                clearResendFlag();
+                clearResendAttemptFlag();
                 return super.processResponse(responsePacket);
             }
 
         } catch (RmException ex) {
             LOGGER.logSevereException(ex);
-            clearResendFlag();
+            clearResendAttemptFlag();
             return doThrow(ex);
         } finally {
             LOGGER.exiting();
@@ -158,7 +158,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     public NextAction processException(Throwable throwable) {
         LOGGER.entering();
         try {
-            if (checkResendPossibility(throwable)) {
+            if (isResendPossible(throwable)) {
                 // eat exception and forward processing to this.processRequest() (INVOKE_AND_FORGET) for request message resend
                 return doResend();
             } else {
@@ -182,7 +182,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private boolean checkResendPossibility(Throwable throwable) {
+    private boolean isResendPossible(Throwable throwable) {
         if (throwable instanceof IOException) {
             return true;
         } else if (throwable instanceof WebServiceException) {
@@ -198,11 +198,15 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
         return super.doInvokeAndForget(this, requestPacketCopy.copy(true));
     }
 
-    private boolean isResend() {
+    private boolean isResendAttempt() {
         return requestPacketCopy != null;
     }
 
-    private void clearResendFlag() {
+    private void prepareForResend(Packet requestPacket) {
+        requestPacketCopy = requestPacket.copy(true);
+    }
+    
+    private void clearResendAttemptFlag() {
         requestPacketCopy = null;
     }
 
