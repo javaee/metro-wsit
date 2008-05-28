@@ -236,7 +236,7 @@
     </javac>
 </target>
 
-<!--target name="create-sts-war">
+<target name="create-sts-war">
     <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war" webxml="../../etc/sts/web.xml">
 	<webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
 	<zipfileset
@@ -245,9 +245,9 @@
             prefix="WEB-INF/wsdl"/>
 	<classes dir="${build.classes.home}" includes="**/sts/**, **/com/**, **/common/**"/>
     </war>
-</target-->
+</target>
 
-<target name="create-sts-war">
+<!--target name="create-sts-war">
         <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
                 webxml="../../etc/sts/web.xml">
                 <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
@@ -266,7 +266,7 @@
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**"/>
         </war>
-   </target>
+   </target-->
 
 <!--target name="create-sts-war">
         <antcall target="copy-am-files" />
