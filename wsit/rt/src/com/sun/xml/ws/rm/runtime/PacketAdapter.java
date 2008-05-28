@@ -414,19 +414,9 @@ public abstract class PacketAdapter {
         }
         
         return ackRequestedHeaderSequenceId;
-    }
+    }   
     
-    /**
-     * TODO javadoc
-     */
-    protected final void assertSequenceId(String expected, String actual) {
-        if (expected != null && !expected.equals(actual)) {
-            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_INBOUND_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
-        }
-    }    
-    
-    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmException;    
-    
+    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmException;        
 
     /**
      * Creates a SOAP fault response that occured while processing the RM headers of a request

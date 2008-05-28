@@ -125,7 +125,7 @@ public class Rm10PacketAdapter extends PacketAdapter {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {
-            assertSequenceId(expectedAckedSequenceId, ackElement.getId());
+            Utilities.assertSequenceId(expectedAckedSequenceId, ackElement.getId());
 
             List<Sequence.AckRange> ranges = new LinkedList<Sequence.AckRange>();
             if (!ackElement.getNack().isEmpty()) {

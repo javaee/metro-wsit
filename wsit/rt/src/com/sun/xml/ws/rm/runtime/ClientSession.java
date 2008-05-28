@@ -56,11 +56,11 @@ import java.util.logging.Level;
 
 /**
  * <p>
- * RM session represents a contract between single WS proxy and it's corresponding service. Multiple tubelines (of the same
- * WS proxy) may share a single RM session, each WS proxy however creates it's own session.
+ * RM client session represents a contract between single WS proxy and it's corresponding service. Multiple tubelines (of the same
+ * WS proxy) may share a single RM session, each WS proxy however creates it's own client session.
  * </p>
  * <p>
- * RM session performs all tasks related to RM message processing, while being focused on a single reliable connection.
+ * RM client session performs all tasks related to RM message processing, while being focused on a single reliable connection.
  * </p>
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -110,7 +110,7 @@ abstract class ClientSession {
         if (expectSequenceHeader) {
             String sequenceId = responseAdapter.getSequenceId();
             if (sequenceId != null) {
-                assertSequenceId(inboundSequenceId, sequenceId);
+                Utilities.assertSequenceId(inboundSequenceId, sequenceId);
                 sequenceManager.getSequence(sequenceId).acknowledgeMessageId(responseAdapter.getMessageNumber());
             } else {
                 throw new RmException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
@@ -119,20 +119,11 @@ abstract class ClientSession {
 
         String ackRequestedSequenceId = responseAdapter.getAckRequestedHeaderSequenceId();
         if (ackRequestedSequenceId != null) {
-            assertSequenceId(inboundSequenceId, ackRequestedSequenceId);
+            Utilities.assertSequenceId(inboundSequenceId, ackRequestedSequenceId);
             sequenceManager.getSequence(ackRequestedSequenceId).setAckRequestedFlag();
         }
 
         responseAdapter.processAcknowledgements(sequenceManager, outboundSequenceId);
-    }
-
-    /**
-     * TODO javadoc
-     */
-    protected final void assertSequenceId(String expected, String actual) {
-        if (expected != null && !expected.equals(actual)) {
-            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_INBOUND_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
-        }
     }
 
     protected final void requestAcknowledgement() throws RmException {
