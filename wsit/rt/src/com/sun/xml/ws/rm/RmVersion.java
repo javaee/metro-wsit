@@ -187,16 +187,36 @@ public enum RmVersion {
      */
     public boolean isRmAction(String wsaAction) {
         return (wsaAction != null) &&
+                (isRmProtocolRequest(wsaAction) ||
+                isRmProtocolResponse(wsaAction) ||
+                isRmFault(wsaAction));        
+    }
+        
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isRmProtocolRequest(String wsaAction) {
+        return (wsaAction != null) &&
                 (ackRequestedAction.equals(wsaAction) ||
                 createSequenceAction.equals(wsaAction) ||
-                createSequenceResponseAction.equals(wsaAction) ||
                 closeSequenceAction.equals(wsaAction) ||
-                closeSequenceResponseAction.equals(wsaAction) ||
                 lastAction.equals(wsaAction) ||
                 makeConnectionAction.equals(wsaAction) ||
+                terminateSequenceAction.equals(wsaAction));
+    }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public boolean isRmProtocolResponse(String wsaAction) {
+        return (wsaAction != null) &&
+                (createSequenceResponseAction.equals(wsaAction) ||
+                closeSequenceResponseAction.equals(wsaAction) ||
                 sequenceAcknowledgementAction.equals(wsaAction) ||
-                wsrmFaultAction.equals(wsaAction) ||
-                terminateSequenceAction.equals(wsaAction) ||
                 terminateSequenceResponseAction.equals(wsaAction));        
     }
     

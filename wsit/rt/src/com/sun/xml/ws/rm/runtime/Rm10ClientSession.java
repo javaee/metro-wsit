@@ -86,7 +86,7 @@ final class Rm10ClientSession extends ClientSession {
         }
 
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-        requestAdapter.setRequestMessage(csElement, RmVersion.WSRM10.createSequenceAction);
+        requestAdapter.setMessage(csElement, RmVersion.WSRM10.createSequenceAction);
 
         PacketAdapter responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.detach()));
         if (responseAdapter == null) {
@@ -124,7 +124,7 @@ final class Rm10ClientSession extends ClientSession {
     @Override
     protected void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-        requestAdapter.setEmptyRequestMessage(RmVersion.WSRM10.lastAction);
+        requestAdapter.setEmptyMessage(RmVersion.WSRM10.lastAction);
         requestAdapter.appendSequenceAcknowledgementHeader(
                 inboundSequenceId, 
                 sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
@@ -134,7 +134,7 @@ final class Rm10ClientSession extends ClientSession {
         sequenceElement.setNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
         sequenceElement.setLastMessage(new LastMessage());
 
-        requestAdapter.addHeader(sequenceElement);
+        requestAdapter.appendHeader(sequenceElement);
         
         PacketAdapter responseAdapter = PacketAdapter.create(configuration);
         try {
@@ -154,7 +154,7 @@ final class Rm10ClientSession extends ClientSession {
     @Override
     protected void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-        requestAdapter.setRequestMessage(new TerminateSequenceElement(outboundSequenceId),  RmVersion.WSRM10.terminateSequenceAction);
+        requestAdapter.setMessage(new TerminateSequenceElement(outboundSequenceId),  RmVersion.WSRM10.terminateSequenceAction);
         requestAdapter.appendSequenceAcknowledgementHeader(
                 inboundSequenceId, 
                 sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());

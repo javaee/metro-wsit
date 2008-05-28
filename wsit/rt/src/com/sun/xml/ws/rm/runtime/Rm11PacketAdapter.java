@@ -71,7 +71,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(sequenceId);
 
-        addHeader(sequenceHeaderElement);
+        appendHeader(sequenceHeaderElement);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(sequenceId);
 
-        addHeader(ackRequestedElement);
+        appendHeader(ackRequestedElement);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
 //            ackElement.setBufferRemaining(-1/*calculate remaining quota*/);
 //        }
 
-        addHeader(ackElement);
+        appendHeader(ackElement);
     }
 
     @Override

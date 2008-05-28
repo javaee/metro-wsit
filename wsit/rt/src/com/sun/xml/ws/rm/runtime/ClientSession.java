@@ -67,6 +67,19 @@ import java.util.logging.Level;
  */
 abstract class ClientSession {
 
+    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
+    private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
+    //
+    protected String inboundSequenceId = null;
+    protected String outboundSequenceId = null;
+    protected final Configuration configuration;
+    protected final SequenceManager sequenceManager;
+    protected final ProtocolCommunicator communicator;
+    private final Lock initLock;
+    private final ScheduledTaskManager scheduledTaskManager;
+    private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
+    private final FiberResumeTask resendTask;
+
     static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
             case WSRM10:
@@ -77,21 +90,8 @@ abstract class ClientSession {
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
     }
-    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
-    private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
-    protected String inboundSequenceId;
-    protected String outboundSequenceId;
-    protected final SequenceManager sequenceManager;
-    protected final ProtocolCommunicator communicator;
-    protected final Configuration configuration;
-    private final Lock initLock;
-    private final ScheduledTaskManager scheduledTaskManager;
-    private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
-    private final FiberResumeTask resendTask;
 
     protected ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
-        this.inboundSequenceId = null;
-        this.outboundSequenceId = null;
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
         this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
@@ -131,7 +131,7 @@ abstract class ClientSession {
         try {
 
             PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-            requestAdapter.setEmptyRequestMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
+            requestAdapter.setEmptyMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
 
             responseAdapter.attach(communicator.send(requestAdapter.detach()));
             if (!responseAdapter.containsMessage()) {
@@ -149,7 +149,7 @@ abstract class ClientSession {
         }
     }
 
-    final Packet processOutgoingPacket(Packet requestPacket) throws RmException {
+    public final Packet processOutgoingPacket(Packet requestPacket) throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, requestPacket);
         initializeIfNecessary(requestAdapter);
 
@@ -169,7 +169,7 @@ abstract class ClientSession {
         return requestAdapter.detach();
     }
 
-    final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
+    public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
         PacketAdapter responseAdapter = PacketAdapter.create(configuration, responsePacket);
         if (responseAdapter.containsMessage()) {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
@@ -184,14 +184,14 @@ abstract class ClientSession {
      * @param fiber a fiber to be resumed after resend interval has passed
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
-    final boolean registerForResend(Fiber fiber, Packet packet) {
+    public final boolean registerForResend(Fiber fiber, Packet packet) {
         return resendTask.registerForResume(fiber, packet);
     }
 
     /**
      * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
-    final void close() {
+    public final void close() {
         try {
             try {
                 closeOutboundSequence();
@@ -242,7 +242,7 @@ abstract class ClientSession {
         initLock.lock();
         try {
             if (!isInitialized()) {
-                communicator.registerMusterRequestPacket(request.copyPacket(false));
+                communicator.registerMusterRequestPacket(request.getPacketCopy(false));
 
                 int numberOfInitiateSessionAttempts = 0;
                 while (true) {

@@ -91,12 +91,12 @@ final class Rm11ClientSession extends ClientSession {
 
 
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-        requestAdapter.setRequestMessage(csElement, RmVersion.WSRM11.createSequenceAction);
+        requestAdapter.setMessage(csElement, RmVersion.WSRM11.createSequenceAction);
 
         if (strType != null) {
             UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
             usesSequenceSTR.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
-            requestAdapter.addHeader(usesSequenceSTR);
+            requestAdapter.appendHeader(usesSequenceSTR);
         }
 
         PacketAdapter responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.detach()));
@@ -134,7 +134,7 @@ final class Rm11ClientSession extends ClientSession {
     protected void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
 
-        requestAdapter.setRequestMessage(
+        requestAdapter.setMessage(
                 new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM11.closeSequenceAction);
         requestAdapter.appendSequenceAcknowledgementHeader(
@@ -165,7 +165,7 @@ final class Rm11ClientSession extends ClientSession {
     @Override
     protected void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
-        requestAdapter.setRequestMessage(
+        requestAdapter.setMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()), 
                 RmVersion.WSRM11.terminateSequenceAction);
 

@@ -148,6 +148,19 @@ public abstract class PacketAdapter {
 
     /**
      * TODO javadoc
+     * 
+     * @return
+     */
+    public final Packet consumeAndDetach() {
+        if (message != null) {
+            message.consume();
+        }
+        
+        return detach();
+    }
+
+    /**
+     * TODO javadoc
      */
     public final Packet detach() {
         try {
@@ -162,34 +175,8 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public final Packet copyPacket(boolean copyMessage) {
+    public final Packet getPacketCopy(boolean copyMessage) {
         return packet.copy(copyMessage);
-    }
-
-    /**
-     * Checks internal state of this {@link PacketAdapter} instance whether it is 
-     * safe to perform message update operations. Success of this condition guarantees
-     * the success of {@link #checkPacketUpdateState()} operation.
-     * 
-     * @throws java.lang.IllegalStateException if the check fails
-     */
-    protected void checkMessageReadyState() throws IllegalStateException {
-        if (message == null) {
-            throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
-        }
-    }
-
-    /**
-     * Checks internal state of this {@link PacketAdapter} instance whether it is 
-     * safe to perform packet update operations. Success of this condition does not 
-     * guarantee the success of {@link #checkMessageUpdateState()} operation.
-     * 
-     * @throws java.lang.IllegalStateException if the check fails
-     */
-    protected void checkPacketReadyState() throws IllegalStateException {
-        if (packet == null) {
-            throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
-        }
     }
 
     /**
@@ -200,7 +187,7 @@ public abstract class PacketAdapter {
      * 
      * @throws java.lang.IllegalStateException in case of failed internal state check
      */
-    protected final void addHeader(Object jaxbHeaderContent) throws IllegalStateException {
+    public final void appendHeader(Object jaxbHeaderContent) throws IllegalStateException {
         checkMessageReadyState();
 
         headers.add(Headers.create(rmVersion.jaxbContext, jaxbHeaderContent));
@@ -231,8 +218,8 @@ public abstract class PacketAdapter {
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    public final PacketAdapter setEmptyRequestMessage(String wsaAction) {
-        return setRequestMessage(Messages.createEmpty(soapVersion), wsaAction);
+    public final PacketAdapter setEmptyMessage(String wsaAction) {
+        return setMessage(Messages.createEmpty(soapVersion), wsaAction);
     }
 
     /**
@@ -248,8 +235,8 @@ public abstract class PacketAdapter {
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    public final PacketAdapter setRequestMessage(Object jaxbElement, String wsaAction) {
-        return setRequestMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
+    public final PacketAdapter setMessage(Object jaxbElement, String wsaAction) {
+        return setMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
     }
     
     /**
@@ -259,7 +246,7 @@ public abstract class PacketAdapter {
      * @param wsaAction
      * @return
      */
-    public final PacketAdapter setRequestMessage(Message newMessage, String wsaAction) {
+    public final PacketAdapter setMessage(Message newMessage, String wsaAction) {
         checkPacketReadyState();
         
         this.packet.setMessage(newMessage);        
@@ -283,11 +270,28 @@ public abstract class PacketAdapter {
      * 
      * @return
      */
-    public final boolean isProtocolMessage() {
-        
-        
+    public final boolean isProtocolMessage() {               
         return (message == null) ? false : rmVersion.isRmAction(headers.getAction(addressingVersion, soapVersion));
     }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public final boolean isProtocolRequest() {               
+        return (message == null) ? false : rmVersion.isRmProtocolRequest(headers.getAction(addressingVersion, soapVersion));
+    }
+    
+    
+    /**
+     * TODO javadoc
+     * 
+     * @return
+     */
+    public final boolean isProtocolResponse() {               
+        return (message == null) ? false : rmVersion.isRmProtocolResponse(headers.getAction(addressingVersion, soapVersion));
+    }    
     
     /**
      * TODO javadoc
@@ -305,19 +309,6 @@ public abstract class PacketAdapter {
      */
     public final boolean isFault() {
         return (message == null) ? false : message.isFault();
-    }
-
-    /**
-     * TODO javadoc
-     * 
-     * @return
-     */
-    public final Packet consumeAndDetach() {
-        if (message != null) {
-            message.consume();
-        }
-        
-        return detach();
     }
     
     /**
@@ -339,8 +330,7 @@ public abstract class PacketAdapter {
         checkMessageReadyState();
         
         return headers.getAction(addressingVersion, soapVersion);
-    }    
-    
+    }        
 
     /**
      * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
@@ -519,4 +509,29 @@ public abstract class PacketAdapter {
         return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.wsrmFaultAction;
     }
     
+    /**
+     * Checks internal state of this {@link PacketAdapter} instance whether it is 
+     * safe to perform message update operations. Success of this condition guarantees
+     * the success of {@link #checkPacketUpdateState()} operation.
+     * 
+     * @throws java.lang.IllegalStateException if the check fails
+     */
+    protected final void checkMessageReadyState() throws IllegalStateException {
+        if (message == null) {
+            throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
+        }
+    }
+
+    /**
+     * Checks internal state of this {@link PacketAdapter} instance whether it is 
+     * safe to perform packet update operations. Success of this condition does not 
+     * guarantee the success of {@link #checkMessageUpdateState()} operation.
+     * 
+     * @throws java.lang.IllegalStateException if the check fails
+     */
+    protected final void checkPacketReadyState() throws IllegalStateException {
+        if (packet == null) {
+            throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
+        }
+    }
 }
