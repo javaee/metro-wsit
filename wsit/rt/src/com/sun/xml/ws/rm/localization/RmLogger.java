@@ -48,7 +48,7 @@ public final class RmLogger {
      * If we run with JAX-WS, we are using its logging domain (appended with ".wspolicy").
      * Otherwise we default to "wspolicy".
      */
-    private static final String LOGGING_SUBSYSTEM_NAME = "javax.enterprise.resource.webservices.jaxws.rm";
+    private static final String LOGGING_SUBSYSTEM_NAME = "javax.enterprise.resource.webservices.rm";
     private static final Level METHOD_CALL_LEVEL_VALUE = Level.FINEST;        
     
     private final String componentClassName;
