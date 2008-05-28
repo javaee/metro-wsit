@@ -46,8 +46,6 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -69,23 +67,6 @@ import java.util.logging.Level;
  */
 abstract class ClientSession {
 
-    private static class FiberRegistration {
-
-        private final long timestamp;
-        final Fiber fiber;
-        final Packet packet;
-
-        FiberRegistration(Fiber fiber, Packet packet) {
-            this.timestamp = System.currentTimeMillis();
-            this.fiber = fiber;
-            this.packet = packet;
-        }
-
-        boolean expired(long period) {
-            return System.currentTimeMillis() - timestamp >= period;
-        }
-    }
-
     static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
             case WSRM10:
@@ -105,8 +86,8 @@ abstract class ClientSession {
     protected final Configuration configuration;
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
-    private final Queue<FiberRegistration> fibersToResend = new LinkedList<FiberRegistration>();
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
+    private final FiberResumeTask resendTask;
 
     protected ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         this.inboundSequenceId = null;
@@ -116,6 +97,7 @@ abstract class ClientSession {
         this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
+        this.resendTask = new FiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
     protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException;
@@ -183,7 +165,7 @@ abstract class ClientSession {
         requestAdapter.appendSequenceHeader(
                 outboundSequenceId,
                 sequenceManager.getSequence(outboundSequenceId).getNextMessageId());
-        if (checkPendingAckRequest()) {
+        if (isPendingAckRequest()) {
             requestAdapter.appendAckRequestedHeader(outboundSequenceId);
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
@@ -212,9 +194,7 @@ abstract class ClientSession {
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
     final boolean registerForResend(Fiber fiber, Packet packet) {
-        synchronized (fibersToResend) {
-            return fibersToResend.offer(new FiberRegistration(fiber, packet));
-        }
+        return resendTask.registerForResume(fiber, packet);
     }
 
     /**
@@ -289,8 +269,7 @@ abstract class ClientSession {
                     }
                 }
 
-
-                scheduledTaskManager.startTasks(createResendTask(), createAckRequesterTask());
+                scheduledTaskManager.startTasks(resendTask, createAckRequesterTask());
             }
         } finally {
             initLock.unlock();
@@ -299,24 +278,6 @@ abstract class ClientSession {
 
     private boolean isInitialized() {
         return outboundSequenceId != null;
-    }
-
-    /**
-     * Resumes all suspended fibers registered for a resend which have an expired retransmission inteval.
-     */
-    private Runnable createResendTask() {
-        return new Runnable() {
-
-            public void run() {
-                while (!fibersToResend.isEmpty() && fibersToResend.peek().expired(configuration.getMessageRetransmissionInterval())) {
-                    FiberRegistration registration;
-                    synchronized (fibersToResend) {
-                        registration = fibersToResend.poll();
-                    }
-                    registration.fiber.resume(registration.packet);
-                }
-            }
-        };
     }
 
     /**
@@ -331,7 +292,7 @@ abstract class ClientSession {
 
             public void run() {
                 try {
-                    if (checkPendingAckRequest()) {
+                    if (isPendingAckRequest()) {
                         requestAcknowledgement();
                         lastAckRequestedTime.set(System.currentTimeMillis());
                     }
@@ -342,7 +303,7 @@ abstract class ClientSession {
         };
     }
 
-    private boolean checkPendingAckRequest() throws UnknownSequenceException {
+    private boolean isPendingAckRequest() throws UnknownSequenceException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
     }
