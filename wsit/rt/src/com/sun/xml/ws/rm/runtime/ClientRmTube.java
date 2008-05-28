@@ -68,7 +68,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
     private final WSDLPort wsdlPort;
     private Packet requestPacketCopy;
 
-    public ClientRmTube(ClientRmTube original, TubeCloner cloner) {
+    protected ClientRmTube(ClientRmTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.session = original.session;
