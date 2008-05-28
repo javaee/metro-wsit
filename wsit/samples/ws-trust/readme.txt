@@ -61,6 +61,7 @@ To run the sample with the sample customer STSAttributeProvider:
     identities/attributes mappings to the STS so that the issued SAMl assertions contain
     the required user information for the service.
 -------------------------------------------------------------------------------------
+To run the sample with AccessManager:
 
 This works with Sun Java System Access Manager 7.1 Beta which is available as part of 
 java_app_platform_sdk-5_01 release. This sample use AM for authentication and control 
