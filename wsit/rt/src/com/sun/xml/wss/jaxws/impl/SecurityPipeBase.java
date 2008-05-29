@@ -205,7 +205,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected SecurityEnvironment secEnv = null;
     
     // debug the Secure SOAP Messages (enable dumping)
-    protected static final boolean debug;
+    protected static final boolean debug = false;
     
     // SOAP version
     protected boolean isSOAP12 = false;
@@ -258,7 +258,7 @@ public abstract class SecurityPipeBase implements Pipe {
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
-            debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
+            //debug = Boolean.valueOf(System.getProperty("DebugSecurity"));
             //ISSUE_REQUEST_URI = new URI(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
             //CANCEL_REQUEST_URI = new URI(WSTrustConstants.CANCEL_REQUEST);
             //jaxbContext = WSTrustElementFactory.getContext();            

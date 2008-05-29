@@ -308,66 +308,7 @@ public class WSTrustUtil {
         }
         return null;
     }
-   
-    public static boolean isMetadata(final PolicyAssertion assertion ) {
-        if ( !isMEXNS(assertion)) {
-            return false;
-        }
-        
-        if ( assertion.getName().getLocalPart().equals(Metadata)) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public static final String MEX_NS = "http://schemas.xmlsoap.org/ws/2004/09/mex";
-    public static final String Metadata = "Metadata";
-    public static final String MetadataSection = "MetadataSection";
-    public static final String MetadataReference = "MetadataReference";
-    
-    public static boolean isMEXNS(final PolicyAssertion assertion) {
-        if ( MEX_NS.equals(assertion.getName().getNamespaceURI()) ) {
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean isMetadataSection(final PolicyAssertion assertion) {
-        if ( !isMEXNS(assertion)) {
-            return false;
-        }
-        
-        if ( assertion.getName().getLocalPart().equals(MetadataSection)) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    public static boolean isMetadataReference(final PolicyAssertion assertion) {
-        if ( !isMEXNS(assertion)) {
-            return false;
-        }
-        
-        if ( assertion.getName().getLocalPart().equals(MetadataReference)) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    public static boolean isAddressingMetadata(final PolicyAssertion assertion) {
-        if ( !PolicyUtil.isAddressingNS(assertion)) {
-            return false;
-        }
-        
-        if ( assertion.getName().getLocalPart().equals(Metadata)) {
-            return true;
-        }        
-        return false;
-    }
-    
+       
     public static String createFriendlyPPID(String displayValue){
         try{
             MessageDigest md = MessageDigest.getInstance("SHA1");
