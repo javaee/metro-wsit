@@ -184,8 +184,8 @@ public class Constants {
     public final static String MustNotSendCancel = "MustNotSendCancel";
     public final static String MustNotSendRenew = "MustNotSendRenew";
     public final static String Attachments = "Attachments";
-    public final static String ContentSignatureTransform = "Content-Signature-Transform";
-    public final static String AttachmentCompleteSignatureTransform = "Attachment-Complete-Signature-Transform";
+    public final static String ContentSignatureTransform = "ContentSignatureTransform";
+    public final static String AttachmentCompleteSignatureTransform = "AttachmentCompleteSignatureTransform";
 
     // End of new assertions from WS-SecurityPolicy 1.2
     
