@@ -142,7 +142,6 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
-            PolicyAssertion addressingMetadata = null;
             if ( this.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {

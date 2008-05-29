@@ -36,12 +36,26 @@
 
 package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.UUID;
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.WebServiceException;
+import org.w3c.dom.Document;
 /**
  *
  * @author K.Venugopal@sun.com Abhijit.Das@Sun.COM
@@ -81,6 +95,13 @@ public class PolicyUtil {
     public static boolean isTrustNS(PolicyAssertion pa) {
         if ( Constants.TRUST_NS.equals(pa.getName().getNamespaceURI()) ||
                 Constants.TRUST13_NS.equals(pa.getName().getNamespaceURI())) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean isMEXNS(final PolicyAssertion assertion) {
+        if ( MEX_NS.equals(assertion.getName().getNamespaceURI()) ) {
             return true;
         }
         return false;
@@ -1318,6 +1339,53 @@ public class PolicyUtil {
         return false;
     }
     
+    public static boolean isAddressingMetadata(final PolicyAssertion assertion) {
+        if ( !PolicyUtil.isAddressingNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(Metadata)) {
+            return true;
+        }        
+        return false;
+    }
+    
+    public static boolean isMetadata(final PolicyAssertion assertion ) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(Metadata)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static boolean isMetadataSection(final PolicyAssertion assertion) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(MetadataSection)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static boolean isMetadataReference(final PolicyAssertion assertion) {
+        if ( !isMEXNS(assertion)) {
+            return false;
+        }
+        
+        if ( assertion.getName().getLocalPart().equals(MetadataReference)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     public static boolean isRequestSecurityTokenTemplate(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
             return false;
@@ -1733,6 +1801,40 @@ public class PolicyUtil {
          UUID uid = UUID.randomUUID();
          String id= "uuid_" + uid.toString();
          return id;
+    }
+    
+    public static byte[] policyAssertionToBytes(final PolicyAssertion token){
+        try{
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            XMLOutputFactory xof = XMLOutputFactory.newInstance();
+            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
+                           
+            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {token}));
+            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
+            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
+            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
+            pm.marshal(sourceModel, writer);
+            writer.close();
+            
+            return baos.toByteArray();
+         }catch (Exception e){
+            throw new WebServiceException(e);
+        }
+    }
+    
+    public static Document policyAssertionToDoc(final PolicyAssertion token){
+        try{
+            byte[] byteArray = policyAssertionToBytes(token);
+                            
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(byteArray));
+
+            return doc;
+        }catch (Exception e){
+            throw new WebServiceException(e);
+        }
     }
     
     public static SecurityPolicyVersion getSecurityPolicyVersion(String nsUri) {

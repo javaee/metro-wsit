@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.security.policy;
 
+import org.w3c.dom.Element;
+
 /**
  *
  * @author ashutosh.shahi@sun.com
@@ -43,4 +45,6 @@ package com.sun.xml.ws.security.policy;
 public interface Claims {
     
     byte[] getClaimsAsBytes();
+    
+    Element getClaimsAsElement();
 }
