@@ -50,6 +50,7 @@ public class Constants {
     public final static String TRUST_NS = "http://schemas.xmlsoap.org/ws/2005/02/trust";
     public final static String TRUST13_NS = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
     public final static String UTILITY_NS = "http://docs.oasis-open.org/wss/2004/01/oasis- 200401-wss-wssecurity-utility-1.0.xsd";
+    public static final String MEX_NS = "http://schemas.xmlsoap.org/ws/2004/09/mex";
     public final static String _XPATHVERSION = "XPathVersion";
     public final static String InclusiveC14N = "InclusiveC14N";
     public final static String InclusiveC14NWithComments = "InclusiveC14NWithComments";
@@ -210,6 +211,12 @@ public class Constants {
     
     //Addressing constants
     public final static String Address = "Address";
+    public static final String IDENTITY = "Identity";
+    
+    // Mex Constants
+    public static final String Metadata = "Metadata";
+    public static final String MetadataSection = "MetadataSection";
+    public static final String MetadataReference = "MetadataReference";
     
     //utility constants
     public final static String Created = "Created";

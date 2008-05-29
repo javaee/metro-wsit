@@ -52,6 +52,8 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.util.Collection;
 import java.util.Iterator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 /**
  *
  * @author Abhijit Das
@@ -59,11 +61,13 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.policy.Issuer, SecurityAssertionValidator {
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private Address address;
+    private Address metadataAddress;
     private boolean populated = false;
     private PolicyAssertion refProps = null;
     private PolicyAssertion refParams = null;
     private PolicyAssertion serviceName = null;
     private String portType = null;
+    private Element identityEle = null;
     
     /**
      * Creates a new instance of Issuer
@@ -78,12 +82,67 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }
+
+    private void getAddressFromMetadata(PolicyAssertion addressingMetadata) {
+        PolicyAssertion metadata = null;
+        PolicyAssertion metadataSection = null;
+        PolicyAssertion metadataReference = null;
+        if(addressingMetadata != null){
+            if ( addressingMetadata.hasParameters() ) {
+                final Iterator <PolicyAssertion> iterator = addressingMetadata.getParametersIterator();
+                while ( iterator.hasNext() ) {
+                    final PolicyAssertion assertion = iterator.next();
+                    if ( PolicyUtil.isMetadata(assertion)) {
+                        metadata = assertion;
+                        break;
+                    }
+                }
+            }
+            if(metadata != null){
+                if ( metadata.hasParameters() ) {
+                    final Iterator <PolicyAssertion> iterator = metadata.getParametersIterator();
+                    while ( iterator.hasNext() ) {
+                        final PolicyAssertion assertion = iterator.next();
+                        if (PolicyUtil.isMetadataSection(assertion)){
+                            metadataSection = assertion;
+                            break;
+                        }
+                    }
+                }
+                if(metadataSection != null){
+                    if ( metadataSection.hasParameters() ) {
+                        final Iterator <PolicyAssertion> iterator = metadataSection.getParametersIterator();
+                        while ( iterator.hasNext() ) {
+                            final PolicyAssertion assertion = iterator.next();
+                            if ( PolicyUtil.isMetadataReference(assertion)) {
+                                metadataReference = assertion;
+                                break;
+                            }
+                        }
+                    }
+                    if(metadataReference != null){
+                        if ( metadataReference.hasParameters() ) {
+                            final Iterator <PolicyAssertion> iterator = metadataReference.getParametersIterator();
+                            while ( iterator.hasNext() ) {
+                                final PolicyAssertion assertion = iterator.next();
+                                if ( PolicyUtil.isAddress(assertion)) {
+                                    metadataAddress = (Address)assertion;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     private void populate(){
         populate(false);
     }
     
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
+            PolicyAssertion addressingMetadata = null;
             if ( this.hasNestedAssertions() ) {
                 Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
                 while ( it.hasNext() ) {
@@ -98,6 +157,11 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
                         this.refProps = assertion;
                     } else if(PolicyUtil.isServiceName(assertion)){
                         this.serviceName = assertion;
+                    } else if(PolicyUtil.isAddressingMetadata(assertion)){
+                        getAddressFromMetadata(assertion);
+                    } else if(Constants.IDENTITY.equals(assertion.getName().getLocalPart())){
+                        Document doc = PolicyUtil.policyAssertionToDoc(assertion);
+                        identityEle = (Element)doc.getElementsByTagNameNS("*", Constants.IDENTITY).item(0);
                     }
                 }
             }
@@ -129,5 +193,15 @@ public class Issuer extends PolicyAssertion implements com.sun.xml.ws.security.p
     public PolicyAssertion getServiceName(){
         populate();
         return serviceName;
+    }
+    
+    public Element getIdentity(){
+        populate();
+        return identityEle;
+    }
+
+    public Address getMetadataAddress() {
+        populate();
+        return metadataAddress;
     }
 }

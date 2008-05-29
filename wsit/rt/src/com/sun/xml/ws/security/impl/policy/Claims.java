@@ -44,14 +44,20 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.ws.WebServiceException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -62,6 +68,7 @@ public class Claims extends PolicyAssertion implements com.sun.xml.ws.security.p
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private byte[] claimsBytes;
+    private Element claimsElement = null;
 
     /**
      * Creates a new instance of Issuer
@@ -77,6 +84,22 @@ public class Claims extends PolicyAssertion implements com.sun.xml.ws.security.p
         populate();
         return claimsBytes;
     }
+    
+    public Element getClaimsAsElement(){
+        populate();
+        if(claimsElement == null){
+            try{
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(claimsBytes));
+            claimsElement = (Element) doc.getElementsByTagNameNS("*", "Claims").item(0);
+            } catch(Exception e){
+                throw new WebServiceException(e);
+            }
+        }
+        return claimsElement;
+    }
 
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
@@ -88,23 +111,8 @@ public class Claims extends PolicyAssertion implements com.sun.xml.ws.security.p
 
     private synchronized AssertionFitness populate(boolean b) {
         if (!populated) {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                XMLOutputFactory xof = XMLOutputFactory.newInstance();
-                XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
-
-                AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[]{this}));
-                Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[]{set}));
-                PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
-                XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
-                pm.marshal(sourceModel, writer);
-                claimsBytes = baos.toByteArray();
-                populated = true;
-            } catch (PolicyException ex) {
-                Logger.getLogger(Claims.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (XMLStreamException ex) {
-                Logger.getLogger(Claims.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            claimsBytes = PolicyUtil.policyAssertionToBytes(this);
+            populated = true;  
         }
         return fitness;
     }
