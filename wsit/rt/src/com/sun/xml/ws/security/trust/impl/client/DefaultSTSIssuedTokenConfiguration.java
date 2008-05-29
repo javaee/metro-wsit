@@ -258,12 +258,21 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         URI stsURI = null;
         if (issuer != null){
             stsURI = issuedToken.getIssuer().getAddress().getURI();
+            if(issuer.getIdentity() != null){
+                this.getOtherOptions().put(IDENTITY, issuer.getIdentity());
+            }
         }
         
         // Get STS information from IssuedToken
         if (stsURI != null){
-            this.stsEndpoint = stsURI.toString();
-            this.stsMEXAddress = getAddressFromMetadata(issuedToken);
+            this.stsEndpoint = stsURI.toString();            
+            Address metadataIssuerAddress = issuer.getMetadataAddress();
+            if(metadataIssuerAddress != null){
+                URI metadataIssuerAddressURI = metadataIssuerAddress.getURI();
+                if(metadataIssuerAddressURI != null){
+                    stsMEXAddress = metadataIssuerAddressURI.toString();
+                }
+            }                        
             
             if(stsMEXAddress == null){
                 stsMEXAddress = stsEndpoint + "/mex";
@@ -297,7 +306,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         }
         RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
         if (rstt != null){
-            Claims claims = getClaims((PolicyAssertion)issuedToken, stsProtocol);
+            Claims claims = null;
+            if(issuedToken.getClaims() != null){
+                claims = getClaims(issuedToken, stsProtocol);
+            }
             if (!protocol.equals(stsProtocol)){
                 copy(rstt, stsProtocol, protocol);
                 setClaims(claims);
@@ -313,150 +325,18 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             }
         }
     }
-
-    private String getAddressFromMetadata(final IssuedToken issuedToken)  {
-        final PolicyAssertion issuer = (PolicyAssertion)issuedToken.getIssuer();
-        PolicyAssertion addressingMetadata = null;
-        PolicyAssertion metadata = null;
-        PolicyAssertion metadataSection = null;
-        PolicyAssertion metadataReference = null;
-        Address address = null;
-        if(issuer != null){
-            address = ((Issuer)issuer).getAddress();
-            
-            if ( issuer.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = issuer.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isAddressingMetadata(assertion)) {
-                        addressingMetadata = assertion;
-                    }else if (IDENTITY.equals(assertion.getName().getLocalPart())){
-                        try{
-                                Document doc = this.policyAssertionToDoc(assertion);
-                                Element identityEle = (Element)doc.getElementsByTagNameNS("*", IDENTITY).item(0);
-                                this.getOtherOptions().put(IDENTITY, identityEle);
-                        }catch (Exception e){
-                            throw new WebServiceException(e);
-                        }
-                    }
-                }
-            }
-        }
-        
-        if(addressingMetadata != null){
-            if ( addressingMetadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = addressingMetadata.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadata(assertion)) {
-                        metadata = assertion;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if(metadata != null){
-            if ( metadata.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadata.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadataSection(assertion)) {
-                        metadataSection = assertion;
-                        break;
-                    }
-                }
-            }
-            
-        }
-        
-        if(metadataSection != null){
-            if ( metadataSection.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadataSection.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( WSTrustUtil.isMetadataReference(assertion)) {
-                        metadataReference = assertion;
-                        break;
-                    }
-                }
-            }
-            
-        }
-        if(metadataReference != null){
-            if ( metadataReference.hasNestedAssertions() ) {
-                final Iterator <PolicyAssertion> iterator = metadataReference.getNestedAssertionsIterator();
-                while ( iterator.hasNext() ) {
-                    final PolicyAssertion assertion = iterator.next();
-                    if ( PolicyUtil.isAddress(assertion)) {
-                        address = (Address)assertion;
-                        // return address.getURI();
-                    }
-                }
-            }
-            
-        }
-        
-        if (address != null){
-            URI addURI = address.getURI();
-            if (addURI != null){
-                return addURI.toString();
-            }
-        }
-        
-        return null;
-    }
     
-     private Claims getClaims(final PolicyAssertion token, String stsWstProtocol){
-        Claims cs = null;
-        final Iterator<PolicyAssertion> tokens =
-                    token.getNestedAssertionsIterator();
-        while(tokens.hasNext()){
-            final PolicyAssertion cToken = tokens.next();
-            if(REQUEST_SECURITY_TOKEN_TEMPLATE.equals(cToken.getName().getLocalPart())){
-                final Iterator<PolicyAssertion> cTokens =
-                            cToken.getNestedAssertionsIterator();
-                while (cTokens.hasNext()){
-                    final PolicyAssertion gToken = cTokens.next();
-                    if (CLAIMS.equals(gToken.getName().getLocalPart())){
-                        try{
-                            Document doc = this.policyAssertionToDoc(gToken);
-                            Element claimsEle = (Element)doc.getElementsByTagNameNS("*", "Claims").item(0);
-                            cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(claimsEle);
-                        }catch (Exception e){
-                            throw new WebServiceException(e);
-                        }
-                    }
-                }          
-            }
-        }
+     private Claims getClaims(final IssuedToken issuedToken, String stsWstProtocol){
+        Claims cs = null;        
+         try {
+             Element claimsEle = issuedToken.getClaims().getClaimsAsElement();
+             cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(claimsEle);
+         } catch (Exception e) {
+             throw new WebServiceException(e);
+         }        
         return cs;
     }
-     
-    private Document policyAssertionToDoc(final PolicyAssertion token){
-        try{
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            XMLOutputFactory xof = XMLOutputFactory.newInstance();
-            XMLStreamWriter writer = xof.createXMLStreamWriter(baos);
-                           
-            AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {token}));
-            Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
-            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
-            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
-            pm.marshal(sourceModel, writer);
-                            
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
-                            
-            writer.close();
-            return doc;
-        }catch (Exception e){
-            throw new WebServiceException(e);
-        }
-    }
-
+      
     private void copy(RequestSecurityTokenTemplate rstt){
         this.setTokenType(rstt.getTokenType());
         this.setKeyType(rstt.getKeyType());
