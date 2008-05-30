@@ -105,7 +105,7 @@
 					</wsp:Policy>
 				</sp:Trust10>
                                 <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
-                                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-keystore.jks" storepass="changeit" alias="wssip's oasis interop test ca id"/>
+                                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-keystore.jks" storepass="changeit" alias="wssip"/>
                                 <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-truststore.jks" storepass="changeit"/>
 
                                 <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
@@ -114,7 +114,7 @@
                                 </sc:ValidatorConfiguration>
                                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
                                      <tc:LifeTime>36000</tc:LifeTime>
-                                     <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
+                                     <tc:Contract>com.sun.xml.ws.security.trust.impl.WSTrustContractImpl</tc:Contract>
                                      <tc:Issuer>SunSTS</tc:Issuer>
                                      <tc:ServiceProviders>
                                             <tc:ServiceProvider endPoint="http://localhost:8080/jaxws-fs/simple" >
