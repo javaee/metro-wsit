@@ -750,7 +750,8 @@ public abstract class SecurityPipeBase implements Pipe {
                 policyList.add(endpointPolicy);
             }
             for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
-                QName operationName = operation.getName();
+                QName operationName = new  QName(operation.getBoundPortType().getName().getNamespaceURI(),
+                        operation.getName().getLocalPart());
                 WSDLOperation wsdlOperation = operation.getOperation();
                 WSDLInput input = wsdlOperation.getInput();
                 WSDLOutput output = wsdlOperation.getOutput();
