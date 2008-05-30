@@ -431,9 +431,9 @@
     <!-- TODO: refactor properties -->
     <property name="module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
     <property name="makepkgs.path" value="/Users/m_potociar/sandbox/java.net/uc2/project/tools"/>
-    <property name="module.revision" value="1" />
+    <property name="module.revision" value="2" />
     <!--property name="uc2.repo" value="http://localhost:10000/"/-->
-    <!--property name="uc2.repo" value="http://iasengsol10.red.iplanet.com:10003/"/-->
+    <!--property name="uc2.repo" value="http://iasengsol10.red.iplanet.com:10003"/-->
     <property name="uc2.repo" value="http://eflat.sfbay.sun.com:10000"/>
 
     <!-- 
@@ -452,14 +452,15 @@
       <mkdir dir="${module.dir}"/>
       
       <get src="http://download.java.net/maven/2/com/sun/tools/ws/webservices-tools/1.2-SNAPSHOT/webservices-tools-1.2-SNAPSHOT.jar"
-        dest="${module.dir}/webservices-tools.jar" />
+        dest="${module.dir}/webservices-tools-1.2-SNAPSHOT.jar" />
       <get src="http://download.java.net/maven/2/com/sun/xml/ws/webservices-rt/1.2-SNAPSHOT/webservices-rt-1.2-SNAPSHOT.jar"
-        dest="${module.dir}/webservices-rt.jar" />
+        dest="${module.dir}/webservices-rt-1.2-SNAPSHOT.jar" />
       <get src="http://download.java.net/maven/2/javax/xml/webservices-api/1.2-SNAPSHOT/webservices-api-1.2-SNAPSHOT.jar"
-        dest="${module.dir}/webservices-api.jar" />
+        dest="${module.dir}/webservices-api-1.2-SNAPSHOT.jar" />
       <get src="http://javaweb.sfbay.sun.com/~bhakti/v3-metro/jsr109-impl-10.0-SNAPSHOT.jar"
-        dest="${module.dir}/jsr109-impl.jar" />
-
+        dest="${module.dir}/jsr109-impl-10.0-SNAPSHOT.jar" />
+      <copy file="${basedir}/LICENSE.txt" toFile="${module.dir}/Metro-LICENSE.txt" />
+        
     </target>
     
     <target name="_publish-uc2">
