@@ -53,12 +53,12 @@ import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
+import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 /**
  *
@@ -123,6 +123,10 @@ public class SupportingTokensProcessor {
             Token token = (Token) tokens.next();
             SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion) && 
+                    this instanceof EndorsingSupportingTokensProcessor){                
+                ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }
             if ( policy.getUUID() != null ) {
                 
                 addToPrimarySignature(policy,token);
