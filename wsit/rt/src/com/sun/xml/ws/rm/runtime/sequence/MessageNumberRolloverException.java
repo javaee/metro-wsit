@@ -1,8 +1,4 @@
 /*
- * $Id: RmException.java,v 1.6 2008-06-02 14:53:32 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
@@ -37,40 +33,33 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
 
-import com.sun.xml.ws.api.message.Message;
+package com.sun.xml.ws.rm.runtime.sequence;
+
+import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
- * Represents all exceptions that may possibly be recovered in the client code.
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
+ *
+ * @author m_potociar
  */
-public class RmException extends Exception {
-    private final transient Message fault;
-    
-    public RmException(String message, Throwable cause) {
-        super(message, cause);
-        fault = null;
+public class MessageNumberRolloverException extends RmRuntimeException {
+
+    private long messageNumber;
+    private String sequenceId;
+
+    public long getMessageNumber() {
+        return messageNumber;
     }
 
-    public RmException(String message) {
-        super(message);
-        fault = null;
-    }
-    
-    public RmException(String message, Message fault) {
-        super(message);
-        this.fault = fault;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    // FIXME avoid storing transient Message instances in the exceptions
-    public Message getFault() {
-        return fault;
+    public String getSequenceId() {
+        return sequenceId;
     }    
+    
+    public MessageNumberRolloverException(String sequenceId, long messageNumber) {
+        // TODO lcoalization code change
+        super(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(sequenceId, messageNumber));
+        this.messageNumber = messageNumber;
+        this.sequenceId = sequenceId;
+    }
 }

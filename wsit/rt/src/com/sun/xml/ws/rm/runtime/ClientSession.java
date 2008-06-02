@@ -40,8 +40,8 @@ import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -100,20 +100,20 @@ abstract class ClientSession {
         this.resendTask = new FiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
-    protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException;
+    protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;
 
     protected abstract void closeOutboundSequence() throws RmException;
 
     protected abstract void terminateOutboundSequence() throws RmException;
 
-    protected final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmException {
+    protected final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmRuntimeException {
         if (expectSequenceHeader) {
             String sequenceId = responseAdapter.getSequenceId();
             if (sequenceId != null) {
                 Utilities.assertSequenceId(inboundSequenceId, sequenceId);
                 sequenceManager.getSequence(sequenceId).acknowledgeMessageId(responseAdapter.getMessageNumber());
             } else {
-                throw new RmException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
+                throw new RmRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
             }
         }
 
@@ -149,7 +149,7 @@ abstract class ClientSession {
         }
     }
 
-    public final Packet processOutgoingPacket(Packet requestPacket) throws RmException {
+    public final Packet processOutgoingPacket(Packet requestPacket) {
         PacketAdapter requestAdapter = PacketAdapter.create(configuration, requestPacket);
         initializeIfNecessary(requestAdapter);
 
@@ -169,7 +169,7 @@ abstract class ClientSession {
         return requestAdapter.detach();
     }
 
-    public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmException {
+    public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
         PacketAdapter responseAdapter = PacketAdapter.create(configuration, responsePacket);
         if (responseAdapter.containsMessage()) {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
@@ -238,7 +238,7 @@ abstract class ClientSession {
      * Performs late initialization of sequences and timer task, provided those have not yet been initialized.
      * The actual initialization thus happens only once in the lifetime of each client RM session object.
      */
-    private void initializeIfNecessary(PacketAdapter request) throws CreateSequenceException, RmException {
+    private void initializeIfNecessary(PacketAdapter request) throws RmRuntimeException {
         initLock.lock();
         try {
             if (!isInitialized()) {
@@ -251,11 +251,11 @@ abstract class ClientSession {
                                 (configuration.requestResponseOperationsDetected()) ? sequenceManager.generateSequenceUID() : null,
                                 communicator.tryStartSecureConversation());
                         break;
-                    } catch (RuntimeException ex) {
+                    } catch (Exception ex) {
                         LOGGER.warning(LocalizationMessages.WSRM_1106_RM_SESSION_INIT_ATTEMPT_FAILED(), ex);
                     } finally {
                         if (++numberOfInitiateSessionAttempts > MAX_INITIATE_SESSION_ATTEMPTS) {
-                            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1107_MAX_RM_SESSION_INIT_ATTEMPTS_REACHED()));
+                            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1107_MAX_RM_SESSION_INIT_ATTEMPTS_REACHED()));
                         }
                     }
                 }
@@ -294,7 +294,7 @@ abstract class ClientSession {
         };
     }
 
-    private boolean isPendingAckRequest() throws UnknownSequenceException {
+    private boolean isPendingAckRequest() throws RmRuntimeException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
     }

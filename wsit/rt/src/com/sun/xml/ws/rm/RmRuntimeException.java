@@ -39,7 +39,9 @@ package com.sun.xml.ws.rm;
 import javax.xml.ws.WebServiceException;
 
 /**
- *
+ * Represents all generally unrecoverable exceptions that may occur during RM runtime
+ * processing
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class RmRuntimeException extends WebServiceException {

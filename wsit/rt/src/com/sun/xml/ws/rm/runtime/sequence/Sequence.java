@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.MessageNumberRolloverException;
 import java.util.List;
 
 /**

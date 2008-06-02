@@ -36,10 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.Headers;
-import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
@@ -53,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.namespace.QName;
 
 /**
  *
@@ -66,7 +62,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmException {
+    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(sequenceId);
@@ -75,7 +71,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RmException {
+    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(sequenceId);
 
@@ -83,7 +79,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmException {
+    public void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
         identifier.setValue(sequenceId);
@@ -107,7 +103,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected void initSequenceHeaderData() throws RmException {
+    protected void initSequenceHeaderData() throws RmRuntimeException {
         SequenceElement sequenceElement = this.readHeaderAsUnderstood("Sequence");
         if (sequenceElement != null) {
             this.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
@@ -115,13 +111,13 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected String initAckRequestedHeaderData() throws RmException {
+    protected String initAckRequestedHeaderData() throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood("AckRequested");
         return (ackRequestedElement != null) ? ackRequestedElement.getId() : null;
     }
 
     @Override
-    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmException {
+    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {
@@ -159,11 +155,6 @@ public class Rm11PacketAdapter extends PacketAdapter {
         // ackElement.getBufferRemaining();
         // ackElement.getFinal();
         }
-    }
-    
-    @Override
-    protected Header createSequenceFaultHeader(QName subcode) {
-        return Headers.create(RmVersion.WSRM11.jaxbContext, new com.sun.xml.ws.rm.v200702.SequenceFaultElement(subcode));
     }
 }
 

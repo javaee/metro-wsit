@@ -36,8 +36,8 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.rm.CreateSequenceException;
 import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
@@ -69,7 +69,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmException {
+    protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
@@ -90,11 +90,11 @@ final class Rm10ClientSession extends ClientSession {
 
         PacketAdapter responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.detach()));
         if (responseAdapter == null) {
-            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
         }
         if (responseAdapter.isFault()) {
-            // FIXME: passing Message instance to exception
-            throw LOGGER.logSevereException(new CreateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CreateSequence"), responseAdapter.message));
+            // FIXME: pass fault value into the exception
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CreateSequence")));
         }
 
         CreateSequenceResponseElement csrElement = responseAdapter.unmarshallMessage();
@@ -112,9 +112,7 @@ final class Rm10ClientSession extends ClientSession {
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
             if (accept == null || !communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
-                throw new CreateSequenceException(
-                        LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()),
-                        inboundSequenceId);
+                throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
             }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, Configuration.UNSPECIFIED);

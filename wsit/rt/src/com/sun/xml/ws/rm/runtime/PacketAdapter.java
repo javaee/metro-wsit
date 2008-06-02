@@ -50,39 +50,24 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.sequence.IllegalMessageIdentifierException;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
+import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import java.util.List;
-import java.util.Locale;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFault;
 
 /**
  *
  * @author m_potociar
  */
 public abstract class PacketAdapter {
+
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketAdapter.class);
-    
-    /**
-     * SOAP 1.1 Sender Fault
-     */
-    private static final QName SOAP_1_1_SENDER_FAULT =
-            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Client", SOAPConstants.SOAP_ENV_PREFIX);
-    /**
-     * SOAP 1.2 Receiver Fault
-     */
-    private static final QName SOAP_1_1_RECEIVER_FAULT =
-            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Server", SOAPConstants.SOAP_ENV_PREFIX);
-    
     protected Packet packet;
     protected Message message;
-    protected HeaderList headers;
     private boolean isSequenceDataInit;
     private boolean isAckRequestedHeaderDataInit;
     private String sequenceId;
@@ -140,8 +125,9 @@ public abstract class PacketAdapter {
      */
     public PacketAdapter attach(@NotNull Packet packet) {
         this.packet = packet;
-        this.message = packet.getMessage();
-        this.headers = (this.message == null) ? null : this.message.getHeaders();
+        if (packet.getMessage() != null) {
+            this.message = packet.getMessage();
+        }
 
         return this;
     }
@@ -155,7 +141,7 @@ public abstract class PacketAdapter {
         if (message != null) {
             message.consume();
         }
-        
+
         return detach();
     }
 
@@ -168,7 +154,6 @@ public abstract class PacketAdapter {
         } finally {
             packet = null;
             message = null;
-            headers = null;
         }
     }
 
@@ -190,23 +175,23 @@ public abstract class PacketAdapter {
     public final void appendHeader(Object jaxbHeaderContent) throws IllegalStateException {
         checkMessageReadyState();
 
-        headers.add(Headers.create(rmVersion.jaxbContext, jaxbHeaderContent));
+        message.getHeaders().add(Headers.create(rmVersion.jaxbContext, jaxbHeaderContent));
     }
 
     /**
      * TODO javadoc
      */
-    public abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmException;
+    public abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      */
-    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RmException;
+    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      */
-    public abstract void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmException;
+    public abstract void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmRuntimeException;
 
     /**
      * TODO javadoc
@@ -238,7 +223,7 @@ public abstract class PacketAdapter {
     public final PacketAdapter setMessage(Object jaxbElement, String wsaAction) {
         return setMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -248,58 +233,55 @@ public abstract class PacketAdapter {
      */
     public final PacketAdapter setMessage(Message newMessage, String wsaAction) {
         checkPacketReadyState();
-        
-        this.packet.setMessage(newMessage);        
+
+        this.packet.setMessage(newMessage);
         this.message = newMessage;
-        this.headers = newMessage.getHeaders();
         
         this.message.assertOneWay(false); // TODO do we really need to call this assert here?
-
-        this.headers.fillRequestAddressingHeaders(
+        this.message.getHeaders().fillRequestAddressingHeaders(
                 this.packet,
                 addressingVersion,
                 soapVersion,
                 false,
                 wsaAction);
-        
+
         return this;
     }
-    
+
     /**
      * TODO javadoc
      * 
      * @return
      */
-    public final boolean isProtocolMessage() {               
-        return (message == null) ? false : rmVersion.isRmAction(headers.getAction(addressingVersion, soapVersion));
+    public final boolean isProtocolMessage() {
+        return (message == null) ? false : rmVersion.isRmAction(getWsaAction());
     }
-    
+
     /**
      * TODO javadoc
      * 
      * @return
      */
-    public final boolean isProtocolRequest() {               
-        return (message == null) ? false : rmVersion.isRmProtocolRequest(headers.getAction(addressingVersion, soapVersion));
+    public final boolean isProtocolRequest() {
+        return (message == null) ? false : rmVersion.isRmProtocolRequest(getWsaAction());
     }
-    
-    
+
     /**
      * TODO javadoc
      * 
      * @return
      */
-    public final boolean isProtocolResponse() {               
-        return (message == null) ? false : rmVersion.isRmProtocolResponse(headers.getAction(addressingVersion, soapVersion));
-    }    
-    
+    public final boolean isProtocolResponse() {
+        return (message == null) ? false : rmVersion.isRmProtocolResponse(getWsaAction());
+    }
+
     /**
      * TODO javadoc
      * 
      * @return
      */
     public final boolean isRmFault() {
-        return (message == null) ? false : rmVersion.isRmFault(headers.getAction(addressingVersion, soapVersion));
+        return (message == null) ? false : rmVersion.isRmFault(getWsaAction());
     }
 
     /**
@@ -310,7 +292,7 @@ public abstract class PacketAdapter {
     public final boolean isFault() {
         return (message == null) ? false : message.isFault();
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -318,7 +300,7 @@ public abstract class PacketAdapter {
      */
     public final boolean containsMessage() {
         return message == null;
-    }    
+    }
 
     /**
      * Provides information about value of the addressing {@code Action} header 
@@ -328,9 +310,9 @@ public abstract class PacketAdapter {
      */
     public String getWsaAction() {
         checkMessageReadyState();
-        
-        return headers.getAction(addressingVersion, soapVersion);
-    }        
+
+        return message.getHeaders().getAction(addressingVersion, soapVersion);
+    }
 
     /**
      * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
@@ -342,8 +324,8 @@ public abstract class PacketAdapter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    public final <T> T readHeaderAsUnderstood(String name) throws RmException {
-        Header header = headers.get(rmVersion.namespaceUri, name, true);
+    public final <T> T readHeaderAsUnderstood(String name) throws RmRuntimeException {
+        Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
         if (header == null) {
             return (T) null;
         }
@@ -351,7 +333,7 @@ public abstract class PacketAdapter {
         try {
             return (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
         } catch (JAXBException ex) {
-            throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
         }
     }
 
@@ -362,153 +344,60 @@ public abstract class PacketAdapter {
      * 
      * @throws com.sun.xml.ws.rm.RmException in case the message unmarshalling failed
      */
-    public final <T> T unmarshallMessage() throws RmException {
+    public final <T> T unmarshallMessage() throws RmRuntimeException {
         checkMessageReadyState();
-        
+
         try {
             return (T) message.readPayloadAsJAXB(rmVersion.jaxbUnmarshaller);
         } catch (JAXBException e) {
-            throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
         }
     }
-    
-    public String getSequenceId() throws RmException {
+
+    public String getSequenceId() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
         }
         return sequenceId;
     }
-    
-    public long getMessageNumber() throws RmException {
+
+    public long getMessageNumber() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
         }
         return messageNumber;
     }
-    
-    protected abstract void initSequenceHeaderData() throws RmException;
-    
+
+    protected abstract void initSequenceHeaderData() throws RmRuntimeException;
+
     protected final void setSequenceData(String sequenceId, long messageNumber) {
         this.sequenceId = sequenceId;
         this.messageNumber = messageNumber;
     }
-    
-    protected abstract String initAckRequestedHeaderData() throws RmException;
-    
-    public final String getAckRequestedHeaderSequenceId() throws RmException {
+
+    protected abstract String initAckRequestedHeaderData() throws RmRuntimeException;
+
+    public final String getAckRequestedHeaderSequenceId() throws RmRuntimeException {
         if (!isAckRequestedHeaderDataInit) {
             ackRequestedHeaderSequenceId = initAckRequestedHeaderData();
             isAckRequestedHeaderDataInit = true;
         }
-        
+
         return ackRequestedHeaderSequenceId;
-    }   
-    
-    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmException;        
-
-    /**
-     * Creates a SOAP fault response that occured while processing the RM headers of a request
-     * 
-     * @param requestPacket the request that caused the fault
-     * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
-     * @param reason English language reason element
-     * @return response packet filled with a generated SOAP fault
-     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
-     */
-    public Packet createHeaderProcessingSoapFaultResponse(QName subcode, String reason) throws RmRuntimeException {
-        try {
-            SOAPFault soapFault = soapVersion.saajSoapFactory.createFault();
-
-            // common SOAP1.1 and SOAP1.2 Fault settings 
-            if (reason != null) {
-                soapFault.setFaultString(reason, Locale.ENGLISH);
-            }
-
-            // SOAP version-specific SOAP Fault settings
-            // FIXME: check if the code we generate is allways a Sender.
-            switch (soapVersion) {
-                case SOAP_11:
-                    soapFault.setFaultCode(SOAP_1_1_SENDER_FAULT);
-                    break;
-                case SOAP_12:
-                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
-                    soapFault.appendFaultSubcode(subcode);
-                    break;
-                default:
-                    throw new RmRuntimeException("Unsupported SOAP version: '" + soapVersion.toString() + "'");
-            }
-
-            Message soapFaultMessage = Messages.create(soapFault);
-            if (soapVersion == SOAPVersion.SOAP_11) {
-                soapFaultMessage.getHeaders().add(createSequenceFaultHeader(subcode));
-            }
-
-            return this.packet.createServerResponse(
-                    soapFaultMessage,
-                    addressingVersion,
-                    soapVersion,
-                    getProperFaultActionForAddressingVersion());
-        } catch (SOAPException ex) {
-            throw new RmRuntimeException("Error creating a SOAP fault", ex);
-        }
     }
-    
-    protected abstract Header createSequenceFaultHeader(QName subcode);
 
-    /**
-     * Creates a SOAP fault response that occured while processing the CreateSequence request message
-     * 
-     * @param requestPacket the request that caused the fault
-     * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
-     * @param reason English language reason element
-     * @return response packet filled with a generated SOAP fault
-     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
-     */
-    public final Packet createCreateSequenceProcessingSoapFaultResponse(QName subcode, String reason) throws RmRuntimeException {
-        try {
-            SOAPFault soapFault = soapVersion.saajSoapFactory.createFault();
-
-            // common SOAP1.1 and SOAP1.2 Fault settings 
-            if (reason != null) {
-                soapFault.setFaultString(reason, Locale.ENGLISH);
-            }
-
-            // SOAP version-specific SOAP Fault settings
-            // FIXME: check if the code we generate is allways a Sender.
-            switch (soapVersion) {
-                case SOAP_11:
-                    soapFault.setFaultCode(subcode);
-                    break;
-                case SOAP_12:
-                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
-                    soapFault.appendFaultSubcode(subcode);
-                    break;
-                default:
-                    throw new RmRuntimeException("Unsupported SOAP version: '" + soapVersion.toString() + "'");
-            }
-
-            Message soapFaultMessage = Messages.create(soapFault);
-            return this.packet.createServerResponse(
-                    soapFaultMessage,
-                    addressingVersion,
-                    soapVersion,
-                    getProperFaultActionForAddressingVersion());
-        } catch (SOAPException ex) {
-            throw new RmRuntimeException("Error creating a SOAP fault", ex);
-        }
-    }
+    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
 
     /**
      * TODO javadoc
-     * 
-     * @return
      */
-    public final String getProperFaultActionForAddressingVersion() {
-        return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.wsrmFaultAction;
+    public String getSecurityContextTokenId() {
+        com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) packet.invocationProperties.get(com.sun.xml.wss.impl.MessageConstants.INCOMING_SCT);
+        return (sct != null) ? sct.getIdentifier().toString() : null;
     }
-    
+
     /**
      * Checks internal state of this {@link PacketAdapter} instance whether it is 
      * safe to perform message update operations. Success of this condition guarantees

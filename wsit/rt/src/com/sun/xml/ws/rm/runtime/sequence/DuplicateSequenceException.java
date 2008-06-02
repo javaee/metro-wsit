@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class DuplicateSequenceException extends RmException {
+public class DuplicateSequenceException extends RmRuntimeException {
     private final String sequenceId;
     
     /**
@@ -70,6 +70,6 @@ public class DuplicateSequenceException extends RmException {
     }        
     
     private static String createErrorMessage(String sequenceId) {
-        return LocalizationMessages.WSRM_1126_DUPLICATE_SEQUENCE_ID();
+        return LocalizationMessages.WSRM_1126_DUPLICATE_SEQUENCE_ID(sequenceId);
     } 
 }

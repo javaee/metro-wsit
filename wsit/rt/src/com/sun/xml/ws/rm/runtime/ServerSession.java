@@ -1,8 +1,4 @@
 /*
- * $Id: RmException.java,v 1.6 2008-06-02 14:53:32 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
@@ -37,40 +33,40 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
+import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
 
 /**
- * Represents all exceptions that may possibly be recovered in the client code.
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
+ *
+ * @author m_potociar
  */
-public class RmException extends Exception {
-    private final transient Message fault;
-    
-    public RmException(String message, Throwable cause) {
-        super(message, cause);
-        fault = null;
+abstract class ServerSession {
+
+    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
+    //
+    protected String inboundSequenceId = null;
+    protected String outboundSequenceId = null;
+    protected final Configuration configuration;
+    protected final SequenceManager sequenceManager;
+
+    static ServerSession create(Configuration configuration, ProtocolCommunicator communicator) {
+//        switch (configuration.getRmVersion()) {
+//            case WSRM10:
+//                return new Rm10ServerSession(configuration, communicator);
+//            case WSRM11:
+//                return new Rm11ServerSession(configuration, communicator);
+//            default:
+//                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
+//        }
+        return null;
     }
 
-    public RmException(String message) {
-        super(message);
-        fault = null;
+    protected ServerSession(Configuration configuration) {
+        this.configuration = configuration;
+        this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
     }
-    
-    public RmException(String message, Message fault) {
-        super(message);
-        this.fault = fault;
-    }
-
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    // FIXME avoid storing transient Message instances in the exceptions
-    public Message getFault() {
-        return fault;
-    }    
 }

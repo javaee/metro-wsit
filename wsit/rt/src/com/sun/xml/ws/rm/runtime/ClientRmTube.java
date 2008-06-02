@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmSoapFaultException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
@@ -122,9 +121,9 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
             }
         } catch (RmSoapFaultException ex) {
             return doReturnWith(ex.getSoapFaultResponse());
-        } catch (RmException ex) {
+        } catch (RmRuntimeException ex) {
             LOGGER.logSevereException(ex);
-            return doThrow(new WebServiceException(ex)); // the input argument has to be a runtime exception
+            return doThrow(ex);
         } finally {
             LOGGER.exiting();
         }
@@ -145,7 +144,7 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 return super.processResponse(responsePacket);
             }
 
-        } catch (RmException ex) {
+        } catch (RmRuntimeException ex) {
             LOGGER.logSevereException(ex);
             clearResendAttemptFlag();
             return doThrow(ex);
