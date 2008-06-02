@@ -67,7 +67,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.2.1 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -174,7 +174,7 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
      * This can happen when a request for a StatefulWebService is received after the instance has
      * timed out or was explicitly unexported.
      */
-    private void registerFallback() {
+    synchronized private void registerFallback() {
         if (!registeredFallback ) {
             registeredFallback = true;
 
