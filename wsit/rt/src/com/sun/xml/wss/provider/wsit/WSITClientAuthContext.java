@@ -92,6 +92,8 @@ import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
@@ -736,7 +738,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
                     
-                    //updateMPForIssuedTokenAsSignedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
+                    updateMPForIssuedTokenAsEncryptedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
                     
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -788,7 +790,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         }
     }
     
-    private void updateMPForIssuedTokenAsSignedSupportingToken(Packet packet, final IssuedTokenContext ctx, final String issuedTokenPolicyId){
+    private void updateMPForIssuedTokenAsEncryptedSupportingToken(Packet packet, final IssuedTokenContext ctx, final String issuedTokenPolicyId){
         /*
          * If IssuedToken is present as SignedSupprotingToken in the wsdl, then the
          * primary signature must have IssuedToken's id for the signature target instead
@@ -797,25 +799,25 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         Message message = packet.getMessage();
         WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
         SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
-        if(sph != null && sph.isIssuedTokenAsSignedSupportingToken()){
+        if(sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()){
             MessagePolicy policy = sph.getMessagePolicy();
             ArrayList list = policy.getPrimaryPolicies();
             Iterator i = list.iterator();
             boolean breakOuterLoop = false;
             while (i.hasNext()) {
                 SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
-                if(PolicyTypeUtil.signaturePolicy(primaryPolicy)){
-                    SignaturePolicy sigPolicy = (SignaturePolicy)primaryPolicy;
-                    SignaturePolicy.FeatureBinding featureBinding = (SignaturePolicy.FeatureBinding)sigPolicy.getFeatureBinding();
+                if(PolicyTypeUtil.encryptionPolicy(primaryPolicy)){
+                    EncryptionPolicy encPolicy = (EncryptionPolicy)primaryPolicy;
+                    EncryptionPolicy.FeatureBinding featureBinding = (EncryptionPolicy.FeatureBinding)encPolicy.getFeatureBinding();
                     ArrayList targetList = featureBinding.getTargetBindings();
                     ListIterator iterator = targetList.listIterator();
                     while(iterator.hasNext()) {
-                        SignatureTarget signatureTarget = (SignatureTarget)iterator.next();
-                        String targetURI = signatureTarget.getValue();
-                        if(targetURI.equals("#"+issuedTokenPolicyId)){
+                        EncryptionTarget encryptionTarget = (EncryptionTarget)iterator.next();
+                        String targetURI = encryptionTarget.getValue();
+                        if(targetURI.equals(issuedTokenPolicyId)){
                             if (ctx != null) {
                                 GenericToken issuedToken = (GenericToken)ctx.getSecurityToken();
-                                signatureTarget.setValue("#"+issuedToken.getId());
+                                encryptionTarget.setValue(issuedToken.getId());
                                 sph.setMessagePolicy(policy);
                                 outMessagePolicyMap.put(operation, sph);
                                 breakOuterLoop = true;

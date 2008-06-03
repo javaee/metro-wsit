@@ -93,7 +93,7 @@ public abstract class BindingProcessor {
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
     private WSSAssertion wss11  = null;
-    private boolean isIssuedTokenAsSignedSupportingToken = false;
+    private boolean isIssuedTokenAsEncryptedSupportingToken = false;
     
     protected boolean foundEncryptTargets = false;
     /** Creates a new instance of BindingProcessor */
@@ -261,7 +261,6 @@ public abstract class BindingProcessor {
         SignedSupportingTokensProcessor stp = new SignedSupportingTokensProcessor(st,
                 tokenProcessor,getBinding(),container,primarySP,getEncryptionPolicy(),pid);
         stp.process();
-        isIssuedTokenAsSignedSupportingToken(stp.isIssuedTokenAsSignedSupportingToken());
     }
     public void processSupportingTokens(EndorsingSupportingTokens est) throws PolicyException{
         
@@ -281,24 +280,28 @@ public abstract class BindingProcessor {
         SignedEncryptedSupportingTokensProcessor setp = new SignedEncryptedSupportingTokensProcessor(sest,
                 tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
         setp.process();
+        isIssuedTokenAsEncryptedSupportingToken(setp.isIssuedTokenAsEncryptedSupportingToken());
     }
     
     public void processSupportingTokens(EncryptedSupportingTokens est) throws PolicyException{
         EncryptedSupportingTokensProcessor etp = new EncryptedSupportingTokensProcessor(est,
                 tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
         etp.process();
+        isIssuedTokenAsEncryptedSupportingToken(etp.isIssuedTokenAsEncryptedSupportingToken());
     }
     
     public void processSupportingTokens(EndorsingEncryptedSupportingTokens est) throws PolicyException{
         EndorsingEncryptedSupportingTokensProcessor etp = new EndorsingEncryptedSupportingTokensProcessor(est, 
                 tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
         etp.process();
+        isIssuedTokenAsEncryptedSupportingToken(etp.isIssuedTokenAsEncryptedSupportingToken());
     }
     
     public void processSupportingTokens(SignedEndorsingEncryptedSupportingTokens est) throws PolicyException{
         SignedEndorsingEncryptedSupportingTokensProcessor etp = new SignedEndorsingEncryptedSupportingTokensProcessor(est, 
                 tokenProcessor, getBinding(), container, primarySP, getEncryptionPolicy(), pid);
         etp.process();
+        isIssuedTokenAsEncryptedSupportingToken(etp.isIssuedTokenAsEncryptedSupportingToken());
     }
     
     protected SignaturePolicy getSignaturePolicy(){
@@ -330,11 +333,11 @@ public abstract class BindingProcessor {
         this.wss11 = wss11;
     }
     
-    public boolean isIssuedTokenAsSignedSupportingToken(){
-        return this.isIssuedTokenAsSignedSupportingToken;
+    public boolean isIssuedTokenAsEncryptedSupportingToken(){
+        return this.isIssuedTokenAsEncryptedSupportingToken;
     }
     
-    private void isIssuedTokenAsSignedSupportingToken(boolean value){
-        this.isIssuedTokenAsSignedSupportingToken = value;
+    private void isIssuedTokenAsEncryptedSupportingToken(boolean value){
+        this.isIssuedTokenAsEncryptedSupportingToken = value;
     }
 }

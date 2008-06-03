@@ -125,7 +125,7 @@ public class XWSSPolicyGenerator {
     private Binding policyBinding = null;
     private List<RequiredElements> reqElements = new ArrayList<RequiredElements>();
     private SecurityPolicyVersion spVersion;
-    private boolean isIssuedTokenAsSignedSupportingToken = false;
+    private boolean isIssuedTokenAsEncryptedSupportingToken = false;
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming, 
@@ -259,19 +259,22 @@ public class XWSSPolicyGenerator {
                     bindingProcessor.processSupportingTokens((SupportingTokens)assertion);
                 } else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedSupportingTokens)assertion);
-                    isIssuedTokenAsSignedSupportingToken(bindingProcessor.isIssuedTokenAsSignedSupportingToken());
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((EndorsingSupportingTokens)assertion);
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedEndorsingSupportingTokens)assertion);
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEncryptedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedEncryptedSupportingTokens)assertion);
+                    isIssuedTokenAsEncryptedSupportingToken(bindingProcessor.isIssuedTokenAsEncryptedSupportingToken());
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isEncryptedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((EncryptedSupportingTokens)assertion);
+                    isIssuedTokenAsEncryptedSupportingToken(bindingProcessor.isIssuedTokenAsEncryptedSupportingToken());
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isEndorsingEncryptedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((EndorsingEncryptedSupportingTokens)assertion);
+                    isIssuedTokenAsEncryptedSupportingToken(bindingProcessor.isIssuedTokenAsEncryptedSupportingToken());
                 }else if(!ignoreST && shouldAddST() && PolicyUtil.isSignedEndorsingEncryptedSupportingToken(assertion, spVersion)){
                     bindingProcessor.processSupportingTokens((SignedEndorsingEncryptedSupportingTokens)assertion);
+                    isIssuedTokenAsEncryptedSupportingToken(bindingProcessor.isIssuedTokenAsEncryptedSupportingToken());
                 }else if(PolicyUtil.isWSS10(assertion, spVersion)){
                     wssAssertion = assertion;
                 }else if(PolicyUtil.isWSS11(assertion, spVersion)){
@@ -381,12 +384,12 @@ public class XWSSPolicyGenerator {
         }
     }
     
-    public boolean isIssuedTokenAsSignedSupportingToken(){
-        return this.isIssuedTokenAsSignedSupportingToken;
+    public boolean isIssuedTokenAsEncryptedSupportingToken(){
+        return this.isIssuedTokenAsEncryptedSupportingToken;
     }
     
-    private void isIssuedTokenAsSignedSupportingToken(boolean value){
-        this.isIssuedTokenAsSignedSupportingToken = value;
+    private void isIssuedTokenAsEncryptedSupportingToken(boolean value){
+        this.isIssuedTokenAsEncryptedSupportingToken = value;
     }
     
 }

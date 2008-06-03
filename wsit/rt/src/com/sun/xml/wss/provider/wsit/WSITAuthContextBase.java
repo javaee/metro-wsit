@@ -955,7 +955,7 @@ public abstract class WSITAuthContextBase  {
         SecurityPolicyHolder sph = new SecurityPolicyHolder();
         sph.setMessagePolicy(messagePolicy);
         sph.setBindingLevelAlgSuite(xwssPolicyGenerator.getBindingLevelAlgSuite());
-        sph.isIssuedTokenAsSignedSupportingToken(xwssPolicyGenerator.isIssuedTokenAsSignedSupportingToken());
+        sph.isIssuedTokenAsEncryptedSupportingToken(xwssPolicyGenerator.isIssuedTokenAsEncryptedSupportingToken());
         List<PolicyAssertion> tokenList = getTokens(effectivePolicy);
         addConfigAssertions(effectivePolicy,sph);
         

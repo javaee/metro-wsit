@@ -36,7 +36,9 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
@@ -51,6 +53,8 @@ import com.sun.xml.ws.security.policy.Token;
  */
 public class SignedEncryptedSupportingTokensProcessor extends SignedSupportingTokensProcessor {
     
+    private boolean isIssuedTokenAsEncryptedSupportingToken = false;
+    
     /** Creates a new instance of SignedEncryptedSupportingTokensProcessor */
     public SignedEncryptedSupportingTokensProcessor(SignedEncryptedSupportingTokens st,TokenProcessor tokenProcessor,Binding binding,
             XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
@@ -62,7 +66,15 @@ public class SignedEncryptedSupportingTokensProcessor extends SignedSupportingTo
             EncryptionPolicy.FeatureBinding fb =(EncryptionPolicy.FeatureBinding) encryptionPolicy.getFeatureBinding();
             EncryptionTarget et = etc.newURIEncryptionTarget(token.getTokenId());
             fb.addTargetBinding(et);
+            
+            if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)){
+                isIssuedTokenAsEncryptedSupportingToken = true;
+            }
         }   
+    }
+    
+    protected boolean isIssuedTokenAsEncryptedSupportingToken(){
+        return isIssuedTokenAsEncryptedSupportingToken;
     }
     
 }
