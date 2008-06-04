@@ -15,10 +15,11 @@ To Install WSIT and run the sample:
 
     For Tomcat, set CATALINA_OPTS=-DWSIT_HOME=<TOMCAT_HOME>.
 
-4. There are 3 samples inside  /wsit/wsit/samples/ws-security/src folder :
+4. There are 4 samples inside  /wsit/wsit/samples/ws-security/src folder :
 	i )  mcs : Mutual Certificate Security
 	ii)  un_symmetric : Username Token with Symmetric binding
 	iii) saml_sv_certificatev : Saml Sender Vouches with Certificate 
+	iv) secure_attachments : A sample showing attachments secured through signature/encryption
 
 	Edit build.properties of each sample (which is inside each sample) to set java.home and tomcat.home/glassfish.home.
 
