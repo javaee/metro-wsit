@@ -51,14 +51,8 @@ public class RMDemoClientTest extends TestCase {
             wsrm.addressing.client.RMDemoService service = new RMDemoService();
             port = service.getRMDemoPort();
             port.addString("hello");
-        } catch (IllegalStateException e) {
-            if (e.getMessage().contains("Addressing")) {
-                foundError = true;
-            }
-
-            e.printStackTrace();
         } catch (Exception e) {
-            if (e.getMessage().contains("Member")) {
+            if (e.getMessage().contains("Addressing") && e.getMessage().contains("MEMBER")) {
                 foundError = true;
             }
 
