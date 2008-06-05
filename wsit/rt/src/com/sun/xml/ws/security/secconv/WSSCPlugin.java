@@ -49,6 +49,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Engine;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -97,6 +100,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.Set;
@@ -130,6 +134,7 @@ public class WSSCPlugin {
     private static SignaturePolicy renewSignaturePolicy = null;
     private static PolicyID pid = new PolicyID();    
     private static Binding binding = null;
+    private Engine fiberEngine;
     
     private Packet packet = null;
     
@@ -390,8 +395,12 @@ public class WSSCPlugin {
         
         // Send the message
         Packet respPacket = null;
-        if(sctConfig.getClientPipe() != null){
-            respPacket = sctConfig.getClientPipe().process(reqPacket);
+        if(sctConfig.getClientTube() != null){            
+            reqPacket = ((SecurityClientTube)sctConfig.getClientTube()).processClientRequestPacket(reqPacket);
+            Tube tubeline = sctConfig.getNextTube();            
+            Fiber fiber = getFiberEngine().createFiber(); 
+            respPacket = fiber.runSync(tubeline, reqPacket);
+            respPacket = ((SecurityClientTube)sctConfig.getClientTube()).processClientResponsePacket(respPacket);            
         }else if(sctConfig.getWSITClientAuthContext() != null){
             try{
                 respPacket = sctConfig.getWSITClientAuthContext().secureRequest(reqPacket, null, true);            
@@ -845,5 +854,12 @@ public class WSSCPlugin {
             spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
         }
         return spVersion;
+    }
+    
+    private Engine getFiberEngine() {
+        if (fiberEngine == null) {
+            fiberEngine = Fiber.current().owner;
+        }
+        return fiberEngine;
     }
 }

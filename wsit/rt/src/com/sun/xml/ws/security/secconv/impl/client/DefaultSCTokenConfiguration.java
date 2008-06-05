@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -81,7 +82,8 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private boolean clientOutboundMessage = true;
     private WSDLPort wsdlPort = null;
     private WSBinding wsBinding = null;
-    private Pipe clientSecurityPipe = null;
+    private Tube clientSecurityTube = null;
+    private Tube nextTube = null;
     private Packet packet = null;
     private WSITClientAuthContext wsitClientAuthContext = null;
     private AddressingVersion addVer = null;
@@ -91,15 +93,29 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private boolean addRenewPolicy = true;    
     
     public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort, 
+            final WSBinding binding, final Tube securityTube, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken, Tube nextTube){
+        this.protocol = protocol;
+        this.scToken = scToken;
+        this.wsdlPort = wsdlPort;
+        this.wsBinding = binding;
+        this.clientSecurityTube = securityTube;
+        this.packet = packet;
+        this.addVer = addVer;
+        this.tokenId = ((Token)scToken).getTokenId();
+        this.nextTube = nextTube;
+        parseAssertions(scToken, localToken);
+    }
+    
+    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort, 
             final WSBinding binding, final Pipe securityPipe, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken){
         this.protocol = protocol;
         this.scToken = scToken;
         this.wsdlPort = wsdlPort;
         this.wsBinding = binding;
-        this.clientSecurityPipe = securityPipe;
+        this.clientSecurityTube = null;
         this.packet = packet;
         this.addVer = addVer;
-        this.tokenId = ((Token)scToken).getTokenId();
+        this.tokenId = ((Token)scToken).getTokenId();        
         parseAssertions(scToken, localToken);
     }
     
@@ -229,12 +245,16 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         return this.wsBinding;
     }
     
-    public Pipe getClientPipe(){
-        return this.clientSecurityPipe;
-    }
+    public Tube getClientTube(){
+        return this.clientSecurityTube;
+    }   
     
     public WSITClientAuthContext getWSITClientAuthContext(){
         return this.wsitClientAuthContext;
+    }
+    
+    public Tube getNextTube(){
+        return this.nextTube;
     }
     
     public Packet getPacket(){

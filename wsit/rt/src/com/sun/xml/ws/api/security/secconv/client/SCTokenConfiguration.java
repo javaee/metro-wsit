@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenConfiguration;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
@@ -111,7 +111,9 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
             
     public abstract Packet getPacket();
     
-    public abstract Pipe getClientPipe();
+    public abstract Tube getClientTube();
+    
+    public abstract Tube getNextTube();
     
     public abstract WSDLPort getWSDLPort();
     

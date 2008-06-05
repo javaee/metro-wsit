@@ -41,8 +41,6 @@ import com.sun.xml.ws.tx.common.Util;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -74,16 +72,14 @@ import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.tx.client.TxClientPipe;
 import com.sun.xml.ws.tx.service.TxServerPipe;
 import com.sun.xml.ws.util.ServiceConfigurationError;
-import com.sun.xml.wss.jaxws.impl.SecurityClientPipe;
-import com.sun.xml.wss.jaxws.impl.SecurityServerPipe;
+import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
+import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
 import com.sun.xml.wss.provider.wsit.JMACAuthConfigFactory;
 import com.sun.xml.xwss.XWSSClientPipe;
 import com.sun.xml.xwss.XWSSServerPipe;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -403,7 +399,8 @@ public class TubelineAssemblyController {
                     
                 } else {
                     //TODO: Log a FINE message indicating could not use Unified Tube.
-                    return PipeAdapter.adapt(new SecurityServerPipe(context, context.getAdaptedTubelineHead()));
+                    //return PipeAdapter.adapt(new SecurityServerPipe(context, context.getAdaptedTubelineHead()));
+                    return new SecurityServerTube(context, context.getTubelineHead());
                 }
 
             } else {
@@ -464,9 +461,12 @@ public class TubelineAssemblyController {
             // return securityTube;
             } else if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
                 //Use the default WSIT Client Security Pipe
-                Pipe securityPipe = new SecurityClientPipe(context, context.getAdaptedTubelineHead());
-                context.setScInitiator((SecureConversationInitiator) securityPipe);
-                return PipeAdapter.adapt(securityPipe);
+                //Pipe securityPipe = new SecurityClientPipe(context, context.getAdaptedTubelineHead());
+                Tube securityTube = new SecurityClientTube(context, context.getTubelineHead());
+                //context.setScInitiator((SecureConversationInitiator) securityPipe);
+                context.setScInitiator((SecureConversationInitiator) securityTube);
+                //return PipeAdapter.adapt(securityPipe);
+                return securityTube;
             } else if (!context.isPolicyAvailable() && isSecurityConfigPresent(context)) {
                 //look for XWSS 2.0 Style Security
                 // policyMap may be null in case of client dispatch without a client config file
