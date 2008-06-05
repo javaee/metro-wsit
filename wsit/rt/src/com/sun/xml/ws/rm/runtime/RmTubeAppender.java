@@ -45,7 +45,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.jaxws.runtime.client.RMClientTube;
 import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
 import javax.xml.ws.WebServiceException;
 

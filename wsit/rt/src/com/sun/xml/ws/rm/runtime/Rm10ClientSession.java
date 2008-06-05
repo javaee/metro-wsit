@@ -85,10 +85,10 @@ final class Rm10ClientSession extends ClientSession {
             csElement.setSecurityTokenReference(strType);
         }
 
-        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
+        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setMessage(csElement, RmVersion.WSRM10.createSequenceAction);
 
-        PacketAdapter responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.detach()));
+        PacketAdapter responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.getPacket()));
         if (responseAdapter == null) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
         }
@@ -98,7 +98,7 @@ final class Rm10ClientSession extends ClientSession {
         }
 
         CreateSequenceResponseElement csrElement = responseAdapter.unmarshallMessage();
-        responseAdapter.detach();
+        responseAdapter.getPacket();
         
         outboundSequenceId = csrElement.getIdentifier().getValue();
 
@@ -121,10 +121,10 @@ final class Rm10ClientSession extends ClientSession {
 
     @Override
     protected void closeOutboundSequence() throws RmException {
-        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
+        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setEmptyMessage(RmVersion.WSRM10.lastAction);
         requestAdapter.appendSequenceAcknowledgementHeader(
-                inboundSequenceId, 
+                inboundSequenceId,
                 sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
         
         SequenceElement sequenceElement = new SequenceElement();
@@ -134,9 +134,9 @@ final class Rm10ClientSession extends ClientSession {
 
         requestAdapter.appendHeader(sequenceElement);
         
-        PacketAdapter responseAdapter = PacketAdapter.create(configuration);
+        PacketAdapter responseAdapter = null;
         try {
-            responseAdapter.attach(communicator.send(requestAdapter.detach()));
+            responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.getPacket()));
             if (responseAdapter.containsMessage()) {
                 processInboundMessageHeaders(responseAdapter, false);
                 if (responseAdapter.isFault()) {
@@ -145,21 +145,23 @@ final class Rm10ClientSession extends ClientSession {
                 }
             }
         } finally {
-            responseAdapter.consumeAndDetach(); // we need to consume message as we didn't read it (e.g. as JAXB bean)
+            if (responseAdapter != null) {
+                responseAdapter.consume(); // we need to consume message as we didn't read it (e.g. as JAXB bean)
+            }
         }
     }
 
     @Override
     protected void terminateOutboundSequence() throws RmException {
-        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
+        PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setMessage(new TerminateSequenceElement(outboundSequenceId),  RmVersion.WSRM10.terminateSequenceAction);
         requestAdapter.appendSequenceAcknowledgementHeader(
                 inboundSequenceId, 
                 sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
         
-        PacketAdapter responseAdapter = PacketAdapter.create(configuration);
+        PacketAdapter responseAdapter = null;
         try {
-            responseAdapter.attach(communicator.send(requestAdapter.detach()));
+            responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
                 throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequenceResponse"));
             }
@@ -185,7 +187,9 @@ final class Rm10ClientSession extends ClientSession {
                 }
             }
         } finally {
-            responseAdapter.consumeAndDetach();
+            if (responseAdapter != null) {
+                responseAdapter.consume();
+            }
         }
     }
 }

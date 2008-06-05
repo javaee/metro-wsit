@@ -53,7 +53,7 @@ import javax.xml.soap.SOAPFault;
  *
  * @author m_potociar
  */
-public class RmSoapFaultException extends RmRuntimeException {
+public class RmSoapFaultException extends RmException {
 
     /**
      * SOAP 1.1 Sender Fault

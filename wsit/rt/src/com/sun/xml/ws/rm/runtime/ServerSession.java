@@ -48,12 +48,14 @@ abstract class ServerSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
     //
-    protected String inboundSequenceId = null;
-    protected String outboundSequenceId = null;
+    private String inboundSequenceId = null;
+    private String outboundSequenceId = null;
+    private String strId = null; // Security Token Reference Identifier bound to this session
+    
     protected final Configuration configuration;
     protected final SequenceManager sequenceManager;
 
-    static ServerSession create(Configuration configuration, ProtocolCommunicator communicator) {
+    static ServerSession create(Configuration configuration, String inboundSequenceId, String outboundSequenceId, String strId) {
 //        switch (configuration.getRmVersion()) {
 //            case WSRM10:
 //                return new Rm10ServerSession(configuration, communicator);
@@ -65,8 +67,19 @@ abstract class ServerSession {
         return null;
     }
 
-    protected ServerSession(Configuration configuration) {
+    protected ServerSession(Configuration configuration, String inboundSequenceId, String outboundSequenceId, String strId) {
         this.configuration = configuration;
         this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
+        this.inboundSequenceId = inboundSequenceId;
+        this.outboundSequenceId = outboundSequenceId;
+        this.strId = strId;                
     }
+    
+    /**
+     * TODO javadoc
+     */
+    public String getBoundSecurityTokenReferenceId() {
+        return strId;
+    }
+    
 }

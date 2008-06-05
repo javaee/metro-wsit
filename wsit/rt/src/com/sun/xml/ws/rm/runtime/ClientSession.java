@@ -127,13 +127,12 @@ abstract class ClientSession {
     }
 
     protected final void requestAcknowledgement() throws RmException {
-        PacketAdapter responseAdapter = PacketAdapter.create(configuration);
+        PacketAdapter responseAdapter = null;
         try {
-
-            PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyPacket());
+            PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyRequestPacket());
             requestAdapter.setEmptyMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
 
-            responseAdapter.attach(communicator.send(requestAdapter.detach()));
+            responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
                 throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
             }
@@ -145,7 +144,9 @@ abstract class ClientSession {
                 throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), responseAdapter.message);
             }
         } finally {
-            responseAdapter.consumeAndDetach();
+            if (responseAdapter !=null) {                
+                responseAdapter.consume();
+            }
         }
     }
 
@@ -166,7 +167,7 @@ abstract class ClientSession {
                     sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
         }
 
-        return requestAdapter.detach();
+        return requestAdapter.getPacket();
     }
 
     public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
@@ -175,7 +176,7 @@ abstract class ClientSession {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
         }
 
-        return responseAdapter.detach();
+        return responseAdapter.getPacket();
     }
 
     /**
@@ -242,7 +243,7 @@ abstract class ClientSession {
         initLock.lock();
         try {
             if (!isInitialized()) {
-                communicator.registerMusterRequestPacket(request.getPacketCopy(false));
+                communicator.registerMusterRequestPacket(request.copyPacket(false));
 
                 int numberOfInitiateSessionAttempts = 0;
                 while (true) {

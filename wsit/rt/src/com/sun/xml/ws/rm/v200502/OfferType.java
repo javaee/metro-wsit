@@ -47,6 +47,16 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * &lt;xs:complexType name="OfferType"&gt;
+ *     &lt;xs:sequence&gt;
+ *         &lt;xs:element ref="wsrm:Identifier"/&gt;
+ *         &lt;xs:element ref="wsrm:Expires" minOccurs="0"/&gt;
+ *         &lt;xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/&gt;
+ *     &lt;/xs:sequence&gt;
+ *     &lt;xs:anyAttribute namespace="##other" processContents="lax"/&gt;
+ * &lt;/xs:complexType&gt;
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "OfferType", propOrder = {
 "identifier",

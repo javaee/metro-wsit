@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
@@ -76,11 +75,7 @@ public class ProtocolCommunicator {
     public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, Configuration configuration) {
         this.tubeline = tubeline;
         this.scInitiator = scInitiator;
-        if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
-            this.configuration = configuration;
-        } else {
-            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION()));
-        }
+        this.configuration = configuration;
         this.soapMustUnderstandAttributeName = new QName(configuration.getSoapVersion().nsUri, "mustUnderstand");
         this.musterRequestPacket = new AtomicReference<Packet>();
     }
@@ -137,10 +132,12 @@ public class ProtocolCommunicator {
     }
         
     /**
-     * Creates a new empty packet
-     * @return a new empty packet
+     * Creates a new empty request packet based on the muster packet registered 
+     * with this {@link ProtocolCommunicator} instance.
+     * 
+     * @return a new empty request packet
      */    
-    public Packet createEmptyPacket() {
+    public Packet createEmptyRequestPacket() {
         return musterRequestPacket.get().copy(false);
     }
 

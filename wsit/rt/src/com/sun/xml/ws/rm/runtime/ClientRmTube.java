@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -44,7 +45,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
-import com.sun.xml.ws.rm.RmSoapFaultException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -86,6 +86,11 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
 
         // TODO don't take the first config alternative automatically...
         Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];
+        if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
+            // TODO L10N
+            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
+        }
+        
         this.session = ClientSession.create(
                 configuration,
                 new ProtocolCommunicator(super.next, scInitiator, configuration));
@@ -119,8 +124,8 @@ public class ClientRmTube extends AbstractFilterTubeImpl {
                 prepareForResend(requestPacket);
                 return super.processRequest(requestPacket);
             }
-        } catch (RmSoapFaultException ex) {
-            return doReturnWith(ex.getSoapFaultResponse());
+//        } catch (RmSoapFaultException ex) {
+//            return doReturnWith(ex.getSoapFaultResponse());
         } catch (RmRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);

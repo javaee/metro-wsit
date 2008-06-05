@@ -50,10 +50,11 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.runtime.sequence.IllegalMessageIdentifierException;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
-import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.wss.impl.MessageConstants;
+import java.net.URI;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -73,29 +74,30 @@ public abstract class PacketAdapter {
     private String sequenceId;
     private String ackRequestedHeaderSequenceId;
     private long messageNumber;
+    private final Configuration configuration;
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
 
-    /**
-     * Creates a new packet adapter based on the configuration. This adapter is empty
-     * and does not contain any underlying packet yet. To attach the packet to the
-     * created {@link PacketAdapter} instance, use {@link #attach(com.sun.xml.ws.api.message.Packet)}
-     * method.
-     * 
-     * @param configuration configuration used to configure newly created packet
-     * @return new empty {@link PacketAdapter} instance
-     */
-    public static PacketAdapter create(@NotNull Configuration configuration) {
-        switch (configuration.getRmVersion()) {
-            case WSRM10:
-                return new Rm10PacketAdapter(configuration);
-            case WSRM11:
-                return new Rm11PacketAdapter(configuration);
-            default:
-                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
-        }
-    }
+//    /**
+//     * Creates a new packet adapter based on the configuration. This adapter is empty
+//     * and does not contain any underlying packet yet. To attach the packet to the
+//     * created {@link PacketAdapter} instance, use {@link #attach(com.sun.xml.ws.api.message.Packet)}
+//     * method.
+//     * 
+//     * @param configuration configuration used to configure newly created packet
+//     * @return new empty {@link PacketAdapter} instance
+//     */
+//    public static PacketAdapter create(@NotNull Configuration configuration) {
+//        switch (configuration.getRmVersion()) {
+//            case WSRM10:
+//                return new Rm10PacketAdapter(configuration);
+//            case WSRM11:
+//                return new Rm11PacketAdapter(configuration);
+//            default:
+//                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
+//        }
+//    }
 
     /**
      * Creates a new packet adapter based on the configuration and attaches a provided 
@@ -108,47 +110,65 @@ public abstract class PacketAdapter {
      * @return new empty {@link PacketAdapter} instance
      */
     public static PacketAdapter create(@NotNull Configuration configuration, @NotNull Packet packet) {
-        return PacketAdapter.create(configuration).attach(packet);
+        switch (configuration.getRmVersion()) {
+            case WSRM10:
+                return new Rm10PacketAdapter(configuration, packet);
+            case WSRM11:
+                return new Rm11PacketAdapter(configuration, packet);
+            default:
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
+        }
     }
 
     /**
      * TODO javadoc
      */
-    protected PacketAdapter(@NotNull Configuration configuration) {
+    protected PacketAdapter(@NotNull Configuration configuration, @NotNull Packet packet) {
+        this.configuration = configuration;
+        
+        // cache frequently accessed config data
         this.rmVersion = configuration.getRmVersion();
         this.soapVersion = configuration.getSoapVersion();
         this.addressingVersion = configuration.getAddressingVersion();
+
+        insertPacket(packet);
     }
 
-    /**
-     * TODO javadoc
-     */
-    public PacketAdapter attach(@NotNull Packet packet) {
+    private final void insertPacket(Packet packet) {
         this.packet = packet;
         if (packet.getMessage() != null) {
             this.message = packet.getMessage();
         }
-
-        return this;
+        
     }
+    
+//    /**
+//     * TODO javadoc
+//     */
+//    public PacketAdapter attach(@NotNull Packet packet) {
+//        this.packet = packet;
+//        if (packet.getMessage() != null) {
+//            this.message = packet.getMessage();
+//        }
+//
+//        return this;
+//    }
 
     /**
      * TODO javadoc
      * 
      * @return
      */
-    public final Packet consumeAndDetach() {
+    public final void consume() {
         if (message != null) {
             message.consume();
         }
-
-        return detach();
     }
 
     /**
      * TODO javadoc
      */
-    public final Packet detach() {
+    public final Packet getPacket() {
         try {
             return packet;
         } finally {
@@ -160,10 +180,21 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public final Packet getPacketCopy(boolean copyMessage) {
+    public final Packet copyPacket(boolean copyMessage) {
         return packet.copy(copyMessage);
     }
 
+    /**
+     * TODO javadoc
+     */    
+    public final PacketAdapter createServerResponseAdapter(Object jaxbElement, String wsaAction) {
+        return PacketAdapter.create(configuration, packet.createServerResponse(
+                Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion),
+                addressingVersion,
+                soapVersion,
+                wsaAction));        
+    }
+    
     /**
      * Utility method which creates a RM {@link Header} with the specified JAXB bean content
      * and adds it to the message stored in the underlying packet.
@@ -236,7 +267,7 @@ public abstract class PacketAdapter {
 
         this.packet.setMessage(newMessage);
         this.message = newMessage;
-        
+
         this.message.assertOneWay(false); // TODO do we really need to call this assert here?
         this.message.getHeaders().fillRequestAddressingHeaders(
                 this.packet,
@@ -314,6 +345,18 @@ public abstract class PacketAdapter {
         return message.getHeaders().getAction(addressingVersion, soapVersion);
     }
 
+    /**
+     * Provides information about value of the addressing {@code To} header 
+     * of the message in the wrapped {@link Packet} instance.
+     * 
+     * @return addressing {@code To} header of the message in the wrapped {@link Packet} instance.
+     */
+    public String getDestination() {
+        checkMessageReadyState();
+
+        return message.getHeaders().getTo(addressingVersion, soapVersion);
+    }
+    
     /**
      * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
      * {@link HeaderList) in the form of JAXB element and marks the header as understood.
@@ -421,6 +464,23 @@ public abstract class PacketAdapter {
     protected final void checkPacketReadyState() throws IllegalStateException {
         if (packet == null) {
             throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
+        }
+    }
+
+    /**
+     * Determines whether the security token reference used to secure the message 
+     * wrapped in this adapter is the expected one
+     *
+     * @param expectedStrId expected security token reference identifier 
+     * @returns {code true} if the actual STR identifier equals to the expected one
+     */
+    private boolean checkSecurityTokenReferenceId(String expectedStrId) {
+        SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+        if (sct != null) {
+            URI sctIdentifierUri = sct.getIdentifier();
+            return (sctIdentifierUri != null) ? sctIdentifierUri.toString().equals(expectedStrId) : expectedStrId == null;
+        } else {
+            return expectedStrId == null;
         }
     }
 }

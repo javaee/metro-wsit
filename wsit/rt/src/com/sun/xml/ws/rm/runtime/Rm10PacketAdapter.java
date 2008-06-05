@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
@@ -57,8 +58,8 @@ import java.util.List;
  */
 public class Rm10PacketAdapter extends PacketAdapter {
 
-    public Rm10PacketAdapter(Configuration configuration) {
-        super(configuration);
+    public Rm10PacketAdapter(Configuration configuration, @NotNull Packet packet) {
+        super(configuration, packet);
     }
 
     @Override
