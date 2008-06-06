@@ -53,9 +53,13 @@ public interface SequenceManager {
      * thus no RM handshake is performed.
      * 
      * @param sequenceId identifier of the new sequence
-     * 
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
+     * 
+     * @return newly created inbound sequence
+     * 
+     * @exception DuplicateSequenceExcepton in case a sequence instance with this 
+     * identifier is already registered with this sequence manager
      */
     public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
 
@@ -63,9 +67,13 @@ public interface SequenceManager {
      * Creates a new inbound sequence object
      * 
      * @param sequenceId identifier of the new sequence
-     * 
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
+     * 
+     * @return newly created inbound sequence
+     * 
+     * @exception DuplicateSequenceExcepton in case a sequence instance with this 
+     * identifier is already registered with this sequence manager
      */
     public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
     
@@ -102,6 +110,10 @@ public interface SequenceManager {
      * sequence is removed from the internal sequence storage
      * 
      * @param sequenceId the unique sequence identifier
+     * 
+     * @return terminated sequence object
+     * 
+     * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
      */
-    public void terminateSequence(String sequenceId) throws UnknownSequenceException;
+    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException;
 }

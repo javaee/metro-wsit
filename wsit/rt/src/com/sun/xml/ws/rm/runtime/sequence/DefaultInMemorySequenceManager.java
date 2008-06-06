@@ -96,12 +96,14 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
         sequence.close();
     }
 
-    public void terminateSequence(String sequenceId) throws UnknownSequenceException {        
+    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {        
         try {
             sequenceLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 Sequence sequence = sequences.remove(sequenceId);
                 sequence.preDestroy();
+                
+                return sequence;
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }

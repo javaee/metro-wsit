@@ -83,7 +83,7 @@ public class PersistentSequenceManager implements SequenceManager {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void terminateSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

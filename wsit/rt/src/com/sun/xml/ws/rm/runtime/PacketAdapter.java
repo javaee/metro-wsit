@@ -187,14 +187,48 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */    
-    public final PacketAdapter createServerResponseAdapter(Object jaxbElement, String wsaAction) {
+    public final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
         return PacketAdapter.create(configuration, packet.createServerResponse(
                 Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion),
+                addressingVersion,
+                soapVersion,
+                wsaAction));    
+    }
+    
+    /**
+     * TODO javadoc
+     */    
+    public final PacketAdapter createEmptyServerResponse(String wsaAction) {
+        return PacketAdapter.create(configuration, packet.createServerResponse(
+                Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
                 wsaAction));        
     }
     
+
+    /**
+     * TODO javadoc
+     * 
+     * @param requestAdapter
+     * @param inboundSequence
+     * @param wsaAction
+     * @return
+     * @throws RmRuntimeException
+     */
+    public final PacketAdapter createAckResponse(String sequenceId, List<AckRange> acknowledgedIndexes, String wsaAction) throws RmRuntimeException {
+        PacketAdapter responseAdapter = this.createEmptyServerResponse(wsaAction);
+        responseAdapter.appendSequenceAcknowledgementHeader(sequenceId, acknowledgedIndexes);
+        return responseAdapter;
+    }
+    
+    public final PacketAdapter closeTransportAndReturnNull() {
+        this.packet.transportBackChannel.close();
+        Packet emptyReturnPacket = new Packet();
+        emptyReturnPacket.invocationProperties.putAll(this.packet.invocationProperties);
+        return PacketAdapter.create(configuration, emptyReturnPacket);        
+    }
+
     /**
      * Utility method which creates a RM {@link Header} with the specified JAXB bean content
      * and adds it to the message stored in the underlying packet.
@@ -262,7 +296,7 @@ public abstract class PacketAdapter {
      * @param wsaAction
      * @return
      */
-    public final PacketAdapter setMessage(Message newMessage, String wsaAction) {
+    private final PacketAdapter setMessage(Message newMessage, String wsaAction) {
         checkPacketReadyState();
 
         this.packet.setMessage(newMessage);

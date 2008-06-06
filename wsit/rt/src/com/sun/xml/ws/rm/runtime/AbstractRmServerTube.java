@@ -48,8 +48,10 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.policy.ConfigurationManager;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
+import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 
 /**
  *
@@ -168,43 +170,55 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     /**
      * TODO javadoc
      */
-    private PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    protected abstract PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter);
+
+    /**
+     * TODO javadoc
+     */
+    protected abstract PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter);
+
+    /**
+     * TODO javadoc
+     */
+    protected abstract PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter);
+
+    /**
+     * TODO javadoc
+     */
+    protected abstract PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter);
+
+    /**
+     * TODO javadoc
+     */
+    protected PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) {
+
+        Sequence inboundSequence;
+        try {
+            inboundSequence = sequenceManager.getSequence(requestAdapter.getAckRequestedHeaderSequenceId());
+        } catch (UnknownSequenceException e) {
+            // TODO process exception
+            //                throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id));
+            throw e;
+        }
+
+        // TODO seq.resetLastActivityTime();
+
+        return requestAdapter.createAckResponse(
+                inboundSequence.getId(),
+                inboundSequence.getAcknowledgedMessageIds(),
+                configuration.getRmVersion().sequenceAcknowledgementAction);
     }
 
     /**
      * TODO javadoc
      */
-    private PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+    protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) {
+        requestAdapter.processAcknowledgements(sequenceManager, null); // TODO resolve expected outbound sequence id
 
-    /**
-     * TODO javadoc
-     */
-    private PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+        // TODO process other RM headers
 
-    /**
-     * TODO javadoc
-     */
-    private PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    /**
-     * TODO javadoc
-     */
-    private PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    /**
-     * TODO javadoc
-     */
-    private PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        // FIXME maybe we should send acknowledgements back if any?
+        return requestAdapter.closeTransportAndReturnNull();
     }
 
     /**

@@ -33,22 +33,24 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rm.v200502.AcceptType;
 import com.sun.xml.ws.rm.v200502.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
 import com.sun.xml.ws.rm.v200502.Identifier;
 import com.sun.xml.ws.rm.v200502.OfferType;
+import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
@@ -59,17 +61,18 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
  * @author m_potociar
  */
 public final class Rm10ServerTube extends AbstractRmServerTube {
+
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ServerTube.class);
-    
+
     protected Rm10ServerTube(AbstractRmServerTube original, TubeCloner cloner) {
         super(original, cloner);
 
-        // TODO initialize all instance variables
+    // TODO initialize all instance variables
     }
 
     public Rm10ServerTube(WsitServerTubeAssemblyContext context) {
         super(context);
-        // TODO initialize all instance variables        
+    // TODO initialize all instance variables        
     }
 
     @Override
@@ -183,6 +186,71 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         }
 
 //        request.assertOneWay(false); // what is this for?
-        return requestAdapter.createServerResponseAdapter(crsElement, configuration.getRmVersion().createSequenceResponseAction);
+        return requestAdapter.createServerResponse(crsElement, configuration.getRmVersion().createSequenceResponseAction);
+    }
+
+    @Override
+    protected PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) {
+        Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+        inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
+
+        inboundSequence.close();
+
+        return requestAdapter.createAckResponse(
+                inboundSequence.getId(), 
+                inboundSequence.getAcknowledgedMessageIds(),                 
+                RmVersion.WSRM10.lastAction);
+    }
+
+    @Override
+    protected PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) {
+        TerminateSequenceElement tsElement = requestAdapter.unmarshallMessage();
+
+        Sequence inboundSequence;
+        try {
+            inboundSequence = sequenceManager.getSequence(tsElement.getIdentifier().getValue());
+        } catch (UnknownSequenceException e) {
+            // TODO process exception
+//            throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(terminateSequenceId), terminateSequenceId));
+            throw e;
+        }
+
+        // Formulate response if required:
+        //   If there is an outbound sequence, client expects us to terminate it.
+        //   There is no TSR. We just close client-side sequence if it is a two-way communication
+
+        // TODO get outbound sequence id:
+        String outboundSeqenceId = null;
+
+        PacketAdapter responseAdapter;
+        if (outboundSeqenceId != null) {
+            TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
+            Identifier id = new Identifier(outboundSeqenceId);
+            terminateSeqResponse.setIdentifier(id);
+
+            responseAdapter = requestAdapter.createServerResponse(terminateSeqResponse, RmVersion.WSRM10.terminateSequenceAction);
+            responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageIds());
+
+            sequenceManager.terminateSequence(outboundSeqenceId);
+        } else {
+            return requestAdapter.closeTransportAndReturnNull();
+        }
+
+// TODO
+//        //end the session if we own its lifetime..i.e. SC is not present
+//        endSession(seq);
+        sequenceManager.terminateSequence(inboundSequence.getId());
+
+        return responseAdapter;
     }
 }
