@@ -157,7 +157,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
                         this.rstTemplate = (RequestSecurityTokenTemplate) assertion;
                     } else if(PolicyUtil.isIssuerName(assertion, spVersion)){
                         issuerName = (IssuerName)assertion;
-                    } else if(PolicyUtil.isClaimsElement(assertion) && 
+                    } else if(PolicyUtil.isClaimsElement(assertion) &&
                             SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) ){
                         claims = (Claims)assertion;
                     } else{

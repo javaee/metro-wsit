@@ -306,9 +306,15 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         }
         RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
         if (rstt != null){
-            Claims claims = null;
-            if(issuedToken.getClaims() != null){
-                claims = getClaims(issuedToken, stsProtocol);
+            Claims claims = null;            
+            if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+                if(issuedToken.getClaims() != null){
+                   claims = getClaims(issuedToken, stsProtocol);
+                }
+            }else{
+                if(rstt.getClaims() != null){
+                    claims = getClaims(issuedToken, stsProtocol);
+                }                
             }
             if (!protocol.equals(stsProtocol)){
                 copy(rstt, stsProtocol, protocol);
@@ -329,7 +335,13 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
      private Claims getClaims(final IssuedToken issuedToken, String stsWstProtocol){
         Claims cs = null;        
          try {
-             Element claimsEle = issuedToken.getClaims().getClaimsAsElement();
+             Element claimsEle = null;         
+             if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+                claimsEle = issuedToken.getClaims().getClaimsAsElement();
+             }else{
+                 RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
+                 claimsEle = rstt.getClaims().getClaimsAsElement();
+             }
              cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(claimsEle);
          } catch (Exception e) {
              throw new WebServiceException(e);

@@ -158,5 +158,11 @@ public interface RequestSecurityTokenTemplate {
      */
     String getKeyWrapAlgorithm();
       
+    /**
+     * 
+     * @return Claims
+     */ 
+    Claims getClaims();
+    
 }
 

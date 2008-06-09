@@ -69,6 +69,7 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
     private String encryptWith;
     private String keyWrapAlgo;
     private String wstVer;
+    private Claims claims = null;
     
     /**
      * Creates a new instance of RequestSecurityTokenTemplate
@@ -167,7 +168,10 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
         return encryptWith;
     }
     
-    
+    public Claims getClaims(){
+        populate();
+        return claims;
+    }
     
     public String getTrustVersion() {
         populate();
@@ -226,7 +230,7 @@ public class RequestSecurityTokenTemplate extends PolicyAssertion implements com
                     }else if(PolicyUtil.isEncryption(assertion)){
                         isEncRequired = true;
                     }else if(PolicyUtil.isClaimsElement(assertion)) {
-                        // Valid assertion.
+                        claims = (Claims)assertion;
                     }else if(PolicyUtil.isEntropyElement(assertion)){
                         // Valid assertion.
                     }else {
