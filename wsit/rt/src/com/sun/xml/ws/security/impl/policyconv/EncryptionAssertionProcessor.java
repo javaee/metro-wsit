@@ -100,6 +100,7 @@ public class EncryptionAssertionProcessor {
         if(encryptParts.hasAttachments() && !encryptAttachments){
             EncryptionTarget target = etCreator.newURIEncryptionTarget(MessageConstants.PROCESS_ALL_ATTACHMENTS);
             target.setContentOnly(true);
+            etCreator.addAttachmentTransform(target, MessageConstants.SWA11_ATTACHMENT_CIPHERTEXT_TRANSFORM);
             binding.addTargetBinding(target);
             encryptAttachments = true;
         }

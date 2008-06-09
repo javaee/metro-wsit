@@ -95,4 +95,10 @@ public class EncryptionTargetCreator {
         }
         return target;
     }
+    
+    public void addAttachmentTransform(EncryptionTarget target, String transformURI){
+        EncryptionTarget.Transform tr = target.newEncryptionTransform();
+        tr.setTransform(transformURI);
+        target.addCipherReferenceTransform(tr);
+    }
 }
