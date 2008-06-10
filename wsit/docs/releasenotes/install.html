@@ -26,7 +26,7 @@ commands:
 
 <blockquote><pre>
 asadmin stop-domain domain1
-ant -Das.home=<GlassFish install directory> -f path/to/metro/metro-on-glassfish.xml install
+ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml install
 asadmin start-domain domain1
 </pre></blockquote>
 
@@ -50,7 +50,7 @@ these commands:
 
 <blockquote><pre>
 catalina.sh stop
-ant -Dtomcat.home=&lt;tomcat install directory> -f path/to/metro/metro-on-tomcat.xml install
+ant -Dtomcat.home=&lt;TOMCAT_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-tomcat.xml install
 catalina.sh start
 </pre></blockquote>
 
@@ -83,14 +83,14 @@ in before Metro installation.
 <h2>GlassFish</h2>
 <blockquote><pre>
 asadmin stop-domain domain1
-ant -Das.home=&lt;GlassFish install directory> -f path/to/metro/metro-on-glassfish.xml uninstall
+ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml uninstall
 asadmin start-domain domain1
 </pre></blockquote>
 
 <h2>Tomcat</h2>
 <blockquote><pre>
 catalina.sh stop
-ant -Dtomcat.home=<tomcat install directory> -f path/to/metro/metro-on-tomcat.xml uninstall
+ant -Dtomcat.home=&lt;TOMCAT_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-tomcat.xml uninstall
 catalina.sh start 
 </pre></blockquote>
 

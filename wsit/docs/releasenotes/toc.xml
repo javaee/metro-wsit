@@ -41,7 +41,7 @@
   </banner>
   <!-- this portion is excuted as the footer -->
   <footer>
-    <a href="../CDDLv1.0.1.html">Copyright&#169; 2007 Sun Microsystems, Inc. All rights reserved.</a>
+    <a href="../LICENSE.txt">Copyright&#169; 2007 Sun Microsystems, Inc. All rights reserved.</a>
   </footer>
     
   <chapter name="Metro">
