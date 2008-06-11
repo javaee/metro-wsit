@@ -53,6 +53,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
@@ -95,8 +96,6 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -318,7 +317,15 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                 }                
             }
-            Packet responsePacket = nextPipe.process(packet);
+            Packet responsePacket = null;
+            if (nextPipe != null) {
+                //legacy pipes in GF
+                responsePacket = nextPipe.process(packet);
+            } else {
+                if (nextTube != null) {
+                    responsePacket = Fiber.current().owner.createFiber().runSync(nextTube, packet);
+                }
+            }
             packet = validateResponse(responsePacket, null, null);
         }
         return packet;

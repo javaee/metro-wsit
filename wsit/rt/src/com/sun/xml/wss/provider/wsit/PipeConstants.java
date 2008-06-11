@@ -46,6 +46,7 @@ public interface PipeConstants {
     static final String ENDPOINT = "ENDPOINT";
     static final String ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     static final String NEXT_PIPE = "NEXT_PIPE";
+    static final String NEXT_TUBE = "NEXT_TUBE";
     static final String POLICY = "POLICY";
     static final String SEI_MODEL = "SEI_MODEL";
     static final String SECURITY_TOKEN = "SECURITY_TOKEN";

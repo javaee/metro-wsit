@@ -46,7 +46,6 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
-import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
@@ -68,13 +67,11 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
@@ -103,7 +100,6 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPFaultException;
@@ -137,6 +133,7 @@ import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 
 import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.jaxws.impl.ClientPipeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerPipeConfiguration;
@@ -179,7 +176,6 @@ import javax.security.auth.message.MessageInfo;
 import javax.xml.soap.SOAPMessage;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
-import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -236,6 +232,7 @@ public abstract class WSITAuthContextBase  {
     
     //***********CTOR initialized Instance Variables**************
     protected Pipe nextPipe;
+    protected Tube nextTube;
     
     // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
     protected boolean optimized = true;
@@ -304,6 +301,7 @@ public abstract class WSITAuthContextBase  {
     public WSITAuthContextBase(Map map) {
         
         this.nextPipe= (Pipe)map.get("NEXT_PIPE");
+        this.nextTube = (Tube)map.get("NEXT_TUBE");
         wsPolicyMap = (PolicyMap)map.get("POLICY");
         port =(WSDLPort)map.get("WSDL_MODEL");
         
@@ -1114,6 +1112,7 @@ public abstract class WSITAuthContextBase  {
         }
     }
     
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeInboundProcessingContext(Packet packet)  {
         ProcessingContextImpl ctx = null;
         

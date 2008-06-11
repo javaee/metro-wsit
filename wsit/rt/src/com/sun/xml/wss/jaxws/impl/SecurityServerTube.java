@@ -420,6 +420,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         

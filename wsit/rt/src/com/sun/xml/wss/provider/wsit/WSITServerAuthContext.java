@@ -507,7 +507,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         return recipient.validateMessage(context);
     }
-    
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage) {
         

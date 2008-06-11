@@ -87,9 +87,11 @@ public class ServerPipeCreator extends ServerPipelineHook {
 	props.put(PipeConstants.SEI_MODEL,context.getSEIModel());
 	props.put(PipeConstants.WSDL_MODEL,context.getWsdlPort());
 	props.put(PipeConstants.ENDPOINT,context.getEndpoint());
-	props.put(PipeConstants.NEXT_PIPE,context.getAdaptedTubelineHead());
+//	props.put(PipeConstants.NEXT_PIPE,context.getAdaptedTubelineHead());
+        props.put(PipeConstants.NEXT_TUBE,context.getTubelineHead());
         props.put(PipeConstants.CONTAINER, context.getEndpoint().getContainer());
         //TODO: Convert GF security pipes to TUBE(s).
-        return PipeAdapter.adapt(new ServerSecurityPipe(props, context.getAdaptedTubelineHead(),httpBinding));
+        ServerSecurityTube serverTube = new ServerSecurityTube(props, context.getTubelineHead(),httpBinding);
+        return serverTube;
     } 
 }

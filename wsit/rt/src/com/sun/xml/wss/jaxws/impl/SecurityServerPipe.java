@@ -420,6 +420,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         

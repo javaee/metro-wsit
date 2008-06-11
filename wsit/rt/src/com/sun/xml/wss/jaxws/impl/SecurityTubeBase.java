@@ -501,6 +501,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         return ((SCTokenWrapper)scAssertion).getMessagePolicy();
     }
     
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeInboundProcessingContext(
             Packet packet /*, boolean isSCMessage*/)  {
         ProcessingContextImpl ctx = null;
