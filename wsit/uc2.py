@@ -10,5 +10,5 @@ transacted web service that involves .NET services."
       },
     "depends"       : { "pkg:/glassfishv3-web" : {"type" : "require" } },
     "dirtrees"      : [ "glassfish" ],
-    "licenses"      : { "glassfish/modules/Metro-LICENSE.txt"    : {"license" : "CDDL v1.0 / GPL v2.0 with Classpath exception" } },
+    "licenses"      : { "glassfish/modules/Metro-LICENSE.txt"    : {"license" : "Metro-LICENSE.txt" } },
 }
