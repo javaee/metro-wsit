@@ -181,6 +181,22 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="create-OSGi-bundle">
+
+        <attribute name="jarname"/>
+        <attribute name="jar-tmpdir"/>
+        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
+        <sequential>
+        <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
+            <arg line="build -classpath"/>
+            <arg value="../@{dist-image-dir}/@{jarname}.jar"/>
+            <arg value="@{jarname}.bnd"/>
+        </java>
+        <!--This is important as the jar gets generated in the rt folder itself-->
+         <move  file="@{jarname}.jar" todir="../${dist.image.wsit.v3.dir}"       />
+        </sequential>
+    </macrodef>
+
     <target name="-do-jar-without-manifest">
         <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
@@ -326,6 +342,8 @@
                 </fileset>
             </services>
         </combine-jars-macro>
+       <!-- <create-OSGi-bundle jarname="${name}-rt"  jar-tmpdir="${rtjar-tmpdir}" />-->
+
     </target>
 
     <target name="combine-jars-v3-runtime">
@@ -341,17 +359,18 @@
                 </fileset>
             </services>
         </combine-jars-macro>
+        <create-OSGi-bundle jarname="${name}-rt"  jar-tmpdir="${rtjar-tmpdir}" />
         </target>
 
 
     <target name="combine-jars-api">
         <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir}" jar-tmpdir="${apijar-tmpdir}"/>
+        <create-OSGi-bundle jarname="${name}-api"  jar-tmpdir="${apijar-tmpdir}" />
 
      </target>
 
      <target name="combine-jars-extra">
         <combine-jars-macro jarname="${name}-extra" classesdir="${extrajar-tmpdir}" jar-tmpdir="${extrajar-tmpdir}"/>
-
 
     </target>
 
@@ -419,6 +438,7 @@
             <fileset dir="${rt.dir}/build/classes"/>
             <fileset dir="${tx.tmp}"/>
         </jar>
+
     </target>
 
     <target name="create-wstx-war" depends="init" description="create wstx webservices war file">
