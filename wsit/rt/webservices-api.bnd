@@ -1,0 +1,3 @@
+Export-Package:javax.xml.*,javax.jws
+Private-Package:
+Import-Package:*
