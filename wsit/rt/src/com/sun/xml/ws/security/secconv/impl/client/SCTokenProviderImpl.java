@@ -71,7 +71,7 @@ import java.util.logging.Logger;
  */
 public class SCTokenProviderImpl implements IssuedTokenProvider {
     
-    private final static WSSCPlugin scp = WSSCFactory.newSCPlugin(null);
+    private final static WSSCPlugin scp = WSSCFactory.newSCPlugin();
     private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSSC_IMPL_DOMAIN,

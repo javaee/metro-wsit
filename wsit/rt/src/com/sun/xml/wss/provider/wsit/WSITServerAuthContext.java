@@ -689,7 +689,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             
             URI requestType = ((RequestSecurityToken)rst).getRequestType();
             BaseSTSResponse rstr = null;
-            WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
+            WSSCContract scContract = WSSCFactory.newWSSCContract(wsscVer);
             scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
                     com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {

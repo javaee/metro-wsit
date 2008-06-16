@@ -55,7 +55,6 @@ import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
-import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -139,11 +138,11 @@ public class WSSCContract {
         //Empty default constructor
     }
     
-    public WSSCContract(Configuration config, final WSSCVersion wsscVer){
-        init(config, null);        
+    public WSSCContract(final WSSCVersion wsscVer){
+        init(wsscVer);        
     }
     
-    public final void init(final Configuration config, final WSSCVersion wsscVer){
+    public final void init(final WSSCVersion wsscVer){
         //this.config = config;        
         if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
             this.wsscVer = wsscVer;

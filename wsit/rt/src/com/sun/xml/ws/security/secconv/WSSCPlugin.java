@@ -117,8 +117,6 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public class WSSCPlugin {
     
-    Configuration config;
-    
     private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSSC_IMPL_DOMAIN,
@@ -139,8 +137,8 @@ public class WSSCPlugin {
     private Packet packet = null;
     
     /** Creates a new instance of WSSCPlugin */
-    public WSSCPlugin(Configuration config) {
-        this.config = config;        
+    public WSSCPlugin() {
+  
     }
     
     /*
@@ -756,7 +754,7 @@ public class WSSCPlugin {
     private void processRequestSecurityTokenResponse(final SCTokenConfiguration sctConfig, final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
     throws WSSecureConversationException {
         WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
-        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract();
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
             contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);    
         }else{

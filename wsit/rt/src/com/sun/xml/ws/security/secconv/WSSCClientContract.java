@@ -88,7 +88,7 @@ public class WSSCClientContract {
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     
-    public WSSCClientContract(Configuration config) {
+    public WSSCClientContract() {
         //this.config = config;                
     }    
     

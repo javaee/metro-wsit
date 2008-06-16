@@ -52,8 +52,8 @@ public class WSSCFactory {
         //empty constructor
     }
     
-    public static WSSCPlugin newSCPlugin(final Configuration config) {
-        return new WSSCPlugin(config);
+    public static WSSCPlugin newSCPlugin() {
+        return new WSSCPlugin();
     }
 
      //public static NewWSSCPlugin newNewSCPlugin(final Configuration config, final WSSCVersion wsscVer) {
@@ -61,14 +61,14 @@ public class WSSCFactory {
     //}
 
 
-    public static WSSCContract newWSSCContract(final Configuration config, final WSSCVersion wsscVer) {
+    public static WSSCContract newWSSCContract(final WSSCVersion wsscVer) {
         final WSSCContract contract = new WSSCContract();
-        contract.init(config, wsscVer); 
+        contract.init(wsscVer); 
         
         return contract;
     }
     
-    public static WSSCClientContract newWSSCClientContract(Configuration config) {
-        return new WSSCClientContract(config);
+    public static WSSCClientContract newWSSCClientContract() {
+        return new WSSCClientContract();
     }
 }

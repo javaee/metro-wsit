@@ -103,7 +103,6 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public class NewWSSCPlugin {
     
-    Configuration config;
     
     private static final Logger log =
             Logger.getLogger(
@@ -120,8 +119,7 @@ public class NewWSSCPlugin {
     private static final String FOR_CANCEL = "For Cancel";
     
     /** Creates a new instance of NewWSSCPlugin */
-    public NewWSSCPlugin(Configuration config, final WSSCVersion wsscVer) {
-        this.config = config;        
+    public NewWSSCPlugin(final WSSCVersion wsscVer) {    
         if(wsscVer instanceof com.sun.xml.ws.security.secconv.impl.wssx.WSSCVersion13){
             this.wsscVer = wsscVer;
             this.wsTrustVer = WSTrustVersion.WS_TRUST_13;
@@ -479,7 +477,7 @@ public class NewWSSCPlugin {
     
     private void processRequestSecurityTokenResponse(final BaseSTSRequest rst, final BaseSTSResponse rstr, final IssuedTokenContext context)
     throws WSSecureConversationException {
-        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract(config);
+        final WSSCClientContract contract = WSSCFactory.newWSSCClientContract();
         if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
             contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);
         }else{

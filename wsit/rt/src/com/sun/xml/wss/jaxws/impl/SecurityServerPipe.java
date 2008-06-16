@@ -563,7 +563,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
             rst = wsscEleFac.createRSTFrom(rstEle);
             URI requestType = ((RequestSecurityToken)rst).getRequestType();            
             BaseSTSResponse rstr = null;
-            WSSCContract scContract = WSSCFactory.newWSSCContract(null, wsscVer);
+            WSSCContract scContract = WSSCFactory.newWSSCContract(wsscVer);
             scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
                     Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
