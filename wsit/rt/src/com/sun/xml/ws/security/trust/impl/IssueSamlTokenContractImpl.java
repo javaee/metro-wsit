@@ -176,7 +176,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         //token = new GenericToken(signedAssertion);
             
         if (stsConfig.getEncryptIssuedToken()){
-            Element encData = encryptToken(signedAssertion, serCert, appliesTo, context.getEncryptionAlgorithm());
+            String keyWrapAlgo = (String) context.getOtherProperties().get(IssuedTokenContext.KEY_WRAP_ALGORITHM);
+            Element encData = encryptToken(signedAssertion, serCert, appliesTo, context.getEncryptionAlgorithm(), keyWrapAlgo);
             token = new GenericToken(encData);
                 //JAXBElement<EncryptedDataType> eEle = u.unmarshal(cipher.martial(encData), EncryptedDataType.class);
                 //return eEle.getValue();
@@ -187,11 +188,16 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return token;
     }
     
-    private EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert, final String appliesTo) throws WSTrustException{
+    private EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert, final String appliesTo, final String keyWrapAlgorithm) throws WSTrustException{
         EncryptedKey encKey = null;
         try{
             final PublicKey pubKey = cert.getPublicKey();
-            final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+            final XMLCipher cipher;
+            if(keyWrapAlgorithm != null){
+                cipher = XMLCipher.getInstance(keyWrapAlgorithm);
+            }else{
+                cipher = XMLCipher.getInstance(XMLCipher.RSA_OAEP);
+            }
             cipher.init(XMLCipher.WRAP_MODE, pubKey);
 
             encKey = cipher.encryptKey(doc, new SecretKeySpec(encryptedKey, "AES"));
@@ -226,7 +232,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         return encKey;
     }
     
-    private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm) throws WSTrustException{
+    private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm, final String keyWrapAlgorithm) throws WSTrustException{
         Element encDataEle = null;
         // Create the encryption key
         try{
@@ -247,7 +253,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             encData.setId(id);
                 
             final KeyInfo encKeyInfo = new KeyInfo(owner);
-            final EncryptedKey encKey = encryptKey(owner, skey, serCert, appliesTo);
+            final EncryptedKey encKey = encryptKey(owner, skey, serCert, appliesTo, keyWrapAlgorithm);
             encKeyInfo.add(encKey);
             encData.setKeyInfo(encKeyInfo);
             
@@ -374,7 +380,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final byte[] key = ctx.getProofKey();
             if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
-                final EncryptedKey encKey = encryptKey(doc, key, serCert, appliesTo);
+                final EncryptedKey encKey = encryptKey(doc, key, serCert, appliesTo, null);
                 try{
                     keyInfo.add(encKey);
                 } catch (XMLEncryptionException ex) {

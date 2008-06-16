@@ -483,6 +483,8 @@ public class SecondaryParametersImpl  extends SecondaryParametersType
                     setEncryptionAlgorithm(new URI((String)obj.getValue()));
                 } else if (local.equalsIgnoreCase("CanonicalizationAlgorithm")){
                     setCanonicalizationAlgorithm(new URI((String)obj.getValue()));
+                } else if (local.equalsIgnoreCase("KeyWrapAlgorithm")){
+                    setKeyWrapAlgorithm(new URI((String)obj.getValue()));
                 } else if (local.equalsIgnoreCase("AllowPostdating")){
                     setAllowPostdating(new AllowPostdatingImpl());
                 }  else if (local.equalsIgnoreCase("SignChallenge")){

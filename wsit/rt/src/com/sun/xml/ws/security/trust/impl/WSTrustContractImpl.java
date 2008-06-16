@@ -437,7 +437,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         
         // Encrypt the token if required and the service certificate is available
         if (stsConfig.getEncryptIssuedToken()&& serCert != null){
-            Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo, encryptionAlgorithm);
+            String keyWrapAlgo = (String) context.getOtherProperties().get(IssuedTokenContext.KEY_WRAP_ALGORITHM);
+            Element encTokenEle = this.encryptToken((Element)issuedToken.getTokenValue(), serCert, appliesTo, encryptionAlgorithm, keyWrapAlgo);
             issuedToken = new GenericToken(encTokenEle);
         }
         reqSecTok.setToken(issuedToken);
@@ -596,7 +597,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         return results;
     }
     
-     private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm) throws WSTrustException{
+     private Element encryptToken(final Element assertion,  final X509Certificate serCert, final String appliesTo, final String encryptionAlgorithm, final String keyWrapAlgorithm) throws WSTrustException{
         Element encDataEle = null;
         // Create the encryption key
         try{
@@ -617,7 +618,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             encData.setId(id);
                 
             final KeyInfo encKeyInfo = new KeyInfo(owner);
-            final EncryptedKey encKey = WSTrustUtil.encryptKey(owner, skey, serCert);
+            final EncryptedKey encKey = WSTrustUtil.encryptKey(owner, skey, serCert, keyWrapAlgorithm);
             encKeyInfo.add(encKey);
             encData.setKeyInfo(encKeyInfo);
             

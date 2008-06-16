@@ -401,7 +401,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final byte[] key = ctx.getProofKey();
             try{
-                final EncryptedKey encKey = WSTrustUtil.encryptKey(doc, key, (X509Certificate)ctx.getOtherProperties().get(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE));
+                final EncryptedKey encKey = WSTrustUtil.encryptKey(doc, key, (X509Certificate)ctx.getOtherProperties().get(IssuedTokenContext.TARGET_SERVICE_CERTIFICATE), null);
                  keyInfo.add(encKey);
             } catch (Exception ex) {
                  log.log(Level.SEVERE,
