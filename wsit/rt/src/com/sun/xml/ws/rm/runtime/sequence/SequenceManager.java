@@ -53,6 +53,7 @@ public interface SequenceManager {
      * thus no RM handshake is performed.
      * 
      * @param sequenceId identifier of the new sequence
+     * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
      * 
@@ -61,12 +62,13 @@ public interface SequenceManager {
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException;
 
     /**
      * Creates a new inbound sequence object
      * 
      * @param sequenceId identifier of the new sequence
+     * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
      * 
@@ -75,7 +77,7 @@ public interface SequenceManager {
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException;
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException;
     
     /**
      * Generates a unique identifier of a sequence
@@ -116,4 +118,26 @@ public interface SequenceManager {
      * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
      */
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException;
+    
+    /**
+     * Binds two sequences together. This method is mainly intended to be used for 
+     * binding together request and response sequences.
+     * 
+     * @param referenceSequenceId a reference sequence indentifier to which the other sequence shall be bound.
+     * @param boundSequenceId a bound sequence identifier
+     * 
+     * @throws UnknownSequenceException in case any of the sequence identifiers does not represent a valid sequence
+     */
+    public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException;
+    
+    /**
+     * Retrieves a sequence previously bound to the reference sequence
+     * 
+     * @param referenceSequenceId a reference sequence indentifier to which the other sequence has been bound.
+     * 
+     * @return bound sequence or {@code null} in case no sequence is bound to the reference sequence
+     * 
+     * @exception UnknownSequenceExceptio in case no such reference sequence is registered within the sequence manager
+     */
+    public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException;
 }

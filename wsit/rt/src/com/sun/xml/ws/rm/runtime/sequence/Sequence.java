@@ -148,9 +148,16 @@ public interface Sequence {
      * @return {@code true} if the AckRequested flag is set, {@code false} otherwise
      */
     public boolean isAckRequested();
+    
+    /**
+     * Provides information on a security session to which this sequence is bound to.
+     * 
+     * @return security token reference identifier to which this sequence is bound to.
+     */
+    public String getBoundSecurityTokenReferenceId();
 
     /**
-     * Closes the session. Subsequent calls to this method have no effect.
+     * Closes the sequence. Subsequent calls to this method have no effect.
      * <p>
      * Once this method is called, any subsequent calls to the {@link #getNextMessageId()} method will
      * result in a {@link IllegalStateException} being raised. It is however still possible to accept message identifier 
@@ -159,19 +166,31 @@ public interface Sequence {
     public void close();
 
     /**
-     * Provides information on the session closed status.
+     * Provides information on the sequence closed status.
      * 
-     * @return {@code true} if the session has been closed, {@code false} otherwise
+     * @return {@code true} if the sequence has been closed, {@code false} otherwise
      */
     public boolean isClosed();
 
     /**
-     * Provides information on the session expiration status.
+     * Provides information on the sequence expiration status.
      * 
-     * @return {@code true} if the session has already expired, {@code false} otherwise
+     * @return {@code true} if the sequence has already expired, {@code false} otherwise
      */
     public boolean isExpired();
-
+    
+    /**
+     * Provides information on the last activity time of this sequence
+     * 
+     * @return last actiit time on the sequence in miliseconds
+     */
+    public long getLastActivityTime();
+    
+    /**
+     * Manually updates the last activit time of the sequence to present time
+     */
+    public void updateLastActivityTime();
+    
     /**
      * The method is called during the sequence termination to allow sequence object to release its allocated resources
      */

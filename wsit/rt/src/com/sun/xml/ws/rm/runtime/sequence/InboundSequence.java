@@ -81,10 +81,10 @@ public class InboundSequence extends AbstractSequence {
                     }
                 }
                 data.updateLastMessageId(messageId);
-            } else if (data.getLastMessageId() == messageId) {
-                // resent message
+            } else {
                 if (!data.removeUnackedMessageId(messageId)) {
                     // duplicate message
+                    // FIXME change exception to DuplicateMessageException
                     throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
                 }
             }

@@ -9,9 +9,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 
-final class FiberResumeTask implements Runnable {
+final class PeriodicFiberResumeTask implements Runnable {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(FiberResumeTask.class);
+    private static final RmLogger LOGGER = RmLogger.getLogger(PeriodicFiberResumeTask.class);
     
     private static class FiberRegistration {
 
@@ -32,7 +32,7 @@ final class FiberResumeTask implements Runnable {
     private final Queue<FiberRegistration> fiberResumeQueue = new ConcurrentLinkedQueue<FiberRegistration>();
     private long resumePeriod;
 
-    FiberResumeTask(long period) {
+    PeriodicFiberResumeTask(long period) {
         super();
         this.resumePeriod = period;
     }

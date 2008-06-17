@@ -47,17 +47,30 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class InMemorySequenceData implements SequenceData {
 
     private final String sequenceId;
+    private final String boundSecurityTokenReferenceId;
     private final long expirationTime;
+    //
+    private final Collection<Long> unackedMessageIdentifiersStorage;
+    private final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables 
+    //
+    private long lastActivityTime;
     private Status status;
     private boolean ackRequestedFlag;
     private long lastMessageId;
-    private final Collection<Long> unackedMessageIdentifiersStorage;
-    private final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables 
 
-    public InMemorySequenceData(Collection<Long> unackedMessageIdentifiersStorage, String sequenceId, long expirationTime, long lastMessageId, Status status, boolean ackRequestedFlag) {
+    public InMemorySequenceData(
+            Collection<Long> unackedMessageIdentifiersStorage, 
+            String sequenceId,
+            String boundSecurityTokenReferenceId,
+            long expirationTime,
+            long lastMessageId, 
+            Status status, 
+            boolean ackRequestedFlag) {
         this.unackedMessageIdentifiersStorage = unackedMessageIdentifiersStorage;
         this.sequenceId = sequenceId;
+        this.boundSecurityTokenReferenceId = boundSecurityTokenReferenceId;
         this.expirationTime = expirationTime;
+        this.lastActivityTime = System.currentTimeMillis();
         this.lastMessageId = lastMessageId;
         this.status = status;
         this.ackRequestedFlag = ackRequestedFlag;
@@ -84,6 +97,14 @@ public class InMemorySequenceData implements SequenceData {
 
     }
 
+    public long getLastActivityTime() {
+        return lastActivityTime;
+    }
+    
+    public void updateLastActivityTime() {
+        this.lastActivityTime = System.currentTimeMillis();
+    }
+    
     public String getSequenceId() {
         return sequenceId; // no need to synchronize
 
@@ -169,5 +190,9 @@ public class InMemorySequenceData implements SequenceData {
 
     public void releaseMessageIdDataReadWriteLock() {
         messageIdLock.writeLock().unlock();
+    }
+
+    public String getBoundSecurityTokenReferenceId() {
+        return boundSecurityTokenReferenceId;
     }
 }

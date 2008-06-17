@@ -76,17 +76,19 @@ public class OutboundSequence extends AbstractSequence {
         return data.getLastMessageId();
     }
 
-    public void acknowledgeMessageId(long messageId) {
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
         // NOTE: This method will most likely not be used in our implementation as we expect range-based 
         //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
-        data.removeUnackedMessageId(messageId);
+        if (!data.removeUnackedMessageId(messageId)) {
+            throw new IllegalMessageIdentifierException(messageId);
+        }
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
         try {
             data.acquireMessageIdDataReadWriteLock();
             
-            if (ranges == null || ranges.isEmpty() || data.noUnackedMessageIds()) {
+            if (ranges == null || ranges.isEmpty()) {
                 return;
             }
 
@@ -102,6 +104,19 @@ public class OutboundSequence extends AbstractSequence {
                     }
                 });
             }
+            
+            // check proper bounds of acked ranges
+            AckRange lastAckRange = ranges.get(ranges.size() - 1);
+            if (data.getLastMessageId() < lastAckRange.upper) {
+                throw new IllegalMessageIdentifierException(lastAckRange.upper);
+            }
+            
+            if (data.noUnackedMessageIds()) {
+                // we have checked the ranges are ok and there's nothing to acknowledge.
+                return;
+            }
+            
+            // acknowledge messages
             Iterator<Long> unackedIterator = data.getAllUnackedIndexes().iterator();
             Iterator<AckRange> rangeIterator = ranges.iterator();
             AckRange currentRange = rangeIterator.next();
@@ -113,7 +128,6 @@ public class OutboundSequence extends AbstractSequence {
                     currentRange = rangeIterator.next();
                 } else {
                     break; // no more acked ranges
-
                 }
             }
         } finally {

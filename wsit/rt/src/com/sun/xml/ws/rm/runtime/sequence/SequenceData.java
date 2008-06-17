@@ -45,6 +45,8 @@ import java.util.Collection;
  */
 public interface SequenceData {
 
+    String getBoundSecurityTokenReferenceId();
+
     void acquireMessageIdDataReadOnlyLock();
 
     void acquireMessageIdDataReadWriteLock();
@@ -54,6 +56,10 @@ public interface SequenceData {
     Collection<Long> getAllUnackedIndexes();
 
     long getExpirationTime();
+    
+    long getLastActivityTime();
+    
+    void updateLastActivityTime();
 
     long getLastMessageId();
 

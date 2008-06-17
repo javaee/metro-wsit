@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmSoapFaultException;
-import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -60,8 +59,10 @@ import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(AbstractRmServerTube.class);
+    //
     protected final Configuration configuration;
     protected final SequenceManager sequenceManager;
+    //
     private PacketAdapter requestAdapter;
 
     protected AbstractRmServerTube(AbstractRmServerTube original, TubeCloner cloner) {
@@ -80,7 +81,6 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
         // TODO don't take the first config alternative automatically...
         if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
-            // TODO L10N
             throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
         }
 
@@ -91,7 +91,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
-        requestAdapter = PacketAdapter.create(configuration, requestPacket);
+        requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         try {
             if (requestAdapter.isProtocolMessage()) {
                 if (requestAdapter.isProtocolRequest()) {
@@ -101,10 +101,13 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RmRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
                 }
             } else {
-                processApplicationRequestHeaders(requestAdapter);
-                // TODO: process RM headers
-                if (configuration.isOrderedDelivery()) {                    // TODO: ordered case processing (suspend until it's this message's turn)
+                if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
+                    /*
+                    TODO: ordered case processing (suspend until it's this message's turn)
+                     */
                 }
+
+                processRmHeaders(requestAdapter, true);
                 return super.processRequest(requestAdapter.getPacket());
             }
         } catch (RmSoapFaultException ex) {
@@ -122,6 +125,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
+            // TODO response processing
             return super.processResponse(responsePacket);
         } finally {
             LOGGER.exiting();
@@ -138,6 +142,11 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         }
     }
 
+    private boolean isMessageInOrder(PacketAdapter requestAdapter) {
+        Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+        return inboundSequence.getLastMessageId() == requestAdapter.getMessageNumber();
+    }
+
     /**
      * TODO javadoc
      */
@@ -148,39 +157,21 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
             return handleTerminateSequenceAction(requestAdapter);
         } else if (configuration.getRmVersion().ackRequestedAction.equals(requestAdapter.getWsaAction())) {
             return handleAckRequestedAction(requestAdapter);
-        } else if (configuration.getRmVersion().lastAction.equals(requestAdapter.getWsaAction())) {
-            return handleLastMessageAction(requestAdapter);
-        } else if (RmVersion.WSRM11.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
-            // FIXME: split RM11 and RM10 processing
-            return handleCloseSequenceAction(requestAdapter);
         } else if (configuration.getRmVersion().sequenceAcknowledgementAction.equals(requestAdapter.getWsaAction())) {
             return handleSequenceAcknowledgementAction(requestAdapter);
-        } else if (configuration.getRmVersion().makeConnectionAction.equals(requestAdapter.getWsaAction())) {
-            return handleMakeConnectionAction(requestAdapter);
         } else {
-            throw new UnsupportedOperationException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(requestAdapter.getWsaAction()));
+            return processOtherProtocolRequest(requestAdapter);
         }
+    }
+
+    protected PacketAdapter processOtherProtocolRequest(PacketAdapter requestAdapter) {
+        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(requestAdapter.getWsaAction()));
     }
 
     /**
      * TODO javadoc
      */
     protected abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedException;
-
-    /**
-     * TODO javadoc
-     */
-    protected abstract PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter);
-
-    /**
-     * TODO javadoc
-     */
-    protected abstract PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter);
-
-    /**
-     * TODO javadoc
-     */
-    protected abstract PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter);
 
     /**
      * TODO javadoc
@@ -197,25 +188,20 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
             inboundSequence = sequenceManager.getSequence(requestAdapter.getAckRequestedHeaderSequenceId());
         } catch (UnknownSequenceException e) {
             // TODO process exception
-            //                throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id));
+            // throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id));
             throw e;
         }
 
-        // TODO seq.resetLastActivityTime();
+        inboundSequence.updateLastActivityTime();
 
-        return requestAdapter.createAckResponse(
-                inboundSequence.getId(),
-                inboundSequence.getAcknowledgedMessageIds(),
-                configuration.getRmVersion().sequenceAcknowledgementAction);
+        return requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
     }
 
     /**
      * TODO javadoc
      */
     protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) {
-        requestAdapter.processAcknowledgements(sequenceManager, null); // TODO resolve expected outbound sequence id
-
-        // TODO process other RM headers
+        processRmHeaders(requestAdapter, false);
 
         // FIXME maybe we should send acknowledgements back if any?
         return requestAdapter.closeTransportAndReturnNull();
@@ -224,8 +210,26 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     /**
      * TODO javadoc
      */
-    private void processApplicationRequestHeaders(PacketAdapter requestAdapter) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void processRmHeaders(PacketAdapter requestAdapter, boolean expectSequenceHeader) {
+        if (expectSequenceHeader) {
+            if (requestAdapter.getSequenceId() == null) {
+                throw new RmRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
+            }
+
+            Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+            inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
+        }
+
+        String ackRequestedSequenceId = requestAdapter.getAckRequestedHeaderSequenceId();
+        if (ackRequestedSequenceId != null) {
+            sequenceManager.getSequence(ackRequestedSequenceId).setAckRequestedFlag();
+        }
+
+        requestAdapter.processAcknowledgements(sequenceManager, getOutboundSequenceId4Request(requestAdapter));
+    }
+
+    private String getOutboundSequenceId4Request(PacketAdapter requestAdapter) {
+        String sequenceId = requestAdapter.getSequenceId();
+        return (sequenceId != null) ? sequenceManager.getBoundSequence(requestAdapter.getSequenceId()).getId() : null;
     }
 }

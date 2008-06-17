@@ -50,40 +50,46 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class DefaultInMemorySequenceManager implements SequenceManager {
 
+    private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
     private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();
-    private final ReadWriteLock sequenceLock = new ReentrantReadWriteLock();
+    private final Map<String, String> boundSequences = new HashMap<String, String>();
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
-            sequenceLock.readLock().lock();
+            internalDataAccessLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 return sequences.get(sequenceId);
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }
         } finally {
-            sequenceLock.readLock().unlock();
+            internalDataAccessLock.readLock().unlock();
         }
     }
 
     public boolean isValid(String sequenceId) {
         try {
-            sequenceLock.readLock().lock();
+            internalDataAccessLock.readLock().lock();
             return sequences.containsKey(sequenceId);
         } finally {
-            sequenceLock.readLock().unlock();
+            internalDataAccessLock.readLock().unlock();
         }
     }
-    
-    public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InMemorySequenceData(new LinkedList<Long>(), sequenceId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
-        
+
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+        SequenceData data = new InMemorySequenceData(
+                new LinkedList<Long>(), 
+                sequenceId, 
+                strId, 
+                expirationTime, 
+                Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
+
         return registerSequence(new OutboundSequence(data));
     }
 
-    public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
-        
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
+
         return registerSequence(new InboundSequence(data));
     }
 
@@ -96,20 +102,25 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
         sequence.close();
     }
 
-    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {        
+    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
         try {
-            sequenceLock.writeLock().lock();
+            internalDataAccessLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 Sequence sequence = sequences.remove(sequenceId);
+
+                if (boundSequences.containsKey(sequenceId)) {
+                    boundSequences.remove(sequenceId);
+                }
+
                 sequence.preDestroy();
-                
+
                 return sequence;
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }
         } finally {
-            sequenceLock.writeLock().unlock();
-        }        
+            internalDataAccessLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -119,16 +130,50 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
      */
     private Sequence registerSequence(Sequence sequence) throws DuplicateSequenceException {
         try {
-            sequenceLock.writeLock().lock();
+            internalDataAccessLock.writeLock().lock();
             if (sequences.containsKey(sequence.getId())) {
                 throw new DuplicateSequenceException(sequence.getId());
             } else {
                 sequences.put(sequence.getId(), sequence);
             }
-            
+
             return sequence;
         } finally {
-            sequenceLock.writeLock().unlock();
+            internalDataAccessLock.writeLock().unlock();
+        }
+    }
+
+    public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
+        try {
+            internalDataAccessLock.writeLock().lock();
+            if (!sequences.containsKey(referenceSequenceId)) {
+                throw new UnknownSequenceException(referenceSequenceId);
+            }
+
+            if (!sequences.containsKey(boundSequenceId)) {
+                throw new UnknownSequenceException(boundSequenceId);
+            }
+
+            boundSequences.put(referenceSequenceId, boundSequenceId);
+        } finally {
+            internalDataAccessLock.writeLock().unlock();
+        }
+    }
+
+    public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
+        try {
+            internalDataAccessLock.readLock().lock();
+            if (!isValid(referenceSequenceId)) {
+                throw new UnknownSequenceException(referenceSequenceId);
+            }
+
+            if (boundSequences.containsKey(referenceSequenceId)) {
+                return sequences.get(boundSequences.get(referenceSequenceId));
+            } else {
+                return null;
+            }
+        } finally {
+            internalDataAccessLock.readLock().unlock();
         }
     }
 }

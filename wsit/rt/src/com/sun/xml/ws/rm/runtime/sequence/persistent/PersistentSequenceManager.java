@@ -59,14 +59,14 @@ public class PersistentSequenceManager implements SequenceManager {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Sequence createOutboudSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
         
         return new OutboundSequence(data);
     }
 
-    public Sequence createInboundSequence(String sequenceId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
         
         return new InboundSequence(data);
     }
@@ -84,6 +84,14 @@ public class PersistentSequenceManager implements SequenceManager {
     }
 
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

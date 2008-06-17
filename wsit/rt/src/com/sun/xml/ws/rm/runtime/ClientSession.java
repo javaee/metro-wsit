@@ -78,7 +78,7 @@ abstract class ClientSession {
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
-    private final FiberResumeTask resendTask;
+    private final PeriodicFiberResumeTask resendTask;
 
     static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
@@ -97,7 +97,7 @@ abstract class ClientSession {
         this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
-        this.resendTask = new FiberResumeTask(configuration.getMessageRetransmissionInterval());
+        this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
     protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;
@@ -129,10 +129,10 @@ abstract class ClientSession {
     protected final void requestAcknowledgement() throws RmException {
         PacketAdapter responseAdapter = null;
         try {
-            PacketAdapter requestAdapter = PacketAdapter.create(configuration, communicator.createEmptyRequestPacket());
+            PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
             requestAdapter.setEmptyMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
 
-            responseAdapter = PacketAdapter.create(configuration, communicator.send(requestAdapter.getPacket()));
+            responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
                 throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
             }
@@ -151,7 +151,7 @@ abstract class ClientSession {
     }
 
     public final Packet processOutgoingPacket(Packet requestPacket) {
-        PacketAdapter requestAdapter = PacketAdapter.create(configuration, requestPacket);
+        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         initializeIfNecessary(requestAdapter);
 
         requestAdapter.appendSequenceHeader(
@@ -162,16 +162,14 @@ abstract class ClientSession {
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
         if (inboundSequenceId != null) {
-            requestAdapter.appendSequenceAcknowledgementHeader(
-                    inboundSequenceId,
-                    sequenceManager.getSequence(inboundSequenceId).getAcknowledgedMessageIds());
+            requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
         }
 
         return requestAdapter.getPacket();
     }
 
     public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
-        PacketAdapter responseAdapter = PacketAdapter.create(configuration, responsePacket);
+        PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
         if (responseAdapter.containsMessage()) {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
         }

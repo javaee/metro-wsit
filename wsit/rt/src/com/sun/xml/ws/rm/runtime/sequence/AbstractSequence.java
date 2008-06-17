@@ -38,8 +38,8 @@ package com.sun.xml.ws.rm.runtime.sequence;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,10 +48,10 @@ import java.util.List;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractSequence implements Sequence {    
-    
+public abstract class AbstractSequence implements Sequence {
+
     protected final SequenceData data;
-        
+
     /**
      * Initializes instance fields.
      * 
@@ -77,8 +77,8 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public List<AckRange> getAcknowledgedMessageIds() {
-         if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
-            // nothing acknowledged yet
+        if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
+            // no message associated with the sequence yet
             return Collections.emptyList();
         } else if (data.noUnackedMessageIds()) {
             // no unacked indexes - we have a single acked range
@@ -87,21 +87,20 @@ public abstract class AbstractSequence implements Sequence {
             // need to calculate ranges from the unacked indexes
             List<AckRange> result = new LinkedList<Sequence.AckRange>();
 
-            Collection<Long> unackedIndexes = data.getAllUnackedIndexes();
-            
-            long lastUnacked = unackedIndexes.iterator().next();
-            if (lastUnacked > Sequence.MIN_MESSAGE_ID) {
-                result.add(new AckRange(Sequence.MIN_MESSAGE_ID, lastUnacked - 1));
-            }
-            for (long unackedIndex : unackedIndexes) {
-                if (unackedIndex > lastUnacked + 1) {
-                    result.add(new AckRange(lastUnacked + 1, unackedIndex - 1));
+            Iterator<Long> unackedIndexIterator = data.getAllUnackedIndexes().iterator();
+            long lastBottomAckRange = Sequence.MIN_MESSAGE_ID;
+            while (unackedIndexIterator.hasNext()) {
+                long lastUnacked = unackedIndexIterator.next();
+                if (lastBottomAckRange < lastUnacked) {
+                    result.add(new AckRange(lastBottomAckRange, lastUnacked - 1));
                 }
-                lastUnacked = unackedIndex;
+                lastBottomAckRange = lastUnacked + 1;
             }
-
+            if (lastBottomAckRange <= data.getLastMessageId()) {
+                result.add(new AckRange(lastBottomAckRange, data.getLastMessageId()));
+            }
             return result;
-        }       
+        }
     }
 
     public boolean hasPendingAcknowledgements() {
@@ -121,11 +120,15 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     protected void clearAckRequestedFlag() {
-        data.setAckRequestedFlag(false);        
+        data.setAckRequestedFlag(false);
     }
-    
+
     public boolean isAckRequested() {
         return data.isAckRequestedFlag();
+    }
+
+    public String getBoundSecurityTokenReferenceId() {
+        return data.getBoundSecurityTokenReferenceId();
     }
 
     public void close() {
@@ -138,6 +141,14 @@ public abstract class AbstractSequence implements Sequence {
 
     public boolean isExpired() {
         return (data.getExpirationTime() == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < data.getExpirationTime();
+    }
+
+    public long getLastActivityTime() {
+        return data.getLastActivityTime();
+    }
+
+    public void updateLastActivityTime() {
+        data.updateLastActivityTime();
     }
 
     public void preDestroy() {

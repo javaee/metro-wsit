@@ -86,6 +86,15 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
+    protected PacketAdapter processOtherProtocolRequest(PacketAdapter requestAdapter) {
+        if (configuration.getRmVersion().lastAction.equals(requestAdapter.getWsaAction())) {
+            return handleLastMessageAction(requestAdapter);
+        } else {
+            return super.processOtherProtocolRequest(requestAdapter);
+        }
+    }
+
+    @Override
     protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedException {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
@@ -145,11 +154,11 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         }
 
 
-        Sequence inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), expirationTime);
+        Sequence inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), receivedSctId, expirationTime);
         if (offeredId != null) {
-            sequenceManager.createOutboudSequence(offeredId, offeredExpirationTime);
+            sequenceManager.createOutboundSequence(offeredId, receivedSctId, offeredExpirationTime);
         }
-        ServerSession.create(configuration, inboundSequence.getId(), offeredId, receivedSctId);
+        sequenceManager.bindSequences(inboundSequence.getId(), offeredId);
 
 // TODO        startSession(inboundSequence);
 
@@ -189,27 +198,16 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         return requestAdapter.createServerResponse(crsElement, configuration.getRmVersion().createSequenceResponseAction);
     }
 
-    @Override
-    protected PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
+    /**
+     * TODO javadoc
+     */
     protected PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) {
         Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
         inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
 
         inboundSequence.close();
 
-        return requestAdapter.createAckResponse(
-                inboundSequence.getId(), 
-                inboundSequence.getAcknowledgedMessageIds(),                 
-                RmVersion.WSRM10.lastAction);
+        return requestAdapter.createAckResponse(inboundSequence, RmVersion.WSRM10.lastAction);
     }
 
     @Override
@@ -229,28 +227,31 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         //   If there is an outbound sequence, client expects us to terminate it.
         //   There is no TSR. We just close client-side sequence if it is a two-way communication
 
-        // TODO get outbound sequence id:
-        String outboundSeqenceId = null;
+        Sequence outboundSeqence = null;
+        try {
+            outboundSeqence = sequenceManager.getBoundSequence(inboundSequence.getId());
 
-        PacketAdapter responseAdapter;
-        if (outboundSeqenceId != null) {
-            TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
-            Identifier id = new Identifier(outboundSeqenceId);
-            terminateSeqResponse.setIdentifier(id);
+            if (outboundSeqence != null) {
+                TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
+                Identifier id = new Identifier(outboundSeqence.getId());
+                terminateSeqResponse.setIdentifier(id);
 
-            responseAdapter = requestAdapter.createServerResponse(terminateSeqResponse, RmVersion.WSRM10.terminateSequenceAction);
-            responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageIds());
+                PacketAdapter responseAdapter = requestAdapter.createServerResponse(terminateSeqResponse, RmVersion.WSRM10.terminateSequenceAction);
+                responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence);
 
-            sequenceManager.terminateSequence(outboundSeqenceId);
-        } else {
-            return requestAdapter.closeTransportAndReturnNull();
+                return responseAdapter;
+            } else {
+                return requestAdapter.closeTransportAndReturnNull();
+            }
+
+        } finally {
+            // TODO end the session if we own its lifetime..i.e. SC is not present
+            // endSession(seq);
+            try {
+                sequenceManager.terminateSequence(inboundSequence.getId());
+            } finally {
+                sequenceManager.terminateSequence(outboundSeqence.getId());
+            }
         }
-
-// TODO
-//        //end the session if we own its lifetime..i.e. SC is not present
-//        endSession(seq);
-        sequenceManager.terminateSequence(inboundSequence.getId());
-
-        return responseAdapter;
     }
 }

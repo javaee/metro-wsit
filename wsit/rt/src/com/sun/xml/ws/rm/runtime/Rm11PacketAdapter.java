@@ -40,7 +40,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.v200702.AckRequestedElement;
 import com.sun.xml.ws.rm.v200702.Identifier;
@@ -80,19 +79,24 @@ public class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmRuntimeException {
+    public void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
-        identifier.setValue(sequenceId);
+        identifier.setValue(sequence.getId());
         ackElement.setIdentifier(identifier);
 
-        if (acknowledgedIndexes != null && !acknowledgedIndexes.isEmpty()) {
-            for (Sequence.AckRange range : acknowledgedIndexes) {
+        List<Sequence.AckRange> ackedMessageIds = sequence.getAcknowledgedMessageIds();
+        if (ackedMessageIds != null && !ackedMessageIds.isEmpty()) {
+            for (Sequence.AckRange range : ackedMessageIds) {
                 ackElement.addAckRange(range.lower, range.upper);
             }
         } else {
             ackElement.addAckRange(0, 0); // we don't have any ack ranges => we have not received any message yet
 
+        }
+        
+        if (sequence.isClosed()) {
+            ackElement.setFinal(new SequenceAcknowledgementElement.Final());
         }
 
 // TODO move this to server side - we don't have a buffer support on the client side
@@ -122,7 +126,9 @@ public class Rm11PacketAdapter extends PacketAdapter {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {
-            Utilities.assertSequenceId(expectedAckedSequenceId, ackElement.getId());
+            if (expectedAckedSequenceId != null) {
+                Utilities.assertSequenceId(expectedAckedSequenceId, ackElement.getId());
+            }
 
             List<Sequence.AckRange> ranges = new LinkedList<Sequence.AckRange>();
             if (ackElement.getNone() == null) {

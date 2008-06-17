@@ -50,12 +50,11 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.wss.impl.MessageConstants;
 import java.net.URI;
-import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -67,13 +66,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 public abstract class PacketAdapter {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketAdapter.class);
+    //
     protected Packet packet;
     protected Message message;
+    //
     private boolean isSequenceDataInit;
     private boolean isAckRequestedHeaderDataInit;
     private String sequenceId;
     private String ackRequestedHeaderSequenceId;
     private long messageNumber;
+    //
     private final Configuration configuration;
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
@@ -109,7 +111,7 @@ public abstract class PacketAdapter {
      * @param packet {@link Packet} instance to be attached to the newly created packet adapter
      * @return new empty {@link PacketAdapter} instance
      */
-    public static PacketAdapter create(@NotNull Configuration configuration, @NotNull Packet packet) {
+    public static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
         switch (configuration.getRmVersion()) {
             case WSRM10:
                 return new Rm10PacketAdapter(configuration, packet);
@@ -188,7 +190,7 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */    
     public final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
-        return PacketAdapter.create(configuration, packet.createServerResponse(
+        return PacketAdapter.getInstance(configuration, packet.createServerResponse(
                 Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion),
                 addressingVersion,
                 soapVersion,
@@ -199,7 +201,7 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */    
     public final PacketAdapter createEmptyServerResponse(String wsaAction) {
-        return PacketAdapter.create(configuration, packet.createServerResponse(
+        return PacketAdapter.getInstance(configuration, packet.createServerResponse(
                 Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
@@ -216,9 +218,9 @@ public abstract class PacketAdapter {
      * @return
      * @throws RmRuntimeException
      */
-    public final PacketAdapter createAckResponse(String sequenceId, List<AckRange> acknowledgedIndexes, String wsaAction) throws RmRuntimeException {
+    public final PacketAdapter createAckResponse(Sequence sequence, String wsaAction) throws RmRuntimeException {
         PacketAdapter responseAdapter = this.createEmptyServerResponse(wsaAction);
-        responseAdapter.appendSequenceAcknowledgementHeader(sequenceId, acknowledgedIndexes);
+        responseAdapter.appendSequenceAcknowledgementHeader(sequence);
         return responseAdapter;
     }
     
@@ -226,7 +228,7 @@ public abstract class PacketAdapter {
         this.packet.transportBackChannel.close();
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(this.packet.invocationProperties);
-        return PacketAdapter.create(configuration, emptyReturnPacket);        
+        return PacketAdapter.getInstance(configuration, emptyReturnPacket);        
     }
 
     /**
@@ -256,7 +258,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public abstract void appendSequenceAcknowledgementHeader(@NotNull String sequenceId, List<AckRange> acknowledgedIndexes) throws RmRuntimeException;
+    public abstract void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException;
 
     /**
      * TODO javadoc

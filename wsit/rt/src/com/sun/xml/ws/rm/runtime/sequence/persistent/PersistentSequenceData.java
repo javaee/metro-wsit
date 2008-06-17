@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime.sequence.persistent;
 
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.Status;
@@ -49,40 +48,50 @@ import java.util.Collection;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class PersistentSequenceData implements SequenceData {
-/**
+
+    /**
     DROP TABLE RM_UNACKED_MESSAGES;
-
+    
     DROP TABLE RM_SEQUENCES;
-
+    
     CREATE TABLE RM_SEQUENCES (
-        id VARCHAR(50) NOT NULL,
-        expiration INTEGER NOT NULL,
-        status SMALLINT NOT NULL,
-        ack_requested_flag CHAR(1) NOT NULL,
-        last_message_id BIGINT NOT NULL,
-        PRIMARY KEY (id)
+    id VARCHAR(50) NOT NULL,
+    expiration INTEGER NOT NULL,
+    status SMALLINT NOT NULL,
+    ack_requested_flag CHAR(1) NOT NULL,
+    last_message_id BIGINT NOT NULL,
+    PRIMARY KEY (id)
     );
-
+    
     CREATE TABLE RM_UNACKED_MESSAGES (
-        sequence_id VARCHAR(50) NOT NULL,
-        message_id BIGINT NOT NULL,
-        PRIMARY KEY (sequence_id, message_id)
+    sequence_id VARCHAR(50) NOT NULL,
+    message_id BIGINT NOT NULL,
+    PRIMARY KEY (sequence_id, message_id)
     );
-
+    
     ALTER TABLE RM_UNACKED_MESSAGES ADD CONSTRAINT FK_RM_SEQUENCE_ID FOREIGN KEY (SEQUENCE_ID) REFERENCES RM_SEQUENCES (ID);
- */
-    
+     */
     private final String sequenceId;
+    private final String boundSecurityTokenReferenceId;
     private final long expirationTime;
-    
     private final Connection sqlConnection;
     private final ResultSet sequenceData;
-            
-    public PersistentSequenceData(Connection connection, String sequenceId, long expirationTime, long lastMessageId, Status status, boolean ackRequestedFlag) throws PersistenceException {
+    
+    
+
+    public PersistentSequenceData(
+            Connection connection,
+            String sequenceId,
+            String boundSecurityTokenReferenceId,
+            long expirationTime,
+            long lastMessageId,
+            Status status,
+            boolean ackRequestedFlag) throws PersistenceException {
         this.sequenceId = sequenceId;
+        this.boundSecurityTokenReferenceId = boundSecurityTokenReferenceId;
         this.expirationTime = expirationTime;
         this.sqlConnection = connection;
-        
+
         try {
             PreparedStatement insertPS = sqlConnection.prepareStatement("INSERT INTO RM_SEQUENCES VALUES (?, ?, ?, ?, ?)");
             insertPS.setString(1, sequenceId);
@@ -98,14 +107,14 @@ public class PersistentSequenceData implements SequenceData {
             // TODO commit
             PreparedStatement queryPS = sqlConnection.prepareStatement("SELECT * FROM RM_SEQUENCES WHERE sequence_id = ?");
             queryPS.setString(1, sequenceId);
-            sequenceData = queryPS.executeQuery();            
+            sequenceData = queryPS.executeQuery();
             if (!sequenceData.first()) {
                 // TODO L10N
                 throw new PersistenceException("Unable to get the sequence data");
             }
         } catch (SQLException ex) {
             // TODO L10N
-            throw new PersistenceException("Error creating the new sequence data record.",  ex);
+            throw new PersistenceException("Error creating the new sequence data record.", ex);
         } finally {
             // resource cleanup
         }
@@ -206,7 +215,7 @@ public class PersistentSequenceData implements SequenceData {
         // TODO
         return false;
     }
-    
+
     public void acquireMessageIdDataReadOnlyLock() {
         // TODO
     }
@@ -214,12 +223,25 @@ public class PersistentSequenceData implements SequenceData {
     public void releaseMessageIdDataReadOnlyLock() {
         // TODO
     }
-    
+
     public void acquireMessageIdDataReadWriteLock() {
         // TODO
     }
 
     public void releaseMessageIdDataReadWriteLock() {
         // TODO
+    }
+
+    public String getBoundSecurityTokenReferenceId() {
+        // TODO
+        return boundSecurityTokenReferenceId;
+    }
+
+    public long getLastActivityTime() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void updateLastActivityTime() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
