@@ -48,29 +48,6 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
 
-    <target name="resgen" depends="init"
-            description="Generate class wrappers for all property files that contain localizable messages">
-
-        <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
-            <classpath>
-                <path path="${javac.classpath}"/>
-                <pathelement path="${basedir}/../${lib.tooltime.dir}/jaxws-tools.jar"/>
-            </classpath>
-        </taskdef>
-
-        <mkdir dir="${build.gen-src.dir}"/>
-
-        <resgen destdir="${build.gen-src.dir}">
-            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties, com/sun/xml/wss/**/*.properties"/>
-        </resgen>
-    </target>
-
-    <target name="-pre-compile" depends="resgen"
-            description="Hook resgen target into compilation process"/>
-
-    <target name="-pre-compile-single" depends="resgen"
-            description="Hook resgen target into single file compilation process"/>
-
     <taskdef name="concatmanifest" classname="taskdefs.ConcatManifest">
         <classpath>
             <fileset dir="../${etc.lib.dir}" includes="wsit-taskdefs.jar"/>
@@ -167,6 +144,7 @@
             <metainf/>
         </sequential>
     </macrodef>
+    
     <macrodef name="combine-jars-macro">
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
@@ -196,6 +174,29 @@
          <move  file="@{jarname}.jar" todir="../${dist.image.wsit.v3.dir}"       />
         </sequential>
     </macrodef>
+
+    <target name="resgen" depends="init"
+            description="Generate class wrappers for all property files that contain localizable messages">
+
+        <taskdef name="resgen" classname="com.sun.tools.resourcegen.ResourceGenTask">
+            <classpath>
+                <path path="${javac.classpath}"/>
+                <pathelement path="${basedir}/../${lib.tooltime.dir}/jaxws-tools.jar"/>
+            </classpath>
+        </taskdef>
+
+        <mkdir dir="${build.gen-src.dir}"/>
+
+        <resgen destdir="${build.gen-src.dir}">
+            <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties, com/sun/xml/wss/**/*.properties"/>
+        </resgen>
+    </target>
+
+    <target name="-pre-compile" depends="resgen"
+            description="Hook resgen target into compilation process"/>
+
+    <target name="-pre-compile-single" depends="resgen"
+            description="Hook resgen target into single file compilation process"/>
 
     <target name="-do-jar-without-manifest">
         <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
