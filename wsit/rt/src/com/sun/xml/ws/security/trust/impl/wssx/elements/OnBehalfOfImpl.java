@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.2 2008-02-26 06:33:29 ofung Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.3 2008-06-17 21:44:05 jdg6688 Exp $
  */
 
 /*
@@ -40,45 +40,53 @@
 
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
-//import com.sun.xml.ws.addressing.EndpointReferenceImpl;
+import com.sun.xml.ws.security.Token;
 import javax.xml.ws.EndpointReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.OnBehalfOfType;
 import javax.xml.bind.JAXBElement;
+import org.w3c.dom.Element;
 
 /**
  *
  * @author Manveen Kaur
  */
 public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
-    
     private EndpointReference epr = null;
     private SecurityTokenReference str = null;
     
-    public OnBehalfOfImpl(OnBehalfOfType oboType)throws Exception{
-        //ToDo
+    public OnBehalfOfImpl(Token oboToken){
+        final Element element = (Element)oboToken.getTokenValue();
+        setAny(element);
+    }
+    
+    public OnBehalfOfImpl(OnBehalfOfType oboType){
+        Object ob = oboType.getAny();
+        if (ob != null){
+            this.setAny((Element)ob);
+        }
     }
     public EndpointReference getEndpointReference() {
         return epr;
     }
     
-    public void setEndpointReference(EndpointReference endpointReference) {
+    public void setEndpointReference(final EndpointReference endpointReference) {
         epr = endpointReference;
-//        if (endpointReference != null) {
-//            JAXBElement<EndpointReferenceImpl> eprElement=
-//                    (new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).
-//                    createEndpointReference((EndpointReferenceImpl)endpointReference);
-//            setAny(eprElement);
-//        }
+       /* if (endpointReference != null) {
+            JAXBElement<EndpointReferenceImpl> eprElement=
+                    (new com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory()).
+                    createEndpointReference((EndpointReferenceImpl)endpointReference);
+            setAny(eprElement);
+        }*/
         str = null;
     }
     
-    public void setSecurityTokenReference(SecurityTokenReference ref) {
+    public void setSecurityTokenReference(final SecurityTokenReference ref) {
         str = ref;
         if (ref != null) {
-            JAXBElement<SecurityTokenReferenceType> strElement=
+            final JAXBElement<SecurityTokenReferenceType> strElement=
                     (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)ref);
             setAny(strElement);
         }
