@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.faults;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -42,6 +42,9 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Locale;
 import javax.xml.namespace.QName;
@@ -51,9 +54,9 @@ import javax.xml.soap.SOAPFault;
 
 /**
  *
- * @author m_potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmSoapFaultException extends RmException {
+public abstract class AbstractRmSoapFault extends RmException {
 
     /**
      * SOAP 1.1 Sender Fault
@@ -68,12 +71,12 @@ public class RmSoapFaultException extends RmException {
     //
     private final transient Packet soapFaultResponse;
 
-    public RmSoapFaultException(Configuration configuration, Packet request, QName subcode, String reason) {
+    public AbstractRmSoapFault(Configuration configuration, Packet request, QName subcode, String reason) {
         super(reason);
         this.soapFaultResponse = createRmProcessingSoapFaultResponse(configuration, request, subcode, reason);
     }
 
-    public RmSoapFaultException(Packet soapFaultResponse, String reason) {
+    public AbstractRmSoapFault(Packet soapFaultResponse, String reason) {
         super(reason);
         this.soapFaultResponse = soapFaultResponse;
     }

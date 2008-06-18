@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmVersion;
@@ -86,7 +87,7 @@ public class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedException {
+    protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -42,7 +43,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
-import com.sun.xml.ws.rm.RmSoapFaultException;
+import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -110,7 +111,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 processRmHeaders(requestAdapter, true);
                 return super.processRequest(requestAdapter.getPacket());
             }
-        } catch (RmSoapFaultException ex) {
+        } catch (AbstractRmSoapFault ex) {
             return doReturnWith(ex.getSoapFaultResponse());
         } catch (RmRuntimeException ex) {
             LOGGER.logSevereException(ex);
@@ -150,7 +151,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     /**
      * TODO javadoc
      */
-    private PacketAdapter processProtocolRequest(PacketAdapter requestAdapter) throws RmSoapFaultException {
+    private PacketAdapter processProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (configuration.getRmVersion().createSequenceAction.equals(requestAdapter.getWsaAction())) {
             return handleCreateSequenceAction(requestAdapter);
         } else if (configuration.getRmVersion().terminateSequenceAction.equals(requestAdapter.getWsaAction())) {
@@ -171,7 +172,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     /**
      * TODO javadoc
      */
-    protected abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedException;
+    protected abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault;
 
     /**
      * TODO javadoc

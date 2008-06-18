@@ -34,19 +34,18 @@
  * holder.
  */
 
-package com.sun.xml.ws.rm.runtime;
+package com.sun.xml.ws.rm.faults;
 
-import com.sun.xml.ws.rm.*;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.policy.Configuration;
 
 /**
  *
- * @author m_potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class CreateSequenceRefusedException extends RmSoapFaultException {
+public class CreateSequenceRefusedFault extends AbstractRmSoapFault {
 
-    public CreateSequenceRefusedException(Configuration configuration, Packet request, String reason) {
+    public CreateSequenceRefusedFault(Configuration configuration, Packet request, String reason) {
         super(createCreateSequenceProcessingSoapFaultResponse(configuration, request, configuration.getRmVersion().createSequenceRefusedFaultCode, reason), reason);
     }
 }

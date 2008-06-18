@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
@@ -95,7 +96,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedException {
+    protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -134,19 +135,19 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
                 if (strReference instanceof com.sun.xml.ws.security.trust.elements.str.DirectReference) {
                     receivedSctId = ((com.sun.xml.ws.security.trust.elements.str.DirectReference) strReference).getURIAttr().toString();
                     if (!activeSctId.equals(receivedSctId)) {
-                        throw LOGGER.logSevereException(new CreateSequenceRefusedException(
+                        throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                                 configuration,
                                 requestAdapter.getPacket(),
                                 LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(receivedSctId, activeSctId)));
                     }
                 } else {
-                    throw LOGGER.logSevereException(new CreateSequenceRefusedException(
+                    throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                             configuration,
                             requestAdapter.getPacket(),
                             LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
                 }
             } else {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedException(
+                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),
                         LocalizationMessages.WSRM_1133_NO_SECURITY_TOKEN_IN_REQUEST_PACKET()));
@@ -174,12 +175,12 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
             try {
                 dest = new URI(requestAdapter.getDestination());
             } catch (URISyntaxException e) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedException(
+                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),
                         LocalizationMessages.WSRM_1129_INVALID_VALUE_OF_MESSAGE_HEADER("To", "CreateSequence", requestAdapter.getDestination())), e);
             } catch (NullPointerException e) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedException(
+                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),
                         LocalizationMessages.WSRM_1130_MISSING_MESSAGE_HEADER("To", "CreateSequence", requestAdapter.getDestination())), e);
