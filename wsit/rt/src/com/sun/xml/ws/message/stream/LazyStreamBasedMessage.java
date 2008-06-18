@@ -73,11 +73,18 @@ public class LazyStreamBasedMessage extends Message{
     private boolean readMessage = false;
     private XMLStreamReader reader = null;
     private Message message = null;
+    AttachmentSet as = null;
     private MutableXMLStreamBuffer buffer = null;
     /** Creates a new instance of StreamMessage */
     public LazyStreamBasedMessage(XMLStreamReader message,StreamSOAPCodec codec) {
         this.reader = message;
         this.codec = codec;
+    }
+    
+    public LazyStreamBasedMessage(XMLStreamReader message,StreamSOAPCodec codec, AttachmentSet as) {
+        this.reader = message;
+        this.codec = codec;
+        this.as = as;
     }
     
     public StreamSOAPCodec getCodec(){
@@ -86,7 +93,11 @@ public class LazyStreamBasedMessage extends Message{
     
     private synchronized void cacheMessage(){
         if(!readMessage){
-            message = codec.decode(reader);
+            if(as == null){
+                message = codec.decode(reader);
+            } else {
+                message = codec.decode(reader, as);
+            }
             readMessage = true;
         }
     }

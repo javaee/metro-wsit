@@ -69,7 +69,7 @@ public class LazyStreamCodec implements StreamSOAPCodec{
     }
     
     public  @NotNull Message decode(@NotNull XMLStreamReader reader, AttachmentSet att){
-        return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec);
+        return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec, att);
     }
     
     public String getMimeType() {
