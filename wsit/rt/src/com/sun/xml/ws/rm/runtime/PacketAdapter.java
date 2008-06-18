@@ -366,7 +366,7 @@ public abstract class PacketAdapter {
      * @return
      */
     public final boolean containsMessage() {
-        return message == null;
+        return message != null;
     }
 
     /**
@@ -397,13 +397,13 @@ public abstract class PacketAdapter {
      * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
      * {@link HeaderList) in the form of JAXB element and marks the header as understood.
      * 
-     * @param headers list of message headers; must not be {@code null}
-     * 
      * @param name the name of the {@link com.sun.xml.ws.api.message.Header} to find.
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
     public final <T> T readHeaderAsUnderstood(String name) throws RmRuntimeException {
+        checkMessageReadyState();
+
         Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
         if (header == null) {
             return (T) null;
@@ -479,7 +479,7 @@ public abstract class PacketAdapter {
 
     /**
      * Checks internal state of this {@link PacketAdapter} instance whether it is 
-     * safe to perform message update operations. Success of this condition guarantees
+     * safe to perform message read or update operations. Success of this condition guarantees
      * the success of {@link #checkPacketUpdateState()} operation.
      * 
      * @throws java.lang.IllegalStateException if the check fails
@@ -492,7 +492,7 @@ public abstract class PacketAdapter {
 
     /**
      * Checks internal state of this {@link PacketAdapter} instance whether it is 
-     * safe to perform packet update operations. Success of this condition does not 
+     * safe to perform packet read or update operations. Success of this condition does not 
      * guarantee the success of {@link #checkMessageUpdateState()} operation.
      * 
      * @throws java.lang.IllegalStateException if the check fails
