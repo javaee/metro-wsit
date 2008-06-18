@@ -60,13 +60,13 @@ public class PersistentSequenceManager implements SequenceManager {
     }
 
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
+        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, Status.CREATED, false);
         
         return new OutboundSequence(data);
     }
 
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
+        SequenceData data = new PersistentSequenceData(sqlConnection, sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATED, false);
         
         return new InboundSequence(data);
     }

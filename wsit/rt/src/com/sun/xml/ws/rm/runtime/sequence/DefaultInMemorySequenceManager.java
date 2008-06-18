@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
-    private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();
+    private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();
     private final Map<String, String> boundSequences = new HashMap<String, String>();
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
@@ -82,13 +82,13 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
                 sequenceId, 
                 strId, 
                 expirationTime, 
-                Sequence.MIN_MESSAGE_ID - 1, Status.CREATING, false);
+                Sequence.MIN_MESSAGE_ID - 1, Status.CREATED, false);
 
         return registerSequence(new OutboundSequence(data));
     }
 
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATING, false);
+        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATED, false);
 
         return registerSequence(new InboundSequence(data));
     }
@@ -106,7 +106,8 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
         try {
             internalDataAccessLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
-                Sequence sequence = sequences.remove(sequenceId);
+                AbstractSequence sequence = sequences.remove(sequenceId);
+                sequence.setStatus(Status.TERMINATING);
 
                 if (boundSequences.containsKey(sequenceId)) {
                     boundSequences.remove(sequenceId);
@@ -128,7 +129,7 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
      * 
      * @param sequence sequence object to be registered within the internal sequence storage
      */
-    private Sequence registerSequence(Sequence sequence) throws DuplicateSequenceException {
+    private Sequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
         try {
             internalDataAccessLock.writeLock().lock();
             if (sequences.containsKey(sequence.getId())) {

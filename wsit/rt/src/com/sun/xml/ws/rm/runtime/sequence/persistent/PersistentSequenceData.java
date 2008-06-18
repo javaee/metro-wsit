@@ -96,7 +96,7 @@ public class PersistentSequenceData implements SequenceData {
             PreparedStatement insertPS = sqlConnection.prepareStatement("INSERT INTO RM_SEQUENCES VALUES (?, ?, ?, ?, ?)");
             insertPS.setString(1, sequenceId);
             insertPS.setLong(2, expirationTime);
-            insertPS.setInt(3, status.ordinal());
+            insertPS.setInt(3, status.getValue());
             insertPS.setBoolean(4, ackRequestedFlag);
             insertPS.setLong(5, lastMessageId);
 
@@ -139,7 +139,7 @@ public class PersistentSequenceData implements SequenceData {
 
     public Status getStatus() {
         try {
-            return Status.ordinalToStatus(sequenceData.getInt("status"));
+            return Status.valueToStatus(sequenceData.getInt("status"));
         } catch (SQLException ex) {
             // TODO handle
             return null;
@@ -148,7 +148,7 @@ public class PersistentSequenceData implements SequenceData {
 
     public void setStatus(Status status) {
         try {
-            sequenceData.updateInt("status", status.ordinal());
+            sequenceData.updateInt("status", status.getValue());
         } catch (SQLException ex) {
             // TODO handle
         }

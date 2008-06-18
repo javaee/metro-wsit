@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collections;
@@ -56,7 +57,11 @@ public class OutboundSequence extends AbstractSequence {
     }
 
     @Override
-    public long getNextMessageId() throws MessageNumberRolloverException {
+    public long getNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+        if (getStatus() != Sequence.Status.CREATED) {
+            throw new IllegalStateException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_NEXT_MESSAGE_ID_REJECTED(getId(), getStatus()));
+        }
+        
         try {
             data.acquireMessageIdDataReadWriteLock();
             

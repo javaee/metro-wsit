@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.List;
 
@@ -58,7 +59,7 @@ public class InboundSequence extends AbstractSequence {
         return data.getLastMessageId();
     }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException {
         // NOTE: This method is not meant to be used on inbound sequence in our implementation right now as we recieve 
         //       only one message at a time. Thus we don't bother optimizing it.
         for (AckRange range : ranges) {
@@ -68,7 +69,11 @@ public class InboundSequence extends AbstractSequence {
         }
     }
 
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
+        if (getStatus() != Sequence.Status.CREATED) {
+            throw new IllegalStateException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getStatus()));
+        }
+        
         try {
             data.acquireMessageIdDataReadWriteLock();
             

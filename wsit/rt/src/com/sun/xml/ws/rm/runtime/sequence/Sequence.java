@@ -48,15 +48,30 @@ public interface Sequence {
     public static final long MAX_MESSAGE_ID = 9223372036854775807L;
     
     public enum Status {
+        // CREATING(10) not needed
+        CREATED(15),
+        CLOSING(20),
+        CLOSED(25),
+        TERMINATING(30);
 
-        CREATING,
-        CREATED,
-        CLOSING,
-        CLOSED,
-        TERMINATING;
-
-        public static Status ordinalToStatus(int ordinal) {
-            return Status.values()[ordinal];
+        private int value;
+        
+        private Status(int value) {
+            this.value = value;
+        }
+        
+        public int getValue() {
+            return value;
+        }
+        
+        public static Status valueToStatus(int value) {
+            for (Status status : Status.values()) {
+                if (status.value == value) {
+                    return status;
+                }
+            }
+            
+            return null;
         }
     }
 
@@ -84,8 +99,12 @@ public interface Sequence {
      * @return the next message identifier that should be used for the next message sent on the sequence.
      * 
      * @exception MessageNumberRolloverException in case the message identifier counter overflows
+     * 
+     * @exception IllegalStateException in case the sequence is closed
+     * 
+     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
      */
-    public long getNextMessageId() throws MessageNumberRolloverException;
+    public long getNextMessageId() throws MessageNumberRolloverException, IllegalStateException, UnsupportedOperationException;
 
     /**
      * Registers given message identifiers with the sequence as aknowledged
@@ -94,8 +113,10 @@ public interface Sequence {
      * 
      * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a messages 
      * with the given identifiers have been already registered
+     * 
+     * @exception IllegalStateException in case the sequence is closed
      */
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException;
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException;
 
     /**
      * Registers given message identifier with the sequence as aknowledged
@@ -104,8 +125,10 @@ public interface Sequence {
      * 
      * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message 
      * with the given identifier has been already registered
+     * 
+     * @exception IllegalStateException in case the sequence is closed
      */
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException;
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException;
 
     /**
      * Provides information on the last message id sent on this sequence

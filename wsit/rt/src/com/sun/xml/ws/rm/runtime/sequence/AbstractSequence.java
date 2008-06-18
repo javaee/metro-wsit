@@ -72,7 +72,7 @@ public abstract class AbstractSequence implements Sequence {
         return data.getSequenceId();
     }
 
-    public long getNextMessageId() throws MessageNumberRolloverException {
+    public long getNextMessageId() throws UnsupportedOperationException {
         throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
     }
 
