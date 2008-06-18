@@ -103,7 +103,7 @@ import java.util.ArrayList;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
-import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory; 
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -113,17 +113,17 @@ import org.w3c.dom.Document;
  * @author hr124446
  */
 public class TrustPluginImpl implements TrustPlugin {
-    
+
     private static final Logger log =
             Logger.getLogger(
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
-    
+
     /** Creates a new instance of TrustPluginImpl */
     public TrustPluginImpl() {
         
     }
-    
+
     public void process(IssuedTokenContext itc) throws WSTrustException{
         String signWith = null;
         String encryptWith = null;
@@ -135,11 +135,11 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
             throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
         }
-        
+
         URI wsdlLocation = null;
         QName serviceName = null;
         QName portName = null;
-        
+
         final String metadataStr = stsConfig.getSTSMEXAddress();
         if (metadataStr != null){
             wsdlLocation = URI.create(metadataStr);
@@ -151,42 +151,42 @@ public class TrustPluginImpl implements TrustPlugin {
             }else{
                 final String serviceNameStr = stsConfig.getSTSServiceName();
                 if (serviceNameStr != null && namespace != null){
-                      serviceName = new QName(namespace,serviceNameStr);
+                    serviceName = new QName(namespace,serviceNameStr);
                 }
 
                 final String portNameStr = stsConfig.getSTSPortName();
                 if (portNameStr != null && namespace != null){
-                      portName = new QName(namespace, portNameStr);
+                    portName = new QName(namespace, portNameStr);
                 }
             }
             wsdlLocation = URI.create(wsdlLocationStr);
         }
-        
+
         Token oboToken = stsConfig.getOBOToken();
-       
+
         BaseSTSResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
-             
+
             result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
-            
+
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();
             contract.handleRSTR(request, result, itc);
             KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
             if (keyPair != null){
-                itc.setProofKeyPair(keyPair);   
+                itc.setProofKeyPair(keyPair);
             }
-            
+
             encryptWith = stsConfig.getEncryptWith();
             if (encryptWith != null) {
-                itc.setEncryptWith(encryptWith);                
+                itc.setEncryptWith(encryptWith);
             }
-            
+
             signWith = stsConfig.getSignWith();
             if (signWith != null) {
                 itc.setSignWith(signWith);
             }
-            
+
         } catch (RemoteException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo), ex);
@@ -197,11 +197,11 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, appliesTo));
         }
     }
-    
+
     public void processValidate(IssuedTokenContext itc) throws WSTrustException{
         // Get STS address and MEX address or service name, port name and namespace
     }
-     
+
     private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException{
         WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
@@ -219,7 +219,7 @@ public class TrustPluginImpl implements TrustPlugin {
             OnBehalfOf obo = fact.createOnBehalfOf(oboToken);
             rst.setOnBehalfOf(obo);
         }
- 
+
         String tokenType = null;
         String keyType = null;
         long keySize = -1;
@@ -249,13 +249,13 @@ public class TrustPluginImpl implements TrustPlugin {
                 /*
                 encryptWith = sitp.getEncryptWith();
                 if (encryptWith != null){
-                    sp.setEncryptWith(URI.create(encryptWith));
+                sp.setEncryptWith(URI.create(encryptWith));
                 }
                 signWith = sitp.getSignWith();
                 if (signWith != null){
-                    sp.setSignWith(URI.create(signWith));
+                sp.setSignWith(URI.create(signWith));
                 }
-                 */ 
+                 */
                 signatureAlgorithm = sitp.getSignatureAlgorithm();
                 if (signatureAlgorithm != null){
                     sp.setSignatureAlgorithm(URI.create(signatureAlgorithm));
@@ -269,7 +269,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 if (canonicalizationAlgorithm != null){
                     sp.setCanonicalizationAlgorithm(URI.create(canonicalizationAlgorithm));
                 }
-                
+
                 keyWrapAlgorithm = sitp.getKeyWrapAlgorithm();
                 if(keyWrapAlgorithm != null){
                     sp.setKeyWrapAlgorithm(URI.create(keyWrapAlgorithm));
@@ -282,77 +282,77 @@ public class TrustPluginImpl implements TrustPlugin {
                 rst.setSecondaryParameters(sp);
             }
         }
-                
+
         if (tokenType == null){
             tokenType = stsConfig.getTokenType();
             if (tokenType != null){
                 rst.setTokenType(URI.create(tokenType));
             }
-         }
-  
-         if (keyType == null){
+        }
+
+        if (keyType == null){
             keyType = stsConfig.getKeyType();
             if (keyType != null){
                 rst.setKeyType(URI.create(keyType));
             }
-         }
+        }
 
-         if (keySize < 1){
+        if (keySize < 1){
             keySize = stsConfig.getKeySize();
             if (keySize > 0){
                 rst.setKeySize(keySize);
             }
-         }
-         
+        }
+
         /* 
         if (encryptWith == null){
-            encryptWith = stsConfig.getEncryptWith();
-            if (encryptWith != null){
-                rst.setEncryptWith(URI.create(encryptWith));
-            }
-         }
-         
-         if (signWith == null){
-            signWith = stsConfig.getSignWith();
-            if (signWith != null){
-                rst.setSignWith(URI.create(signWith));
-            }
-         }
-         */  
+        encryptWith = stsConfig.getEncryptWith();
+        if (encryptWith != null){
+        rst.setEncryptWith(URI.create(encryptWith));
+        }
+        }
+        
+        if (signWith == null){
+        signWith = stsConfig.getSignWith();
+        if (signWith != null){
+        rst.setSignWith(URI.create(signWith));
+        }
+        }
+         */
 
-         if (signatureAlgorithm == null){
+        if (signatureAlgorithm == null){
             signatureAlgorithm = stsConfig.getSignatureAlgorithm();
             if (signatureAlgorithm != null){
                 rst.setSignWith(URI.create(signWith));
             }
-          }  
+        }
 
-          if (encryptionAlgorithm == null){
+        if (encryptionAlgorithm == null){
             encryptionAlgorithm = stsConfig.getEncryptionAlgorithm();
             if (encryptionAlgorithm != null){
                 rst.setEncryptionAlgorithm(URI.create(encryptionAlgorithm));
             }
-          }  
+        }
 
-          if (canonicalizationAlgorithm == null){
+        if (canonicalizationAlgorithm == null){
             canonicalizationAlgorithm = stsConfig.getCanonicalizationAlgorithm();
             if (canonicalizationAlgorithm != null){
                 rst.setCanonicalizationAlgorithm(URI.create(canonicalizationAlgorithm));
             }
-          }  
+        }
 
-          if (claims == null){
+        if (claims == null){
             claims = stsConfig.getClaims();
             if (claims != null){
                 rst.setClaims(claims);
             }
-          }  
+        }
 
         int len = 32;
         if (keySize > 0){
             len = (int)keySize/8;
         }
-        
+
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final SecureRandom secRandom = new SecureRandom();
             final byte[] nonce = new byte[len];
@@ -363,11 +363,11 @@ public class TrustPluginImpl implements TrustPlugin {
             rst.setComputedKeyAlgorithm(URI.create(wstVer.getCKPSHA1algorithmURI()));
         }else if (wstVer.getPublicKeyTypeURI().equals(keyType) && keySize > 1 ){
             // Create a RSA key pairs for use with UseKey
-            KeyPairGenerator kpg;            
+            KeyPairGenerator kpg;
             try{
                 kpg = KeyPairGenerator.getInstance("RSA");
-                //RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
-                //kpg.initialize(rsaSpec);
+            //RSAKeyGenParameterSpec rsaSpec = new RSAKeyGenParameterSpec((int)keySize, RSAKeyGenParameterSpec.F0);
+            //kpg.initialize(rsaSpec);
             }catch (NoSuchAlgorithmException ex){
                 throw new WSTrustException("Unable to create key pairs for UseKey", ex);
             }
@@ -376,10 +376,10 @@ public class TrustPluginImpl implements TrustPlugin {
             //}
             kpg.initialize((int)keySize);
             KeyPair keyPair = kpg.generateKeyPair();
-            
+
             // Create the Sig attribute Value for UseKey
             // String sig = "uuid-" + UUID.randomUUID().toString();
-            
+
             // Create the UseKey element in RST
             KeyInfo keyInfo = createKeyInfo(keyPair.getPublic());
             final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -388,12 +388,12 @@ public class TrustPluginImpl implements TrustPlugin {
                 doc = docFactory.newDocumentBuilder().newDocument();
                 keyInfo.marshal(new DOMStructure(doc), null);
             }catch(ParserConfigurationException ex){
-                log.log(Level.SEVERE, 
-                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
             }catch(MarshalException ex){
-                log.log(Level.SEVERE, 
-                    LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
                 throw new WSTrustException(LogStringsMessages.WST_0039_ERROR_CREATING_DOCFACTORY(), ex);
             }
             Token token = new GenericToken(doc.getDocumentElement());
@@ -402,17 +402,17 @@ public class TrustPluginImpl implements TrustPlugin {
 
             // Put the key pair and the sig in the STSConfiguration
             stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
-            //stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig); */
+        //stsConfig.getOtherOptions().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, sig); */
         }
-       
+
         if(log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, 
-                   LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
+            log.log(Level.FINE,
+                    LogStringsMessages.WST_1006_CREATED_RST_ISSUE(WSTrustUtil.elemToString(rst, wstVer)));
         }
-        
+
         return rst;
     }
-    
+
     private BaseSTSResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
         WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
@@ -422,12 +422,12 @@ public class TrustPluginImpl implements TrustPlugin {
                 log.log(Level.FINE,
                         LogStringsMessages.WST_1012_SERVICE_PORTNAME_MEX(serviceName, portName));
             }
-            
+
             final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
             serviceName = names[0];
             portName = names[1];
         }
-        
+
         Service service = null;
         try{
             // Work around for issue 338
@@ -458,31 +458,35 @@ public class TrustPluginImpl implements TrustPlugin {
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
         //SOAPVersion sv = wsbinding.getSOAPVersion();
-        
+
         //dispatch = addAddressingHeaders(dispatch);
         if (stsURI != null){
             dispatch.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
         dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
-        
+
         // Pass the keys and/or username, password to the message context
-        String userName = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
-        String password = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
-        if (userName != null){
-            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
-        }
-        if (password != null){
-            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
-        }
-        KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
-        String id = (String)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_SIGNATURE_ID);
-        if (keyPair != null){
-            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
-        }
-        if (id != null){
-            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, id);
-        }
+//        String userName = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+//        String password = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
+//        if (userName != null){
+//            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
+//        }
+//        if (password != null){
+//            dispatch.getRequestContext().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+//        }                
+
+//        KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
+//        String id = (String)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_SIGNATURE_ID);
+//        if (keyPair != null){
+//            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_RSA_KEY_PAIR, keyPair);
+//        }
+//        if (id != null){
+//            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, id);
+//        }
+
+        dispatch.getRequestContext().putAll(stsConfig.getOtherOptions());
+
         //RequestSecurityTokenResponse rstr = null;
         // try{
         //  MessageFactory factory = sv.saajMessageFactory;
@@ -505,22 +509,22 @@ public class TrustPluginImpl implements TrustPlugin {
         // } catch(Exception ex){
         // ex.printStackTrace();
         // }
-        
+
         final BaseSTSResponse rstr;
         if(wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
             rstr = fact.createRSTRCollectionFrom(((JAXBElement)dispatch.invoke(fact.toJAXBElement(request))));
         }else{
             rstr = fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
         }
-        
+
         if(log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, 
+            log.log(Level.FINE,
                     LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wstVer)));
         }
-        
+
         return rstr;
     }
-    
+
     /**
      * This method uses mex client api to issue a mex request and return the
      * matching service name and port name
@@ -529,20 +533,20 @@ public class TrustPluginImpl implements TrustPlugin {
      * and the second one will be portName.
      */
     protected static QName[]  doMexRequest(final String wsdlLocation, final String stsURI) throws WSTrustException {
-        
+
         final QName[] serviceInfo = new QName[2];
         final MetadataClient mexClient = new MetadataClient();
-        
+
         final Metadata metadata = mexClient.retrieveMetadata(wsdlLocation);
-        
+
         //this method gives the names of services and the corresponding port details
         if(metadata != null){
             final List<PortInfo> ports = mexClient.getServiceInformation(metadata);
-            
+
             //we have to iterate through this to get the appropriate serviceName and portname
             for(PortInfo port : ports){
                 final String uri = port.getAddress();
-                
+
                 //if the stsAddress what we have matches the address of this port, return
                 //this port information
                 if(uri.equals(stsURI)){
@@ -550,9 +554,9 @@ public class TrustPluginImpl implements TrustPlugin {
                     serviceInfo[1]= port.getPortName();
                     break;
                 }
-                
+
             }
-            
+
             if(serviceInfo[0]==null || serviceInfo[1]==null){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WST_0042_NO_MATCHING_SERVICE_MEX(stsURI));
@@ -565,7 +569,7 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new WSTrustException(
                     LogStringsMessages.WST_0017_SERVICE_PORTNAME_ERROR(wsdlLocation));
         }
-        
+
         return serviceInfo;
     }
 
