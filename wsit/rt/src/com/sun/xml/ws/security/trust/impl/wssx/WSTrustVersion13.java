@@ -68,6 +68,10 @@ public class WSTrustVersion13 extends WSTrustVersion{
         return nsURI +"/Validate";
     }
     
+    public String getValidateStatuesTokenType(){
+        return nsURI+"/RSTR/Status";
+    }
+    
     public String getKeyExchangeRequestTypeURI(){
         return nsURI +"/KET";
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.10 2008-03-30 07:25:56 jdg6688 Exp $
+ * $Id: RequestSecurityToken.java,v 1.11 2008-06-18 01:37:12 jdg6688 Exp $
  */
 
 /*
@@ -128,6 +128,12 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
       */
      void setParticipants(Participants participants);
      
+     void setValidateTarget(ValidateTarget valigateTarget);
+     
+     void setRenewTarget(RenewTarget renewTarget);
+     
+     void setCancelTarget(CancelTarget cancelTarget);
+     
      /**
       * Get the participants sharing the token if specified, null otherwise 
       */
@@ -136,6 +142,8 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
      RenewTarget getRenewTarget();
      
      CancelTarget getCancelTarget();
+     
+     ValidateTarget getValidateTarget();
      
      void setSecondaryParameters(SecondaryParameters sp);
      

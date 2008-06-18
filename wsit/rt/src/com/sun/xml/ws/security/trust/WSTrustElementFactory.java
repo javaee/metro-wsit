@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.20 2008-05-27 22:19:58 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.21 2008-06-18 01:37:11 jdg6688 Exp $
  */
 
 /*
@@ -66,6 +66,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 import com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl;
 import java.net.URI;
 
@@ -211,6 +212,8 @@ public abstract class WSTrustElementFactory {
     public abstract UseKey createUseKey(Token token, String sig);
 
     public abstract OnBehalfOf createOnBehalfOf(Token oboToken);
+    
+    public abstract ValidateTarget createValidateTarget(Token token);
     /**
      * Create a Lifetime.
      */

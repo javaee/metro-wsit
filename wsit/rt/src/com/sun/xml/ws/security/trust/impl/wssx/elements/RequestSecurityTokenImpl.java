@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.7 2008-05-16 12:54:36 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.8 2008-06-18 01:37:12 jdg6688 Exp $
  */
 
 /*
@@ -78,6 +78,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.RenewingType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SecondaryParametersType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
+import com.sun.xml.ws.security.trust.impl.wssx.bindings.ValidateTargetType;
 import java.util.ArrayList;
 
 /**
@@ -116,6 +117,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private DelegateTo delegateTo = null;
     private RenewTarget renewTarget = null;
     private CancelTarget cancelTarget = null;
+    private ValidateTarget validateTarget = null;
     
     private AllowPostdating apd = null;
     private BinaryExchange binaryExchange = null;
@@ -226,6 +228,17 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public RenewTarget getRenewTarget() {
         return renewTarget;
+    }
+    
+     public final void setValidateTarget(final ValidateTarget target) {
+        this.validateTarget = target;
+        JAXBElement<ValidateTargetType> vtElement =
+                (new ObjectFactory()).createValidateTarget((ValidateTargetType)target);
+        getAny().add(vtElement);
+    }
+    
+    public ValidateTarget getValidateTarget() {
+       return validateTarget;
     }
     
     public void setParticipants(Participants participants) {
@@ -674,6 +687,9 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                 } else if (local.equalsIgnoreCase("CancelTarget")){
                     CancelTargetType ctType = (CancelTargetType)obj.getValue();
                     setCancelTarget(new CancelTargetImpl(ctType));
+                } else if (local.equalsIgnoreCase("ValidateTarget")){
+                    ValidateTargetType vtType = (ValidateTargetType)obj.getValue();
+                    setValidateTarget(new ValidateTargetImpl(vtType));
                 } else if (local.equalsIgnoreCase("AppliesTo")) {
                     setAppliesTo((AppliesTo)obj.getValue());
                 } else if (local.equalsIgnoreCase("SecondaryParameters")){

@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.21 2008-05-16 12:54:37 shyam_rao Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.22 2008-06-18 01:37:12 jdg6688 Exp $
  */
 
 /*
@@ -231,6 +231,14 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public RenewTarget getRenewTarget() {
         return renewTarget;
+    }
+    
+    public final void setValidateTarget(final ValidateTarget target) {
+        throw new UnsupportedOperationException("Unsupported operation: setValidateTarget");
+    }
+    
+    public ValidateTarget getValidateTarget() {
+       throw new UnsupportedOperationException("Unsupported operation: getValidateTarget");
     }
     
     public final void setParticipants(final Participants participants) {

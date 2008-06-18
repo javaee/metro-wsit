@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.23 2008-05-27 22:19:57 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.24 2008-06-18 01:37:12 jdg6688 Exp $
  */
 
 /*
@@ -64,6 +64,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 
 import com.sun.xml.ws.security.trust.impl.elements.BinarySecretImpl;
 import com.sun.xml.ws.security.trust.impl.elements.CancelTargetImpl;
@@ -222,6 +223,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public OnBehalfOf createOnBehalfOf(Token oboToken){
         return new OnBehalfOfImpl(oboToken);
     }
+    
+    public ValidateTarget createValidateTarget(Token token){
+         throw new UnsupportedOperationException("Unsupported operation: ValidateTarget");
+    }
+    
     /**
      * Create an Entropy with a BinarySecret
      */

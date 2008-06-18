@@ -67,7 +67,9 @@ public abstract class WSTrustVersion {
 
     public abstract String getCancelRequestTypeURI();
 
-    public abstract String getValidateRequestTypeURI();        
+    public abstract String getValidateRequestTypeURI();     
+    
+    public abstract String getValidateStatuesTokenType();
 
     public abstract String getKeyExchangeRequestTypeURI();
     

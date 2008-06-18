@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.14 2008-05-27 22:19:58 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.15 2008-06-18 01:37:11 jdg6688 Exp $
  */
 
 /*
@@ -64,6 +64,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
@@ -85,6 +86,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedSecurityTokenIm
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedTokenCancelledImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.SecondaryParametersImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.UseKeyImpl;
+import com.sun.xml.ws.security.trust.impl.wssx.elements.ValidateTargetImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinarySecretType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EntropyType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestSecurityTokenType;
@@ -307,6 +309,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
     public CancelTarget createCancelTarget(SecurityTokenReference str){
         return new CancelTargetImpl(str);
+    }
+    
+    public ValidateTarget createValidateTarget(Token token){
+         return new ValidateTargetImpl(token);
     }
     
     public SecondaryParameters createSecondaryParameters(){
