@@ -289,8 +289,8 @@
             <arguments>
                 <arg value="-r" />
                 <arg path="${testcases}" />
-                <arg value="-cp:override" />
-                <arg path="${wsit.image}/webservices-api.jar:${wsit.image}/webservices-rt.jar:${wsit.image}/webservices-tools.jar" />
+                <arg value="-cp:metrov3-image" />
+                <arg path="${wsit.image}" />
                 <arg value="-transport" />
                 <arg path="../../lib/runtime/jaxws-local-transport.jar" />
             </arguments>
