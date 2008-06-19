@@ -90,7 +90,7 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
     
     public void issue(IssuedTokenContext ctx)throws WSTrustException{        
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){       
+        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
             IssuedTokenContext tmpCtx = null;
             try{
                 tmpCtx = getSecurityContextToken(sctConfig.getTokenId(), sctConfig.checkTokenExpiry());
@@ -114,7 +114,8 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
                 ctx.setSecurityToken(tmpCtx.getSecurityToken());                
                 ctx.setAttachedSecurityTokenReference(tmpCtx.getAttachedSecurityTokenReference());
                 ctx.setUnAttachedSecurityTokenReference(tmpCtx.getUnAttachedSecurityTokenReference());
-                if(((SecurityContextToken)tmpCtx.getSecurityToken()).getInstance() != null){
+                if(tmpCtx.getSecurityToken() != null && 
+                        ((SecurityContextToken)tmpCtx.getSecurityToken()).getInstance() != null){
                     String sctInfoKey = ((SecurityContextToken)tmpCtx.getSecurityToken()).getIdentifier().toString()+"_"+
                             ((SecurityContextToken)tmpCtx.getSecurityToken()).getInstance();                    
                     ctx.setSecurityContextTokenInfo(getSecurityContextTokenInfo(sctInfoKey));
@@ -132,9 +133,15 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
     } 
     
     public void cancel(IssuedTokenContext ctx)throws WSTrustException{
-        scp.processCancellation(ctx);
+        SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
+        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
+            scp.processCancellation(ctx);
+            clearSessionCache();
+        }else{             
+             log.log(Level.WARNING, "SecureConversation session is already cancelled");
+        }
     }
-    
+        
     public void renew(IssuedTokenContext ctx)throws WSTrustException{
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
         if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
@@ -172,7 +179,12 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
     private void addSecurityContextTokenInfo(String key, SecurityContextTokenInfo sctInfo){
         securityContextTokenMap.put(key, sctInfo);
     }
-    
+
+    private void clearSessionCache(){
+        issuedTokenContextMap.clear();
+        securityContextTokenMap.clear();
+    }
+
     /**
      * Return the valid SecurityContext for matching key
      *
