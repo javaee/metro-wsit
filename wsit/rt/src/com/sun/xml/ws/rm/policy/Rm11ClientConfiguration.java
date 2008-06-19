@@ -59,13 +59,13 @@ class Rm11ClientConfiguration implements Configuration {
         destinationConfig = new Rm11ServiceConfiguration(alternative, soapVersion, addressingVersion, requestResponseDetected);
 
         AckRequestIntervalClientAssertion ackIntervalAssertion = ConfigurationManager.extractAssertion(alternative, AckRequestIntervalClientAssertion.NAME, AckRequestIntervalClientAssertion.class);
-        ackRequestInterval = (ackIntervalAssertion != null) ? ackIntervalAssertion.getInterval() : DEFAULT_ACKNOWLEDGEMENT_REQUEST_INTERVAL;
+        ackRequestInterval = (ackIntervalAssertion != null) ? ackIntervalAssertion.getInterval() : UNSPECIFIED;
         
         CloseTimeoutClientAssertion closeTimeoutAssertion = ConfigurationManager.extractAssertion(alternative, CloseTimeoutClientAssertion.NAME, CloseTimeoutClientAssertion.class);
         closeSequenceOperationTimeout = (closeTimeoutAssertion != null) ? closeTimeoutAssertion.getTimeout() : DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
         
         ResendIntervalClientAssertion resendIntervalAssertion = ConfigurationManager.extractAssertion(alternative, ResendIntervalClientAssertion.NAME, ResendIntervalClientAssertion.class);
-        retransmittionInterval = (resendIntervalAssertion != null) ? resendIntervalAssertion.getInterval() : DEFAULT_RETRANSMISSION_INTERVAL;
+        retransmittionInterval = (resendIntervalAssertion != null) ? resendIntervalAssertion.getInterval() : UNSPECIFIED;
 
         // TODO: add new assertions for this one
         exponentialBackoff = false;

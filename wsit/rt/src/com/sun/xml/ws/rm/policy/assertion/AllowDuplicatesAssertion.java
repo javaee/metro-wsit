@@ -48,7 +48,9 @@ import javax.xml.namespace.QName;
  * <sunc:AllowDuplicates />
  */
 /**
- * TODO: is this assertion used?
+ * Tells the RM destination that multiple delivery of a single message is allowed.
+ * 
+ * TODO: this assertion is not used yet
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */

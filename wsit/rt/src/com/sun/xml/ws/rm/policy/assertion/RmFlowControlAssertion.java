@@ -53,14 +53,18 @@ import javax.xml.namespace.QName;
  * </ms:RmFlowControl>
  */
 /**
+ * Defines maximum server-side buffer size in ordered delivery scenario.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class RmFlowControlAssertion extends ComplexAssertion {
 
     public static final QName NAME = new QName(Constants.microsoftVersion, "RmFlowControl");
+    //    
     private static final RmLogger LOGGER = RmLogger.getLogger(RmFlowControlAssertion.class);
     private static final QName BUFFER_SIZE_ASSERTION_QNAME = new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
+    private static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
+    //
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
@@ -76,27 +80,23 @@ public class RmFlowControlAssertion extends ComplexAssertion {
     private RmFlowControlAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
         super(data, assertionParameters, nestedAlternative);
 
-        long _maxBufferSize = Configuration.UNSPECIFIED; // default
-
+        long _maxBufferSize = DEFAULT_DESTINATION_BUFFER_QUOTA; // default
+        boolean bufferSizeSet = false;
         if (nestedAlternative != null) {
             for (PolicyAssertion assertion : nestedAlternative) {
                 if (BUFFER_SIZE_ASSERTION_QNAME.equals(assertion.getName())) {
-                    _maxBufferSize = evaluateBufferSize(_maxBufferSize == Configuration.UNSPECIFIED, assertion.getValue(), data);
+                    if (bufferSizeSet) {
+                        throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1006_MULTIPLE_BUFFER_SIZES_IN_POLICY()));
+                    } else {
+                        _maxBufferSize = Long.parseLong(assertion.getValue());
+                    }
                 }
             }
         }
-        maxBufferSize = (_maxBufferSize == Configuration.UNSPECIFIED) ? Configuration.DEFAULT_DESTINATION_BUFFER_QUOTA : _maxBufferSize;
+        maxBufferSize = _maxBufferSize;
     }
 
     public long getMaximumBufferSize() {
         return maxBufferSize;
-    }
-
-    private long evaluateBufferSize(boolean successCondition, String valueOnSuccess, AssertionData data) throws AssertionCreationException {
-        if (successCondition) {
-            return Long.parseLong(valueOnSuccess);
-        } else {
-            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1006_MULTIPLE_BUFFER_SIZES_IN_POLICY()));
-        }
     }
 }

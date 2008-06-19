@@ -46,14 +46,10 @@ import com.sun.xml.ws.rm.RmVersion;
 public interface Configuration {
     public static final long UNSPECIFIED = -1;
     
-    public static final long DEFAULT_SEQUENCE_ACKNOWLEDGEMENT_INTERVAL = UNSPECIFIED;
     public static final long DEFAULT_INACTIVITY_TIMEOUT = 600000;
+    public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
 //    public static final SecurityBinding DEFAULT_SECURITY_BINDING = SecurityBinding.NONE;
 //    public static final DeliveryAssurance DEFAULT_DELIVERY_ASSURANCE = DeliveryAssurance.EXACTLY_ONCE;
-    public static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
-    public static final long DEFAULT_ACKNOWLEDGEMENT_REQUEST_INTERVAL = Configuration.UNSPECIFIED;
-    public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
-    public static final long DEFAULT_RETRANSMISSION_INTERVAL = Configuration.UNSPECIFIED;
 
     public static enum SecurityBinding {
         STR,

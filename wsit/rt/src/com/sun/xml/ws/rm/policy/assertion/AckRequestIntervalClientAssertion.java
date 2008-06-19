@@ -48,7 +48,9 @@ import javax.xml.namespace.QName;
  * <sunc:AckRequestInterval Miliseconds="..." />
  */
 /**
- *
+ * Defines an inactivity period after which a client with unacknowledged messages 
+ * autonomously sends acknowledgment request to the service.
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class AckRequestIntervalClientAssertion extends SimpleAssertion {

@@ -83,7 +83,7 @@ public class Rm11ServiceConfiguration implements Configuration {
         
         // TODO: add new assertions for these
         inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT;
-        acknowledgementInterval = DEFAULT_SEQUENCE_ACKNOWLEDGEMENT_INTERVAL;        
+        acknowledgementInterval = UNSPECIFIED;        
     }
 
     public RmVersion getRmVersion() {

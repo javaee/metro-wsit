@@ -48,7 +48,8 @@ import javax.xml.namespace.QName;
  * <sunc:CloseTimeout Miliseconds="..." />
  */
 /**
- *
+ * Defines a period of time after which an attempt to close a session would timeout.
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class CloseTimeoutClientAssertion extends SimpleAssertion {

@@ -48,7 +48,8 @@ import javax.xml.namespace.QName;
  * <sunc:ResendInterval Miliseconds="..." />
  */
 /**
- *
+ * Specifies a time period for client attempts to resend unacknowledged messages.
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class ResendIntervalClientAssertion extends SimpleAssertion {

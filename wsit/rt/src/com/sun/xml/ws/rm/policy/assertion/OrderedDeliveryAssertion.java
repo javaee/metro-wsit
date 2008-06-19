@@ -48,6 +48,7 @@ import javax.xml.namespace.QName;
  * <sunc:Ordered />
  */
 /**
+ * Tells RM destination that ordered delivery of messages is expected.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */

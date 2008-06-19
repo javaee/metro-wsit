@@ -86,9 +86,9 @@ public final class Rm10Assertion extends SimpleAssertion {
         super(data, assertionParameters);
 
         long _inactivityTimeout = Configuration.DEFAULT_INACTIVITY_TIMEOUT;
-        long _retransmittionInterval = Configuration.DEFAULT_RETRANSMISSION_INTERVAL;
+        long _retransmittionInterval = Configuration.UNSPECIFIED;
         boolean _useExponentialBackoffAlgorithm = false;
-        long _acknowledgementInterval = Configuration.DEFAULT_SEQUENCE_ACKNOWLEDGEMENT_INTERVAL;
+        long _acknowledgementInterval = Configuration.UNSPECIFIED;
 
         if (assertionParameters != null) {
             for (PolicyAssertion parameter : assertionParameters) {

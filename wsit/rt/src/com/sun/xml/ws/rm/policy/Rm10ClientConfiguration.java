@@ -62,7 +62,7 @@ class Rm10ClientConfiguration implements Configuration {
         long _retransmittionInterval = rmAssertion.getBaseRetransmittionInterval();
         
         AckRequestIntervalClientAssertion ackIntervalAssertion = ConfigurationManager.extractAssertion(alternative, AckRequestIntervalClientAssertion.NAME, AckRequestIntervalClientAssertion.class);
-        ackRequestInterval = (ackIntervalAssertion != null) ? ackIntervalAssertion.getInterval() : DEFAULT_ACKNOWLEDGEMENT_REQUEST_INTERVAL;
+        ackRequestInterval = (ackIntervalAssertion != null) ? ackIntervalAssertion.getInterval() : UNSPECIFIED;
         
         CloseTimeoutClientAssertion closeTimeoutAssertion = ConfigurationManager.extractAssertion(alternative, CloseTimeoutClientAssertion.NAME, CloseTimeoutClientAssertion.class);
         closeSequenceOperationTimeout = (closeTimeoutAssertion != null) ? closeTimeoutAssertion.getTimeout() : DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
