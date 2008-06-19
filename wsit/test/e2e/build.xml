@@ -155,13 +155,18 @@
         </path>
     </target>   
     
-    <target name="setup-emma-remote" description="internal: overrides local setup for emma">
-        <property name="wsit.image" value="${basedir}/wsit-image/metro"/>   
+    <target name="setup-emma-remote" description="internal: overrides remote setup for emma">
+        <property name="wsit.image" value="${basedir}/wsit-image/metro"/>
         <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
     </target>
 
     <target name="setup-emma-local" description="internal: overrides local setup for emma">
         <property name="wsit.image" value="${wsit.dir}/dist/image/metro"/>
+        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+    </target>
+
+    <target name="setup-emma-v3" description="internal: overrides GlassFish v3 setup for emma">
+        <property name="wsit.image" value="${wsit.dir}/dist/image/metro/for_v3"/>
         <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
     </target>
 
@@ -276,8 +281,24 @@
         </run-tests>
     </target>
     
+    <target name="main-v3"
+            description="Run all tests with the Metro libraries for GlassFish v3"
+            depends="setup-emma-v3">
+                
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:override" />
+                <arg path="${wsit.image}/webservices-api.jar:${wsit.image}/webservices-rt.jar:${wsit.image}/webservices-tools.jar" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+    
     <target name="main"
-            description="Runs unit test on the entire workspace"
+            description="Runs the e2e tests on the entire workspace"
             depends="setup-emma-local">
         
         <run-tests>
