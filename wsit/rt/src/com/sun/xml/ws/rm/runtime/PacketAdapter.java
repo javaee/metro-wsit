@@ -52,9 +52,8 @@ import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
-import com.sun.xml.ws.security.SecurityContextToken;
-import com.sun.xml.wss.impl.MessageConstants;
-import java.net.URI;
+import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.runtime.util.SessionManager;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -81,34 +80,14 @@ public abstract class PacketAdapter {
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
 
-//    /**
-//     * Creates a new packet adapter based on the configuration. This adapter is empty
-//     * and does not contain any underlying packet yet. To attach the packet to the
-//     * created {@link PacketAdapter} instance, use {@link #attach(com.sun.xml.ws.api.message.Packet)}
-//     * method.
-//     * 
-//     * @param configuration configuration used to configure newly created packet
-//     * @return new empty {@link PacketAdapter} instance
-//     */
-//    public static PacketAdapter create(@NotNull Configuration configuration) {
-//        switch (configuration.getRmVersion()) {
-//            case WSRM10:
-//                return new Rm10PacketAdapter(configuration);
-//            case WSRM11:
-//                return new Rm11PacketAdapter(configuration);
-//            default:
-//                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
-//        }
-//    }
-
     /**
-     * Creates a new packet adapter based on the configuration and attaches a provided 
-     * {@code packet} instance to it. To detach the packet from the
-     * created {@link PacketAdapter} instance, use {@link #detach()}
-     * method.
+     * Provides an instance of a packet adapter based on the configuration and attaches a provided 
+     * {@code packet} instance to it.
      * 
      * @param configuration configuration used to configure newly created packet
+     * 
      * @param packet {@link Packet} instance to be attached to the newly created packet adapter
+     * 
      * @return new empty {@link PacketAdapter} instance
      */
     public static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
@@ -127,7 +106,7 @@ public abstract class PacketAdapter {
      */
     protected PacketAdapter(@NotNull Configuration configuration, @NotNull Packet packet) {
         this.configuration = configuration;
-        
+
         // cache frequently accessed config data
         this.rmVersion = configuration.getRmVersion();
         this.soapVersion = configuration.getSoapVersion();
@@ -141,20 +120,8 @@ public abstract class PacketAdapter {
         if (packet.getMessage() != null) {
             this.message = packet.getMessage();
         }
-        
+
     }
-    
-//    /**
-//     * TODO javadoc
-//     */
-//    public PacketAdapter attach(@NotNull Packet packet) {
-//        this.packet = packet;
-//        if (packet.getMessage() != null) {
-//            this.message = packet.getMessage();
-//        }
-//
-//        return this;
-//    }
 
     /**
      * TODO javadoc
@@ -188,26 +155,25 @@ public abstract class PacketAdapter {
 
     /**
      * TODO javadoc
-     */    
+     */
     public final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
         return PacketAdapter.getInstance(configuration, packet.createServerResponse(
                 Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion),
                 addressingVersion,
                 soapVersion,
-                wsaAction));    
+                wsaAction));
     }
-    
+
     /**
      * TODO javadoc
-     */    
+     */
     public final PacketAdapter createEmptyServerResponse(String wsaAction) {
         return PacketAdapter.getInstance(configuration, packet.createServerResponse(
                 Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
-                wsaAction));        
+                wsaAction));
     }
-    
 
     /**
      * TODO javadoc
@@ -223,12 +189,12 @@ public abstract class PacketAdapter {
         responseAdapter.appendSequenceAcknowledgementHeader(sequence);
         return responseAdapter;
     }
-    
+
     public final PacketAdapter closeTransportAndReturnNull() {
         this.packet.transportBackChannel.close();
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(this.packet.invocationProperties);
-        return PacketAdapter.getInstance(configuration, emptyReturnPacket);        
+        return PacketAdapter.getInstance(configuration, emptyReturnPacket);
     }
 
     /**
@@ -392,7 +358,7 @@ public abstract class PacketAdapter {
 
         return message.getHeaders().getTo(addressingVersion, soapVersion);
     }
-    
+
     /**
      * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
      * {@link HeaderList) in the form of JAXB element and marks the header as understood.
@@ -473,8 +439,18 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */
     public String getSecurityContextTokenId() {
-        com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) packet.invocationProperties.get(com.sun.xml.wss.impl.MessageConstants.INCOMING_SCT);
-        return (sct != null) ? sct.getIdentifier().toString() : null;
+        String sessionId = (String) packet.invocationProperties.get(Session.SESSION_ID_KEY);
+        if (sessionId == null) {
+            return null;
+        }
+
+        Session session = SessionManager.getSessionManager().getSession(sessionId);
+        return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
+
+// TODO remove old code once this new one is proven to work
+//        
+//        com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) packet.invocationProperties.get(com.sun.xml.wss.impl.MessageConstants.INCOMING_SCT);
+//        return (sct != null) ? sct.getIdentifier().toString() : null;
     }
 
     /**
@@ -504,19 +480,24 @@ public abstract class PacketAdapter {
     }
 
     /**
-     * Determines whether the security token reference used to secure the message 
+     * Determines whether the security context token identifier used to secure the message 
      * wrapped in this adapter is the expected one
      *
-     * @param expectedStrId expected security token reference identifier 
-     * @returns {code true} if the actual STR identifier equals to the expected one
+     * @param expectedStrId expected security context token identifier 
+     * @returns {code true} if the actual security context token identifier equals to the expected one
      */
-    private boolean checkSecurityTokenReferenceId(String expectedStrId) {
-        SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
-        if (sct != null) {
-            URI sctIdentifierUri = sct.getIdentifier();
-            return (sctIdentifierUri != null) ? sctIdentifierUri.toString().equals(expectedStrId) : expectedStrId == null;
-        } else {
-            return expectedStrId == null;
-        }
+    private boolean checkSecurityContextTokenId(String expectedSctId) {
+        String actualSctId = getSecurityContextTokenId();
+        return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
+
+// TODO Remove old code once the new one is proven to work
+//         
+//        SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+//        if (sct != null) {
+//            URI sctIdentifierUri = sct.getIdentifier();
+//            return (sctIdentifierUri != null) ? sctIdentifierUri.toString().equals(expectedStrId) : expectedStrId == null;
+//        } else {
+//            return expectedStrId == null;
+//        }
     }
 }
