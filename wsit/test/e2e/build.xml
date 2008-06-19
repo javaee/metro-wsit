@@ -36,13 +36,6 @@
  holder.
 -->
 
-<!--
- $Id: build.xml,v 1.37 2008-04-24 16:04:34 m_potociar Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
--->
-
 <project name="wsit.dev.java.net main" default="main" basedir=".">
     <property file="${basedir}/build.properties"/>
     <import file="properties.xml"/>
@@ -50,6 +43,101 @@
     <path id="harness.classpath">
         <fileset dir="${test.lib.dir}" includes="*.jar"/>
     </path>
+    
+    <!-- invokes e2e tests -->
+    <macrodef name="run-tests">
+        <!--
+            These are the default args that are passed to the harness which mean that
+            the tests will be using the dist image of the wsit workspace , run the tests
+            using local transport and recursively scan for all the sub dirs under testcases
+
+            Please modify these options if you wish to test the harness in different
+            modes
+            For more information on the different command line options
+            refer to docs/index.html
+        -->
+        <element name="arguments" />                        
+        <sequential>
+            <antcall target="prepare"/>
+            
+            <!-- BEGIN: Emma code coverage specific stuff -->
+            <emma enabled="${emma.enabled}" >
+                <instr 
+                    destdir="${out.instr.dir}"	
+                    metadatafile="${coverage.dir}/metadata.emma"
+                    merge="true"
+                >
+                    <instrpath>
+                        <fileset dir="${wsit.image}/lib" includes="*.jar" />
+                    </instrpath>
+                    
+                    <filter includes="com.sun.xml.ws.addressing.*"/>
+                    <filter includes="com.sun.xml.ws.api.tx*"/>
+                    <filter includes="com.sun.xml.ws.assembler.*"/>
+                    <filter includes="com.sun.xml.ws.encoding.*"/>
+                    <filter includes="com.sun.xml.ws.message.*"/>
+                    <filter includes="com.sun.xml.ws.mex.*"/>
+                    <filter includes="com.sun.xml.ws.policy.*"/>
+                    <filter includes="com.sun.xml.ws.rm.*"/>
+                    <filter includes="com.sun.xml.ws.runtime.*"/>
+                    <filter includes="com.sun.xml.ws.security.*"/>
+                    <filter includes="com.sun.xml.ws.transport.*"/>
+                    <filter includes="com.sun.xml.ws.tx.*"/>
+                    
+                    <filter includes="com.sun.xml.wss.jaxws.*"/>
+                    <filter includes="com.sun.xml.wss.provider.*"/>
+                </instr>
+            </emma>            
+            <!-- END: Emma code coverage specific stuff -->
+            
+            <java jar="${test.lib.dir}/harness.jar" fork="true">
+                <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
+                <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+                <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/>
+                <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>
+                
+                
+                <arg value="-report" />
+                <arg path="${logs.dir}" />
+                
+                <!-- BEGIN: Emma code coverage specific stuff -->
+                <arg value="-cp:override" />
+                <arg pathref="instr.override.path" />                
+                <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
+                <jvmarg value="-Demma.coverage.out.merge=true" />
+                <!-- END: Emma code coverage specific stuff -->    
+
+                <arguments />
+                <arg line="${args}"/>
+                
+                <!-->
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
+		<jvmarg value="-Xdebug"/>
+                <!-->
+            </java>
+            
+            <mkdir dir="${logs.dir}/junit-reports" />
+            <junitreport todir="${logs.dir}/junit-reports">
+                <fileset dir="${logs.dir}" includes="*.xml" />
+                <report format="frames" todir="${logs.dir}/junit-reports"/>
+            </junitreport>
+            
+            <!-- BEGIN: Emma code coverage specific stuff -->
+            <emma enabled="${emma.enabled}" >
+                <report sourcepath="${wsit.sources}" >
+                    <fileset dir="${coverage.dir}" >
+                        <include name="*.emma" />
+                    </fileset>
+                    
+                    <txt outfile="${coverage.dir}/coverage.txt" />
+                    <html outfile="${coverage.dir}/coverage.html" />
+                    <xml outfile="${coverage.dir}/coverage.xml" />
+                </report>
+            </emma>                        
+            <!-- END: Emma code coverage specific stuff -->
+            
+        </sequential>                 
+    </macrodef>
     
     <!-- BEGIN: Emma code coverage specific stuff -->
     <path id="emma.lib" >
@@ -150,101 +238,6 @@
         <delete dir="${out.instr.dir}"/>
         <delete dir="${coverage.dir}"/>
     </target>
-    
-    <!-- invokes Unit test-->
-    <macrodef name="run-tests">
-        <!--
-            These are the default args that are passed to the harness which mean that
-            the tests will be using the dist image of the wsit workspace , run the tests
-            using local transport and recursively scan for all the sub dirs under testcases
-
-            Please modify these options if you wish to test the harness in different
-            modes
-            For more information on the different command line options
-            refer to docs/index.html
-        -->
-        <element name="arguments" />                        
-        <sequential>
-            <antcall target="prepare"/>
-            
-            <!-- BEGIN: Emma code coverage specific stuff -->
-            <emma enabled="${emma.enabled}" >
-                <instr 
-                    destdir="${out.instr.dir}"	
-                    metadatafile="${coverage.dir}/metadata.emma"
-                    merge="true"
-                >
-                    <instrpath>
-                        <fileset dir="${wsit.image}/lib" includes="*.jar" />
-                    </instrpath>
-                    
-                    <filter includes="com.sun.xml.ws.addressing.*"/>
-                    <filter includes="com.sun.xml.ws.api.tx*"/>
-                    <filter includes="com.sun.xml.ws.assembler.*"/>
-                    <filter includes="com.sun.xml.ws.encoding.*"/>
-                    <filter includes="com.sun.xml.ws.message.*"/>
-                    <filter includes="com.sun.xml.ws.mex.*"/>
-                    <filter includes="com.sun.xml.ws.policy.*"/>
-                    <filter includes="com.sun.xml.ws.rm.*"/>
-                    <filter includes="com.sun.xml.ws.runtime.*"/>
-                    <filter includes="com.sun.xml.ws.security.*"/>
-                    <filter includes="com.sun.xml.ws.transport.*"/>
-                    <filter includes="com.sun.xml.ws.tx.*"/>
-                    
-                    <filter includes="com.sun.xml.wss.jaxws.*"/>
-                    <filter includes="com.sun.xml.wss.provider.*"/>
-                </instr>
-            </emma>            
-            <!-- END: Emma code coverage specific stuff -->
-            
-            <java jar="${test.lib.dir}/harness.jar" fork="true">
-                <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
-                <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
-                <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/>
-                <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>
-                
-                
-                <arg value="-report" />
-                <arg path="${logs.dir}" />
-                
-                <!-- BEGIN: Emma code coverage specific stuff -->
-                <arg value="-cp:override" />
-                <arg pathref="instr.override.path" />                
-                <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
-                <jvmarg value="-Demma.coverage.out.merge=true" />
-                <!-- END: Emma code coverage specific stuff -->    
-
-                <arguments />
-                <arg line="${args}"/>
-                
-                <!-->
-                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
-		<jvmarg value="-Xdebug"/>
-                <!-->
-            </java>
-            
-            <mkdir dir="${logs.dir}/junit-reports" />
-            <junitreport todir="${logs.dir}/junit-reports">
-                <fileset dir="${logs.dir}" includes="*.xml" />
-                <report format="frames" todir="${logs.dir}/junit-reports"/>
-            </junitreport>
-            
-            <!-- BEGIN: Emma code coverage specific stuff -->
-            <emma enabled="${emma.enabled}" >
-                <report sourcepath="${wsit.sources}" >
-                    <fileset dir="${coverage.dir}" >
-                        <include name="*.emma" />
-                    </fileset>
-                    
-                    <txt outfile="${coverage.dir}/coverage.txt" />
-                    <html outfile="${coverage.dir}/coverage.html" />
-                    <xml outfile="${coverage.dir}/coverage.xml" />
-                </report>
-            </emma>                        
-            <!-- END: Emma code coverage specific stuff -->
-            
-        </sequential>                 
-    </macrodef>
     
     <target name="main-hudson-no-get">
         <property name="noget" value="true"/>
