@@ -556,6 +556,10 @@ public final class RMServerTube extends TubeBase {
         //TODO.. Read STR element in csrElement if any
         if (this.secureReliableMessaging) {
             SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+            
+            // String sessionId = (String) packet.invocationProperties.get(Session.SESSION_ID_KEY);
+            // Session session = sessionManager.getSession(sessionId);
+            // String sctId = session.getSecurityInfo().getIdentifier();
             if (sct != null) {
                 String securityContextTokenId = sct.getIdentifier().toString();
                 WSTrustElementFactory wsTrustElemFactory = WSTrustElementFactory.newInstance();
