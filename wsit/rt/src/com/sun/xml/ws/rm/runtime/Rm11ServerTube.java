@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
@@ -75,14 +76,14 @@ public class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter processOtherProtocolRequest(PacketAdapter requestAdapter) {
+    protected PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (RmVersion.WSRM11.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
             // FIXME: split RM11 and RM10 processing
             return handleCloseSequenceAction(requestAdapter);
         } else if (RmVersion.WSRM11.makeConnectionAction.equals(requestAdapter.getWsaAction())) {
             return handleMakeConnectionAction(requestAdapter);
         } else {
-            return super.processOtherProtocolRequest(requestAdapter);
+            return super.processVersionSpecificProtocolRequest(requestAdapter);
         }
     }
 

@@ -35,12 +35,15 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
+import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -55,6 +58,8 @@ import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
@@ -67,13 +72,10 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
 
     protected Rm10ServerTube(AbstractRmServerTube original, TubeCloner cloner) {
         super(original, cloner);
-
-    // TODO initialize all instance variables
     }
 
     public Rm10ServerTube(WsitServerTubeAssemblyContext context) {
         super(context);
-    // TODO initialize all instance variables        
     }
 
     @Override
@@ -87,11 +89,11 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter processOtherProtocolRequest(PacketAdapter requestAdapter) {
+    protected PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (configuration.getRmVersion().lastAction.equals(requestAdapter.getWsaAction())) {
             return handleLastMessageAction(requestAdapter);
         } else {
-            return super.processOtherProtocolRequest(requestAdapter);
+            return super.processVersionSpecificProtocolRequest(requestAdapter);
         }
     }
 
@@ -125,32 +127,31 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
 
         // Read STR element in csrElement if any
         com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = csElement.getSecurityTokenReference();
-        String receivedSctId = null;
-        if (strType != null) { // RM messaging bound to a secured session
-            String activeSctId = requestAdapter.getSecurityContextTokenId();
-            if (activeSctId != null) {
-                com.sun.xml.ws.security.trust.elements.str.Reference strReference = com.sun.xml.ws.security.trust.WSTrustElementFactory.newInstance().createSecurityTokenReference(
-                        new com.sun.xml.ws.security.secext10.ObjectFactory().createSecurityTokenReference(strType)).getReference();
 
-                if (strReference instanceof com.sun.xml.ws.security.trust.elements.str.DirectReference) {
-                    receivedSctId = ((com.sun.xml.ws.security.trust.elements.str.DirectReference) strReference).getURIAttr().toString();
-                    if (!activeSctId.equals(receivedSctId)) {
-                        throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                                configuration,
-                                requestAdapter.getPacket(),
-                                LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(receivedSctId, activeSctId)));
-                    }
-                } else {
-                    throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                            configuration,
-                            requestAdapter.getPacket(),
-                            LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
-                }
-            } else {
+
+        String receivedSctId = null;
+        if (strType != null) { // RM messaging should be bound to a secured session
+            String activeSctId = requestAdapter.getSecurityContextTokenId();
+            if (activeSctId == null) {
                 throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),
                         LocalizationMessages.WSRM_1133_NO_SECURITY_TOKEN_IN_REQUEST_PACKET()));
+            }
+            try {
+                receivedSctId = Utilities.extractSecurityContextTokenId(strType);
+            } catch (RmException ex) {
+                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
+                        configuration,
+                        requestAdapter.getPacket(),
+                        ex.getMessage()));
+            }
+            
+            if (!activeSctId.equals(receivedSctId)) {
+                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
+                        configuration,
+                        requestAdapter.getPacket(),
+                        LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(receivedSctId, activeSctId)));
             }
         }
 
@@ -200,10 +201,24 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     /**
-     * TODO javadoc
+     * Handles last message request processing
+     * 
+     * @param  requestAdapter last message request packet adapter
+     * 
+     * @return acknowledgement response message wrapped in a response packet adapter
+     * 
+     * @exception UnknownSequenceFault if there is no such sequence registered with current 
+     *            sequence manager.
      */
-    protected PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) {
-        Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+    protected PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+        Sequence inboundSequence;
+        try {
+            inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+        } catch (UnknownSequenceException e) {
+            LOGGER.logException(e, getProtocolFaultLoggingLevel());
+            throw LOGGER.logException(new UnknownSequenceFault(configuration, requestAdapter.getPacket(), e.getMessage()), getProtocolFaultLoggingLevel());
+        }
+
         inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
 
         inboundSequence.close();
@@ -212,16 +227,15 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) {
+    protected PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         TerminateSequenceElement tsElement = requestAdapter.unmarshallMessage();
 
         Sequence inboundSequence;
         try {
             inboundSequence = sequenceManager.getSequence(tsElement.getIdentifier().getValue());
         } catch (UnknownSequenceException e) {
-            // TODO process exception
-//            throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(terminateSequenceId), terminateSequenceId));
-            throw e;
+            LOGGER.logException(e, getProtocolFaultLoggingLevel());
+            throw LOGGER.logException(new UnknownSequenceFault(configuration, requestAdapter.getPacket(), e.getMessage()), getProtocolFaultLoggingLevel());
         }
 
         // Formulate response if required:

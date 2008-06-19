@@ -33,11 +33,16 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
+//
+import com.sun.xml.ws.security.secext10.ObjectFactory;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.elements.str.DirectReference;
+import com.sun.xml.ws.security.trust.elements.str.Reference;
 
 /**
  * The non-instantiable utility class containing various common static utility methods 
@@ -46,8 +51,9 @@ import com.sun.xml.ws.rm.localization.RmLogger;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 final class Utilities {
-    private static final RmLogger LOGGER =  RmLogger.getLogger(Utilities.class);
-    
+
+    private static final RmLogger LOGGER = RmLogger.getLogger(Utilities.class);
+
     /**
      * Non-instantiable constructor
      */
@@ -67,5 +73,15 @@ final class Utilities {
         if (expected != null && !expected.equals(actual)) {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
         }
-    }    
+    }
+
+    public static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RmException {
+        Reference strReference = WSTrustElementFactory.newInstance().createSecurityTokenReference(
+                new ObjectFactory().createSecurityTokenReference(strType)).getReference();
+        if (!(strReference instanceof DirectReference)) {
+            throw LOGGER.logSevereException(
+                    new RmException(LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
+        }
+        return ((DirectReference) strReference).getURIAttr().toString();
+    }
 }

@@ -38,12 +38,15 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
+import com.sun.xml.ws.rm.faults.SequenceTerminatedFault;
+import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -52,6 +55,7 @@ import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
+import java.util.logging.Level;
 
 /**
  *
@@ -102,13 +106,19 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RmRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
                 }
             } else {
+                processRmHeaders(requestAdapter, true);
+
                 if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
-                    /*
-                    TODO: ordered case processing (suspend until it's this message's turn)
-                     */
+                    if (FlowControledFibers.INSTANCE.getUsedBufferSize(requestAdapter.getSequenceId()) > configuration.getDestinationBufferQuota()) {
+                        Sequence sequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+                        PacketAdapter responseAdapter = requestAdapter.createAckResponse(sequence, configuration.getRmVersion().sequenceAcknowledgementAction);
+
+                        return doReturnWith(responseAdapter.getPacket());
+                    }
+                    FlowControledFibers.INSTANCE.registerForResume(Fiber.current(), requestAdapter);
+                    return doSuspend(super.next);
                 }
 
-                processRmHeaders(requestAdapter, true);
                 return super.processRequest(requestAdapter.getPacket());
             }
         } catch (AbstractRmSoapFault ex) {
@@ -126,7 +136,18 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            // TODO response processing
+            /*
+             * TODO response processing:
+             * - store unacked response message
+             * - append RM headers
+             */
+
+            if (configuration.isOrderedDelivery()) {
+                /*
+                 * TODO: Resume fiber with the next request if possible
+                 */
+            }
+
             return super.processResponse(responsePacket);
         } finally {
             LOGGER.exiting();
@@ -149,7 +170,14 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * TODO javadoc
+     * Handles all protocol message request processing
+     * 
+     * @param  requestAdapter request packet adapter
+     * 
+     * @return protocol message response packet adapter
+     * 
+     * @exception AbstractRmSoapFault exception representing a protocol request 
+     *            message processing SOAP fault
      */
     private PacketAdapter processProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (configuration.getRmVersion().createSequenceAction.equals(requestAdapter.getWsaAction())) {
@@ -161,36 +189,71 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         } else if (configuration.getRmVersion().sequenceAcknowledgementAction.equals(requestAdapter.getWsaAction())) {
             return handleSequenceAcknowledgementAction(requestAdapter);
         } else {
-            return processOtherProtocolRequest(requestAdapter);
+            return processVersionSpecificProtocolRequest(requestAdapter);
         }
     }
 
-    protected PacketAdapter processOtherProtocolRequest(PacketAdapter requestAdapter) {
+    /**
+     * Handles all RM version-specific protocol message request processing
+     * 
+     * @param  requestAdapter request packet adapter
+     * 
+     * @return protocol message response packet adapter
+     * 
+     * @exception AbstractRmSoapFault exception representing a protocol request 
+     *            message processing SOAP fault
+     */
+    protected PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         throw new UnsupportedOperationException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(requestAdapter.getWsaAction()));
     }
 
     /**
-     * TODO javadoc
+     * Handles create sequence request processing
+     * 
+     * @param  requestAdapter create sequence request packet adapter
+     * 
+     * @return create sequence response message wrapped in a response packet adapter
+     * 
+     * @exception CreateSequenceRefusedFault in case of any problems while creating the sequence
      */
     protected abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault;
 
     /**
-     * TODO javadoc
+     * Handles terminate sequence request processing
+     * 
+     * @param  requestAdapter terminate sequence request packet adapter
+     * 
+     * @return terminate sequence response message wrapped in a response packet adapter
+     * 
+     * @exception UnknownSequenceFault if there is no such sequence registered with current 
+     *            sequence manager.
      */
-    protected abstract PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter);
+    protected abstract PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault;
 
     /**
-     * TODO javadoc
+     * Handles acknowledgement request message processing
+     * 
+     * @param  requestAdapter  acknowledgement request message packet adapter
+     * 
+     * @return response for the acknowledgement request message wrapped in a response packet adapter
+     * 
+     * @exception UnknownSequenceFault if there is no such sequence registered with current 
+     *            sequence manager.
+     * 
+     * @exception SequenceTerminatedFault if the sequence is currently in TERMINATING state
      */
-    protected PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) {
+    protected PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) throws UnknownSequenceFault, SequenceTerminatedFault {
 
         Sequence inboundSequence;
         try {
             inboundSequence = sequenceManager.getSequence(requestAdapter.getAckRequestedHeaderSequenceId());
         } catch (UnknownSequenceException e) {
-            // TODO process exception
-            // throw LOGGER.logSevereException(new InvalidSequenceException(LocalizationMessages.WSRM_3022_UNKNOWN_SEQUENCE_ID_IN_MESSAGE(id), id));
-            throw e;
+            LOGGER.logException(e, getProtocolFaultLoggingLevel());
+            throw LOGGER.logException(new UnknownSequenceFault(configuration, requestAdapter.getPacket(), e.getMessage()), getProtocolFaultLoggingLevel());
+        }
+
+        if (inboundSequence.getStatus() == Sequence.Status.TERMINATING) {
+            throw LOGGER.logException(new SequenceTerminatedFault(configuration, requestAdapter.getPacket(), ""), getProtocolFaultLoggingLevel());
         }
 
         inboundSequence.updateLastActivityTime();
@@ -199,9 +262,16 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * TODO javadoc
+     * Handles sequence acknowledgement message processing
+     * 
+     * @param  requestAdapter sequence acknowledgement message packet adapter
+     * 
+     * @return closes the transport and returns {@code null}
+     * 
+     * @exception UnknownSequenceFault if there is no such sequence registered with current 
+     *            sequence manager.
      */
-    protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) {
+    protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         processRmHeaders(requestAdapter, false);
 
         // FIXME maybe we should send acknowledgements back if any?
@@ -209,28 +279,68 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * TODO javadoc
+     * Returns a preconfigured logging level that should be used to log exceptions 
+     * related to protocol message processing.
+     * 
+     * @return common logging level for protocol message processing errors
      */
-    private void processRmHeaders(PacketAdapter requestAdapter, boolean expectSequenceHeader) {
+    protected final Level getProtocolFaultLoggingLevel() {
+        return Level.WARNING;
+    }
+
+    /**
+     * Processes the WS-RM headers on the request message
+     * 
+     * @param requestAdapter packet adapter containing the request message to be processed
+     * 
+     * @param expectSequenceHeader determines whether the message should contain 
+     *        a Sequence header or not
+     * 
+     * @exception UnknownSequenceFault if there is no such sequence registered with current 
+     *            sequence manager.
+     */
+    private void processRmHeaders(PacketAdapter requestAdapter, boolean expectSequenceHeader) throws UnknownSequenceFault {
         if (expectSequenceHeader) {
             if (requestAdapter.getSequenceId() == null) {
+                // TODO proper soap fault
                 throw new RmRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
             }
 
-            Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+            Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
             inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
         }
 
         String ackRequestedSequenceId = requestAdapter.getAckRequestedHeaderSequenceId();
         if (ackRequestedSequenceId != null) {
-            sequenceManager.getSequence(ackRequestedSequenceId).setAckRequestedFlag();
+            getSequenceOrSoapFault(requestAdapter.getPacket(), ackRequestedSequenceId).setAckRequestedFlag();
         }
 
         requestAdapter.processAcknowledgements(sequenceManager, getOutboundSequenceId4Request(requestAdapter));
     }
 
-    private String getOutboundSequenceId4Request(PacketAdapter requestAdapter) {
+    protected final String getOutboundSequenceId4Request(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         String sequenceId = requestAdapter.getSequenceId();
-        return (sequenceId != null) ? sequenceManager.getBoundSequence(requestAdapter.getSequenceId()).getId() : null;
+        if (sequenceId == null) {
+            return null;
+        }
+
+        Sequence boundSequence;
+        try {
+            boundSequence = sequenceManager.getBoundSequence(requestAdapter.getSequenceId());
+        } catch (UnknownSequenceException e) {
+            LOGGER.logException(e, getProtocolFaultLoggingLevel());
+            throw new UnknownSequenceFault(configuration, requestAdapter.getPacket(), requestAdapter.getSequenceId());
+        }
+
+        return (boundSequence != null) ? boundSequence.getId() : null;
+    }
+    
+    protected final Sequence getSequenceOrSoapFault(Packet packet, String sequenceId) throws UnknownSequenceFault {
+        try {
+             return sequenceManager.getSequence(sequenceId);
+        } catch (UnknownSequenceException e) {
+            LOGGER.logException(e, getProtocolFaultLoggingLevel());
+            throw LOGGER.logException(new UnknownSequenceFault(configuration, packet, e.getMessage()), getProtocolFaultLoggingLevel());
+        }        
     }
 }
