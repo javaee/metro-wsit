@@ -87,16 +87,15 @@ public final class WSTCPProtocolFinder implements ProtocolFinder {
                         if (loop > 2){
                             break;
                         }
-                        continue;
+                    } else if (count > 0) {
+                        protocolInfo.bytesRead += count;
                     }
                 }
             } catch (IOException ex){
-                ;
             } finally {
                 if ( count == -1 ){
                     return;
                 }
-                protocolInfo.bytesRead = count;
             }
         }
 
@@ -108,8 +107,7 @@ public final class WSTCPProtocolFinder implements ProtocolFinder {
             return;
         }
         
-        byteBuffer.position(0);
-        byteBuffer.limit(curPosition);
+        byteBuffer.flip();
         
         // Rule b - check protocol id
         try {

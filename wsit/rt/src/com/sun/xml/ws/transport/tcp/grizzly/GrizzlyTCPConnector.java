@@ -72,6 +72,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
         this.listener = listener;
         isPortUnificationMode = true;
         this.properties = properties;
+        port = -1;
     }
     
     public void listen() throws IOException {
