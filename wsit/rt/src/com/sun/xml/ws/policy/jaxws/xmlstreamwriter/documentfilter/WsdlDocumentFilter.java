@@ -42,6 +42,7 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.transport.tcp.wsit.PortAttributeInvocationTransformer;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -58,6 +59,7 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
         public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new FilteringInvocationProcessor(
                     writer,
+                    new PortAttributeInvocationTransformer(),
                     new MexImportFilteringStateMachine(),
                     new PrivateAttributeFilteringStateMachine(),
                     new PrivateElementFilteringStateMachine(
