@@ -68,7 +68,6 @@ public final class TCPTransportPolicyValidator implements PolicyAssertionValidat
     }
     
     public PolicyAssertionValidator.Fitness validateServerSide(final PolicyAssertion assertion) {
-        final QName assertionName = assertion.getName();
         return commonSupportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
     

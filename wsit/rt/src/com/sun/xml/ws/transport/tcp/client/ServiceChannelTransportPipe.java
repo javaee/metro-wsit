@@ -67,6 +67,10 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
     public ServiceChannelTransportPipe(@NotNull final WsitClientTubeAssemblyContext context) {
         super(context);
     }
+
+    public ServiceChannelTransportPipe(WsitClientTubeAssemblyContext context, int customTCPPort) {
+        super(context, customTCPPort);
+    }
     
     private ServiceChannelTransportPipe(final ServiceChannelTransportPipe that, final PipeCloner cloner) {
         super(that, cloner);
@@ -94,7 +98,8 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
                 if (logger.isLoggable(Level.FINE)) {
                     logger.log(Level.FINE, MessagesMessages.WSTCP_1003_TCP_SERVICE_TP_PROCESS_TRANSPORT_CREATE());
                 }
-                final ConnectionSession connectionSession = (ConnectionSession) packet.invocationProperties.get(TCPConstants.TCP_SESSION);
+                final ConnectionSession connectionSession = 
+                        (ConnectionSession) packet.invocationProperties.get(TCPConstants.TCP_SESSION);
                 channelContext = connectionSession.getServiceChannelContext();
                 clientTransport.setup(channelContext);
             }

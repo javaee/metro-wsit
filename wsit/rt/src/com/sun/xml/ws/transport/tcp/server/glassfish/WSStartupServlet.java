@@ -43,6 +43,7 @@ import com.sun.xml.ws.transport.tcp.server.TCPAdapter;
 import com.sun.xml.ws.transport.tcp.server.TCPContext;
 import com.sun.xml.ws.transport.tcp.server.TCPResourceLoader;
 import com.sun.xml.ws.transport.tcp.server.TCPServletContext;
+import com.sun.xml.ws.transport.tcp.server.WSTCPModule;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -60,9 +61,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * WS startup servlet for Servlet based deployment
+ * Deprecared, use com.sun.xml.ws.transport.tcp.server.WSStartupServlet instead.
  * @author JAX-WS team
  */
 @SuppressWarnings({"unchecked"})
+@Deprecated
 public final class WSStartupServlet extends HttpServlet
         implements ServletContextAttributeListener, ServletContextListener {
     
@@ -71,13 +75,15 @@ public final class WSStartupServlet extends HttpServlet
     
     private static final String JAXWS_RI_RUNTIME = "/WEB-INF/sun-jaxws.xml";
     
-    private transient WSTCPLifeCycleModule transportModule;
+    private transient WSTCPModule transportModule;
     
     private List<TCPAdapter> adapters;
     
+    @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     }
     
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
     }
     
@@ -92,7 +98,7 @@ public final class WSStartupServlet extends HttpServlet
         final ServletContainer container = new ServletContainer(servletContext);
         
         try {
-            transportModule = WSTCPLifeCycleModule.getInstance();
+            transportModule = WSTCPModule.getInstance();
             final DeploymentDescriptorParser<TCPAdapter> parser = new DeploymentDescriptorParser<TCPAdapter>(
                     classLoader, new TCPResourceLoader(context), container, TCPAdapter.FACTORY);
             final URL sunJaxWsXml = context.getResource(JAXWS_RI_RUNTIME);

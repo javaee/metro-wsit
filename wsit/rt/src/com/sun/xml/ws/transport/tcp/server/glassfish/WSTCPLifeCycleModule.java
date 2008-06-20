@@ -42,11 +42,9 @@ import com.sun.appserv.server.ServerLifecycleException;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.transport.tcp.grizzly.GrizzlyTCPConnector;
 import com.sun.xml.ws.transport.tcp.server.*;
-import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * GlassFish lifecycle module, which works as SOAP/TCP endpoints registry.
@@ -54,36 +52,15 @@ import java.util.logging.Logger;
  * @author Alexey Stashok
  */
 
-public final class WSTCPLifeCycleModule implements LifecycleListener {
-    private static WSTCPLifeCycleModule instance;
-    
-    private static final Logger logger = Logger.getLogger(
-            com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
-    
+public final class WSTCPLifeCycleModule extends WSTCPModule implements LifecycleListener {
     private WSTCPConnector connector;
     private WSTCPDelegate delegate;
     private Properties properties;
     
-    /**
-     * Method returns initialized WSTCPLifeCycleModule instance
-     * @throws IllegalStateException if instance was not initialized
-     */
-    public static @NotNull WSTCPLifeCycleModule getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException(MessagesMessages.WSTCP_0007_TRANSPORT_MODULE_NOT_INITIALIZED());
-        }
-        
-        return instance;
-    }
-    
-    private static void setInstance(WSTCPLifeCycleModule instance) {
-        WSTCPLifeCycleModule.instance = instance;
-    }
-    
     public void handleEvent(@NotNull final LifecycleEvent lifecycleEvent) throws ServerLifecycleException {
         final int eventType = lifecycleEvent.getEventType();
         if (eventType == LifecycleEvent.INIT_EVENT) {
-            WSTCPLifeCycleModule.setInstance(this);
+            WSTCPModule.setInstance(this);
             logger.log(Level.FINE, "WSTCPLifeCycleModule.INIT_EVENT");
             properties = (Properties) lifecycleEvent.getData();
         } else if (eventType == LifecycleEvent.STARTUP_EVENT) {
@@ -103,7 +80,7 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
             }
         } else if (eventType == LifecycleEvent.SHUTDOWN_EVENT) {
             logger.log(Level.FINE, "WSTCPLifeCycleModule.SHUTDOWN_EVENT");
-            WSTCPLifeCycleModule.setInstance(null);
+            WSTCPModule.setInstance(null);
             
             if (delegate != null) {
                 delegate.destroy();
@@ -124,5 +101,14 @@ public final class WSTCPLifeCycleModule implements LifecycleListener {
     public void free(@NotNull final String contextPath,
             @NotNull final List<TCPAdapter> adapters) {
         delegate.freeAdapters(contextPath, adapters);
+    }
+
+    @Override
+    public int getPort() {
+        if (connector != null) {
+            return connector.getPort();
+        }
+        
+        return -1;
     }
 }

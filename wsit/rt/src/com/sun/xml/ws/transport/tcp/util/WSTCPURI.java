@@ -53,6 +53,10 @@ public final class WSTCPURI implements com.sun.xml.ws.transport.tcp.connectionca
     public String host;
     public int port;
     public String path;
+    
+    // The TCP port, where connection will be established.
+    // If -1 then port value will be used.
+    public int customPort = -1;
 
     private String uri2string;
     private Map<String, String> params;
@@ -106,22 +110,54 @@ public final class WSTCPURI implements com.sun.xml.ws.transport.tcp.connectionca
         
         return new WSTCPURI(uri.getHost(), uri.getPort(), path, params, uri.toASCIIString());
     }
+
+    /**
+     * Get custom TCP port, where connection should be established
+     * @return custom TCP port
+     */
+    public int getCustomPort() {
+        return customPort;
+    }
+
+    /**
+     * Set custom TCP port, where connection should be established
+     * @param customPort custom TCP port
+     */
+    public void setCustomPort(int customPort) {
+        this.customPort = customPort;
+    }
     
+    public int getEffectivePort() {
+        if (customPort == -1) {
+            return port;
+        }
+        
+        return customPort;
+    }
+    
+    @Override
     public String toString() {
         return uri2string;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof WSTCPURI) {
             WSTCPURI toCmp = (WSTCPURI) o;
-            return port == toCmp.port && host.equals(toCmp.host);
+            boolean basicResult = (port == toCmp.port && host.equals(toCmp.host));
+            if (customPort == -1 && toCmp.customPort == -1) {
+                return basicResult;
+            } else {
+                return basicResult && (customPort == toCmp.customPort);
+            }
         }
         
         return false;
     }
     
+    @Override
     public int hashCode() {
-        return host.hashCode() + port;
+        return host.hashCode() + (port << 2) + customPort;
     }
 
     public ConnectionSession createConnection() throws IOException {

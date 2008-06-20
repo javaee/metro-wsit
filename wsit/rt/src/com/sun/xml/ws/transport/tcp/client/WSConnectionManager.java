@@ -189,7 +189,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1034_CONNECTION_MANAGER_CREATE_SESSION_ENTER(tcpURI));
             }
-            final Connection connection = Connection.create(tcpURI.host, tcpURI.port);
+            final Connection connection = Connection.create(tcpURI.host, tcpURI.getEffectivePort());
             doSendMagicAndCheckVersions(connection);
             final ConnectionSession connectionSession = new ClientConnectionSession(connection, this);
             

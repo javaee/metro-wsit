@@ -37,23 +37,32 @@
 package com.sun.xml.ws.transport.tcp.wsit;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.transport.tcp.client.*;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
  * @author Alexey Stashok
  */
 public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client.TCPTransportPipeFactory {
     private static final QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
-    
+
     @Override
     public Pipe doCreate(@NotNull final ClientPipeAssemblerContext context) {
         return doCreate(context, true);
@@ -64,7 +73,7 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
             return null;
         }
         
-        setClientSettingsIfRequired(context.getWsdlModel());
+        initializeConnectionManagement(context.getWsdlModel());
         if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
             return new ServiceChannelTransportPipe(context);
         }
@@ -77,19 +86,21 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
             return null;
         }
         
-        setClientSettingsIfRequired(context.getWsdlPort());
+        initializeConnectionManagement(context.getWsdlPort());
+        int customTCPPort = retrieveCustomTCPPort(context.getWsdlPort());
+        
         if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
-            return PipeAdapter.adapt(new ServiceChannelTransportPipe(context));
+            return PipeAdapter.adapt(new ServiceChannelTransportPipe(context, customTCPPort));
         }
         
-        return PipeAdapter.adapt(new TCPTransportPipe(context));
+        return PipeAdapter.adapt(new TCPTransportPipe(context, customTCPPort));
     }
     
     /**
      * Sets the client ConnectionManagement settings, which are passed via cliend
      * side policies for ServiceChannelWS
      */
-    private static void setClientSettingsIfRequired(WSDLPort port) {
+    private static void initializeConnectionManagement(WSDLPort port) {
         PolicyConnectionManagementSettingsHolder instance = 
                 PolicyConnectionManagementSettingsHolder.getInstance();
         
@@ -100,6 +111,46 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
                             PolicyConnectionManagementSettingsHolder.createSettingsInstance(port);
                 }
             }
+        }
+    }
+    
+    private static int retrieveCustomTCPPort(WSDLPort port) {
+        try {
+            WSDLModel model = port.getBinding().getOwner();
+            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
+
+            if (mapWrapper != null) {
+                PolicyMap policyMap = mapWrapper.getPolicyMap();
+                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
+                Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+
+                if (policy != null && policy.contains(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
+                    /* if client set to choose optimal transport and server has TCP transport policy
+                    then need to check server side policy "enabled" attribute*/
+                    for (AssertionSet assertionSet : policy) {
+                        for (PolicyAssertion assertion : assertionSet) {
+                            if (assertion.getName().equals(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
+                                String value = assertion.getAttributeValue(new QName("port"));
+                                if (value == null) {
+                                    return -1;
+                                }
+                                value = value.trim();
+
+                                try {
+                                    return Integer.parseInt(value);
+                                } catch(NumberFormatException e) {
+                                }
+                                
+                                return -1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        } catch (PolicyException e) {
+            throw new WebServiceException(e);
         }
     }
 }

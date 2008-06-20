@@ -50,6 +50,7 @@ import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings;
 import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings.ConnectionManagementSettingsHolder;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;
@@ -104,7 +105,7 @@ public class PolicyConnectionManagementSettingsHolder
             WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
             if (mapWrapper != null) {
                 PolicyMap policyMap = mapWrapper.getPolicyMap();
-                PolicyMapKey endpointKey = policyMap.createWsdlEndpointScopeKey(com.sun.xml.ws.transport.tcp.util.TCPConstants.SERVICE_CHANNEL_WS_NAME,
+                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(com.sun.xml.ws.transport.tcp.util.TCPConstants.SERVICE_CHANNEL_WS_NAME,
                         com.sun.xml.ws.transport.tcp.util.TCPConstants.SERVICE_CHANNEL_WS_PORT_NAME);
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
                 if (policy != null && policy.contains(TCPConstants.TCPTRANSPORT_CONNECTION_MANAGEMENT_ASSERTION)) {

@@ -75,23 +75,30 @@ public class TCPTransportPipe implements Pipe {
     final protected Codec defaultCodec;
     final protected WSBinding wsBinding;
     final protected WSService wsService;
+    final protected int customTCPPort;
     
     public TCPTransportPipe(final ClientPipeAssemblerContext context) {
-        this(context.getService(), context.getBinding(), context.getCodec());
+        this(context.getService(), context.getBinding(), context.getCodec(), -1);
     }
 
     public TCPTransportPipe(final WsitClientTubeAssemblyContext context) {
-        this(context.getService(), context.getBinding(), context.getCodec());
-    }    
+        this(context, -1);
+    }
+
+    public TCPTransportPipe(WsitClientTubeAssemblyContext context, int customTCPPort) {
+        this(context.getService(), context.getBinding(), context.getCodec(), customTCPPort);
+    }
     
-    protected TCPTransportPipe(final WSService wsService, final WSBinding wsBinding, final Codec defaultCodec) {
+    protected TCPTransportPipe(final WSService wsService, final WSBinding wsBinding, 
+            final Codec defaultCodec, final int customTCPPort) {
         this.wsService = wsService;
         this.wsBinding = wsBinding;
         this.defaultCodec = defaultCodec;
+        this.customTCPPort = customTCPPort;
     }
     
     protected TCPTransportPipe(final TCPTransportPipe that, final PipeCloner cloner) {
-        this(that.wsService, that.wsBinding, that.defaultCodec.copy());
+        this(that.wsService, that.wsBinding, that.defaultCodec.copy(), that.customTCPPort);
         cloner.add(that, this);
     }
     
@@ -223,6 +230,7 @@ public class TCPTransportPipe implements Pipe {
         
         final WSTCPURI tcpURI = WSTCPURI.parse(uri);
         if (tcpURI == null) throw new WebServiceException(MessagesMessages.WSTCP_0005_INVALID_EP_URL(uri.toString()));
+        tcpURI.setCustomPort(customTCPPort);
         final ChannelContext channelContext = wsConnectionManager.openChannel(tcpURI, wsService, wsBinding, defaultCodec);
         clientTransport.setup(channelContext);
     }
