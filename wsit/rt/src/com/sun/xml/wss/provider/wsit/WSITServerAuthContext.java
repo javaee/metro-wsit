@@ -311,20 +311,28 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), ex);
             thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
         } catch (XWSSecurityException xwse) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), xwse);
             thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
             
         } catch (XWSSecurityRuntimeException xwse) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), xwse);
             thereWasAFault = true;
               SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
             
         }  catch (WebServiceException xwse) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), xwse);
             thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
@@ -335,6 +343,13 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                     LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), se);
             thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
+        } catch (Exception ex) {
+            //NPE's from server need to be handled as well
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), ex);
+            thereWasAFault = true;
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
         }
         
