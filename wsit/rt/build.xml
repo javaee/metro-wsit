@@ -343,8 +343,6 @@
                 </fileset>
             </services>
         </combine-jars-macro>
-       <!-- <create-OSGi-bundle jarname="${name}-rt"  jar-tmpdir="${rtjar-tmpdir}" />-->
-
     </target>
 
     <target name="combine-jars-v3-runtime">
@@ -361,7 +359,7 @@
             </services>
         </combine-jars-macro>
         <create-OSGi-bundle jarname="${name}-rt"  jar-tmpdir="${rtjar-tmpdir}" />
-        </target>
+    </target>
 
 
     <target name="combine-jars-api">

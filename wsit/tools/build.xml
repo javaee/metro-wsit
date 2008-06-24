@@ -132,25 +132,14 @@
                 </fileset>
             </services>
         </combine-jars-macro>
-        <create-OSGi-bundle jarname="${name}-tools"  jar-tmpdir="build/classes" />
+        <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
+            <arg value="build"/>
+            <arg line="-classpath ../${dist.image.wsit.lib.dir}/${name}-tools.jar"/>
+            <arg line="-output ../${dist.image.wsit.v3.dir}"/>
+            <arg value="${name}-tools.bnd"/>
+        </java>
     </target>
 
-    <macrodef name="create-OSGi-bundle">
-
-        <attribute name="jarname"/>
-        <attribute name="jar-tmpdir"/>
-        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
-        <sequential>
-        <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
-            <arg line="build -classpath"/>
-            <arg value="../@{dist-image-dir}/@{jarname}.jar"/>
-            <arg value="@{jarname}.bnd"/>
-        </java>
-        <!--This is important as the jar gets generated in the rt folder itself-->
-        <move  file="@{jarname}.jar" todir="../${dist.image.wsit.v3.dir}"       />
-        </sequential>
-    </macrodef>
-    
     <target name="test.resources.copy"
             description="Copy test resources before running tests">
         <copy todir="build/test/unit/data">
