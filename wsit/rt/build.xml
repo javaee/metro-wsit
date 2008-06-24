@@ -165,13 +165,12 @@
         <attribute name="jar-tmpdir"/>
         <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
         <sequential>
-        <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
-            <arg line="build -classpath"/>
-            <arg value="../@{dist-image-dir}/@{jarname}.jar"/>
-            <arg value="@{jarname}.bnd"/>
-        </java>
-        <!--This is important as the jar gets generated in the rt folder itself-->
-         <move  file="@{jarname}.jar" todir="../${dist.image.wsit.v3.dir}"       />
+            <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
+                <arg value="build"/>
+                <arg line="-classpath ../@{dist-image-dir}/@{jarname}.jar"/>
+                <arg line="-output ../${dist.image.wsit.v3.dir}"/>
+                <arg value="@{jarname}.bnd"/>
+            </java>
         </sequential>
     </macrodef>
 
