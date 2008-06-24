@@ -325,7 +325,7 @@ public abstract class PacketAdapter {
     public final boolean isFault() {
         return (message == null) ? false : message.isFault();
     }
-
+    
     /**
      * TODO javadoc
      * 
@@ -435,16 +435,28 @@ public abstract class PacketAdapter {
 
     public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
 
-    /**
-     * TODO javadoc
-     */
-    public String getSecurityContextTokenId() {
+    public Session getSession() {
         String sessionId = (String) packet.invocationProperties.get(Session.SESSION_ID_KEY);
         if (sessionId == null) {
             return null;
         }
 
-        Session session = SessionManager.getSessionManager().getSession(sessionId);
+        return SessionManager.getSessionManager().getSession(sessionId);
+    }
+
+    public void setSession(String sessionId) {
+        packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);        
+    }
+    
+    public boolean hasSession() {
+        return getSession() != null;
+    }
+
+    /**
+     * TODO javadoc
+     */
+    public String getSecurityContextTokenId() {
+        Session session = getSession();
         return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
 
 // TODO remove old code once this new one is proven to work

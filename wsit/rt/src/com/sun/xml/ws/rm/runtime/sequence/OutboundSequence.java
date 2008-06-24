@@ -38,10 +38,14 @@ package com.sun.xml.ws.rm.runtime.sequence;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * TODO javadoc
@@ -51,48 +55,91 @@ import java.util.List;
 public class OutboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
+    //
+    private final List<Long> unackedMessageIdentifiers;
+    private final Map<Long, Object> weakMessageStorage;
+    private final Map<Long, Long> weakIdtoCorrelationIdMap;
+    
 
-    public OutboundSequence(SequenceData data) {
-        super(data);
+    public OutboundSequence(
+            String sequenceId,
+            String securityContextTokenId,
+            long expirationTime) {
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1);
+
+        this.unackedMessageIdentifiers = new LinkedList<Long>();
+        this.weakMessageStorage = new WeakHashMap<Long, Object>();
+        this.weakIdtoCorrelationIdMap = new WeakHashMap<Long, Long>();
     }
 
     @Override
-    public long getNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+    protected Collection<Long> getUnackedMessageIdStorage() {
+        return unackedMessageIdentifiers;
+    }
+
+    @Override
+    public long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
         if (getStatus() != Sequence.Status.CREATED) {
             throw new IllegalStateException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_NEXT_MESSAGE_ID_REJECTED(getId(), getStatus()));
         }
-        
+
         try {
-            data.acquireMessageIdDataReadWriteLock();
-            
-            long nextId = data.incrementAndGetLastMessageId();
+            messageIdLock.writeLock().lock();
+
+            long nextId = getLastMessageId() + 1;
             if (nextId > Sequence.MAX_MESSAGE_ID) {
-                throw LOGGER.logSevereException(new MessageNumberRolloverException(data.getSequenceId(), nextId));
+                throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
             }
 
-            data.addUnackedMessageId(nextId);
+            updateLastMessageId(nextId);
+            
+            // making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
+            unackedMessageIdentifiers.add(new Long(nextId)); 
             return nextId;
         } finally {
-            data.releaseMessageIdDataReadWriteLock();
+            messageIdLock.writeLock().unlock();
         }
     }
 
-    public long getLastMessageId() {
-        return data.getLastMessageId();
+    @Override
+    public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
+        Long idKey;
+        try {
+            messageIdLock.readLock().lock();
+            int index = unackedMessageIdentifiers.indexOf(id);
+            if (index >= 0) { // the id is in the list
+                idKey = unackedMessageIdentifiers.get(index);
+            } else {
+                idKey = new Long(id); // creating a new uncached long object that GC can dispose
+            }            
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+
+        // we hold message while correlation id is still around in id-to-correlationId map
+        // we hold correlation id while id is still around in unacked ids list
+        Long correlationIdKey = new Long(correlationId);
+        weakIdtoCorrelationIdMap.put(idKey, correlationIdKey);
+        weakMessageStorage.put(correlationIdKey, message); 
+    }
+
+    @Override
+    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException {
+        return weakMessageStorage.get(correlationId);
     }
 
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
         // NOTE: This method will most likely not be used in our implementation as we expect range-based 
         //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
-        if (!data.removeUnackedMessageId(messageId)) {
+        if (!unackedMessageIdentifiers.remove(messageId)) {
             throw new IllegalMessageIdentifierException(messageId);
         }
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
         try {
-            data.acquireMessageIdDataReadWriteLock();
-            
+            messageIdLock.writeLock().lock();
+
             if (ranges == null || ranges.isEmpty()) {
                 return;
             }
@@ -109,20 +156,20 @@ public class OutboundSequence extends AbstractSequence {
                     }
                 });
             }
-            
+
             // check proper bounds of acked ranges
             AckRange lastAckRange = ranges.get(ranges.size() - 1);
-            if (data.getLastMessageId() < lastAckRange.upper) {
+            if (getLastMessageId() < lastAckRange.upper) {
                 throw new IllegalMessageIdentifierException(lastAckRange.upper);
             }
-            
-            if (data.noUnackedMessageIds()) {
+
+            if (unackedMessageIdentifiers.isEmpty()) {
                 // we have checked the ranges are ok and there's nothing to acknowledge.
                 return;
             }
-            
+
             // acknowledge messages
-            Iterator<Long> unackedIterator = data.getAllUnackedIndexes().iterator();
+            Iterator<Long> unackedIterator = unackedMessageIdentifiers.iterator();
             Iterator<AckRange> rangeIterator = ranges.iterator();
             AckRange currentRange = rangeIterator.next();
             while (unackedIterator.hasNext()) {
@@ -136,7 +183,7 @@ public class OutboundSequence extends AbstractSequence {
                 }
             }
         } finally {
-            data.releaseMessageIdDataReadWriteLock();
+            messageIdLock.writeLock().unlock();
         }
     }
 }

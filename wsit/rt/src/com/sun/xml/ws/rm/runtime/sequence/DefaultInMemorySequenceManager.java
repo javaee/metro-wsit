@@ -37,9 +37,7 @@ package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.Status;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -77,20 +75,11 @@ public class DefaultInMemorySequenceManager implements SequenceManager {
     }
 
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InMemorySequenceData(
-                new LinkedList<Long>(), 
-                sequenceId, 
-                strId, 
-                expirationTime, 
-                Sequence.MIN_MESSAGE_ID - 1, Status.CREATED, false);
-
-        return registerSequence(new OutboundSequence(data));
+        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime));
     }
 
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InMemorySequenceData(new TreeSet<Long>(), sequenceId, strId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, Status.CREATED, false);
-
-        return registerSequence(new InboundSequence(data));
+        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime));
     }
 
     public String generateSequenceUID() {

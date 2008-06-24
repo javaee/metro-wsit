@@ -37,7 +37,10 @@ package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
@@ -50,13 +53,22 @@ import java.util.List;
 public class InboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
+    //
+    private final Set<Long> unackedMessageIdentifiers;
 
-    public InboundSequence(SequenceData data) {
-        super(data);
+    public InboundSequence(
+            String sequenceId,
+            String securityContextTokenId,
+            long expirationTime) {
+
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID);
+
+        this.unackedMessageIdentifiers = new TreeSet<Long>();
     }
 
-    public long getLastMessageId() {
-        return data.getLastMessageId();
+    @Override
+    protected Collection<Long> getUnackedMessageIdStorage() {
+        return unackedMessageIdentifiers;
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException {
@@ -73,28 +85,28 @@ public class InboundSequence extends AbstractSequence {
         if (getStatus() != Sequence.Status.CREATED) {
             throw new IllegalStateException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getStatus()));
         }
-        
+
         try {
-            data.acquireMessageIdDataReadWriteLock();
-            
-            if (messageId > data.getLastMessageId()) {
+            messageIdLock.writeLock().lock();
+
+            if (messageId > getLastMessageId()) {
                 // new message - note that this will work even for the first message that arrives
-                if (data.getLastMessageId() + 1 != messageId) {
+                if (getLastMessageId() + 1 != messageId) {
                     // some message(s) got lost...
-                    for (long lostMessageId = data.getLastMessageId() + 1; lostMessageId < messageId; lostMessageId++) {
-                        data.addUnackedMessageId(lostMessageId);
+                    for (long lostIdentifier = getLastMessageId() + 1; lostIdentifier < messageId; lostIdentifier++) {
+                        unackedMessageIdentifiers.add(lostIdentifier);
                     }
                 }
-                data.updateLastMessageId(messageId);
+                updateLastMessageId(messageId);
             } else {
-                if (!data.removeUnackedMessageId(messageId)) {
+                if (!unackedMessageIdentifiers.remove(messageId)) {
                     // duplicate message
                     // FIXME change exception to DuplicateMessageException
                     throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
                 }
             }
         } finally {
-            data.releaseMessageIdDataReadWriteLock();
+            messageIdLock.writeLock().unlock();
         }
     }
 }

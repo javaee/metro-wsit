@@ -156,7 +156,7 @@ abstract class ClientSession {
 
         requestAdapter.appendSequenceHeader(
                 outboundSequenceId,
-                sequenceManager.getSequence(outboundSequenceId).getNextMessageId());
+                sequenceManager.getSequence(outboundSequenceId).generateNextMessageId());
         if (isPendingAckRequest()) {
             requestAdapter.appendAckRequestedHeader(outboundSequenceId);
             lastAckRequestedTime.set(System.currentTimeMillis());

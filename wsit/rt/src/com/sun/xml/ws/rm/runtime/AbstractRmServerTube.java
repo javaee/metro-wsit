@@ -106,12 +106,30 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RmRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
                 }
             } else {
-                processRmHeaders(requestAdapter, true);
+                processNonSequenceRmHeaders(requestAdapter);
+                Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
+                if (duplicatesNotAllowed()) {
+                    if (inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
+                        Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+                        Object storedMessage = outboundSequence.retrieveMessage(requestAdapter.getMessageNumber());
+
+                        PacketAdapter responseAdapter;
+                        if (storedMessage instanceof Packet) {
+                            responseAdapter = PacketAdapter.getInstance(configuration, (Packet) storedMessage);
+                            responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
+                        } else if (storedMessage == null) {
+                            responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
+                        } else {
+                            throw new AssertionError("Unexpected message packet type: " + storedMessage.getClass().getName());
+                        }
+
+                        doReturnWith(responseAdapter.getPacket());
+                    }
+                }
 
                 if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
-                    if (FlowControledFibers.INSTANCE.getUsedBufferSize(requestAdapter.getSequenceId()) > configuration.getDestinationBufferQuota()) {
-                        Sequence sequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-                        PacketAdapter responseAdapter = requestAdapter.createAckResponse(sequence, configuration.getRmVersion().sequenceAcknowledgementAction);
+                    if (FlowControledFibers.INSTANCE.getUsedBufferSize(inboundSequence.getId()) > configuration.getDestinationBufferQuota()) {
+                        PacketAdapter responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
 
                         return doReturnWith(responseAdapter.getPacket());
                     }
@@ -127,7 +145,6 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
-            requestAdapter.getPacket();
             LOGGER.exiting();
         }
     }
@@ -136,16 +153,32 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            /*
-             * TODO response processing:
-             * - store unacked response message
-             * - append RM headers
-             */
+            PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
+            Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
+            Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+
+            inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
+
+            responseAdapter.appendSequenceHeader(
+                    outboundSequence.getId(),
+                    outboundSequence.generateNextMessageId());
+
+            // we allways request acknowledgement (at least for this response)
+            responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+
+            if (duplicatesNotAllowed()) {
+                outboundSequence.storeMessage(
+                        requestAdapter.getMessageNumber(), 
+                        responseAdapter.getMessageNumber(), 
+                        responseAdapter.getPacket());
+            }
+
+            // we apply acknowledgement only after the message was stored, because otherwise we would
+            // send a stale acknowledgement data in case of resend
+            responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
 
             if (configuration.isOrderedDelivery()) {
-                /*
-                 * TODO: Resume fiber with the next request if possible
-                 */
+                FlowControledFibers.INSTANCE.tryResume(inboundSequence.getId(), inboundSequence.getLastMessageId() + 1);
             }
 
             return super.processResponse(responsePacket);
@@ -272,7 +305,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      *            sequence manager.
      */
     protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
-        processRmHeaders(requestAdapter, false);
+        processNonSequenceRmHeaders(requestAdapter);
 
         // FIXME maybe we should send acknowledgements back if any?
         return requestAdapter.closeTransportAndReturnNull();
@@ -289,27 +322,14 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     * Processes the WS-RM headers on the request message
+     * Processes the WS-RM headers on the request message. Does not however process Sequence header.
      * 
      * @param requestAdapter packet adapter containing the request message to be processed
-     * 
-     * @param expectSequenceHeader determines whether the message should contain 
-     *        a Sequence header or not
      * 
      * @exception UnknownSequenceFault if there is no such sequence registered with current 
      *            sequence manager.
      */
-    private void processRmHeaders(PacketAdapter requestAdapter, boolean expectSequenceHeader) throws UnknownSequenceFault {
-        if (expectSequenceHeader) {
-            if (requestAdapter.getSequenceId() == null) {
-                // TODO proper soap fault
-                throw new RmRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
-            }
-
-            Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
-            inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
-        }
-
+    private void processNonSequenceRmHeaders(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         String ackRequestedSequenceId = requestAdapter.getAckRequestedHeaderSequenceId();
         if (ackRequestedSequenceId != null) {
             getSequenceOrSoapFault(requestAdapter.getPacket(), ackRequestedSequenceId).setAckRequestedFlag();
@@ -334,13 +354,17 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
         return (boundSequence != null) ? boundSequence.getId() : null;
     }
-    
+
     protected final Sequence getSequenceOrSoapFault(Packet packet, String sequenceId) throws UnknownSequenceFault {
         try {
-             return sequenceManager.getSequence(sequenceId);
+            return sequenceManager.getSequence(sequenceId);
         } catch (UnknownSequenceException e) {
             LOGGER.logException(e, getProtocolFaultLoggingLevel());
             throw LOGGER.logException(new UnknownSequenceFault(configuration, packet, e.getMessage()), getProtocolFaultLoggingLevel());
-        }        
+        }
+    }
+
+    private boolean duplicatesNotAllowed() {
+        return configuration.getDeliveryAssurance() != Configuration.DeliveryAssurance.AT_LEAST_ONCE;
     }
 }

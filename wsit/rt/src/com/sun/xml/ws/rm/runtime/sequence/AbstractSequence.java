@@ -38,10 +38,15 @@ package com.sun.xml.ws.rm.runtime.sequence;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * TODO javadoc
@@ -50,105 +55,178 @@ import java.util.List;
  */
 public abstract class AbstractSequence implements Sequence {
 
-    protected final SequenceData data;
+    protected final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables     
+    //
+    private final String sequenceId;
+    private final String boundSecurityTokenReferenceId;
+    private final long expirationTime;
+    //
+    private final AtomicReference<Status> status;
+    private final AtomicBoolean ackRequestedFlag;
+    //
+    private long lastMessageId;
+    private long lastActivityTime;
 
     /**
      * Initializes instance fields.
      * 
      * @param id sequence identifier
      * 
-     * @param expirationTime sequence expiration time
+     * @param securityContextTokenId security context token identifier bound to this sequence
      * 
-     * @param unackedMessageIdentifiersStorage instance of a collection imlementation that should be used as a storage 
-     *        for unacknowledged message identifiers on the sequence. <b>Note that the child implementation is responsible 
-     *        for keeping the storage sorted! Otherwise a call to {@link #getAcknowledgedMessageIds()} may return undefined
-     *        results.</b>
+     * @param expirationTime sequence expiration time
      */
-    protected AbstractSequence(SequenceData data) {
-        this.data = data;
+    protected AbstractSequence(
+            String sequenceId,
+            String securityContextTokenId,
+            long expirationTime,
+            long initalLastMessageId) {
+
+        this.sequenceId = sequenceId;
+        this.boundSecurityTokenReferenceId = securityContextTokenId;
+        this.expirationTime = expirationTime;
+        this.status = new AtomicReference<Status>(Status.CREATED);
+        this.ackRequestedFlag = new AtomicBoolean(false);
+        this.lastActivityTime = System.currentTimeMillis();
+        this.lastMessageId = initalLastMessageId;
     }
+
+    protected abstract Collection<Long> getUnackedMessageIdStorage();
 
     public String getId() {
-        return data.getSequenceId();
+        return sequenceId; // no need to synchronize
     }
 
-    public long getNextMessageId() throws UnsupportedOperationException {
+    public String getBoundSecurityTokenReferenceId() {
+        return boundSecurityTokenReferenceId;
+    }
+
+    public long generateNextMessageId() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
+    }
+
+
+    public long getLastMessageId() {
+        try {
+            messageIdLock.readLock().lock();
+            return lastMessageId;
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+    }
+    
+    protected final long updateLastMessageId(long newValue) {
+        try {
+            messageIdLock.writeLock().lock();
+            long oldValue = lastMessageId;
+            lastMessageId = newValue;
+            return oldValue;
+        } finally {
+            messageIdLock.writeLock().unlock();
+        }        
+    }
+    
+    public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
+    }
+
+    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
     }
 
     public List<AckRange> getAcknowledgedMessageIds() {
-        if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
-            // no message associated with the sequence yet
-            return Collections.emptyList();
-        } else if (data.noUnackedMessageIds()) {
-            // no unacked indexes - we have a single acked range
-            return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, getLastMessageId()));
-        } else {
-            // need to calculate ranges from the unacked indexes
-            List<AckRange> result = new LinkedList<Sequence.AckRange>();
+        messageIdLock.readLock().lock();
+        try {
+            if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
+                // no message associated with the sequence yet
+                return Collections.emptyList();
+            } else if (getUnackedMessageIdStorage().isEmpty()) {
+                // no unacked indexes - we have a single acked range
+                return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, getLastMessageId()));
+            } else {
+                // need to calculate ranges from the unacked indexes
+                List<AckRange> result = new LinkedList<Sequence.AckRange>();
 
-            Iterator<Long> unackedIndexIterator = data.getAllUnackedIndexes().iterator();
-            long lastBottomAckRange = Sequence.MIN_MESSAGE_ID;
-            while (unackedIndexIterator.hasNext()) {
-                long lastUnacked = unackedIndexIterator.next();
-                if (lastBottomAckRange < lastUnacked) {
-                    result.add(new AckRange(lastBottomAckRange, lastUnacked - 1));
+                Iterator<Long> unackedIndexIterator = getUnackedMessageIdStorage().iterator();
+                long lastBottomAckRange = Sequence.MIN_MESSAGE_ID;
+                while (unackedIndexIterator.hasNext()) {
+                    long lastUnacked = unackedIndexIterator.next();
+                    if (lastBottomAckRange < lastUnacked) {
+                        result.add(new AckRange(lastBottomAckRange, lastUnacked - 1));
+                    }
+                    lastBottomAckRange = lastUnacked + 1;
                 }
-                lastBottomAckRange = lastUnacked + 1;
+                if (lastBottomAckRange <= getLastMessageId()) {
+                    result.add(new AckRange(lastBottomAckRange, getLastMessageId()));
+                }
+                return result;
             }
-            if (lastBottomAckRange <= data.getLastMessageId()) {
-                result.add(new AckRange(lastBottomAckRange, data.getLastMessageId()));
-            }
-            return result;
+        } finally {
+            messageIdLock.readLock().unlock();
         }
     }
 
+    public boolean isAcknowledged(long messageId) {
+        try{
+            messageIdLock.readLock().lock();
+            if (messageId > getLastMessageId()) {
+                return false;
+            }
+
+            return !getUnackedMessageIdStorage().contains(messageId);
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+    }       
+
     public boolean hasPendingAcknowledgements() {
-        return !data.noUnackedMessageIds();
+        try {
+            messageIdLock.readLock().lock();
+            return !getUnackedMessageIdStorage().isEmpty();
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
     }
 
     public Status getStatus() {
-        return data.getStatus();
+        return status.get();
     }
 
     protected void setStatus(Status newStatus) {
-        data.setStatus(newStatus);
+        status.set(newStatus);
     }
 
     public void setAckRequestedFlag() {
-        data.setAckRequestedFlag(true);
+        ackRequestedFlag.set(true);
     }
 
     protected void clearAckRequestedFlag() {
-        data.setAckRequestedFlag(false);
+        ackRequestedFlag.set(false);
     }
 
     public boolean isAckRequested() {
-        return data.isAckRequestedFlag();
-    }
-
-    public String getBoundSecurityTokenReferenceId() {
-        return data.getBoundSecurityTokenReferenceId();
+        return ackRequestedFlag.get();
     }
 
     public void close() {
-        data.setStatus(Status.CLOSED);
+        status.set(Status.CLOSED);
     }
 
     public boolean isClosed() {
-        return data.getStatus() == Status.CLOSING || data.getStatus() == Status.CLOSED || data.getStatus() == Status.TERMINATING;
+        Status currentStatus = status.get();
+        return currentStatus == Status.CLOSING || currentStatus == Status.CLOSED || currentStatus == Status.TERMINATING;
     }
 
     public boolean isExpired() {
-        return (data.getExpirationTime() == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < data.getExpirationTime();
+        return (expirationTime == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < expirationTime;
     }
 
     public long getLastActivityTime() {
-        return data.getLastActivityTime();
+        return lastActivityTime;
     }
 
     public void updateLastActivityTime() {
-        data.updateLastActivityTime();
+        lastActivityTime = System.currentTimeMillis();
     }
 
     public void preDestroy() {

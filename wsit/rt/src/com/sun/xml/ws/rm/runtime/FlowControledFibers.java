@@ -93,7 +93,7 @@ public enum FlowControledFibers {
                 sequenceFibers = repository.get(sequenceId);
             }
 
-            sequenceFibers.add(registration);
+            sequenceFibers.offer(registration);
         } finally {
             repositoryLock.writeLock().unlock();
         }

@@ -94,6 +94,8 @@ public interface Sequence {
     public String getId();
 
     /**
+     * This operation is supported by outbound sequences only. 
+     * <p/>
      * Generates a new message identifier and registers it within the sequence
      * 
      * @return the next message identifier that should be used for the next message sent on the sequence.
@@ -104,8 +106,54 @@ public interface Sequence {
      * 
      * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
      */
-    public long getNextMessageId() throws MessageNumberRolloverException, IllegalStateException, UnsupportedOperationException;
+    public long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException, UnsupportedOperationException;
 
+    /**
+     * This operation is supported by outbound sequences only. 
+     * <p/>
+     * Stores a message within the sequence. The message is guaranteed to remain stored
+     * in the sequence until the message id associated with the message is acknowledged
+     * 
+     * @param correlationId identifier of a message that correlates with the stored message
+     * 
+     * @param id message identifier attached to the message
+     * 
+     * @param message the message that is supposed to be stored in the sequence 
+     *        until the message is not acknowledged as received
+     * 
+     * @exception IllegalStateException in case the sequence is closed
+     * 
+     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
+     */
+    public void storeMessage(long correlationId, long id, Object message) throws IllegalStateException, UnsupportedOperationException;
+
+    /**
+     * This operation is supported by outbound sequences only. 
+     * <p/>
+     * Retrieves a message stored within the sequence if avalable. May return {@code null}
+     * if no stored message under given message id is available.
+     * <p/>
+     * Availability of the message depends on the message identifier acknowledgement. 
+     * Message, if stored (see {@link #storeMessage(long, java.lang.Object)} remains 
+     * available for retrieval until it is acknowledged. Once the message identifier 
+     * associated with the stored message has been acknowledged, availability of the 
+     * stored message is no longer guaranteed and stored message becomes eligible for 
+     * garbage collection.
+     * <p/>
+     * Note however, that message MAY still be available even after it has been acknowledged.
+     * Thus it is NOT safe to use this method as a test of a message acknowledgement.
+     * 
+     * @param correlationId identifier of a message that correlates with the stored message
+     * 
+     * @return the message that is stored in the sequence if available, {@code null} otherwise.
+     * 
+     * @exception IllegalMessageIdentifierException in case the message number is not 
+     *            registered with the sequence.
+     * 
+     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
+     */
+    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException, IllegalMessageIdentifierException;
+    
     /**
      * Registers given message identifiers with the sequence as aknowledged
      * 
@@ -130,6 +178,16 @@ public interface Sequence {
      */
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException;
 
+    /**
+     * Determines whether such message number has been already acknowledged on the sequence 
+     * or not.
+     * 
+     * @param messageId message identifier to test
+     * @return {@code true } or {@code false} depending on whether a message with such message
+     *         identifer has been already acknowledged or not
+     */
+    public boolean isAcknowledged(long messageId);
+    
     /**
      * Provides information on the last message id sent on this sequence
      * 

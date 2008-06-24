@@ -64,29 +64,29 @@ public class OutboundSequenceTest extends TestCase {
         super.tearDown();
     }
 
-    public void testGetNextMessageId() throws Exception {
-        assertEquals(1, outboundSequence.getNextMessageId());
-        assertEquals(2, outboundSequence.getNextMessageId());
-        assertEquals(3, outboundSequence.getNextMessageId());
-        assertEquals(4, outboundSequence.getNextMessageId());
-        assertEquals(5, outboundSequence.getNextMessageId());
+    public void testGenerateNextMessageId() throws Exception {
+        assertEquals(1, outboundSequence.generateNextMessageId());
+        assertEquals(2, outboundSequence.generateNextMessageId());
+        assertEquals(3, outboundSequence.generateNextMessageId());
+        assertEquals(4, outboundSequence.generateNextMessageId());
+        assertEquals(5, outboundSequence.generateNextMessageId());
     }
 
     public void testGetLastMessageId() throws Exception {
-        outboundSequence.getNextMessageId(); // 1
-        outboundSequence.getNextMessageId(); // 2
-        outboundSequence.getNextMessageId(); // 3
-        outboundSequence.getNextMessageId(); // 4
+        outboundSequence.generateNextMessageId(); // 1
+        outboundSequence.generateNextMessageId(); // 2
+        outboundSequence.generateNextMessageId(); // 3
+        outboundSequence.generateNextMessageId(); // 4
 
         assertEquals(4, outboundSequence.getLastMessageId());
     }
 
     public void testPendingAcknowedgements() throws Exception {
-        outboundSequence.getNextMessageId(); // 1 
-        outboundSequence.getNextMessageId(); // 2 
-        outboundSequence.getNextMessageId(); // 3 
-        outboundSequence.getNextMessageId(); // 4 
-        outboundSequence.getNextMessageId(); // 5 
+        outboundSequence.generateNextMessageId(); // 1 
+        outboundSequence.generateNextMessageId(); // 2 
+        outboundSequence.generateNextMessageId(); // 3 
+        outboundSequence.generateNextMessageId(); // 4 
+        outboundSequence.generateNextMessageId(); // 5 
 
         assertTrue(outboundSequence.hasPendingAcknowledgements());
 
@@ -139,40 +139,85 @@ public class OutboundSequenceTest extends TestCase {
         assertTrue("IllegalMessageIdentifierException expected", passed);
     }
 
+    public void testIsAcknowledged() {
+        outboundSequence.generateNextMessageId(); // 1
+        outboundSequence.generateNextMessageId(); // 2
+        outboundSequence.generateNextMessageId(); // 3
+        outboundSequence.generateNextMessageId(); // 4
+        outboundSequence.generateNextMessageId(); // 5
+        
+        outboundSequence.acknowledgeMessageId(1);
+        outboundSequence.acknowledgeMessageId(2);
+        outboundSequence.acknowledgeMessageId(4);
+        
+        assertTrue(outboundSequence.isAcknowledged(1));
+        assertTrue(outboundSequence.isAcknowledged(2));
+        assertFalse(outboundSequence.isAcknowledged(3));
+        assertTrue(outboundSequence.isAcknowledged(4));
+        assertFalse(outboundSequence.isAcknowledged(5));
+        assertFalse(outboundSequence.isAcknowledged(6));
+    }
+    
     public void testSequenceStatusAfterCloseOperation() throws Exception {
         outboundSequence.close();
         assertEquals(Sequence.Status.CLOSED, outboundSequence.getStatus());
     }
 
     public void testBehaviorAfterCloseOperation() throws Exception {
-        outboundSequence.getNextMessageId(); // 1
+        outboundSequence.generateNextMessageId(); // 1
         outboundSequence.close();
         assertEquals(Sequence.Status.CLOSED, outboundSequence.getStatus());
 
         // sequence acknowledgement behavior
         outboundSequence.acknowledgeMessageId(1); // ok
 
-        // sequence getNextMessageId behavior
+        // sequence generateNextMessageId behavior
         boolean passed = false;
         try {
-            outboundSequence.getNextMessageId(); // error        
+            outboundSequence.generateNextMessageId(); // error        
         } catch (IllegalStateException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
     }
-    
-    
-    public void testStatus() throws Exception {
-        Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
-        assertEquals(Sequence.Status.CREATED, inbound.getStatus());
 
-        // TODO test closing
-        
-        inbound.close();
-        assertEquals(Sequence.Status.CLOSED, inbound.getStatus());   
-        
-        sequenceManager.terminateSequence(inbound.getId());
-        assertEquals(Sequence.Status.TERMINATING, inbound.getStatus());           
-    }    
+    public void testStatus() throws Exception {
+        Sequence outbound = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1);
+        assertEquals(Sequence.Status.CREATED, outbound.getStatus());
+
+        outbound.close();
+        assertEquals(Sequence.Status.CLOSED, outbound.getStatus());
+
+        sequenceManager.terminateSequence(outbound.getId());
+        assertEquals(Sequence.Status.TERMINATING, outbound.getStatus());
+    }
+
+    public void testStoreAndRetrieveMessage() throws InterruptedException {
+        Object[] messages = new Object[3];
+        for (int i = 0; i < messages.length; i++) {
+            Object message = new Object();
+            long msgId = outboundSequence.generateNextMessageId();
+            outboundSequence.storeMessage(i + 5, msgId, message);
+            messages[i] = message;
+        }
+
+        System.gc();
+
+        int i = 0;
+        for (Object expected : messages) {
+            Object actual = outboundSequence.retrieveMessage(i + 5);
+            assertEquals("Retrieved message is not the same as stored message", expected, actual);
+            outboundSequence.acknowledgeMessageId(++i);
+        }
+        /*        
+        System.gc();
+        Thread.sleep(2000);
+        System.gc();
+
+        for (i = 0; i < messages.length; i++) {
+        Object actual = outboundSequence.retrieveMessage(i + 1);
+        assertEquals("Retrieved message is not the same as stored message", null, actual);
+        }      
+         */
+    }
 }

@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rm.runtime.sequence.persistent;
 
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.Status;
-import com.sun.xml.ws.rm.runtime.sequence.SequenceData;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,7 +46,7 @@ import java.util.Collection;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PersistentSequenceData implements SequenceData {
+public class PersistentSequenceData {
 
     /**
     DROP TABLE RM_UNACKED_MESSAGES;
@@ -242,6 +241,14 @@ public class PersistentSequenceData implements SequenceData {
     }
 
     public void updateLastActivityTime() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void storeMessage(long id, Object message) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Object retrieveMessage(long id) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

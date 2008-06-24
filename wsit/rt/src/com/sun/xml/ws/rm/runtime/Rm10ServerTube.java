@@ -58,8 +58,6 @@ import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
@@ -113,6 +111,12 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
             com.sun.xml.ws.rm.v200502.Identifier id = offerElement.getIdentifier();
             if (id != null) {
                 offeredId = id.getValue();
+                if (sequenceManager.isValid(offeredId)) { // we already have such sequence
+                    throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
+                            configuration,
+                            requestAdapter.getPacket(),
+                            LocalizationMessages.WSRM_1137_OFFERED_ID_ALREADY_IN_USE(offeredId)));
+                }
             }
 
             if (offerElement.getExpires() != null && !"PT0S".equals(offerElement.getExpires().getValue().toString())) {
@@ -146,7 +150,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
                         requestAdapter.getPacket(),
                         ex.getMessage()));
             }
-            
+
             if (!activeSctId.equals(receivedSctId)) {
                 throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,

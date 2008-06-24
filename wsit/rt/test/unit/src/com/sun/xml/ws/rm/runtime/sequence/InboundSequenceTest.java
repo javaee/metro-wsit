@@ -46,7 +46,7 @@ import junit.framework.TestCase;
 public class InboundSequenceTest extends TestCase {
 
     private SequenceManager sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
-    private Sequence inboundSequnce;
+    private Sequence inboundSequence;
 
     public InboundSequenceTest(String testName) {
         super(testName);
@@ -54,20 +54,20 @@ public class InboundSequenceTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        inboundSequnce = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
+        inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
         super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        sequenceManager.terminateSequence(inboundSequnce.getId());
+        sequenceManager.terminateSequence(inboundSequence.getId());
         super.tearDown();
     }
 
-    public void testGetNextMessageId() throws Exception {
+    public void testGenerateNextMessageId() throws Exception {
         boolean passed = false;
         try {
-            inboundSequnce.getNextMessageId();
+            inboundSequence.generateNextMessageId();
         } catch (UnsupportedOperationException e) {
             passed = true;
         }
@@ -75,49 +75,49 @@ public class InboundSequenceTest extends TestCase {
     }
 
     public void testGetLastMessageId() throws Exception {
-        inboundSequnce.acknowledgeMessageId(1);
-        inboundSequnce.acknowledgeMessageId(2);
-        inboundSequnce.acknowledgeMessageId(3);
-        inboundSequnce.acknowledgeMessageId(4);
+        inboundSequence.acknowledgeMessageId(1);
+        inboundSequence.acknowledgeMessageId(2);
+        inboundSequence.acknowledgeMessageId(3);
+        inboundSequence.acknowledgeMessageId(4);
 
-        assertEquals(4, inboundSequnce.getLastMessageId());
+        assertEquals(4, inboundSequence.getLastMessageId());
     }
 
     public void testPendingAcknowedgements() throws Exception {
-        assertFalse(inboundSequnce.hasPendingAcknowledgements());
+        assertFalse(inboundSequence.hasPendingAcknowledgements());
 
         List<Sequence.AckRange> ackedRages;
 
 
-        inboundSequnce.acknowledgeMessageId(1);
-        assertFalse(inboundSequnce.hasPendingAcknowledgements());
-        ackedRages = inboundSequnce.getAcknowledgedMessageIds();
+        inboundSequence.acknowledgeMessageId(1);
+        assertFalse(inboundSequence.hasPendingAcknowledgements());
+        ackedRages = inboundSequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(1, ackedRages.get(0).upper);
 
-        inboundSequnce.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
+        inboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                     new Sequence.AckRange(2, 2),
                     new Sequence.AckRange(4, 5)
                 }));
-        assertTrue(inboundSequnce.hasPendingAcknowledgements());
-        ackedRages = inboundSequnce.getAcknowledgedMessageIds();
+        assertTrue(inboundSequence.hasPendingAcknowledgements());
+        ackedRages = inboundSequence.getAcknowledgedMessageIds();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(2, ackedRages.get(0).upper);
         assertEquals(4, ackedRages.get(1).lower);
         assertEquals(5, ackedRages.get(1).upper);
 
-        inboundSequnce.acknowledgeMessageId(3);
-        assertFalse(inboundSequnce.hasPendingAcknowledgements());
-        ackedRages = inboundSequnce.getAcknowledgedMessageIds();
+        inboundSequence.acknowledgeMessageId(3);
+        assertFalse(inboundSequence.hasPendingAcknowledgements());
+        ackedRages = inboundSequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
         boolean passed = false;
         try {
-            inboundSequnce.acknowledgeMessageId(4); // duplicate message acknowledgement
+            inboundSequence.acknowledgeMessageId(4); // duplicate message acknowledgement
         } catch (IllegalMessageIdentifierException e) {
             passed = true;
         }
@@ -126,7 +126,7 @@ public class InboundSequenceTest extends TestCase {
         passed = false;
         try {
             // duplicate message acknowledgement
-            inboundSequnce.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
+            inboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                         new Sequence.AckRange(2, 2),
                         new Sequence.AckRange(4, 5)
                     }));
@@ -136,17 +136,29 @@ public class InboundSequenceTest extends TestCase {
         assertTrue("IllegalMessageIdentifierException expected", passed);
     }
 
+    public void testIsAcknowledged() {
+        inboundSequence.acknowledgeMessageId(1);
+        inboundSequence.acknowledgeMessageId(2);
+        inboundSequence.acknowledgeMessageId(4);
+        
+        assertTrue(inboundSequence.isAcknowledged(1));
+        assertTrue(inboundSequence.isAcknowledged(2));
+        assertFalse(inboundSequence.isAcknowledged(3));
+        assertTrue(inboundSequence.isAcknowledged(4));
+        assertFalse(inboundSequence.isAcknowledged(5));
+    }
+    
     public void testBehaviorAfterCloseOperation() throws Exception {
-        inboundSequnce.acknowledgeMessageId(1);
-        inboundSequnce.acknowledgeMessageId(2);
-        inboundSequnce.acknowledgeMessageId(4);
+        inboundSequence.acknowledgeMessageId(1);
+        inboundSequence.acknowledgeMessageId(2);
+        inboundSequence.acknowledgeMessageId(4);
 
-        inboundSequnce.close();
+        inboundSequence.close();
 
         // sequence acknowledgement behavior
         boolean passed = false;
         try {
-            inboundSequnce.acknowledgeMessageId(3); // error        
+            inboundSequence.acknowledgeMessageId(3); // error        
         } catch (IllegalStateException e) {
             passed = true;
         }
@@ -154,23 +166,36 @@ public class InboundSequenceTest extends TestCase {
 
         passed = false;
         try {
-            inboundSequnce.acknowledgeMessageId(5); // error        
+            inboundSequence.acknowledgeMessageId(5); // error        
         } catch (IllegalStateException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
     }
-    
+
     public void testStatus() throws Exception {
         Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
         assertEquals(Sequence.Status.CREATED, inbound.getStatus());
 
         // TODO test closing
-        
+
         inbound.close();
-        assertEquals(Sequence.Status.CLOSED, inbound.getStatus());   
-        
+        assertEquals(Sequence.Status.CLOSED, inbound.getStatus());
+
         sequenceManager.terminateSequence(inbound.getId());
-        assertEquals(Sequence.Status.TERMINATING, inbound.getStatus());           
+        assertEquals(Sequence.Status.TERMINATING, inbound.getStatus());
+    }
+
+    public void testStoreAndRetrieveMessage() {
+        try {
+            inboundSequence.storeMessage(1, 1, new Object());
+            fail("UnsupportedOperationException was expected to be thrown");
+        } catch (UnsupportedOperationException e) {
+        }
+        try {
+            inboundSequence.retrieveMessage(1);
+            fail("UnsupportedOperationException was expected to be thrown");
+        } catch (UnsupportedOperationException e) {
+        }
     }
 }
