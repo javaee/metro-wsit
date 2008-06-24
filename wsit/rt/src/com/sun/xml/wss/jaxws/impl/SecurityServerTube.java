@@ -366,6 +366,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (isSCCancel(retPacket)){
                 removeContext(tmpPacket);
             }
+            tmpPacket = null;
         }
         resetCachedOperation();
         retPacket.setMessage(msg);
