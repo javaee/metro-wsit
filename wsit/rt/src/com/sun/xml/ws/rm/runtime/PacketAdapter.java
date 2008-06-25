@@ -81,7 +81,7 @@ public abstract class PacketAdapter {
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
-    
+
     /**
      * Provides an instance of a packet adapter based on the configuration and attaches a provided 
      * {@code packet} instance to it.
@@ -133,7 +133,7 @@ public abstract class PacketAdapter {
     public final void consume() {
         if (message != null && !messageConsumed) {
             messageConsumed = true; // TODO remove this workaround
-            message.consume();            
+            message.consume();
         }
     }
 
@@ -141,12 +141,7 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */
     public final Packet getPacket() {
-        try {
-            return packet;
-        } finally {
-            packet = null;
-            message = null;
-        }
+        return packet;
     }
 
     /**
@@ -328,7 +323,7 @@ public abstract class PacketAdapter {
     public final boolean isFault() {
         return (message == null) ? false : message.isFault();
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -450,9 +445,9 @@ public abstract class PacketAdapter {
     }
 
     public void setSession(String sessionId) {
-        packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);        
+        packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
     }
-    
+
     public boolean hasSession() {
         return getSession() != null;
     }
