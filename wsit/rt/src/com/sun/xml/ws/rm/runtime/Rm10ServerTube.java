@@ -68,7 +68,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ServerTube.class);
 
-    protected Rm10ServerTube(AbstractRmServerTube original, TubeCloner cloner) {
+    protected Rm10ServerTube(Rm10ServerTube original, TubeCloner cloner) {
         super(original, cloner);
     }
 
@@ -163,8 +163,8 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         Sequence inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), receivedSctId, expirationTime);
         if (offeredId != null) {
             sequenceManager.createOutboundSequence(offeredId, receivedSctId, offeredExpirationTime);
+            sequenceManager.bindSequences(inboundSequence.getId(), offeredId);
         }
-        sequenceManager.bindSequences(inboundSequence.getId(), offeredId);
 
 // TODO        startSession(inboundSequence);
 

@@ -96,6 +96,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
+                
         requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         try {
             if (requestAdapter.isProtocolMessage()) {
@@ -106,8 +107,15 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RmRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
                 }
             } else {
-                processNonSequenceRmHeaders(requestAdapter);
                 Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
+                
+                if (!requestAdapter.isSecurityContextTokenIdValid(inboundSequence.getBoundSecurityTokenReferenceId())) {
+                    // TODO L10N + maybe throw SOAP fault exception?
+                    throw new RmRuntimeException("Security context token on the message does not match the token bound to the sequence");
+                }
+                
+                processNonSequenceRmHeaders(requestAdapter);
+                
                 if (duplicatesNotAllowed()) {
                     if (inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
                         Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());

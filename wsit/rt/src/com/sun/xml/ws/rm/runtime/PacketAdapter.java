@@ -74,12 +74,14 @@ public abstract class PacketAdapter {
     private String sequenceId;
     private String ackRequestedHeaderSequenceId;
     private long messageNumber;
+    // TODO remove this workaround
+    private boolean messageConsumed;
     //
     private final Configuration configuration;
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
-
+    
     /**
      * Provides an instance of a packet adapter based on the configuration and attaches a provided 
      * {@code packet} instance to it.
@@ -129,8 +131,9 @@ public abstract class PacketAdapter {
      * @return
      */
     public final void consume() {
-        if (message != null) {
-            message.consume();
+        if (message != null && !messageConsumed) {
+            messageConsumed = true; // TODO remove this workaround
+            message.consume();            
         }
     }
 
@@ -396,6 +399,8 @@ public abstract class PacketAdapter {
             return (T) message.readPayloadAsJAXB(rmVersion.jaxbUnmarshaller);
         } catch (JAXBException e) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
+        } finally {
+            messageConsumed = true; // TODO remove this workaround
         }
     }
 
@@ -498,7 +503,7 @@ public abstract class PacketAdapter {
      * @param expectedStrId expected security context token identifier 
      * @returns {code true} if the actual security context token identifier equals to the expected one
      */
-    private boolean checkSecurityContextTokenId(String expectedSctId) {
+    public boolean isSecurityContextTokenIdValid(String expectedSctId) {
         String actualSctId = getSecurityContextTokenId();
         return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
 

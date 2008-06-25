@@ -54,7 +54,7 @@ public class Rm11ServerTube extends AbstractRmServerTube {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ServerTube.class);
 
-    protected Rm11ServerTube(AbstractRmServerTube original, TubeCloner cloner) {
+    protected Rm11ServerTube(Rm11ServerTube original, TubeCloner cloner) {
         super(original, cloner);
 
     // TODO initialize all instance variables
@@ -66,10 +66,10 @@ public class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    public Rm10ServerTube copy(TubeCloner cloner) {
+    public Rm11ServerTube copy(TubeCloner cloner) {
         LOGGER.entering();
         try {
-            return new Rm10ServerTube(this, cloner);
+            return new Rm11ServerTube(this, cloner);
         } finally {
             LOGGER.exiting();
         }
