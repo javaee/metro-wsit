@@ -132,7 +132,6 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         // Read STR element in csrElement if any
         com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType = csElement.getSecurityTokenReference();
 
-
         String receivedSctId = null;
         if (strType != null) { // RM messaging should be bound to a secured session
             String activeSctId = requestAdapter.getSecurityContextTokenId();
@@ -166,7 +165,9 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
             sequenceManager.bindSequences(inboundSequence.getId(), offeredId);
         }
 
-// TODO        startSession(inboundSequence);
+        if (!requestAdapter.hasSession()) { // security did not start session - we must do it
+            Utilities.startSession(inboundSequence.getId());
+        }
 
 //      //initialize CreateSequenceResponseElement
         CreateSequenceResponseElement crsElement = new CreateSequenceResponseElement();
@@ -264,8 +265,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
             }
 
         } finally {
-            // TODO end the session if we own its lifetime..i.e. SC is not present
-            // endSession(seq);
+            Utilities.endSessionIfExists(inboundSequence.getId());
             try {
                 sequenceManager.terminateSequence(inboundSequence.getId());
             } finally {

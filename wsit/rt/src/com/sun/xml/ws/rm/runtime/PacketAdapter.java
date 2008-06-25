@@ -446,6 +446,9 @@ public abstract class PacketAdapter {
 
     public void setSession(String sessionId) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
+
+        Session session = SessionManager.getSessionManager().getSession(sessionId);
+        packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
     }
 
     public boolean hasSession() {

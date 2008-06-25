@@ -113,7 +113,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     // TODO L10N + maybe throw SOAP fault exception?
                     throw new RmRuntimeException("Security context token on the message does not match the token bound to the sequence");
                 }
-                
+                                
                 processNonSequenceRmHeaders(requestAdapter);
                 
                 if (duplicatesNotAllowed()) {
@@ -135,6 +135,10 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     }
                 }
 
+                if (!requestAdapter.hasSession()) { // security did not set session - we must do it
+                    requestAdapter.setSession(inboundSequence.getId());
+                }
+                
                 if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
                     if (FlowControledFibers.INSTANCE.getUsedBufferSize(inboundSequence.getId()) > configuration.getDestinationBufferQuota()) {
                         PacketAdapter responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);

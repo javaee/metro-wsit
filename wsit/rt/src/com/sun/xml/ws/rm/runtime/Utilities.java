@@ -39,6 +39,8 @@ import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 //
+import com.sun.xml.ws.runtime.util.Session;
+import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.secext10.ObjectFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
@@ -83,5 +85,36 @@ final class Utilities {
                     new RmException(LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
         }
         return ((DirectReference) strReference).getURIAttr().toString();
+    }
+
+    /**
+     * Either creates a new <code>Session</code> for the
+     * <code>InboundSequence</code> or returns one that has
+     * already been created by the SC Pipe.
+     *
+     * @param sequence The InboundSequence
+     * @return The Session
+     */
+    public static Session startSession(String sessionId) {
+        SessionManager manager = SessionManager.getSessionManager();
+        Session session = manager.getSession(sessionId);
+        if (session == null) {
+            session = manager.createSession(sessionId);
+        }
+
+        return session;
+    }
+
+    /**
+     * Terminates the session associated with the sequence if
+     * RM owns the lifetime of the session.. i.e. If SC is not present.
+     *
+     * @param sequence The InboundSequence
+     */
+    public static void endSessionIfExists(String sessionId) {
+        SessionManager manager = SessionManager.getSessionManager();
+        if (manager.getSession(sessionId) != null) {
+            manager.terminateSession(sessionId);
+        }
     }
 }
