@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseImpl.java,v 1.7 2008-05-16 12:54:36 shyam_rao Exp $
+ * $Id: RequestSecurityTokenResponseImpl.java,v 1.8 2008-06-26 20:59:01 jdg6688 Exp $
  */
 
 /*
@@ -51,6 +51,7 @@ import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
@@ -666,7 +667,8 @@ public class RequestSecurityTokenResponseImpl extends RequestSecurityTokenRespon
                     UseKeyType ukType = (UseKeyType)obj.getValue();
                     setUseKey(new UseKeyImpl(ukType));
                 } else if (local.equalsIgnoreCase("Status")){
-                    setStatus((Status)obj.getValue());
+                    final StatusType sType = (StatusType)obj.getValue();
+                    setStatus(new StatusImpl(sType));
                 } else if (local.equalsIgnoreCase("DelegateTo")){
                     DelegateToType dtType  = (DelegateToType)obj.getValue();
                     setDelegateTo(new DelegateToImpl(dtType));

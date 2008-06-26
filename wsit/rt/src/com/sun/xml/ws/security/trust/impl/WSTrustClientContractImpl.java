@@ -66,6 +66,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
@@ -168,6 +169,13 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             if (unattachedRef != null){
                 context.setUnAttachedSecurityTokenReference(unattachedRef.getSTR());
             }
+        }else if (rst.getRequestType().toString().equals(wstVer.getValidateRequestTypeURI())){
+            Status status = rstr.getStatus();
+            context.setStatus(status);
+             final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
+             if (securityToken != null){
+                 context.setSecurityToken(securityToken.getToken());
+             }
         }
     }
     

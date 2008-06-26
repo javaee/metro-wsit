@@ -36,10 +36,12 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.STSTokenProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
@@ -67,6 +69,7 @@ import com.sun.xml.wss.saml.SAMLAssertionFactory;
 import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.saml.SubjectConfirmation;
 import com.sun.xml.wss.saml.KeyInfoConfirmationData;
+import com.sun.xml.wss.saml.util.SAMLUtil;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -179,7 +182,51 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
     }
 
     public void isValideToken(IssuedTokenContext ctx) throws WSTrustException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
+        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
+        
+        // Get the token to be validated 
+        Token token = ctx.getSecurityToken();
+        
+        // Validate the token and create the Status
+        // Only for SAML tokens for now: verify the signature and check 
+        // the time stamp
+        Element element = (Element) token.getTokenValue();
+        
+        String code = wstVer.getValidStatusCodeURI();
+        String reason = "The Trust service successfully validate the imput";
+        
+        // Check if it is an SAML assertion
+        if (!isSAMLAssertion(element)){
+            code = wstVer.getInvalidStatusCodeURI();
+            reason = "The Trust service did not successfully validate the input";
+        }
+        
+        // validate the SAML asserttion
+        // Verify the signature of the SAML assertion
+        // ToDo
+        
+        // validate time in Conditions
+        try{
+            if(!SAMLUtil.validateTimeInConditionsStatement(element)){
+                 code = wstVer.getInvalidStatusCodeURI();
+                 reason = "The Trust service did not successfully validate the input";
+            }
+        }catch (XWSSecurityException ex){
+            throw new WSTrustException(ex.getMessage());
+        }
+        
+        // Create the Status
+        Status status = eleFac.createStatus(code, reason);
+        
+        // Get TokenType
+        String tokenType = ctx.getTokenType();
+        if (!wstVer.getValidateStatuesTokenType().equals(tokenType)){
+            // Todo: create a token of the required type
+        }
+        
+        // populate the IssuedTokenContext
+        ctx.setStatus(status);
     }
 
     public void renewToken(IssuedTokenContext ctx) throws WSTrustException {
@@ -420,5 +467,15 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         }
         
         return keyInfo;
+    }
+    
+    private boolean isSAMLAssertion(Element token){
+        if (token.getLocalName().equals("Assertion") && 
+            (token.getNamespaceURI().equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE) ||
+             token.getNamespaceURI().equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE))){
+            return true;
+        }
+        
+        return false;
     }
 }

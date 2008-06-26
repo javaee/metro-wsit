@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponse.java,v 1.5 2008-02-26 06:33:19 ofung Exp $
+ * $Id: RequestSecurityTokenResponse.java,v 1.6 2008-06-26 20:58:11 jdg6688 Exp $
  */
 
 /*
@@ -43,6 +43,8 @@ package com.sun.xml.ws.security.trust.elements;
 import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
+
+import com.sun.xml.ws.api.security.trust.Status;
 
 /**
  * @author Kumar Jayanti
@@ -177,5 +179,9 @@ public interface RequestSecurityTokenResponse extends WSTrustElementBase, BaseST
     void setRequestedTokenCancelled(RequestedTokenCancelled rtc);
     
     RequestedTokenCancelled getRequestedTokenCancelled();
+    
+    Status getStatus();
+    
+    void setStatus(Status status);
 }
 

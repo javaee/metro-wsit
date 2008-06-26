@@ -1,5 +1,5 @@
 /*
-* $Id: StatusImpl.java,v 1.2 2008-02-26 06:33:29 ofung Exp $
+* $Id: StatusImpl.java,v 1.3 2008-06-26 20:59:01 jdg6688 Exp $
  */
 
 /*
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.StatusType;
 
 /**
@@ -49,8 +49,13 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.StatusType;
  */
 public class StatusImpl extends StatusType implements Status{
     
-    public StatusImpl() {
-        // empty construcotr
+   public StatusImpl(String code, String reason) {
+        setCode(code);
+        setReason(reason);
     }
     
+    public StatusImpl(StatusType statusType){
+        setCode(statusType.getCode());
+        setReason(statusType.getReason());
+    }
 }

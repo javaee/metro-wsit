@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.15 2008-06-18 01:37:11 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.16 2008-06-26 20:58:11 jdg6688 Exp $
  */
 
 /*
@@ -62,7 +62,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
-import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 
@@ -85,6 +85,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenImpl
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedTokenCancelledImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.SecondaryParametersImpl;
+import com.sun.xml.ws.security.trust.impl.wssx.elements.StatusImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.UseKeyImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.ValidateTargetImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.BinarySecretType;
@@ -237,6 +238,11 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public Claims createClaims(Element elem)throws WSTrustException {
         return new ClaimsImpl(ClaimsImpl.fromElement(elem));
     }
+    
+    public Status createStatus(String code, String reason){
+        return new StatusImpl(code, reason);
+    }
+    
     
     /**
      * Create a Lifetime.

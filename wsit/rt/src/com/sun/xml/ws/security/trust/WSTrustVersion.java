@@ -96,6 +96,12 @@ public abstract class WSTrustVersion {
     public abstract String getCancelResponseAction();
 
     public abstract String getCancelFinalResoponseAction();
+    
+    public abstract String getValidateRequestAction();
+
+    public abstract String getValidateResponseAction();
+
+    public abstract String getValidateFinalResoponseAction();
 
     public abstract String getCKPSHA1algorithmURI();
     
@@ -104,4 +110,9 @@ public abstract class WSTrustVersion {
     public abstract String getAsymmetricKeyBinarySecretTypeURI();
 
     public abstract String getNonceBinarySecretTypeURI();
+    
+    public abstract String getValidStatusCodeURI();
+    
+    public abstract String getInvalidStatusCodeURI();
+    
 }

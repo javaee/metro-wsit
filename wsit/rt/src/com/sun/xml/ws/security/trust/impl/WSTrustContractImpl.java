@@ -67,6 +67,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
@@ -507,7 +508,50 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
     }
 
     public BaseSTSResponse validate(BaseSTSRequest request, IssuedTokenContext context) throws WSTrustException {
-        throw new UnsupportedOperationException("Unsupported operation: validate");
+        RequestSecurityToken rst = (RequestSecurityToken)request;
+        
+        // Get STS certificate and private key
+        Object[] certAndKey = this.getSTSCertAndPrivateKey();
+        context.getOtherProperties().put(IssuedTokenContext.STS_CERTIFICATE, (X509Certificate)certAndKey[0]);
+        context.getOtherProperties().put(IssuedTokenContext.STS_PRIVATE_KEY, (PrivateKey)certAndKey[1]);
+        
+        // get TokenType
+        URI tokenType = rst.getTokenType();
+        context.setTokenType(tokenType.toString());
+        
+        //Get ValidateTarget
+        Token token = null;
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_10_NS_URI)){
+            // It is not well defined how to carry the security token 
+            // to be validated. ValidateTarget is obly introduced in the 
+            // ws-trust 1.3. Here we assume the token is directly child element 
+            // of RST
+            List<Object> exts = rst.getExtensionElements();
+            if (exts.size() > 0){
+                token = new GenericToken((Element)exts.get(0));
+            }  
+        }else{
+            ValidateTarget vt = rst.getValidateTarget();
+            token = new GenericToken((Element)vt.getAny());
+        }
+        context.setSecurityToken(token);
+        
+        // Get STSTokenProvider and validate the token
+        STSTokenProvider tokenProvider = WSTrustFactory.getSTSTokenProvider();
+        tokenProvider.isValideToken(context);
+        
+        // Create RequestSecurityTokenResponse
+        final RequestSecurityTokenResponse rstr = eleFac.createRSTRForValidate(tokenType, null, context.getStatus());
+        
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
+            list.add(rstr);
+            RequestSecurityTokenResponseCollection rstrc = eleFac.createRSTRC(list);
+
+            return rstrc;
+        }
+        
+        return rstr;
     }
 
     public void handleUnsolicited(BaseSTSResponse rstr, IssuedTokenContext context) throws WSTrustException {

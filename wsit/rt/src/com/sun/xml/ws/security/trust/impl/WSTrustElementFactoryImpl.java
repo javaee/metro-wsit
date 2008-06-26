@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.24 2008-06-18 01:37:12 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.25 2008-06-26 20:58:12 jdg6688 Exp $
  */
 
 /*
@@ -62,7 +62,7 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
-import com.sun.xml.ws.security.trust.elements.Status;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 
@@ -81,6 +81,7 @@ import com.sun.xml.ws.security.trust.impl.elements.RequestedUnattachedReferenceI
 import com.sun.xml.ws.security.trust.impl.elements.RequestSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedSecurityTokenImpl;
 import com.sun.xml.ws.security.trust.impl.elements.RequestedTokenCancelledImpl;
+import com.sun.xml.ws.security.trust.impl.elements.StatusImpl;
 import com.sun.xml.ws.security.trust.impl.elements.UseKeyImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.DirectReferenceImpl;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
@@ -259,6 +260,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
     public Claims createClaims(Element elem) throws WSTrustException {
         return new ClaimsImpl(ClaimsImpl.fromElement(elem));
+    }
+    
+    public Status createStatus(String code, String reason){
+        return new StatusImpl(code, reason);
     }
     
     /**

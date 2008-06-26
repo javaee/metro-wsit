@@ -227,7 +227,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             boolean isTrustMsg = false;
             if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
                 isTrustMsg = true;
-                String action = (String) packet.invocationProperties.get(wsTrustVer.getIssueRequestAction());
+                String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
                 HeaderList headers = packet.getMessage().getHeaders();
                 headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
             }

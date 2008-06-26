@@ -1,6 +1,3 @@
-/*
- * $Id: Status.java,v 1.3 2008-02-26 06:33:19 ofung Exp $
- */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
@@ -38,17 +35,12 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.trust.elements;
-
-import com.sun.xml.ws.security.trust.WSTrustConstants;
+package com.sun.xml.ws.api.security.trust;
 
 /**
- * @author WS-Trust Implementation Team.
+ * @author Jiandong Guo
  */
 public interface Status {
-    
-    public static final String STATUS_CODE_VALID = WSTrustConstants.WST_NAMESPACE + "/status/valid";
-    public static final String STATUS_CODE_INVALID = WSTrustConstants.WST_NAMESPACE + "/status/invalid";
     
     /**
      * Gets the value of the code property.
@@ -81,5 +73,4 @@ public interface Status {
      *     
      */
     void setReason(String value);
-    
 }

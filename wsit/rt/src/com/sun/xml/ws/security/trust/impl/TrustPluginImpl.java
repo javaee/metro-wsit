@@ -94,6 +94,7 @@ import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.UseKey;
+import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 import java.security.KeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -135,41 +136,14 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
             throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(appliesTo));
         }
-
-        URI wsdlLocation = null;
-        QName serviceName = null;
-        QName portName = null;
-
-        final String metadataStr = stsConfig.getSTSMEXAddress();
-        if (metadataStr != null){
-            wsdlLocation = URI.create(metadataStr);
-        }else{
-            final String namespace = stsConfig.getSTSNamespace();
-            String wsdlLocationStr = stsConfig.getSTSWSDLLocation();
-            if (wsdlLocationStr == null){
-                wsdlLocationStr = stsURI;
-            }else{
-                final String serviceNameStr = stsConfig.getSTSServiceName();
-                if (serviceNameStr != null && namespace != null){
-                    serviceName = new QName(namespace,serviceNameStr);
-                }
-
-                final String portNameStr = stsConfig.getSTSPortName();
-                if (portNameStr != null && namespace != null){
-                    portName = new QName(namespace, portNameStr);
-                }
-            }
-            wsdlLocation = URI.create(wsdlLocationStr);
-        }
-
         Token oboToken = stsConfig.getOBOToken();
 
         BaseSTSResponse result = null;
         try {
             final RequestSecurityToken request = createRequest(stsConfig, appliesTo, oboToken);
-
-            result = invokeRST(request, wsdlLocation, serviceName, portName, stsURI, stsConfig);
-
+             
+            result = invokeRST(request, stsConfig);
+            
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();
             contract.handleRSTR(request, result, itc);
             KeyPair keyPair = (KeyPair)stsConfig.getOtherOptions().get(WSTrustConstants.USE_KEY_RSA_KEY_PAIR);
@@ -199,7 +173,25 @@ public class TrustPluginImpl implements TrustPlugin {
     }
 
     public void processValidate(IssuedTokenContext itc) throws WSTrustException{
-        // Get STS address and MEX address or service name, port name and namespace
+        STSIssuedTokenConfiguration stsConfig = (STSIssuedTokenConfiguration)itc.getSecurityPolicy().get(0);
+        String stsURI = stsConfig.getSTSEndpoint();
+        if(stsURI == null){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(null));
+            throw new WebServiceException(LogStringsMessages.WST_0029_COULD_NOT_GET_STS_LOCATION(null));
+        }
+        BaseSTSResponse result = null;
+        try{
+            Token token = itc.getSecurityToken();
+            final RequestSecurityToken request = createRequestForValidatation(stsConfig, token);
+            result = invokeRST(request, stsConfig);
+            final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();
+            contract.handleRSTR(request, result, itc);
+        }catch (RemoteException ex) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, null), ex);
+            throw new WSTrustException(LogStringsMessages.WST_0016_PROBLEM_IT_CTX(stsURI, null), ex);
+        }
     }
 
     private RequestSecurityToken createRequest(final STSIssuedTokenConfiguration stsConfig, final String appliesTo, final Token oboToken) throws URISyntaxException, WSTrustException, NumberFormatException{
@@ -412,8 +404,52 @@ public class TrustPluginImpl implements TrustPlugin {
 
         return rst;
     }
+    
+    private RequestSecurityToken createRequestForValidatation(final STSIssuedTokenConfiguration stsConfig, final Token token){
+        WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
+        WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
+        final URI requestType = URI.create(wstVer.getValidateRequestTypeURI());
+        final URI tokenType = URI.create(wstVer.getValidateStatuesTokenType());
+        final RequestSecurityToken rst= fact.createRSTForValidate(tokenType, requestType);
+        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_10_NS_URI)){
+            rst.getAny().add(token.getTokenValue());
+        }else {
+            ValidateTarget vt = fact.createValidateTarget(token);
+            rst.setValidateTarget(vt);
+        }
+        
+        return rst;
+    }
+    
+    private BaseSTSResponse invokeRST(final RequestSecurityToken request, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
+        
+        String stsURI = stsConfig.getSTSEndpoint();
+        URI wsdlLocation = null;
+        QName serviceName = null;
+        QName portName = null;
+        
+        final String metadataStr = stsConfig.getSTSMEXAddress();
+        if (metadataStr != null){
+            wsdlLocation = URI.create(metadataStr);
+        }else{
+            final String namespace = stsConfig.getSTSNamespace();
+            String wsdlLocationStr = stsConfig.getSTSWSDLLocation();
+            if (wsdlLocationStr == null){
+                wsdlLocationStr = stsURI;
+            }else{
+                final String serviceNameStr = stsConfig.getSTSServiceName();
+                if (serviceNameStr != null && namespace != null){
+                      serviceName = new QName(namespace,serviceNameStr);
+                }
 
-    private BaseSTSResponse invokeRST(final RequestSecurityToken request, final URI wsdlLocation, QName serviceName, QName portName, String stsURI, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
+                final String portNameStr = stsConfig.getSTSPortName();
+                if (portNameStr != null && namespace != null){
+                      portName = new QName(namespace, portNameStr);
+                }
+            }
+            wsdlLocation = URI.create(wsdlLocationStr);
+        }
+        
         WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
         if(serviceName == null || portName==null){
@@ -464,8 +500,8 @@ public class TrustPluginImpl implements TrustPlugin {
             dispatch.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, stsURI);
         }
         dispatch.getRequestContext().put(WSTrustConstants.IS_TRUST_MESSAGE, "true");
-        dispatch.getRequestContext().put(wstVer.getIssueRequestAction(), wstVer.getIssueRequestAction());
-
+        dispatch.getRequestContext().put(WSTrustConstants.TRUST_ACTION, getAction(wstVer, request.getRequestType().toString()));
+        
         // Pass the keys and/or username, password to the message context
 //        String userName = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
 //        String password = (String) stsConfig.getOtherOptions().get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
@@ -585,5 +621,22 @@ public class TrustPluginImpl implements TrustPlugin {
         kvs.add(kv);
         KeyInfo ki = kif.newKeyInfo(kvs);
         return ki;
+    }
+    
+    private String getAction(WSTrustVersion wstVer, String requestType){
+        if (wstVer.getIssueRequestTypeURI().equals(requestType)){
+            return wstVer.getIssueRequestAction();
+        }
+        if (wstVer.getValidateRequestTypeURI().equals(requestType)){
+            return wstVer.getValidateRequestAction();
+        }
+        if (wstVer.getRenewRequestTypeURI().equals(requestType)){
+            return wstVer.getRenewRequestAction();
+        }
+        if (wstVer.getCancelRequestTypeURI().equals(requestType)){
+            return wstVer.getCancelRequestAction();
+        }
+            
+        return wstVer.getIssueRequestAction();
     }
 }

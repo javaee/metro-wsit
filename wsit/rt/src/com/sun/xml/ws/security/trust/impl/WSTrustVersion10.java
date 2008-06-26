@@ -123,6 +123,18 @@ public class WSTrustVersion10 extends WSTrustVersion{
     public  String getCancelFinalResoponseAction(){
         return nsURI + "/RSTR/Cancel";
     }
+    
+    public  String getValidateRequestAction(){
+        return nsURI + "/RST/Validate";
+    }
+
+    public  String getValidateResponseAction(){
+        return nsURI + "/RSTR/Validate";
+    }
+
+    public  String getValidateFinalResoponseAction(){
+        return nsURI + "/RSTR/Validate";
+    }
 
     public  String getCKPSHA1algorithmURI(){
         return nsURI + "/CK/PSHA1";
@@ -138,5 +150,13 @@ public class WSTrustVersion10 extends WSTrustVersion{
 
     public  String getNonceBinarySecretTypeURI(){
         return nsURI + "/Nonce";
+    }
+    
+    public String getValidStatusCodeURI(){
+        return nsURI + "/status/valid";
+    }
+    
+    public String getInvalidStatusCodeURI(){
+        return nsURI + "/status/invalid";
     }
 }
