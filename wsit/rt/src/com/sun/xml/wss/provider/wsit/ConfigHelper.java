@@ -352,7 +352,8 @@ public abstract class ConfigHelper /*implements RegistrationListener*/ {
         } catch(IllegalAccessException ex) {
             
         }
-        throw new RuntimeException("Failed to Load CallbackHandmer:" + classname);
+        //throw new RuntimeException("Failed to Load CallbackHandler:" + classname);
+        return null;
     }
 
     private class ConfigData {
