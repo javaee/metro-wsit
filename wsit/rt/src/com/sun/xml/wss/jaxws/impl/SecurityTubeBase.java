@@ -531,7 +531,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             ctx.isTrustMessage(true);
         }
         if (pipeConfig.getWSDLPort() != null) {
-            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
+            ctx.getExtraneousProperties().put(SecurityTubeBase.WSDLPORT, pipeConfig.getWSDLPort());
         }
         return ctx;
     }
@@ -1170,7 +1170,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return false;
         }
         
-        return rmVer.isRMAction(getAction(packet));
+        return rmVer.isRmAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){

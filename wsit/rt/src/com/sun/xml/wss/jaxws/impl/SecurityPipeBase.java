@@ -40,7 +40,6 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
-import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
@@ -63,7 +62,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 import java.util.Set;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -92,7 +90,6 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
@@ -130,18 +127,8 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;
-import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
-import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
-import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_TERMINATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -548,7 +535,7 @@ public abstract class SecurityPipeBase implements Pipe {
             ctx.isTrustMessage(true);
         }
         if (pipeConfig.getWSDLPort() != null) {
-            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
+            ctx.getExtraneousProperties().put(SecurityPipeBase.WSDLPORT, pipeConfig.getWSDLPort());
         }
         return ctx;
     }
@@ -1187,7 +1174,7 @@ public abstract class SecurityPipeBase implements Pipe {
             return false;
         }
         
-        return rmVer.isRMAction(getAction(packet));
+        return rmVer.isRmAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){

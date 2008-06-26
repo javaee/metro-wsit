@@ -40,7 +40,6 @@ package com.sun.xml.wss.jaxws.impl;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -71,19 +70,6 @@ import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_TERMINATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
-import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI_13NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI_13NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.JAXWS_21_MESSAGE;
 
 /**
  *
@@ -277,7 +263,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isRMMessage(){
-        return rmVer.isRMAction(action);
+        return rmVer.isRmAction(action);
     }
     
     private String getAction(Message msg){

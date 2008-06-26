@@ -146,29 +146,9 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 
-import static com.sun.xml.wss.jaxws.impl.Constants.ACTION_HEADER;
-import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
-import static com.sun.xml.wss.jaxws.impl.Constants.BINDING_SCOPE;
 import static com.sun.xml.wss.jaxws.impl.Constants.rstSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrSCTURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstTrustURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.rstrTrustURI;
-import static com.sun.xml.wss.jaxws.impl.Constants.wsaURI;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
-import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
-import static com.sun.xml.wss.jaxws.impl.Constants._SecureConversationToken_QNAME;
-import static com.sun.xml.wss.jaxws.impl.Constants.XENC_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.ENCRYPTED_DATA_LNAME;
-import static com.sun.xml.wss.jaxws.impl.Constants.MESSAGE_ID_HEADER;
-import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
 
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_CREATE_SEQ_RESP;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_SEQ_ACK;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_TERMINATE_SEQ;
-import static com.sun.xml.wss.jaxws.impl.Constants.RM_LAST_MESSAGE;
 import com.sun.xml.wss.jaxws.impl.RMPolicyResolver;
 import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
@@ -879,7 +859,7 @@ public abstract class WSITAuthContextBase  {
             return false;
         }
 
-        return rmVer.isRMAction(getAction(packet));
+        return rmVer.isRmAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){
@@ -1145,7 +1125,7 @@ public abstract class WSITAuthContextBase  {
             ctx.isTrustMessage(true);
         }
         if (pipeConfig.getWSDLPort() != null) {
-            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
+            ctx.getExtraneousProperties().put(WSITAuthContextBase.WSDLPORT, pipeConfig.getWSDLPort());
         }
         return ctx;
     }
