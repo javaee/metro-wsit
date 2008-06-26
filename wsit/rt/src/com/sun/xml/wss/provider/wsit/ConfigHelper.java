@@ -353,6 +353,7 @@ public abstract class ConfigHelper /*implements RegistrationListener*/ {
             
         }
         //throw new RuntimeException("Failed to Load CallbackHandler:" + classname);
+        Logger.getLogger(ConfigHelper.class.getName()).log(Level.WARNING, "Failed to Load CallbackHandler:" + classname);
         return null;
     }
 
