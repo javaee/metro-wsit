@@ -66,7 +66,7 @@ public class RmTubeAppender implements TubeAppender {
 //                    context.getBinding(),
 //                    context.getScInitiator(),
 //                    context.getTubelineHead());
-             return new ClientRmTube(context);
+             return new RmClientTube(context);
         } else {
             return context.getTubelineHead();
         }
@@ -84,7 +84,7 @@ public class RmTubeAppender implements TubeAppender {
                     context.getWsdlPort(),
                     context.getEndpoint().getBinding(),
                     context.getTubelineHead());
-//             return new ServerRmTube(context);
+//             return new Rm10ServerTube(context); // todo: switch between different RM versions
         } else {
             return context.getTubelineHead();
         }
