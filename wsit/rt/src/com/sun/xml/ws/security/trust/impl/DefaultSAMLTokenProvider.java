@@ -186,7 +186,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
         
         // Get the token to be validated 
-        Token token = ctx.getSecurityToken();
+        Token token = ctx.getTarget();
         
         // Validate the token and create the Status
         // Only for SAML tokens for now: verify the signature and check 

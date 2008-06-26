@@ -172,10 +172,10 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         }else if (rst.getRequestType().toString().equals(wstVer.getValidateRequestTypeURI())){
             Status status = rstr.getStatus();
             context.setStatus(status);
-             final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
-             if (securityToken != null){
+            final RequestedSecurityToken securityToken = rstr.getRequestedSecurityToken();
+            if (securityToken != null){
                  context.setSecurityToken(securityToken.getToken());
-             }
+            }
         }
     }
     

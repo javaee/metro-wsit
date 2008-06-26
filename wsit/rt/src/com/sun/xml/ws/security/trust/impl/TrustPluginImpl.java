@@ -182,7 +182,7 @@ public class TrustPluginImpl implements TrustPlugin {
         }
         BaseSTSResponse result = null;
         try{
-            Token token = itc.getSecurityToken();
+            Token token = itc.getTarget();
             final RequestSecurityToken request = createRequestForValidatation(stsConfig, token);
             result = invokeRST(request, stsConfig);
             final WSTrustClientContract contract = WSTrustFactory.createWSTrustClientContract();

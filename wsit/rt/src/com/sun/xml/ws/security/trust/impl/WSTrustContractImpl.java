@@ -534,14 +534,21 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             ValidateTarget vt = rst.getValidateTarget();
             token = new GenericToken((Element)vt.getAny());
         }
-        context.setSecurityToken(token);
+        context.setTarget(token);
         
         // Get STSTokenProvider and validate the token
         STSTokenProvider tokenProvider = WSTrustFactory.getSTSTokenProvider();
         tokenProvider.isValideToken(context);
         
+        // Create RequestedSecurityToken 
+        RequestedSecurityToken reqSecTok = null;
+        if (!wstVer.getValidateStatuesTokenType().equals(tokenType.toString())){
+            Token issuedToken = context.getSecurityToken();
+            reqSecTok.setToken(issuedToken);
+        }
+        
         // Create RequestSecurityTokenResponse
-        final RequestSecurityTokenResponse rstr = eleFac.createRSTRForValidate(tokenType, null, context.getStatus());
+        final RequestSecurityTokenResponse rstr = eleFac.createRSTRForValidate(tokenType, reqSecTok, context.getStatus());
         
         if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
             List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();
