@@ -42,7 +42,7 @@ import com.sun.xml.ws.rm.RmRuntimeException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PersistenceException extends RmRuntimeException {
+public final class PersistenceException extends RmRuntimeException {
 
     public PersistenceException(String message) {
         super(message);

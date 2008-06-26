@@ -50,13 +50,13 @@ import java.util.TreeSet;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class InboundSequence extends AbstractSequence {
+final class InboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
     //
     private final Set<Long> unackedMessageIdentifiers;
 
-    public InboundSequence(
+    InboundSequence(
             String sequenceId,
             String securityContextTokenId,
             long expirationTime) {
@@ -67,7 +67,7 @@ public class InboundSequence extends AbstractSequence {
     }
 
     @Override
-    protected Collection<Long> getUnackedMessageIdStorage() {
+    Collection<Long> getUnackedMessageIdStorage() {
         return unackedMessageIdentifiers;
     }
 

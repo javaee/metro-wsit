@@ -66,12 +66,12 @@ final class Rm11ClientSession extends ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ClientSession.class);
 
-    public Rm11ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+    Rm11ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         super(configuration, communicator);
     }
 
     @Override
-    protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
+    void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
@@ -129,7 +129,7 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    protected void closeOutboundSequence() throws RmException {
+    void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
 
         requestAdapter.setMessage(
@@ -159,7 +159,7 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    protected void terminateOutboundSequence() throws RmException {
+    void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()), 

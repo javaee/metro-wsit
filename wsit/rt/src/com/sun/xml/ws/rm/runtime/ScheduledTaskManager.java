@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-class ScheduledTaskManager {
+final class ScheduledTaskManager {
 
     private static final long DELAY = 2000;
     private static final long PERIOD = 2000;
@@ -58,7 +58,7 @@ class ScheduledTaskManager {
     /**
      * TODO javadoc
      */
-    public ScheduledTaskManager() {
+    ScheduledTaskManager() {
         scheduler = Executors.newScheduledThreadPool(1);
         scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
     }
@@ -66,7 +66,7 @@ class ScheduledTaskManager {
     /**
      * Starts the scheduled task executor
      */
-    public List<ScheduledFuture<?>> startTasks(Runnable... tasks) {
+    List<ScheduledFuture<?>> startTasks(Runnable... tasks) {
         List<ScheduledFuture<?>> handles = new ArrayList<ScheduledFuture<?>>(tasks.length);
         for (Runnable task : tasks) {
             handles.add(startTask(task));
@@ -78,7 +78,7 @@ class ScheduledTaskManager {
     /**
      * Stops the  scheduled task executor
      */
-    public void stopAll() {
+    void stopAll() {
         ScheduledFuture<?> handle;
         while ((handle = scheduledTaskHandles.poll()) != null) {
             handle.cancel(false);
@@ -91,7 +91,7 @@ class ScheduledTaskManager {
      * 
      * @param task new task to be executed regularly
      */
-    public ScheduledFuture<?> startTask(Runnable task) {
+    ScheduledFuture<?> startTask(Runnable task) {
         final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, DELAY, PERIOD, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
             // TODO: handle error condition

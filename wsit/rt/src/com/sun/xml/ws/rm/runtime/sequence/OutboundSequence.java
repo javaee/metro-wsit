@@ -52,7 +52,7 @@ import java.util.WeakHashMap;
  * TODO make class thread-safe
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class OutboundSequence extends AbstractSequence {
+final class OutboundSequence extends AbstractSequence {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
     //
@@ -61,7 +61,7 @@ public class OutboundSequence extends AbstractSequence {
     private final Map<Long, Long> weakIdtoCorrelationIdMap;
     
 
-    public OutboundSequence(
+    OutboundSequence(
             String sequenceId,
             String securityContextTokenId,
             long expirationTime) {
@@ -73,7 +73,7 @@ public class OutboundSequence extends AbstractSequence {
     }
 
     @Override
-    protected Collection<Long> getUnackedMessageIdStorage() {
+    Collection<Long> getUnackedMessageIdStorage() {
         return unackedMessageIdentifiers;
     }
 

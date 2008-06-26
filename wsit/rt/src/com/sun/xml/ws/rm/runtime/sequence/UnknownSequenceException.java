@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class UnknownSequenceException extends RmRuntimeException {
+public final class UnknownSequenceException extends RmRuntimeException {
     private final String sequenceId;
     
     /**

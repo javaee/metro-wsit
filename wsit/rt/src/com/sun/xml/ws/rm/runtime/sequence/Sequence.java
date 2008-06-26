@@ -217,11 +217,18 @@ public interface Sequence {
     public Status getStatus();
 
     /**
-     * This method should be called to set the AckRequested flag, which indicates a pending request for acknowledgement of all
-     * message identifiers registered with this sequence. The flag is automatically cleared once {@link #getAcknowledgedMessageIds()}
-     * method is called.
+     * This method should be called to set the AckRequested flag, which indicates 
+     * a pending request for acknowledgement of all message identifiers registered 
+     * with this sequence.
      */
     public void setAckRequestedFlag();
+    
+    /**
+     * This method should be called to clear the AckRequested flag, which indicates 
+     * that any pending requests for acknowledgement of all message identifiers registered 
+     * with this sequence were satisfied.
+     */
+    public void clearAckRequestedFlag();
 
     /**
      * Provides information on the actual AckRequested flag status

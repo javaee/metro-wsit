@@ -70,11 +70,12 @@ abstract class ClientSession {
     private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
     private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
     //
-    protected String inboundSequenceId = null;
-    protected String outboundSequenceId = null;
-    protected final Configuration configuration;
-    protected final SequenceManager sequenceManager;
-    protected final ProtocolCommunicator communicator;
+    String inboundSequenceId = null;
+    String outboundSequenceId = null;
+    final Configuration configuration;
+    final SequenceManager sequenceManager;
+    final ProtocolCommunicator communicator;
+    //
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
@@ -91,22 +92,22 @@ abstract class ClientSession {
         }
     }
 
-    protected ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+    ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
-        this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
         this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
-    protected abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;
+    abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;
 
-    protected abstract void closeOutboundSequence() throws RmException;
+    abstract void closeOutboundSequence() throws RmException;
 
-    protected abstract void terminateOutboundSequence() throws RmException;
+    abstract void terminateOutboundSequence() throws RmException;
 
-    protected final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmRuntimeException {
+    final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmRuntimeException {
         if (expectSequenceHeader) {
             String sequenceId = responseAdapter.getSequenceId();
             if (sequenceId != null) {
@@ -126,7 +127,7 @@ abstract class ClientSession {
         responseAdapter.processAcknowledgements(sequenceManager, outboundSequenceId);
     }
 
-    protected final void requestAcknowledgement() throws RmException {
+    final void requestAcknowledgement() throws RmException {
         PacketAdapter responseAdapter = null;
         try {
             PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
@@ -150,7 +151,7 @@ abstract class ClientSession {
         }
     }
 
-    public final Packet processOutgoingPacket(Packet requestPacket) {
+    final Packet processOutgoingPacket(Packet requestPacket) {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         initializeIfNecessary(requestAdapter);
 
@@ -168,7 +169,7 @@ abstract class ClientSession {
         return requestAdapter.getPacket();
     }
 
-    public final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
+    final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
         if (responseAdapter.containsMessage()) {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
@@ -183,14 +184,14 @@ abstract class ClientSession {
      * @param fiber a fiber to be resumed after resend interval has passed
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
-    public final boolean registerForResend(Fiber fiber, Packet packet) {
+    final boolean registerForResend(Fiber fiber, Packet packet) {
         return resendTask.registerForResume(fiber, packet);
     }
 
     /**
      * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
-    public final void close() {
+    final void close() {
         try {
             try {
                 closeOutboundSequence();

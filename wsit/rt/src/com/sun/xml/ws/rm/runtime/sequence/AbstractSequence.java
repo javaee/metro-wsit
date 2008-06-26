@@ -53,7 +53,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractSequence implements Sequence {
+abstract class AbstractSequence implements Sequence {
 
     protected final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables     
     //
@@ -76,7 +76,7 @@ public abstract class AbstractSequence implements Sequence {
      * 
      * @param expirationTime sequence expiration time
      */
-    protected AbstractSequence(
+    AbstractSequence(
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,
@@ -90,8 +90,6 @@ public abstract class AbstractSequence implements Sequence {
         this.lastActivityTime = System.currentTimeMillis();
         this.lastMessageId = initalLastMessageId;
     }
-
-    protected abstract Collection<Long> getUnackedMessageIdStorage();
 
     public String getId() {
         return sequenceId; // no need to synchronize
@@ -113,17 +111,6 @@ public abstract class AbstractSequence implements Sequence {
         } finally {
             messageIdLock.readLock().unlock();
         }
-    }
-    
-    protected final long updateLastMessageId(long newValue) {
-        try {
-            messageIdLock.writeLock().lock();
-            long oldValue = lastMessageId;
-            lastMessageId = newValue;
-            return oldValue;
-        } finally {
-            messageIdLock.writeLock().unlock();
-        }        
     }
     
     public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
@@ -159,6 +146,9 @@ public abstract class AbstractSequence implements Sequence {
                 if (lastBottomAckRange <= getLastMessageId()) {
                     result.add(new AckRange(lastBottomAckRange, getLastMessageId()));
                 }
+                
+                
+                
                 return result;
             }
         } finally {
@@ -192,15 +182,11 @@ public abstract class AbstractSequence implements Sequence {
         return status.get();
     }
 
-    protected void setStatus(Status newStatus) {
-        status.set(newStatus);
-    }
-
     public void setAckRequestedFlag() {
         ackRequestedFlag.set(true);
     }
 
-    protected void clearAckRequestedFlag() {
+    public void clearAckRequestedFlag() {
         ackRequestedFlag.set(false);
     }
 
@@ -231,5 +217,22 @@ public abstract class AbstractSequence implements Sequence {
 
     public void preDestroy() {
         // nothing to do...
+    }
+
+    abstract Collection<Long> getUnackedMessageIdStorage();
+
+    final long updateLastMessageId(long newValue) {
+        try {
+            messageIdLock.writeLock().lock();
+            long oldValue = lastMessageId;
+            lastMessageId = newValue;
+            return oldValue;
+        } finally {
+            messageIdLock.writeLock().unlock();
+        }        
+    }
+    
+    final void setStatus(Status newStatus) {
+        status.set(newStatus);
     }
 }

@@ -55,7 +55,7 @@ class Rm10ServiceConfiguration implements Configuration {
     private final long acknowledgementInterval;
     private final boolean requestResponseDetected;
 
-    public Rm10ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+    Rm10ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;

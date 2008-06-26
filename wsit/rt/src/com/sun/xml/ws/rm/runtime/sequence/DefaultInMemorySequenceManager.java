@@ -46,7 +46,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class DefaultInMemorySequenceManager implements SequenceManager {
+final class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
     private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();

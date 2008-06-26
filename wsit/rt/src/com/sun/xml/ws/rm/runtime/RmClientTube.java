@@ -60,14 +60,14 @@ import javax.xml.ws.WebServiceException;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmClientTube extends AbstractFilterTubeImpl {
+final class RmClientTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(RmClientTube.class);
     private final ClientSession session;
     private final WSDLPort wsdlPort;
     private Packet requestPacketCopy;
 
-    protected RmClientTube(RmClientTube original, TubeCloner cloner) {
+    RmClientTube(RmClientTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.session = original.session;
@@ -76,7 +76,7 @@ public class RmClientTube extends AbstractFilterTubeImpl {
         this.requestPacketCopy = null;
     }
 
-    public RmClientTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
+    RmClientTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {

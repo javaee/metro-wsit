@@ -48,7 +48,7 @@ import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
  * @author Marek Potociar (marek.potociar at sun.com)
  * @author Jungwook Chae
  */
-public class PersistentSequenceManager implements SequenceManager {
+public final class PersistentSequenceManager implements SequenceManager {
     private final Connection sqlConnection = null; // TODO initialize properly
     
     public void closeSequence(String sequenceId) throws UnknownSequenceException {

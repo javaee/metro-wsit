@@ -45,7 +45,7 @@ import junit.framework.TestCase;
  */
 public class OutboundSequenceTest extends TestCase {
 
-    private SequenceManager sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
+    private SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getSequenceManager();
     private Sequence outboundSequence;
 
     public OutboundSequenceTest(String testName) {

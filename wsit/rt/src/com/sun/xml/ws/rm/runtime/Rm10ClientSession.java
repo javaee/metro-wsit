@@ -64,12 +64,12 @@ final class Rm10ClientSession extends ClientSession {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ClientSession.class);
 
-    public Rm10ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+    Rm10ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         super(configuration, communicator);
     }
 
     @Override
-    protected void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
+    void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
@@ -120,7 +120,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    protected void closeOutboundSequence() throws RmException {
+    void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setEmptyMessage(RmVersion.WSRM10.lastAction);
         requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
@@ -150,7 +150,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    protected void terminateOutboundSequence() throws RmException {
+    void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setMessage(new TerminateSequenceElement(outboundSequenceId),  RmVersion.WSRM10.terminateSequenceAction);
         requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));

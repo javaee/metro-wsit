@@ -55,7 +55,7 @@ class Rm11ClientConfiguration implements Configuration {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
 
-    public Rm11ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmRuntimeException {
+    Rm11ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmRuntimeException {
         destinationConfig = new Rm11ServiceConfiguration(alternative, soapVersion, addressingVersion, requestResponseDetected);
 
         AckRequestIntervalClientAssertion ackIntervalAssertion = ConfigurationManager.extractAssertion(alternative, AckRequestIntervalClientAssertion.NAME, AckRequestIntervalClientAssertion.class);

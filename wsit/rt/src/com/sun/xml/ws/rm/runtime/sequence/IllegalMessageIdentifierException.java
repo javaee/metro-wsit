@@ -43,7 +43,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class IllegalMessageIdentifierException extends RmRuntimeException {
+public final class IllegalMessageIdentifierException extends RmRuntimeException {
     private final long messageId;
     
     public IllegalMessageIdentifierException(long messageIdentifier) {

@@ -71,13 +71,13 @@ final class Utilities {
      * @param actual actual sequence identifier value
      * @throws java.lang.IllegalStateException if actual value does not equal to the expected value
      */
-    public static void assertSequenceId(String expected, String actual) throws IllegalStateException {
+    static void assertSequenceId(String expected, String actual) throws IllegalStateException {
         if (expected != null && !expected.equals(actual)) {
             throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.WSRM_1105_SEQUENCE_ID_NOT_RECOGNIZED(actual, expected)));
         }
     }
 
-    public static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RmException {
+    static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RmException {
         Reference strReference = WSTrustElementFactory.newInstance().createSecurityTokenReference(
                 new ObjectFactory().createSecurityTokenReference(strType)).getReference();
         if (!(strReference instanceof DirectReference)) {
@@ -95,7 +95,7 @@ final class Utilities {
      * @param sequence The InboundSequence
      * @return The Session
      */
-    public static Session startSession(String sessionId) {
+    static Session startSession(String sessionId) {
         SessionManager manager = SessionManager.getSessionManager();
         Session session = manager.getSession(sessionId);
         if (session == null) {
@@ -111,7 +111,7 @@ final class Utilities {
      *
      * @param sequence The InboundSequence
      */
-    public static void endSessionIfExists(String sessionId) {
+    static void endSessionIfExists(String sessionId) {
         SessionManager manager = SessionManager.getSessionManager();
         if (manager.getSession(sessionId) != null) {
             manager.terminateSession(sessionId);

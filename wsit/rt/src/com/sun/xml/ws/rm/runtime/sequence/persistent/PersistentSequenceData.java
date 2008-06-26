@@ -46,7 +46,7 @@ import java.util.Collection;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PersistentSequenceData {
+final class PersistentSequenceData {
 
     /**
     DROP TABLE RM_UNACKED_MESSAGES;

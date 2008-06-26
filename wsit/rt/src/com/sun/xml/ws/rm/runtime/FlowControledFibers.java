@@ -49,7 +49,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public enum FlowControledFibers {
+enum FlowControledFibers {
 
     INSTANCE;
 
@@ -78,7 +78,7 @@ public enum FlowControledFibers {
         };
     }
 
-    public void registerForResume(Fiber fiber, PacketAdapter packetAdapter) {
+    void registerForResume(Fiber fiber, PacketAdapter packetAdapter) {
         FiberRegistration registration = new FiberRegistration(fiber, packetAdapter);
         String sequenceId = packetAdapter.getSequenceId();
 
@@ -99,7 +99,7 @@ public enum FlowControledFibers {
         }
     }
 
-    public boolean tryResume(String sequenceId, long messageId) {
+    boolean tryResume(String sequenceId, long messageId) {
         Queue<FiberRegistration> sequenceBuffer = getSequenceBuffer(sequenceId);
 
         if (sequenceBuffer == null) {
@@ -123,7 +123,7 @@ public enum FlowControledFibers {
         return true;
     }
 
-    public int getUsedBufferSize(String sequenceId) {
+    int getUsedBufferSize(String sequenceId) {
         Queue<FiberRegistration> sequenceBuffer = getSequenceBuffer(sequenceId);
 
         if (sequenceBuffer == null) {

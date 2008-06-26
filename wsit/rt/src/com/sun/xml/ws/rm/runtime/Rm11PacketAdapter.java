@@ -53,9 +53,9 @@ import java.util.List;
 
 /**
  *
- * @author m_potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class Rm11PacketAdapter extends PacketAdapter {
+class Rm11PacketAdapter extends PacketAdapter {
 
     public Rm11PacketAdapter(Configuration configuration, @NotNull Packet packet) {
         super(configuration, packet);
@@ -86,6 +86,7 @@ public class Rm11PacketAdapter extends PacketAdapter {
         ackElement.setIdentifier(identifier);
 
         List<Sequence.AckRange> ackedMessageIds = sequence.getAcknowledgedMessageIds();
+        sequence.clearAckRequestedFlag();
         if (ackedMessageIds != null && !ackedMessageIds.isEmpty()) {
             for (Sequence.AckRange range : ackedMessageIds) {
                 ackElement.addAckRange(range.lower, range.upper);

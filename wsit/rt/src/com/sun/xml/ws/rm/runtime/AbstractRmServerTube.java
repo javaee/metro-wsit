@@ -61,16 +61,16 @@ import java.util.logging.Level;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
+abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(AbstractRmServerTube.class);
     //
-    protected final Configuration configuration;
-    protected final SequenceManager sequenceManager;
+    final Configuration configuration;
+    final SequenceManager sequenceManager;
     //
     private PacketAdapter requestAdapter;
 
-    protected AbstractRmServerTube(AbstractRmServerTube original, TubeCloner cloner) {
+    AbstractRmServerTube(AbstractRmServerTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.configuration = original.configuration;
@@ -79,7 +79,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         this.requestAdapter = null;
     }
 
-    public AbstractRmServerTube(WsitServerTubeAssemblyContext context) {
+    AbstractRmServerTube(WsitServerTubeAssemblyContext context) {
         super(context.getTubelineHead());
 
         this.configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
@@ -89,7 +89,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
             throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
         }
 
-        this.sequenceManager = SequenceManagerFactory.getInstance().getSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getSequenceManager();
         this.requestAdapter = null;
     }
 
@@ -248,7 +248,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * @exception AbstractRmSoapFault exception representing a protocol request 
      *            message processing SOAP fault
      */
-    protected PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
+    PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         throw new UnsupportedOperationException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(requestAdapter.getWsaAction()));
     }
 
@@ -261,7 +261,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * 
      * @exception CreateSequenceRefusedFault in case of any problems while creating the sequence
      */
-    protected abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault;
+    abstract PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault;
 
     /**
      * Handles terminate sequence request processing
@@ -273,7 +273,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * @exception UnknownSequenceFault if there is no such sequence registered with current 
      *            sequence manager.
      */
-    protected abstract PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault;
+    abstract PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault;
 
     /**
      * Handles acknowledgement request message processing
@@ -287,7 +287,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * 
      * @exception SequenceTerminatedFault if the sequence is currently in TERMINATING state
      */
-    protected PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) throws UnknownSequenceFault, SequenceTerminatedFault {
+    PacketAdapter handleAckRequestedAction(PacketAdapter requestAdapter) throws UnknownSequenceFault, SequenceTerminatedFault {
 
         Sequence inboundSequence;
         try {
@@ -316,7 +316,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * @exception UnknownSequenceFault if there is no such sequence registered with current 
      *            sequence manager.
      */
-    protected PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+    PacketAdapter handleSequenceAcknowledgementAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         processNonSequenceRmHeaders(requestAdapter);
 
         // FIXME maybe we should send acknowledgements back if any?
@@ -329,7 +329,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      * 
      * @return common logging level for protocol message processing errors
      */
-    protected final Level getProtocolFaultLoggingLevel() {
+    final Level getProtocolFaultLoggingLevel() {
         return Level.WARNING;
     }
 
@@ -350,7 +350,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         requestAdapter.processAcknowledgements(sequenceManager, getOutboundSequenceId4Request(requestAdapter));
     }
 
-    protected final String getOutboundSequenceId4Request(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+    final String getOutboundSequenceId4Request(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         String sequenceId = requestAdapter.getSequenceId();
         if (sequenceId == null) {
             return null;
@@ -367,7 +367,7 @@ public abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         return (boundSequence != null) ? boundSequence.getId() : null;
     }
 
-    protected final Sequence getSequenceOrSoapFault(Packet packet, String sequenceId) throws UnknownSequenceFault {
+    final Sequence getSequenceOrSoapFault(Packet packet, String sequenceId) throws UnknownSequenceFault {
         try {
             return sequenceManager.getSequence(sequenceId);
         } catch (UnknownSequenceException e) {

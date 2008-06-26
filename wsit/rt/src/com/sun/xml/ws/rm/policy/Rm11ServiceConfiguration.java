@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm.policy;
 
 import com.sun.xml.ws.api.SOAPVersion;
@@ -52,8 +51,9 @@ import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class Rm11ServiceConfiguration implements Configuration {
-     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ServiceConfiguration.class);
-    
+
+    private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ServiceConfiguration.class);
+    //
     private SOAPVersion soapVersion;
     private AddressingVersion addressingVersion;
     private final long inactivityTimeout;
@@ -64,26 +64,26 @@ public class Rm11ServiceConfiguration implements Configuration {
     private final long acknowledgementInterval;
     private final boolean requestResponseDetected;
 
-    public Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmRuntimeException {
+    Rm11ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) throws RmRuntimeException {
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
-        
+
         if (alternative.contains(Rm10Assertion.NAME)) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY()));
         }
-        
+
         Rm11Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm11Assertion.NAME, Rm11Assertion.class);
         deliveryAssurance = rmAssertion.getDeliveryAssurance();
         orderedDelivery = rmAssertion.isOrderedDelivery();
         securityBinding = rmAssertion.getSecurityBinding();
-        
+
         RmFlowControlAssertion rmFlowControlAssertion = ConfigurationManager.extractAssertion(alternative, RmFlowControlAssertion.NAME, RmFlowControlAssertion.class);
         bufferQuota = (rmFlowControlAssertion != null) ? rmFlowControlAssertion.getMaximumBufferSize() : UNSPECIFIED;
-        
+
         // TODO: add new assertions for these
         inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT;
-        acknowledgementInterval = UNSPECIFIED;        
+        acknowledgementInterval = UNSPECIFIED;
     }
 
     public RmVersion getRmVersion() {

@@ -60,19 +60,21 @@ import javax.xml.namespace.QName;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ProtocolCommunicator {
+final class ProtocolCommunicator {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
 
+    final QName soapMustUnderstandAttributeName;
+    //
     private volatile Engine fiberEngine;
+    //
     private final ReadWriteLock fiberEngineLock = new ReentrantReadWriteLock();
     private final AtomicReference<Packet> musterRequestPacket;
-    public final QName soapMustUnderstandAttributeName;
     private final Tube tubeline;
     private final SecureConversationInitiator scInitiator;
     private final Configuration configuration;
 
-    public ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, Configuration configuration) {
+    ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, Configuration configuration) {
         this.tubeline = tubeline;
         this.scInitiator = scInitiator;
         this.configuration = configuration;
@@ -85,7 +87,7 @@ public class ProtocolCommunicator {
      * 
      * @param muster a packet that will be used as a muster for creating new request packets used to carry the messages.
      */
-    public void registerMusterRequestPacket(Packet muster) {
+    void registerMusterRequestPacket(Packet muster) {
         musterRequestPacket.set(muster);
     }
 
@@ -94,7 +96,7 @@ public class ProtocolCommunicator {
      * 
      * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
      */
-    public SecurityTokenReferenceType tryStartSecureConversation() {
+    SecurityTokenReferenceType tryStartSecureConversation() {
         JAXBElement<SecurityTokenReferenceType> strElement = null;
         if (scInitiator != null) {
             try {
@@ -112,7 +114,7 @@ public class ProtocolCommunicator {
      * @param request {@link Packet} containing the message to be send
      * @return response {@link Message} wrapped in a response {@link Packet} received
      */
-    public Packet send(Packet request) {
+    Packet send(Packet request) {
         Fiber fiber = getFiberEngine().createFiber(); // TODO: could we possibly reuse the same fiber?
 
         return fiber.runSync(tubeline, request);
@@ -126,7 +128,7 @@ public class ProtocolCommunicator {
      * @return destination endpoint reference or {@code null} in case the {@link ProtocolCommunicator} instance has not 
      *         been initialized yet
      */
-    public WSEndpointReference getDestination() {
+    WSEndpointReference getDestination() {
         Packet packet = musterRequestPacket.get();
         return (packet != null) ? new WSEndpointReference(packet.endpointAddress.toString(), configuration.getAddressingVersion()) : null;
     }
@@ -137,7 +139,7 @@ public class ProtocolCommunicator {
      * 
      * @return a new empty request packet
      */    
-    public Packet createEmptyRequestPacket() {
+    Packet createEmptyRequestPacket() {
         return musterRequestPacket.get().copy(false);
     }
 

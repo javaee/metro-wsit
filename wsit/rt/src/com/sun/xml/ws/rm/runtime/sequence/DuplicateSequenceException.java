@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class DuplicateSequenceException extends RmRuntimeException {
+public final class DuplicateSequenceException extends RmRuntimeException {
     private final String sequenceId;
     
     /**

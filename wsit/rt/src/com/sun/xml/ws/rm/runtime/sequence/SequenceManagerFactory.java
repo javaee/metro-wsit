@@ -35,58 +35,21 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class SequenceManagerFactory {
-
-    private static volatile SequenceManagerFactory INSTANCE;
-    private static ReadWriteLock INIT_LOCK = new ReentrantReadWriteLock();
-
-    /**
-     * 
-     * @return
-     */
-    public static SequenceManagerFactory getInstance() {
-        INIT_LOCK.readLock().lock();
-        try {
-            if (INSTANCE == null) {
-                INIT_LOCK.readLock().unlock();
-
-                INIT_LOCK.writeLock().lock();
-                try {
-                    if (INSTANCE == null) {
-                        INSTANCE = initFactory();
-                    }
-                } finally {
-                    INIT_LOCK.readLock().lock();
-                    INIT_LOCK.writeLock().unlock();
-                }
-            }
-
-            return INSTANCE;
-        } finally {
-            INIT_LOCK.readLock().unlock();
-        }
-    }
-
-    private static SequenceManagerFactory initFactory() {
+public enum SequenceManagerFactory {
+    INSTANCE;
+    
+    private SequenceManager sequenceManager;
+    
+    private SequenceManagerFactory() {
         // TODO: load from external configuration and revert to default if not present
-        return new SequenceManagerFactory() {
-
-            @Override
-            public SequenceManager getSequenceManager() {
-                return new DefaultInMemorySequenceManager();
-            }
-        };
+        this.sequenceManager = new DefaultInMemorySequenceManager();
     }
 
-    protected SequenceManagerFactory() {
+    public SequenceManager getSequenceManager() {
+        return this.sequenceManager;
     }
-
-    public abstract SequenceManager getSequenceManager();
 }

@@ -53,16 +53,16 @@ import java.util.List;
 
 /**
  *
- * @author m_potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class Rm10PacketAdapter extends PacketAdapter {
+class Rm10PacketAdapter extends PacketAdapter {
 
-    public Rm10PacketAdapter(Configuration configuration, @NotNull Packet packet) {
+    Rm10PacketAdapter(Configuration configuration, @NotNull Packet packet) {
         super(configuration, packet);
     }
 
     @Override
-    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
+    void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(sequenceId);
@@ -71,7 +71,7 @@ public class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
+    void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(sequenceId);
 
@@ -79,13 +79,14 @@ public class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
+    void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
         identifier.setValue(sequence.getId());
         ackElement.setIdentifier(identifier);
 
         List<Sequence.AckRange> ackedMessageIds = sequence.getAcknowledgedMessageIds();
+        sequence.clearAckRequestedFlag();
         if (ackedMessageIds != null && !ackedMessageIds.isEmpty()) {
             for (Sequence.AckRange range : ackedMessageIds) {
                 ackElement.addAckRange(range.lower, range.upper);
@@ -104,7 +105,7 @@ public class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected void initSequenceHeaderData() throws RmRuntimeException {
+    void initSequenceHeaderData() throws RmRuntimeException {
         SequenceElement sequenceElement = this.readHeaderAsUnderstood("Sequence");
         if (sequenceElement != null) {
             this.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
@@ -112,13 +113,13 @@ public class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected String initAckRequestedHeaderData() throws RmRuntimeException {
+    String initAckRequestedHeaderData() throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood("AckRequested");
         return (ackRequestedElement != null) ? ackRequestedElement.getId() : null;
     }
 
     @Override
-    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
+    void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {

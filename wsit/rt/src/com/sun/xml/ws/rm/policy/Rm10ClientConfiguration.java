@@ -54,7 +54,7 @@ class Rm10ClientConfiguration implements Configuration {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
 
-    public Rm10ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+    Rm10ClientConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
         destinationConfig = new Rm10ServiceConfiguration(alternative, soapVersion, addressingVersion, requestResponseDetected);
 
         Rm10Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm10Assertion.NAME, Rm10Assertion.class);

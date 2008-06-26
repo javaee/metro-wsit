@@ -48,7 +48,6 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rm.v200502.AcceptType;
 import com.sun.xml.ws.rm.v200502.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
@@ -62,17 +61,17 @@ import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
  *
- * @author m_potociar
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Rm10ServerTube extends AbstractRmServerTube {
+final class Rm10ServerTube extends AbstractRmServerTube {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ServerTube.class);
 
-    protected Rm10ServerTube(Rm10ServerTube original, TubeCloner cloner) {
+    Rm10ServerTube(Rm10ServerTube original, TubeCloner cloner) {
         super(original, cloner);
     }
 
-    public Rm10ServerTube(WsitServerTubeAssemblyContext context) {
+    Rm10ServerTube(WsitServerTubeAssemblyContext context) {
         super(context);
     }
 
@@ -87,7 +86,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
+    PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (configuration.getRmVersion().lastAction.equals(requestAdapter.getWsaAction())) {
             return handleLastMessageAction(requestAdapter);
         } else {
@@ -96,7 +95,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    protected PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
+    PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -108,7 +107,7 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
         long offeredExpirationTime = Configuration.UNSPECIFIED;
         OfferType offerElement = csElement.getOffer();
         if (offerElement != null) {
-            com.sun.xml.ws.rm.v200502.Identifier id = offerElement.getIdentifier();
+            Identifier id = offerElement.getIdentifier();
             if (id != null) {
                 offeredId = id.getValue();
                 if (sequenceManager.isValid(offeredId)) { // we already have such sequence
@@ -215,33 +214,20 @@ public final class Rm10ServerTube extends AbstractRmServerTube {
      * @exception UnknownSequenceFault if there is no such sequence registered with current 
      *            sequence manager.
      */
-    protected PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
-        Sequence inboundSequence;
-        try {
-            inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-        } catch (UnknownSequenceException e) {
-            LOGGER.logException(e, getProtocolFaultLoggingLevel());
-            throw LOGGER.logException(new UnknownSequenceFault(configuration, requestAdapter.getPacket(), e.getMessage()), getProtocolFaultLoggingLevel());
-        }
-
+    PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+        Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
+        
         inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
-
         inboundSequence.close();
 
         return requestAdapter.createAckResponse(inboundSequence, RmVersion.WSRM10.lastAction);
     }
 
     @Override
-    protected PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+    PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         TerminateSequenceElement tsElement = requestAdapter.unmarshallMessage();
 
-        Sequence inboundSequence;
-        try {
-            inboundSequence = sequenceManager.getSequence(tsElement.getIdentifier().getValue());
-        } catch (UnknownSequenceException e) {
-            LOGGER.logException(e, getProtocolFaultLoggingLevel());
-            throw LOGGER.logException(new UnknownSequenceFault(configuration, requestAdapter.getPacket(), e.getMessage()), getProtocolFaultLoggingLevel());
-        }
+        Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), tsElement.getIdentifier().getValue());
 
         // Formulate response if required:
         //   If there is an outbound sequence, client expects us to terminate it.

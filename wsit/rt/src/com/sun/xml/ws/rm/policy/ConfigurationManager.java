@@ -95,7 +95,7 @@ public abstract class ConfigurationManager {
     }
 
     // TODO: improve the naive implementation - in the future we might want handle also message scope RM settings
-    protected List<Configuration> configurations = new ArrayList<Configuration>();
+    List<Configuration> configurations = new ArrayList<Configuration>();
 
     private ConfigurationManager(WSDLPort wsdlPort, WSBinding binding) throws RmRuntimeException {
         PolicyMap policyMap = (wsdlPort != null) ? wsdlPort.getBinding().getOwner().getExtension(WSDLPolicyMapWrapper.class).getPolicyMap() : null;
@@ -122,11 +122,11 @@ public abstract class ConfigurationManager {
         }
     }
 
-    public Configuration[] getConfigurationAlternatives(/*TODO: define arguments*/) {
+    public final Configuration[] getConfigurationAlternatives(/*TODO: define arguments*/) {
         return configurations.toArray(new Configuration[configurations.size()]);
     }
 
-    protected abstract void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmRuntimeException;
+    abstract void addNewConfiguration(AssertionSet set, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseOperationsDetected) throws RmRuntimeException;
 
     /**
      * Determine whether wsdl port contains any two-way operations.

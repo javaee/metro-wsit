@@ -43,7 +43,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  *
  * @author m_potociar
  */
-public class MessageNumberRolloverException extends RmRuntimeException {
+public final class MessageNumberRolloverException extends RmRuntimeException {
 
     private long messageNumber;
     private String sequenceId;
