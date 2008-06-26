@@ -171,14 +171,6 @@ public enum RmVersion {
             throw new Error(e);
         }
     }
-
-    /**
-     * @deprecated Use {@link #isRmAction()} instead.
-     */
-    @Deprecated
-    public boolean isRMAction(String wsaAction) {
-        return isRmAction(wsaAction);
-    }
     
     /**
      * TODO javadoc
