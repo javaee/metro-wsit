@@ -256,7 +256,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
         Packet retPacket = getResponsePacket(messageInfo);
         if (isTrustMessage){
-            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueFinalResoponseAction());
+            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction((String)messageInfo.getMap().get("TRUST_REQUEST_ACTION")));
         }
         Packet ret = null;
         try {
@@ -382,9 +382,11 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
                 sharedState.put("IS_SC_CANCEL", TRUE);
-            } else if (wsTrustVer.getIssueRequestAction().equals(action)) {
+            } else if (wsTrustVer.getIssueRequestAction().equals(action)||
+                       wsTrustVer.getValidateRequestAction().equals(action)) {
                 isTrustMessage = true;
                 sharedState.put("IS_TRUST_MESSAGE", TRUE);
+                sharedState.put("TRUST_REQUEST_ACTION", action);
                 packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
                 
                 if(trustConfig != null){

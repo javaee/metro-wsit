@@ -102,6 +102,26 @@ public abstract class WSTrustVersion {
     public abstract String getValidateResponseAction();
 
     public abstract String getValidateFinalResoponseAction();
+    
+    public String getFinalResponseAction(String reqAction){ 
+        if (reqAction.equals(getIssueRequestAction())){
+            return getIssueFinalResoponseAction();
+        }
+        
+        if (reqAction.equals(getRenewRequestAction())){
+            return getRenewFinalResoponseAction();
+        }
+        
+        if (reqAction.equals(getCancelRequestAction())){
+            return getCancelFinalResoponseAction();
+        }
+        
+        if (reqAction.equals(getValidateRequestAction())){
+            return getValidateFinalResoponseAction();
+        }
+        
+        return null;
+    }
 
     public abstract String getCKPSHA1algorithmURI();
     

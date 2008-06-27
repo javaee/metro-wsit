@@ -842,11 +842,20 @@ public abstract class WSITAuthContextBase  {
         if (!isAddressingEnabled()) {
             return false;
         }
+        
+        // Issue
         String action = getAction(packet);
         if(wsTrustVer.getIssueRequestAction().equals(action) ||
                 wsTrustVer.getIssueFinalResoponseAction().equals(action)){
             return true;
         }
+        
+         // Validate 
+         if(wsTrustVer.getValidateRequestAction().equals(action) ||
+                wsTrustVer.getValidateFinalResoponseAction().equals(action)){
+            return true;
+        }
+        
         return false;
         
     }

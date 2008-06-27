@@ -134,6 +134,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     private boolean isTrustMessage;
     private boolean isSCIssueMessage;
     private boolean isSCCancelMessage;
+    private String reqAction = null;
     
     // Creates a new instance of SecurityServerTube
     public SecurityServerTube(WsitServerTubeAssemblyContext context, Tube nextTube) {
@@ -187,7 +188,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         isTrustMessage = false;
         tmpPacket = null;
         String msgId = null;
-        String action = null;
+        //String reqAction= null;
         
         boolean thereWasAFault = false;
         
@@ -251,15 +252,16 @@ public class SecurityServerTube extends SecurityTubeBase {
         packet.setMessage(msg);
         
         if (isAddressingEnabled()) {
-            action = getAction(packet);
-            if (wsscVer.getSCTRequestAction().equals(action) || wsscVer.getSCTRenewRequestAction().equals(action)) {
+            reqAction= getAction(packet);
+            if (wsscVer.getSCTRequestAction().equals(reqAction) || wsscVer.getSCTRenewRequestAction().equals(reqAction)) {
                 isSCIssueMessage = true;
                 if(wsscConfig != null){
                     packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS,wsscConfig.iterator());
                 }
-            } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
+            } else if (wsscVer.getSCTCancelRequestAction().equals(reqAction)) {
                 isSCCancelMessage = true;
-            } else if (wsTrustVer.getIssueRequestAction().equals(action)) {
+            } else if (wsTrustVer.getIssueRequestAction().equals(reqAction)||
+                       wsTrustVer.getValidateRequestAction().equals(reqAction)) {
                 isTrustMessage = true;
                 packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
                 
@@ -300,7 +302,7 @@ public class SecurityServerTube extends SecurityTubeBase {
                 //-------put application message on hold and invoke SC contract--------
                 
                 retPacket = invokeSecureConversationContract(
-                        packet, ctx, isSCIssueMessage, action);
+                        packet, ctx, isSCIssueMessage, reqAction);
                 tmpPacket = packet;
                 return processResponse(retPacket);
                 
@@ -321,7 +323,7 @@ public class SecurityServerTube extends SecurityTubeBase {
                 
         // Add addrsssing headers to trust message
         if (isTrustMessage){
-            retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getIssueFinalResoponseAction());
+            retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
         }
         
         if(retPacket.getMessage() == null){

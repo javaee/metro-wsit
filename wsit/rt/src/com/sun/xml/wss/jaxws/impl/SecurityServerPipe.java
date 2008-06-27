@@ -256,7 +256,8 @@ public class SecurityServerPipe extends SecurityPipeBase {
                 }
             } else if (wsscVer.getSCTCancelRequestAction().equals(action)) {
                 isSCCancelMessage = true;
-            } else if (wsTrustVer.getIssueRequestAction().equals(action)) {
+            } else if (wsTrustVer.getIssueRequestAction().equals(action)||
+                    wsTrustVer.getValidateRequestAction().equals(action)) {
                 isTrustMessage = true;
                 packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
                 
@@ -309,7 +310,7 @@ public class SecurityServerPipe extends SecurityPipeBase {
                     
                     // Add addrsssing headers to trust message
                     if (isTrustMessage){
-                        retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getIssueFinalResoponseAction());
+                        retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(action));
                     }
                 }else {
                     retPacket = packet;

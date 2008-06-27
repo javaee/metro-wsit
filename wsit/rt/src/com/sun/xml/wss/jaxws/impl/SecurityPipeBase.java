@@ -1158,8 +1158,16 @@ public abstract class SecurityPipeBase implements Pipe {
             return false;
         }
         String action = getAction(packet);
+        
+        // Issue
         if(wsTrustVer.getIssueRequestAction().equals(action) ||
                 wsTrustVer.getIssueFinalResoponseAction().equals(action)){
+            return true;
+        }
+        
+         // Validate 
+         if(wsTrustVer.getValidateRequestAction().equals(action) ||
+                wsTrustVer.getValidateFinalResoponseAction().equals(action)){
             return true;
         }
         return false;
