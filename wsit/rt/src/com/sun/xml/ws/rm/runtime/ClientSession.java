@@ -95,7 +95,7 @@ abstract class ClientSession {
     ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
-        this.sequenceManager = SequenceManagerFactory.INSTANCE.getSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
         this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());

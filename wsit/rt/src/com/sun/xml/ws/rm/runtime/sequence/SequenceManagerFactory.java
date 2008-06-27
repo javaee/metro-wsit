@@ -42,14 +42,21 @@ package com.sun.xml.ws.rm.runtime.sequence;
 public enum SequenceManagerFactory {
     INSTANCE;
     
-    private SequenceManager sequenceManager;
+    // FIXME: instead of creating two managers, distinguish between creating inbound and outbound sequences
+    private SequenceManager clientSequenceManager;
+    private SequenceManager serverSequenceManager;
     
     private SequenceManagerFactory() {
         // TODO: load from external configuration and revert to default if not present
-        this.sequenceManager = new DefaultInMemorySequenceManager();
+        this.clientSequenceManager = new DefaultInMemorySequenceManager();
+        this.serverSequenceManager = new DefaultInMemorySequenceManager();
     }
 
-    public SequenceManager getSequenceManager() {
-        return this.sequenceManager;
+    public SequenceManager getClientSequenceManager() {
+        return this.clientSequenceManager;
+    }
+
+    public SequenceManager getServerSequenceManager() {
+        return this.serverSequenceManager;
     }
 }

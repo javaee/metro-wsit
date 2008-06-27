@@ -37,10 +37,10 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
@@ -70,15 +70,12 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ServerTube.class);
 
-    Rm11ServerTube(Rm11ServerTube original, TubeCloner cloner) {
-        super(original, cloner);
-
-    // TODO initialize all instance variables
+    Rm11ServerTube(Configuration configuration, Tube tubelineHead) {
+        super(configuration, tubelineHead);
     }
 
-    Rm11ServerTube(WsitServerTubeAssemblyContext context) {
-        super(context);
-    // TODO initialize all instance variables        
+    Rm11ServerTube(Rm11ServerTube original, TubeCloner cloner) {
+        super(original, cloner);
     }
 
     @Override

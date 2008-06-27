@@ -45,7 +45,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.jaxws.runtime.server.RMServerTube;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -80,11 +79,11 @@ public class RmTubeAppender implements TubeAppender {
      */
     public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-            return new RMServerTube(
-                    context.getWsdlPort(),
-                    context.getEndpoint().getBinding(),
-                    context.getTubelineHead());
-//             return new Rm10ServerTube(context); // todo: switch between different RM versions
+//            return new RMServerTube(
+//                    context.getWsdlPort(),
+//                    context.getEndpoint().getBinding(),
+//                    context.getTubelineHead());
+             return AbstractRmServerTube.getInstance(context);
         } else {
             return context.getTubelineHead();
         }

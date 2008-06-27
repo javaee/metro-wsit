@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
@@ -69,6 +70,18 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     final SequenceManager sequenceManager;
     //
     private PacketAdapter requestAdapter;
+    
+    static AbstractRmServerTube getInstance(WsitServerTubeAssemblyContext context) {
+        Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
+        switch (configuration.getRmVersion()) {
+            case WSRM10 :
+                return new Rm10ServerTube(configuration, context.getTubelineHead());
+            case WSRM11 :
+                return new Rm11ServerTube(configuration, context.getTubelineHead());
+            default :
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));                
+        }
+    }
 
     AbstractRmServerTube(AbstractRmServerTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -79,17 +92,17 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         this.requestAdapter = null;
     }
 
-    AbstractRmServerTube(WsitServerTubeAssemblyContext context) {
-        super(context.getTubelineHead());
+    AbstractRmServerTube(Configuration configuration, Tube tubelineHead) {
+        super(tubelineHead);
 
-        this.configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
+        this.configuration = configuration;
 
         // TODO don't take the first config alternative automatically...
         if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
             throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
         }
 
-        this.sequenceManager = SequenceManagerFactory.INSTANCE.getSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager();
         this.requestAdapter = null;
     }
 
