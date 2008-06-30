@@ -178,7 +178,7 @@ public class WSSCClientContract {
             // if yes cleanup the IssuedTokenContext accordingly
             final RequestedTokenCancelled cancelled = rstr.getRequestedTokenCancelled();
             if(cancelled!=null){
-                context.setSecurityToken(null);
+                //context.setSecurityToken(null);
                 context.setProofKey(null);
             }
         }

@@ -126,20 +126,21 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         }else if(!sctConfig.isClientOutboundMessage()){
             ctx.getSecurityPolicy().clear();
         }else{
-            scp.process(ctx);
-            addSecurityContextToken(sctConfig.getTokenId(), ctx);
+            scp.process(ctx);            
+            String sctId = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString();
+            sctConfig =  new DefaultSCTokenConfiguration((DefaultSCTokenConfiguration)sctConfig, sctId);
+            ctx.getSecurityPolicy().clear();
+            ctx.getSecurityPolicy().add(sctConfig);
             addSecurityContextToken(((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString(), ctx);
         }        
     } 
     
     public void cancel(IssuedTokenContext ctx)throws WSTrustException{
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
-            scp.processCancellation(ctx);
-            clearSessionCache();
-        }else{             
-             log.log(Level.WARNING, "SecureConversation session is already cancelled");
-        }
+        if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){              
+            scp.processCancellation(ctx);            
+            clearSessionCache(sctConfig.getTokenId(), ctx);
+        }            
     }
         
     public void renew(IssuedTokenContext ctx)throws WSTrustException{
@@ -180,9 +181,9 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         securityContextTokenMap.put(key, sctInfo);
     }
 
-    private void clearSessionCache(){
-        issuedTokenContextMap.clear();
-        securityContextTokenMap.clear();
+    private void clearSessionCache(String sctId, IssuedTokenContext ctx){        
+        securityContextTokenMap.remove(sctId+"_"+ ((SecurityContextToken)ctx.getSecurityToken()).getInstance()); 
+        issuedTokenContextMap.remove(sctId);
     }
 
     /**

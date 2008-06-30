@@ -157,8 +157,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     // Per-Proxy State for SecureConversation sessions
     // as well as IssuedTokenContext returned by invoking a Trust-Plugin
     // This map stores IssuedTokenContext against the Policy-Id
-    protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();
-    
+    protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();    
+        
     
     protected PipeConfiguration pipeConfig = null;
     

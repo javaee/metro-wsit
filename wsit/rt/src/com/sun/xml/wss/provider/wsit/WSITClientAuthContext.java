@@ -129,6 +129,7 @@ import javax.xml.ws.soap.SOAPFaultException;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.util.Hashtable;
 import java.util.ListIterator;
 
 /**
@@ -158,7 +159,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     private CallbackHandler handler = null;
     //***************AuthModule Instance**********
     WSITClientAuthModule authModule = null;
-    private Container container = null;
+    private Container container = null;  
+    private Hashtable<String, String> scPolicyIDtoSctIdMap = new Hashtable<String, String>();
 
     /** Creates a new instance of WSITClientAuthContext */
     public WSITClientAuthContext(String operation, Subject subject, Map map, CallbackHandler callbackHandler) {
@@ -267,6 +269,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage);
         ((ProcessingContextImpl)ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
         ctx.isClient(true);
         if(hasKerberosTokenPolicy()){
             populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
@@ -375,7 +378,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         cancelSecurityContextToken();
-        issuedTokenContextMap.clear();
+        //issuedTokenContextMap.clear();
+        //scPolicyIDtoSctIdMap.clear();
     }
 
     public Packet validateResponse(Packet req, Subject clientSubject, Subject serviceSubject)
@@ -384,6 +388,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         ctx.isClient(true);
         
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
+        ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
         ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER,
                 new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer));
         Message msg = req.getMessage();
@@ -596,8 +601,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
-                issuedTokenContextMap.put(
-                        ((Token)tok).getTokenId(), ctx);
+                issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+                //PolicyID to sctID map
+                SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
+                scPolicyIDtoSctIdMap.put(((Token)tok).getTokenId(), sctConfig.getTokenId());
             }catch(WSTrustException se){
                 log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                 throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -654,8 +661,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);                     
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
-                    issuedTokenContextMap.put(
-                        ((Token)scToken).getTokenId(), ctx);
+                    issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);
+                    //PolicyID to sctID map
+                    SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
+                    scPolicyIDtoSctIdMap.put(((Token)scToken).getTokenId(), sctConfig.getTokenId());
                   }catch(WSTrustException se){
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -675,6 +684,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 try{
                     itm.cancelIssuedToken(ctx);
                     issuedTokenContextMap.remove(id);
+                    scPolicyIDtoSctIdMap.remove(id);
                 }catch(WSTrustException se){
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);

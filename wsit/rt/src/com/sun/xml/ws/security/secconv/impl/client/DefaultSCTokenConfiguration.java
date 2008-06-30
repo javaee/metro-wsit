@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.security.secconv.impl.client;
 
 import com.sun.xml.ws.api.WSBinding;
@@ -55,6 +54,7 @@ import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.provider.wsit.WSITClientAuthContext;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,7 +65,7 @@ import javax.xml.namespace.QName;
  *
  * @author Shyam Rao
  */
-public class DefaultSCTokenConfiguration extends SCTokenConfiguration{        
+public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
 
     private static final String SC_CLIENT_CONFIGURATION = "SCClientConfiguration";
     private static final String RENEW_EXPIRED_SCT = "renewExpiredSCT";
@@ -74,8 +74,8 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private static final String CONFIG_NAMESPACE = "";
     private Trust10 trust10 = null;
     private Trust13 trust13 = null;
-    private SymmetricBinding symBinding = null;    
-    private int skl = 0;    
+    private SymmetricBinding symBinding = null;
+    private int skl = 0;
     private boolean reqClientEntropy = true;
     private boolean isExpired = false;
     private boolean checkTokenExpiry = true;
@@ -90,10 +90,10 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private Token scToken = null;
     private String tokenId = null;
     private MessagePolicy messagePolicy = null;
-    private boolean addRenewPolicy = true;    
-    
-    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort, 
-            final WSBinding binding, final Tube securityTube, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken, Tube nextTube){
+    private boolean addRenewPolicy = true;
+
+    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
+            final WSBinding binding, final Tube securityTube, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken, Tube nextTube) {
         this.protocol = protocol;
         this.scToken = scToken;
         this.wsdlPort = wsdlPort;
@@ -101,12 +101,12 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.clientSecurityTube = securityTube;
         this.packet = packet;
         this.addVer = addVer;
-        this.tokenId = ((Token)scToken).getTokenId();
+        this.tokenId = null;
         this.nextTube = nextTube;
         parseAssertions(scToken, localToken);
     }
-    
-    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort, 
+
+    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
             final WSBinding binding, final Pipe securityPipe, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken){
         this.protocol = protocol;
         this.scToken = scToken;
@@ -115,11 +115,11 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.clientSecurityTube = null;
         this.packet = packet;
         this.addVer = addVer;
-        this.tokenId = ((Token)scToken).getTokenId();        
+        this.tokenId = ((Token)scToken).getTokenId();
         parseAssertions(scToken, localToken);
     }
-    
-    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort, 
+
+    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
             final WSBinding binding, final WSITClientAuthContext wsitClientAuthContext, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken){
         this.protocol = protocol;
         this.scToken = scToken;
@@ -130,48 +130,75 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.addVer = addVer;
         this.tokenId = ((Token)scToken).getTokenId();
         parseAssertions(scToken, localToken);
-    }         
-    
+    }
+
     public DefaultSCTokenConfiguration(String protocol, final MessagePolicy messagePolicy){
         super(protocol);
-        this.messagePolicy = messagePolicy;        
+        this.messagePolicy = messagePolicy;
     }
-    
+
     public DefaultSCTokenConfiguration(String protocol, final MessagePolicy messagePolicy, boolean addRenewPolicy){
-        this(protocol, messagePolicy);        
+        this(protocol, messagePolicy);
         this.addRenewPolicy = addRenewPolicy;
     }
-    
+
     public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry){
         super(protocol);
-        this.tokenId = tokenId;        
+        this.tokenId = tokenId;
         this.checkTokenExpiry = checkTokenExpiry;
     }
-    
-     public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry, boolean clientOutboundMessage){
-        this(protocol, tokenId, checkTokenExpiry);                
+
+    public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry, boolean clientOutboundMessage){
+        this(protocol, tokenId, checkTokenExpiry);
         this.clientOutboundMessage = clientOutboundMessage;
     }
     
-    private void parseAssertions(SecureConversationToken scToken, PolicyAssertion localToken){
+    public DefaultSCTokenConfiguration(DefaultSCTokenConfiguration that, String tokenId) { 
+        this.protocol = that.protocol;
+        this.scToken = that.scToken;
+        this.wsdlPort = that.wsdlPort;
+        this.wsBinding = that.wsBinding;
+        this.clientSecurityTube = that.clientSecurityTube;
+        this.wsitClientAuthContext = that.wsitClientAuthContext;
+        this.packet = that.packet;
+        this.addVer = that.addVer;        
+        this.nextTube = that.nextTube;      
+        this.tokenId = tokenId;
+        this.checkTokenExpiry = that.checkTokenExpiry;
+        this.clientOutboundMessage = that.clientOutboundMessage;
+        this.messagePolicy = that.messagePolicy;
+        this.addRenewPolicy = that.addRenewPolicy;
+        this.reqClientEntropy = that.reqClientEntropy;
+        this.symBinding = that.symBinding;
+        this.skl = that.skl;
+        this.scToken = that.scToken;
+        this.wsdlPort = that.wsdlPort;
+        this.wsBinding = that.wsBinding;
+        this.renewExpiredSCT = that.renewExpiredSCT;
+        this.requireCancelSCT = that.requireCancelSCT;
+        this.scTokenTimeout = that.scTokenTimeout;
         
-        final AssertionSet assertions = scToken.getBootstrapPolicy().getAssertionSet();        
+    }
+
+    private void parseAssertions(SecureConversationToken scToken, PolicyAssertion localToken){
+
+        final AssertionSet assertions = scToken.getBootstrapPolicy().getAssertionSet();
         for(PolicyAssertion policyAssertion : assertions){
-            SecurityPolicyVersion spVersion  = 
-                    PolicyUtil.getSecurityPolicyVersion(policyAssertion.getName().getNamespaceURI());            
+            SecurityPolicyVersion spVersion  =
+                    PolicyUtil.getSecurityPolicyVersion(policyAssertion.getName().getNamespaceURI());
             if(PolicyUtil.isTrust13(policyAssertion, spVersion)){
                 this.trust13 = (Trust13)policyAssertion;
             }else if(PolicyUtil.isTrust10(policyAssertion, spVersion)){
-                this.trust10 = (Trust10)policyAssertion;                
+                this.trust10 = (Trust10)policyAssertion;
             }else if(PolicyUtil.isSymmetricBinding(policyAssertion, spVersion)){
                 this.symBinding = (SymmetricBinding)policyAssertion;
             }
-        }        
+        }
         if(symBinding!=null){
             final AlgorithmSuite algoSuite = symBinding.getAlgorithmSuite();
             skl = algoSuite.getMinSKLAlgorithm();
         }
-        
+
         if(trust10 != null){
             final Set trustReqdProps = trust10.getRequiredProperties();
             reqClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
@@ -180,7 +207,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
             final Set trustReqdProps = trust13.getRequiredProperties();
             reqClientEntropy = trustReqdProps.contains(Constants.REQUIRE_CLIENT_ENTROPY);
         }
-        
+
         if(localToken != null){
             if (SC_CLIENT_CONFIGURATION.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
@@ -194,73 +221,73 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
                     this.scTokenTimeout = Integer.parseInt(sctConfigPolicy.getValue());
                     break;
                 }
-            }                                
+            }
         }
     }
-    
+
     public String getTokenId(){
         return tokenId;
-    }    
-    
+    }
+
     public boolean checkTokenExpiry(){
         return this.checkTokenExpiry;
     }
-    
+
     public boolean isClientOutboundMessage(){
         return this.clientOutboundMessage;
     }
-    
+
     public MessagePolicy getMessagePolicy(){
         return this.messagePolicy;
     }
-    
+
     public boolean addRenewPolicy(){
         return this.addRenewPolicy;
     }
-    
+
     public boolean getReqClientEntropy(){
         return this.reqClientEntropy;
     }
-    
+
     public boolean isSymmetricBinding(){
         if(symBinding == null){
             return false;
         }
         return true;
     }
-    
+
     public int getKeySize(){
         return this.skl;
-    }                
-        
+    }
+
     public Token getSCToken(){
         return this.scToken;
     }
-    
+
     public WSDLPort getWSDLPort(){
         return this.wsdlPort;
     }
-    
+
     public WSBinding getWSBinding(){
         return this.wsBinding;
     }
-    
+
     public Tube getClientTube(){
         return this.clientSecurityTube;
-    }   
-    
+    }
+
     public WSITClientAuthContext getWSITClientAuthContext(){
         return this.wsitClientAuthContext;
     }
-    
+
     public Tube getNextTube(){
         return this.nextTube;
     }
-    
+
     public Packet getPacket(){
         return this.packet;
     }
-    
+
     public AddressingVersion getAddressingVersion(){
         return this.addVer;
     }
