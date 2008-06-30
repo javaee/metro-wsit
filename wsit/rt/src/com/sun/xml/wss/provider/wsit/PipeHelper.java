@@ -35,6 +35,7 @@
  */
 
 package com.sun.xml.wss.provider.wsit;
+import com.sun.xml.ws.security.spi.SecurityContext;
 import com.sun.xml.ws.api.server.WSEndpoint;
 
 import java.security.AccessController;
@@ -86,9 +87,15 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.Module;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Object;
 import java.lang.Object;
+import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class PipeHelper extends ConfigHelper {
@@ -99,6 +106,7 @@ public class PipeHelper extends ConfigHelper {
 //        new LocalStringManagerImpl(PipeConstants.class);
     private SEIModel seiModel;
     private SOAPVersion soapVersion;
+    private static final String SECURITY_CONTEXT_PROP="META-INF/services/com.sun.xml.ws.security.spi.SecurityContext";
     
     public PipeHelper(String layer, Map<Object, Object> map, CallbackHandler cbh) {
         init(layer, getAppCtxt(map), map, cbh);
@@ -134,10 +142,57 @@ public class PipeHelper extends ConfigHelper {
 	return null;
     }
 
+     public static URL loadFromClasspath(final String configFileName) {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            return ClassLoader.getSystemResource(configFileName);
+        } else {
+            return loader.getResource(configFileName);
+        }
+    }
+     
     public static Subject getClientSubject() {
 
-	Subject s = Subject.getSubject(AccessController.getContext());
+        Subject s = null;
+        URL url = loadFromClasspath(SECURITY_CONTEXT_PROP);
+        if (url != null) {
+            InputStream is = null;
+            try {
+                is = url.openStream();
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                int val = is.read();
+                while (val != -1) {
+                    os.write(val);
+                    val = is.read();
+                }
+                String className = os.toString();
+                Class c = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+                SecurityContext context = (SecurityContext)c.newInstance();
+                s = context.getSubject();
 
+            } catch (InstantiationException ex) {
+                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
+            } catch (IOException ex) {
+                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(PipeHelper.class.getName()).log(Level.WARNING, null, ex);
+                }
+            }
+        }
+        if (s == null) {
+            s = Subject.getSubject(AccessController.getContext());
+        }
 	if (s == null) {
 	    s = new Subject();
 	}

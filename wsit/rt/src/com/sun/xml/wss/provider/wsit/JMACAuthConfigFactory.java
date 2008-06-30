@@ -444,7 +444,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
                 try {
                     is.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(JMACAuthConfigFactory.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(JMACAuthConfigFactory.class.getName()).log(Level.WARNING, null, ex);
                 }
             }
         } else {
