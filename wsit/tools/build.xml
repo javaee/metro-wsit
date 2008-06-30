@@ -42,7 +42,7 @@
 <project name="WSIT-Tools" default="default" basedir=".">
     <description>Builds, tests, and runs the project WSIT-Tools.</description>
     <import file="nbproject/build-impl.xml"/>
-    <import file="../properties.xml"/>
+    <import file="../build-shared.xml"/>
     
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
@@ -132,12 +132,7 @@
                 </fileset>
             </services>
         </combine-jars-macro>
-        <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
-            <arg value="build"/>
-            <arg line="-classpath ../${dist.image.wsit.lib.dir}/${name}-tools.jar"/>
-            <arg line="-output ../${dist.image.wsit.v3.dir}"/>
-            <arg value="${name}-tools.bnd"/>
-        </java>
+        <create-OSGi-bundle jarname="${name}-tools"/>
     </target>
 
     <target name="test.resources.copy"

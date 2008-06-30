@@ -1,3 +1,0 @@
-Export-Package:com.sun.tools.*
-Private-Package:com.sun.org.*,com.sun.xml.*,org.*,com.sun.dtdparser.*,com.sun.codemodel.*,META-INF.services
-Import-Package:*

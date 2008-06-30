@@ -43,7 +43,7 @@
 <project name="WSIT-Runtime" default="default" basedir=".">
     <description>Builds, tests, and runs the project WSIT-Runtime.</description>
     <import file="nbproject/build-impl.xml"/>
-    <import file="../properties.xml"/>
+    <import file="../build-shared.xml"/>
 
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
@@ -156,21 +156,6 @@
                 <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="create-OSGi-bundle">
-
-        <attribute name="jarname"/>
-        <attribute name="jar-tmpdir"/>
-        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
-        <sequential>
-            <java jar="../${etc.lib.dir}/bnd-0.0.249.jar" fork="true">
-                <arg value="build"/>
-                <arg line="-classpath ../@{dist-image-dir}/@{jarname}.jar"/>
-                <arg line="-output ../${dist.image.wsit.v3.dir}"/>
-                <arg value="@{jarname}.bnd"/>
-            </java>
         </sequential>
     </macrodef>
 
@@ -357,13 +342,13 @@
                 </fileset>
             </services>
         </combine-jars-macro>
-        <create-OSGi-bundle jarname="${name}-rt"  jar-tmpdir="${rtjar-tmpdir}" />
+        <create-OSGi-bundle jarname="${name}-rt"/>
     </target>
 
 
     <target name="combine-jars-api">
         <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir}" jar-tmpdir="${apijar-tmpdir}"/>
-        <create-OSGi-bundle jarname="${name}-api"  jar-tmpdir="${apijar-tmpdir}" />
+        <create-OSGi-bundle jarname="${name}-api"/>
 
      </target>
 
