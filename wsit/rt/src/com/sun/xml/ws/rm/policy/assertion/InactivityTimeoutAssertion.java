@@ -33,22 +33,52 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+
+package com.sun.xml.ws.rm.policy.assertion;
+
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.SimpleAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rm.Constants;
+import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
- * Class contains  constants for faults defined by the 02/2005 version of the
- * WS-RM specification.
- * @author Bhakti Mehta
+ * Assertion which replaces inactivity timeout attribute of WS-RMP v1.0 RMAssertion.
+ * The same assertion is used by .Net framework which could simplify the interoperability.
+ * 
+ * <pre>
+ * <netrmp:InactivityTimeout Milliseconds="600000" xmlns:netrmp="http://schemas.microsoft.com/ws-rx/wsrmp/200702"/> 
+ * </pre>
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class Constants {
+public class InactivityTimeoutAssertion extends SimpleAssertion {
+    public static final QName NAME = new QName(Constants.microsoftVersion3_5, "InactivityTimeout");
+    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
 
-    public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
-    public static final String microsoftVersion3_5 = "http://schemas.microsoft.com/ws-rx/wsrmp/200702";
-    public static final String sunVersion = "http://sun.com/2006/03/rm";
-    public static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
-    /*
-     * RequestContext / MessageContext property names
-     */
-    public static final String sequenceProperty = "com.sun.xml.ws.sequence";
-    public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
+    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
+            return new InactivityTimeoutAssertion(data, assertionParameters);
+        }
+    };
+    
+    public static RmAssertionInstantiator getInstantiator() {
+        return instantiator;
+    }
+
+    private final long timeout;
+    
+    public InactivityTimeoutAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
+        
+        timeout = Long.parseLong(data.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
+    }
+   
+    public long getTimeout() {
+        return timeout;
+    }
+    
+    
+
 }

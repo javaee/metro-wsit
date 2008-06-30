@@ -42,6 +42,7 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
@@ -81,8 +82,10 @@ public class Rm11ServiceConfiguration implements Configuration {
         RmFlowControlAssertion rmFlowControlAssertion = ConfigurationManager.extractAssertion(alternative, RmFlowControlAssertion.NAME, RmFlowControlAssertion.class);
         bufferQuota = (rmFlowControlAssertion != null) ? rmFlowControlAssertion.getMaximumBufferSize() : UNSPECIFIED;
 
+        InactivityTimeoutAssertion inactivityTimeoutAssertion = ConfigurationManager.extractAssertion(alternative, InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.class);
+        inactivityTimeout = (inactivityTimeoutAssertion != null) ? inactivityTimeoutAssertion.getTimeout() : DEFAULT_INACTIVITY_TIMEOUT;
+        
         // TODO: add new assertions for these
-        inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT;
         acknowledgementInterval = UNSPECIFIED;
     }
 

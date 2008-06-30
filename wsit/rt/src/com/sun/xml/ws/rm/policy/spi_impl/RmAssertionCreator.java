@@ -49,6 +49,7 @@ import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rm.policy.assertion.AckRequestIntervalClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.AllowDuplicatesAssertion;
 import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
+import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.RmAssertionInstantiator;
@@ -74,6 +75,7 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
         instantiationMap.put(CloseTimeoutClientAssertion.NAME, CloseTimeoutClientAssertion.getInstantiator());
         instantiationMap.put(OrderedDeliveryAssertion.NAME, OrderedDeliveryAssertion.getInstantiator());
         instantiationMap.put(ResendIntervalClientAssertion.NAME, ResendIntervalClientAssertion.getInstantiator());
+        instantiationMap.put(InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.getInstantiator());
     }    
     
     private static final String[] SUPPORTED_DOMAINS = new String[]{
@@ -81,7 +83,8 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
         RmVersion.WSRM11.policyNamespaceUri,
         Constants.sunVersion,
         Constants.sunClientVersion,
-        Constants.microsoftVersion
+        Constants.microsoftVersion,
+        Constants.microsoftVersion3_5
     };
 
     public String[] getSupportedDomainNamespaceURIs() {
