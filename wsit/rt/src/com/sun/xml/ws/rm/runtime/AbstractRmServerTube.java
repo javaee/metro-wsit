@@ -178,31 +178,42 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     public NextAction processResponse(Packet responsePacket) {
         LOGGER.entering();
         try {
-            PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
             Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-
             inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
 
-            Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+            PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
 
-            if (outboundSequence != null) {
-                responseAdapter.appendSequenceHeader(
-                        outboundSequence.getId(),
-                        outboundSequence.generateNextMessageId());
+            if (responseAdapter.containsMessage()) {
+                // response in req-resp MEP
+                Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+                if (outboundSequence != null) {
+                    responseAdapter.appendSequenceHeader(
+                            outboundSequence.getId(),
+                            outboundSequence.generateNextMessageId());
 
-                // we allways request acknowledgement (at least for this response)
-                responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+                    // we allways request acknowledgement (at least for this response)
+                    responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
 
-                if (duplicatesNotAllowed()) {
-                    outboundSequence.storeMessage(
-                            requestAdapter.getMessageNumber(),
-                            responseAdapter.getMessageNumber(),
-                            responseAdapter.getPacket());
+                    if (duplicatesNotAllowed()) {
+                        outboundSequence.storeMessage(
+                                requestAdapter.getMessageNumber(),
+                                responseAdapter.getMessageNumber(),
+                                responseAdapter.getPacket());
+                    }
+                } else {
+                    // we don't have a sequence for outgoing messages
+                    throw new IllegalStateException(LocalizationMessages.WSRM_1139_NO_OUTBOUND_SEQUENCE_FOR_RESPONSE(inboundSequence.getId()));
+                }
+                // we apply acknowledgement only after the message was possibly stored, because otherwise we would
+                // send a stale acknowledgement data in case of resend
+                responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
+            } else {
+                // response in one-way MEP
+                if (inboundSequence.isAckRequested()) {
+                    responseAdapter.setEmptyMessage(configuration.getRmVersion().sequenceAcknowledgementAction);
+                    responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
                 }
             }
-            // we apply acknowledgement only after the message was stored, because otherwise we would
-            // send a stale acknowledgement data in case of resend
-            responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
 
             if (configuration.isOrderedDelivery()) {
                 FlowControledFibers.INSTANCE.tryResume(inboundSequence.getId(), inboundSequence.getLastMessageId() + 1);
