@@ -63,6 +63,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.util.Collections;
 import java.util.WeakHashMap;
 
 /**
@@ -80,7 +81,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private String appContext = null;
     private CallbackHandler callbackHandler = null;
     private WSITClientAuthContext clientAuthContext = null;
-    private PolicyMap policyMap = null;
+    //private PolicyMap policyMap = null;
     
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
@@ -88,7 +89,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private String secDisabled = null;
     private static final String TRUE="true";
     private static final String FALSE="false";
-    private WeakHashMap<PolicyMap, WSITClientAuthContext> policyMaptoClientAuthContextHash = new WeakHashMap<PolicyMap, WSITClientAuthContext>();
+    private Map<Object, WSITClientAuthContext> tubetoClientAuthContextHash = Collections.synchronizedMap(new WeakHashMap<Object, WSITClientAuthContext>());
     
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
@@ -103,16 +104,22 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     public ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
         PolicyMap  pMap = (PolicyMap)map.get("POLICY");
         WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
+        Object tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
+        map.put(PipeConstants.AUTH_CONFIG, this);
+        
         if (pMap == null || pMap.isEmpty()) {
             return null;
         }
-        
+        if (tubeOrPipe == null) {
+            //this is a cloned pipe
+            return clientAuthContext;
+        }
         //now check if security is enabled
         //if the policy has changed due to redeploy recheck if security is enabled        
-        if (this.secDisabled == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {            
+        if (this.secDisabled == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {            
             this.wLock.lock();
             try {                
-                if (this.secDisabled == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {
+                if (this.secDisabled == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
                     if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
                         this.secDisabled = TRUE;
                         return null;
@@ -136,13 +143,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             if (clientAuthContext != null) {
                //probably the app was redeployed
                //if so reacquire the AuthContext
-                if (policyMaptoClientAuthContextHash.containsKey(pMap)) {
-                    authContextInitialized = true;                    
-                    clientAuthContext = (WSITClientAuthContext)policyMaptoClientAuthContextHash.get(pMap);
-                    if(policyMaptoClientAuthContextHash.size()>1){
-                        policyMaptoClientAuthContextHash.clear();                    
-                        policyMaptoClientAuthContextHash.put(pMap, clientAuthContext);
-                    }
+                if (tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
+                    authContextInitialized = true;    
+                    clientAuthContext = (WSITClientAuthContext)tubetoClientAuthContextHash.get(tubeOrPipe);
                 }
             }
         } finally {
@@ -153,9 +156,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             this.wLock.lock();
             try {
                 // recheck the precondition, since the rlock was released.                
-                if (clientAuthContext == null || !policyMaptoClientAuthContextHash.containsKey(pMap)) {
+                if (clientAuthContext == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
                     clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);                    
-                    policyMaptoClientAuthContextHash.put(pMap, clientAuthContext);                    
+                    tubetoClientAuthContextHash.put(tubeOrPipe, clientAuthContext);                    
                 }
             } finally {
                 this.wLock.unlock();
@@ -187,6 +190,10 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
 
     public boolean isProtected() {
         return true;
+    }
+    
+    public ClientAuthContext cleanupAuthContext(Object tubeOrPipe) {
+        return this.tubetoClientAuthContextHash.remove(tubeOrPipe);
     }
 
     @SuppressWarnings("unchecked")

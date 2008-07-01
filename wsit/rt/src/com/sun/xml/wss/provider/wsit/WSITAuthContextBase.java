@@ -254,7 +254,7 @@ public abstract class WSITAuthContextBase  {
     
     //milliseconds
     protected long timestampTimeOut = 0;
-    
+
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
     
@@ -284,7 +284,6 @@ public abstract class WSITAuthContextBase  {
         this.nextTube = (Tube)map.get("NEXT_TUBE");
         wsPolicyMap = (PolicyMap)map.get("POLICY");
         port =(WSDLPort)map.get("WSDL_MODEL");
-        
         if (this instanceof WSITClientAuthContext) {
 //            WSService service = (WSService)map.get("SERVICE");
             WSBinding binding = (WSBinding)map.get("BINDING");

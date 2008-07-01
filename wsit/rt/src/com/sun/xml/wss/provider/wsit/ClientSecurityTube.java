@@ -63,6 +63,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ClientSecurityTube extends AbstractFilterTubeImpl implements SecureConversationInitiator {
 
+    private static final String WSIT_CLIENT_AUTH_CONTEXT="com.sun.xml.wss.provider.wsit.WSITClientAuthContext";
     protected PipeHelper helper;
     
     private AuthStatus status = AuthStatus.SEND_SUCCESS;
@@ -106,6 +107,19 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
     
     @Override
     public void preDestroy() {
+        //Give the AuthContext a chance to cleanup 
+        //create a dummy request packet
+        try {
+            Packet request = new Packet();
+            PacketMessageInfo info = new PacketMapMessageInfo(request, new Packet());
+            Subject subj = getClientSubject(request);
+            ClientAuthContext cAC = helper.getClientAuthContext(info, subj);
+            if (cAC.getClass().getName().equals(WSIT_CLIENT_AUTH_CONTEXT)) {
+                cAC.cleanSubject(info, subj);
+            }
+        } catch (Exception ex) {
+        //ignore exceptions
+        }
         helper.disable();
     }    
     
