@@ -69,7 +69,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
+    void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
@@ -99,7 +99,7 @@ final class Rm10ClientSession extends ClientSession {
 
         CreateSequenceResponseElement csrElement = responseAdapter.unmarshallMessage();
         responseAdapter.getPacket();
-        
+
         outboundSequenceId = csrElement.getIdentifier().getValue();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -123,15 +123,17 @@ final class Rm10ClientSession extends ClientSession {
     void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setEmptyMessage(RmVersion.WSRM10.lastAction);
-        requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
-        
+        if (inboundSequenceId != null) {
+            requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+        }
+
         SequenceElement sequenceElement = new SequenceElement();
         sequenceElement.setId(outboundSequenceId);
         sequenceElement.setNumber(sequenceManager.getSequence(outboundSequenceId).getLastMessageId());
         sequenceElement.setLastMessage(new LastMessage());
 
         requestAdapter.appendHeader(sequenceElement);
-        
+
         PacketAdapter responseAdapter = null;
         try {
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
@@ -152,9 +154,11 @@ final class Rm10ClientSession extends ClientSession {
     @Override
     void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
-        requestAdapter.setMessage(new TerminateSequenceElement(outboundSequenceId),  RmVersion.WSRM10.terminateSequenceAction);
-        requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
-        
+        requestAdapter.setMessage(new TerminateSequenceElement(outboundSequenceId), RmVersion.WSRM10.terminateSequenceAction);
+        if (inboundSequenceId != null) {
+            requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+        }
+
         PacketAdapter responseAdapter = null;
         try {
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));

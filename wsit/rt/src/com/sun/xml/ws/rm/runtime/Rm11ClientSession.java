@@ -71,7 +71,7 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
+    void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
 
@@ -135,7 +135,9 @@ final class Rm11ClientSession extends ClientSession {
         requestAdapter.setMessage(
                 new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM11.closeSequenceAction);
-        requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+        if (inboundSequenceId != null) {
+            requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+        }
 
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
         if (!responseAdapter.containsMessage()) {
@@ -150,7 +152,7 @@ final class Rm11ClientSession extends ClientSession {
         }
 
         CloseSequenceResponseElement csrElement = responseAdapter.unmarshallMessage(); // consuming message here
-        responseAdapter.getPacket();                
+        responseAdapter.getPacket();
 
         if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
             throw new CloseSequenceException(
@@ -162,11 +164,11 @@ final class Rm11ClientSession extends ClientSession {
     void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setMessage(
-                new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()), 
+                new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM11.terminateSequenceAction);
 
         PacketAdapter responseAdapter = null;
-        try {            
+        try {
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
                 throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequenceResponse"));
