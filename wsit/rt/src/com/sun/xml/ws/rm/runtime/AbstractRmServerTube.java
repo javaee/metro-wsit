@@ -70,16 +70,16 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     final SequenceManager sequenceManager;
     //
     private PacketAdapter requestAdapter;
-    
+
     static AbstractRmServerTube getInstance(WsitServerTubeAssemblyContext context) {
         Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
         switch (configuration.getRmVersion()) {
-            case WSRM10 :
+            case WSRM10:
                 return new Rm10ServerTube(configuration, context.getTubelineHead());
-            case WSRM11 :
+            case WSRM11:
                 return new Rm11ServerTube(configuration, context.getTubelineHead());
-            default :
-                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));                
+            default:
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
     }
 
@@ -109,7 +109,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
-                
+
         requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         try {
             if (requestAdapter.isProtocolMessage()) {
@@ -121,14 +121,14 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 }
             } else {
                 Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
-                
+
                 if (!requestAdapter.isSecurityContextTokenIdValid(inboundSequence.getBoundSecurityTokenReferenceId())) {
                     // TODO L10N + maybe throw SOAP fault exception?
                     throw new RmRuntimeException("Security context token on the message does not match the token bound to the sequence");
                 }
-                                
+
                 processNonSequenceRmHeaders(requestAdapter);
-                
+
                 if (duplicatesNotAllowed()) {
                     if (inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
                         Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
@@ -151,7 +151,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 if (!requestAdapter.hasSession()) { // security did not set session - we must do it
                     requestAdapter.setSession(inboundSequence.getId());
                 }
-                
+
                 if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
                     if (FlowControledFibers.INSTANCE.getUsedBufferSize(inboundSequence.getId()) > configuration.getDestinationBufferQuota()) {
                         PacketAdapter responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
@@ -180,24 +180,26 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         try {
             PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
             Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-            Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
 
             inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
 
-            responseAdapter.appendSequenceHeader(
-                    outboundSequence.getId(),
-                    outboundSequence.generateNextMessageId());
+            Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
 
-            // we allways request acknowledgement (at least for this response)
-            responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+            if (outboundSequence != null) {
+                responseAdapter.appendSequenceHeader(
+                        outboundSequence.getId(),
+                        outboundSequence.generateNextMessageId());
 
-            if (duplicatesNotAllowed()) {
-                outboundSequence.storeMessage(
-                        requestAdapter.getMessageNumber(), 
-                        responseAdapter.getMessageNumber(), 
-                        responseAdapter.getPacket());
+                // we allways request acknowledgement (at least for this response)
+                responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+
+                if (duplicatesNotAllowed()) {
+                    outboundSequence.storeMessage(
+                            requestAdapter.getMessageNumber(),
+                            responseAdapter.getMessageNumber(),
+                            responseAdapter.getPacket());
+                }
             }
-
             // we apply acknowledgement only after the message was stored, because otherwise we would
             // send a stale acknowledgement data in case of resend
             responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
