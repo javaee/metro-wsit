@@ -190,10 +190,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         wsscConfig = holder.getConfigAssertions(
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
 
+        Properties props = new Properties();
         if (callbackHandler != null) {
+            populateConfigProperties(configAssertions, props);
             try {
-                Properties props = new Properties();
-                populateConfigProperties(configAssertions, props);
                 String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
                 if (jmacHandler != null) {
                     handler = loadGFHandler(true, jmacHandler);
@@ -208,8 +208,11 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                         LogStringsMessages.WSITPVD_0027_ERROR_POPULATING_CLIENT_CONFIG_PROP(), ex);
             }
         } else {
-            Properties props = new Properties();
             handler = configureClientHandler(configAssertions, props);
+            String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
+            if (jmacHandler != null) {
+                handler = loadGFHandler(true, jmacHandler);
+            }
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         }
 

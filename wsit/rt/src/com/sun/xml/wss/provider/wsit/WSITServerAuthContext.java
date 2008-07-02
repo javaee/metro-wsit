@@ -166,8 +166,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
         
         String isGF = System.getProperty("com.sun.aas.installRoot");
-        if (isGF != null) {
-            
+        if (isGF != null) {            
             try {
                 Properties props = new Properties();
                 populateConfigProperties(configAssertions, props);
@@ -194,6 +193,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             // with Default Realm Authentication
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
+            String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
+            if (jmacHandler != null) {
+                handler = loadGFHandler(false, jmacHandler);
+            }
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         }
         
