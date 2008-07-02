@@ -114,7 +114,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
             PacketMessageInfo info = new PacketMapMessageInfo(request, new Packet());
             Subject subj = getClientSubject(request);
             ClientAuthContext cAC = helper.getClientAuthContext(info, subj);
-            if (cAC.getClass().getName().equals(WSIT_CLIENT_AUTH_CONTEXT)) {
+            if (cAC != null && WSIT_CLIENT_AUTH_CONTEXT.equals(cAC.getClass().getName())) {
                 cAC.cleanSubject(info, subj);
             }
         } catch (Exception ex) {
