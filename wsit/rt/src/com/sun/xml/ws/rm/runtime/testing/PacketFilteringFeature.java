@@ -45,8 +45,10 @@ import javax.xml.ws.WebServiceFeature;
  */
 public final class PacketFilteringFeature extends WebServiceFeature {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringFeature.class);
     public static final String ID = "com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature";
+    //
+    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringFeature.class);
+    //
     private final PacketFilter[] filters;
 
     public PacketFilteringFeature() {

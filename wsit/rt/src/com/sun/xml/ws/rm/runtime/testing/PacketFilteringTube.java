@@ -51,7 +51,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PacketFilteringTube extends AbstractFilterTubeImpl {
+class PacketFilteringTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringTube.class);
     private final boolean isClientSide;

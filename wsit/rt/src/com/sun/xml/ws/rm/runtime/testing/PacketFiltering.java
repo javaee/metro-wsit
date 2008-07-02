@@ -56,9 +56,7 @@ public @interface PacketFiltering {
     boolean enabled() default true;
 
     /**
-     * Property to determine the value of the
-     * <code>wsdl:required</code> attribute on
-     * <code>wsaw:UsingAddressing</code> element in the WSDL.
+     * Property to determine the packet filters.
      */
     Class<? extends PacketFilter>[] filters() default {};
 }
