@@ -89,7 +89,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
+    PacketAdapter processVersionSpecificProtocolRequest( PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (RmVersion.WSRM11.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
             return handleCloseSequenceAction(requestAdapter);
         } else if (RmVersion.WSRM11.makeConnectionAction.equals(requestAdapter.getWsaAction())) {
@@ -100,7 +100,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
+    PacketAdapter handleCreateSequenceAction( PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -221,7 +221,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
      */
     PacketAdapter handleCloseSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         CloseSequenceElement closeSeqElement = requestAdapter.unmarshallMessage();
-        
+
         Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), closeSeqElement.getIdentifier().getValue());
 
         // TODO handle last message number - pass it to the sequence so that it can allocate new unacked messages if necessary
@@ -238,7 +238,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+    PacketAdapter handleTerminateSequenceAction( PacketAdapter requestAdapter) throws UnknownSequenceFault {
         TerminateSequenceElement tsElement = requestAdapter.unmarshallMessage();
 
         Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), tsElement.getIdentifier().getValue());
@@ -267,7 +267,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
                 responseAction = RmVersion.WSRM11.terminateSequenceResponseAction;
                 responseObject = terminateSeqResponse;
             }
-            
+
             PacketAdapter responseAdapter = requestAdapter.createServerResponse(responseObject, responseAction);
             responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence);
 
@@ -277,7 +277,9 @@ final class Rm11ServerTube extends AbstractRmServerTube {
             try {
                 sequenceManager.terminateSequence(inboundSequence.getId());
             } finally {
-                sequenceManager.terminateSequence(outboundSeqence.getId());
+                if (outboundSeqence != null) {
+                    sequenceManager.terminateSequence(outboundSeqence.getId());
+                }
             }
         }
     }

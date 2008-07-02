@@ -86,7 +86,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter processVersionSpecificProtocolRequest(PacketAdapter requestAdapter) throws AbstractRmSoapFault {
+    PacketAdapter processVersionSpecificProtocolRequest( PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (configuration.getRmVersion().lastAction.equals(requestAdapter.getWsaAction())) {
             return handleLastMessageAction(requestAdapter);
         } else {
@@ -95,7 +95,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter handleCreateSequenceAction(PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
+    PacketAdapter handleCreateSequenceAction( PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
         long expirationTime = Configuration.UNSPECIFIED;
@@ -216,10 +216,10 @@ final class Rm10ServerTube extends AbstractRmServerTube {
      */
     PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
-        
+
         if (inboundSequence.getLastMessageId() != requestAdapter.getMessageNumber()) {
             LOGGER.warning(LocalizationMessages.WSRM_1138_LAST_MESSAGE_INCONSISTENCY_DETECTED(
-                    requestAdapter.getMessageNumber(), 
+                    requestAdapter.getMessageNumber(),
                     inboundSequence.getLastMessageId()));
         }
         inboundSequence.close();
@@ -228,7 +228,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
     }
 
     @Override
-    PacketAdapter handleTerminateSequenceAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
+    PacketAdapter handleTerminateSequenceAction( PacketAdapter requestAdapter) throws UnknownSequenceFault {
         TerminateSequenceElement tsElement = requestAdapter.unmarshallMessage();
 
         Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), tsElement.getIdentifier().getValue());
@@ -259,7 +259,9 @@ final class Rm10ServerTube extends AbstractRmServerTube {
             try {
                 sequenceManager.terminateSequence(inboundSequence.getId());
             } finally {
-                sequenceManager.terminateSequence(outboundSeqence.getId());
+                if (outboundSeqence != null) {
+                    sequenceManager.terminateSequence(outboundSeqence.getId());
+                }
             }
         }
     }
