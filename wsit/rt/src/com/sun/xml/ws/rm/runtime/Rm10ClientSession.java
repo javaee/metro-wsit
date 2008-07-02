@@ -90,7 +90,7 @@ final class Rm10ClientSession extends ClientSession {
 
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
         if (responseAdapter == null) {
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequence")));
         }
         if (responseAdapter.isFault()) {
             // FIXME: pass fault value into the exception
@@ -163,7 +163,12 @@ final class Rm10ClientSession extends ClientSession {
         try {
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
-                throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequenceResponse"));
+                if (inboundSequenceId != null) {
+                    // we should get the TerminateSequence response back
+                    throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequence"));
+                } else {
+                    return;
+                }
             }
 
             processInboundMessageHeaders(responseAdapter, false);

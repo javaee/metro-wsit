@@ -101,7 +101,7 @@ final class Rm11ClientSession extends ClientSession {
 
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
         if (!responseAdapter.containsMessage()) {
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequenceResponse")));
+            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequence")));
         }
         if (responseAdapter.isFault()) {
             // FIXME pass fault data into exception
@@ -141,7 +141,7 @@ final class Rm11ClientSession extends ClientSession {
 
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
         if (!responseAdapter.containsMessage()) {
-            throw new CloseSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CloseSequenceResponse"));
+            throw new CloseSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CloseSequence"));
         }
 
         processInboundMessageHeaders(responseAdapter, false);
@@ -171,7 +171,12 @@ final class Rm11ClientSession extends ClientSession {
         try {
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
-                throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequenceResponse"));
+                if (inboundSequenceId != null) {
+                    // we should get the TerminateSequence response back
+                    throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequence"));
+                } else {
+                    return;
+                }
             }
 
             processInboundMessageHeaders(responseAdapter, false);
