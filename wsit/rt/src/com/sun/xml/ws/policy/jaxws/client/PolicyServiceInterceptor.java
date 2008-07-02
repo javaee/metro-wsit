@@ -60,6 +60,7 @@ import javax.xml.ws.WebServiceFeature;
 public class PolicyServiceInterceptor extends ServiceInterceptor {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyServiceInterceptor.class);
     
+    @Override
     public List<WebServiceFeature> preCreateBinding(final WSPortInfo port, final java.lang.Class<?> serviceEndpointInterface, final WSFeatureList defaultFeatures) {
         LOGGER.entering(port, serviceEndpointInterface, defaultFeatures);
         final LinkedList<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
