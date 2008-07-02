@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.messagedump.MessageDumpingTubeAppender;
 import com.sun.xml.ws.tx.common.Util;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -178,22 +179,6 @@ public class TubelineAssemblyController {
                 return context.getWrappedContext().createDumpTube(name, System.out, context.getTubelineHead());
             }
 
-            return context.getTubelineHead();
-        }
-    }
-
-    public static class MessageDumpingTubeAppender implements TubeAppender {
-
-        public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
-            MessageDumpingFeature msgDumper = context.getBinding().getFeature(MessageDumpingFeature.class);
-            if (msgDumper != null) {
-                return msgDumper.createMessageDumpingTube(context.getTubelineHead());
-            }
-
-            return context.getTubelineHead();
-        }
-
-        public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
             return context.getTubelineHead();
         }
     }

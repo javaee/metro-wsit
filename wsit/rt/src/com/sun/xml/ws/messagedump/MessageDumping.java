@@ -33,35 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.pipe.Tube;
-import java.util.LinkedList;
-import java.util.Queue;
-import javax.xml.ws.WebServiceFeature;
+package com.sun.xml.ws.messagedump;
+
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class MessageDumpingFeature extends WebServiceFeature {
-    public static final String ID = MessageDumpingFeature.class.getName();
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = MessageDumpingFeature.ID, bean = MessageDumpingFeature.class)
+public @interface MessageDumping {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
+
+    /**
+     * Message logging root
+     */
+    String messageLoggingRoot() default MessageDumpingTube.DEFAULT_MSGDUMP_LOGGING_ROOT;
     
-    private Queue<String> messageQueue = new LinkedList<String>();
+    /**
+     * Message logging level
+     */
+    String messageLoggingLevel() default "FINE";
     
-    /** Creates a new instance of MessageDumpingFeature */
-    public MessageDumpingFeature() {
-    }
-    
-    public String getID() {
-        return ID;
-    }
-    
-    public Tube createMessageDumpingTube(Tube next) {
-        return new MessageDumpingTube(messageQueue, next);
-    }
-    
-    public String nextMessage() {
-        return messageQueue.poll();
-    }
+    /**
+     * Turns on or off storing messages
+     */
+    boolean storeMessages() default false; 
 }

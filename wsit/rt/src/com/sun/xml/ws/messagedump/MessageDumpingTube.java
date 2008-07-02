@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.assembler;
+package com.sun.xml.ws.messagedump;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -41,11 +41,12 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.util.pipe.DumpTube;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -54,13 +55,17 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-class MessageDumpingTube extends AbstractFilterTubeImpl {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(MessageDumpingTube.class);
-    private static boolean warnStaxUtils;
-    
-    private final Queue<String> messageQueue;
-    private final XMLOutputFactory staxOut;
-    
+final class MessageDumpingTube extends AbstractFilterTubeImpl {
+
+    static final String DEFAULT_MSGDUMP_LOGGING_ROOT = com.sun.xml.ws.util.Constants.LoggingDomain + ".messagedump";
+    private static final Logger TUBE_LOGGER = Logger.getLogger(DEFAULT_MSGDUMP_LOGGING_ROOT);
+    //
+    private final XMLOutputFactory xmlOutputFactory;
+    private final Logger messageLogger;
+    private final MessageDumpingFeature messageDumpingFeature;
+    //
+    private AtomicBoolean logMissingStaxUtilsWarning;
+
     /**
      * @param name
      *      Specify the name that identifies this {@link MessageDumpingTube}
@@ -73,62 +78,77 @@ class MessageDumpingTube extends AbstractFilterTubeImpl {
      * @param next
      *      The next {@link Tube} in the pipeline.
      */
-    public MessageDumpingTube(Queue<String> messageQueue, Tube next) {
+    MessageDumpingTube(Tube next, MessageDumpingFeature feature) {
         super(next);
-        this.messageQueue = messageQueue;
-        this.staxOut = XMLOutputFactory.newInstance();
-        //staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
+        
+        this.xmlOutputFactory = XMLOutputFactory.newInstance();
+        this.logMissingStaxUtilsWarning = new AtomicBoolean(false);
+
+        this.messageLogger = Logger.getLogger(feature.getMessageLoggingRoot());
+        this.messageDumpingFeature = feature;
+    //staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
     }
-    
+
     /**
      * Copy constructor.
      */
-    protected MessageDumpingTube(MessageDumpingTube that, TubeCloner cloner) {
+    MessageDumpingTube(MessageDumpingTube that, TubeCloner cloner) {
         super(that, cloner);
-        this.messageQueue = that.messageQueue;
-        this.staxOut = that.staxOut;
+
+        this.xmlOutputFactory = that.xmlOutputFactory;
+        this.logMissingStaxUtilsWarning = that.logMissingStaxUtilsWarning;
+
+        this.messageLogger = that.messageLogger;
+        this.messageDumpingFeature = that.messageDumpingFeature;
     }
-    
+
     public AbstractTubeImpl copy(TubeCloner cloner) {
         return new MessageDumpingTube(this, cloner);
     }
-    
+
     @Override
     public NextAction processRequest(Packet request) {
         dump(request);
         return super.processRequest(request);
     }
-    
+
     @Override
     public NextAction processResponse(Packet response) {
         dump(response);
         return super.processResponse(response);
     }
-    
-    protected void dump(Packet packet) {
+
+    private void dump(Packet packet) {
         StringWriter stringOut = new StringWriter();
-        if(packet.getMessage()==null) {
+        if (packet.getMessage() == null) {
             stringOut.write("[null]");
-        }else {
+        } else {
             XMLStreamWriter writer = null;
             try {
-                writer = staxOut.createXMLStreamWriter(stringOut);
+                writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
                 writer = createIndenter(writer);
                 packet.getMessage().copy().writeTo(writer);
             } catch (XMLStreamException e) {
-                LOGGER.warning("Unexpected exception occured while dumping message", e);
+                TUBE_LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
             } finally {
                 if (writer != null) {
                     try {
                         writer.close();
-                    } catch (XMLStreamException ignored) { }
+                    } catch (XMLStreamException ignored) {
+                    }
                 }
             }
         }
-        
-        messageQueue.offer(stringOut.toString());
+
+        String message = stringOut.toString();
+
+        if (messageDumpingFeature.getMessageLoggingStatus()) {
+            messageLogger.log(messageDumpingFeature.getMessageLoggingLevel(), message);
+        }
+
+        messageDumpingFeature.offerMessage(message);
     }
-    
+
     /**
      * Wraps {@link XMLStreamWriter} by an indentation engine if possible.
      *
@@ -139,58 +159,15 @@ class MessageDumpingTube extends AbstractFilterTubeImpl {
         try {
             Class clazz = getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
             Constructor c = clazz.getConstructor(XMLStreamWriter.class);
-            writer = (XMLStreamWriter)c.newInstance(writer);
-        } catch (InstantiationException ex) {
+            writer = (XMLStreamWriter) c.newInstance(writer);
+        } catch (Exception ex) {
             // if stax-utils.jar is not in the classpath, this will fail
             // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (IllegalAccessException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (IllegalArgumentException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (InvocationTargetException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (NoSuchMethodException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (SecurityException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        } catch (ClassNotFoundException ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if(!warnStaxUtils) {
-                warnStaxUtils = true;
-                LOGGER.warning("Put stax-utils.jar to the classpath to indent the dump output", ex);
+            if (logMissingStaxUtilsWarning.compareAndSet(false, true)) {
+                TUBE_LOGGER.log(Level.WARNING, "Put stax-utils.jar to the classpath to indent the dump output", ex);
             }
         }
         return writer;
-    }   
+    }
 }
 
