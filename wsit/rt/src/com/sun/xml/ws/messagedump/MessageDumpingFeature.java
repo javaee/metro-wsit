@@ -39,6 +39,7 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.xml.ws.WebServiceFeature;
+import com.sun.xml.ws.api.FeatureConstructor;
 
 /**
  *
@@ -74,6 +75,7 @@ public final class MessageDumpingFeature extends WebServiceFeature {
         super.enabled = enabled;
     }
 
+    @FeatureConstructor({"enabled", "msgLogRoot", "msgLogLevel", "storeMessages"})
     public MessageDumpingFeature(boolean enabled, String msgLogRoot, String msgLogLevel, boolean storeMessages) {
         // this constructor is here just to satisfy JAX-WS specification requirements
         this(msgLogRoot, Level.parse(msgLogLevel), storeMessages);
