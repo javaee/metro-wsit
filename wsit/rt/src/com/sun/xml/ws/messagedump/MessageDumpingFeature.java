@@ -75,7 +75,7 @@ public final class MessageDumpingFeature extends WebServiceFeature {
         super.enabled = enabled;
     }
 
-    @FeatureConstructor({"enabled", "msgLogRoot", "msgLogLevel", "storeMessages"})
+    @FeatureConstructor({"enabled", "messageLoggingRoot", "messageLoggingLevel", "storeMessages"})
     public MessageDumpingFeature(boolean enabled, String msgLogRoot, String msgLogLevel, boolean storeMessages) {
         // this constructor is here just to satisfy JAX-WS specification requirements
         this(msgLogRoot, Level.parse(msgLogLevel), storeMessages);
