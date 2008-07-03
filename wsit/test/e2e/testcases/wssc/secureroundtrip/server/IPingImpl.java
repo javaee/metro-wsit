@@ -62,7 +62,10 @@ public class IPingImpl {
 
     private String getSessionData() {
 	Hashtable sess = getSession();
-        String ret = (String)sess.get("request_record");
+        String ret = null;
+        if (sess != null){
+            ret = (String)sess.get("request_record");
+        }
         return ret != null ? ret : "";
 
     }
