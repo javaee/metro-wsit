@@ -1,6 +1,4 @@
 import javax.xml.ws.BindingProvider;
-import com.sun.xml.ws.rm.jaxws.runtime.client.ClientSession;
-import com.sun.xml.ws.rm.RMException;
 
 import javax.xml.bind.*;
 import javax.xml.namespace.*;

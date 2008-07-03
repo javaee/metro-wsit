@@ -35,11 +35,13 @@
  */
 package wsrm.ackrequestedinterval.client;
 
+import junit.framework.TestCase;
+
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class AckRequestedIntervalClientTest {
+public class AckRequestedIntervalClientTest extends TestCase {
 
     public void testAckRequestedInterval() {
         wsrm.ackrequestedinterval.client.IPing port = null;

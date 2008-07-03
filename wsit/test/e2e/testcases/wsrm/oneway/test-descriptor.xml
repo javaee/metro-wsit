@@ -35,9 +35,8 @@
 -->
 
 <descriptor>
-  <description>This is a roundtrip RM test </description>
+  <description>This is a oneway RM test </description>
   <client href ="test.bsh"/>
-  <client href ="test1.bsh"/>
   <service basedir="./server">
     <wsdl href="EchoService.wsdl"/>
   </service>
