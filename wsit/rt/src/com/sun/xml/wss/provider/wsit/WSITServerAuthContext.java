@@ -445,6 +445,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             // if this is SC message we need to secure it in ValidateRequest Itself
             retPacket = secureResponse(retPacket, serviceSubject, sharedState);
         } else {
+             updateSCSessionInfo(packet);
             retPacket = packet;
         }
         
@@ -871,5 +872,18 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         }
         return null;
-    }            
+    }   
+    
+    @SuppressWarnings("unchecked")
+    private void updateSCSessionInfo(Packet packet) {
+        SecurityContextToken sct =
+                (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+        if (sct != null) {
+            // get the secure session id 
+            String sessionId = sct.getIdentifier().toString();
+            
+            // put the secure session id the the message context
+            packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
+        }
+    }
 }

@@ -778,7 +778,15 @@ public class SecurityServerPipe extends SecurityPipeBase {
             //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
             //IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
             //IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
-            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sct.getIdentifier().toString(), true);
+            
+            // get the secure session id 
+            String sessionId = sct.getIdentifier().toString();
+            
+            // put the secure session id the the message context
+            packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
+            
+            // update the Subject
+            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sessionId, true);
             if (itctx != null) {
                 Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);
