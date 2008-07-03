@@ -96,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -195,9 +196,18 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             handler = configureServerHandler(configAssertions, props);
             String jmacHandler = props.getProperty(DefaultCallbackHandler.JMAC_CALLBACK_HANDLER);
             if (jmacHandler != null) {
-                handler = loadGFHandler(false, jmacHandler);
+                try {
+                    handler = loadGFHandler(false, jmacHandler);
+                    secEnv = new WSITProviderSecurityEnvironment(handler, map, props);
+                } catch (XWSSecurityException ex) {
+                    log.log(Level.SEVERE,
+                            LogStringsMessages.WSITPVD_0048_ERROR_POPULATING_SERVER_CONFIG_PROP(), ex);
+                    throw new WebServiceException(
+                            LogStringsMessages.WSITPVD_0048_ERROR_POPULATING_SERVER_CONFIG_PROP(), ex);
+                }
+            } else {
+                secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
             }
-            secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         }
         
         //initialize the AuthModules and keep references to them
