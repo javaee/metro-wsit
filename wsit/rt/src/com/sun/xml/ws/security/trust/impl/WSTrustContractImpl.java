@@ -514,7 +514,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         Object[] certAndKey = this.getSTSCertAndPrivateKey();
         context.getOtherProperties().put(IssuedTokenContext.STS_CERTIFICATE, (X509Certificate)certAndKey[0]);
         context.getOtherProperties().put(IssuedTokenContext.STS_PRIVATE_KEY, (PrivateKey)certAndKey[1]);
-        
+        context.getOtherProperties().put(IssuedTokenContext.WS_TRUST_VERSION, wstVer);
+         
         // get TokenType
         URI tokenType = rst.getTokenType();
         context.setTokenType(tokenType.toString());
