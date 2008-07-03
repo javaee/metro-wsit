@@ -42,6 +42,8 @@ package com.sun.xml.ws.api.security.trust;
  */
 public interface Status {
     
+    boolean isValid();
+    
     /**
      * Gets the value of the code property.
      * 

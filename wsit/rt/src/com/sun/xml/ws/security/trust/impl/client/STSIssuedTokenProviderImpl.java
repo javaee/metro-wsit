@@ -63,6 +63,6 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
     
     public void validate(IssuedTokenContext ctx)throws WSTrustException{
         TrustPlugin tp = WSTrustFactory.newTrustPlugin();
-        tp.process(ctx);
+        tp.processValidate(ctx);
     }
 }
