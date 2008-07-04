@@ -194,7 +194,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         Element element = (Element) token.getTokenValue();
         
         String code = wstVer.getValidStatusCodeURI();
-        String reason = "The Trust service successfully validate the imput";
+        String reason = "The Trust service successfully validate the input";
         
         // Check if it is an SAML assertion
         if (!isSAMLAssertion(element)){
