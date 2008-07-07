@@ -203,7 +203,7 @@
     <wsdl:service name="PingService">        
         <wsdl:port name="CustomBinding_IPingService" binding="tns:Scenario_2_IssuedToken_MutualCertificate10">
             <soap12:address location="REPLACE_WITH_ACTUAL_URL"/>
-            <wsa10:EndpointReference>
+            <!--wsa10:EndpointReference>
                 <wsa10:Address>default</wsa10:Address>
                 <Identity>
                     <KeyInfo>
@@ -214,7 +214,7 @@
                         </X509Data>
                     </KeyInfo>
                 </Identity>
-            </wsa10:EndpointReference>
+            </wsa10:EndpointReference-->
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>
