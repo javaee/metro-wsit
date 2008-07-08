@@ -237,7 +237,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
     private boolean isMessageInOrder(PacketAdapter requestAdapter) {
         Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-        return inboundSequence.getLastMessageId() == requestAdapter.getMessageNumber();
+        return inboundSequence.getLastMessageId() + 1 == requestAdapter.getMessageNumber();
     }
 
     /**
