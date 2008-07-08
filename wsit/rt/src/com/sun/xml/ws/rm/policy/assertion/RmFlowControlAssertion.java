@@ -43,7 +43,6 @@ import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
