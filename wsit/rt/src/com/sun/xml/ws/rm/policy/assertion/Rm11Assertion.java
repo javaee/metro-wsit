@@ -87,13 +87,14 @@ public final class Rm11Assertion extends ComplexAssertion {
         return instantiator;
     }
     private final SecurityBinding securityBinding;
-    private final DeliveryAssuranceAssertion deliveryAssuranceAssertion;
+    private final DeliveryAssurance deliveryAssurance;
+    private final boolean isOrderedDelivery;
 
     private Rm11Assertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
         super(data, assertionParameters, nestedAlternative);
 
         SecurityBinding _securityBinding = SecurityBinding.NONE;
-        DeliveryAssuranceAssertion _deliveryAssuranceAssertion = null;
+        DeliveryAssuranceAssertion deliveryAssuranceAssertion = null;
 
         if (nestedAlternative != null) {
             for (PolicyAssertion nestedAssertion : nestedAlternative) {
@@ -102,25 +103,28 @@ public final class Rm11Assertion extends ComplexAssertion {
                 } else if (SEQUENCE_TRANSPORT_SECURITY_QNAME.equals(nestedAssertion.getName())) {
                     _securityBinding = evaluateDeliveryAssurance(_securityBinding == SecurityBinding.NONE, SecurityBinding.TRANSPORT, data);
                 } else if (DeliveryAssuranceAssertion.NAME.equals(nestedAssertion.getName())) {
-                    _deliveryAssuranceAssertion = (DeliveryAssuranceAssertion) nestedAssertion;
+                    deliveryAssuranceAssertion = (DeliveryAssuranceAssertion) nestedAssertion;
                 }
             }
         }
         
-        if (_deliveryAssuranceAssertion == null) {
-            throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1004_EXPECTED_DA_NOT_SPECIFIED_IN_POLICY()));
+        if (deliveryAssuranceAssertion == null) {
+            deliveryAssurance = DeliveryAssurance.EXACTLY_ONCE;
+            isOrderedDelivery = false;
+        } else {
+            deliveryAssurance = deliveryAssuranceAssertion.getDeliveryAssurance();
+            isOrderedDelivery = deliveryAssuranceAssertion.isOrderedDelivery();            
         }
 
         securityBinding = _securityBinding;
-        deliveryAssuranceAssertion = _deliveryAssuranceAssertion;
     }
 
     public DeliveryAssurance getDeliveryAssurance() {
-        return deliveryAssuranceAssertion.getDeliveryAssurance();
+        return deliveryAssurance;
     }
 
     public boolean isOrderedDelivery() {
-        return deliveryAssuranceAssertion.isOrderedDelivery();
+        return isOrderedDelivery;
     }
 
     public SecurityBinding getSecurityBinding() {
