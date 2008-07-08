@@ -33,40 +33,20 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.ackrequestedinterval.client;
+package wsrm.basicorderedoneway.server;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import junit.framework.TestCase;
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
+import javax.xml.ws.soap.SOAPBinding;
 
-/**
- *
- * @author Marek Potociar <marek.potociar at sun.com>
- */
-public class AckRequestedIntervalClientTest extends TestCase {
+@WebService(endpointInterface = "wsrm.basicorderedoneway.server.IPing")
+@BindingType(SOAPBinding.SOAP12HTTP_BINDING)
+public class IPingImpl {
 
-    public void testAckRequestedInterval() {
-        wsrm.ackrequestedinterval.client.IPing port = null;
-        try {
-            wsrm.ackrequestedinterval.client.PingService service = new PingService();
-            port = service.getWSHttpBindingIPing();
-            
-            for (int i = 0; i < 100; i++) {
-                port.ping("hello " + i);
-                System.out.println(" message sent " + i);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("The ReliableOneway.testSendPing failed with the execption");
-        } finally {
-            if (port != null) {
-                try {
-                    ((java.io.Closeable) port).close();
-                } catch (IOException ex) {
-                    Logger.getLogger(AckRequestedIntervalClientTest.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+    /**
+     * @param String
+     */
+    public void ping(String s) {
+        System.out.println("On server side received " + s);
     }
 }

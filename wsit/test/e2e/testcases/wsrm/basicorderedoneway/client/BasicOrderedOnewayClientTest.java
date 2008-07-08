@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.ackrequestedinterval.client;
+package wsrm.basicorderedoneway.client;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -44,15 +44,15 @@ import junit.framework.TestCase;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class AckRequestedIntervalClientTest extends TestCase {
+public class BasicOrderedOnewayClientTest extends TestCase {
 
     public void testAckRequestedInterval() {
-        wsrm.ackrequestedinterval.client.IPing port = null;
+        IPing port = null;
         try {
-            wsrm.ackrequestedinterval.client.PingService service = new PingService();
-            port = service.getWSHttpBindingIPing();
+            PingService service = new PingService();
+            port = service.getPingPort();
             
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 20; i++) {
                 port.ping("hello " + i);
                 System.out.println(" message sent " + i);
             }
@@ -64,7 +64,7 @@ public class AckRequestedIntervalClientTest extends TestCase {
                 try {
                     ((java.io.Closeable) port).close();
                 } catch (IOException ex) {
-                    Logger.getLogger(AckRequestedIntervalClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(BasicOrderedOnewayClientTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
