@@ -133,10 +133,10 @@ public interface Configuration {
     public long getDestinationBufferQuota();
     
     /**
-     * Specifies how long (in miliseconds) the RM client is expected to wait before 
+     * Specifies how long (in miliseconds) the RM source is expected to wait before 
      * retransmitting the message.
      * 
-     * @return a period of time (in miliseconds) the RM client is expected to wait 
+     * @return a period of time (in miliseconds) the RM source is expected to wait 
      * before retransmitting the message.
      */
     public long getMessageRetransmissionInterval();
@@ -151,9 +151,9 @@ public interface Configuration {
     public boolean useExponetialBackoffRetransmission();    
     
     /**
-     * Specifies the duration after which the RM client will transmit an acknowledgement request.
+     * Specifies the duration after which the RM source will transmit an acknowledgement request.
      * 
-     * @return the duration after which the RM client will transmit an acknowledgement request.
+     * @return the duration after which the RM source will transmit an acknowledgement request.
      */
     public long getAcknowledgementRequestInterval();    
     
