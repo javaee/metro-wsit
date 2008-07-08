@@ -786,6 +786,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             
             // put the secure session id the the message context
             packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
+            packet.invocationProperties.put(Session.SESSION_KEY, sessionManager.getSession(sessionId).getUserData());
             
             // update the Sbject
             IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sessionId, true);
