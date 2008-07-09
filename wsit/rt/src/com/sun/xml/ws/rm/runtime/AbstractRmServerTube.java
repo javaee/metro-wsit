@@ -132,7 +132,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 if (duplicatesNotAllowed()) {
                     if (inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
                         Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
-                        Object storedMessage = outboundSequence.retrieveMessage(requestAdapter.getMessageNumber());
+                        Object storedMessage = (outboundSequence != null) ? outboundSequence.retrieveMessage(requestAdapter.getMessageNumber()) : null;
 
                         PacketAdapter responseAdapter;
                         if (storedMessage instanceof Packet) {
