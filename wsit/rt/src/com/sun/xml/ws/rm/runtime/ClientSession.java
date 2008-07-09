@@ -45,6 +45,7 @@ import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
@@ -145,7 +146,7 @@ abstract class ClientSession {
                 throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), responseAdapter.message);
             }
         } finally {
-            if (responseAdapter !=null) {                
+            if (responseAdapter != null) {
                 responseAdapter.consume();
             }
         }
@@ -163,7 +164,11 @@ abstract class ClientSession {
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
         if (inboundSequenceId != null) {
-            requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+            Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
+            
+            if (inboundSequence.getLastMessageId() > 0 /*sequence has been used already*/) { // FIXME: create an API method to test this
+                requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
+            }
         }
 
         return requestAdapter.getPacket();
