@@ -227,15 +227,47 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      * 
+     * @return
+     */
+    final PacketAdapter keepTransportBackChannelOpen() {
+        this.packet.keepTransportBackChannelOpen();
+        
+        return this;
+    }
+    
+    /**
      * Creates a new JAX-WS {@link Message} object that doesn't have any payload
-     * and sets it as the current packet content.
+     * and sets it as the current packet content as a request message.
      * 
      * @param wsaAction WS-Addressing action header to set 
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    final PacketAdapter setEmptyMessage(String wsaAction) {
-        return setMessage(Messages.createEmpty(soapVersion), wsaAction);
+    final PacketAdapter setEmptyRequestMessage(String wsaAction) {
+        return setRequestMessage(Messages.createEmpty(soapVersion), wsaAction);
+    }
+    
+    /**
+     * TODO javadoc
+     * 
+     * @param requestAdapter
+     * @param wsaAction
+     * @return
+     */
+    final PacketAdapter setEmptyResponseMessage(PacketAdapter requestAdapter, String wsaAction) {
+        this.message = Messages.createEmpty(soapVersion);
+        this.packet = requestAdapter.packet.createServerResponse(
+                this.message,
+                addressingVersion,
+                soapVersion,
+                wsaAction);
+
+// TODO replace the above code with this commented out code once we integrate JAX-WS RI 2.1.5 or higher
+//        checkPacketReadyState();
+//        
+//        this.message = Messages.createEmpty(soapVersion);
+//        this.packet.setResponseMessage(requestAdapter.packet, message, addressingVersion, soapVersion, wsaAction);
+        return this;        
     }
 
     /**
@@ -251,8 +283,8 @@ abstract class PacketAdapter {
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    final PacketAdapter setMessage(Object jaxbElement, String wsaAction) {
-        return setMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
+    final PacketAdapter setRequestMessage(Object jaxbElement, String wsaAction) {
+        return setRequestMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
     }
 
     /**
@@ -262,11 +294,11 @@ abstract class PacketAdapter {
      * @param wsaAction
      * @return
      */
-    private final PacketAdapter setMessage(Message newMessage, String wsaAction) {
+    private final PacketAdapter setRequestMessage(Message newMessage, String wsaAction) {
         checkPacketReadyState();
 
-        this.packet.setMessage(newMessage);
         this.message = newMessage;
+        this.packet.setMessage(this.message);
 
         this.message.assertOneWay(false); // TODO do we really need to call this assert here?
         this.message.getHeaders().fillRequestAddressingHeaders(

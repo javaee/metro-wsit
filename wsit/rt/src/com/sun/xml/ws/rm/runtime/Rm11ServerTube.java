@@ -252,21 +252,21 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 
             String responseAction;
             Object responseObject;
-            if (outboundSeqence != null) {
-                TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
-                Identifier id = new Identifier(outboundSeqence.getId());
-                terminateSeqResponse.setIdentifier(id);
-
-                responseAction = RmVersion.WSRM11.terminateSequenceAction;
-                responseObject = terminateSeqResponse;
-            } else {
+//            if (outboundSeqence != null) {
+//                TerminateSequenceElement terminateSeqResponse = new TerminateSequenceElement();
+//                Identifier id = new Identifier(outboundSeqence.getId());
+//                terminateSeqResponse.setIdentifier(id);
+//
+//                responseAction = RmVersion.WSRM11.terminateSequenceAction;
+//                responseObject = terminateSeqResponse;
+//            } else {
                 TerminateSequenceResponseElement terminateSeqResponse = new TerminateSequenceResponseElement();
-                Identifier id = new Identifier(outboundSeqence.getId());
+                Identifier id = new Identifier(inboundSequence.getId());
                 terminateSeqResponse.setIdentifier(id);
 
                 responseAction = RmVersion.WSRM11.terminateSequenceResponseAction;
                 responseObject = terminateSeqResponse;
-            }
+//            }
 
             PacketAdapter responseAdapter = requestAdapter.createServerResponse(responseObject, responseAction);
             responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence);

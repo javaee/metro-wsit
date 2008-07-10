@@ -216,12 +216,8 @@ final class Rm10ServerTube extends AbstractRmServerTube {
      */
     PacketAdapter handleLastMessageAction(PacketAdapter requestAdapter) throws UnknownSequenceFault {
         Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
-
-        if (inboundSequence.getLastMessageId() != requestAdapter.getMessageNumber()) {
-            LOGGER.warning(LocalizationMessages.WSRM_1138_LAST_MESSAGE_INCONSISTENCY_DETECTED(
-                    requestAdapter.getMessageNumber(),
-                    inboundSequence.getLastMessageId()));
-        }
+        
+        inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
         inboundSequence.close();
 
         return requestAdapter.createAckResponse(inboundSequence, RmVersion.WSRM10.lastAction);

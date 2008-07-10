@@ -132,7 +132,7 @@ abstract class ClientSession {
         PacketAdapter responseAdapter = null;
         try {
             PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
-            requestAdapter.setEmptyMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
+            requestAdapter.setEmptyRequestMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
 
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {

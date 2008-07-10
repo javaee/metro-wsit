@@ -91,7 +91,7 @@ final class Rm11ClientSession extends ClientSession {
 
 
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
-        requestAdapter.setMessage(csElement, RmVersion.WSRM11.createSequenceAction);
+        requestAdapter.setRequestMessage(csElement, RmVersion.WSRM11.createSequenceAction);
 
         if (strType != null) {
             UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
@@ -132,7 +132,7 @@ final class Rm11ClientSession extends ClientSession {
     void closeOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
 
-        requestAdapter.setMessage(
+        requestAdapter.setRequestMessage(
                 new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM11.closeSequenceAction);
         if (inboundSequenceId != null) {
@@ -163,7 +163,7 @@ final class Rm11ClientSession extends ClientSession {
     @Override
     void terminateOutboundSequence() throws RmException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
-        requestAdapter.setMessage(
+        requestAdapter.setRequestMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM11.terminateSequenceAction);
 
@@ -193,7 +193,7 @@ final class Rm11ClientSession extends ClientSession {
                 sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
             } else if (RmVersion.WSRM11.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseElement tsrElement = responseAdapter.unmarshallMessage();
-
+                
                 if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
                     throw new TerminateSequenceException(
                             LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(tsrElement.getIdentifier().getValue(), outboundSequenceId));

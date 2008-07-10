@@ -129,23 +129,21 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
                 processNonSequenceRmHeaders(requestAdapter);
 
-                if (duplicatesNotAllowed()) {
-                    if (inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
-                        Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
-                        Object storedMessage = (outboundSequence != null) ? outboundSequence.retrieveMessage(requestAdapter.getMessageNumber()) : null;
+                if (duplicatesNotAllowed() && inboundSequence.isAcknowledged(requestAdapter.getMessageNumber())) {
+                    Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+                    Object storedMessage = (outboundSequence != null) ? outboundSequence.retrieveMessage(requestAdapter.getMessageNumber()) : null;
 
-                        PacketAdapter responseAdapter;
-                        if (storedMessage instanceof Packet) {
-                            responseAdapter = PacketAdapter.getInstance(configuration, (Packet) storedMessage);
-                            responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
-                        } else if (storedMessage == null) {
-                            responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
-                        } else {
-                            throw new AssertionError("Unexpected message packet type: " + storedMessage.getClass().getName());
-                        }
-
-                        doReturnWith(responseAdapter.getPacket());
+                    PacketAdapter responseAdapter;
+                    if (storedMessage instanceof Packet) {
+                        responseAdapter = PacketAdapter.getInstance(configuration, (Packet) storedMessage);
+                        responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
+                    } else if (storedMessage == null) {
+                        responseAdapter = requestAdapter.createAckResponse(inboundSequence, configuration.getRmVersion().sequenceAcknowledgementAction);
+                    } else {
+                        throw new AssertionError("Unexpected message packet type: " + storedMessage.getClass().getName());
                     }
+
+                    doReturnWith(responseAdapter.getPacket());
                 }
 
                 if (!requestAdapter.hasSession()) { // security did not set session - we must do it
@@ -162,7 +160,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     return doSuspend(super.next);
                 }
 
-                return super.processRequest(requestAdapter.getPacket());
+                return super.processRequest(requestAdapter.keepTransportBackChannelOpen().getPacket());
             }
         } catch (AbstractRmSoapFault ex) {
             return doReturnWith(ex.getSoapFaultResponse());
@@ -208,18 +206,16 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 // send a stale acknowledgement data in case of resend
                 responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
             } else {
-                // response in one-way MEP
-                if (inboundSequence.isAckRequested()) {
-                    responseAdapter.setEmptyMessage(configuration.getRmVersion().sequenceAcknowledgementAction);
-                    responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
-                }
+                // response in one-way MEP - just send a sequence acknowledgement
+                responseAdapter.setEmptyResponseMessage(requestAdapter, configuration.getRmVersion().sequenceAcknowledgementAction);
+                responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
             }
 
             if (configuration.isOrderedDelivery()) {
                 FlowControledFibers.INSTANCE.tryResume(inboundSequence.getId(), inboundSequence.getLastMessageId() + 1);
             }
 
-            return super.processResponse(responsePacket);
+            return super.processResponse(responseAdapter.getPacket());
         } finally {
             LOGGER.exiting();
         }
