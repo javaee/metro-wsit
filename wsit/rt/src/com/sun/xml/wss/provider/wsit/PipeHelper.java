@@ -76,14 +76,14 @@ import javax.xml.ws.WebServiceException;
 //import com.sun.enterprise.util.LocalStringManagerImpl;
 //import com.sun.enterprise.util.io.FileUtils;
 
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
-import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.BoundEndpoint;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.Module;
@@ -107,6 +107,8 @@ public class PipeHelper extends ConfigHelper {
     private SEIModel seiModel;
     private SOAPVersion soapVersion;
     private static final String SECURITY_CONTEXT_PROP="META-INF/services/com.sun.xml.ws.security.spi.SecurityContext";
+    private Class secCntxt = null;
+    private SecurityContext context = null;
     
     public PipeHelper(String layer, Map<Object, Object> map, CallbackHandler cbh) {
         init(layer, getAppCtxt(map), map, cbh);
@@ -120,6 +122,33 @@ public class PipeHelper extends ConfigHelper {
             }
         }
         this.soapVersion = (binding != null) ? binding.getSOAPVersion(): SOAPVersion.SOAP_11;
+        
+         URL url = loadFromClasspath(SECURITY_CONTEXT_PROP);
+        if (url != null) {
+            InputStream is = null;
+            try {
+                is = url.openStream();
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                int val = is.read();
+                while (val != -1) {
+                    os.write(val);
+                    val = is.read();
+                }
+                String className = os.toString();
+                secCntxt = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+                 if (secCntxt != null) {
+                     context = (SecurityContext) secCntxt.newInstance();
+                 }
+            } catch (Exception e) {
+                throw new WebServiceException(e);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(PipeHelper.class.getName()).log(Level.WARNING, null, ex);
+                }
+            }
+        }
    }
 
     public ClientAuthContext getClientAuthContext(MessageInfo info, Subject s) 
@@ -151,52 +180,20 @@ public class PipeHelper extends ConfigHelper {
         }
     }
      
-    public static Subject getClientSubject() {
+    public Subject getClientSubject() {
 
         Subject s = null;
-        URL url = loadFromClasspath(SECURITY_CONTEXT_PROP);
-        if (url != null) {
-            InputStream is = null;
-            try {
-                is = url.openStream();
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                int val = is.read();
-                while (val != -1) {
-                    os.write(val);
-                    val = is.read();
-                }
-                String className = os.toString();
-                Class c = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-                SecurityContext context = (SecurityContext)c.newInstance();
-                s = context.getSubject();
-
-            } catch (InstantiationException ex) {
-                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
-                throw new WebServiceException(ex);
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
-                throw new WebServiceException(ex);
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
-                throw new WebServiceException(ex);
-            } catch (IOException ex) {
-                Logger.getLogger(PipeHelper.class.getName()).log(Level.SEVERE, null, ex);
-                throw new WebServiceException(ex);
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(PipeHelper.class.getName()).log(Level.WARNING, null, ex);
-                }
-            }
+        if (context != null) {
+            s = context.getSubject();
         }
+
         if (s == null) {
             s = Subject.getSubject(AccessController.getContext());
         }
-	if (s == null) {
-	    s = new Subject();
-	}
-	return s;
+        if (s == null) {
+            s = new Subject();
+        }
+        return s;
     }
 
     public void getSessionToken(Map<Object, Object> m, 
@@ -320,5 +317,20 @@ public class PipeHelper extends ConfigHelper {
     private static String getEndpointURI(WSEndpoint wse) {
         return wse.getPort().getAddress().getURI().toASCIIString();
     }
+    
+     public void authorize(Packet request) {
+
+        // SecurityContext constructor should set initiator to
+        // unathenticated if Subject is null or empty
+        Subject s = (Subject) request.invocationProperties.get(PipeConstants.CLIENT_SUBJECT);
+        if (s == null) {
+            s = Subject.getSubject(AccessController.getContext());
+        }
+        //TODO: actual container authorization checks to go here
+        if (context != null) {
+            context.setSubject(s);
+        }
+    }
+
 
 }

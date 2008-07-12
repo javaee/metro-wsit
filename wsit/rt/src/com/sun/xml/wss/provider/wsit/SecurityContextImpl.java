@@ -37,6 +37,7 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.security.spi.SecurityContext;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -50,15 +51,39 @@ import javax.security.auth.Subject;
 public class SecurityContextImpl implements SecurityContext {
 
     private static final String GF_SEC_CONTEXT="com.sun.enterprise.security.SecurityContext";
+    private Class c = null;
+    private Method getCurrent = null;
+    private Method serverGenCred =null;
+    private Method getSubject = null;
+    private Constructor ctor = null;
+    
+    public SecurityContextImpl() {
+        try {
+            Class[] params = new Class[]{};
+            c = Class.forName(GF_SEC_CONTEXT, true, Thread.currentThread().getContextClassLoader());
+            getCurrent = c.getMethod("getCurrent", params);
+            serverGenCred = c.getMethod("didServerGenerateCredentials", params);
+            getSubject = c.getMethod("getSubject", params);
+            params = new Class[]{Subject.class};
+            ctor = c.getConstructor(params);
+        } catch (NoSuchMethodException ex) {
+            //Logger.getLogger(SecurityContextImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            //Logger.getLogger(SecurityContextImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            //Logger.getLogger(SecurityContextImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
     public Subject getSubject() {
         Subject s = null;
         Class[] params = new Class[]{};
         Object[] args = new Object[]{};
         try {
-            Class c = Class.forName(GF_SEC_CONTEXT, true, Thread.currentThread().getContextClassLoader());
-            Method getCurrent = c.getMethod("getCurrent", params);
-            Method serverGenCred = c.getMethod("didServerGenerateCredentials", params);
-            Method getSubject = c.getMethod("getSubject", params);
+            
+            if(getCurrent == null || serverGenCred == null ||getSubject == null) {
+                return null;
+            }
             
             Object currentSC = getCurrent.invoke(null, args);
             if (currentSC == null) {
@@ -76,13 +101,45 @@ public class SecurityContextImpl implements SecurityContext {
             return null;
         } catch (InvocationTargetException ex) {
             return null;
-        } catch (ClassNotFoundException ex) {
-            return null;
-        } catch (NoSuchMethodException ex) {
-            return null;
         } catch (SecurityException ex) {
             return null;
         }
     }
+    
+    public void setSubject(Subject subject) {
+        //SecurityContext sC = new SecurityContext(s);
+	//SecurityContext.setCurrent(sC);
+        Class[] params = null;
+        Object[] args = null;
+        try {
+            args = new Object[] {subject};
+            if (ctor == null) {
+                //TODO: log warning here
+                return;
+            }
+            Object secContext = ctor.newInstance(args);
+            params = new Class[]{secContext.getClass()};
+            Method setCurrent = c.getMethod("setCurrent", params);
+            args = new Object[]{secContext};
+            if (setCurrent == null) {
+                //TODO: log warning here
+                return;
+            }
+            setCurrent.invoke(null, args);
+        } catch (InstantiationException ex) {
+            //ignore
+        } catch (IllegalAccessException ex) {
+            //ignore
+        } catch (IllegalArgumentException ex) {
+            //ignore
+        } catch (InvocationTargetException ex) {
+            //ignore
+        } catch (NoSuchMethodException ex) {
+            //ignore
+        } catch (SecurityException ex) {
+            //ignore
+        }
+    }
+
 
 }

@@ -89,13 +89,13 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
         return new ServerSecurityTube(this, cloner);
     }
 
-    private static Subject getClientSubject(Packet p) {
+    private Subject getClientSubject(Packet p) {
         Subject s = null;
         if (p != null) {
             s = (Subject) p.invocationProperties.get(PipeConstants.CLIENT_SUBJECT);
         }
         if (s == null) {
-            s = PipeHelper.getClientSubject();
+            s = helper.getClientSubject();
             if (p != null) {
                 p.invocationProperties.put(PipeConstants.CLIENT_SUBJECT, s);
             }
@@ -121,7 +121,9 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 status = sAC.validateRequest(info, clientSubject, serverSubject);
                 validatedRequest = info.getRequestPacket();
             } else {
-                throw new WebServiceException("Internal Error : Null ServerAuthContext");
+                //throw new WebServiceException("Internal Error : Null ServerAuthContext");
+                //could be MEX case here
+	        validatedRequest = info.getRequestPacket();
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "ws.error_validate_request", e);
@@ -137,6 +139,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
             // only do doAdPriv if SecurityManager is in effect
 //            boolean authorized = true;
 //            if (authorized) {
+            helper.authorize(validatedRequest);
             if (System.getSecurityManager() == null) {
                 return doInvoke(super.next, validatedRequest);
             } else {

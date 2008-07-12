@@ -214,19 +214,15 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
 	return response;
     }
 
-    private static Subject getClientSubject(Packet p) {
+    private Subject getClientSubject(Packet p) {
 
 	Subject s = null;
-
 	if (p != null) {
 	    s = (Subject) 
 		p.invocationProperties.get(PipeConstants.CLIENT_SUBJECT);
 	}
-
 	if (s == null) {
-
-	    s = PipeHelper.getClientSubject();
-
+	    s = helper.getClientSubject();
             if (p != null) {
 	        p.invocationProperties.put(PipeConstants.CLIENT_SUBJECT,s);
             }

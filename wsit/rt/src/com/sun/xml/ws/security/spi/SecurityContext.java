@@ -47,4 +47,10 @@ public interface SecurityContext {
      * @return the subject containing credentials from the encompassing runtime, null if none is available
      */
     public Subject getSubject();
+    
+    /**
+     * 
+     * @param subject
+     */
+    public void setSubject(Subject subject);
 }
