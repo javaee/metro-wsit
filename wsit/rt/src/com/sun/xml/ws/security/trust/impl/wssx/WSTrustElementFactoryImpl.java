@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.16 2008-06-26 20:58:11 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.17 2008-07-16 17:41:49 jdg6688 Exp $
  */
 
 /*
@@ -141,22 +141,8 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
      
-    private Marshaller marshaller = null; 
     public WSTrustElementFactoryImpl(){
-        try {
-            marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
-            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new com.sun.xml.ws.security.trust.util.TrustNamespacePrefixMapper());
-        } catch( PropertyException e ) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
-            throw new RuntimeException(
-                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
-        } catch (JAXBException jbe) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
-            throw new RuntimeException(
-                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
-        }
+        
     }
     
     /**
@@ -711,7 +697,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             
             //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
-            marshaller.marshal(rstElement, doc);
+            getMarshaller().marshal(rstElement, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
@@ -736,7 +722,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             
             //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
-            marshaller.marshal(rstrElement, doc);
+            getMarshaller().marshal(rstrElement, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
@@ -748,7 +734,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         try { 
            // javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
-            marshaller.marshal(rstrElement, doc);
+           getMarshaller().marshal(rstrElement, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
@@ -771,7 +757,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
            // javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();            
             JAXBElement<RequestSecurityTokenResponseCollectionType> rstrElement =
                     (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);                                    
-            marshaller.marshal(rstrElement, doc);   
+            getMarshaller().marshal(rstrElement, doc);   
 
             return doc.getDocumentElement();                        
         } catch (Exception ex) {
@@ -789,7 +775,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
-            marshaller.marshal(bsElement, doc);
+            getMarshaller().marshal(bsElement, doc);
             return doc.getDocumentElement();            
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
@@ -813,7 +799,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             
             //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
-            marshaller.marshal(strElement, doc);
+            getMarshaller().marshal(strElement, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
@@ -839,11 +825,31 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             //javax.xml.bind.Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
             JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
-            marshaller.marshal(bsElement, doc);
+            getMarshaller().marshal(bsElement, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
-    }    
+    }
+    
+    private Marshaller getMarshaller(){
+         try {
+            Marshaller marshaller = getContext(WSTrustVersion.WS_TRUST_13).createMarshaller();
+            marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new com.sun.xml.ws.security.trust.util.TrustNamespacePrefixMapper());
+        
+            return marshaller;
+         } catch( PropertyException e ) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
+            throw new RuntimeException(
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), e);
+        } catch (JAXBException jbe) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
+            throw new RuntimeException(
+                    LogStringsMessages.WST_0003_ERROR_CREATING_WSTRUSTFACT(), jbe);
+        }
+    }
+    
 }
