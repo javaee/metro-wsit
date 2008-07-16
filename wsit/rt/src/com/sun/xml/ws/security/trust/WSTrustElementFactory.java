@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.22 2008-06-26 20:58:10 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.22.2.1 2008-07-16 21:34:59 jdg6688 Exp $
  */
 
 /*
@@ -129,9 +129,9 @@ public abstract class WSTrustElementFactory {
             throw new RuntimeException(jbe.getMessage(),jbe);
         }        
     }
-    private static WSTrustElementFactory trustElemFactory 
+    private static final WSTrustElementFactory trustElemFactory 
             = new WSTrustElementFactoryImpl();
-    private static WSTrustElementFactory trustElemFactory13 
+    private static final WSTrustElementFactory trustElemFactory13 
             = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();        
 
     public static JAXBContext getContext() {
