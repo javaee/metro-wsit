@@ -34,39 +34,13 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport.tcp.encoding;
+package com.sun.xml.ws.transport.tcp.encoding.configurator;
 
-import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
-import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
-import java.io.InputStream;
+import com.sun.xml.fastinfoset.vocab.SerializerVocabulary;
 
-/**
- * @author Alexey Stashok
- */
-public class WSTCPFastInfosetStreamReaderRecyclable extends StAXDocumentParser implements XMLStreamReaderFactory.RecycleAware {
-    private RecycleAwareListener listener;
-    
-    public WSTCPFastInfosetStreamReaderRecyclable() {
-    }
-    
-    public WSTCPFastInfosetStreamReaderRecyclable(InputStream in, RecycleAwareListener listener) {
-        super(in);
-        this.listener = listener;
-    }
-    
-    public void onRecycled() {
-        listener.onRecycled();
-    }
+public class DefaultSerializerVocabularyFactory implements SerializerVocabularyFactory {
 
-    public RecycleAwareListener getListener() {
-        return listener;
-    }
-
-    public void setListener(RecycleAwareListener listener) {
-        this.listener = listener;
-    }
-    
-    public interface RecycleAwareListener {
-        public void onRecycled();
+    public SerializerVocabulary newInstance() {
+        return new SerializerVocabulary();
     }
 }

@@ -34,39 +34,14 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport.tcp.encoding;
+package com.sun.xml.ws.transport.tcp.encoding.configurator;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
-import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
-import java.io.InputStream;
 
 /**
- * @author Alexey Stashok
+ * DocumentParser factory to be used in SOAP/TCP codec
  */
-public class WSTCPFastInfosetStreamReaderRecyclable extends StAXDocumentParser implements XMLStreamReaderFactory.RecycleAware {
-    private RecycleAwareListener listener;
-    
-    public WSTCPFastInfosetStreamReaderRecyclable() {
-    }
-    
-    public WSTCPFastInfosetStreamReaderRecyclable(InputStream in, RecycleAwareListener listener) {
-        super(in);
-        this.listener = listener;
-    }
-    
-    public void onRecycled() {
-        listener.onRecycled();
-    }
+public interface DocumentParserFactory {
 
-    public RecycleAwareListener getListener() {
-        return listener;
-    }
-
-    public void setListener(RecycleAwareListener listener) {
-        this.listener = listener;
-    }
-    
-    public interface RecycleAwareListener {
-        public void onRecycled();
-    }
+    public StAXDocumentParser newInstance();
 }

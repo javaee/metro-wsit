@@ -53,6 +53,7 @@ import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.encoding.ContentTypeImpl;
 import com.sun.xml.ws.encoding.fastinfoset.FastInfosetStreamSOAPCodec;
 import com.sun.xml.ws.message.stream.StreamHeader;
+import com.sun.xml.ws.transport.tcp.encoding.configurator.WSTCPCodecConfigurator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,9 +68,6 @@ import javax.xml.ws.WebServiceException;
  * @author Alexey Stashok
  */
 public abstract class WSTCPFastInfosetStreamCodec implements Codec {
-    private static final int DEFAULT_INDEXED_STRING_SIZE_LIMIT = 32;
-    private static final int DEFAULT_INDEXED_STRING_MEMORY_LIMIT = 4 * 1024 * 1024; //4M limit
-    
     private StAXDocumentParser _statefulParser;
     private StAXDocumentSerializer _serializer;
     
@@ -139,14 +137,21 @@ public abstract class WSTCPFastInfosetStreamCodec implements Codec {
             _serializer.setOutputStream(out);
             return _serializer;
         } else {
-            StAXDocumentSerializer serializer = new StAXDocumentSerializer(out);
+            WSTCPCodecConfigurator configurator = WSTCPCodecConfigurator.INSTANCE;
+            StAXDocumentSerializer serializer = configurator.getDocumentSerializerFactory().newInstance();
+            serializer.setOutputStream(out);
+            
             if (_retainState) {
-                SerializerVocabulary vocabulary = new SerializerVocabulary();
+                SerializerVocabulary vocabulary = configurator.getSerializerVocabularyFactory().newInstance();
                 serializer.setVocabulary(vocabulary);
-                serializer.setAttributeValueSizeLimit(DEFAULT_INDEXED_STRING_SIZE_LIMIT);
-                serializer.setCharacterContentChunkSizeLimit(DEFAULT_INDEXED_STRING_SIZE_LIMIT);
-                serializer.setAttributeValueMapMemoryLimit(DEFAULT_INDEXED_STRING_MEMORY_LIMIT);
-                serializer.setCharacterContentChunkMapMemoryLimit(DEFAULT_INDEXED_STRING_MEMORY_LIMIT);
+                serializer.setAttributeValueSizeLimit(
+                        configurator.getAttributeValueSizeLimit());
+                serializer.setCharacterContentChunkSizeLimit(
+                        configurator.getCharacterContentChunkSizeLimit());
+                serializer.setAttributeValueMapMemoryLimit(
+                        configurator.getAttributeValueMapMemoryLimit());
+                serializer.setCharacterContentChunkMapMemoryLimit(
+                        configurator.getCharacterContentChunkMapMemoryLimit());
             }
             _serializer = serializer;
             return serializer;
@@ -158,10 +163,18 @@ public abstract class WSTCPFastInfosetStreamCodec implements Codec {
             _statefulParser.setInputStream(in);
             return _statefulParser;
         } else {
-            StAXDocumentParser parser = new WSTCPFastInfosetStreamReaderRecyclable(in, _readerRecycleListener);
+            WSTCPCodecConfigurator configurator = WSTCPCodecConfigurator.INSTANCE;
+            StAXDocumentParser parser = configurator.getDocumentParserFactory().newInstance();
+            parser.setInputStream(in);
+            if (parser instanceof WSTCPFastInfosetStreamReaderRecyclable) {
+                ((WSTCPFastInfosetStreamReaderRecyclable) parser).
+                        setListener(_readerRecycleListener);
+            }
+            
             parser.setStringInterning(true);
             if (_retainState) {
-                ParserVocabulary vocabulary = new ParserVocabulary();
+                ParserVocabulary vocabulary = configurator.
+                        getParserVocabularyFactory().newInstance();
                 parser.setVocabulary(vocabulary);
             }
             _statefulParser = parser;
