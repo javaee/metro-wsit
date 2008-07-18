@@ -69,10 +69,10 @@
                 xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
         <wsp:ExactlyOne>
             <wsp:All>
-                <sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
+                <!--sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
                     <sc:CallbackHandler  name="usernameHandler"  classname="common.SampleUsernamePasswordCallbackHandler"/> 
                     <sc:CallbackHandler  name="passwordHandler"  classname="common.SampleUsernamePasswordCallbackHandler"/>
-                </sc:CallbackHandlerConfiguration>
+                </sc:CallbackHandlerConfiguration-->
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>

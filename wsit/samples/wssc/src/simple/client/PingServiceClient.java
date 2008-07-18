@@ -66,6 +66,11 @@ public class PingServiceClient {
             ((BindingProvider)stub).getRequestContext().
                 put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, serviceURL);  
             
+             ((BindingProvider)stub).getRequestContext().
+                put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, "alice"); 
+            ((BindingProvider)stub).getRequestContext().
+                put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, "alice");
+            
             stub.ping(new Holder("1"), new Holder("sun"), new Holder("Passed!"));
             
             // Ping again
