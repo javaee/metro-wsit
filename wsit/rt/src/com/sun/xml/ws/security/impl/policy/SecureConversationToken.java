@@ -69,7 +69,7 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     private String tokenType = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private PolicyAssertion mustNotSendCancel = null;
     private PolicyAssertion mustNotSendRenew = null;

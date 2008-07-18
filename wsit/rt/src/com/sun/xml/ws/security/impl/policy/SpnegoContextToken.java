@@ -64,7 +64,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     private Issuer issuer = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     
     /**

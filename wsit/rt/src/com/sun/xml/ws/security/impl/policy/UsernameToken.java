@@ -63,7 +63,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private boolean hasPassword = true;
     private boolean useHashPassword = false;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private Issuer issuer = null;
     private IssuerName issuerName = null;

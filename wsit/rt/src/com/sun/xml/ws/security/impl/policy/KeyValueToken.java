@@ -57,7 +57,7 @@ public class KeyValueToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private boolean populated = false;
     private String tokenType = null;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private String id = null;
     private boolean isServer = false;

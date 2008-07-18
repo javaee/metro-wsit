@@ -60,7 +60,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.p
     private com.sun.xml.ws.security.policy.Token _token;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String _includeToken;
     /**
      * Creates a new instance of Token

@@ -68,7 +68,7 @@ public class IssuedToken extends PolicyAssertion implements  com.sun.xml.ws.secu
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean reqDK=false;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private Claims claims = null;
     
