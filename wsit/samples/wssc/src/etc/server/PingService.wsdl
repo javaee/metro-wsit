@@ -65,7 +65,7 @@
 						<sp:IncludeTimestamp/>
 					</wsp:Policy>
 				</sp:TransportBinding>
-				<!--sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+				<sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
 					<wsp:Policy>
 						<sp:SecureConversationToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 							<wsp:Policy>
@@ -103,8 +103,8 @@
 												</sp:Layout>
 												<sp:IncludeTimestamp/>
 											</wsp:Policy>
-										</sp:TransportBinding-->
-										<sp:SignedSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+										</sp:TransportBinding>
+										<sp:SignedSupportingTokens>
 											<wsp:Policy>
 												<sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
 													<wsp:Policy>
@@ -113,7 +113,7 @@
 												</sp:UsernameToken>
 											</wsp:Policy>
 										</sp:SignedSupportingTokens>
-										<sp:Wss11 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+										<sp:Wss11>
 											<wsp:Policy>
 												<sp:MustSupportRefKeyIdentifier/>
 												<sp:MustSupportRefIssuerSerial/>
@@ -121,14 +121,14 @@
 												<sp:MustSupportRefEncryptedKey/>
 											</wsp:Policy>
 										</sp:Wss11>
-										<sp:Trust10 xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+										<sp:Trust10>
 											<wsp:Policy>
 												<sp:MustSupportIssuedTokens/>
 												<sp:RequireClientEntropy/>
 												<sp:RequireServerEntropy/>
 											</wsp:Policy>
 										</sp:Trust10>
-									<!--/wsp:Policy>
+									</wsp:Policy>
 								</sp:BootstrapPolicy>
 							</wsp:Policy>
 						</sp:SecureConversationToken>
@@ -140,7 +140,7 @@
 						<sp:RequireClientEntropy/>
 						<sp:RequireServerEntropy/>
 					</wsp:Policy>
-				</sp:Trust10-->
+				</sp:Trust10>
 				<wsap:UsingAddressing/>
 				<sc:ValidatorConfiguration wspp:visibility="private" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
 					<sc:Validator name="usernameValidator" classname="common.SampleUsernamePasswordValidator"/>
