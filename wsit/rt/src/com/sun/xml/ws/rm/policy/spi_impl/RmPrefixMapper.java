@@ -53,7 +53,8 @@ public class RmPrefixMapper implements PrefixMapper {
     static {
         prefixMap.put(RmVersion.WSRM10.policyNamespaceUri, "wsrmp10");
         prefixMap.put(RmVersion.WSRM11.policyNamespaceUri, "wsrmp");
-        prefixMap.put(Constants.microsoftVersion, "msrmp");
+        prefixMap.put(Constants.microsoftVersion, "net30rmp");
+        prefixMap.put(Constants.microsoftVersion3_5, "net35rmp");
         prefixMap.put(Constants.sunVersion, "sunrmp");
         prefixMap.put(Constants.sunClientVersion, "sunrmcp");
     }
