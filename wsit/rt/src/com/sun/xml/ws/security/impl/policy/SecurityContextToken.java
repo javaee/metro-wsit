@@ -71,7 +71,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     private Set<String> referenceType = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     
     /** Creates a new instance of SecurityContextToken */

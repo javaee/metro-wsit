@@ -73,7 +73,7 @@ public class X509Token extends PolicyAssertion implements com.sun.xml.ws.securit
     private String tokenType = null;
     private HashSet<String> referenceType = null;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private Issuer issuer = null;
     private IssuerName issuerName = null;

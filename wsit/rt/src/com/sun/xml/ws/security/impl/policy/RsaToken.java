@@ -56,7 +56,7 @@ public class RsaToken  extends PolicyAssertion implements com.sun.xml.ws.securit
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private boolean populated = false;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeToken;
     private String id = null;
     private boolean isServer = false;

@@ -65,7 +65,7 @@ public class HttpsToken extends PolicyAssertion implements com.sun.xml.ws.securi
     private boolean httpDigestAuthentication = false;
     private String id = "";
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName rccQname;
+    private final QName rccQname;
     private Issuer issuer = null;
     private IssuerName issuerName = null;
     private Claims claims = null;

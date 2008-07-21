@@ -72,7 +72,7 @@ public class SamlToken extends PolicyAssertion implements com.sun.xml.ws.securit
     private boolean populated = false;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-    private static QName itQname;
+    private final QName itQname;
     private String includeTokenType;
     private Issuer issuer = null;
     private IssuerName issuerName = null;
