@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-07 08:32:01 $ by $Author: ritzmann $</pre>
+        <pre>Last Modified : $Date: 2008-07-22 08:30:12 $ by $Author: m_potociar $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -206,23 +206,28 @@
         <br>
         <hr>
         <h2><a name="rm"></a>Reliable Messaging Status</h2>        
-        <p><code> Updated:  ??, 2008</code></p>
+        <p><code> Updated:  July 22, 2008</code></p>
         
         <p><b>New in this release</b></p>
         <ul>
             <li>New server-side RM code</li>
             <li>Support for <code>http://schemas.microsoft.com/ws-rx/wsrmp/200702:InactivityTimeout</code> assertion</li>
             <li>Improved RM protocol SOAP fault handling</li>
+            <li>Various fixes on the client side in the protocol message communication</li>
         </ul>
         
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>...</li>
+            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=750">Issue 750</a>: RM sequence does not release acked RMMessage objects</li>
+            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=901">Issue 901</a>: RM client reports null inbound sequence warning in One-Way scenarios</li>
+            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=961">Issue 961</a>: NPE in RM server tube when processing a resent oneway request</li>
+            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=962">Issue 962</a>: Client generates sequence acknowledgement header even if the sequence has not been used before</li>
+            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=963">Issue 963</a>: Several MS-Sun interop tests are failing</li>
         </ul>
         
         <p><b>Known issues</b></p>
         <ul>
-            <li><a href="http://wsit.dev.java.net/issues/show_bug.cgi?id=X">Issue X</a>: Description</li>
+            No known issues.
         </ul>
         
         <p><b>Feature requests not implemented in this release</b></p>
