@@ -124,6 +124,9 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 //throw new WebServiceException("Internal Error : Null ServerAuthContext");
                 //could be MEX case here
 	        validatedRequest = info.getRequestPacket();
+                //explicitly set status to SUCCESS here so we can send the request 
+                //could be a MEX endpoint for which SAC is null!.
+                status = AuthStatus.SUCCESS;
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "ws.error_validate_request", e);
@@ -164,7 +167,8 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
             }
 
         } else {
-            // validateRequest did not return success
+            // validateRequest did not return SUCCESS but it returned SEND_SUCCESS or
+            // SEND_FAILURE so we do not invoke the ENDPOINT.
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "ws.status_validate_request", status);
             }
@@ -206,6 +210,13 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
         AuthStatus stat;
         try {
             stat = sAC.secureResponse(info, serverSubject);
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "ws.status_secure_response", stat);
+            }
+            if (AuthStatus.SEND_FAILURE == stat) {
+                return helper.makeFaultResponse(info.getResponsePacket(), new Exception("Error in Securing Response"));
+            }
+            return info.getResponsePacket();
         } catch (Exception e) {
             if (e instanceof AuthException) {
                 if (logger.isLoggable(Level.INFO)) {
@@ -216,10 +227,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
             }
             return helper.makeFaultResponse(info.getResponsePacket(), e);
         }
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "ws.status_secure_response", status);
-        }
-        return info.getResponsePacket();
+
     }
 
     /**
