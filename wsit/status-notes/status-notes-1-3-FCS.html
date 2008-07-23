@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-23 20:41:19 $ by $Author: jitu $</pre>
+        <pre>Last Modified : $Date: 2008-07-23 22:06:23 $ by $Author: jdg6688 $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -672,26 +672,22 @@
         <br>
         <hr>
         <h2><a name="sc"></a>Secure Conversation Status</h2>        
-        <p><code>Updated: ??, 2008</code></p>
+        <p><code>Updated: July 23, 2008</code></p>
         
         <p><b>New in this release</b></p>
         <ul>
-            <li>...</li>
+            <li>None</li>
         </ul>
         
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>...</li>
+            <li>909: Trust namespace is used to initiate the secure conversation provider on the client side in 196 path</li>
+            <li>969: Attempt to initiate RM session with security enabled failed with an exception</li>
         </ul>
         
         <p><b>Known issues</b></p>
         <ul>
-            <li>
-                <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=681">Issue 909</a>: 
-                Trust namespace is used to initiate the secure conversation provider on the client 
-                side in 196 path in the case RM and secure conversation is enabled. This gives a 
-                ClassCastException.
-            </li>
+            <li>None</li>
         </ul>
         
         <p><b>Feature requests not implemented in this release</b></p>
@@ -703,16 +699,19 @@
         <br>
         <hr>
         <h2><a name="trust"></a>Trust Status</h2>
-        <p><code> Updated:  ??, 2008</code></p>
+        <p><code> Updated:  July 22, 2008</code></p>
         
         <p><b>New in this release</b></p>
         <ul>
-            <li>...</li>
+            <li>WS-Trust Validation Binding</li>
+            <li>Mixed Versions of WS-Trust</li>
+            <li>Support for encryption parameters in RSTT</li>
         </ul>
         
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>...</li>
+            <li>968: ArrayIndexOutOfBoundsException (Security vs. JAXB)</li>
+            <li>937: Need WS-Trust version via STS Client Configuration</li>
         </ul>
         
         <p><b>Known issues</b></p>
@@ -722,9 +721,7 @@
         
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Mixed Versions of Trust </li>
             <li>Token Cache and SSO</li>
-            <li>Token Validation protocol. </li>
             <li>Token Cancellation Protocol. </li>
             <li>Token Renewing Protocol </li>
             <li>Any profiles on top of Negotiation and Challenge Extensions</li>    
