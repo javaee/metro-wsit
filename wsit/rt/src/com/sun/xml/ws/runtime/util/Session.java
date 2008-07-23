@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.runtime.util;
 
-import com.sun.xml.ws.rm.jaxws.runtime.Sequence;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 
 /**
@@ -72,7 +71,6 @@ public class Session {
      */
     private final Object userData;
     private SecurityContextTokenInfo securityInfo;
-    private Sequence sequence;
     /*
      * These fields are for internal use
      */
@@ -129,24 +127,6 @@ public class Session {
      */
     public void setSecurityInfo(SecurityContextTokenInfo securityInfo) {
         this.securityInfo = securityInfo;
-    }
-
-    /**
-     * Accessor for the <code>sequence</code> field.
-     * 
-     * @return The value of the field.
-     */
-    public Sequence getSequence() {
-        return sequence;
-    }
-
-    /**
-     * Mutator for the <code>sequence</code> field.
-     * 
-     * @returns The value of the field.
-     */
-    public void setSequence(Sequence sequence) {
-        this.sequence = sequence;
     }
 
     /**

@@ -58,7 +58,7 @@ public final class MessageNumberRolloverException extends RmRuntimeException {
     
     public MessageNumberRolloverException(String sequenceId, long messageNumber) {
         // TODO lcoalization code change
-        super(LocalizationMessages.WSRM_3026_MESSAGE_NUMBER_ROLLOVER(sequenceId, messageNumber));
+        super(LocalizationMessages.WSRM_1138_MESSAGE_NUMBER_ROLLOVER(sequenceId, messageNumber));
         this.messageNumber = messageNumber;
         this.sequenceId = sequenceId;
     }
