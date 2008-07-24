@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-24 07:28:52 $ by $Author: kumarjayanti $</pre>
+        <pre>Last Modified : $Date: 2008-07-24 12:06:28 $ by $Author: snajper $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -832,16 +832,13 @@ place&nbsp; for Metro 1.3<br>
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>         
-        <p><code> Updated: ??, 2008</code></p>
+        <p><code> Updated: 24th July, 2008</code></p>
         
         <p><b>New in this release</b></p>
         <ul>
-            <li>...</li>
-        </ul>
-        
-        <p><b>Fixed in this release</b></p>
-        <ul>
-            <li>...</li>
+            <li>Support for .NET 3.5 interoperability</li>
+            <li>Kerberos profile</li>
+            <li>Minor feature additions in security profiles and advanced settings for RM and Security
         </ul>
         
         <p><b>Known issues</b></p>
@@ -865,23 +862,6 @@ place&nbsp; for Metro 1.3<br>
     )
                         </pre></code>
                     </td>
-                </tr>
-                <tr>
-                    <td>WSIT and Identity modules</td>
-                    <td>If you have Enterprise Pack 5.5.1 Beta installed on top of your NetBeans 5.5.1 installation, you may 
-                    not be able to invoke WSIT Configuration dialog on web service clients. There is exception thrown instead, 
-                    which is an error in Identity module suite from Enterprise Pack. To enable WSIT configuration on clients, go to 
-                    Tools->Module Manager, and disable or uninstall all Identity modules. For more information please see 
-                    <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=657">issue 657</a>.
-                </tr>
-                <tr>
-                    <td>Online Help</td>
-                    <td>Online help is missing for the Advanced Configuration node for 
-                        the client side WSIT Web Sevices Attributes Editor. When you 
-                        click the Help button, the About WSIT page comes up and has 
-                        help for the subsections (Transport, Certificates, User Authentication,
-                        and Secure Token Service. But there is no help for the Advanced Configuration 
-                    node, which has options for RM. See NetBeans issue <a href="http://www.netbeans.org/issues/show_bug.cgi?id=99180">99180</a></td>
                 </tr>
                 <tr>
                     <td>Package rename refactoring does not modify WSIT configuration file name</td>
