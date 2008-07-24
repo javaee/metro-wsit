@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-23 22:17:38 $ by $Author: jdg6688 $</pre>
+        <pre>Last Modified : $Date: 2008-07-24 05:35:06 $ by $Author: ashutoshshahi $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -205,16 +205,23 @@
         <br>
         <hr>
         <h2><a name="security"></a>Security Status</h2>        
-        <p><code> Updated:  ??, 2008</code></p>
+        <p><code> Updated:  July 24, 2008</code></p>
         
         <p><b>New in this release</b></p>
         <ul>
-            <li>...</li>
+            <li>Attachment Signature and Encryption Support.</li>
+            <li>Introduction of additional granular SAML APIs</li>
         </ul>
         
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>...</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=728">Issue 728</a>: ArrayIndexOutOfBoundsException for SAML HOK-secured service invocation</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=735">Issue 735</a>: A NPE happen when adding additional SOAP headers</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=906">Issue 906</a>: Support IssuedToken as SignedSupportingToken</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=912">Issue 912</a>: SignedSupportingToken with IssuedToken and SymmetricKey inside it fails</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=920">Issue 920</a>: SignedEncryptedSupportingToken is not supported with IssuedToken</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=921">Issue 921</a>: SignedEncryptedSupportingToken with SAMLToken not working</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=948">Issue 948</a>: attachments being consumed by Security</li>
         </ul>        
         
         <p><b>Known Issues</b></p>
@@ -255,24 +262,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: top;"><a
-                            href="https://wsit.dev.java.net/issues/show_bug.cgi?id=735">Issue 735</a>:&nbsp;
-                        A NPE happen when adding additional SOAP headers<br>
-                    </td>
-                    <td style="vertical-align: top;">Scheduled for Metro 1.4 release.</td>
-                    <td style="vertical-align: top;"><br>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top;"><a
-                            href="https://wsit.dev.java.net/issues/show_bug.cgi?id=728">Issue 728</a>:&nbsp;
-                        ArrayIndexOutofBounds in SAML HOK Scenario for SignedSupporting Tokens<br>
-                    </td>
-                    <td style="vertical-align: top;">Scheduled for Metro 1.3 release.</td>
-                    <td style="vertical-align: top;"><br>
-                    </td>
-                </tr>
-                <tr>
                     <td>
                         <p>"" URI Reference not supported in Signature<br>
                         </p>
@@ -280,23 +269,6 @@
                     <td>
                         <pre>Need to support empty URI Reference in Signature <a
                             href="https://wsit.dev.java.net/issues/show_bug.cgi?id=269">Issue#269</a></pre>
-                    </td>
-                    <td>
-                        <p><font color="#000000">Will be supported in a future release</font></p>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p><font color="#000000">includeToken Policy ONCE</font></p>
-                    </td>
-                    <td>
-                        <p><font color="#000000">WSSecurityPolicy:TokenInclusion:
-                                includeToken Policy ONCE is Only Supported for Kerberos Tokens in this
-                                release.&nbsp; Support for other Tokens will be supported in a future
-                                release.<br>
-                        </font></p>
-                        <p><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=19">Issue#19</a>
-                        on IssueTracker</p>
                     </td>
                     <td>
                         <p><font color="#000000">Will be supported in a future release</font></p>
@@ -452,7 +424,7 @@
             </li>
             <li>
                 The Following WS-SecurityPolicy Features from specification Draft: 
-                Jul 2005 Ver 1.1 are unsupported in this release of WSIT:
+                Jul 2005 Ver 1.1 and WS-SecurityPolicy Version 1.2 are unsupported in this release of WSIT:
                 <br><br>
                 <table border="1" cellpadding="2" cellspacing="3">
                     <tbody>
