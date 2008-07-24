@@ -98,8 +98,12 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         this.configuration = configuration;
 
         // TODO don't take the first config alternative automatically...
-        if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
-            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
+        
+        if (this.configuration.getAddressingVersion() == null) {
+            throw new RmRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
+        }        
+        if (this.configuration.getAddressingVersion() != AddressingVersion.W3C) {
+            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
         }
 
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager();
