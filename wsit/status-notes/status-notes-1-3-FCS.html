@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-24 06:47:41 $ by $Author: ashutoshshahi $</pre>
+        <pre>Last Modified : $Date: 2008-07-24 07:28:52 $ by $Author: kumarjayanti $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -211,6 +211,8 @@
         <ul>
             <li>Attachment Signature and Encryption Support.</li>
             <li>Introduction of additional granular SAML APIs</li>
+            <li>JSR 196 Pluggability Support that allows Metro Security to be
+replaced by a Thrid Party JSR 196 AuthConfigProvider</li>
         </ul>
         
         <p><b>Fixed in this release</b></p>
@@ -221,7 +223,10 @@
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=912">Issue 912</a>: SignedSupportingToken with IssuedToken and SymmetricKey inside it fails</li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=920">Issue 920</a>: SignedEncryptedSupportingToken is not supported with IssuedToken</li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=921">Issue 921</a>: SignedEncryptedSupportingToken with SAMLToken not working</li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=948">Issue 948</a>: attachments being consumed by Security</li>
+	    <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=948">Issue 948</a>: attachments being consumed by Security</li>
+            <li>MaxNonceAge information item specified in NetBeans IDE user interface and configuration&nbsp; WSDL will&nbsp; be honored. This was not working in previous releases and this can be used in conjunction with Password
+Digest Authentication feature to configure the time for which Nonces will be cached on the server for replay detection</li>
+
         </ul>        
         
         <p><b>Known Issues</b></p>
@@ -245,7 +250,7 @@
                         WS-SecurityPolicy. This prevents a clean approach to having some secure
                         and some non-secure methods in a WebService<br>
                     </td>
-                    <td style="vertical-align: top;">Scheduled for Metro 1.4
+                    <td style="vertical-align: top;">Scheduled for Metro 1.3
                         release.&nbsp; <br>
                     </td>
                     <td style="vertical-align: top;"><br>
@@ -379,7 +384,18 @@
                     <td style="vertical-align: top;">Will be fixed in a future
                         release. Note that WCF RTM does not support sp:ProtectTokens assertion<br>
                     </td>
-                </tr>
+	    </tr>
+<tr>
+<td style="vertical-align: top;">Security with List data type
+dropping xs namespace declaration&nbsp; <br>
+</td>
+<td style="vertical-align: top;"><a
+href="https://wsit.dev.java.net/issues/show_bug.cgi?id=971">Issue#971</a></td>
+<td style="vertical-align: top;">A workaround&nbsp; is in
+place&nbsp; for Metro 1.3<br>
+</td>
+</tr>
+
             </tbody>
         </table>
         
@@ -392,9 +408,6 @@
                 Application Policy. That means both the BootstrapPolicy and
                 ApplicationPolicy should use the same AlgorithmSuite.<br>
             </li>
-            <li>MaxNonceAge information item specified in NetBeans IDE user
-                interface and configuration&nbsp; WSDL will not be honored, default
-            values will be used instead. </li>
             <li>If a binary secret arrives in a SAML assertion, then
                 implementation does not&nbsp; ensure that&nbsp; SSL was used for the
             Incoming Message. </li>
@@ -424,7 +437,7 @@
             </li>
             <li>
                 The Following WS-SecurityPolicy Features from specification Draft: 
-                Jul 2005 Ver 1.1 are unsupported in this release of WSIT:
+                Jul 2005 Ver 1.1 and WS-SecurityPolicy Version 1.2 are unsupported in this release of WSIT:
                 <br><br>
                 <table border="1" cellpadding="2" cellspacing="3">
                     <tbody>
