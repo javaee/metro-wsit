@@ -600,7 +600,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     }
 
     protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol) throws PolicyException {
-        outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, true));
+        outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, false));
     }
 
     protected void addIncomingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {

@@ -680,11 +680,11 @@ public class SecurityServerTube extends SecurityTubeBase {
     }
     
     protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy,true,false,true));
+        outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
     }
     
     protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy,true,true,true));
+        inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
     }
     
     protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
