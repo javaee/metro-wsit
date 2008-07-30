@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">        
         <h1>WSIT Features of Metro 1.3 FCS Status Notes</h1>        
         
-        <pre>Last Modified : $Date: 2008-07-25 23:33:27 $ by $Author: haroldcarr $</pre>
+        <pre>Last Modified : $Date: 2008-07-30 09:55:56 $ by $Author: snajper $</pre>
         
         <h5>Updated: ??, 2008</h5>
         
@@ -876,6 +876,13 @@ place&nbsp; for Metro 1.3<br>
                         can manually change the name of the configuration file under the 
                         Web Pages-&gt;WEB-INF node to wsit.&lt;newpkgname&gt;.xml. 
                     See NetBeans issue <a href="http://www.netbeans.org/issues/show_bug.cgi?id=105287">105287</a></td>
+                </tr>
+                <tr>
+                    <td>Web Service Client creation does not work</td>
+                    <td>NetBeans 6.5 introduced new feature "Deploy on Save" which speeds up development in a way that you don't need to manually deploy your application
+                    after changes have been made. This feature currently clashes with web service deployment. Workaround is to turn this feature off. To do that, switch off the
+                    "Deploy on Change" feature in Web application -> Project properties -> Run section. For more information see: 
+                    NetBeans issue <a href="http://www.netbeans.org/issues/show_bug.cgi?id=141291">141291</a></td>
                 </tr>
             </tbody>
         </table>
