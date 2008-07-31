@@ -3,9 +3,13 @@ README for developers of WSIT
 
 1. HOW TO CHECK OUT AND BUILD WSIT
 
-Please see the project home page for details: https://wsit.dev.java.net/
+Please see the project home page for instructions how to retrieve the source code:
+https://metro.dev.java.net/
 
-You need a working installation of Ant 1.6.5 to build the project.
+You need a working installation of Ant 1.6.5 to build the project. Invoke ant from the
+top-level directory to start a build. The build needs additional memory to complete
+successfully, set ANT_OPTS to "-Xmx192m" before invoking ant. Alternatively, you can
+use NetBeans to open the project and build it.
 
 2. HOW TO RUN UNIT AND END-TO-END TESTS
 
