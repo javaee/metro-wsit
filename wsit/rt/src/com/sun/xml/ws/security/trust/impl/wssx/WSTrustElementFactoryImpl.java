@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.17 2008-07-16 17:41:49 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.18 2008-07-31 20:17:41 jdg6688 Exp $
  */
 
 /*
@@ -76,6 +76,7 @@ import com.sun.xml.ws.security.trust.impl.wssx.elements.ClaimsImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.EntropyImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.IssuedTokensImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.LifetimeImpl;
+import com.sun.xml.ws.security.trust.impl.wssx.elements.OnBehalfOfImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenResponseImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestSecurityTokenResponseCollectionImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.elements.RequestedProofTokenImpl;
@@ -238,7 +239,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     }
     
     public OnBehalfOf createOnBehalfOf(Token oboToken){
-        return null;
+         return new OnBehalfOfImpl(oboToken);
     }
     
     /**
