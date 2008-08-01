@@ -569,7 +569,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             //if (attrs.isEmpty()){
             if (claimedAttrs.isEmpty()){
                 AuthnContext ctx = samlFac.createAuthnContext(this.authnCtxClass, null);
-                final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
+                final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx, null, null);
                 statements.add(statement); 
             }//else{
                // final AttributeStatement statement = samlFac.createAttributeStatement(null);

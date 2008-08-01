@@ -414,7 +414,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             //if (attrs.isEmpty()){
             if (claimedAttrs.isEmpty()){
                 AuthnContext ctx = samlFac.createAuthnContext(authnCtx, null);
-                final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx);
+                final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx, null, null);
                 statements.add(statement); 
             }//else{
                // final AttributeStatement statement = samlFac.createAttributeStatement(null);
