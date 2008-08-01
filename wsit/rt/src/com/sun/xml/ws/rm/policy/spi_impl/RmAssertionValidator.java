@@ -48,6 +48,7 @@ import com.sun.xml.ws.rm.policy.assertion.AllowDuplicatesAssertion;
 import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
+import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
 import static com.sun.xml.ws.rm.Constants.microsoftVersion;
 import static com.sun.xml.ws.rm.Constants.sunVersion;
 import static com.sun.xml.ws.rm.Constants.sunClientVersion;
@@ -68,6 +69,7 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
         serverSideSupportedAssertions.add(OrderedDeliveryAssertion.NAME);
         serverSideSupportedAssertions.add(AllowDuplicatesAssertion.NAME);
         serverSideSupportedAssertions.add(RmFlowControlAssertion.NAME);
+        serverSideSupportedAssertions.add(InactivityTimeoutAssertion.NAME);        
 
         clientSideSupportedAssertions.add(AckRequestIntervalClientAssertion.NAME);
         clientSideSupportedAssertions.add(ResendIntervalClientAssertion.NAME);
