@@ -1,6 +1,6 @@
 pkg = {
     "name"          : "metro",
-    "version"       : "1.2,0-",
+    "version"       : "1.3,0-",
     "attributes"    : { 
         "description"      : "Metro Web Services Stack for GlassFish",
         "description_long" : "Metro is a high-performance, extensible, \
