@@ -20,7 +20,7 @@
     </licenses>
 
     <properties>
-        <hk2.version>0.2-SNAPSHOT</hk2.version>
+        <hk2.version>0.2</hk2.version>
     </properties>
 
     <build>
