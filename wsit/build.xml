@@ -292,6 +292,7 @@
                 <documents dir="build/release-notes-src" includes="*.html" />
                 <tags dir="docs/releasenotes/tags" includes="**/*.tag" />
                 <property key="IMPL_VERSION" value="${release.impl.version}"/>
+                <property key="UNDERSCORE_VERSION" value="${release.underscore.version}" />
                 <property key="IMPL_VERSION_SUFFIX" value="${release.impl.version.suffix}"/>
                 <property key="DATE" value="${DSTAMP}"/>
                 <!-- Product name so that we can switch between JAX-WS RI and Metro -->
