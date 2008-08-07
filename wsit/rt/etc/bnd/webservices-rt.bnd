@@ -1,3 +1,37 @@
-Export-Package: com.sun.xml.fastinfoset;version=1.2.2, com.sun.msv.util;version=2.1.8, com.sun.msv.verifier.jarv;version=2.1.8, com.sun.xml.bind;version=2.1.8, com.sun.xml.bind.annotation;version=2.1.8, com.sun.xml.bind.api;version=2.1.8, com.sun.xml.bind.api.impl;version=2.1.8, com.sun.xml.bind.marshaller;version=2.1.8, com.sun.xml.bind.serializer;version=2.1.8, com.sun.xml.bind.unmarshaller;version=2.1.8, com.sun.xml.bind.util;version=2.1.8, com.sun.xml.bind.v2;version=2.1.8, com.sun.xml.bind.v2.model.annotation;version=2.1.8, com.sun.xml.bind.v2.model.core;version=2.1.8, com.sun.xml.bind.v2.model.impl;version=2.1.8, com.sun.xml.bind.v2.model.nav;version=2.1.8, com.sun.xml.bind.v2.runtime;version=2.1.8, com.sun.xml.bind.v2.runtime.unmarshaller;version=2.1.8, com.sun.xml.bind.v2.schemagen;version=2.1.8, com.sun.xml.bind.v2.schemagen.episode;version=2.1.8, com.sun.xml.bind.v2.util;version=2.1.8, com.sun.xml.bind.validator;version=2.1.8, com.sun.xml.bind.xmlschema;version=2.1.8, com.sun.xml.registry;version=1.0.6, com.sun.xml.rpc;version=1.1.3, com.sun.xml.util;version=2.1.4, com.sun.xml.ws.api;version=2.1.4, com.sun.xml.ws.api.addressing;version=2.1.4, com.sun.xml.ws.api.client;version=2.1.4, com.sun.xml.ws.api.fastinfoset;version=2.1.4, com.sun.xml.ws.api.handler;version=2.1.4, com.sun.xml.ws.api.message;version=2.1.4, com.sun.xml.ws.api.model;version=2.1.4, com.sun.xml.ws.api.pipe;version=2.1.4, com.sun.xml.ws.api.server;version=2.1.4, com.sun.xml.ws.api.streaming;version=2.1.4, com.sun.xml.ws.api.wsdl;version=2.1.4, com.sun.xml.ws.model;version=2.1.4, com.sun.xml.ws.wsdl.parser;version=2.1.4, com.sun.xml.ws.policy;version=@RELEASE_VERSION@, org.jvnet.mimepull;version=1.2, org.jvnet.staxex;version=1.2, com.sun.xml.stream.buffer;version=0.5, org.jvnet.wom.api;version=@RELEASE_VERSION@, com.ctc.wstx.api;version=3.2.1, javax.xml.crypto.dsig;version=1.0, com.sun.xml.wss;version=3.0, com.sun.xml.ws.api.rm;version=@RELEASE_VERSION@, com.sun.xml.ws.api.security;version=@RELEASE_VERSION@, com.sun.xml.ws.api.tx;version=@RELEASE_VERSION@, com.sun.xml.ws.developer;version=2.1.4, com.sun.xml.ws.spi;version=2.1.4, com.sun.msv.grammar.trex.*;version=2.1.8, com.sun.xml.ws.api.pipe.helper;version=2.1.4
+Export-Package: com.ctc.wstx.api;version=3.2.1, \
+  com.sun.istack;version=2.1.4, \
+  com.sun.msv.grammar.trex.*;version=2.1.8, \
+  com.sun.msv.util;version=2.1.8, \
+  com.sun.msv.verifier.jarv;version=2.1.8, \
+  com.sun.xml.bind;version=2.1.8, com.sun.xml.bind.annotation;version=2.1.8, \
+  com.sun.xml.bind.api;version=2.1.8, com.sun.xml.bind.api.impl;version=2.1.8, \
+  com.sun.xml.bind.marshaller;version=2.1.8, com.sun.xml.bind.serializer;version=2.1.8, com.sun.xml.bind.unmarshaller;version=2.1.8, com.sun.xml.bind.util;version=2.1.8, \
+  com.sun.xml.bind.v2;version=2.1.8, com.sun.xml.bind.v2.model.annotation;version=2.1.8, com.sun.xml.bind.v2.model.core;version=2.1.8, com.sun.xml.bind.v2.model.impl;version=2.1.8, com.sun.xml.bind.v2.model.nav;version=2.1.8, com.sun.xml.bind.v2.runtime;version=2.1.8, com.sun.xml.bind.v2.runtime.unmarshaller;version=2.1.8, com.sun.xml.bind.v2.schemagen;version=2.1.8, com.sun.xml.bind.v2.schemagen.episode;version=2.1.8, com.sun.xml.bind.v2.util;version=2.1.8, \
+  com.sun.xml.bind.validator;version=2.1.8, com.sun.xml.bind.xmlschema;version=2.1.8, \
+  com.sun.xml.fastinfoset;version=1.2.2, \
+  com.sun.xml.registry;version=1.0.6, \
+  com.sun.xml.rpc;version=1.1.3, \
+  com.sun.xml.stream.buffer;version=0.5, \
+  com.sun.xml.txw2.*;version=2.1.4, \
+  com.sun.xml.util;version=2.1.4, \
+  com.sun.xml.ws.api;version=2.1.4, \
+  com.sun.xml.ws.api.*;version=2.1.4, \
+  com.sun.xml.ws.assembler;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.binding;version=2.1.4, \
+  com.sun.xml.ws.developer;version=2.1.4, \
+  com.sun.xml.ws.model;version=2.1.4, \
+  com.sun.xml.ws.spi;version=2.1.4, \
+  com.sun.xml.ws.streaming;version=2.1.4, \
+  com.sun.xml.ws.wsdl.*;version=2.1.4, \
+  com.sun.xml.ws.policy;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.policy.sourcemodel.wspolicy;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.transport.http;version=2.1.4, \
+  com.sun.xml.ws.transport.http.servlet;version=2.1.4, \
+  com.sun.xml.ws.util;version=2.1.4, \
+  com.sun.xml.ws.util.exception;version=2.1.4, com.sun.xml.ws.util.localization;version=2.1.4, com.sun.xml.ws.util.xml;version=2.1.4, \
+  com.sun.xml.wss;version=3.0, \
+  javax.xml.crypto.dsig;version=1.0, \
+  org.jvnet.mimepull;version=1.2, org.jvnet.staxex;version=1.2, \
+  org.jvnet.wom.api;version=@RELEASE_VERSION@
 Import-Package: *
 Include-Resource: @webservices-rt.jar
