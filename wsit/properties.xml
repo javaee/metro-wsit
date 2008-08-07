@@ -82,4 +82,5 @@
     <property name="extrajar-tmpdir" value="${tmpdir}/extrajars"/>
     <property name="extraapijar-tmpdir" value="${tmpdir}/extraapijars"/>
     
+    <property name="bnd.jar" value="../${etc.lib.dir}/bnd-0.0.249-ext.jar"/>
 </project>

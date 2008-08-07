@@ -63,7 +63,7 @@
         <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
         <sequential>
             <taskdef resource="aQute/bnd/ant/taskdef.properties"
-                     classpath="../${etc.lib.dir}/bnd-0.0.249.jar"/>
+                     classpath="${bnd.jar}"/>
             <mkdir dir="${build.dir}/bnd"/>
             <copy file="${basedir}/etc/bnd/@{jarname}.bnd" todir="${build.dir}/bnd">
                 <filterset>
