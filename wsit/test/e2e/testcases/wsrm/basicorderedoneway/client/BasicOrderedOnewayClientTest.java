@@ -35,10 +35,17 @@
  */
 package wsrm.basicorderedoneway.client;
 
+import com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import junit.framework.TestCase;
+import wsrm.basicorderedoneway.common.EvenMessageDelayingFilter;
 
 /**
  *
@@ -46,21 +53,66 @@ import junit.framework.TestCase;
  */
 public class BasicOrderedOnewayClientTest extends TestCase {
 
+    private static final Logger LOGGER = Logger.getLogger(BasicOrderedOnewayClientTest.class.getName());
+    private static final int NUMBER_OF_THREADS = 5;
+
     public void testAckRequestedInterval() {
         IPing port = null;
+        final CountDownLatch latch = new CountDownLatch(NUMBER_OF_THREADS);
         try {
             PingService service = new PingService();
-            port = service.getPingPort();
-            
-            for (int i = 0; i < 20; i++) {
-                port.ping("hello " + i);
-                System.out.println(" message sent " + i);
+            port = service.getPingPort(new PacketFilteringFeature(
+                    EvenMessageDelayingFilter.class //  2
+                    //                    EvenMessageDelayingFilter.class, //  4
+                    //                    EvenMessageDelayingFilter.class, //  6
+                    //                    EvenMessageDelayingFilter.class, //  8
+                    //                    EvenMessageDelayingFilter.class, // 10
+                    //                    EvenMessageDelayingFilter.class  // 12
+                    ));
+
+            final IPing portCopy = port;
+            Executor executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+
+
+            for (final AtomicInteger i = new AtomicInteger(1); i.get() <= NUMBER_OF_THREADS; i.incrementAndGet()) {
+                executor.execute(new Runnable() {
+
+                    int id = i.get();
+
+                    public void run() {
+                        try {
+                            LOGGER.info(String.format("Calling web service in runnable [ %d ]", id));
+                            portCopy.ping("ping");
+                            LOGGER.info(String.format("Web service call finished in runnable [ %d ]", id));
+                        } finally {
+                            latch.countDown();
+                            LOGGER.info(String.format("Decreasing latch count to %d", latch.getCount()));
+                        }
+                    }
+                });
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(BasicOrderedOnewayClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
             fail("The ReliableOneway.testSendPing failed with the execption");
         } finally {
             if (port != null) {
+                try {
+                    LOGGER.info(String.format("Still need to wait for %d threads", latch.getCount()));
+                    latch.await(30, TimeUnit.SECONDS);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(BasicOrderedOnewayClientTest.class.getName()).log(Level.SEVERE, null, ex);                    
+                    try {
+                        ((java.io.Closeable) port).close();
+                    } catch (IOException ioex) {
+                        Logger.getLogger(BasicOrderedOnewayClientTest.class.getName()).log(Level.SEVERE, null, ioex);
+                    }
+                    fail("The test did not finished in 30 seconds. Most likely it is stuck in a deadlock or on sending poisoned messages");
+                }
                 try {
                     ((java.io.Closeable) port).close();
                 } catch (IOException ex) {
