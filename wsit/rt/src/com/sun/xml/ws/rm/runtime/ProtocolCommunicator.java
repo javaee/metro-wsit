@@ -97,15 +97,18 @@ final class ProtocolCommunicator {
      * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
      */
     SecurityTokenReferenceType tryStartSecureConversation() {
-        JAXBElement<SecurityTokenReferenceType> strElement = null;
+        SecurityTokenReferenceType strType = null;
         if (scInitiator != null) {
             try {
-                strElement = scInitiator.startSecureConversation(musterRequestPacket.get().copy(false));
+                @SuppressWarnings("unchecked") 
+                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(musterRequestPacket.get().copy(false));
+                
+                strType = (strElement != null) ? strElement.getValue() : null;
             } catch (WSSecureConversationException ex) {
                 LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
             }
         }
-        return (strElement != null) ? strElement.getValue() : null;
+        return strType;
     }
 
     /**

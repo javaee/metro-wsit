@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.pipe.Fiber;
-import java.util.Comparator;
+import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -44,6 +44,7 @@ import java.util.Queue;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 
 /**
  *
@@ -53,32 +54,52 @@ enum FlowControledFibers {
 
     INSTANCE;
 
-    private static class FiberRegistration {
+    private static final RmLogger LOGGER = RmLogger.getLogger(FlowControledFibers.class);
+    private static class FiberRegistration implements Comparable<FiberRegistration>{
 
-        PacketAdapter packetAdapter;
-        Fiber fiber;
+        final PacketAdapter packetAdapter;
+        final Fiber fiber;
+        final long messageNumber;
 
         FiberRegistration(Fiber fiber, PacketAdapter packetAdapter) {
             this.fiber = fiber;
             this.packetAdapter = packetAdapter;
+            this.messageNumber = packetAdapter.getMessageNumber();
+        }
+
+        @Override
+        public boolean equals(Object that) {
+            if (!(that instanceof FiberRegistration)) {
+                return false;
+            }
+
+            final FiberRegistration thatRegistration = (FiberRegistration) that;
+            if (this.messageNumber == thatRegistration.messageNumber) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return 53 * 7 + (int) this.messageNumber;
+        }
+
+        public int compareTo(FiberRegistration that) {
+            return (this.messageNumber < that.messageNumber) ? -1 : (this.messageNumber == that.messageNumber) ? 0 : 1;
         }
     }
+    //
     private final Map<String, Queue<FiberRegistration>> repository;
     private final ReadWriteLock repositoryLock;
-    private final Comparator<FiberRegistration> registrationComparator;
-
+    
     private FlowControledFibers() {
         repository = new HashMap<String, Queue<FiberRegistration>>();
         repositoryLock = new ReentrantReadWriteLock();
-        registrationComparator = new Comparator<FiberRegistration>() {
-
-            public int compare(FiberRegistration r1, FiberRegistration r2) {
-                return (r1.packetAdapter.getMessageNumber() < r2.packetAdapter.getMessageNumber()) ? -1 : (r1.packetAdapter.getMessageNumber() == r2.packetAdapter.getMessageNumber()) ? 0 : 1;
-            }
-        };
     }
 
-    void registerForResume(Fiber fiber, PacketAdapter packetAdapter) {
+    boolean registerForResume(Fiber fiber, PacketAdapter packetAdapter) {       
         FiberRegistration registration = new FiberRegistration(fiber, packetAdapter);
         String sequenceId = packetAdapter.getSequenceId();
 
@@ -87,13 +108,27 @@ enum FlowControledFibers {
 
             Queue<FiberRegistration> sequenceFibers;
             if (!repository.containsKey(sequenceId)) {
-                sequenceFibers = new PriorityQueue<FiberRegistration>(10, registrationComparator);
+                sequenceFibers = new PriorityQueue<FiberRegistration>(10);
                 repository.put(sequenceId, sequenceFibers);
             } else {
                 sequenceFibers = repository.get(sequenceId);
             }
 
-            sequenceFibers.offer(registration);
+            // if the priority queue already contains the registration with given message number
+            // the method returns false without actually registering the fiber and packetAdapter
+            if (sequenceFibers.contains(registration)) {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format("Duplicate registration: Another fiber already suspended for message [ %d ] on the sequence [ %s ]", registration.messageNumber, sequenceId));
+                }
+                return false;
+            } else {
+                boolean offerResult = sequenceFibers.offer(registration);
+                
+                if (!offerResult && LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format("Adding fiber to the suspended fiber's queue failed for message [ %d ] on the sequence [ %s ]", registration.messageNumber, sequenceId));
+                }
+                return offerResult;
+            }
         } finally {
             repositoryLock.writeLock().unlock();
         }
@@ -102,7 +137,10 @@ enum FlowControledFibers {
     boolean tryResume(String sequenceId, long messageId) {
         Queue<FiberRegistration> sequenceBuffer = getSequenceBuffer(sequenceId);
 
-        if (sequenceBuffer == null) {
+        if (sequenceBuffer == null || sequenceBuffer.isEmpty()) {
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(String.format("Nothing to resume: No fibers suspended on the sequence [ %s ]", sequenceId));
+            }
             return false;
         }
 
@@ -110,16 +148,23 @@ enum FlowControledFibers {
         try {
             repositoryLock.writeLock().lock();
 
-            if (sequenceBuffer.peek().packetAdapter.getMessageNumber() != messageId) {
+            long nextSuspendedMessageId = sequenceBuffer.peek().packetAdapter.getMessageNumber();
+            if (nextSuspendedMessageId != messageId) {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format("No fiber resumed: Next suspended message [ %d ] is not as expected [ %d ] on the sequence [ %s ].", nextSuspendedMessageId, messageId, sequenceId));
+                }
                 return false;
             } else {
                 registration = sequenceBuffer.poll();
             }
         } finally {
-            repositoryLock.writeLock().lock();
+            repositoryLock.writeLock().unlock();
         }
 
         registration.fiber.resume(registration.packetAdapter.getPacket());
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format("Resuming fiber for the suspended message [ %d ] is on the sequence [ %s ].", registration.messageNumber, sequenceId));
+        }
         return true;
     }
 

@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
@@ -402,11 +403,12 @@ abstract class PacketAdapter {
 
         Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
         if (header == null) {
-            return (T) null;
+            return null;
         }
 
         try {
-            return (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+            @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+            return result;
         } catch (JAXBException ex) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
         }
@@ -423,7 +425,8 @@ abstract class PacketAdapter {
         checkMessageReadyState();
 
         try {
-            return (T) message.readPayloadAsJAXB(rmVersion.jaxbUnmarshaller);
+            @SuppressWarnings("unchecked") T result = (T) message.readPayloadAsJAXB(rmVersion.jaxbUnmarshaller);
+            return result;
         } catch (JAXBException e) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
         } finally {
@@ -431,6 +434,9 @@ abstract class PacketAdapter {
         }
     }
 
+    /**
+     * TODO javadoc
+     */
     final String getSequenceId() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
@@ -439,6 +445,9 @@ abstract class PacketAdapter {
         return sequenceId;
     }
 
+    /**
+     * TODO javadoc
+     */
     final long getMessageNumber() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
@@ -447,15 +456,27 @@ abstract class PacketAdapter {
         return messageNumber;
     }
 
+    /**
+     * TODO javadoc
+     */
     abstract void initSequenceHeaderData() throws RmRuntimeException;
 
+    /**
+     * TODO javadoc
+     */
     final void setSequenceData(String sequenceId, long messageNumber) {
         this.sequenceId = sequenceId;
         this.messageNumber = messageNumber;
     }
 
+    /**
+     * TODO javadoc
+     */
     abstract String initAckRequestedHeaderData() throws RmRuntimeException;
 
+    /**
+     * TODO javadoc
+     */
     final String getAckRequestedHeaderSequenceId() throws RmRuntimeException {
         if (!isAckRequestedHeaderDataInit) {
             ackRequestedHeaderSequenceId = initAckRequestedHeaderData();
@@ -465,8 +486,14 @@ abstract class PacketAdapter {
         return ackRequestedHeaderSequenceId;
     }
 
+    /**
+     * TODO javadoc
+     */
     abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
 
+    /**
+     * TODO javadoc
+     */
     Session getSession() {
         String sessionId = (String) packet.invocationProperties.get(Session.SESSION_ID_KEY);
         if (sessionId == null) {
@@ -476,6 +503,16 @@ abstract class PacketAdapter {
         return SessionManager.getSessionManager().getSession(sessionId);
     }
 
+    /**
+     * TODO javadoc
+     */
+    boolean hasSession() {
+        return getSession() != null;
+    }
+
+    /**
+     * TODO javadoc
+     */
     void setSession(String sessionId) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
@@ -483,10 +520,11 @@ abstract class PacketAdapter {
         packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
     }
 
-    boolean hasSession() {
-        return getSession() != null;
+    void exposeSequenceDataToUser() {
+        packet.invocationProperties.put(Constants.sequenceProperty, sequenceId);
+        packet.invocationProperties.put(Constants.messageNumberProperty, messageNumber);
     }
-
+    
     /**
      * TODO javadoc
      */
@@ -536,15 +574,5 @@ abstract class PacketAdapter {
     final boolean isSecurityContextTokenIdValid(String expectedSctId) {
         String actualSctId = getSecurityContextTokenId();
         return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
-
-// TODO Remove old code once the new one is proven to work
-//         
-//        SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
-//        if (sct != null) {
-//            URI sctIdentifierUri = sct.getIdentifier();
-//            return (sctIdentifierUri != null) ? sctIdentifierUri.toString().equals(expectedStrId) : expectedStrId == null;
-//        } else {
-//            return expectedStrId == null;
-//        }
     }
 }

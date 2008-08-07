@@ -41,7 +41,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 
 /**
  *
@@ -95,7 +94,7 @@ public abstract class PacketFilter {
                 return null;
             }
 
-            HeaderList headers = packet.getMessage().getHeaders();
+            HeaderList headers = packet.getMessage().copy().getHeaders();
             switch (rmVersion) {
                 case WSRM10: {
                     com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
@@ -106,7 +105,7 @@ public abstract class PacketFilter {
                     return (se != null) ? se.getId() : null;
                 }
                 default:
-                    LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
+                    LOGGER.severe(String.format("Unsupported RM version [ %s ]", rmVersion.namespaceUri));
                     return null;
             }
         } catch (Exception ex) {
@@ -129,7 +128,7 @@ public abstract class PacketFilter {
                 return UNSPECIFIED;
             }
 
-            HeaderList headers = packet.getMessage().getHeaders();
+            HeaderList headers = packet.getMessage().copy().getHeaders();
             switch (rmVersion) {
                 case WSRM10: {
                     com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
@@ -140,7 +139,7 @@ public abstract class PacketFilter {
                     return (se != null) ? se.getMessageNumber() : UNSPECIFIED;
                 }
                 default:
-                    LOGGER.severe("Unsupported RM version [" + rmVersion.namespaceUri + "]");
+                    LOGGER.severe(String.format("Unsupported RM version [ %s ]", rmVersion.namespaceUri));
                     return UNSPECIFIED;
             }
         } catch (Exception ex) {
@@ -159,13 +158,13 @@ public abstract class PacketFilter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    private <T> T readHeader(HeaderList headers, String name) throws JAXBException, XMLStreamException {
+    private <T> T readHeader(HeaderList headers, String name) throws JAXBException {
         Header header = headers.get(rmVersion.namespaceUri, name, false);
         if (header == null) {
             return (T) null;
         }
 
-        return (T) rmVersion.jaxbUnmarshaller.unmarshal(header.readHeader());
-//        return (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+        @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+        return result;
     }
 }

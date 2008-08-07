@@ -141,17 +141,20 @@ final class RmClientTube extends AbstractFilterTubeImpl {
             boolean responseToOneWayRequest = requestPacketCopy.getMessage().isOneWay(wsdlPort);
             responsePacket = session.processIncommingPacket(responsePacket, responseToOneWayRequest);
 
-            if (!responseToOneWayRequest && responseNotAvailableYet(responsePacket)) {
+            if (
+                    (responseToOneWayRequest && requestNotAcknowledged(requestPacketCopy)) ||
+                    (!responseToOneWayRequest && responseNotAvailableYet(responsePacket))
+            ) {
                 LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
                 return doResend();
             } else {
-                clearResendAttemptFlag();
+                releaseResendResources();
                 return super.processResponse(responsePacket);
             }
 
         } catch (RmRuntimeException ex) {
             LOGGER.logSevereException(ex);
-            clearResendAttemptFlag();
+            releaseResendResources();
             return doThrow(ex);
         } finally {
             LOGGER.exiting();
@@ -166,6 +169,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 // eat exception and forward processing to this.processRequest() (INVOKE_AND_FORGET) for request message resend
                 return doResend();
             } else {
+                releaseResendResources();
                 return super.processException(throwable);
             }
         } finally {
@@ -210,7 +214,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         requestPacketCopy = requestPacket.copy(true);
     }
     
-    private void clearResendAttemptFlag() {
+    private void releaseResendResources() {
         requestPacketCopy = null;
     }
 
@@ -221,5 +225,9 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         // In such case we also need to retry.
         Message responseMessage = responsePacket.getMessage();
         return responseMessage != null && !responseMessage.hasPayload();
+    }
+    
+    private boolean requestNotAcknowledged(Packet requestPacket) {
+        return !session.sequenceManager.getSequence(session.outboundSequenceId).isAcknowledged(PacketAdapter.getInstance(session.configuration, requestPacket).getMessageNumber());
     }
 }

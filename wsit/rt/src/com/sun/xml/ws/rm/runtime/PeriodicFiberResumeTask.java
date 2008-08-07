@@ -38,7 +38,6 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,7 +50,7 @@ import java.util.logging.Level;
 final class PeriodicFiberResumeTask implements Runnable {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(PeriodicFiberResumeTask.class);
-    
+
     private static class FiberRegistration {
 
         private final long timestamp;
@@ -77,11 +76,14 @@ final class PeriodicFiberResumeTask implements Runnable {
     }
 
     public void run() {
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(String.format("Periodic fiber task executed - resume queue size: [ %d ]", fiberResumeQueue.size()));
+        }
         while (!fiberResumeQueue.isEmpty() && fiberResumeQueue.peek().expired(resumePeriod)) {
-            FiberRegistration registration = fiberResumeQueue.poll();            
+            FiberRegistration registration = fiberResumeQueue.poll();
             registration.fiber.resume(registration.packet);
-            if (LOGGER.isLoggable(Level.FINER)) {                
-                LOGGER.finer(LocalizationMessages.WSRM_1127_FIBER_RESUMED(registration.fiber.toString(), registration.packet.toString()));
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(String.format("Fiber %s resumed with packet%n%s", registration.fiber, registration.packet));
             }
         }
     }
@@ -93,6 +95,9 @@ final class PeriodicFiberResumeTask implements Runnable {
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
     final boolean registerForResume(@NotNull Fiber fiber, Packet packet) {
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format("Fiber %s registered for resume with packet%n%s", fiber, packet));
+        }
         return fiberResumeQueue.offer(new FiberRegistration(fiber, packet));
     }
 }
