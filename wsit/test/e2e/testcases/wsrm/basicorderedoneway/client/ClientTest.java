@@ -51,9 +51,9 @@ import wsrm.basicorderedoneway.common.EvenMessageDelayingFilter;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class TestClient extends TestCase {
+public class ClientTest extends TestCase {
 
-    private static final Logger LOGGER = Logger.getLogger(TestClient.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
     private static final int NUMBER_OF_THREADS = 5;
 
     public void testAckRequestedInterval() {
@@ -93,7 +93,7 @@ public class TestClient extends TestCase {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(TestClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         } catch (Exception e) {
@@ -105,18 +105,18 @@ public class TestClient extends TestCase {
                     LOGGER.info(String.format("Still need to wait for %d threads", latch.getCount()));
                     latch.await(30, TimeUnit.SECONDS);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(TestClient.class.getName()).log(Level.SEVERE, null, ex);                    
+                    Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);                    
                     try {
                         ((java.io.Closeable) port).close();
                     } catch (IOException ioex) {
-                        Logger.getLogger(TestClient.class.getName()).log(Level.SEVERE, null, ioex);
+                        Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ioex);
                     }
                     fail("The test did not finished in 30 seconds. Most likely it is stuck in a deadlock or on sending poisoned messages");
                 }
                 try {
                     ((java.io.Closeable) port).close();
                 } catch (IOException ex) {
-                    Logger.getLogger(TestClient.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

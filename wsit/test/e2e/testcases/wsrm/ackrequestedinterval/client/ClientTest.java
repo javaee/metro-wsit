@@ -33,38 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.addressing.client;
+package wsrm.ackrequestedinterval.client;
 
-import junit.framework.TestCase;
-import java.io.Closeable;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class TestClient extends TestCase {
+public class ClientTest extends TestCase {
+    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
 
-    private static final Logger LOGGER = Logger.getLogger(TestClient.class.getName());
-
-    public void testAddressingVersionSupport() throws Exception {
+    public void testAckRequestedInterval() {
         IPing port = null;
         try {
             PingService service = new PingService();
             port = service.getPingPort();
-            port.ping("Hello world!");
-            fail("Exception was not thrown as expected");
-        } catch (Exception e) {
-            LOGGER.log(Level.ALL, "Exception caught - will examine the message now", e);
-            if (!(e.getMessage().contains("Addressing") && e.getMessage().contains("MEMBER"))) {
-                fail("Exception that has been thrown does not contain expected message.");
+            
+            for (int i = 0; i < 50; i++) {
+                port.ping("Hello " + i);
+                LOGGER.info(String.format("Hello %d. message successfully sent.", i));
             }
-            LOGGER.log(Level.ALL, "Exception's message is as expected.");
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "WS proxy invocation failed with an unexpected exception.", ex);
+            fail(String.format("Test failed with the execption: %s", ex));
         } finally {
             if (port != null) {
-                ((Closeable) port).close();
+                try {
+                    ((java.io.Closeable) port).close();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error while closing WS proxy", ex);
+                }
             }
-        }
+        }    
     }
 }

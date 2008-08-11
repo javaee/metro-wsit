@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.secureonewaysoap12.client;
+package wsrm.oneway.client;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -44,8 +44,8 @@ import junit.framework.TestCase;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class TestClient extends TestCase {
-    private static final Logger LOGGER = Logger.getLogger(TestClient.class.getName());
+public class ClientTest extends TestCase {
+    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
     
     public void testOneWay() {
         IPing port = null;
