@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
@@ -35,8 +34,12 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://xmlsoap.org/Ping" targetNamespace="http://xmlsoap.org/Ping" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xs:element name="Ping" type="xs:string"/>
-	
+<xs:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://tempuri.org/">
+    <xs:element name="Ping">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="Text" nillable="true" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

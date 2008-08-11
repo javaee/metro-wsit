@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
@@ -35,8 +34,11 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
+<descriptor>
+    <description>Basic secured one-way RM test</description>
+    <!--client href ="test.bsh"/-->
+    <service basedir="./server">
+        <wsdl href="PingService.wsdl"/>
+    </service>
+</descriptor>
 
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://xmlsoap.org/Ping" targetNamespace="http://xmlsoap.org/Ping" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xs:element name="Ping" type="xs:string"/>
-	
-</xs:schema>
