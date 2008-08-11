@@ -68,6 +68,18 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(AbstractRmServerTube.class);
     private static final Lock FLOW_CONTROL_ACCESS_LOCK = new ReentrantLock();
+    /**
+     * The property wih this key may be set by JCaps in the message context to indicate 
+     * whether the message that was delivered to the application endpoint should be 
+     * acknowledged or not.
+     * 
+     * The property value may be "true" or "false", "true" s default.
+     * 
+     * Introduction of this property is required as a temporary workaround for missing
+     * concept of distinguishing between system and application errors in JAXWS RI.
+     * The workaround should be removed once the missing concept is introduced.
+     */
+    private static final String RM_ACK_PROPERTY_KEY = "RM_ACK";
     //
     final Configuration configuration;
     final SequenceManager sequenceManager;
@@ -193,52 +205,63 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             Sequence inboundSequence = sequenceManager.getSequence(requestAdapter.getSequenceId());
-            inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
-
             PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
 
-            if (responseAdapter.containsMessage()) {
-                // response in req-resp MEP
-                Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
-                if (outboundSequence != null) {
-                    responseAdapter.appendSequenceHeader(
-                            outboundSequence.getId(),
-                            outboundSequence.generateNextMessageId());
+            /**
+             * This if clause is a part of the RM-JCaps private contract. JCaps may decide
+             * that the request it received should be resent and thus it should not be acknowledged.
+             * 
+             * For more information, see documentation of RM_ACK_PROPERTY_KEY constant field.
+             */
+            String rmAckPropertyValue = (String) requestAdapter.getPacket().invocationProperties.get(RM_ACK_PROPERTY_KEY);
+            if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
+                inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
 
-                    // we allways request acknowledgement (at least for this response)
-                    responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+                if (responseAdapter.containsMessage()) {
+                    // response in req-resp MEP
+                    Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
+                    if (outboundSequence != null) {
+                        responseAdapter.appendSequenceHeader(
+                                outboundSequence.getId(),
+                                outboundSequence.generateNextMessageId());
 
-                    if (duplicatesNotAllowed()) {
-                        outboundSequence.storeMessage(
-                                requestAdapter.getMessageNumber(),
-                                responseAdapter.getMessageNumber(),
-                                responseAdapter.getPacket());
+                        // we allways request acknowledgement (at least for this response)
+                        responseAdapter.appendAckRequestedHeader(outboundSequence.getId());
+
+                        if (duplicatesNotAllowed()) {
+                            outboundSequence.storeMessage(
+                                    requestAdapter.getMessageNumber(),
+                                    responseAdapter.getMessageNumber(),
+                                    responseAdapter.getPacket());
+                        }
+                    } else {
+                        // we don't have a sequence for outgoing messages
+                        throw new IllegalStateException(LocalizationMessages.WSRM_1139_NO_OUTBOUND_SEQUENCE_FOR_RESPONSE(inboundSequence.getId()));
                     }
+                    // we apply acknowledgement only after the message was possibly stored, because otherwise we would
+                    // send a stale acknowledgement data in case of resend
+                    responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
                 } else {
-                    // we don't have a sequence for outgoing messages
-                    throw new IllegalStateException(LocalizationMessages.WSRM_1139_NO_OUTBOUND_SEQUENCE_FOR_RESPONSE(inboundSequence.getId()));
+                    // response in one-way MEP - just send a sequence acknowledgement                
+                    responseAdapter.setEmptyResponseMessage(requestAdapter, configuration.getRmVersion().sequenceAcknowledgementAction);
+                    responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
                 }
-                // we apply acknowledgement only after the message was possibly stored, because otherwise we would
-                // send a stale acknowledgement data in case of resend
-                responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
-            } else {
-                // response in one-way MEP - just send a sequence acknowledgement                
-                responseAdapter.setEmptyResponseMessage(requestAdapter, configuration.getRmVersion().sequenceAcknowledgementAction);
-                responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
-            }
 
-            if (configuration.isOrderedDelivery()) {
-                try {
-                    if (LOGGER.isLoggable(Level.FINER)) {
-                        LOGGER.finer(String.format("Request [ %d ] processed. Trying to resume next request", requestAdapter.getMessageNumber()));
+                if (configuration.isOrderedDelivery()) {
+                    try {
+                        if (LOGGER.isLoggable(Level.FINER)) {
+                            LOGGER.finer(String.format("Request [ %d ] processed. Trying to resume next request", requestAdapter.getMessageNumber()));
+                        }
+
+                        FLOW_CONTROL_ACCESS_LOCK.lock();
+
+                        FlowControledFibers.INSTANCE.tryResume(inboundSequence.getId(), inboundSequence.getLastMessageId() + 1);
+                    } finally {
+                        FLOW_CONTROL_ACCESS_LOCK.unlock();
                     }
-
-                    FLOW_CONTROL_ACCESS_LOCK.lock();
-                    
-                    FlowControledFibers.INSTANCE.tryResume(inboundSequence.getId(), inboundSequence.getLastMessageId() + 1);
-                } finally {
-                    FLOW_CONTROL_ACCESS_LOCK.unlock();
                 }
+            } else if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
             }
 
             return super.processResponse(responseAdapter.getPacket());
