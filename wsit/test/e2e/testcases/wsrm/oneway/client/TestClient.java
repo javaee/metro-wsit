@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.ackrequestedinterval.client;
+package wsrm.oneway.client;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -44,29 +44,30 @@ import junit.framework.TestCase;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class AckRequestedIntervalClientTest extends TestCase {
-
-    public void testAckRequestedInterval() {
-        wsrm.ackrequestedinterval.client.IPing port = null;
+public class TestClient extends TestCase {
+    private static final Logger LOGGER = Logger.getLogger(TestClient.class.getName());
+    
+    public void testOneWay() {
+        IPing port = null;
         try {
-            wsrm.ackrequestedinterval.client.PingService service = new PingService();
-            port = service.getWSHttpBindingIPing();
+            PingService service = new PingService();
+            port = service.getPingPort();
             
-            for (int i = 0; i < 100; i++) {
-                port.ping("hello " + i);
-                System.out.println(" message sent " + i);
+            for (int i = 0; i < 50; i++) {
+                port.ping("Hello " + i);
+                LOGGER.info(String.format("Hello %d. message successfully sent.", i));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("The ReliableOneway.testSendPing failed with the execption");
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "WS proxy invocation failed with an unexpected exception.", ex);
+            fail(String.format("Test failed with the execption: %s", ex));
         } finally {
             if (port != null) {
                 try {
                     ((java.io.Closeable) port).close();
                 } catch (IOException ex) {
-                    Logger.getLogger(AckRequestedIntervalClientTest.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, "Error while closing WS proxy", ex);
                 }
             }
-        }
+        }    
     }
 }

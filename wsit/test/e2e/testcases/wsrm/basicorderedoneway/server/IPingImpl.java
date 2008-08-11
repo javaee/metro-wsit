@@ -38,6 +38,9 @@ package wsrm.basicorderedoneway.server;
 import com.sun.xml.ws.rm.Constants;
 import javax.annotation.Resource;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
@@ -47,20 +50,22 @@ import javax.xml.ws.soap.SOAPBinding;
 @WebService(endpointInterface = "wsrm.basicorderedoneway.server.IPing")
 @BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class IPingImpl {
+    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
     private static final AtomicLong CURRENT_PING_VALUE = new AtomicLong(1);
+    //
     @Resource WebServiceContext wsContext;
 
-    /**
-     * @param String
-     */
+    @WebMethod
     public void ping(String s) {        
         MessageContext msgCtx = wsContext.getMessageContext();
         long msgNumber = (Long) msgCtx.get(Constants.messageNumberProperty);
         
-        System.out.println(String.format("==============  Message [ %d ]: On server side received %s  ===============", msgNumber, s));
+        LOGGER.log(Level.ALL, String.format("==============  Message [ %d ]: On server side received %s  ===============", msgNumber, s));
         long value = CURRENT_PING_VALUE.getAndIncrement();
         if (msgNumber != value) {
-            throw new RuntimeException("Expected message number: " + value + "Received message number: " + msgNumber);
+            String errorMessage = String.format("Expected message number: %d%, received message number: %d", value, msgNumber);
+            LOGGER.severe(errorMessage);
+            throw new RuntimeException(errorMessage);
         }
     }
 }

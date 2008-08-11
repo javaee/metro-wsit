@@ -34,25 +34,21 @@
  * holder.
  */
 package wsrm.oneway.server;
-import javax.xml.bind.JAXBElement;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.jws.WebMethod;
 import javax.jws.WebService;
+import javax.xml.ws.BindingType;
 
-import javax.xml.bind.*;
-import javax.xml.namespace.*;
-
-import javax.jws.WebService;
-import javax.jws.WebParam;
-import javax.xml.bind.JAXBElement;
-
-@WebService(endpointInterface="wsrm.oneway.server.IPing")
-@javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+@WebService(endpointInterface = "wsrm.oneway.server.IPing")
+@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
 public class IPingImpl {
 
-    /**
-     * @param String
-     */
-       public void ping(String s ) {
+    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
 
-           System.out.println("On server side received " + s);
-        }         
+    @WebMethod
+    public void ping(String message) {
+        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
+    }
 }

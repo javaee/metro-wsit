@@ -37,28 +37,31 @@ package wsrm.addressing.client;
 
 import junit.framework.TestCase;
 import java.io.Closeable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RMDemoClientTest extends TestCase {
+public class TestClient extends TestCase {
+
+    private static final Logger LOGGER = Logger.getLogger(TestClient.class.getName());
 
     public void testAddressingVersionSupport() throws Exception {
-        boolean foundError = false;
-        wsrm.addressing.client.RMDemo port = null;
+        IPing port = null;
         try {
-            wsrm.addressing.client.RMDemoService service = new RMDemoService();
-            port = service.getRMDemoPort();
-            port.addString("hello");
+            PingService service = new PingService();
+            port = service.getPingPort();
+            port.ping("Hello world!");
+            fail("Exception was not thrown as expected");
         } catch (Exception e) {
-            if (e.getMessage().contains("Addressing") && e.getMessage().contains("MEMBER")) {
-                foundError = true;
+            LOGGER.log(Level.ALL, "Exception caught - will examine the message now", e);
+            if (!(e.getMessage().contains("Addressing") && e.getMessage().contains("MEMBER"))) {
+                fail("Exception that has been thrown does not contain expected message.");
             }
-
-            e.printStackTrace();
+            LOGGER.log(Level.ALL, "Exception's message is as expected.");
         } finally {
-            assertTrue(foundError);
             if (port != null) {
                 ((Closeable) port).close();
             }

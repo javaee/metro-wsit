@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
@@ -33,12 +34,11 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-
 <descriptor>
-  <description>This is a basic ordered oneway RM test </description>
-  <!-- client href ="test.bsh"/-->
-  <service basedir="./server">
-    <wsdl href="PingService.wsdl"/>
-  </service>
+    <description>Basic ordered oneway RM test</description>
+    <!-- client href ="test.bsh"/-->
+    <service basedir="./server">
+        <wsdl href="PingService.wsdl"/>
+    </service>
 </descriptor>
 

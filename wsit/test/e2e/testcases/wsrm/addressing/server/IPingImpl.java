@@ -35,60 +35,20 @@
  */
 package wsrm.addressing.server;
 
-import com.sun.xml.ws.runtime.util.Session;
-
-import javax.annotation.Resource;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
-import javax.xml.ws.WebServiceContext;
-import java.util.Hashtable;
+import javax.xml.ws.BindingType;
 
+@WebService(endpointInterface = "wsrm.oneway.server.IPing")
+@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+public class IPingImpl {
 
-@WebService(endpointInterface="wsrm.addressing.server.RMDemo")
-@javax.xml.ws.BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
-public class RMDemoImpl {
-
-
-    /* JAX-WS initializes context for each request */
-    @Resource
-    private WebServiceContext context;
-
-    /* Get Sesssion using well-known key in MessageContext */
-    private Hashtable getSession() {
-        return (Hashtable)context.getMessageContext()
-                .get("com.sun.xml.ws.session");
-    }
-
-    /* Get String associated with SessionID for current request */
-
-    private String getSessionData() {
-	Hashtable sess = getSession();
-        String ret = (String)sess.get("request_record");
-        return ret != null ? ret : "";
-
-    }
-
-    /* Store String associated with SessionID for current request */
-    private void setSessionData(String data) {
-        Hashtable session = getSession();
-        session.put("request_record", data);
-    }
-
-    /* RMDemo Methods */
+    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
 
     @WebMethod
-    public void addString(String s ) {
-        /* append string to session data */
-        setSessionData(getSessionData() + " " + s);
+    public void ping(String message) {
+        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
     }
-
-
-
-    @WebMethod
-    public String getResult() {
-        /* return session data */
-        return getSessionData();
-    }
-
 }
-
