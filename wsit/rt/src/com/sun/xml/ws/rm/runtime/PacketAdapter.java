@@ -57,6 +57,7 @@ import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -82,6 +83,7 @@ abstract class PacketAdapter {
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
+    private final Unmarshaller jaxbUnmarshaller;
 
     /**
      * Provides an instance of a packet adapter based on the configuration and attaches a provided 
@@ -114,6 +116,7 @@ abstract class PacketAdapter {
         this.rmVersion = configuration.getRmVersion();
         this.soapVersion = configuration.getSoapVersion();
         this.addressingVersion = configuration.getAddressingVersion();
+        this.jaxbUnmarshaller = rmVersion.createUnmarshaller();
 
         insertPacket(packet);
     }
@@ -407,7 +410,7 @@ abstract class PacketAdapter {
         }
 
         try {
-            @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+            @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(jaxbUnmarshaller);
             return result;
         } catch (JAXBException ex) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
@@ -425,7 +428,7 @@ abstract class PacketAdapter {
         checkMessageReadyState();
 
         try {
-            @SuppressWarnings("unchecked") T result = (T) message.readPayloadAsJAXB(rmVersion.jaxbUnmarshaller);
+            @SuppressWarnings("unchecked") T result = (T) message.readPayloadAsJAXB(jaxbUnmarshaller);
             return result;
         } catch (JAXBException e) {
             throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));

@@ -37,6 +37,7 @@ package com.sun.xml.ws.rm;
 
 import com.sun.xml.bind.api.JAXBRIContext;
 
+import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
@@ -62,6 +63,7 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200502.SequenceFaultElement.class,
     com.sun.xml.ws.rm.v200502.TerminateSequenceElement.class,
     javax.xml.ws.wsaddressing.W3CEndpointReference.class),
+    
     WSRM11(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
     "http://docs.oasis-open.org/ws-rx/wsrmp/200702",
@@ -87,13 +89,15 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class,
     javax.xml.ws.wsaddressing.W3CEndpointReference.class);
+    
+    private static final RmLogger LOGGER = RmLogger.getLogger(RmVersion.class);
+    
     /**
      * General constants
      */
     public final String namespaceUri;
     public final String policyNamespaceUri;
     public final JAXBRIContext jaxbContext;
-    public final Unmarshaller jaxbUnmarshaller;
     /**
      * Action constants
      */
@@ -166,7 +170,6 @@ public enum RmVersion {
 
         try {
             this.jaxbContext = JAXBRIContext.newInstance(classes, null, null, null, false, null);
-            this.jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException e) {
             throw new Error(e);
         }
@@ -219,5 +222,28 @@ public enum RmVersion {
      */
     public boolean isRmFault(String wsaAction) {
         return wsrmFaultAction.equals(wsaAction);
+    }
+    
+    /**
+     * Creates JAXB {@link Unmarshaller} that is able to unmarshall Rm protocol elements for given WS-RM version.
+     * <p />
+     * As JAXB unmarshallers are not thread-safe, this method should be used to create a new {@link Unmarshaller} 
+     * instance whenever there is a chance that the same instance might be invoked concurrently from multiple
+     * threads. On th other hand, it is prudent to cache or pool {@link Unmarshaller} instances if possible as 
+     * constructing a new {@link Unmarshaller} instance is rather expensive.
+     * <p />
+     * For additional information see this <a href="https://jaxb.dev.java.net/guide/Performance_and_thread_safety.html">blog entry</a>.
+     *  
+     * @return created JAXB unmarshaller
+     * 
+     * @exception RmRuntimeException in case the creation of unmarshaller failed
+     */
+    public Unmarshaller createUnmarshaller() throws RmRuntimeException {
+        try {
+            return this.jaxbContext.createUnmarshaller();
+        } catch (JAXBException ex) {
+            LOGGER.severe("Unable to create JAXB unmarshaller", ex);
+            throw new RmRuntimeException("Unable to create JAXB unmarshaller", ex);
+        }        
     }
 }

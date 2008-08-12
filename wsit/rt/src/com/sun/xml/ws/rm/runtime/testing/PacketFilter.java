@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -51,9 +52,11 @@ public abstract class PacketFilter {
     protected static final long UNSPECIFIED = -1;
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilter.class);
     protected final RmVersion rmVersion;
+    protected final Unmarshaller jaxbUnmarshaller;
 
     protected PacketFilter(RmVersion rmVersion) {
         this.rmVersion = rmVersion;
+        this.jaxbUnmarshaller = rmVersion.createUnmarshaller();
     }
 
     /**
@@ -164,7 +167,7 @@ public abstract class PacketFilter {
             return (T) null;
         }
 
-        @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(rmVersion.jaxbUnmarshaller);
+        @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(jaxbUnmarshaller);
         return result;
     }
 }
