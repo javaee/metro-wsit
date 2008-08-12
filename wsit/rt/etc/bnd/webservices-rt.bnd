@@ -3,6 +3,7 @@ Export-Package: com.ctc.wstx.api;version=3.2.1, \
   com.sun.msv.grammar.trex.*;version=2.1.8, \
   com.sun.msv.util;version=2.1.8, \
   com.sun.msv.verifier.jarv;version=2.1.8, \
+  com.sun.xml.bind.v2.runtime.*;version=2.1.8, \
   com.sun.xml.bind;version=2.1.8, com.sun.xml.bind.annotation;version=2.1.8, \
   com.sun.xml.bind.api;version=2.1.8, com.sun.xml.bind.api.impl;version=2.1.8, \
   com.sun.xml.bind.marshaller;version=2.1.8, com.sun.xml.bind.serializer;version=2.1.8, com.sun.xml.bind.unmarshaller;version=2.1.8, com.sun.xml.bind.util;version=2.1.8, \
@@ -32,6 +33,8 @@ Export-Package: com.ctc.wstx.api;version=3.2.1, \
   com.sun.xml.wss;version=3.0, \
   javax.xml.crypto.dsig;version=1.0, \
   org.jvnet.mimepull;version=1.2, org.jvnet.staxex;version=1.2, \
+  com.sun.xml.messaging.saaj.soap;version=1.3,\
+  com.sun.xml.messaging.saaj.soap.*;version=1.3,\
   org.jvnet.wom.api;version=@RELEASE_VERSION@
 Import-Package: *
 Include-Resource: @webservices-rt.jar
