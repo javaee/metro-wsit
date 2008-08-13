@@ -57,10 +57,10 @@
     <macrodef name="expand-jars-macro">
         <attribute name="libdir"/>
         <attribute name="tmpdirtowork"/>
-        <attribute name="excludejar" default=""/>
+        <element name="expandfiles" optional="true"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="@{tmpdirtowork}"/>
+            <delete dir="@{tmpdirtowork}" quiet="true"/>
             <mkdir dir="@{tmpdirtowork}"/>
             <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{tmpdirtowork}"/>
             <updateManifestWithVersion file="@{tmpdirtowork}/MANIFEST.MF"
@@ -68,6 +68,7 @@
             <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
+                    
                     <exclude name="*javadocs*.jar"/>
                     <exclude name="*api*.jar"/>
                     <exclude name="jaxws-local-transport.jar"/>
@@ -75,7 +76,7 @@
                     <exclude name="http.jar"/>
                     <exclude name="mail-1.4.jar"/>
                     <exclude name="grizzly.jar"/>
-                    <exclude name="@{excludejar}"/>
+                    <expandfiles/>
                 </fileset>
             </concatmanifest>
             <delete dir="@{tmpdirtowork}/META-INF" includeemptydirs="true" excludes="services/**"/>
@@ -86,24 +87,26 @@
 
     <macrodef name="expand-api-jars-macro">
         <attribute name="libdir"/>
+        <attribute name="tmpdirtowork" default="${apijar-tmpdir}"/>
+        <element name="expandfiles" optional="true"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="${apijar-tmpdir}"/>
-            <mkdir dir="${apijar-tmpdir}"/>
-            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="${apijar-tmpdir}"/>
-            <updateManifestWithVersion file="${apijar-tmpdir}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
-            <concatmanifest tempdir="${apijar-tmpdir}" manifest="${apijar-tmpdir}/MANIFEST.MF">
+            <delete dir="@{tmpdirtowork}" quiet="true"/>
+            <mkdir dir="@{tmpdirtowork}"/>
+            <copy file="../${etc.metainf.dir}/MANIFEST.MF" todir="@{tmpdirtowork}"/>
+            <updateManifestWithVersion file="@{tmpdirtowork}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
+            <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
                 <fileset dir="@{libdir}" >
-                    <include name="jaxb-api.jar"/>
                     <include name="jsr173_api.jar"/>
                     <include name="saaj-api.jar"/>
                     <include name="jaxws-api.jar"/>
                     <include name="jsr181-api.jar"/>
 
                     <exclude name="*javadocs*.jar"/>
+                    <expandfiles/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${apijar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <delete dir="@{tmpdirtowork}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -150,10 +153,11 @@
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
         <attribute name="jar-tmpdir"/>
-        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
+        <attribute name="dist-image-dir" default="../${dist.image.wsit.lib.dir}"/>
         <element name="services" optional="true"/>
         <sequential>
-            <jar destfile="../@{dist-image-dir}/@{jarname}.jar" manifest="@{jar-tmpdir}/MANIFEST.MF">
+            <mkdir dir="@{dist-image-dir}"/>
+            <jar destfile="@{dist-image-dir}/@{jarname}.jar" manifest="@{jar-tmpdir}/MANIFEST.MF">
                 <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
@@ -190,7 +194,9 @@
         <antcall target="combine-jars-runtime"/>
         <antcall target="combine-jars-v3-runtime"/>
         <antcall target="expand-jars-api"/>
+        <antcall target="expand-jars-v3-api"/>
         <antcall target="combine-jars-api"/>
+        <antcall target="combine-jars-v3-api"/>
         <antcall target="expand-jars-extra"/>
         <antcall target="combine-jars-extra"/>
         <antcall target="expand-jars-extra-api"/>
@@ -261,12 +267,13 @@
     </target>
 
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
-         <!--This is because we decided for TP2
-                to have webservices-rt without jaxrpc-spi and jaxrpc-impl.jar
-            -->
-         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}"
-                 excludejar="jaxrpc*.jar">
-
+         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
+            <expandfiles>
+                 <!--This is because we decided for TP2 to have webservices-rt
+                     without jaxrpc-spi and jaxrpc-impl.jar -->
+                <exclude name="jaxrpc*.jar"/>
+                <exclude name="jaxb*.jar"/>
+            </expandfiles>
             <!--The wsit/etc/META-INF/services folder
             has entries for
             javax.xml.stream.XMLEventFactory
@@ -291,15 +298,22 @@
         <copy todir="${rtjar-tmpdir-v3}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
-
-        
     </target>
 
     <target name="expand-jars-api" unless="runtime.jars.expanded">
-        <expand-api-jars-macro libdir="../${lib.runtime.dir}" >
-
+        <expand-api-jars-macro libdir="../${lib.runtime.dir}">
+            <expandfiles>
+                <include name="jaxb-api.jar"/>
+            </expandfiles>
         </expand-api-jars-macro>
+    </target>
 
+    <target name="expand-jars-v3-api" unless="runtime.jars.expanded">
+        <expand-api-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${apijar-tmpdir-v3}">
+            <expandfiles>
+                <exclude name="jaxb-api.jar"/>
+            </expandfiles>
+        </expand-api-jars-macro>
     </target>
 
     <target name="expand-jars-extra-api" unless="runtime.jars.expanded">
@@ -331,9 +345,8 @@
     </target>
 
     <target name="combine-jars-v3-runtime">
-        <mkdir dir="../${dist.image.wsit.v3.dir}"/>
         <combine-jars-macro jarname="${name}-rt" classesdir="build/classes" jar-tmpdir="${rtjar-tmpdir-v3}"
-                dist-image-dir="${dist.image.wsit.v3.dir}">
+                dist-image-dir="${basedir}/${osgi.build.dir}">
             <services>
                 <fileset dir="${rtjar-tmpdir-v3}">
                     <include name="**/*.*"/>
@@ -343,25 +356,23 @@
                 </fileset>
             </services>
         </combine-jars-macro>
-        <create-OSGi-bundle jarname="${name}-rt"/>
     </target>
-
 
     <target name="combine-jars-api">
         <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir}" jar-tmpdir="${apijar-tmpdir}"/>
-        <create-OSGi-bundle jarname="${name}-api"/>
+    </target>
 
-     </target>
+    <target name="combine-jars-v3-api">
+        <combine-jars-macro jarname="${name}-api" classesdir="${apijar-tmpdir-v3}" jar-tmpdir="${apijar-tmpdir-v3}"
+                            dist-image-dir="${basedir}/${osgi.build.dir}"/>
+    </target>
 
-     <target name="combine-jars-extra">
+    <target name="combine-jars-extra">
         <combine-jars-macro jarname="${name}-extra" classesdir="${extrajar-tmpdir}" jar-tmpdir="${extrajar-tmpdir}"/>
-
     </target>
 
     <target name="combine-jars-extra-api">
         <combine-jars-macro jarname="${name}-extra-api" classesdir="${extraapijar-tmpdir}" jar-tmpdir="${extraapijar-tmpdir}"/>
-
-
     </target>
 
     <target name="test.resources.copy"

@@ -51,7 +51,7 @@
         </classpath>
     </taskdef>
 
-    <target name="-do-jar-without-manifest" depends="image">
+    <target name="-do-jar-without-manifest" depends="image, bundle">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
@@ -66,7 +66,27 @@
     <target name="main" depends="dist"
         description="Create the wsit tool and runtime jars and installers."/>
     
-    <target name="image" description="Create the wsit tool and runtime jars.">
+    <target name="bundle" depends="init, image"
+            description="Create the Metro OSGi bundle for GlassFish V3.">
+
+        <taskdef resource="aQute/bnd/ant/taskdef.properties"
+                 classpath="${bnd.jar}"/>
+
+        <mkdir dir="${build.dir}/bnd"/>
+        <copy file="${basedir}/etc/bnd/webservices.bnd" todir="${build.dir}/bnd">
+            <filterset>
+                <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
+            </filterset>
+        </copy>
+        
+        <mkdir dir="${dist.image.wsit.v3.dir}"/>
+        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
+             failok="false"
+             output="${dist.image.wsit.v3.dir}/webservices.jar"
+             files="${build.dir}/bnd/webservices.bnd"/>
+    </target>
+    
+    <target name="image" description="Create the Metro tool and runtime jars.">
         <filter token="release.impl.version" value="${release.impl.version}"/>
         <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
         <copy todir="${dist.image.wsit.dir}" filtering="true">
@@ -87,7 +107,7 @@
             <replacefilter token="jaxws-tools.jar" value="webservices-tools.jar" />
         </replace>
     </target>
-
+    
     <target name="-javadoc-build" depends="init"/>
     
     <target name="src-zip">

@@ -1,0 +1,11 @@
+Bundle-SymbolicName: javax.xml.ws
+Bundle-Name: metro
+Export-Package: com.sun.xml.ws.api;version=2.1.4, \
+  com.sun.xml.ws.api.*;version=2.1.4, \
+  com.sun.xml.ws.developer;version=2.1.4, \
+  com.sun.xml.ws.spi;version=2.1.4, \
+  javax.jws;version=2.0, \
+  javax.xml.soap;version=1.3, \
+  javax.xml.ws;version=2.1
+Private-Package: *
+Import-Package: *
