@@ -84,6 +84,12 @@
              failok="false"
              output="${dist.image.wsit.v3.dir}/webservices.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
+
+        <copy todir="${dist.image.wsit.v3.dir}">
+            <fileset dir="${lib.osgi.dir}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
     </target>
     
     <target name="image" description="Create the Metro tool and runtime jars.">
