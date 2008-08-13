@@ -183,6 +183,12 @@
         <integrate-jaxws jaxws.base.url="http://kohsuke.sfbay/hudson/job/jaxws-2.1.x-bleedingedge/lastSuccessfulBuild"/>
         
     </target>
+    
+    <target name="integrate-jaxb-osgi-hudson"
+        description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
+        <get src="http://hudson.sfbay/job/jaxb-ri-2.1/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb.jar"
+             dest="${lib.osgi.dir}/jaxb.jar" />
+    </target>
 
     <target name="integrate-xwss30-hudson" 
             description="integrate the last successful XWSS 3.0 Hudson build">
