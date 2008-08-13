@@ -33,22 +33,33 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.addressing.server;
+package wsrm.wsa_member_submission_support.client;
 
+import junit.framework.TestCase;
+import java.io.Closeable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-import javax.xml.ws.BindingType;
 
-@WebService(endpointInterface = "wsrm.oneway.server.IPing")
-@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
-public class IPingImpl {
+/**
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
+public class ClientTest extends TestCase {
 
-    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
 
-    @WebMethod
-    public void ping(String message) {
-        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
+    public void testMemberSubmissionAddressingVersionSupport() throws Exception {
+        IPing port = null;
+        try {
+            PingService service = new PingService();
+            port = service.getPingPort();
+            port.ping("Hello world!");
+        } catch (Exception e) {
+            LOGGER.log(Level.ALL, "Unexpected exception thrown while invoking the web service", e);
+        } finally {
+            if (port != null) {
+                ((Closeable) port).close();
+            }
+        }
     }
 }

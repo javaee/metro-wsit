@@ -48,11 +48,11 @@
     xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
     xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" 
     xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
-    xmlns:wsap = "http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+    xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
     xmlns:wsrm="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
     xmlns:sunrm="http://sun.com/2006/03/rm">
 
-    <wsp:Policy wsu:Id="PingServicePolicy">
+    <wsp:Policy wsu:Id="PingServicePolicyMS">
         <wsp:ExactlyOne>
             <wsp:All>
                 <wsrm:RMAssertion />
@@ -75,7 +75,7 @@
         </operation>
     </portType>
     <binding name="IPingBinding" type="tns:IPing">
-        <wsp:PolicyReference URI="#PingServicePolicy" />
+        <wsp:PolicyReference URI="#PingServicePolicyMS" />
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
         <operation name="Ping">
             <input>

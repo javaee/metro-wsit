@@ -33,38 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.addressing.client;
+package wsrm.wsa_member_submission_support.server;
 
-import junit.framework.TestCase;
-import java.io.Closeable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
 
-/**
- *
- * @author Marek Potociar (marek.potociar at sun.com)
- */
-public class ClientTest extends TestCase {
+@WebService(endpointInterface = "wsrm.wsa_member_submission_support.server.IPing")
+@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+public class IPingImpl {
 
-    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
 
-    public void testAddressingVersionSupport() throws Exception {
-        IPing port = null;
-        try {
-            PingService service = new PingService();
-            port = service.getPingPort();
-            port.ping("Hello world!");
-            fail("Exception was not thrown as expected");
-        } catch (Exception e) {
-            LOGGER.log(Level.ALL, "Exception caught - will examine the message now", e);
-            if (!(e.getMessage().contains("Addressing") && e.getMessage().contains("MEMBER"))) {
-                fail("Exception that has been thrown does not contain expected message.");
-            }
-            LOGGER.log(Level.ALL, "Exception's message is as expected.");
-        } finally {
-            if (port != null) {
-                ((Closeable) port).close();
-            }
-        }
+    @WebMethod()
+    public void ping(String message) {
+        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
     }
 }
