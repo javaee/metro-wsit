@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm.v200702;
 import com.sun.xml.ws.rm.protocol.AbstractAcceptType;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +78,7 @@ import javax.xml.bind.annotation.XmlType;
 public class AcceptType extends AbstractAcceptType {
 
     @XmlElement(name = "AcksTo", required = true)
-    protected W3CEndpointReference acksTo;
+    protected EndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAnyAttribute
@@ -92,7 +92,7 @@ public class AcceptType extends AbstractAcceptType {
      *     {@link EndpointReferenceType }
      *     
      */
-    public W3CEndpointReference getAcksTo() {
+    public EndpointReference getAcksTo() {
         return acksTo;
     }
 
@@ -152,7 +152,7 @@ public class AcceptType extends AbstractAcceptType {
      *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    public void setAcksTo(W3CEndpointReference value) {
+    public void setAcksTo(EndpointReference value) {
         //this.any.add(value);
         this.acksTo = value;
     }

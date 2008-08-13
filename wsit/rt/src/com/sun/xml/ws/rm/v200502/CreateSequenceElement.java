@@ -39,7 +39,7 @@ import com.sun.xml.ws.rm.protocol.AbstractCreateSequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +86,7 @@ import javax.xml.bind.annotation.XmlType;
 public class CreateSequenceElement extends AbstractCreateSequence {
 
     @XmlElement(name = "AcksTo", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-    protected W3CEndpointReference acksTo;
+    protected EndpointReference acksTo;
     @XmlAnyElement(lax = true)
     protected List<Object> any = new ArrayList<Object>();
     @XmlElement(name = "Expires", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
@@ -100,36 +100,15 @@ public class CreateSequenceElement extends AbstractCreateSequence {
 
     /**
      * Gets the value of the acksTo property.
-     *
-     * @return
-     *     possible object is
-     *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
-     *
      */
-    //Temporary hack till https://jaxb.dev.java.net/issues/show_bug.cgi?id=257
-    //is fixed
-    public W3CEndpointReference getAcksTo() {
-        /*for (int i = 0 ; i < any.size(); i++) {
-        if (any.get(i) instanceof WSEndpointReference) {
-        return (W3CEndpointReference)any.get(i);
-        }
-        }
-        return null;*/
+    public EndpointReference getAcksTo() {
         return acksTo;
     }
 
     /**
      * Sets the value of the acksTo property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link javax.xml.ws.EndpointReference }
-     *
      */
-    //Temporary hack till https://jaxb.dev.java.net/issues/show_bug.cgi?id=257
-    //is fixed
-    public void setAcksTo(W3CEndpointReference value) {
-        //this.any.add(value);
+    public void setAcksTo(EndpointReference value) {
         this.acksTo = value;
     }
 

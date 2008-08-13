@@ -38,7 +38,6 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.rm.RmVersion;
@@ -57,7 +56,6 @@ import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Calendar;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
  *
@@ -191,12 +189,8 @@ final class Rm10ServerTube extends AbstractRmServerTube {
                         LocalizationMessages.WSRM_1130_MISSING_MESSAGE_HEADER("To", "CreateSequence", requestAdapter.getDestination())), e);
             }
 
-            W3CEndpointReference endpointReference;
             WSEndpointReference wsepr = new WSEndpointReference(dest, configuration.getAddressingVersion());
-            if (configuration.getAddressingVersion() == AddressingVersion.W3C) {
-                endpointReference = (W3CEndpointReference) wsepr.toSpec();
-                accept.setAcksTo(endpointReference);
-            }
+            accept.setAcksTo(wsepr.toSpec());
             crsElement.setAccept(accept);
         }
 

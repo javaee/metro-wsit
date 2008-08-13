@@ -165,7 +165,7 @@ abstract class ClientSession {
         }
         if (inboundSequenceId != null) {
             Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
-            
+
             if (inboundSequence.getLastMessageId() > 0 /*sequence has been used already*/) { // FIXME: create an API method to test this
                 requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
             }
@@ -198,28 +198,30 @@ abstract class ClientSession {
      */
     final void close() {
         try {
-            try {
-                closeOutboundSequence();
-            } catch (RmException ex) {
-                LOGGER.logException(ex, Level.WARNING);
-            } finally {
+            if (outboundSequenceId != null && sequenceManager.isValid(outboundSequenceId)) {
                 try {
-                    sequenceManager.closeSequence(outboundSequenceId);
-                } catch (UnknownSequenceException ex) {
+                    closeOutboundSequence();
+                } catch (RmException ex) {
                     LOGGER.logException(ex, Level.WARNING);
+                } finally {
+                    try {
+                        sequenceManager.closeSequence(outboundSequenceId);
+                    } catch (UnknownSequenceException ex) {
+                        LOGGER.logException(ex, Level.WARNING);
+                    }
                 }
-            }
 
-            try {
-                waitUntilAllRequestsAckedOrTimeout();
-                terminateOutboundSequence();
-            } catch (RmException ex) {
-                LOGGER.logException(ex, Level.WARNING);
-            } finally {
                 try {
-                    sequenceManager.terminateSequence(outboundSequenceId);
-                } catch (UnknownSequenceException ex) {
+                    waitUntilAllRequestsAckedOrTimeout();
+                    terminateOutboundSequence();
+                } catch (RmException ex) {
                     LOGGER.logException(ex, Level.WARNING);
+                } finally {
+                    try {
+                        sequenceManager.terminateSequence(outboundSequenceId);
+                    } catch (UnknownSequenceException ex) {
+                        LOGGER.logException(ex, Level.WARNING);
+                    }
                 }
             }
 

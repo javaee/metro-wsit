@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -117,9 +116,9 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         if (this.configuration.getAddressingVersion() == null) {
             throw new RmRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
         }
-        if (this.configuration.getAddressingVersion() != AddressingVersion.W3C) {
-            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
-        }
+//        if (this.configuration.getAddressingVersion() != AddressingVersion.W3C) {
+//            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
+//        }
 
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager();
         this.requestAdapter = null;

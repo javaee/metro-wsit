@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.protocol;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.EndpointReference;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public abstract class AbstractAcceptType {
      *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    protected abstract W3CEndpointReference getAcksTo();
+    protected abstract EndpointReference getAcksTo();
 
     /**
      * Sets the value of the acksTo property.
@@ -63,7 +63,7 @@ public abstract class AbstractAcceptType {
      *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
      *
      */
-    public abstract void setAcksTo(W3CEndpointReference value);
+    public abstract void setAcksTo(EndpointReference value);
 
     /**
      * Gets the value of the any property.

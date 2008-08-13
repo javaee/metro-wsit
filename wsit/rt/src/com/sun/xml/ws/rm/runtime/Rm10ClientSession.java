@@ -54,7 +54,6 @@ import com.sun.xml.ws.rm.v200502.TerminateSequenceElement;
 import com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.Calendar;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
 
 /**
  *
@@ -71,7 +70,7 @@ final class Rm10ClientSession extends ClientSession {
     @Override
     void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
-        csElement.setAcksTo(new W3CEndpointReference(configuration.getAddressingVersion().anonymousEpr.asSource("AcksTo")));
+        csElement.setAcksTo(configuration.getAddressingVersion().anonymousEpr.toSpec());
 
         if (offerInboundSequenceId != null) {
             Identifier offerIdentifier = new Identifier();

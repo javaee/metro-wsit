@@ -37,7 +37,11 @@ package com.sun.xml.ws.rm;
 
 import com.sun.xml.bind.api.JAXBRIContext;
 
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
@@ -61,8 +65,7 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200502.SequenceAcknowledgementElement.class,
     com.sun.xml.ws.rm.v200502.SequenceElement.class,
     com.sun.xml.ws.rm.v200502.SequenceFaultElement.class,
-    com.sun.xml.ws.rm.v200502.TerminateSequenceElement.class,
-    javax.xml.ws.wsaddressing.W3CEndpointReference.class),
+    com.sun.xml.ws.rm.v200502.TerminateSequenceElement.class),
     
     WSRM11(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
@@ -87,8 +90,7 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200702.TerminateSequenceElement.class,
     com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
-    com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class,
-    javax.xml.ws.wsaddressing.W3CEndpointReference.class);
+    com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class);
     
     private static final RmLogger LOGGER = RmLogger.getLogger(RmVersion.class);
     
@@ -135,7 +137,7 @@ public enum RmVersion {
     public final QName sequenceClosedFaultCode; // since WS-RM 1.1
     public final QName wsrmRequiredFaultCode; // since WS-RM 1.1
 
-    private RmVersion(String nsUri, String policynsuri, Class<?>... classes) {
+    private RmVersion(String nsUri, String policynsuri, Class<?>... rmProtocolClasses) {
         this.namespaceUri = nsUri;
         this.policyNamespaceUri = policynsuri;
 
@@ -169,7 +171,16 @@ public enum RmVersion {
         this.wsrmRequiredFaultCode = new QName(namespaceUri, "WSRMRequired"); // since WS-RM 1.1
 
         try {
-            this.jaxbContext = JAXBRIContext.newInstance(classes, null, null, null, false, null);
+            /**
+             * We need to add all supported WS-A EndpointReference implementation classes to the array
+             * before we pass the array to the JAXBRIContext factory method.
+             */
+            Set<Class<?>> jaxbElementClasses = new HashSet<Class<?>>(Arrays.asList(rmProtocolClasses));
+            for (AddressingVersion av : AddressingVersion.values()) {                
+                jaxbElementClasses.add(av.eprType.eprClass);                
+            }
+            
+            this.jaxbContext = JAXBRIContext.newInstance(jaxbElementClasses.toArray(rmProtocolClasses), null, null, null, false, null);
         } catch (JAXBException e) {
             throw new Error(e);
         }

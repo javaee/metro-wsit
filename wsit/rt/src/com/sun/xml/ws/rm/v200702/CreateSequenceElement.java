@@ -40,7 +40,7 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.wsaddressing.W3CEndpointReference;
+import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +87,7 @@ import javax.xml.bind.annotation.XmlType;
 public class CreateSequenceElement extends AbstractCreateSequence {
 
     @XmlElement(name = "AcksTo", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-    protected W3CEndpointReference acksTo;
+    protected EndpointReference acksTo;
     @XmlElement(name = "Expires", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Expires expires;
     @XmlElement(name = "Offer", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
@@ -101,25 +101,15 @@ public class CreateSequenceElement extends AbstractCreateSequence {
 
     /**
      * Gets the value of the acksTo property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link W3CEndpointReference }
-     *     
      */
-    public W3CEndpointReference getAcksTo() {
+    public EndpointReference getAcksTo() {
         return acksTo;
     }
 
     /**
      * Sets the value of the acksTo property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link W3CEndpointReference }
-     *     
      */
-    public void setAcksTo(W3CEndpointReference value) {
+    public void setAcksTo(EndpointReference value) {
         this.acksTo = value;
     }
 

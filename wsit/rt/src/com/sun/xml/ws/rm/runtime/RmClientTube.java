@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -86,10 +85,9 @@ final class RmClientTube extends AbstractFilterTubeImpl {
 
         // TODO don't take the first config alternative automatically...
         Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];
-        if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
-            // TODO L10N
-            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
-        }
+//        if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
+//            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
+//        }
         
         this.session = ClientSession.create(
                 configuration,
