@@ -84,7 +84,7 @@
         <sequential>
             <delete dir="@{expanddir}"/>
             <mkdir dir="@{expanddir}"/>
-            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{expanddir}"/>
+            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{expanddir}" verbose="true"/>
             <updateManifestWithVersion file="@{expanddir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
             <concatmanifest tempdir="@{expanddir}" manifest="@{expanddir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
