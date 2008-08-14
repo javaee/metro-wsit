@@ -240,8 +240,7 @@
         <antcall target="create-wsit-tools-jar"/>
     </target>
 
-    <target name="create-wsit-integration-zip">
-       <antcall target="create-wsit-jars"/>
+    <target name="create-wsit-integration-zip" depends="create-wsit-jars">
         <property name="wsit.integration.dir" value="${dist.dir}/wsit-integration"/>
         <mkdir dir="${dist.dir}/wsit-integration"/>
 
@@ -270,16 +269,15 @@
             </fileset>
         </copy>
         <zip destfile="${wsit.integration.dir}/wsit-integration.zip">
-                   <fileset dir="${wsit.integration.dir}">
-                       <include name="wsit-rt*.*"/>
-                       <include name="wsit-tools*.*"/>
-                       <include name="xws-security.jar"/>
-                       <include name="*src*"/>
-                       <include name="trust-jaxbbindings.jar"/>
-                       <include name="wstx-*.*"/>
-                   </fileset>
-
-         </zip>
+            <fileset dir="${wsit.integration.dir}">
+               <include name="wsit-rt*.*"/>
+               <include name="wsit-tools*.*"/>
+               <include name="xws-security.jar"/>
+               <include name="*src*"/>
+               <include name="trust-jaxbbindings.jar"/>
+               <include name="wstx-*.*"/>
+            </fileset>
+        </zip>
     </target>
     
     <target name="-post-compile-test"
