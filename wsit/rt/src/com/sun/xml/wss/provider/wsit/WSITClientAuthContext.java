@@ -478,6 +478,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
+            context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();

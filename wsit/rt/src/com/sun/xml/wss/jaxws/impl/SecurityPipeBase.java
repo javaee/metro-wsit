@@ -185,6 +185,10 @@ public abstract class SecurityPipeBase implements Pipe {
     private final QName bsp10Client = new QName("http://schemas.sun.com/2006/03/wss/client","BSP10");
     protected boolean bsp10 = false;
     
+    protected boolean allowMissingTimestamp = false;
+    private final QName allowMissingTSServer = new QName("http://schemas.sun.com/2006/03/wss/server","AllowMissingTimestamp");
+    private final QName allowMissingTSClient = new QName("http://schemas.sun.com/2006/03/wss/client","AllowMissingTimestamp");
+    
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
     
@@ -297,6 +301,7 @@ public abstract class SecurityPipeBase implements Pipe {
         transportOptimization = that.transportOptimization;
         optimized = that.optimized;
         disableIncPrefix = that.disableIncPrefix;
+        allowMissingTimestamp = that.allowMissingTimestamp;
         encHeaderContent = that.encHeaderContent;
         issuedTokenContextMap = that.issuedTokenContextMap;
         secEnv = that.secEnv;
@@ -374,6 +379,7 @@ public abstract class SecurityPipeBase implements Pipe {
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
             context.setBSP(bsp10);
+            context.setAllowMissingTimestamp(allowMissingTimestamp);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
         } catch(XWSSecurityException xwse){
@@ -415,6 +421,7 @@ public abstract class SecurityPipeBase implements Pipe {
         context.setDisableIncPrefix(disableIncPrefix);
         context.setEncHeaderContent(encHeaderContent);
         context.setBSP(bsp10);
+        context.setAllowMissingTimestamp(allowMissingTimestamp);
         //  context.setJAXWSMessage(message, soapVersion);
         if(debug){
             try {
@@ -709,6 +716,9 @@ public abstract class SecurityPipeBase implements Pipe {
                 }
                 if(endpointPolicy.contains(bsp10Client) || endpointPolicy.contains(bsp10Server)){
                     bsp10 = true;
+                }
+                if(endpointPolicy.contains(allowMissingTSClient) || endpointPolicy.contains(allowMissingTSServer)){
+                    allowMissingTimestamp = true;
                 }
                 if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
