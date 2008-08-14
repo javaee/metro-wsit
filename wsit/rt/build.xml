@@ -311,6 +311,7 @@
     <target name="expand-jars-v3-api" unless="runtime.jars.expanded">
         <expand-api-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${apijar-tmpdir-v3}">
             <expandfiles>
+                <include name="jaxr-api.jar"/>
                 <exclude name="jaxb-api.jar"/>
             </expandfiles>
         </expand-api-jars-macro>
