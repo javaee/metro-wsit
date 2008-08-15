@@ -193,25 +193,10 @@
         </zip>
     </target>
     
-    <target name="wsit-jars-tools">
-        <delete dir="${build.expand.dir}"/>
-        <mkdir dir="${build.expand.dir}/META-INF"/>
-        <property name="wsit.tools.dir" value="${tools.dir}/build"/>
-        <property name="wsit.tools.jarname" value="wsit-tools"/>
-        <mkdir dir="${wsit.tools.dir}"/>
-        
-        <updateManifestWithVersion file="${build.expand.dir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
-        <jar destfile="${wsit.tools.dir}/${wsit.tools.jarname}.jar" manifest="${build.expand.dir}/MANIFEST.MF">
-            <fileset dir="${tools.dir}/build/classes"/>
-        </jar>
-    </target>
-
     <target name="-post-compile-test" depends="init,test.resources.copy">
     </target>
 
     <target name="-post-compile-test-single" depends="init,test.resources.copy">
     </target>
-    
-    <target name="create-wsit-tools-jar" depends="wsit-jars-tools"/>
     
 </project>

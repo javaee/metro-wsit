@@ -406,37 +406,6 @@
         </zip>
     </target>
 
-    <target name="-post-compile-test" depends="init,test.resources.copy,test.services.copy">
-    </target>
-
-    <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
-    </target>
-
-    <target name="create-wsit-runtime-jar" depends="wsit-jars-runtime, create-wstx-war"/>
-
-    <target name="wsit-jars-runtime">
-        <delete dir="${tmpdir}"/>
-        <mkdir dir="${tmpdir}/META-INF/services"/>
-        <property name="wsit.rt.dir" value="${rt.dir}/build"/>
-        <property name="wsit.rt.jarname" value="wsit-rt"/>
-        <mkdir dir="${wsit.rt.dir}"/>
-        <updateManifestWithVersion file="${tmpdir}/MANIFEST.MF" />
-
-        <!-- include wsdl files for wstx resource lookups -->        
-        <include-wstx-resources/>
-
-        <jar destfile="${wsit.rt.dir}/${wsit.rt.jarname}.jar" manifest="${tmpdir}/MANIFEST.MF">
-            <metainf dir="../etc/META-INF">
-                <include name="services/*.*"/>
-                <exclude name="services/*.TJavaGeneratorExtension"/>
-                <exclude name="services/*.TWSDLExtensionHandler"/>
-            </metainf>
-            <fileset dir="${rt.dir}/build/classes"/>
-            <fileset dir="${tx.tmp}"/>
-        </jar>
-
-    </target>
-
     <target name="create-wstx-war" depends="init" description="create wstx webservices war file">
         <property name="wstx.tmp" value="${build.dir}/wstx-tmp"/>
         <delete dir="${wstx.tmp}"/>
@@ -450,4 +419,10 @@
         </war>
     </target>
     
+    <target name="-post-compile-test" depends="init,test.resources.copy,test.services.copy">
+    </target>
+
+    <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
+    </target>
+
 </project>

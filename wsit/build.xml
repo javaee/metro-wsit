@@ -228,55 +228,33 @@
       <ant antfile="run-ql-tests.xml"/>
     </target>
 
-    <target name="create-wsit-runtime-jar">
-        <ant dir="${rt.dir}" target="create-wsit-runtime-jar"/>
-    </target>
-     <target name="create-wsit-tools-jar">
-        <ant dir="${tools.dir}" target="create-wsit-tools-jar"/>
-    </target>
+    <target name="create-wsit-integration-zip" depends="jar, src-zip">
+        <property name="metro.integration.dir" value="${dist.dir}/metro-integration"/>
+        <delete dir="${dist.dir}/metro-integration" quiet="true"/>
+        <mkdir dir="${dist.dir}/metro-integration"/>
 
-    <target name="create-wsit-jars" depends="jar,src-zip" >
-        <antcall target="create-wsit-runtime-jar"/>
-        <antcall target="create-wsit-tools-jar"/>
-    </target>
-
-    <target name="create-wsit-integration-zip" depends="create-wsit-jars">
-        <property name="wsit.integration.dir" value="${dist.dir}/wsit-integration"/>
-        <mkdir dir="${dist.dir}/wsit-integration"/>
-
-        <copy todir="${wsit.integration.dir}" >
-            <fileset dir="${dist.image.wsit.dir}">
-                <include name="wstx-services.war"/>
-            </fileset>
+        <copy todir="${metro.integration.dir}" >
+            <fileset dir="${dist.image.wsit.lib.dir}"/>
         </copy>
-        <copy todir="${wsit.integration.dir}" >
+        <copy todir="${metro.integration.dir}" >
             <fileset dir="${rt.dir}/build">
-                <include name="wsit-*.*"/>
                 <include name="*src.zip"/>
             </fileset>
         </copy>
-        <copy todir="${wsit.integration.dir}" >
+        <copy todir="${metro.integration.dir}" >
             <fileset dir="${tools.dir}/build/">
-                <include name="wsit-*.*"/>
                 <include name="*src.zip"/>
             </fileset>
         </copy>
-        <copy todir="${wsit.integration.dir}">
+        <copy todir="${metro.integration.dir}">
             <fileset dir="${lib.runtime.dir}">
                 <include name="xws-security.jar"/>
                 <include name="trust-jaxbbindings.jar"/>
                 <include name="secconv-jaxbbindings.jar"/>
             </fileset>
         </copy>
-        <zip destfile="${wsit.integration.dir}/wsit-integration.zip">
-            <fileset dir="${wsit.integration.dir}">
-               <include name="wsit-rt*.*"/>
-               <include name="wsit-tools*.*"/>
-               <include name="xws-security.jar"/>
-               <include name="*src*"/>
-               <include name="trust-jaxbbindings.jar"/>
-               <include name="wstx-*.*"/>
-            </fileset>
+        <zip destfile="${metro.integration.dir}/metro-integration.zip">
+            <fileset dir="${metro.integration.dir}"/>
         </zip>
     </target>
     
