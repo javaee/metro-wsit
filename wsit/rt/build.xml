@@ -188,7 +188,7 @@
             description="Hook resgen target into single file compilation process"/>
 
     <target name="-do-jar-without-manifest">
-        <available file="${tmpdir}" type="dir" property="runtime.jars.expanded"/>
+        <available file="${rtjar-tmpdir}" type="dir" property="runtime.jars.expanded"/>
         <antcall target="expand-jars-runtime"/>
         <antcall target="expand-jars-v3-runtime"/>
         <antcall target="combine-jars-runtime"/>
@@ -391,18 +391,19 @@
         </copy>
     </target>
 
-    <target name="src-zip">
-        <delete dir="${tmpdir}"/>
-        <mkdir dir="${tmpdir}"/>
-        <unzip dest="${tmpdir}">
+    <target name="src-zip" depends="init">
+        <property name="build.src.dir" value="${build.dir}/src"/>
+        <delete dir="${build.src.dir}" quiet="true"/>
+        <mkdir dir="${build.src.dir}"/>
+        <unzip dest="${build.src.dir}">
             <fileset dir="../${lib.runtime.dir}" includes="*src.zip"/>
         </unzip>
-        <delete file="${tmpdir}/*.txt"/>
-        <delete dir="${tmpdir}/META-INF" includeemptydirs="true"/>
+        <delete file="${build.src.dir}/*.txt"/>
+        <delete dir="${build.src.dir}/META-INF" includeemptydirs="true"/>
         <zip destfile="${build.dir}/${name}-src.zip">
             <fileset dir="src"/>
             <fileset dir="${build.gen-src.dir}"/>
-            <fileset dir="${tmpdir}"/>
+            <fileset dir="${build.src.dir}"/>
         </zip>
     </target>
 

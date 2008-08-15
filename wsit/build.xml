@@ -228,7 +228,7 @@
       <ant antfile="run-ql-tests.xml"/>
     </target>
 
-    <target name="create-wsit-integration-zip" depends="jar, src-zip"
+    <target name="create-wsit-integration-zip" depends="dist, src-zip"
             description="Create an archive dist/metro-integration/metro-integration.zip
                 that contains all libraries and their source code that go into the Metro
                 stack. Right now this target is not entirely accomplishing this task

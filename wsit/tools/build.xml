@@ -47,7 +47,9 @@
     <property name="build.dir" value="${basedir}/build"/>
     <property name="build.gen-src.dir" value="${build.dir}/gen-src"/>
     <property name="build.expand.dir" value="${build.dir}/expand"/>
+    <property name="build.manifest.dir" value="${build.dir}/manifest"/>
     <property name="build.expand.v3.dir" value="${build.dir}/expand-v3"/>
+    <property name="build.manifest.v3.dir" value="${build.dir}/manifest-v3"/>
     
     <target name="resgen" depends="init"
             description="Generate class wrappers for all property files that contain localizable messages">
@@ -79,14 +81,18 @@
     <macrodef name="expand-jars-macro">
         <attribute name="libdir"/>
         <attribute name="expanddir" default="${build.expand.dir}"/>
+        <attribute name="manifestdir" default="${build.manifest.dir}"/>
+        <element name="updatemanifest" optional="true"/>
         <element name="expandfiles" optional="true"/>
         <element name="metainf" optional="true"/>
         <sequential>
-            <delete dir="@{expanddir}"/>
+            <delete dir="@{expanddir}" quiet="true"/>
             <mkdir dir="@{expanddir}"/>
-            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{expanddir}"/>
-            <updateManifestWithVersion file="@{expanddir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
-            <concatmanifest tempdir="@{expanddir}" manifest="@{expanddir}/MANIFEST.MF">
+            <delete dir="@{manifestdir}" quiet="true"/>
+            <mkdir dir="@{manifestdir}"/>
+            <copy file="${basedir}/${etc.metainf.dir}/MANIFEST.MF" todir="@{manifestdir}"/>
+            <updatemanifest/>
+            <concatmanifest tempdir="@{expanddir}" manifest="@{manifestdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <exclude name="*javadocs*.jar"/>
@@ -100,13 +106,14 @@
     
     <macrodef name="combine-jars-macro">
         <attribute name="expanddir" default="${build.expand.dir}"/>
+        <attribute name="manifestdir" default="${build.manifest.dir}"/>
         <attribute name="destdir" default="../${dist.image.wsit.lib.dir}"/>
         <attribute name="classesdir"/>
         <attribute name="jarname"/>
         <element name="services" optional="true"/>
         <sequential>
             <mkdir dir="@{destdir}"/>
-            <jar destfile="@{destdir}/@{jarname}.jar" manifest="@{expanddir}/MANIFEST.MF">
+            <jar destfile="@{destdir}/@{jarname}.jar" manifest="@{manifestdir}/MANIFEST.MF">
                 <services/>
                 <fileset dir="@{classesdir}"/>
             </jar>
@@ -123,6 +130,9 @@
     
     <target name="expand-jars-tooltime" unless="tooltime.jars.expanded">
         <expand-jars-macro libdir="../${lib.tooltime.dir}">
+            <updatemanifest>
+                <updateManifestWithVersion file="${build.manifest.dir}/MANIFEST.MF" class-path="webservices-rt.jar"/>
+            </updatemanifest>
             <metainf>
                 <copy todir="${build.expand.dir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
@@ -134,7 +144,7 @@
     </target>
     
     <target name="expand-jars-v3-tooltime" unless="tooltime.jars.expanded">
-        <expand-jars-macro libdir="../${lib.tooltime.dir}" expanddir="${build.expand.v3.dir}">
+        <expand-jars-macro libdir="../${lib.tooltime.dir}" expanddir="${build.expand.v3.dir}" manifestdir="${build.manifest.v3.dir}">
             <expandfiles>
                 <exclude name="jaxb*.jar"/>
             </expandfiles>
@@ -160,6 +170,7 @@
 
     <target name="combine-jars-v3-tooltime">
         <combine-jars-macro expanddir="${build.expand.v3.dir}"
+                            manifestdir="${build.manifest.v3.dir}"
                             destdir="${basedir}/${osgi.build.dir}"
                             jarname="${name}-tools" classesdir="build/classes">
             <services>
@@ -178,18 +189,19 @@
         </copy>
     </target>
     
-    <target name="src-zip">
-        <delete dir="${build.expand.dir}"/>
-        <mkdir dir="${build.expand.dir}"/>
-        <unzip dest="${build.expand.dir}">
+    <target name="src-zip" depends="init">
+        <property name="build.src.dir" value="${build.dir}/src"/>
+        <delete dir="${build.src.dir}" quiet="true"/>
+        <mkdir dir="${build.src.dir}"/>
+        <unzip dest="${build.src.dir}">
             <fileset dir="../${lib.tooltime.dir}" includes="*src.zip"/>
         </unzip>
-        <delete file="${build.expand.dir}/*.txt"/>
-        <delete dir="${build.expand.dir}/META-INF" includeemptydirs="true"/>
+        <delete file="${build.src.dir}/*.txt"/>
+        <delete dir="${build.src.dir}/META-INF" includeemptydirs="true"/>
         <zip destfile="${build.dir}/${name}-tools-src.zip">
             <fileset dir="src"/>
             <fileset dir="${build.gen-src.dir}"/>
-            <fileset dir="${build.expand.dir}"/>
+            <fileset dir="${build.src.dir}"/>
         </zip>
     </target>
     
