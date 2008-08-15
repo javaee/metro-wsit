@@ -228,7 +228,12 @@
       <ant antfile="run-ql-tests.xml"/>
     </target>
 
-    <target name="create-wsit-integration-zip" depends="jar, src-zip">
+    <target name="create-wsit-integration-zip" depends="jar, src-zip"
+            description="Create an archive dist/metro-integration/metro-integration.zip
+                that contains all libraries and their source code that go into the Metro
+                stack. Right now this target is not entirely accomplishing this task
+                and only bundles the combined webservices-*.jar instead of the individual
+                libraries that went into these jars.">
         <property name="metro.integration.dir" value="${dist.dir}/metro-integration"/>
         <delete dir="${dist.dir}/metro-integration" quiet="true"/>
         <mkdir dir="${dist.dir}/metro-integration"/>
