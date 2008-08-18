@@ -3,17 +3,34 @@ Bundle-Name: metro
 Export-Package: \
   com.sun.tools.ws.spi;version=2.1.4, \
   com.sun.tools.ws.util.xml;version=2.1.4, \
+  com.sun.xml.fastinfoset.sax;version=@RELEASE_VERSION@, \
+  com.sun.xml.fastinfoset.stax;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.api;version=2.1.4, \
   com.sun.xml.ws.api.*;version=2.1.4, \
+  com.sun.xml.ws.assembler;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.developer;version=2.1.4, \
   com.sun.xml.ws.spi;version=2.1.4, \
   com.sun.xml.ws.assembler;version=2.1.4, \
   com.sun.xml.ws.transport.http;version=2.1.4, \
   com.sun.xml.ws.transport.http.servlet;version=2.1.4, \
-  javax.jws;version=2.0, \
   javax.xml.registry;version=1.0, \
   javax.xml.registry.*;version=1.0, \
-  javax.xml.soap;version=1.3, \
-  javax.xml.ws;version=2.1
+  javax.xml.ws;version=2.1, \
+  org.jvnet.fastinfoset;version=@RELEASE_VERSION@, \
+  org.jvnet.staxex;version=@RELEASE_VERSION@
+Import-Package: \
+  com.sun.enterprise.security.*;resolution:=optional, \
+  com.sun.enterprise.transaction.*;resolution:=optional, \
+  com.sun.enterprise.web.*;resolution:=optional, \
+  com.sun.enterprise.webservice;resolution:=optional, \
+  com.sun.enterprise.webservice.monitoring;resolution:=optional, \
+  com.sun.mail.util;resolution:=optional, \
+  com.sun.msv.*;resolution:=optional, \
+  com.sun.xml.bind.serializer;resolution:=optional, \
+  com.sun.xml.bind.validator;resolution:=optional, \
+  com.sun.xml.rpc.*;resolution:=optional, \
+  com.sun.xml.ws.spi.runtime;resolution:=optional, \
+  org.iso_relax.verifier.impl;resolution:=optional, \
+  org.relaxng.datatype;resolution:=optional, \
+  *
 Private-Package: *
-Import-Package: *;resolution:=optional
