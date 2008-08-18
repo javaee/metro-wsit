@@ -16,6 +16,8 @@ Export-Package: \
   javax.xml.registry;version=1.0, \
   javax.xml.registry.*;version=1.0, \
   javax.xml.ws;version=2.1, \
+  javax.jws;version=@RELEASE_VERSION@, \
+  javax.jws.soap;version=@RELEASE_VERSION@, \
   org.jvnet.fastinfoset;version=@RELEASE_VERSION@, \
   org.jvnet.staxex;version=@RELEASE_VERSION@
 Import-Package: \
