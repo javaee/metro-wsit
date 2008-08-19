@@ -20,10 +20,13 @@ Export-Package: \
   javax.jws.soap;version=@RELEASE_VERSION@, \
   com.sun.xml.messaging.saaj.soap;version=1.3, \
   com.sun.xml.ws.rm.policy.spi_impl;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.rm.policy.assertion;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.tx.common;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.addressing.policy;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.encoding.policy;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.policy.jaxws;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.policy;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.policy.spi;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.security.impl.policy;version=@RELEASE_VERSION@, \
   org.jvnet.fastinfoset;version=@RELEASE_VERSION@, \
   org.jvnet.staxex;version=@RELEASE_VERSION@
