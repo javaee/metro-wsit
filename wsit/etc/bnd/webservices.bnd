@@ -24,10 +24,12 @@ Export-Package: \
   com.sun.xml.ws.tx.common;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.addressing.policy;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.encoding.policy;version=@RELEASE_VERSION@, \
-  com.sun.xml.ws.policy.jaxws;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.policy;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.policy.jaxws;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.policy.jcaps;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.policy.spi;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.security.impl.policy;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.transport.tcp.wsit;version=@RELEASE_VERSION@, \
   org.jvnet.fastinfoset;version=@RELEASE_VERSION@, \
   org.jvnet.staxex;version=@RELEASE_VERSION@
 Import-Package: \
