@@ -199,6 +199,10 @@ public abstract class WSITAuthContextBase  {
     private final QName allowMissingTSServer = new QName("http://schemas.sun.com/2006/03/wss/server","AllowMissingTimestamp");
     private final QName allowMissingTSClient = new QName("http://schemas.sun.com/2006/03/wss/client","AllowMissingTimestamp");
     
+    protected boolean securityMUValue = true;
+    private final QName unsetSecurityMUValueServer = new QName("http://schemas.sun.com/2006/03/wss/server","UnsetSecurityMUValue");
+    private final QName unsetSecurityMUValueClient = new QName("http://schemas.sun.com/2006/03/wss/client","UnsetSecurityMUValue");
+    
     //static JAXBContext used across the Pipe
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
@@ -373,7 +377,10 @@ public abstract class WSITAuthContextBase  {
                 }
                 if(endpointPolicy.contains(allowMissingTSClient) || endpointPolicy.contains(allowMissingTSServer)){
                     allowMissingTimestamp = true;
-                }                
+                }  
+                if(endpointPolicy.contains(unsetSecurityMUValueClient) || endpointPolicy.contains(unsetSecurityMUValueServer)){
+                    securityMUValue = false;
+                } 
                 if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
                     spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
                     wsscVer = WSSCVersion.WSSC_10;
@@ -1119,6 +1126,7 @@ public abstract class WSITAuthContextBase  {
             ((JAXBFilterProcessingContext)ctx).setDisableIncPrefix(disableIncPrefix);
             ((JAXBFilterProcessingContext)ctx).setEncHeaderContent(encHeaderContent);
             ((JAXBFilterProcessingContext)ctx).setAllowMissingTimestamp(allowMissingTimestamp);
+            ((JAXBFilterProcessingContext)ctx).setMustUnderstandValue(securityMUValue);        
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -1421,6 +1429,7 @@ public abstract class WSITAuthContextBase  {
             ((JAXBFilterProcessingContext)ctx).setDisableIncPrefix(disableIncPrefix);
             ((JAXBFilterProcessingContext)ctx).setEncHeaderContent(encHeaderContent);
             ((JAXBFilterProcessingContext)ctx).setAllowMissingTimestamp(allowMissingTimestamp);
+            ((JAXBFilterProcessingContext)ctx).setMustUnderstandValue(securityMUValue);    
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
@@ -1559,10 +1568,11 @@ public abstract class WSITAuthContextBase  {
         try{
             JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
             context.setSOAPVersion(soapVersion);
+            context.setAllowMissingTimestamp(allowMissingTimestamp);
+            context.setMustUnderstandValue(securityMUValue);
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
-            context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();

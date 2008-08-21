@@ -412,6 +412,8 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"DisablePayloadBuffering"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"AllowMissingTimestamp"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"AllowMissingTimestamp"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"UnsetSecurityMUValue"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"UnsetSecurityMUValue"));
         // newly added by M.P.
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"KeyStore"));
         supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"TrustStore"));

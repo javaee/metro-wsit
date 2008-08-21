@@ -441,6 +441,9 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","AllowMissingTimestamp"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","AllowMissingTimestamp"));
         
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","UnsetSecurityMUValue"));
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","UnsetSecurityMUValue"));
+        
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,CallbackHandler));
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,KeyStore));
         //supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,TrustStore));

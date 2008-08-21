@@ -475,10 +475,11 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         try {
             JAXBFilterProcessingContext context = (JAXBFilterProcessingContext) ctx;
             context.setSOAPVersion(soapVersion);
+            context.setAllowMissingTimestamp(allowMissingTimestamp);
+            context.setMustUnderstandValue(securityMUValue);
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
-            context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setEncHeaderContent(encHeaderContent);
             SecurityAnnotator.secureMessage(context);
             return context.getJAXWSMessage();
