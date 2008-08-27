@@ -449,8 +449,8 @@
 
     cdmetro
     export UC2_DIST=$HOME/sandbox/java.net/uc2/project/build/dist/darwin-universal
-    export LD_LIBRARY_PATH=$DIST/pkg/python2.4-minimal/lib
-    export PYTHONPATH=$DIST/pkg/vendor-packages:`pwd`
+    export LD_LIBRARY_PATH=$UC2_DIST/pkg/python2.4-minimal/lib
+    export PYTHONPATH=$UC2_DIST/pkg/vendor-packages:`pwd`
 
     -->
 
