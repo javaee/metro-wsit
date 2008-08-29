@@ -91,7 +91,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <attachArtifact file="../dist/image/metro/for_v3/webservices.jar" classifier="osgi"/>
+                                <attachArtifact file="../../dist/image/metro/for_v3/webservices.jar" classifier="osgi"/>
                             </tasks>
                         </configuration>
                     </execution>
