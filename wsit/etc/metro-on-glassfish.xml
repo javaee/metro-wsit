@@ -57,14 +57,10 @@
         <os family="unix"/>
     </condition>
 
-    <target name="init" if="notInstalled" description="Backup existing WSIT jars and tool scripts">
-        <mkdir dir="${backup.dir}"/>
-        <copy todir="${backup.dir}" failonerror="false">
-            <fileset dir="${as.lib.home}" includes="webservices-rt.jar, webservices-tools.jar"/>
-            <fileset dir="${as.lib.home}/endorsed" includes="webservices-api.jar"/>
-        </copy>
-    </target>
-
+    <condition property="glassfish-v3">
+        <available file="${as.home}/modules" type="dir"/>
+    </condition>
+ 
     <condition property="jdk6">
         <contains substring="1.6.0" string="${java.version}"/>
     </condition>
@@ -72,14 +68,14 @@
     <condition property="endorsed-api-flagged">
         <equals arg1="${install.api}" arg2="true"/>
     </condition>
- 
+
     <target name="jdk6-message" if="jdk6">
-        <echo message="NOTE: WSIT is being installed using JDK6."/>
+        <echo message="NOTE: Metro is being installed using JDK6."/>
         <echo/>
         <echo message="  The file 'web-services-api.jar' must be installed"/>
-        <echo message="  into $JAVA_HOME/lib/endorsed for WSIT to prevent"/>
+        <echo message="  into $JAVA_HOME/lib/endorsed for Metro to prevent"/>
         <echo message="  conflicts between the JAX-WS 2.0 classes"/>
-        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
+        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with Metro."/>
         <echo/>
         <echo message="  You must have write-permissions on the JDK 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>
@@ -90,9 +86,31 @@
         <echo message="  webservices-api.jar into the 'endorsed' directory."/>
         <echo/>
     </target>
-    
-    <target name="install" depends="init" description="Install latest WSIT jars">
-        <echo message="Installing WSIT @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
+
+    <target name="gfv3-message" if="glassfish-v3">
+        <echo message="NOTE: This script can only install Metro on GlassFish V2."/>
+        <echo/>
+        <echo message="  Please use the update center to install Metro on GlassFish V3:"/>
+        <echo message="  https://glassfish.dev.java.net/downloads/quickstart/v3-preview2.html"/>
+        <echo/>
+    </target>
+
+    <target name="gfv3-checkpoint" if="glassfish-v3">
+        <antcall target="gfv3-message"/>
+        <fail message="It looks like you are trying to install Metro on GlassFish V3. Please use the update center."/>
+    </target>
+
+    <target name="init" if="notInstalled" depends="gfv3-checkpoint"
+            description="Backup existing Metro jars and tool scripts">
+        <mkdir dir="${backup.dir}"/>
+        <copy todir="${backup.dir}" failonerror="false">
+            <fileset dir="${as.lib.home}" includes="webservices-rt.jar, webservices-tools.jar"/>
+            <fileset dir="${as.lib.home}/endorsed" includes="webservices-api.jar"/>
+        </copy>
+    </target>
+
+    <target name="install" depends="init" description="Install latest Metro jars">
+        <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib">
@@ -109,7 +127,8 @@
         <echo message="... installation complete."/>
     </target>
 
-    <target name="install-api" if="jdk6" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
+    <target name="install-api" if="jdk6" depends="gfv3-checkpoint"
+            description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
         <mkdir dir="${java.home}/lib/endorsed"/>
         <copy toDir="${java.home}/lib/endorsed" overwrite="true">
             <fileset dir="lib">
@@ -119,8 +138,9 @@
     </target>
 
     <target name="uninstall" unless="notInstalled"
-            description="Restore original WSIT jars and tool scripts">
-        <echo message="Uninstalling WSIT @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
+            depends="gfv3-checkpoint"
+            description="Restore original Metro jars and tool scripts">
+        <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}" includes="webservices-rt.jar, webservices-tools.jar"/>
@@ -141,15 +161,17 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs WSIT @release.impl.version@ @release.impl.version.suffix@ on GlassFish v2"/>
+        <echo message="  Installs Metro @release.impl.version@ @release.impl.version.suffix@ on GlassFish v2"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls WSIT @release.impl.version@ @release.impl.version.suffix@ from GlassFish v2"/>
+        <echo message="  Uninstalls Metro @release.impl.version@ @release.impl.version.suffix@ from GlassFish v2"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>
         <echo message="Usage:"/>
         <echo message="  ant -f metro-on-glassfish.xml {install,uninstall}"/>
         <antcall target="jdk6-message"/>
+        <antcall target="gfv3-message"/>
     </target>
+
 </project>
