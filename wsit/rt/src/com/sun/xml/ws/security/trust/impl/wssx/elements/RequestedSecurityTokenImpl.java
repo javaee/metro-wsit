@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.3 2008-02-26 06:33:29 ofung Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.3.4.1 2008-09-02 17:50:41 jdg6688 Exp $
  */
 
 /*
@@ -53,6 +53,7 @@ import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.RequestedSecurityTokenType;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
@@ -103,7 +104,8 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             }*/
             else{
                 setAny(rdstEle);
-                containedToken = new GenericToken((Element)rdstEle.getValue());
+                Element token = (new WSTrustElementFactoryImpl()).toElement(rdstEle);
+                containedToken = new GenericToken(token);
             }
         }
         else{

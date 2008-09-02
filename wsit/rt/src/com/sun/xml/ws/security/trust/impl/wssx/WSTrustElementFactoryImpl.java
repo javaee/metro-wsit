@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.16.2.2 2008-07-31 22:37:20 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.16.2.3 2008-09-02 17:50:41 jdg6688 Exp $
  */
 
 /*
@@ -827,6 +827,21 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)bs);
             getMarshaller().marshal(bsElement, doc);
+            return doc.getDocumentElement();
+            
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+    }
+    
+    public Element toElement(JAXBElement jaxbEle){
+        try{
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.newDocument();
+        
+            getMarshaller().marshal(jaxbEle, doc);
             return doc.getDocumentElement();
             
         } catch (Exception ex) {

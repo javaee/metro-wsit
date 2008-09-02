@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.25.2.1 2008-07-16 21:34:59 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.25.2.2 2008-09-02 17:50:41 jdg6688 Exp $
  */
 
 /*
@@ -896,6 +896,21 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
             throw new RuntimeException(LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
+        }
+    }
+    
+    public Element toElement(JAXBElement jaxbEle){
+        try{
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.newDocument();
+        
+            getMarshaller().marshal(jaxbEle, doc);
+            return doc.getDocumentElement();
+            
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
         }
     }
     
