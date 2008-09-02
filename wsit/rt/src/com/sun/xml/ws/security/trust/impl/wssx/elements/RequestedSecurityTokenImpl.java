@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.3 2008-02-26 06:33:29 ofung Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.4 2008-09-02 18:12:59 jdg6688 Exp $
  */
 
 /*
@@ -60,6 +60,8 @@ import com.sun.xml.ws.security.secconv.impl.wssx.elements.SecurityContextTokenIm
 import com.sun.xml.ws.security.secconv.impl.wssx.bindings.SecurityContextTokenType;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
+import com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl;
+
 import com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType;
 
@@ -86,7 +88,7 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
     public RequestedSecurityTokenImpl() {
     }
     
-    public RequestedSecurityTokenImpl(RequestedSecurityTokenType rdstType){
+     public RequestedSecurityTokenImpl(RequestedSecurityTokenType rdstType){
         Object rdst = rdstType.getAny();
         if (rdst instanceof JAXBElement){
             JAXBElement rdstEle = (JAXBElement)rdst; 
@@ -103,7 +105,8 @@ public class RequestedSecurityTokenImpl extends RequestedSecurityTokenType imple
             }*/
             else{
                 setAny(rdstEle);
-                containedToken = new GenericToken((Element)rdstEle.getValue());
+                Element token = (new WSTrustElementFactoryImpl()).toElement(rdstEle);
+                containedToken = new GenericToken(token);
             }
         }
         else{
