@@ -60,44 +60,52 @@
 	There are 2 ways to designate a tomcat build.
     -->
     <condition property="bld.for.tomcat" value="true">
-          <or>
-	     <and>
-                 <not><isset property="as.home"/></not>
-                 <isset property="catalina.home"/>
-             </and>
+        <or>
+            <and>
+                <not>
+                    <isset property="as.home"/>
+                </not>
+                <isset property="catalina.home"/>
+            </and>
 
-             <and> 
-                 <isset property="as.home"/> 
-                 <isset property="catalina.home"/>
-                 <isset property="use.tomcat"/>
-             </and>
-          </or>
+            <and>
+                <isset property="as.home"/>
+                <isset property="catalina.home"/>
+                <isset property="use.tomcat"/>
+            </and>
+        </or>
     </condition>
-    
-    <!--  
+
+    <!--
         Verify that one of the two supported containers is identified
         for use.  If these are not set correctly lib.home and deploy.dir
         will not be correct and all elements that use them will not be correct.
     -->
     <fail message="Web container not identified. Require AS_HOME or CATALINA_HOME be set" >
-          <condition >
-              <and> 
-                  <not><isset property="as.home"/></not> 
-                  <not><isset property="catalina.home"/></not>
-              </and>
-          </condition>
-      </fail> 
-   <fail message="Two Web containers identified. Only one allowed AS_HOME or CATALINA_HOME" >
-      <condition>
-          <and> 
-              <isset property="as.home"/> 
-              <isset property="catalina.home"/>
-              <not><isset property="use.tomcat"/></not>
-          </and>
-      </condition>
-   </fail>
-    
-   
+        <condition >
+            <and>
+                <not>
+                    <isset property="as.home"/>
+                </not>
+                <not>
+                    <isset property="catalina.home"/>
+                </not>
+            </and>
+        </condition>
+    </fail>
+    <fail message="Two Web containers identified. Only one allowed AS_HOME or CATALINA_HOME" >
+        <condition>
+            <and>
+                <isset property="as.home"/>
+                <isset property="catalina.home"/>
+                <not>
+                    <isset property="use.tomcat"/>
+                </not>
+            </and>
+        </condition>
+    </fail>
+
+
     <condition property="lib.home" value="${catalina.home}/shared/lib" else="${as.home}/lib">
         <isset property="bld.for.tomcat"/>
     </condition>
@@ -108,8 +116,8 @@
 
     <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
         <isset property="bld.for.tomcat"/>
-    </condition> 
- 
+    </condition>
+
     <path id="wsit.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
         <fileset dir="${lib.home}">
@@ -172,13 +180,13 @@
 
     <target name="create-war">
         <war warfile="${war.file}" webxml="etc/web.xml">
-    	      <webinf dir="${basedir}/etc" includes="sun-jaxws.xml"/>
-              <webinf file="${basedir}/etc/wsit-fromjava.server.AddNumbersImpl.xml"/>
-    	      <zipfileset
+            <webinf dir="${basedir}/etc" includes="sun-jaxws.xml"/>
+            <webinf file="${basedir}/etc/wsit-fromjava.server.AddNumbersImpl.xml"/>
+            <zipfileset
                 dir="${basedir}/etc"
                 includes="*.wsdl, *.xsd"
                 prefix="WEB-INF/wsdl"/>
-    	      <classes dir="${build.classes.home}"/>
+            <classes dir="${build.classes.home}"/>
         </war>
     </target>
 
