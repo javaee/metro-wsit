@@ -416,8 +416,8 @@ application archive (WAR) file.<br>
 The <span style="font-family: monospace;">metro</span>
 directory also
 contains two <span style="font-family: monospace;">ant</span> files, <span
- style="font-family: monospace;">wsit-on-glassfish.xml</span> and <span
- style="font-family: monospace;">wsit-on-tomcat.xml</span>. These
+ style="font-family: monospace;">metro-on-glassfish.xml</span> and <span
+ style="font-family: monospace;">metro-on-tomcat.xml</span>. These
 two files are used to install the WSIT binaries into the respective web
 containers. That procedure is explained next.<br>
 <br>
@@ -444,7 +444,7 @@ cd dist/image/metro<br>
 </a></span><span style="font-family: monospace;"><a
  name="Installing_On_GlassFish">ant
 -Das.home=&lt;GlassFish install
-directory&gt; -f wsit-on-glassfish.xml install<br>
+directory&gt; -f metro-on-glassfish.xml install<br>
 </a></span><span style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;"><a name="Installing_On_GlassFish">asadmin
 start-domain domain1</a></span><a name="Installing_On_GlassFish"><br>
@@ -479,7 +479,7 @@ cd dist/image/metro</a></span><a
  style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;"><a name="Installing_On_Tomcat">ant
 -Dtomcat.home=&lt;tomcat install
-directory&gt; -f wsit-on-tomcat.xml install<br>
+directory&gt; -f metro-on-tomcat.xml install<br>
 </a></span><span style="font-family: monospace;"><a
  name="Installing_On_Tomcat">catalina.sh start</a></span><a
  name="Installing_On_Tomcat"><br>
@@ -520,7 +520,7 @@ stop-domain domain1</span><br>
 <span style="font-family: monospace;"></span><span
  style="font-family: monospace;">ant
 -Das.home=&lt;GlassFish install
-directory&gt; -f wsit-on-glassfish.xml uninstall</span><br>
+directory&gt; -f metro-on-glassfish.xml uninstall</span><br>
 <span style="font-family: monospace;"></span><span
  style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;">asadmin start-domain domain1</span><br>
@@ -535,7 +535,7 @@ cd dist/image/metro</span><br>
 <div style="margin-left: 40px;"><span
  style="font-weight: bold; font-family: monospace;"></span><span
  style="font-family: monospace;">ant -Dtomcat.home=&lt;tomcat install
-directory&gt; -f wsit-on-tomcat.xml uninstall<br>
+directory&gt; -f metro-on-tomcat.xml uninstall<br>
 </span><span style="font-family: monospace;">catalina.sh start<br>
 </span></div>
 <span style="font-weight: bold;"></span>
