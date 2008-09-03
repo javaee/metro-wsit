@@ -81,8 +81,7 @@
         for use.  If these are not set correctly lib.home and deploy.dir
         will not be correct and all elements that use them will not be correct.
     -->
-    <fail message="Web container not identified. Require AS_HOME or CATALINA_HOME be s
-et" >
+    <fail message="Web container not identified. Require AS_HOME or CATALINA_HOME be set" >
         <condition >
             <and>
                 <not>
@@ -94,8 +93,7 @@ et" >
             </and>
         </condition>
     </fail>
-    <fail message="Two Web containers identified. Only one allowed AS_HOME or CATALINA_
-HOME" >
+    <fail message="Two Web containers identified. Only one allowed AS_HOME or CATALINA_HOME" >
         <condition>
             <and>
                 <isset property="as.home"/>
