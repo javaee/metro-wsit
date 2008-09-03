@@ -47,5 +47,8 @@ Import-Package: \
   com.sun.xml.ws.spi.runtime;resolution:=optional, \
   org.iso_relax.verifier.impl;resolution:=optional, \
   org.relaxng.datatype;resolution:=optional, \
+  com.sun.appserv.server;resolution:=optional, \
+  org.apache.tomcat.util.buf;resolution:=optional, \
+  org.apache.coyote;resolution:=optional, \
   *
 Private-Package: *
