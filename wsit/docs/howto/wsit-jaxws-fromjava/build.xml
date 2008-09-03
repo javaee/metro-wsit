@@ -109,8 +109,39 @@
         <isset property="bld.for.tomcat"/>
     </condition>
 
-    <condition property="lib.endorsed" value="${catalina.home}/common/endorsed" else="${as.home}/lib/endorsed">
+    <condition property="lib.endorsed" value="${catalina.home}/common/endorsed">
         <isset property="bld.for.tomcat"/>
+    </condition>
+
+    <condition property="lib.endorsed" value="${as.home}/lib/endorsed">
+        <and>
+            <not>
+                <isset property="bld.for.tomcat"/>
+            </not>
+            <available file="${as.home}/lib/endorsed" type="dir"/>
+        </and>
+    </condition>
+
+    <!-- GF V3 has no lib/endorsed directory. We are setting a dummy value -->
+    <!-- to avoid a failure when using the wsit.classpath                  -->
+    <condition property="lib.endorsed" value="${as.home}/modules">
+        <and>
+            <not>
+                <isset property="bld.for.tomcat"/>
+            </not>
+            <available file="${as.home}/modules" type="dir"/>
+        </and>
+    </condition>
+
+    <!-- If GF V3 is absent, we need to make sure this property points to an              -->
+    <!-- existing directory, otherwise the build will fail when using the wsit.classpath  -->
+    <condition property="lib.glassfishv3" value="${as.home}/modules" else="${basedir}">
+        <and>
+            <not>
+                <isset property="bld.for.tomcat"/>
+            </not>
+            <available file="${as.home}/modules" type="dir"/>
+        </and>
     </condition>
 
     <condition property="deploy.dir" value="${catalina.home}/webapps" else="${as.home}/domains/${domain}/autodeploy">
@@ -129,6 +160,10 @@
         </fileset>
         <fileset dir="${lib.endorsed}">
             <include name="webservices-api.jar"/>
+        </fileset>
+        <fileset dir="${lib.glassfishv3}">
+            <include name="jaxb.jar"/>
+            <include name="webservices.jar"/>
         </fileset>
     </path>
 
