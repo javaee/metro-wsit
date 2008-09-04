@@ -16,6 +16,11 @@ Export-Package: \
   javax.xml.registry;version=1.0, \
   javax.xml.registry.*;version=1.0, \
   javax.xml.ws;version=2.1, \
+  javax.xml.ws.*;version=2.1, \
+  javax.xml.soap;version=1.3, \
+  javax.xml.soap.*;version=1.3, \
+  javax.xml.ws.handler;version=2.1, \
+  javax.xml.ws.handler.*;version=2.1, \
   javax.jws;version=@RELEASE_VERSION@, \
   javax.jws.soap;version=@RELEASE_VERSION@, \
   com.sun.xml.messaging.saaj.soap;version=1.3, \
