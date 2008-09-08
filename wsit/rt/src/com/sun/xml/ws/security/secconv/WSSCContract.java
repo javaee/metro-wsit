@@ -198,7 +198,7 @@ public class WSSCContract {
         
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)response, wsTrustVer)));
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString(response, wsTrustVer)));
         }
         
         // update subject
@@ -596,7 +596,7 @@ public class WSSCContract {
         }
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(elemToString(((RequestSecurityTokenResponse)rstr))));
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
         final Session session =
                 SessionManager.getSessionManager().getSession(token.getIdentifier().toString());
@@ -640,7 +640,7 @@ public class WSSCContract {
         }
          if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+                    LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
         return rstr;
     }
@@ -744,21 +744,6 @@ public class WSSCContract {
             throw new WSSecureConversationException(LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
         }
         return timeout;
-    }
-    
-    private String elemToString(final RequestSecurityTokenResponse rstr){
-        try {
-            final javax.xml.bind.Marshaller marshaller = wsscEleFac.getContext(wsTrustVer).createMarshaller();
-            final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
-            marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            final java.io.StringWriter writer = new java.io.StringWriter();
-            marshaller.marshal(rstrElement, writer);
-            return writer.toString();
-        } catch (Exception e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG());
-            throw new RuntimeException(LogStringsMessages.WSSC_0001_ERROR_MARSHAL_LOG(), e);
-        }
     }
     
     private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){

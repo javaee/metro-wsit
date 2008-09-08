@@ -261,7 +261,7 @@ public class WSSCPlugin {
         
         if(log.isLoggable(Level.FINE)){            
             log.log(Level.FINE, 
-                    LogStringsMessages.WSSC_1012_RECEIVED_SCT_RSTR_ISSUE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+                    LogStringsMessages.WSSC_1012_RECEIVED_SCT_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
         
         // Handle the RequestSecurityTokenResponse
@@ -319,7 +319,7 @@ public class WSSCPlugin {
                 
         if(log.isLoggable(Level.FINE)){            
             log.log(Level.FINE, 
-                    LogStringsMessages.WSSC_1014_RECEIVED_SCT_RSTR_RENEW(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+                    LogStringsMessages.WSSC_1014_RECEIVED_SCT_RSTR_RENEW(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
         
         try {
@@ -497,7 +497,7 @@ public class WSSCPlugin {
         
         if(log.isLoggable(Level.FINE)){            
             log.log(Level.FINE, 
-                    LogStringsMessages.WSSC_1016_RECEIVED_SCT_RSTR_CANCEL(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wsTrustVer)));
+                    LogStringsMessages.WSSC_1016_RECEIVED_SCT_RSTR_CANCEL(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
         // Handle the RequestSecurityTokenResponse
         try {

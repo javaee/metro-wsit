@@ -68,6 +68,8 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
@@ -321,7 +323,7 @@ public class WSTrustUtil {
         return displayValue;
     }
     
-    public static String elemToString(final RequestSecurityTokenResponse rstr, final WSTrustVersion wstVer){
+    public static String elemToString(final BaseSTSResponse rstr, final WSTrustVersion wstVer){
         StringWriter writer = new StringWriter();
         try{
             Transformer trans = TransformerFactory.newInstance().newTransformer();
@@ -333,7 +335,7 @@ public class WSTrustUtil {
         return writer.toString();
     }
 
-    public static String elemToString(final RequestSecurityToken rst, final WSTrustVersion wstVer){
+    public static String elemToString(final BaseSTSRequest rst, final WSTrustVersion wstVer){
         StringWriter writer = new StringWriter();
         try{
             Transformer trans = TransformerFactory.newInstance().newTransformer();

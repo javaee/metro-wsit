@@ -555,7 +555,7 @@ public class TrustPluginImpl implements TrustPlugin {
 
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString((RequestSecurityTokenResponse)rstr, wstVer)));
+                    LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wstVer)));
         }
 
         return rstr;
