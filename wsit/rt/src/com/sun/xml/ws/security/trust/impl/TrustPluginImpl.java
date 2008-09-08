@@ -45,6 +45,8 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSService.InitParams;
 import com.sun.xml.ws.api.security.trust.Claims;
@@ -57,14 +59,19 @@ import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.*;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
+import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
@@ -92,6 +99,7 @@ import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;
@@ -106,9 +114,19 @@ import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
+
 /**
  *
  * @author hr124446
@@ -489,7 +507,8 @@ public class TrustPluginImpl implements TrustPlugin {
                     LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
             throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
-        final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+       //final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+        final Dispatch<Message> dispatch = service.createDispatch(portName, Message.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
@@ -546,19 +565,22 @@ public class TrustPluginImpl implements TrustPlugin {
         // ex.printStackTrace();
         // }
 
-        final BaseSTSResponse rstr;
-        if(wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
-            rstr = fact.createRSTRCollectionFrom(((JAXBElement)dispatch.invoke(fact.toJAXBElement(request))));
-        }else{
-            rstr = fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
-        }
+        Message reqMsg = Messages.createUsingPayload(fact.toSource(request), ((WSBinding)dispatch.getBinding()).getSOAPVersion());
+        Message respMsg = dispatch.invoke(reqMsg);
+        Source respSrc = respMsg.readPayloadAsSource();
+        final BaseSTSResponse resp = parseRSTR(respSrc, wstVer);
+        //if(wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+          //  rstr = fact.createRSTRCollectionFrom(((JAXBElement)dispatch.invoke(fact.toJAXBElement(request))));
+        //}else{
+          //  rstr = fact.createRSTRFrom((JAXBElement)dispatch.invoke(fact.toJAXBElement(request)));
+        //}
 
         if(log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
-                    LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(rstr, wstVer)));
+                    LogStringsMessages.WST_1007_CREATED_RSTR_ISSUE(WSTrustUtil.elemToString(resp, wstVer)));
         }
 
-        return rstr;
+        return resp;
     }
 
     /**
@@ -638,5 +660,41 @@ public class TrustPluginImpl implements TrustPlugin {
         }
             
         return wstVer.getIssueRequestAction();
+    }
+    
+    private BaseSTSResponse parseRSTR(Source source, WSTrustVersion wstVer) throws WSTrustException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+        Element ele;
+        try{                                
+            Result result = new StreamResult(baos);
+            Transformer tf = TransformerFactory.newInstance().newTransformer();
+            tf.transform(source, result);
+            baos.close();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();            
+            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
+            ele = doc.getDocumentElement();
+        }catch(Exception xe){
+            throw new WSTrustException("Error occurred while trying to parse RSTP stream", xe);
+        }
+        
+        RequestedSecurityToken rdst = null;
+        WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
+        NodeList list = ele.getElementsByTagNameNS(ele.getNamespaceURI(), "RequestedSecurityToken");
+        if (list.getLength() > 0){
+            Element issuedToken = (Element)list.item(0).getChildNodes().item(0);
+            GenericToken token = new GenericToken(issuedToken);
+            rdst = fact.createRequestedSecurityToken(token);
+        }
+        BaseSTSResponse rstr;
+        if(wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
+            rstr = fact.createRSTRCollectionFrom(ele);
+            ((RequestSecurityTokenResponseCollection)rstr).getRequestSecurityTokenResponses().get(0).setRequestedSecurityToken(rdst);
+        }else{
+            rstr = fact.createRSTRFrom(ele);
+            ((RequestSecurityTokenResponse)rstr).setRequestedSecurityToken(rdst);
+        }
+        return rstr;
     }
 }

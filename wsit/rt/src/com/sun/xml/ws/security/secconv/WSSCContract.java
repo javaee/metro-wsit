@@ -801,10 +801,10 @@ public class WSSCContract {
                     }
                 }
                 if (samlReader != null && samlAssertion != null){
-                     boolean valid = SAMLUtil.validateTimeInConditionsStatement(samlAssertion);
-                    if (!valid){
-                        throw new WSSecureConversationException("The SAML assertion is invalid");
-                    }
+                    // boolean valid = SAMLUtil.validateTimeInConditionsStatement(samlAssertion);
+                    //if (!valid){
+                        //throw new WSSecureConversationException("The SAML assertion is invalid");
+                    //}
                     set.remove(samlReader);
                     set.add(samlAssertion);
                 }
