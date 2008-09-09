@@ -45,6 +45,7 @@
 		excludes="*/CVS"/>
   </target>
   <target name="wsit-enabled-fromjava">
+        <ant dir="wsit-enabled-fromjava" target="clean"/>
 	<zip destfile="wsit-enabled-fromjava.zip" 
 		basedir="." includes="wsit-enabled-fromjava/**"
 		excludes="**/CVS,**/build"/>
