@@ -269,9 +269,6 @@
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
          <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
             <expandfiles>
-                 <!--This is because we decided for TP2 to have webservices-rt
-                     without jaxrpc-spi and jaxrpc-impl.jar -->
-                <exclude name="jaxrpc*.jar"/>
                 <exclude name="jaxb*.jar"/>
             </expandfiles>
             <!--The wsit/etc/META-INF/services folder
