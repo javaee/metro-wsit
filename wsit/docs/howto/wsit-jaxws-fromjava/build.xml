@@ -266,15 +266,6 @@
         <echo message="run:          Runs the client"/>
     </target>
 
-    <target name="server" depends="setup">
-
-        <antcall target="clean" />
-
-        <antcall target="build-server-java" />
-
-        <antcall target="create-war" />
-
-        <antcall target="deploy" />
-    </target>
+    <target name="server" depends="clean, setup, build-server-java, create-war, deploy"/>
 
 </project>

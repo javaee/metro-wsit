@@ -255,15 +255,6 @@
         <echo message="run:          Runs the client"/>
     </target>
 
-    <target name="server" depends="setup">
-
-        <antcall target="clean" />
-
-        <antcall target="build-server-wsdl" />
-
-        <antcall target="create-war" />
-
-        <!-- antcall target="deploy" / -->
-    </target>
+    <target name="server" depends="clean, setup, build-server-wsdl, create-war, deploy"/>
 
 </project>
