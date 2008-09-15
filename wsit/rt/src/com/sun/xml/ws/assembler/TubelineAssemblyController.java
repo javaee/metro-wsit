@@ -426,11 +426,39 @@ public class TubelineAssemblyController {
 
     };
 
-    Collection<TubeAppender> getClientSideAppenders() {
+    /**
+     * Provides a ordered collection of WSIT/Metro client-side tube appenders that are be used to 
+     * construct a client-side Metro tubeline in {@link TubelineAssemblerFactoryImpl}.
+     * 
+     * <b>
+     * WARNING: This method is part of Metro internal API and may be changed, removed or 
+     * replaced by a different method without a prior notice. The method SHOULD NOT be used 
+     * outside of Metro codebase.
+     * </b>
+     * 
+     * @return collection of WSIT/Metro client-side tube appenders
+     * 
+     * TODO: Make method package-private once a declarative tubeline assembly mechanism is introduced.
+     */
+    public Collection<TubeAppender> getClientSideAppenders() {
         return Arrays.asList(clientAppenders);
     }
 
-    Collection<TubeAppender> getServerSideAppenders() {
+    /**
+     * Provides a ordered collection of WSIT/Metro server-side tube appenders that are be used to 
+     * construct a server-side Metro tubeline in {@link TubelineAssemblerFactoryImpl}.
+     * 
+     * <b>
+     * WARNING: This method is part of Metro internal API and may be changed, removed or 
+     * replaced by a different method without a prior notice. The method SHOULD NOT be used 
+     * outside of Metro codebase.
+     * </b>
+     * 
+     * @return collection of WSIT/Metro client-side tube appenders
+     * 
+     * TODO: Make method package-private once a declarative tubeline assembly mechanism is introduced.
+     */
+    public Collection<TubeAppender> getServerSideAppenders() {
         return Arrays.asList(serverAppenders);
     }
 }
