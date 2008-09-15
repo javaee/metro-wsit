@@ -129,11 +129,8 @@
                       useScope="runtime">
             <remoteRepository refid="maven.repository"/>
             <dependency groupId="net.sourceforge.findbugs"
-                       artifactId="findbugs"
-                       version="1.0.0"/>
-            <dependency groupId="net.sourceforge.findbugs"
-                       artifactId="coreplugin"
-                       version="1.0.0"/>
+                        artifactId="findbugs"
+                        version="1.3.2"/>
         </dependencies>
         <typedef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
             <classpath refid="findbugs.classpath"/>
@@ -150,7 +147,8 @@
         <findbugs output="html" outputFile="${build.dir}/findbugs.html"
                   stylesheet="fancy.xsl"
                   classpath="${findbugs.classpath}"
-                  pluginList="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
+                  jvmargs="-Xmx256m"
+                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar">
             <class location="${build.classes.dir}"/>
             <auxClasspath>
                 <path path="${run.classpath}"/>
@@ -161,9 +159,10 @@
 
     <target name="findbugs.xml" depends="findbugs.base"
             description="Run findbugs and produce a XML formatted result">
-        <findbugs output="xml" outputFile="${build.dir}/findbugs.xml"
+        <findbugs output="xml:withMessages" outputFile="${build.dir}/findbugs.xml"
                   classpath="${findbugs.classpath}"
-                  pluginList="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.0.0/coreplugin-1.0.0.jar">
+                  jvmargs="-Xmx256m"
+                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar">
             <class location="${build.classes.dir}"/>
             <auxClasspath>
                 <path path="${run.classpath}"/>
