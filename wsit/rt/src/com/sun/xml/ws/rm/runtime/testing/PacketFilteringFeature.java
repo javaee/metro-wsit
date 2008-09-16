@@ -95,6 +95,9 @@ public final class PacketFilteringFeature extends WebServiceFeature {
     }
 
     public PacketFilter[] getFilters() {
-        return filters;
+        PacketFilter[] filtersCopy = new PacketFilter[filters.length];
+        System.arraycopy(filters, 0, filtersCopy, 0, filters.length);
+        
+        return filtersCopy;
     }
 }
