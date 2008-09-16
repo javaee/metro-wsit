@@ -121,6 +121,8 @@ final class OutboundSequence extends AbstractSequence {
 
         // we hold message while correlation id is still around in id-to-correlationId map
         // we hold correlation id while id is still around in unacked ids list
+        
+        // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
         Long correlationIdKey = new Long(correlationId);
         weakIdtoCorrelationIdMap.put(idKey, correlationIdKey);
         weakMessageStorage.put(correlationIdKey, message); 
