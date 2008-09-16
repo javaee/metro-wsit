@@ -119,7 +119,9 @@ final class Rm11ClientSession extends ClientSession {
 
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
-            if (accept == null || !communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
+            if (accept == null || accept.getAcksTo() == null) {
+                throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, communicator.getDestination()));
+            } else if (!communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
                 throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
             }
             inboundSequenceId = offerInboundSequenceId;
