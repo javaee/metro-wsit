@@ -209,23 +209,30 @@ public class TubelineAssemblyController {
          * @return true if OptimizedTransport is enabled, false otherwise
          */
         private boolean isOptimizedTransportEnabled(PolicyMap policyMap, WSDLPort port, WSPortInfo portInfo) {
-            if (policyMap == null || port == null) {
+            if (policyMap == null || (port == null && portInfo == null)) {
                 return false;
             }
 
-            String schema = null;
+            String schema;
+            QName serviceName;
+            QName portName;
             if (port != null) {
                 schema = port.getAddress().getURI().getScheme();
-            } else if (portInfo != null) {
+                serviceName = port.getOwner().getName();
+                portName = port.getName();
+            } else {
                 schema = portInfo.getEndpointAddress().getURI().getScheme();
+                serviceName = portInfo.getServiceName();
+                portName = portInfo.getPortName();
             }
+            
             if (com.sun.xml.ws.transport.tcp.util.TCPConstants.PROTOCOL_SCHEMA.equals(schema)) {
                 // if target endpoint URI starts with TCP schema - dont check policies, just return true
                 return true;
             }
 
             try {
-                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
+                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 
                 if (policy != null && policy.contains(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION) &&
