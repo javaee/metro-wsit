@@ -423,5 +423,12 @@
 
     <target name="-post-compile-test-single" depends="init,test.resources.copy,test.services.copy">
     </target>
+    
+    <target name="findbugs.hudson" depends="findbugs.xml"
+            description="Put srcdir into generated findbugs.xml that Hudson can cope with">
+        <xslt style="../${etc.dir}/findbugs/findbugs.xsl"
+              in="${build.dir}/findbugs.xml"
+              out="${build.dir}/findbugs-hudson.xml"/>
+    </target>
 
 </project>
