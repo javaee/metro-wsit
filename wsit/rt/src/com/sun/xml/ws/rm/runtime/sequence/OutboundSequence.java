@@ -93,7 +93,8 @@ final class OutboundSequence extends AbstractSequence {
 
             updateLastMessageId(nextId);
             
-            // making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
+            // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
+            // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
             unackedMessageIdentifiers.add(new Long(nextId)); 
             return nextId;
         } finally {
@@ -110,7 +111,9 @@ final class OutboundSequence extends AbstractSequence {
             if (index >= 0) { // the id is in the list
                 idKey = unackedMessageIdentifiers.get(index);
             } else {
-                idKey = new Long(id); // creating a new uncached long object that GC can dispose
+                // Creating a new uncached long object that GC can dispose
+                // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
+                idKey = new Long(id); 
             }            
         } finally {
             messageIdLock.readLock().unlock();
