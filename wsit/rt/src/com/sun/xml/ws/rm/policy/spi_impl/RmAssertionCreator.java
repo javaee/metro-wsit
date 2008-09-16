@@ -53,8 +53,11 @@ import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.RmAssertionInstantiator;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
@@ -78,17 +81,16 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
         instantiationMap.put(InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.getInstantiator());
     }    
     
-    private static final String[] SUPPORTED_DOMAINS = new String[]{
+    private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(Arrays.asList(
         RmVersion.WSRM10.policyNamespaceUri,
         RmVersion.WSRM11.policyNamespaceUri,
         Constants.sunVersion,
         Constants.sunClientVersion,
         Constants.microsoftVersion,
-        Constants.microsoftVersion3_5
-    };
+        Constants.microsoftVersion3_5));
 
     public String[] getSupportedDomainNamespaceURIs() {
-        return SUPPORTED_DOMAINS;
+        return SUPPORTED_DOMAINS.toArray(new String[SUPPORTED_DOMAINS.size()]);
     }
 
     public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
