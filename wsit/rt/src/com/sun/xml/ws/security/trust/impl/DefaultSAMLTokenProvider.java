@@ -125,7 +125,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         String confirMethod = (String)ctx.getOtherProperties().get(IssuedTokenContext.CONFIRMATION_METHOD);
         Map<QName, List<String>> claimedAttrs = (Map<QName, List<String>>) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
         WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
-        WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
+       // WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
         
         // Create the KeyInfo for SubjectConfirmation
         final KeyInfo keyInfo = createKeyInfo(ctx);
@@ -175,8 +175,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             valueType = MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE;
         }
         final SecurityTokenReference samlReference = WSTrustUtil.createSecurityTokenReference(assertionId, valueType);
-        final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
-        final RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
+        //final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
+        //final RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
         ctx.setAttachedSecurityTokenReference(samlReference);
         ctx.setUnAttachedSecurityTokenReference(samlReference);
     }

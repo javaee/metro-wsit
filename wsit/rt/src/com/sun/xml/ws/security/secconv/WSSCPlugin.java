@@ -122,7 +122,7 @@ public class WSSCPlugin {
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
-    private WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();    
+    //private WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance();    
     
     //private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     //private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;

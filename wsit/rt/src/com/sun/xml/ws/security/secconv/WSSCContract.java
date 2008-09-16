@@ -124,7 +124,7 @@ public class WSSCContract {
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;    
     private WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10);
-    private Iterator wsscConfig = null;
+    //private Iterator wsscConfig = null;
     private static final int DEFAULT_KEY_SIZE = 128;
     public static final String LIFETIME = "LifeTime";
     public static final String SC_CONFIGURATION = "SCConfiguration";
@@ -449,12 +449,12 @@ public class WSSCContract {
         URI con = null;
         URI computeKeyAlgo = URI.create(wsTrustVer.getCKPSHA1algorithmURI());
         final RenewTarget renewTgt = ((RequestSecurityToken)request).getRenewTarget();
-        final SecurityTokenReference str = renewTgt.getSecurityTokenReference();
-        String id = null;
-        final Reference ref = str.getReference();
-        if (ref.getType().equals("Reference")){
-            id = ((DirectReference)ref).getURIAttr().toString();
-        }
+        //final SecurityTokenReference str = renewTgt.getSecurityTokenReference();
+       // String id = null;
+        //final Reference ref = str.getReference();
+        //if (ref.getType().equals("Reference")){
+          //  id = ((DirectReference)ref).getURIAttr().toString();
+        //}
         final String conStr = ((RequestSecurityToken)request).getContext();
         if (conStr != null) {
             try {
@@ -467,7 +467,7 @@ public class WSSCContract {
         }
                 
         // AppliesTo
-        final AppliesTo scopes = ((RequestSecurityToken)request).getAppliesTo();
+        //final AppliesTo scopes = ((RequestSecurityToken)request).getAppliesTo();
         
         final RequestedProofToken proofToken = wsscEleFac.createRequestedProofToken();
         

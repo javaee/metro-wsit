@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.4 2008-02-26 06:33:29 ofung Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.5 2008-09-16 20:56:49 jdg6688 Exp $
  */
 
 /*
@@ -85,19 +85,21 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
         List<Object> list = rstrcType.getRequestSecurityTokenResponse();
         for (int i = 0; i < list.size(); i++) {
 
-            RequestSecurityTokenResponseType rst = null;
+            RequestSecurityTokenResponseType rstr = null;
             Object object = list.get(i);
             if (object instanceof JAXBElement){
                 JAXBElement obj = (JAXBElement)object;
 
                 String local = obj.getName().getLocalPart();
                 if (local.equalsIgnoreCase("RequestSecurityTokenResponse")) {
-                    rst = (RequestSecurityTokenResponseType)obj.getValue();
+                    rstr = (RequestSecurityTokenResponseType)obj.getValue();
                 }
             } else{
-                rst = (RequestSecurityTokenResponseType)object;
+                rstr = (RequestSecurityTokenResponseType)object;
             }
-            addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl(rst));
+            if (rstr != null){
+                addRequestSecurityTokenResponse(new RequestSecurityTokenResponseImpl(rstr));
+            }
         }
     }
     

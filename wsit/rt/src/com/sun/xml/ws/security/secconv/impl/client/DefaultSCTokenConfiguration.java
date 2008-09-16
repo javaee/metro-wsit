@@ -77,7 +77,7 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private SymmetricBinding symBinding = null;
     private int skl = 0;
     private boolean reqClientEntropy = true;
-    private boolean isExpired = false;
+    //private boolean isExpired = false;
     private boolean checkTokenExpiry = true;
     private boolean clientOutboundMessage = true;
     private WSDLPort wsdlPort = null;

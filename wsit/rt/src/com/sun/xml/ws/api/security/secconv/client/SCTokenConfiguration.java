@@ -122,4 +122,8 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     public abstract WSITClientAuthContext getWSITClientAuthContext();
     
     public abstract AddressingVersion getAddressingVersion();
+    
+    public Map<String, Object> getOtherOptions(){
+        return this.otherOptions;
+    }
 }

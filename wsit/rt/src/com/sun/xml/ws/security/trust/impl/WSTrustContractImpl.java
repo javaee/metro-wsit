@@ -544,6 +544,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         // Create RequestedSecurityToken 
         RequestedSecurityToken reqSecTok = null;
         if (!wstVer.getValidateStatuesTokenType().equals(tokenType.toString())){
+            reqSecTok = eleFac.createRequestedSecurityToken();
             Token issuedToken = context.getSecurityToken();
             reqSecTok.setToken(issuedToken);
         }

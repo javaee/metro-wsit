@@ -312,14 +312,15 @@ public class WSTrustUtil {
     }
        
     public static String createFriendlyPPID(String displayValue){
-        try{
+        //ToDo
+        /*try{
             MessageDigest md = MessageDigest.getInstance("SHA1");
             byte[] hashId = md.digest(com.sun.xml.wss.impl.misc.Base64.decode(displayValue));
             StringBuffer sb = new StringBuffer();
             
         }catch(Exception ex){
             return displayValue;
-        }
+        }*/
         return displayValue;
     }
     
@@ -347,9 +348,6 @@ public class WSTrustUtil {
         return writer.toString();
     }      
     
-    public static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
-    
     public static long getCurrentTimeWithOffset(){
         final Calendar cal = new GregorianCalendar();
         int offset = cal.get(Calendar.ZONE_OFFSET);
@@ -364,6 +362,8 @@ public class WSTrustUtil {
     }
     
     public static Lifetime createLifetime(long currentTime, long lifespan, WSTrustVersion wstVer) {
+        final SimpleDateFormat calendarFormatter
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
         final Calendar cal = new GregorianCalendar();
         synchronized (calendarFormatter) {
             calendarFormatter.setTimeZone(cal.getTimeZone());
@@ -418,7 +418,6 @@ public class WSTrustUtil {
             }else{
                 SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
                 Element assertionEle = assertion.toElement(null);
-                Document doc = assertionEle.getOwnerDocument();
                 String samlNS = assertionEle.getNamespaceURI();
                 String samlPrefix = assertionEle.getPrefix();
                 NodeList asList = assertionEle.getElementsByTagNameNS(samlNS, "AttributeStatement");
