@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.5 2008-09-16 20:56:49 jdg6688 Exp $
+ * $Id: RequestSecurityTokenResponseCollectionImpl.java,v 1.6 2008-09-16 23:21:58 jdg6688 Exp $
  */
 
 /*
@@ -111,7 +111,6 @@ public class RequestSecurityTokenResponseCollectionImpl extends RequestSecurityT
     }
     
     public void addRequestSecurityTokenResponse(RequestSecurityTokenResponse rstr){
-        System.out.println("******* rstr added in rstrc*****");
          getRequestSecurityTokenResponses().add(rstr);
          
         JAXBElement<RequestSecurityTokenResponseType> rstrEl =
