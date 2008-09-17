@@ -40,8 +40,9 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
@@ -99,7 +100,7 @@ public enum RmVersion {
      */
     public final String namespaceUri;
     public final String policyNamespaceUri;
-    public final JAXBRIContext jaxbContext;
+    private final Map<AddressingVersion, JAXBRIContext> jaxbContexts;
     /**
      * Action constants
      */
@@ -175,12 +176,15 @@ public enum RmVersion {
              * We need to add all supported WS-A EndpointReference implementation classes to the array
              * before we pass the array to the JAXBRIContext factory method.
              */
-            Set<Class<?>> jaxbElementClasses = new HashSet<Class<?>>(Arrays.asList(rmProtocolClasses));
+            this.jaxbContexts = new HashMap<AddressingVersion, JAXBRIContext>();
+            LinkedList<Class<?>> jaxbElementClasses = new LinkedList<Class<?>>(Arrays.asList(rmProtocolClasses));
+            
             for (AddressingVersion av : AddressingVersion.values()) {                
                 jaxbElementClasses.add(av.eprType.eprClass);                
+                this.jaxbContexts.put(av, JAXBRIContext.newInstance(jaxbElementClasses.toArray(rmProtocolClasses), null, null, null, false, null));
+                jaxbElementClasses.removeLast();
             }
             
-            this.jaxbContext = JAXBRIContext.newInstance(jaxbElementClasses.toArray(rmProtocolClasses), null, null, null, false, null);
         } catch (JAXBException e) {
             throw new Error(e);
         }
@@ -249,12 +253,23 @@ public enum RmVersion {
      * 
      * @exception RmRuntimeException in case the creation of unmarshaller failed
      */
-    public Unmarshaller createUnmarshaller() throws RmRuntimeException {
+    public Unmarshaller createUnmarshaller(AddressingVersion av) throws RmRuntimeException {
         try {
-            return this.jaxbContext.createUnmarshaller();
+            return jaxbContexts.get(av).createUnmarshaller();
         } catch (JAXBException ex) {
             LOGGER.severe("Unable to create JAXB unmarshaller", ex);
             throw new RmRuntimeException("Unable to create JAXB unmarshaller", ex);
         }        
+    }
+    
+    /**
+     * Returns JAXB context that is intitialized based on a given addressing version.
+     * 
+     * @param av addressing version used to initialize JAXB context
+     * 
+     * @return JAXB context that is intitialized based on a given addressing version.
+     */
+    public JAXBRIContext getJaxbContext(AddressingVersion av) {
+        return jaxbContexts.get(av);
     }
 }

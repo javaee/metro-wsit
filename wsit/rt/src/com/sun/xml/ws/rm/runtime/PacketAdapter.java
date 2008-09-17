@@ -64,7 +64,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-abstract class PacketAdapter {
+public abstract class PacketAdapter {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketAdapter.class);
     //
@@ -95,7 +95,7 @@ abstract class PacketAdapter {
      * 
      * @return new empty {@link PacketAdapter} instance
      */
-    static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
+    public static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
         switch (configuration.getRmVersion()) {
             case WSRM10:
                 return new Rm10PacketAdapter(configuration, packet);
@@ -116,7 +116,7 @@ abstract class PacketAdapter {
         this.rmVersion = configuration.getRmVersion();
         this.soapVersion = configuration.getSoapVersion();
         this.addressingVersion = configuration.getAddressingVersion();
-        this.jaxbUnmarshaller = rmVersion.createUnmarshaller();
+        this.jaxbUnmarshaller = rmVersion.createUnmarshaller(addressingVersion);
 
         insertPacket(packet);
     }
@@ -134,7 +134,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final void consume() {
+    public final void consume() {
         if (message != null && !messageConsumed) {
             messageConsumed = true; // TODO remove this workaround
             message.consume();
@@ -144,23 +144,23 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final Packet getPacket() {
+    public final Packet getPacket() {
         return packet;
     }
 
     /**
      * TODO javadoc
      */
-    final Packet copyPacket(boolean copyMessage) {
+    public final Packet copyPacket(boolean copyMessage) {
         return packet.copy(copyMessage);
     }
 
     /**
      * TODO javadoc
      */
-    final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
+    public final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
         return PacketAdapter.getInstance(configuration, packet.createServerResponse(
-                Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion),
+                Messages.create(rmVersion.getJaxbContext(addressingVersion), jaxbElement, soapVersion),
                 addressingVersion,
                 soapVersion,
                 wsaAction));
@@ -169,7 +169,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final PacketAdapter createEmptyServerResponse(String wsaAction) {
+    public final PacketAdapter createEmptyServerResponse(String wsaAction) {
         return PacketAdapter.getInstance(configuration, packet.createServerResponse(
                 Messages.createEmpty(soapVersion),
                 addressingVersion,
@@ -186,13 +186,13 @@ abstract class PacketAdapter {
      * @return
      * @throws RmRuntimeException
      */
-    final PacketAdapter createAckResponse(Sequence sequence, String wsaAction) throws RmRuntimeException {
+    public final PacketAdapter createAckResponse(Sequence sequence, String wsaAction) throws RmRuntimeException {
         PacketAdapter responseAdapter = this.createEmptyServerResponse(wsaAction);
         responseAdapter.appendSequenceAcknowledgementHeader(sequence);
         return responseAdapter;
     }
     
-    final PacketAdapter closeTransportAndReturnNull() {
+    public final PacketAdapter closeTransportAndReturnNull() {
         this.packet.transportBackChannel.close();
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(this.packet.invocationProperties);
@@ -207,33 +207,33 @@ abstract class PacketAdapter {
      * 
      * @throws java.lang.IllegalStateException in case of failed internal state check
      */
-    final void appendHeader(Object jaxbHeaderContent) throws IllegalStateException {
+    public final void appendHeader(Object jaxbHeaderContent) throws IllegalStateException {
         checkMessageReadyState();
 
-        message.getHeaders().add(Headers.create(rmVersion.jaxbContext, jaxbHeaderContent));
+        message.getHeaders().add(Headers.create(rmVersion.getJaxbContext(addressingVersion), jaxbHeaderContent));
     }
 
     /**
      * TODO javadoc
      */
-    abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException;
+    public abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      */
-    abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException;
+    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      */
-    abstract void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException;
+    public abstract void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      * 
      * @return
      */
-    final PacketAdapter keepTransportBackChannelOpen() {
+    public final PacketAdapter keepTransportBackChannelOpen() {
         this.packet.keepTransportBackChannelOpen();
         
         return this;
@@ -247,7 +247,7 @@ abstract class PacketAdapter {
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    final PacketAdapter setEmptyRequestMessage(String wsaAction) {
+    public final PacketAdapter setEmptyRequestMessage(String wsaAction) {
         return setRequestMessage(Messages.createEmpty(soapVersion), wsaAction);
     }
     
@@ -258,7 +258,7 @@ abstract class PacketAdapter {
      * @param wsaAction
      * @return
      */
-    final PacketAdapter setEmptyResponseMessage(PacketAdapter requestAdapter, String wsaAction) {
+    public final PacketAdapter setEmptyResponseMessage(PacketAdapter requestAdapter, String wsaAction) {
         this.message = Messages.createEmpty(soapVersion);
         this.packet = requestAdapter.packet.createServerResponse(
                 this.message,
@@ -287,8 +287,8 @@ abstract class PacketAdapter {
      * 
      * @return the updated {@link PacketAdapter} instance
      */
-    final PacketAdapter setRequestMessage(Object jaxbElement, String wsaAction) {
-        return setRequestMessage(Messages.create(rmVersion.jaxbContext, jaxbElement, soapVersion), wsaAction);
+    public final PacketAdapter setRequestMessage(Object jaxbElement, String wsaAction) {
+        return setRequestMessage(Messages.create(rmVersion.getJaxbContext(addressingVersion), jaxbElement, soapVersion), wsaAction);
     }
 
     /**
@@ -320,7 +320,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean isProtocolMessage() {
+    public final boolean isProtocolMessage() {
         return (message == null) ? false : rmVersion.isRmAction(getWsaAction());
     }
 
@@ -329,7 +329,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean isProtocolRequest() {
+    public final boolean isProtocolRequest() {
         return (message == null) ? false : rmVersion.isRmProtocolRequest(getWsaAction());
     }
 
@@ -338,7 +338,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean isProtocolResponse() {
+    public final boolean isProtocolResponse() {
         return (message == null) ? false : rmVersion.isRmProtocolResponse(getWsaAction());
     }
 
@@ -347,7 +347,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean isRmFault() {
+    public final boolean isRmFault() {
         return (message == null) ? false : rmVersion.isRmFault(getWsaAction());
     }
 
@@ -356,7 +356,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean isFault() {
+    public final boolean isFault() {
         return (message == null) ? false : message.isFault();
     }
 
@@ -365,7 +365,7 @@ abstract class PacketAdapter {
      * 
      * @return
      */
-    final boolean containsMessage() {
+    public final boolean containsMessage() {
         return message != null;
     }
 
@@ -375,7 +375,7 @@ abstract class PacketAdapter {
      * 
      * @return addressing {@code Action} header of the message in the wrapped {@link Packet} instance.
      */
-    final String getWsaAction() {
+    public final String getWsaAction() {
         checkMessageReadyState();
 
         return message.getHeaders().getAction(addressingVersion, soapVersion);
@@ -387,7 +387,7 @@ abstract class PacketAdapter {
      * 
      * @return addressing {@code To} header of the message in the wrapped {@link Packet} instance.
      */
-    final String getDestination() {
+    public final String getDestination() {
         checkMessageReadyState();
 
         return message.getHeaders().getTo(addressingVersion, soapVersion);
@@ -401,7 +401,7 @@ abstract class PacketAdapter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    final <T> T readHeaderAsUnderstood(String name) throws RmRuntimeException {
+    public final <T> T readHeaderAsUnderstood(String name) throws RmRuntimeException {
         checkMessageReadyState();
 
         Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
@@ -424,7 +424,7 @@ abstract class PacketAdapter {
      * 
      * @throws com.sun.xml.ws.rm.RmException in case the message unmarshalling failed
      */
-    final <T> T unmarshallMessage() throws RmRuntimeException {
+    public final <T> T unmarshallMessage() throws RmRuntimeException {
         checkMessageReadyState();
 
         try {
@@ -440,7 +440,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final String getSequenceId() throws RmRuntimeException {
+    public final String getSequenceId() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
@@ -451,7 +451,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final long getMessageNumber() throws RmRuntimeException {
+    public final long getMessageNumber() throws RmRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
@@ -467,7 +467,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final void setSequenceData(String sequenceId, long messageNumber) {
+    public final void setSequenceData(String sequenceId, long messageNumber) {
         this.sequenceId = sequenceId;
         this.messageNumber = messageNumber;
     }
@@ -480,7 +480,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    final String getAckRequestedHeaderSequenceId() throws RmRuntimeException {
+    public final String getAckRequestedHeaderSequenceId() throws RmRuntimeException {
         if (!isAckRequestedHeaderDataInit) {
             ackRequestedHeaderSequenceId = initAckRequestedHeaderData();
             isAckRequestedHeaderDataInit = true;
@@ -492,12 +492,12 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
+    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
 
     /**
      * TODO javadoc
      */
-    Session getSession() {
+    public Session getSession() {
         String sessionId = (String) packet.invocationProperties.get(Session.SESSION_ID_KEY);
         if (sessionId == null) {
             return null;
@@ -509,21 +509,21 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    boolean hasSession() {
+    public boolean hasSession() {
         return getSession() != null;
     }
 
     /**
      * TODO javadoc
      */
-    void setSession(String sessionId) {
+    public void setSession(String sessionId) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
         Session session = SessionManager.getSessionManager().getSession(sessionId);
         packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
     }
 
-    void exposeSequenceDataToUser() {
+    public void exposeSequenceDataToUser() {
         packet.invocationProperties.put(Constants.sequenceProperty, sequenceId);
         packet.invocationProperties.put(Constants.messageNumberProperty, messageNumber);
     }
@@ -531,7 +531,7 @@ abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    String getSecurityContextTokenId() {
+    public final String getSecurityContextTokenId() {
         Session session = getSession();
         return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
 
@@ -548,7 +548,7 @@ abstract class PacketAdapter {
      * 
      * @throws java.lang.IllegalStateException if the check fails
      */
-    final void checkMessageReadyState() throws IllegalStateException {
+    public final void checkMessageReadyState() throws IllegalStateException {
         if (message == null) {
             throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
         }
@@ -561,7 +561,7 @@ abstract class PacketAdapter {
      * 
      * @throws java.lang.IllegalStateException if the check fails
      */
-    final void checkPacketReadyState() throws IllegalStateException {
+    public final void checkPacketReadyState() throws IllegalStateException {
         if (packet == null) {
             throw new IllegalStateException("This PacketAdapter instance does not contain a packet with a non-null message");
         }
@@ -574,7 +574,7 @@ abstract class PacketAdapter {
      * @param expectedStrId expected security context token identifier 
      * @returns {code true} if the actual security context token identifier equals to the expected one
      */
-    final boolean isSecurityContextTokenIdValid(String expectedSctId) {
+    public final boolean isSecurityContextTokenIdValid(String expectedSctId) {
         String actualSctId = getSecurityContextTokenId();
         return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
     }

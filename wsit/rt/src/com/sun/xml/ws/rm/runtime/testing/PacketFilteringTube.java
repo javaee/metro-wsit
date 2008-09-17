@@ -44,7 +44,10 @@ import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.policy.ConfigurationManager;
 import java.io.IOException;
+import java.util.List;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -55,7 +58,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
 
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringTube.class);
     private final boolean isClientSide;
-    private final PacketFilter[] filters;
+    private final List<PacketFilter> filters;
 
     public PacketFilteringTube(PacketFilteringTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -66,13 +69,17 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
     public PacketFilteringTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = true;
-        this.filters = getFilters(context.getBinding());
+        
+        Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];        
+        this.filters = getConfiguredFilters(context.getBinding(), configuration);
     }
 
     public PacketFilteringTube(WsitServerTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = false;
-        this.filters = getFilters(context.getEndpoint().getBinding());
+
+        Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
+        this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), configuration);
     }
 
     @Override
@@ -141,8 +148,8 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         return super.processResponse(response); // TODO: is this ok?
     }
 
-    private PacketFilter[] getFilters(WSBinding binding) {
+    private List<PacketFilter> getConfiguredFilters(WSBinding binding, Configuration configuration) {
         PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature.getFilters();
+        return pfFeature.createFilters(configuration);
     }
 }

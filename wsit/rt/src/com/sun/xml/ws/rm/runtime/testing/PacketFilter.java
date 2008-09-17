@@ -35,13 +35,11 @@
  */
 package com.sun.xml.ws.rm.runtime.testing;
 
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.PacketAdapter;
 
 /**
  *
@@ -51,14 +49,18 @@ public abstract class PacketFilter {
 
     protected static final long UNSPECIFIED = -1;
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilter.class);
-    protected final RmVersion rmVersion;
-    protected final Unmarshaller jaxbUnmarshaller;
+    
+    private Configuration rmConfiguration;
 
+    /**
+     * @deprecated Use no-parameter constructor instead
+     */
     protected PacketFilter(RmVersion rmVersion) {
-        this.rmVersion = rmVersion;
-        this.jaxbUnmarshaller = rmVersion.createUnmarshaller();
     }
 
+    protected PacketFilter() {
+    }
+    
     /**
      * Method is called during the client-side request packet processing, which means that it is called BEFORE the request 
      * is sent to the service.
@@ -97,20 +99,8 @@ public abstract class PacketFilter {
                 return null;
             }
 
-            HeaderList headers = packet.getMessage().copy().getHeaders();
-            switch (rmVersion) {
-                case WSRM10: {
-                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
-                    return (se != null) ? se.getIdentifier().toString() : null;// TODO ???
-                }
-                case WSRM11: {
-                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeader(headers, "Sequence");
-                    return (se != null) ? se.getId() : null;
-                }
-                default:
-                    LOGGER.severe(String.format("Unsupported RM version [ %s ]", rmVersion.namespaceUri));
-                    return null;
-            }
+            PacketAdapter pa = PacketAdapter.getInstance(rmConfiguration, packet);
+            return pa.getSequenceId(); 
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return null;
@@ -130,44 +120,16 @@ public abstract class PacketFilter {
             if (packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
                 return UNSPECIFIED;
             }
-
-            HeaderList headers = packet.getMessage().copy().getHeaders();
-            switch (rmVersion) {
-                case WSRM10: {
-                    com.sun.xml.ws.rm.v200502.SequenceElement se = readHeader(headers, "Sequence");
-                    return (se != null) ? se.getMessageNumber() : UNSPECIFIED;
-                }
-                case WSRM11: {
-                    com.sun.xml.ws.rm.v200702.SequenceElement se = readHeader(headers, "Sequence");
-                    return (se != null) ? se.getMessageNumber() : UNSPECIFIED;
-                }
-                default:
-                    LOGGER.severe(String.format("Unsupported RM version [ %s ]", rmVersion.namespaceUri));
-                    return UNSPECIFIED;
-            }
+            
+            PacketAdapter pa = PacketAdapter.getInstance(rmConfiguration, packet);
+            return pa.getMessageNumber(); 
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return UNSPECIFIED;
         }
     }
 
-    /**
-     * Utility method which retrieves the RM header with the specified name from the underlying {@link Message}'s 
-     * {@link HeaderList) in the form of JAXB element and marks the header as understood.
-     * 
-     * @param headers list of message headers; must not be {@code null}
-     * 
-     * @param name the name of the {@link com.sun.xml.ws.api.message.Header} to find.
-     * 
-     * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
-     */
-    private <T> T readHeader(HeaderList headers, String name) throws JAXBException {
-        Header header = headers.get(rmVersion.namespaceUri, name, false);
-        if (header == null) {
-            return (T) null;
-        }
-
-        @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(jaxbUnmarshaller);
-        return result;
+    final void configure(Configuration configuration) {
+        this.rmConfiguration = configuration;
     }
 }

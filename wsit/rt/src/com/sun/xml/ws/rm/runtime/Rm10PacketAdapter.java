@@ -62,7 +62,7 @@ class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
+    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(sequenceId);
@@ -71,7 +71,7 @@ class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
+    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(sequenceId);
 
@@ -79,7 +79,7 @@ class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
+    public void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
         identifier.setValue(sequence.getId());
@@ -119,7 +119,7 @@ class Rm10PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
+    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {

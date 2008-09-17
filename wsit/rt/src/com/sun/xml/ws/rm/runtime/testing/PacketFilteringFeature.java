@@ -37,6 +37,11 @@ package com.sun.xml.ws.rm.runtime.testing;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.rm.policy.Configuration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -49,17 +54,17 @@ public final class PacketFilteringFeature extends WebServiceFeature {
     //
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringFeature.class);
     //
-    private final PacketFilter[] filters;
+    private final List<Class<? extends PacketFilter>> filterClasses;
 
     public PacketFilteringFeature() {
         // this constructor is here just to satisfy JAX-WS specification requirements
-        this.filters = null;
+        this.filterClasses = Collections.emptyList();
         this.enabled = true;
     }
 
     public PacketFilteringFeature(boolean enabled) {
         // this constructor is here just to satisfy JAX-WS specification requirements
-        this.filters = null;
+        this.filterClasses = Collections.emptyList();
         this.enabled = enabled;
     }
 
@@ -71,21 +76,9 @@ public final class PacketFilteringFeature extends WebServiceFeature {
     public PacketFilteringFeature(boolean enabled, Class<? extends PacketFilter>... filterClasses) {
         this.enabled = enabled;
         if (filterClasses != null && filterClasses.length > 0) {
-            this.filters = new PacketFilter[filterClasses.length];
-            int i = 0;
-            for (Class<? extends PacketFilter> filterClass : filterClasses) {
-                try {
-                    this.filters[i] = filterClass.newInstance();
-                } catch (InstantiationException ex) {
-                    LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
-                } catch (IllegalAccessException ex) {
-                    LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
-                } finally {
-                    i++;
-                }
-            }
+            this.filterClasses = Collections.unmodifiableList(Arrays.asList(filterClasses));
         } else {
-            this.filters = null;
+            this.filterClasses = Collections.emptyList();
         }
     }
 
@@ -94,10 +87,25 @@ public final class PacketFilteringFeature extends WebServiceFeature {
         return ID;
     }
 
-    public PacketFilter[] getFilters() {
-        PacketFilter[] filtersCopy = new PacketFilter[filters.length];
-        System.arraycopy(filters, 0, filtersCopy, 0, filters.length);
+    List<PacketFilter> createFilters(Configuration configuration) {
+        List<PacketFilter> filters = new ArrayList<PacketFilter>(filterClasses.size());
         
-        return filtersCopy;
+        for (Class<? extends PacketFilter> filterClass : filterClasses) {
+            try {
+                final PacketFilter filter = filterClass.newInstance();
+                filter.configure(configuration);
+                filters.add(filter);
+            } catch (InstantiationException ex) {
+                LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
+            } catch (IllegalAccessException ex) {
+                LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);
+            }
+        }
+
+        return filters;
+    }
+
+    boolean hasFilters() {
+        return !filterClasses.isEmpty();
     }
 }

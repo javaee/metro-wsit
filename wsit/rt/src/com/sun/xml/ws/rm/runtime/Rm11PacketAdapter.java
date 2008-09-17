@@ -109,7 +109,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected void initSequenceHeaderData() throws RmRuntimeException {
+    void initSequenceHeaderData() throws RmRuntimeException {
         SequenceElement sequenceElement = this.readHeaderAsUnderstood("Sequence");
         if (sequenceElement != null) {
             this.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
@@ -117,7 +117,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    protected String initAckRequestedHeaderData() throws RmRuntimeException {
+    String initAckRequestedHeaderData() throws RmRuntimeException {
         AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood("AckRequested");
         return (ackRequestedElement != null) ? ackRequestedElement.getId() : null;
     }
