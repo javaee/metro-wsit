@@ -56,5 +56,6 @@ Import-Package: \
   com.sun.appserv.server;resolution:=optional, \
   org.apache.tomcat.util.buf;resolution:=optional, \
   org.apache.coyote;resolution:=optional, \
+  javax.ejb;resolution:=optional, \
   *
 Private-Package: *
