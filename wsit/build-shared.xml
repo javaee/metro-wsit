@@ -148,7 +148,8 @@
                   stylesheet="fancy.xsl"
                   classpath="${findbugs.classpath}"
                   jvmargs="-Xmx256m"
-                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar">
+                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar"
+                  excludefilter="findbugs-exclude.xml">
             <class location="${build.classes.dir}"/>
             <auxClasspath>
                 <path path="${run.classpath}"/>
@@ -162,7 +163,8 @@
         <findbugs output="xml" outputFile="${build.dir}/findbugs.xml"
                   classpath="${findbugs.classpath}"
                   jvmargs="-Xmx256m"
-                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar">
+                  pluginlist="${user.home}/.m2/repository/net/sourceforge/findbugs/coreplugin/1.3.2/coreplugin-1.3.2.jar"
+                  excludefilter="findbugs-exclude.xml">
             <class location="${build.classes.dir}"/>
             <auxClasspath>
                 <path path="${run.classpath}"/>
