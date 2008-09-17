@@ -264,53 +264,15 @@ public class TubelineAssemblyController {
     public static class AddressingTubeAppender implements TubeAppender {
 
         public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
-            if (isAddressingEnabled(context.getPolicyMap(), context.getWsdlPort(), context.getBinding())) {
-                return context.getWrappedContext().createWsaTube(context.getTubelineHead());
-            }
-
-            return context.getTubelineHead();
+            return context.getWrappedContext().createWsaTube(context.getTubelineHead());
         }
 
         public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
-            if (isAddressingEnabled(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint().getBinding())) {
-                return context.getWrappedContext().createWsaTube(context.getTubelineHead());
-            }
-
-            return context.getTubelineHead();
-        }
-
-        /**
-         * Checks to see whether WS-Addressing is enabled or not.
-         *
-         * @param policyMap policy map for {@link this} assembler
-         * @param port wsdl:port
-         * @param binding Binding
-         * @return true if Addressing is enabled, false otherwise
-         */
-        private boolean isAddressingEnabled(PolicyMap policyMap, WSDLPort port, WSBinding binding) {
-            if (AddressingVersion.isEnabled(binding)) {
-                return true;
-            }
-
-            if (policyMap == null || port == null) {
-                return false;
-            }
-
-            try {
-                PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                        port.getName());
-                Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-
-                return (policy != null) &&
-                        (policy.contains(AddressingVersion.W3C.policyNsUri) ||
-                        policy.contains(AddressingVersion.MEMBER.policyNsUri));
-            } catch (PolicyException e) {
-                throw new WebServiceException(e);
-            }
+            return context.getWrappedContext().createWsaTube(context.getTubelineHead());
         }
     }
 
-    
+
     public static class MonitoringTubeAppender implements TubeAppender {
 
         public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
