@@ -99,7 +99,6 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
     private final static PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyWSDLGeneratorExtension.class);
     private PolicyMap policyMap;
     private SEIModel seiModel;
-    private Class endpointClass;
     private final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
     private final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
     private final PolicyMerger merger = PolicyMerger.getMerger();
@@ -109,7 +108,6 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.entering();
         try {
             this.seiModel = context.getModel();
-            this.endpointClass = context.getEndpointClass();
 
             final PolicyMapUpdateProvider[] policyMapUpdateProviders = PolicyUtils.ServiceProvider.load(PolicyMapUpdateProvider.class);
             final PolicyMapExtender[] extenders = new PolicyMapExtender[policyMapUpdateProviders.length];
