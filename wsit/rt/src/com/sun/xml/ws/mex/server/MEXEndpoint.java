@@ -77,9 +77,6 @@ import javax.xml.ws.soap.Addressing;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_MDATA_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_REQUEST;
 import static com.sun.xml.ws.mex.MetadataConstants.GET_RESPONSE;
-import static com.sun.xml.ws.mex.MetadataConstants.MEX_NAMESPACE;
-import static com.sun.xml.ws.mex.MetadataConstants.MEX_PREFIX;
-import static com.sun.xml.ws.mex.MetadataConstants.WSA_PREFIX;
 
 
 @ServiceMode(value=Service.Mode.MESSAGE)
