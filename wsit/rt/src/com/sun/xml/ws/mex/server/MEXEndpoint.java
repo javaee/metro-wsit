@@ -212,16 +212,18 @@ public class MEXEndpoint implements Provider<Message> {
                 break;
             }
         }
-        ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
+        if (ownerEndpointAddress != null) {
+            ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
 
-        boundEndpoints = module.getBoundEndpoints();
-        for (BoundEndpoint endpoint : boundEndpoints) {
-            //compare ownerEndpointAddress with this endpoints address
-            //   if matches, set ownerEndpoint to the corresponding WSEndpoint
-            String endpointAddress = endpoint.getAddress(baseAddress).toString();
-            if (endpointAddress.equals(ownerEndpointAddress)) {
-                ownerEndpoint = endpoint.getEndpoint();
-                break;
+            boundEndpoints = module.getBoundEndpoints();
+            for (BoundEndpoint endpoint : boundEndpoints) {
+                //compare ownerEndpointAddress with this endpoints address
+                //   if matches, set ownerEndpoint to the corresponding WSEndpoint
+                String endpointAddress = endpoint.getAddress(baseAddress).toString();
+                if (endpointAddress.equals(ownerEndpointAddress)) {
+                    ownerEndpoint = endpoint.getEndpoint();
+                    break;
+                }
             }
         }
 
