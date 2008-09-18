@@ -259,12 +259,16 @@ public abstract class PacketAdapter {
      * @return
      */
     public final PacketAdapter setEmptyResponseMessage(PacketAdapter requestAdapter, String wsaAction) {
-        this.message = Messages.createEmpty(soapVersion);
-        this.packet = requestAdapter.packet.createServerResponse(
-                this.message,
+        checkPacketReadyState();
+        
+        Packet tempPacket = requestAdapter.packet.createServerResponse(
+                Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
                 wsaAction);
+        
+        this.packet.setMessage(tempPacket.getMessage());
+        this.message = this.packet.getMessage();
 
 // TODO replace the above code with this commented out code once we integrate JAX-WS RI 2.1.5 or higher
 //        checkPacketReadyState();
