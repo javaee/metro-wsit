@@ -46,6 +46,7 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.ws.EndpointReference;
 
 /**
  * This is the class which will determine which RM version we are dealing with
@@ -67,7 +68,6 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200502.SequenceElement.class,
     com.sun.xml.ws.rm.v200502.SequenceFaultElement.class,
     com.sun.xml.ws.rm.v200502.TerminateSequenceElement.class),
-    
     WSRM11(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
     "http://docs.oasis-open.org/ws-rx/wsrmp/200702",
@@ -92,15 +92,13 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class);
-    
+    //
     private static final RmLogger LOGGER = RmLogger.getLogger(RmVersion.class);
-    
     /**
      * General constants
      */
     public final String namespaceUri;
     public final String policyNamespaceUri;
-    private final Map<AddressingVersion, JAXBRIContext> jaxbContexts;
     /**
      * Action constants
      */
@@ -125,18 +123,21 @@ public enum RmVersion {
     public final QName sequenceQName;
     public final QName sequenceSTRAssertionQName;
     public final QName sequenceTransportSecurityAssertionQName;
-
     /**
      * Fault codes
      */
     public final QName sequenceTerminatedFaultCode;
     public final QName unknownSequenceFaultCode;
     public final QName invalidAcknowledgementFaultCode;
-    public final QName messageNumberRolloverFaultCode;    
+    public final QName messageNumberRolloverFaultCode;
     public final QName lastMessageNumberExceededFaultCode; // WS-RM 1.0 only
     public final QName createSequenceRefusedFaultCode;
     public final QName sequenceClosedFaultCode; // since WS-RM 1.1
-    public final QName wsrmRequiredFaultCode; // since WS-RM 1.1
+    public final QName wsrmRequiredFaultCode; // since WS-RM 1.1    
+    /**
+     * Private fields
+     */
+    private final Map<AddressingVersion, JAXBRIContext> jaxbContexts;
 
     private RmVersion(String nsUri, String policynsuri, Class<?>... rmProtocolClasses) {
         this.namespaceUri = nsUri;
@@ -178,18 +179,29 @@ public enum RmVersion {
              */
             this.jaxbContexts = new HashMap<AddressingVersion, JAXBRIContext>();
             LinkedList<Class<?>> jaxbElementClasses = new LinkedList<Class<?>>(Arrays.asList(rmProtocolClasses));
-            
-            for (AddressingVersion av : AddressingVersion.values()) {                
-                jaxbElementClasses.add(av.eprType.eprClass);                
-                this.jaxbContexts.put(av, JAXBRIContext.newInstance(jaxbElementClasses.toArray(rmProtocolClasses), null, null, null, false, null));
+
+            for (AddressingVersion av : AddressingVersion.values()) {
+                jaxbElementClasses.add(av.eprType.eprClass);
+
+                Map<Class, Class> eprClassReplacementMap = new HashMap<Class, Class>();
+                eprClassReplacementMap.put(EndpointReference.class, av.eprType.eprClass);
+                
+                this.jaxbContexts.put(av, JAXBRIContext.newInstance(
+                        jaxbElementClasses.toArray(rmProtocolClasses),
+                        null,
+                        eprClassReplacementMap,
+                        null,
+                        false,
+                        null));
+
                 jaxbElementClasses.removeLast();
             }
-            
+
         } catch (JAXBException e) {
             throw new Error(e);
         }
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -199,9 +211,9 @@ public enum RmVersion {
         return (wsaAction != null) &&
                 (isRmProtocolRequest(wsaAction) ||
                 isRmProtocolResponse(wsaAction) ||
-                isRmFault(wsaAction));        
+                isRmFault(wsaAction));
     }
-        
+
     /**
      * TODO javadoc
      * 
@@ -216,7 +228,7 @@ public enum RmVersion {
                 makeConnectionAction.equals(wsaAction) ||
                 terminateSequenceAction.equals(wsaAction));
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -227,9 +239,9 @@ public enum RmVersion {
                 (createSequenceResponseAction.equals(wsaAction) ||
                 closeSequenceResponseAction.equals(wsaAction) ||
                 sequenceAcknowledgementAction.equals(wsaAction) ||
-                terminateSequenceResponseAction.equals(wsaAction));        
+                terminateSequenceResponseAction.equals(wsaAction));
     }
-    
+
     /**
      * TODO javadoc
      * 
@@ -238,7 +250,7 @@ public enum RmVersion {
     public boolean isRmFault(String wsaAction) {
         return wsrmFaultAction.equals(wsaAction);
     }
-    
+
     /**
      * Creates JAXB {@link Unmarshaller} that is able to unmarshall Rm protocol elements for given WS-RM version.
      * <p />
@@ -259,9 +271,9 @@ public enum RmVersion {
         } catch (JAXBException ex) {
             LOGGER.severe("Unable to create JAXB unmarshaller", ex);
             throw new RmRuntimeException("Unable to create JAXB unmarshaller", ex);
-        }        
+        }
     }
-    
+
     /**
      * Returns JAXB context that is intitialized based on a given addressing version.
      * 
