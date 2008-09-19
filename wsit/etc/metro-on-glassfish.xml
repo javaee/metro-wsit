@@ -60,9 +60,15 @@
     <condition property="glassfish-v3">
         <available file="${as.home}/modules" type="dir"/>
     </condition>
- 
+
+    <!-- Check if we are running JAVA SE 6 update release 3 or older --> 
     <condition property="jdk6">
-        <contains substring="1.6.0" string="${java.version}"/>
+        <or>
+            <contains string="${java.version}" substring="1.6.0.0"/>
+            <contains string="${java.version}" substring="1.6.0_1"/>
+            <contains string="${java.version}" substring="1.6.0_2"/>
+            <contains string="${java.version}" substring="1.6.0_03"/>
+        </or>
     </condition>
 
     <condition property="endorsed-api-flagged">
@@ -75,7 +81,7 @@
         <echo message="  The file 'web-services-api.jar' must be installed"/>
         <echo message="  into $JAVA_HOME/lib/endorsed for Metro to prevent"/>
         <echo message="  conflicts between the JAX-WS 2.0 classes"/>
-        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with Metro."/>
+        <echo message="  bundled with Java SE 6 and JAX-WS 2.1 bundled with Metro."/>
         <echo/>
         <echo message="  You must have write-permissions on the JDK 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>

@@ -44,8 +44,14 @@
     <property name="catalina.endorsed" value="${catalina.home}/common/endorsed"/>
     <property name="java.home" value="${env.JAVA_HOME}"/>
 
+    <!-- Check if we are running JAVA SE 6 update release 3 or older --> 
     <condition property="jdk6">
-        <contains string="${java.version}" substring="1.6.0"/>
+        <or>
+            <contains string="${java.version}" substring="1.6.0.0"/>
+            <contains string="${java.version}" substring="1.6.0_1"/>
+            <contains string="${java.version}" substring="1.6.0_2"/>
+            <contains string="${java.version}" substring="1.6.0_03"/>
+        </or>
     </condition>
  
     <target name="jdk6-message" if="jdk6">
@@ -54,7 +60,7 @@
         <echo message="  The file 'web-services-api.jar' must be installed"/>
         <echo message="  into $JAVA_HOME/lib/endorsed for WSIT to prevent"/>
         <echo message="  conflicts between the JAX-WS 2.0 classes"/>
-        <echo message="  bundled with JDK 6 and JAX-WS 2.1 bundled with WSIT."/>
+        <echo message="  bundled with Java SE 6 and JAX-WS 2.1 bundled with WSIT."/>
         <echo/>
         <echo message="  You must have write-permissions on the JDK 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>
