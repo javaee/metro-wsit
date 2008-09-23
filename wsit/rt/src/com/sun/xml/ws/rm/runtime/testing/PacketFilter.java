@@ -95,7 +95,7 @@ public abstract class PacketFilter {
      */
     protected final String getSequenceId(Packet packet) {
         try {
-            if (packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
+            if (rmConfiguration == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
                 return null;
             }
 
@@ -117,7 +117,7 @@ public abstract class PacketFilter {
      */
     protected final long getMessageId(Packet packet) {
         try {
-            if (packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
+            if (rmConfiguration == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
                 return UNSPECIFIED;
             }
             

@@ -70,16 +70,17 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(context.getTubelineHead());
         this.isClientSide = true;
         
-        Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];        
-        this.filters = getConfiguredFilters(context.getBinding(), configuration);
+        Configuration[] configurations = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives();
+        
+        this.filters = getConfiguredFilters(context.getBinding(), (configurations != null && configurations.length > 0) ? configurations[0] : null);
     }
 
     public PacketFilteringTube(WsitServerTubeAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = false;
 
-        Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
-        this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), configuration);
+        Configuration[] configurations = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives();
+        this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), (configurations != null && configurations.length > 0) ? configurations[0] : null);
     }
 
     @Override
