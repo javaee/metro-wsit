@@ -49,6 +49,7 @@ import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.TransportBinding;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
@@ -90,6 +91,9 @@ public class TransportBindingProcessor extends BindingProcessor {
         while(itr.hasNext()){
             Token token = (Token) itr.next();
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            if (policy instanceof IssuedTokenKeyBinding){
+                ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }
             AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
             atp.setFeatureBinding(policy);
             container.insert(atp);
@@ -101,6 +105,9 @@ public class TransportBindingProcessor extends BindingProcessor {
         while(itr.hasNext()){
             Token token = (Token) itr.next();
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            if (policy instanceof IssuedTokenKeyBinding){
+                ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }
             AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
             atp.setFeatureBinding(policy);
             container.insert(atp);
