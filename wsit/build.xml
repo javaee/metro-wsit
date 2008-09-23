@@ -456,10 +456,11 @@
 
     <target name="-set-uc2-properties" description="Sets properties needed for UC2 push">
         <property name="module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
-        <loadresource property="hudson.last.successful.build">
-            <url url="http://hudson.sfbay.sun.com/job/wsit-javanet/lastSuccessfulBuild/buildNumber" />
-        </loadresource>
-        <property name="module.revision" value="${hudson.last.successful.build}" />    
+        <property name="metro.hudson.job.name" value="wsit-javanet" />
+        <loadresource property="metro.hudson.pushed.build.number">
+            <url url="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/lastSuccessfulBuild/buildNumber" />
+        </loadresource>        
+        <property name="module.revision" value="${metro.hudson.pushed.build.number}" />    
 
         <property environment="env" />
         <property name="makepkgs.path" value="${env.UC2_DIST}/../../../tools"/>
@@ -476,19 +477,19 @@
     
       <mkdir dir="${module.dir}"/>
 
-      <get src="http://hudson.sfbay.sun.com/job/wsit-javanet/${hudson.last.successful.build}/artifact/dist/image/metro/for_v3/jaxb.jar"
+      <get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb.jar"
       dest="${module.dir}/jaxb.jar" />
-      <get src="http://hudson.sfbay.sun.com/job/wsit-javanet/${hudson.last.successful.build}/artifact/dist/image/metro/for_v3/webservices.jar"
+      <get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices.jar"
       dest="${module.dir}/webservices.jar" />      
       <get src="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar"
-        dest="${module.dir}/jsr109-impl-10.0-SNAPSHOT.jar" />
+        dest="${module.dir}/jsr109-impl.jar" />
       
       <copy file="${basedir}/LICENSE.txt" toFile="${module.dir}/Metro-LICENSE.txt" />
         
     </target>
     
     <target name="publish-uc2" depends="-set-uc2-properties">
-        <echo message="Publishing hudson build #${hudson.last.successful.build} to UC2 at ${uc2.repo}" />
+        <echo message="Publishing hudson ${metro.hudson.job.name} job build #${metro.hudson.pushed.build.number} to UC2 at ${uc2.repo}" />
         <exec executable="python">
             <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${module.revision} -b ${basedir}/ucmodule uc2"/>
         </exec>
