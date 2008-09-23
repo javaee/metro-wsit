@@ -259,22 +259,22 @@ public abstract class PacketAdapter {
      * @return
      */
     public final PacketAdapter setEmptyResponseMessage(PacketAdapter requestAdapter, String wsaAction) {
-        checkPacketReadyState();
-        
-        Packet tempPacket = requestAdapter.packet.createServerResponse(
-                Messages.createEmpty(soapVersion),
-                addressingVersion,
-                soapVersion,
-                wsaAction);
-        
-        this.packet.setMessage(tempPacket.getMessage());
-        this.message = this.packet.getMessage();
-
-// TODO replace the above code with this commented out code once we integrate JAX-WS RI 2.1.5 or higher
+// TODO remove the commented code once the new code is proven to work
 //        checkPacketReadyState();
 //        
-//        this.message = Messages.createEmpty(soapVersion);
-//        this.packet.setResponseMessage(requestAdapter.packet, message, addressingVersion, soapVersion, wsaAction);
+//        Packet tempPacket = requestAdapter.packet.createServerResponse(
+//                Messages.createEmpty(soapVersion),
+//                addressingVersion,
+//                soapVersion,
+//                wsaAction);
+//        
+//        this.packet.setMessage(tempPacket.getMessage());
+//        this.message = this.packet.getMessage();
+
+        checkPacketReadyState();
+        
+        this.message = Messages.createEmpty(soapVersion);
+        this.packet.setResponseMessage(requestAdapter.packet, message, addressingVersion, soapVersion, wsaAction);
         return this;        
     }
 
@@ -538,11 +538,6 @@ public abstract class PacketAdapter {
     public final String getSecurityContextTokenId() {
         Session session = getSession();
         return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
-
-// TODO remove old code once this new one is proven to work
-//        
-//        com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) packet.invocationProperties.get(com.sun.xml.wss.impl.MessageConstants.INCOMING_SCT);
-//        return (sct != null) ? sct.getIdentifier().toString() : null;
     }
 
     /**
