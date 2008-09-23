@@ -128,6 +128,16 @@ public abstract class PacketFilter {
             return UNSPECIFIED;
         }
     }
+    
+    /**
+     * Provides information on RM version configured on the current web service port.
+     * May return {@code null} if RM is not enabled on the port.
+     * 
+     * @return RM version configured on the current WS port or {@code null} if RM is not enabled.
+     */
+    protected final RmVersion getRmVersion() {
+        return (rmConfiguration != null) ? rmConfiguration.getRmVersion() : null;
+    }
 
     final void configure(Configuration configuration) {
         this.rmConfiguration = configuration;
