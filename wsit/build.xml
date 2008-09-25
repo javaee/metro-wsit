@@ -445,6 +445,11 @@
     GLASSFISH UPDATE CENTER SCRIPTS
     
     Prerequisities:
+    1. install Update Center v2.0 Toolkit
+    2. Setup the Pyhton environment 
+    3. Setup the UC2_DIST path to point to the UC2 toolkit directory
+    3. cd to Metro code base directory
+    4. run the uc2 ant target
     ===============    
 
     cdmetro
@@ -491,7 +496,7 @@
     <target name="publish-uc2" depends="-set-uc2-properties">
         <echo message="Publishing hudson ${metro.hudson.job.name} job build #${metro.hudson.pushed.build.number} to UC2 at ${uc2.repo}" />
         <exec executable="python">
-            <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${module.revision} -b ${basedir}/ucmodule uc2"/>
+            <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${release.impl.version},0-${module.revision} -b ${basedir}/ucmodule uc2"/>
         </exec>
     </target>    
     
