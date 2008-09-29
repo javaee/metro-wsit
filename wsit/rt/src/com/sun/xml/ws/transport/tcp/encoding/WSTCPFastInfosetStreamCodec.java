@@ -144,10 +144,14 @@ public abstract class WSTCPFastInfosetStreamCodec implements Codec {
             if (_retainState) {
                 SerializerVocabulary vocabulary = configurator.getSerializerVocabularyFactory().newInstance();
                 serializer.setVocabulary(vocabulary);
-                serializer.setAttributeValueSizeLimit(
-                        configurator.getAttributeValueSizeLimit());
-                serializer.setCharacterContentChunkSizeLimit(
-                        configurator.getCharacterContentChunkSizeLimit());
+                serializer.setMinAttributeValueSize(
+                        configurator.getMinAttributeValueSize());
+                serializer.setMaxAttributeValueSize(
+                        configurator.getMaxAttributeValueSize());
+                serializer.setMinCharacterContentChunkSize(
+                        configurator.getMinCharacterContentChunkSize());
+                serializer.setMaxCharacterContentChunkSize(
+                        configurator.getMaxCharacterContentChunkSize());
                 serializer.setAttributeValueMapMemoryLimit(
                         configurator.getAttributeValueMapMemoryLimit());
                 serializer.setCharacterContentChunkMapMemoryLimit(

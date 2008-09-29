@@ -50,7 +50,6 @@ import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings;
 import com.sun.xml.ws.transport.tcp.util.ConnectionManagementSettings.ConnectionManagementSettingsHolder;
-import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;

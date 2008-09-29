@@ -44,8 +44,9 @@ package com.sun.xml.ws.transport.tcp.encoding.configurator;
 public enum WSTCPCodecConfigurator {
     INSTANCE;
 
-    private static final int DEFAULT_INDEXED_STRING_SIZE_LIMIT = 32;
-    private static final int DEFAULT_INDEXED_STRING_MEMORY_LIMIT = 4 * 1024 * 1024; //4M limit
+    private static final int MIN_INDEXED_STRING_SIZE_LIMIT = 0;
+    private static final int MAX_INDEXED_STRING_SIZE_LIMIT = 32;
+    private static final int INDEXED_STRING_MEMORY_LIMIT = 4 * 1024 * 1024; //4M limit
     
     
     private DocumentParserFactory documentParserFactory = new DefaultDocumentParserFactory();
@@ -54,10 +55,12 @@ public enum WSTCPCodecConfigurator {
     private ParserVocabularyFactory parserVocabularyFactory = new DefaultParserVocabularyFactory();
     private SerializerVocabularyFactory serializerVocabularyFactory = new DefaultSerializerVocabularyFactory();
     
-    private int attributeValueSizeLimit = DEFAULT_INDEXED_STRING_SIZE_LIMIT;
-    private int characterContentChunkSizeLimit = DEFAULT_INDEXED_STRING_SIZE_LIMIT;
-    private int attributeValueMapMemoryLimit = DEFAULT_INDEXED_STRING_MEMORY_LIMIT;
-    private int characterContentChunkMapMemoryLimit = DEFAULT_INDEXED_STRING_MEMORY_LIMIT;
+    private int minAttributeValueSize = MIN_INDEXED_STRING_SIZE_LIMIT;
+    private int maxAttributeValueSize = MAX_INDEXED_STRING_SIZE_LIMIT;
+    private int minCharacterContentChunkSize = MIN_INDEXED_STRING_SIZE_LIMIT;
+    private int maxCharacterContentChunkSize = MAX_INDEXED_STRING_SIZE_LIMIT;
+    private int attributeValueMapMemoryLimit = INDEXED_STRING_MEMORY_LIMIT;
+    private int characterContentChunkMapMemoryLimit = INDEXED_STRING_MEMORY_LIMIT;
     
     /**
      * Get the {@link DocumentParserFactory}
@@ -123,25 +126,45 @@ public enum WSTCPCodecConfigurator {
         this.serializerVocabularyFactory = serializerVocabularyFactory;
     }
 
+
     /**
-     * Gets the limit on the size of attribute values
+     * Gets the minimum size of attribute values
      * that will be indexed.
      *
-     * @return The attribute value size limit.
+     * @return The minimum attribute values size.
      */
-    public int getAttributeValueSizeLimit() {
-        return attributeValueSizeLimit;
+    public int getMinAttributeValueSize() {
+        return minAttributeValueSize;
     }
 
     /**
-     * Sets the limit on the size of attribute values
+     * Sets the minimum size of attribute values
      * that will be indexed.
      *
-     * @param size The attribute value size limit. Any value less
-     * that a length of size limit will be indexed.
+     * @param size the minimum attribute values size.
      */
-    public void setAttributeValueSizeLimit(int attributeValueSizeLimit) {
-        this.attributeValueSizeLimit = attributeValueSizeLimit;
+    public void setMinAttributeValueSize(int minAttributeValueSize) {
+        this.minAttributeValueSize = minAttributeValueSize;
+    }
+
+    /**
+     * Gets the maximum size of attribute values
+     * that will be indexed.
+     *
+     * @return The maximum attribute values size.
+     */
+    public int getMaxAttributeValueSize() {
+        return maxAttributeValueSize;
+    }
+
+    /**
+     * Sets the maximum size of attribute values
+     * that will be indexed.
+     *
+     * @param size the maximum attribute values size.
+     */
+    public void setMaxAttributeValueSize(int maxAttributeValueSize) {
+        this.maxAttributeValueSize = maxAttributeValueSize;
     }
 
     /**
@@ -166,24 +189,43 @@ public enum WSTCPCodecConfigurator {
     }
 
     /**
-     * Gets the limit on the size of character content chunks
+     * Gets the minimum size of character content chunks
      * that will be indexed.
      *
-     * @return The character content chunk size limit.
+     * @return The minimum character content chunk size.
      */
-    public int getCharacterContentChunkSizeLimit() {
-        return characterContentChunkSizeLimit;
+    public int getMinCharacterContentChunkSize() {
+        return minCharacterContentChunkSize;
     }
 
     /**
-     * Sets the limit on the size of character content chunks
+     * Sets the minimum size of character content chunks
      * that will be indexed.
      *
-     * @param size The character content chunk size limit. Any chunk less
-     * that a length of size limit will be indexed.
+     * @param size the minimum character content chunk size.
      */
-    public void setCharacterContentChunkSizeLimit(int characterContentChunkSizeLimit) {
-        this.characterContentChunkSizeLimit = characterContentChunkSizeLimit;
+    public void setMinCharacterContentChunkSize(int minCharacterContentChunkSize) {
+        this.minCharacterContentChunkSize = minCharacterContentChunkSize;
+    }
+
+    /**
+     * Gets the maximum size of character content chunks
+     * that will be indexed.
+     *
+     * @return The maximum character content chunk size.
+     */
+    public int getMaxCharacterContentChunkSize() {
+        return maxCharacterContentChunkSize;
+    }
+
+    /**
+     * Sets the maximum size of character content chunks
+     * that will be indexed.
+     *
+     * @param size the maximum character content chunk size.
+     */
+    public void setMaxCharacterContentChunkSize(int maxCharacterContentChunkSize) {
+        this.maxCharacterContentChunkSize = maxCharacterContentChunkSize;
     }
 
     /**
