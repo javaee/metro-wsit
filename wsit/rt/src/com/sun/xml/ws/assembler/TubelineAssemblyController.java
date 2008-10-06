@@ -43,8 +43,6 @@ import javax.xml.ws.WebServiceException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
