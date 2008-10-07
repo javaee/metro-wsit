@@ -93,6 +93,8 @@ public class TransportBindingProcessor extends BindingProcessor {
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
             if (policy instanceof IssuedTokenKeyBinding){
                 ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }else if (policy instanceof AuthenticationTokenPolicy.SAMLAssertionBinding){
+                ((AuthenticationTokenPolicy.SAMLAssertionBinding)policy).setSTRID(null);
             }
             AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
             atp.setFeatureBinding(policy);
@@ -107,6 +109,8 @@ public class TransportBindingProcessor extends BindingProcessor {
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
             if (policy instanceof IssuedTokenKeyBinding){
                 ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }else if (policy instanceof AuthenticationTokenPolicy.SAMLAssertionBinding){
+                ((AuthenticationTokenPolicy.SAMLAssertionBinding)policy).setSTRID(null);
             }
             AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
             atp.setFeatureBinding(policy);
@@ -187,6 +191,11 @@ public class TransportBindingProcessor extends BindingProcessor {
         while(itr.hasNext()){
             Token token = (Token) itr.next();
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            if (policy instanceof IssuedTokenKeyBinding){
+                ((IssuedTokenKeyBinding)policy).setSTRID(null);
+            }else if (policy instanceof AuthenticationTokenPolicy.SAMLAssertionBinding){
+                ((AuthenticationTokenPolicy.SAMLAssertionBinding)policy).setSTRID(null);
+            }
             AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
             atp.setFeatureBinding(policy);
             container.insert(atp);
