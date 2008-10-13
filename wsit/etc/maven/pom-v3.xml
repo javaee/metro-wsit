@@ -44,7 +44,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sun.xml.ws</groupId>
     <artifactId>webservices</artifactId>
-    <version>1.4</version>
+    <version>1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     
     <name>Metro OSGi bundles for GlassFish V3</name>
@@ -68,11 +68,22 @@
         </license>
     </licenses>
 
+    <description>
+        Metro is a high-performance, extensible, easy-to-use web service stack.
+        It is a one-stop shop for all your web service needs, from the simplest
+        hello world web service to reliable, secured, and transacted web service
+        that involves .NET services.
+        
+        This module is exclusively meant for use in GlassFish V3 development. It
+        is highly unlikely to work in any other environment. If you are looking
+        for a Maven distribution of Metro, please use com.sun.xml.ws.webservices.
+    </description>
+
     <dependencies>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb</artifactId>
-            <version>2.1.9</version>
+            <version>2.1.9-SNAPSHOT</version>
             <classifier>osgi</classifier>
         </dependency>
     </dependencies>

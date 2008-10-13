@@ -43,7 +43,7 @@
     <parent>
         <groupId>com.sun.xml.ws</groupId>
         <artifactId>webservices</artifactId>
-        <version>1.4</version>
+        <version>1.4-SNAPSHOT</version>
 
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -60,6 +60,16 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <description>
+        Metro is a high-performance, extensible, easy-to-use web service stack.
+        It is a one-stop shop for all your web service needs, from the simplest
+        hello world web service to reliable, secured, and transacted web service
+        that involves .NET services.
+        
+        This module contains the Metro runtime code. It has not been tested on
+        its own and instead you should depend on the parent module
+        com.sun.xml.ws.webservices.
+    </description>
 
     <build>
         <plugins>
