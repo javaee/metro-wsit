@@ -68,6 +68,17 @@
         </license>
     </licenses>
 
+    <description>
+        Metro is a high-performance, extensible, easy-to-use web service stack.
+        It is a one-stop shop for all your web service needs, from the simplest
+        hello world web service to reliable, secured, and transacted web service
+        that involves .NET services.
+        
+        This module is exclusively meant for use in GlassFish V3 development. It
+        is highly unlikely to work in any other environment. If you are looking
+        for a Maven distribution of Metro, please use com.sun.xml.ws.webservices.
+    </description>
+
     <build>
         <plugins>
             <!-- fake out maven and install the binary artifact -->

@@ -45,7 +45,7 @@
     <version>1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Maven modules for Metro</name>
+    <name>Metro</name>
     <url>https://metro.dev.java.net/</url>
     <organization>
         <name>Sun Microsystems, Inc</name>
@@ -63,6 +63,17 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <description>
+        Metro is a high-performance, extensible, easy-to-use web service stack.
+        It is a one-stop shop for all your web service needs, from the simplest
+        hello world web service to reliable, secured, and transacted web service
+        that involves .NET services.
+        
+        This is the top module for the Metro project. This is the module you
+        should depend upon by default. The Maven distribution is meant for use
+        of Metro outside a container. For Tomcat or GlassFish please use the
+        regular distribution with its installation scripts.
+    </description>
 
     <build>
         <extensions>
