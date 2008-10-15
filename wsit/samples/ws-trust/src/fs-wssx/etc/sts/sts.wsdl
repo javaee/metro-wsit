@@ -44,8 +44,8 @@
                                               xmlns:i0="http://xmlsoap.org/DAB" 
                                               xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                                               xmlns:wsp="http://www.w3.org/ns/ws-policy" 
-                                              xmlns:tns="http://tempuri.org/" 
-                                              xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" 
+                                              xmlns:tns="http://tempuri.org/"
+                                              xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
                                               xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" 
                                               xmlns:wsa10="http://www.w3.org/2005/08/addressing">
 	<wsp:Policy wsu:Id="ISecurityTokenService_policy">
@@ -188,27 +188,27 @@
 	<wsdl:portType name="ISecurityTokenService">
 		<wsdl:operation name="IssueToken">
 			<wsdl:input wsam:Action="http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" message="tns:ISecurityTokenService_IssueToken_InputMessage"/>
-			<wsdl:output wsam:Action="http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/Issue" message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
+			<wsdl:output wsam:Action="http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal" message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
 		</wsdl:operation>
 	</wsdl:portType>
 	<wsdl:binding name="ISecurityTokenService_Binding" type="tns:ISecurityTokenService">
 		<wsp:PolicyReference URI="#ISecurityTokenService_policy"/>
-		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="IssueToken">
-			<soap12:operation soapAction="http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" style="document"/>
+			<soap:operation soapAction="http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue" style="document"/>
 			<wsdl:input>
 				<wsp:PolicyReference URI="#ISecurityTokenService_IssueToken_Input_policy"/>
-				<soap12:body use="literal"/>
+				<soap:body use="literal"/>
 			</wsdl:input>
 			<wsdl:output>
 				<wsp:PolicyReference URI="#ISecurityTokenService_IssueToken_Output_policy"/>
-				<soap12:body use="literal"/>
+				<soap:body use="literal"/>
 			</wsdl:output>
 		</wsdl:operation>
 	</wsdl:binding>
 	<wsdl:service name="SecurityTokenService">
 		<wsdl:port name="ISecurityTokenService_Port" binding="tns:ISecurityTokenService_Binding">
-			<soap12:address location="http://localhost:8080/jaxws-sts/sts"/>
+			<soap:address location="http://localhost:8080/jaxws-fs-wssx-sts/sts"/>
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
