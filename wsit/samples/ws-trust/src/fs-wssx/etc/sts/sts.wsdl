@@ -79,7 +79,7 @@
 						<sp:OnlySignEntireHeadersAndBody/>
 					</wsp:Policy>
 				</sp:SymmetricBinding>
-				<sp:SignedSupportingTokens xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+				<sp:SignedEncryptedSupportingTokens xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
                                     <wsp:Policy>
                                         <sp:UsernameToken sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
                                             <wsp:Policy>
@@ -87,7 +87,7 @@
                                             </wsp:Policy>
                                         </sp:UsernameToken>
                                     </wsp:Policy>
-                                </sp:SignedSupportingTokens>
+                                </sp:SignedEncryptedSupportingTokens>
 				<sp:Wss11 xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 					<wsp:Policy>
 						<sp:MustSupportRefKeyIdentifier/>
@@ -97,21 +97,22 @@
 						<!--sp:RequireSignatureConfirmation/-->
 					</wsp:Policy>
 				</sp:Wss11>
-				<sp:Trust10 xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+				<sp:Trust13 xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 					<wsp:Policy>
 						<sp:MustSupportIssuedTokens/>
 						<sp:RequireClientEntropy/>
 						<sp:RequireServerEntropy/>
 					</wsp:Policy>
-				</sp:Trust10>
+				</sp:Trust13>
                                 <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
-                                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-keystore.jks" storepass="changeit" alias="wssip"/>
-                                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="$WSIT_HOME/xws-security/etc/sts-truststore.jks" storepass="changeit"/>
-
+                                <sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="C:/Program Files/glassfish-v2ur2/domains/domain1/config/keystore.jks" storepass="changeit" alias="wssip"/>
+                                <sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" location="C:/Program Files/glassfish-v2ur2//domains/domain1/config/cacerts.jks" storepass="changeit"/>
+				
                                 <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
                                     <sc:Validator name="usernameValidator"  classname="common.SampleUsernamePasswordValidator"/> 
                                     <!--sc:Validator name="usernameValidator"  classname="common.SampleAMUsernamePasswordValidator"/-->
-                                </sc:ValidatorConfiguration>
+                                    <sc:Validator name="timestampValidator"  classname="common.SampleTimestampValidator"/>
+                               </sc:ValidatorConfiguration>
                                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
                                      <tc:LifeTime>36000</tc:LifeTime>
                                      <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
