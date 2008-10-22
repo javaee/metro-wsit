@@ -45,7 +45,7 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:CloseTimeout Miliseconds="..." />
+ * <sunc:CloseTimeout Milliseconds="..." />
  */
 /**
  * Defines a period of time after which an attempt to close a session would timeout.
@@ -54,7 +54,7 @@ import javax.xml.namespace.QName;
  */
 public class CloseTimeoutClientAssertion extends SimpleAssertion {
     public static final QName NAME = new QName(Constants.sunClientVersion, "CloseTimeout");
-    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
@@ -71,7 +71,7 @@ public class CloseTimeoutClientAssertion extends SimpleAssertion {
     public CloseTimeoutClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
         
-        timeout = Long.parseLong(data.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
+        timeout = Long.parseLong(data.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
     }
    
     public long getTimeout() {

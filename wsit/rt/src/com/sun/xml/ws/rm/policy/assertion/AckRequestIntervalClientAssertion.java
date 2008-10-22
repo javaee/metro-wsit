@@ -45,7 +45,7 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:AckRequestInterval Miliseconds="..." />
+ * <sunc:AckRequestInterval Milliseconds="..." />
  */
 /**
  * Defines an inactivity period after which a client with unacknowledged messages 
@@ -55,7 +55,7 @@ import javax.xml.namespace.QName;
  */
 public class AckRequestIntervalClientAssertion extends SimpleAssertion {
     public static final QName NAME = new QName(Constants.sunClientVersion, "AckRequestInterval");
-    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
@@ -72,7 +72,7 @@ public class AckRequestIntervalClientAssertion extends SimpleAssertion {
     private AckRequestIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
         
-        interval = Long.parseLong(super.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
+        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
     }
    
     public long getInterval() {

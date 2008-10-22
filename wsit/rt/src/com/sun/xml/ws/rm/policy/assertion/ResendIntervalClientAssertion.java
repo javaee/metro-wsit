@@ -45,7 +45,7 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:ResendInterval Miliseconds="..." />
+ * <sunc:ResendInterval Milliseconds="..." />
  */
 /**
  * Specifies a time period for client attempts to resend unacknowledged messages.
@@ -54,7 +54,7 @@ import javax.xml.namespace.QName;
  */
 public class ResendIntervalClientAssertion extends SimpleAssertion {
     public static final QName NAME = new QName(Constants.sunClientVersion, "ResendInterval");
-    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
@@ -71,7 +71,7 @@ public class ResendIntervalClientAssertion extends SimpleAssertion {
     public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
         
-        interval = Long.parseLong(super.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
+        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
     }
    
     public long getInterval() {
