@@ -48,7 +48,6 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.Configuration;
 import java.util.Locale;
 import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 
@@ -58,17 +57,6 @@ import javax.xml.soap.SOAPFault;
  */
 public abstract class AbstractRmSoapFault extends RmException {
 
-    /**
-     * SOAP 1.1 Sender Fault
-     */
-    private static final QName SOAP_1_1_SENDER_FAULT =
-            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Client", SOAPConstants.SOAP_ENV_PREFIX);
-    /**
-     * SOAP 1.2 Receiver Fault
-     */
-    private static final QName SOAP_1_1_RECEIVER_FAULT =
-            new QName(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "Server", SOAPConstants.SOAP_ENV_PREFIX);
-    //
     private final transient Packet soapFaultResponse;
 
     public AbstractRmSoapFault(Configuration configuration, Packet request, QName subcode, String reason) {
@@ -103,14 +91,12 @@ public abstract class AbstractRmSoapFault extends RmException {
                 soapFault.setFaultString(reason, Locale.ENGLISH);
             }
 
+            soapFault.setFaultCode(configuration.getSoapVersion().faultCodeServer);
             // SOAP version-specific SOAP Fault settings
-            // FIXME: check if the code we generate is allways a Sender.
             switch (configuration.getSoapVersion()) {
                 case SOAP_11:
-                    soapFault.setFaultCode(SOAP_1_1_SENDER_FAULT);
                     break;
                 case SOAP_12:
-                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
                     soapFault.appendFaultSubcode(subcode);
                     break;
                 default:
@@ -163,7 +149,7 @@ public abstract class AbstractRmSoapFault extends RmException {
                     soapFault.setFaultCode(subcode);
                     break;
                 case SOAP_12:
-                    soapFault.setFaultCode(SOAPConstants.SOAP_SENDER_FAULT);
+                    soapFault.setFaultCode(configuration.getSoapVersion().faultCodeServer);
                     soapFault.appendFaultSubcode(subcode);
                     break;
                 default:
