@@ -109,7 +109,7 @@ public final class Rm11Assertion extends ComplexAssertion {
         }
         
         if (deliveryAssuranceAssertion == null) {
-            deliveryAssurance = DeliveryAssurance.EXACTLY_ONCE;
+            deliveryAssurance = DeliveryAssurance.getDefault();
             isOrderedDelivery = false;
         } else {
             deliveryAssurance = deliveryAssuranceAssertion.getDeliveryAssurance();

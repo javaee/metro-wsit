@@ -103,7 +103,7 @@ public class DeliveryAssuranceAssertion extends ComplexAssertion {
                 }
             }
         }
-        deliveryAssurance = (_deliveryAssurance == null) ? DeliveryAssurance.EXACTLY_ONCE : _deliveryAssurance;
+        deliveryAssurance = (_deliveryAssurance == null) ? DeliveryAssurance.getDefault() : _deliveryAssurance;
         orderedDelivery = _orderedDelivery;
     }
 
