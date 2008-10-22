@@ -35,7 +35,17 @@
  holder.
 -->
 
-<TerminateSequence xmlns="http://docs.oasis-open.org/ws-rx/wsrm/200702">
-    <Identifier>uuid:839aabc1-fcfd-4402-9f88-0462c01a01ed</Identifier>
-    <LastMsgNumber>3</LastMsgNumber>
-</TerminateSequence>
+<wsp1:Policy wsu:Id="RmEnabledServicePolicy"
+xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+xmlns:wsp1="http://schemas.xmlsoap.org/ws/2004/09/policy"
+xmlns:wsrm1="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
+xmlns:sunrm="http://sun.com/2006/03/rm"
+xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy" >
+    <wsp1:ExactlyOne>
+        <wsp1:All>
+            <wsrm1:RMAssertion />
+            <net:RmFlowControl />
+        </wsp1:All>
+    </wsp1:ExactlyOne>
+</wsp1:Policy>
+
