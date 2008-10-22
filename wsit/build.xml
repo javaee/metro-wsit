@@ -151,11 +151,11 @@
                 <fileset dir="${tmpdir}" includes="jaxb-xjc.*, *-tools.*"/>
             </copy>
             <zip file="lib/jaxws-samples.zip">
-              <fileset dir="${tmpdir}/jaxws-ri/samples" />
+                <fileset dir="${tmpdir}/jaxws-ri/samples" />
             </zip>
-          <zip file="lib/jaxws-bin.zip">
-            <fileset dir="${tmpdir}/jaxws-ri/bin" />
-          </zip>
+            <zip file="lib/jaxws-bin.zip">
+                <fileset dir="${tmpdir}/jaxws-ri/bin" />
+            </zip>
 
             <!-- retrieve the JAX-WS source zips -->
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"
@@ -196,7 +196,7 @@
              dest="${lib.osgi.dir}/jaxb.jar" />
     </target>
 
-    <target name="integrate-xwss30-hudson" 
+    <target name="integrate-xwss30-hudson"
             description="integrate the last successful XWSS 3.0 Hudson build">
         <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
          dest="lib/xws-security.src.zip" / -->
@@ -206,7 +206,7 @@
              dest="lib/runtime/xws-security.src.zip" />
     </target>
 
-    <target name="integrate-jaxrpc" 
+    <target name="integrate-jaxrpc"
             description="integrate the last successful jaxrpc with jcaps fixes build">
         <get src="http://kohsuke.sfbay/hudson/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-impl.jar"
              dest="lib/runtime/jaxrpc-impl.jar" />
@@ -225,7 +225,7 @@
     </target>
 
     <target name="runtests">
-      <ant antfile="run-ql-tests.xml"/>
+        <ant antfile="run-ql-tests.xml"/>
     </target>
 
     <target name="create-wsit-integration-zip" depends="dist, src-zip"
@@ -272,19 +272,19 @@
 
     <target name="integrate-htmlmacro-hudson"
             description="integrate the last successful htmlmacro Hudson build">
-      <get
+        <get
           src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
           dest="${lib.releasenotes.dir}/htmlmacro.zip"/>
-      <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
-      <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
-      <copy todir="${lib.releasenotes.dir}" overwrite="true">
-        <fileset dir="${lib.releasenotes.dir}/htmlmacro/" includes="*.zip,*.jar"/>
-      </copy>
-      <delete dir="${lib.releasenotes.dir}/htmlmacro"/>
-      <delete file="${lib.releasenotes.dir}/htmlmacro.zip"/>
+        <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
+        <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
+        <copy todir="${lib.releasenotes.dir}" overwrite="true">
+            <fileset dir="${lib.releasenotes.dir}/htmlmacro/" includes="*.zip,*.jar"/>
+        </copy>
+        <delete dir="${lib.releasenotes.dir}/htmlmacro"/>
+        <delete file="${lib.releasenotes.dir}/htmlmacro.zip"/>
     </target>
 
-  <macrodef name="generate-release-notes">
+    <macrodef name="generate-release-notes">
         <attribute name="target" /><!-- where to put the generated docs? -->
         <sequential>
             <mkdir dir="@{target}"/>
@@ -293,13 +293,13 @@
             </copy>
             <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
                 <classpath>
-                  <fileset dir="lib/releasenotes" />
+                    <fileset dir="lib/releasenotes" />
                 </classpath>
             </taskdef>
             <mkdir dir="build/release-notes-src"/>
             <unzip src="lib/releasenotes/release-notes-src.zip" dest="build/release-notes-src"/>
             <copy todir="build/release-notes-src" overwrite="true">
-              <fileset dir="docs/releasenotes" />
+                <fileset dir="docs/releasenotes" />
             </copy>
             <htmlmacro destdir="@{target}">
                 <documents dir="build/release-notes-src" includes="*.html" />
@@ -325,62 +325,62 @@
 
     
 
-     <target name="generate-bundle-for-licensee" depends="init">
-         <property name="wsit.ws.dir" value="${basedir}"/>
-         <property name="source.drop.dir" value="build/source-bundle"/>
-         <property name="source.dist.dir.name" value="wsit-sourcebundle-${BUILD_TAG}"/>
+    <target name="generate-bundle-for-licensee" depends="init">
+        <property name="wsit.ws.dir" value="${basedir}"/>
+        <property name="source.drop.dir" value="build/source-bundle"/>
+        <property name="source.dist.dir.name" value="wsit-sourcebundle-${BUILD_TAG}"/>
 
 
-         <property name="ws.source.dir" value="${source.drop.dir}"/>
-         <echo message="wsit.ws.dir => ${wsit.ws.dir}" />
-         <echo message="ws.source.dir => ${ws.source.dir}" />
-         <mkdir dir="${ws.source.dir}" />
-         <delete dir="${ws.source.dir}" />
+        <property name="ws.source.dir" value="${source.drop.dir}"/>
+        <echo message="wsit.ws.dir => ${wsit.ws.dir}" />
+        <echo message="ws.source.dir => ${ws.source.dir}" />
+        <mkdir dir="${ws.source.dir}" />
+        <delete dir="${ws.source.dir}" />
 
-         <echo message="Copying wsit sources"/>
-         <mkdir dir="${ws.source.dir}/wsit/rt" />
+        <echo message="Copying wsit sources"/>
+        <mkdir dir="${ws.source.dir}/wsit/rt" />
 
-         <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/build.xml"/>
-         <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/properties.xml"/>
-         <copy todir="${ws.source.dir}/wsit/rt">
-             <fileset dir="${wsit.ws.dir}/rt"/>
-         </copy>
+        <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/build.xml"/>
+        <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/properties.xml"/>
+        <copy todir="${ws.source.dir}/wsit/rt">
+            <fileset dir="${wsit.ws.dir}/rt"/>
+        </copy>
 
-         <copy todir="${ws.source.dir}/wsit/tools">
-             <fileset dir="${wsit.ws.dir}/tools"/>
-         </copy>
+        <copy todir="${ws.source.dir}/wsit/tools">
+            <fileset dir="${wsit.ws.dir}/tools"/>
+        </copy>
 
-         <copy todir="${ws.source.dir}/wsit/lib/">
-             <fileset dir="${wsit.ws.dir}/lib"/>
-         </copy>
+        <copy todir="${ws.source.dir}/wsit/lib/">
+            <fileset dir="${wsit.ws.dir}/lib"/>
+        </copy>
 
-         <copy todir="${ws.source.dir}/wsit/docs">
-             <fileset dir="${wsit.ws.dir}/docs"/>
-         </copy>
+        <copy todir="${ws.source.dir}/wsit/docs">
+            <fileset dir="${wsit.ws.dir}/docs"/>
+        </copy>
 
 
-         <copy todir="${ws.source.dir}/wsit">
-             <fileset dir="${wsit.ws.dir}">
-                 <include name="*.html"/>
-                 <include name="*.txt"/>
-             </fileset>
-         </copy>
+        <copy todir="${ws.source.dir}/wsit">
+            <fileset dir="${wsit.ws.dir}">
+                <include name="*.html"/>
+                <include name="*.txt"/>
+            </fileset>
+        </copy>
          
-         <copy todir="${ws.source.dir}/wsit/nbproject">
-             <fileset dir="${wsit.ws.dir}/nbproject"/>
-         </copy>
-         <copy todir="${ws.source.dir}/wsit/etc">
-             <fileset dir="${wsit.ws.dir}/etc"/>
-         </copy>
-         <delete>
-             <fileset dir="${wsit.ws.dir}" includes="**/CVS" />
-         </delete>
+        <copy todir="${ws.source.dir}/wsit/nbproject">
+            <fileset dir="${wsit.ws.dir}/nbproject"/>
+        </copy>
+        <copy todir="${ws.source.dir}/wsit/etc">
+            <fileset dir="${wsit.ws.dir}/etc"/>
+        </copy>
+        <delete>
+            <fileset dir="${wsit.ws.dir}" includes="**/CVS" />
+        </delete>
 
 
-         <zip destfile="${source.drop.dir}/wsit-licensee-bundle.zip"
+        <zip destfile="${source.drop.dir}/wsit-licensee-bundle.zip"
               basedir="${ws.source.dir}"
                  />
-     </target>
+    </target>
 
    
 
@@ -460,45 +460,92 @@
     -->
 
     <target name="-set-uc2-properties" description="Sets properties needed for UC2 push">
-        <property name="module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
-        <property name="metro.hudson.job.name" value="wsit-javanet" />
+        <property name="gfv3.module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
+        <property name="gfv3.bin.dir" value="${basedir}/ucmodule/glassfish/bin"/>
+
+        <property name="module.version" value="1.4" />
+        <property name="module.revision" value="5007" />
+        <!--property name="metro.hudson.job.name" value="wsit-javanet" />
         <loadresource property="metro.hudson.pushed.build.number">
             <url url="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/lastSuccessfulBuild/buildNumber" />
-        </loadresource>        
-        <property name="module.revision" value="${metro.hudson.pushed.build.number}" />    
+        </loadresource>
+        <property name="module.revision" value="${metro.hudson.pushed.build.number}" /-->
+
+        <property name="webservices.jar.source.url" value="http://download.java.net/maven/2/com/sun/xml/ws/webservices/1.4-RC1/webservices-1.4-RC1-osgi.jar" />
+        <!--property name="webservices.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices.jar" /-->
+        <!--property name="webservices.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/webservices.jar" /-->
+
+        <property name="jaxb.jar.source.url" value="http://download.java.net/maven/2/com/sun/xml/bind/jaxb/2.1.9-RC1/jaxb-2.1.9-RC1-osgi.jar" />
+        <!--property name="jaxb.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb.jar" /-->
+        <!--property name="jaxb.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/jaxb.jar" /-->
+
+        <property name="jsr109.jar.source.url" value="http://javaweb.sfbay/~bhakti/109oct20/jsr109-impl.jar" />
+        <!--property name="jsr109.jar.source.url" value="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar" /-->
+
+        <property name="shell.scripts.source.url.base" value="http://hudson.sfbay/job/jsr109-impl/ws/webservices/jsr109-impl/target/classes" />
+
 
         <property environment="env" />
         <property name="makepkgs.path" value="${env.UC2_DIST}/../../../tools"/>
-        <property name="uc2.repo" value="http://eflat.sfbay.sun.com:10000"/>
-        <!--property name="uc2.repo" value="http://localhost:10000/"/-->
-        <!--property name="uc2.repo" value="http://iasengsol10.red.iplanet.com:10003"/-->        
+        <property name="uc2.repo" value="http://eflat.sfbay.sun.com:40000"/>
+        <!--property name="uc2.repo" value="http://repine.sfbay.sun.com:40000"/-->
     </target>
 
     <target name="-clean-uc2" description="Clean UC related things">
-      <delete dir="${basedir}/ucmodule"/>
+        <delete dir="${basedir}/ucmodule"/>
     </target>
     
-    <target name="prepare-uc2" depends="-clean-uc2, -set-uc2-properties" description="Prepare GlassFish Update Center Module"> 
-    
-      <mkdir dir="${module.dir}"/>
+    <target name="prepare-uc2" depends="-clean-uc2, -set-uc2-properties" description="Prepare GlassFish Update Center Module">
 
-      <get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb.jar"
-      dest="${module.dir}/jaxb.jar" />
-      <get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices.jar"
-      dest="${module.dir}/webservices.jar" />      
-      <get src="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar"
-        dest="${module.dir}/jsr109-impl.jar" />
-      
-      <copy file="${basedir}/LICENSE.txt" toFile="${module.dir}/Metro-LICENSE.txt" />
+        <mkdir dir="${gfv3.module.dir}"/>
+        <mkdir dir="${gfv3.bin.dir}"/>
+
+        <echo message="Retrieving webservices.jar from '${webservices.jar.source.url}'" />
+        <get src="${webservices.jar.source.url}" dest="${gfv3.module.dir}/webservices.jar" verbose="false" />
+
+        <echo message="Retrieving jaxb.jar from '${jaxb.jar.source.url}'" />
+        <get src="${jaxb.jar.source.url}" dest="${gfv3.module.dir}/jaxb.jar" verbose="false" />
+            
+        <echo message="Retrieving jsr109-impl.jar from '${jsr109.jar.source.url}'" />
+        <get src="${jsr109.jar.source.url}" dest="${gfv3.module.dir}/jsr109-impl.jar" verbose="false" />
+        
+        <echo message="Retrieving shell scripts from '${shell.scripts.source.url.base}/'" />
+        <copy todir="${gfv3.bin.dir}" flatten="true" verbose="true" >
+            <resources>
+                <url url="${shell.scripts.source.url.base}/schemagen"/>
+                <url url="${shell.scripts.source.url.base}/schemagen.bat"/>
+
+                <url url="${shell.scripts.source.url.base}/wscompile"/>
+                <url url="${shell.scripts.source.url.base}/wscompile.bat"/>
+
+                <url url="${shell.scripts.source.url.base}/wsdeploy"/>
+                <url url="${shell.scripts.source.url.base}/wsdeploy.bat"/>
+
+                <url url="${shell.scripts.source.url.base}/wsgen"/>
+                <url url="${shell.scripts.source.url.base}/wsgen.bat"/>
+
+                <url url="${shell.scripts.source.url.base}/wsimport"/>
+                <url url="${shell.scripts.source.url.base}/wsimport.bat"/>
+
+                <url url="${shell.scripts.source.url.base}/xjc"/>
+                <url url="${shell.scripts.source.url.base}/xjc.bat"/>
+            </resources>
+        </copy>
+              
+        <echo message="Adding Metro license" />
+        <copy file="${basedir}/LICENSE.txt" toFile="${gfv3.module.dir}/Metro-LICENSE.txt" />
         
     </target>
     
     <target name="publish-uc2" depends="-set-uc2-properties">
-        <echo message="Publishing hudson ${metro.hudson.job.name} job build #${metro.hudson.pushed.build.number} to UC2 at ${uc2.repo}" />
+        <property name="full.module.version" value="${module.version},0-${module.revision}" />
+
+        <echo message="Push Metro module v${full.module.version} to ${uc2.repo}" />
         <exec executable="python">
-            <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${release.impl.version},0-${module.revision} -b ${basedir}/ucmodule uc2"/>
+            <arg line="${makepkgs.path}/makepkgs.py -s ${uc2.repo} -v ${full.module.version} -b ${basedir}/ucmodule uc2"/>
         </exec>
-    </target>    
+        <echo message="Push finished" />
+    </target>
     
     <target name="uc2" depends="prepare-uc2,publish-uc2" />
 </project>
