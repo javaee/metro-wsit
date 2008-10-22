@@ -81,8 +81,8 @@ public class RmFlowControlAssertion extends ComplexAssertion {
 
         long _maxBufferSize = DEFAULT_DESTINATION_BUFFER_QUOTA; // default
         boolean bufferSizeSet = false;
-        if (nestedAlternative != null) {
-            for (PolicyAssertion assertion : nestedAlternative) {
+        if (assertionParameters != null) {
+            for (PolicyAssertion assertion : assertionParameters) {
                 if (BUFFER_SIZE_ASSERTION_QNAME.equals(assertion.getName())) {
                     if (bufferSizeSet) {
                         throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1006_MULTIPLE_BUFFER_SIZES_IN_POLICY()));
