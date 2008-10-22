@@ -60,7 +60,11 @@ public interface Configuration {
     public static enum DeliveryAssurance {
         EXACTLY_ONCE,
         AT_LEAST_ONCE,
-        AT_MOST_ONCE
+        AT_MOST_ONCE;
+
+        public static DeliveryAssurance getDefault() {
+            return DeliveryAssurance.EXACTLY_ONCE;
+        }
     }
 
     /**
