@@ -110,6 +110,7 @@
     <!-- Complex Type Definitions -->
     <xsd:complexType name="metroConfigCType">
         <xsd:sequence>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element ref="tns:tubelines" minOccurs="0" maxOccurs="1" />
             <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
@@ -204,11 +205,11 @@
 
     <xsd:complexType name="tubeFactoriesListCType">
         <xsd:sequence>
-            <xsd:element name="tube-factory" maxOccurs="unbounded" type="xsd:string">
+            <xsd:element name="tube-factory" maxOccurs="unbounded" type="tns:tubeFactoryCType">
                 <xsd:annotation>
                     <xsd:documentation>
-                        The  element holds fully qualified name of a tube factory class
-                        implementation. Each tube factory implements a specific interface
+                        The  element holds information necessary for instantiating
+                        the tube factory. Each tube factory implements a specific interface
                         that declares methods invoked during a tubeline construction
                         in the Metro tubeline assembler.
                     </xsd:documentation>
@@ -216,6 +217,23 @@
             </xsd:element>
             <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
+        <xsd:anyAttribute namespace="##other" processContents="lax" />
+    </xsd:complexType>
+
+    <xsd:complexType name="tubeFactoryCType">
+        <xsd:sequence>
+            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="className" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:documentation>
+                    This required attribute holds the fully qualified name of a tube factory
+                    class implementation. Each tube factory implements a specific interface
+                    that declares methods invoked during a tubeline construction in the Metro
+                    tubeline assembler.
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
         <xsd:anyAttribute namespace="##other" processContents="lax" />
     </xsd:complexType>
 </xsd:schema>
