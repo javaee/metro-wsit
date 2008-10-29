@@ -63,6 +63,7 @@ import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
@@ -124,21 +125,19 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     //private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
     private Set wsscConfig = null;
-    private Engine fiberEngine;    
-    
+
     // Creates a new instance of SecurityClientTube
     public SecurityClientTube(WsitClientTubeAssemblyContext wsitContext, Tube nextTube) {
         super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
-        //scPlugin = new WSSCPlugin(null, wsscVer);        
-        CallbackHandler handler = null;        
+        //scPlugin = new WSSCPlugin(null, wsscVer);
         try {            
             Iterator it = outMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-            Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
+            Set<PolicyAssertion> configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
             wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
             Properties props = new Properties();
-            handler = configureClientHandler(configAssertions, props);
+            CallbackHandler handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         } catch (Exception e) {
             log.log(Level.SEVERE,
@@ -177,9 +176,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     public Packet processClientRequestPacket(Packet packet){
 
         // Add Action header to trust message
-        boolean isTrustMsg = false;
         if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
-            isTrustMsg = true;
             String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
             HeaderList headers = packet.getMessage().getHeaders();
             headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
@@ -286,7 +283,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }   
         
         // Could be OneWay
-        if (ret == null || ret.getMessage() == null) {
+        if (ret.getMessage() == null) {
             return ret;
         }
 
@@ -390,11 +387,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
-                            ((Token)scToken).getTokenId(), ctx);                    
+                            scToken.getTokenId(), ctx);
                     //PolicyID to sctID map
                     SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-                    scPolicyIDtoSctIdMap.put(((Token)scToken).getTokenId(), sctConfig.getTokenId());
-                    fiberEngine = Fiber.current().owner;
+                    scPolicyIDtoSctIdMap.put(scToken.getTokenId(), sctConfig.getTokenId());
                 }catch(WSTrustException se){
                     log.log(Level.SEVERE,
                         LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -418,7 +414,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             operation = getOperation(packet.getMessage());
         }
 
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if (sph == null) {
             return EMPTY_LIST;
         }
@@ -440,7 +436,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         //Note: Assuming only one SC assertion
         Token tok = (Token) toks.get(0);
         IssuedTokenContext ctx =
-                (IssuedTokenContext) issuedTokenContextMap.get(tok.getTokenId());
+                issuedTokenContextMap.get(tok.getTokenId());
 
         PolicyAssertion scClientAssertion = null;
         if (wsscConfig != null) {
@@ -458,11 +454,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                 
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
-                issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+                issuedTokenContextMap.put(tok.getTokenId(), ctx);
                 //PolicyID to sctID map
                 SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-                scPolicyIDtoSctIdMap.put(((Token)tok).getTokenId(), sctConfig.getTokenId());
-                fiberEngine = Fiber.current().owner;
+                scPolicyIDtoSctIdMap.put(tok.getTokenId(), sctConfig.getTokenId());
             }catch(WSTrustException se){
                 log.log(Level.SEVERE,
                         LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
@@ -480,7 +475,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         while (keys.hasMoreElements()) {
             String id = (String) keys.nextElement();
             IssuedTokenContext ctx =
-                    (IssuedTokenContext)issuedTokenContextMap.get(id);
+                    issuedTokenContextMap.get(id);
             
             if (ctx.getSecurityToken() instanceof SecurityContextToken){
                 try{
@@ -649,7 +644,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
          */        
         Message message = packet.getMessage();
         WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if(sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()){
             MessagePolicy policy = sph.getMessagePolicy();
             ArrayList list = policy.getPrimaryPolicies();
@@ -685,7 +680,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     }
 
     //TODO use constants here
-    private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
+    private CallbackHandler configureClientHandler(Set<PolicyAssertion> configAssertions, Properties props) {
+        CallbackHandlerFeature chf = pipeConfig.getBinding().getFeature(CallbackHandlerFeature.class);
+        if(chf!=null)   return chf.getHandler();
+
         //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
