@@ -63,6 +63,14 @@
         com.sun.xml.ws.webservices.
     </description>
 
+    <dependencies>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+    
     <build>
         <plugins>
             <!-- fake out maven and install the binary artifact -->
