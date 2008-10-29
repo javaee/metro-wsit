@@ -47,18 +47,46 @@
 <xsd:schema
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:tns="http://java.sun.com/xml/ns/metro"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 
     targetNamespace="http://java.sun.com/xml/ns/metro"
     elementFormDefault="qualified"
-    attributeFormDefault="unqualified">
+    attributeFormDefault="unqualified"
+    jaxb:version="2.1">
+
+    <xsd:annotation>
+        <xsd:documentation>
+            This file defines the XML schema for metro.xml configuration file.
+        </xsd:documentation>
+        <xsd:appinfo>
+            <jaxb:schemaBindings>
+                <jaxb:package name="com.sun.xml.ws.runtime.config"/>
+            </jaxb:schemaBindings>
+        </xsd:appinfo>
+    </xsd:annotation>
 
     <!-- Element Definitions -->
-    <xsd:element name="metro" type="tns:metroConfigCType">
+    <xsd:element name="metro">
         <xsd:annotation>
             <xsd:documentation>
                 The root element in Metro configuration file.
             </xsd:documentation>
         </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="tns:tubelines" minOccurs="0" maxOccurs="1" />
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="version" type="tns:metroConfigVersionSType" use="required">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Atribute defining version of the Metro configuration used in the
+                        file.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:anyAttribute namespace="##other" processContents="lax" />
+        </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="tubelines" type="tns:tubelinesConfigCType">
@@ -108,22 +136,6 @@
     </xsd:simpleType>
 
     <!-- Complex Type Definitions -->
-    <xsd:complexType name="metroConfigCType">
-        <xsd:sequence>
-            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element ref="tns:tubelines" minOccurs="0" maxOccurs="1" />
-            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
-        <xsd:attribute name="version" type="tns:metroConfigVersionSType" use="required">
-            <xsd:annotation>
-                <xsd:documentation>
-                    Atribute defining version of the Metro configuration used in the
-                    file.
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        <xsd:anyAttribute namespace="##other" processContents="lax" />
-    </xsd:complexType>
 
     <xsd:complexType name="tubelinesConfigCType">
         <xsd:sequence>
