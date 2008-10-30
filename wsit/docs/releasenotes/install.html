@@ -12,14 +12,31 @@ and <tt>metro-on-tomcat.xml</tt>. These
 two files are used to install the Metro binaries into the respective web
 containers. That procedure is explained next.
 
-<h2>GlassFish</h2>
+<h2>GlassFish v3 Prelude</h2>
 <p>
-To install Metro into GlassFish, you must pass the name
-of the GlassFish top-level directory into <tt>ant</tt>. For this example that
+Metro is available on Update Center for GlassFish v3 Prelude. To install it into GF:
+<ul>
+<li>Stop GFv3</li>
+<li>Start the Update Tool - on the command prompt change to the directory where GFv3 Prelude 
+was installed, then <code>bin</code> directory and run <code>updatetool.exe</code> (Windows)
+or <code>./updatetool</code> (Unix).</li>
+<li>Click Available Add-ons</li>
+<li>Select Metro Web Services Stack for GlassFish</li>
+<li>Click Install</li>
+<li>Accept the license</li>
+<li>Start GFv3</li>
+</ul>
+</p>
+
+<h2>GlassFish v2</h2>
+<p>
+GlassFish v2 bundles Metro. However you may want to replace the default Metro version by this
+more up to date release. To do that, you must pass the name
+of the GlassFish v2 top-level directory into <tt>ant</tt>. For this example that
 information is passed as an <tt>ant</tt>
 property value
 on the command line. To shutdown
-the instance of GlassFish
+the instance of GlassFish v2
 into which you are installing Metro, change directories, invoke the <tt>install</tt> target, and then
 restart the GlassFish instance, please run the following sequence of
 commands:
@@ -37,8 +54,6 @@ directory and make the necessary classpath alterations in the
 domain configuration file: <tt>domain.xml</tt>.
 It will also update the classpath for the utility script files: <tt>wsimport</tt> and
 <tt>wsgen</tt>.
-
-
 
 <h2>Tomcat</h2>
 <p>
@@ -80,7 +95,10 @@ container, the steps are almost identical to the install process.
 The following steps will restore your web container to the state it was
 in before Metro installation.
 
-<h2>GlassFish</h2>
+<h2>GlassFish v3 Prelude</h2>
+Use the Update Tool to remove Metro Web Services from GlassFish.
+
+<h2>GlassFish v2</h2>
 <blockquote><pre>
 asadmin stop-domain domain1
 ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml uninstall
