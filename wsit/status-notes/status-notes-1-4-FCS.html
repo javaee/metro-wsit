@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 1.4 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2008-10-30 10:48:50 $ by $Author: snajper $</pre>
+        <pre>Last Modified : $Date: 2008-10-30 11:20:49 $ by $Author: ashutoshshahi $</pre>
 
         <h5>Updated: October 29, 2008</h5>
 
@@ -218,7 +218,7 @@
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1021">Issue 1021 </a>: validation of server side policy failed.</li>
         </ul>
 
         <p><b>Known Issues</b></p>
@@ -383,8 +383,9 @@
                     </td>
                     <td style="vertical-align: top;"><a
                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=971">Issue#971</a></td>
-                    <td style="vertical-align: top;">A workaround&nbsp; is in
-                        place&nbsp; for Metro 1.3<br>
+                    <td style="vertical-align: top;">This issue is now fixed for Sign, and Sign + Encrypt scenario.
+                        It issue still exists for plain Encryption scenario. The workaround should be to use Sign+Encrypt if encryption is required,
+                        or use non-optimized security.<br>
                     </td>
                 </tr>
 
