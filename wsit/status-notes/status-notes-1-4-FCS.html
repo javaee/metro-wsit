@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 1.3.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2008-10-30 02:29:18 $ by $Author: jitu $</pre>
+        <pre>Last Modified : $Date: 2008-10-30 09:36:49 $ by $Author: snajper $</pre>
 
         <h5>Updated: September 19, 2008</h5>
 
@@ -826,12 +826,17 @@
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
-        <p><code> Updated: ??, 2008</code></p>
+        <p><code> Updated: September 30, 2008</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>Support for .NET 3.5 / METRO 1.3 configuration</li>
         </ul>
+
+        <p><b>Fixed in this release</b></p>
+        <ul><li>
+            <a href="http://www.netbeans.org/issues/buglist.cgi?component=websvc&subcomponent=wsit&issue_status=RESOLVED&issue_status=VERIFIED&resolution=FIXED&target_milestone=6.5&target_milestone=6.5M1&target_milestone=6.5M2&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=substring&long_desc=&long_desc_type=substring&issue_file_loc=&issue_file_loc_type=substring&status_whiteboard=&status_whiteboard_type=substring&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&namedcmd=All+my+issues&newqueryname=&order=Reuse+same+sort+as+last+time&Submit+query=Submit+query">Bugs fixed</a>
+        </li></ul>
 
         <p><b>Known issues</b></p>
         <table border="1" cellpadding="2" cellspacing="2">
@@ -843,6 +848,11 @@
                     <th>
                         <p>Status/Workaround</p>
                     </th>
+                </tr>
+                <tr>
+                    <td>Security settings are not supported with GlassFish v3</td>
+                    <td>Metro 1.4 does not yet support Security with JSR109 deployment on GlassFish v3, thus security
+                    settings in QoS dialog are not supported. The fix is targeted to METRO 1.5 release.</td>
                 </tr>
                 <tr>
                     <td>To enable Microsoft WCF <-> Java interoperability, an 'action=operationName' attribute needs to be specified on each operation.</td>
@@ -864,7 +874,7 @@
                     See NetBeans issue <a href="http://www.netbeans.org/issues/show_bug.cgi?id=105287">105287</a></td>
                 </tr>
                 <tr>
-                    <td>Web Service Client creation does not work</td>
+                    <td>Web Service Client creation does not work properly with Deploy on Save feature</td>
                     <td>NetBeans 6.5 introduced new feature "Deploy on Save" which speeds up development in a way that you don't need to manually deploy your application
                         after changes have been made. This feature currently clashes with web service deployment. Workaround is to turn this feature off. To do that, switch off the
                         "Deploy on Change" feature in Web application -> Project properties -> Run section. For more information see:
