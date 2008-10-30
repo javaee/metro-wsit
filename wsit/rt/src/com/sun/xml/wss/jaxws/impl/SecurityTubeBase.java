@@ -94,6 +94,8 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.ws.soap.SOAPFaultException;
 import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
@@ -639,7 +641,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     protected SOAPFaultException getSOAPFaultException(WssSoapFaultException sfe) {
         
-        SOAPFault fault = null;
+        SOAPFault fault;
         try {
             if (isSOAP12) {
                 fault = soapFactory.createFault(sfe.getFaultString(),SOAPConstants.SOAP_SENDER_FAULT);
@@ -647,11 +649,13 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             } else {
                 fault = soapFactory.createFault(sfe.getFaultString(), sfe.getFaultCode());
             }
-        } catch (Exception e) {
+        } catch (SOAPException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0002_INTERNAL_SERVER_ERROR());
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0002_INTERNAL_SERVER_ERROR(), e);
         }
-        return new SOAPFaultException(fault);
+        SOAPFaultException e = new SOAPFaultException(fault);
+        e.initCause(sfe);
+        return e;
         
     }
     
@@ -758,15 +762,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
                         operation.getName().getLocalPart());
                 WSDLOperation wsdlOperation = operation.getOperation();
-                WSDLInput input = wsdlOperation.getInput();
-                WSDLOutput output = wsdlOperation.getOutput();
-                
-                QName inputMessageName = input.getMessage().getName();
-                QName outputMessageName = null;
-                if(output != null){
-                    outputMessageName = output.getMessage().getName();
-                }
-                
+
                 PolicyMapKey messageKey =  PolicyMap.createWsdlMessageScopeKey(
                         serviceName,portName,operationName);
                 
@@ -1339,13 +1335,11 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     // return the callbackhandler if the xwssCallbackHandler was set
     // otherwise populate the props and return null.
-    protected String populateConfigProperties(Set configAssertions, Properties props) {
+    protected String populateConfigProperties(Set<PolicyAssertion> configAssertions, Properties props) {
         if (configAssertions == null) {
             return null;
         }
-        Iterator it = configAssertions.iterator();
-        for (; it.hasNext();) {
-            PolicyAssertion as = (PolicyAssertion)it.next();
+        for(PolicyAssertion as : configAssertions) {
             if ("KeyStore".equals(as.getName().getLocalPart())) {
                 populateKeystoreProps(props, (KeyStore)as);
             } else if ("TrustStore".equals(as.getName().getLocalPart())) {
