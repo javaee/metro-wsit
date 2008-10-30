@@ -143,7 +143,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
-            Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
+            Set<PolicyAssertion> configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
             wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
             Properties props = new Properties();
@@ -187,7 +187,6 @@ public class SecurityServerTube extends SecurityTubeBase {
         isSCCancelMessage = false;
         isTrustMessage = false;
         tmpPacket = null;
-        String msgId = null;
         //String reqAction= null;
         
         boolean thereWasAFault = false;
@@ -282,7 +281,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (isSCIssueMessage){
                 List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
                 if(!policies.isEmpty()) {
-                    packet.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                    packet.invocationProperties.put(SC_ASSERTION, policies.get(0));
                 }
             }
         }
@@ -428,7 +427,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
         
-        ProcessingContextImpl ctx = null;
+        ProcessingContextImpl ctx;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
@@ -439,7 +438,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
-            MessagePolicy policy = null;
+            MessagePolicy policy;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
             } else if (isRMMessage(packet)) {
@@ -471,7 +470,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
-            ctx.getExtraneousProperties().put(this.WSDLPORT, pipeConfig.getWSDLPort());
+            ctx.getExtraneousProperties().put(WSDLPORT, pipeConfig.getWSDLPort());
         } catch (XWSSecurityException e) {
             log.log(
                     Level.SEVERE, LogStringsMessages.WSSTUBE_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
@@ -489,8 +488,6 @@ public class SecurityServerTube extends SecurityTubeBase {
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
        
-        MessagePolicy mp = null;
-     
         if (outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();
@@ -504,11 +501,11 @@ public class SecurityServerTube extends SecurityTubeBase {
             cachedOperation = getWSDLOpFromAction(packet, false);                    
         }
 
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(cachedOperation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
         if(sph == null){
             return new MessagePolicy();
         }
-        mp = sph.getMessagePolicy();
+        MessagePolicy mp = sph.getMessagePolicy();
         return mp;
     }
     
@@ -550,8 +547,8 @@ public class SecurityServerTube extends SecurityTubeBase {
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
         
         Message msg = packet.getMessage();
-        Message retMsg = null;
-        String retAction = null;
+        Message retMsg  ;
+        String retAction  ;
         
         try {
             // Set the requestor authenticated Subject in the IssuedTokenContext
@@ -562,11 +559,11 @@ public class SecurityServerTube extends SecurityTubeBase {
             WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(wsscVer);
             
             JAXBElement rstEle = msg.readPayloadAsJAXB(WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller());
-            BaseSTSRequest rst = null;
+            BaseSTSRequest rst;
             
             rst = wsscEleFac.createRSTFrom(rstEle);
             URI requestType = ((RequestSecurityToken)rst).getRequestType();            
-            BaseSTSResponse rstr = null;
+            BaseSTSResponse rstr ;
             WSSCContract scContract = WSSCFactory.newWSSCContract(wsscVer);
             scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
                     Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
@@ -627,7 +624,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
             
             if(!policies.isEmpty()) {
-                retPacket.invocationProperties.put(SC_ASSERTION, (PolicyAssertion)policies.get(0));
+                retPacket.invocationProperties.put(SC_ASSERTION, policies.get(0));
             }
         }
         
@@ -715,7 +712,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         return retPacket;
     }       
     
-    private CallbackHandler configureServerHandler(Set configAssertions, Properties props) {
+    private CallbackHandler configureServerHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {
@@ -790,7 +787,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             packet.invocationProperties.put(Session.SESSION_KEY, sessionManager.getSession(sessionId).getUserData());
             
             // update the Sbject
-            IssuedTokenContext itctx = (IssuedTokenContext)sessionManager.getSecurityContext(sessionId, true);
+            IssuedTokenContext itctx = sessionManager.getSecurityContext(sessionId, true);
             if (itctx != null) {
                 Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);

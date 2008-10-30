@@ -100,8 +100,6 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
-import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import java.util.Properties;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
@@ -130,12 +128,12 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     public SecurityClientPipe(WsitClientTubeAssemblyContext wsitContext, Pipe nextPipe) {
         super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextPipe);
         //scPlugin = new WSSCPlugin(null, wsscVer);        
-        CallbackHandler handler = null;
+        CallbackHandler handler;
         tubeline = wsitContext.getTubelineHead();
         try {
             Iterator it = outMessagePolicyMap.values().iterator();
             SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-            Set configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
+            Set<PolicyAssertion> configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
             trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
             wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
             Properties props = new Properties();
@@ -248,7 +246,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         }
         //--------INVOKE NEXT PIPE------------
         //Packet ret = nextPipe.process(packet);
-        Packet ret = null;
+        Packet ret;
         Fiber fiber = null;
         if(isSCCancel(packet) && fiberEngine != null && tubeline != null){
             fiber = fiberEngine.createFiber();         
@@ -351,7 +349,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
-                            ((Token)scToken).getTokenId(), ctx);
+                            scToken.getTokenId(), ctx);
                     fiberEngine = Fiber.current().owner;
                 }catch(WSTrustException se){
                     log.log(Level.SEVERE,
@@ -369,14 +367,14 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
             return new ArrayList<PolicyAssertion>();
         }
 
-        WSDLBoundOperation operation = null;
+        WSDLBoundOperation operation;
         if (isTrustMessage(packet)) {
             operation = getWSDLOpFromAction(packet, false);
         } else {
             operation = getOperation(packet.getMessage());
         }
 
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if (sph == null) {
             return EMPTY_LIST;
         }
@@ -398,7 +396,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         //Note: Assuming only one SC assertion
         Token tok = (Token) toks.get(0);
         IssuedTokenContext ctx =
-                (IssuedTokenContext) issuedTokenContextMap.get(tok.getTokenId());
+                issuedTokenContextMap.get(tok.getTokenId());
 
         PolicyAssertion scClientAssertion = null;
         if (wsscConfig != null) {
@@ -414,7 +412,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                 
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
-                issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
+                issuedTokenContextMap.put(tok.getTokenId(), ctx);
                 fiberEngine = Fiber.current().owner;
             }catch(WSTrustException se){
                 log.log(Level.SEVERE,
@@ -433,7 +431,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
         while (keys.hasMoreElements()) {
             String id = (String) keys.nextElement();
             IssuedTokenContext ctx =
-                    (IssuedTokenContext)issuedTokenContextMap.get(id);
+                    issuedTokenContextMap.get(id);
             
             if (ctx.getSecurityToken() instanceof SecurityContextToken){
                 try{
@@ -466,7 +464,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
 
     private void invokeTrustPlugin(Packet packet, boolean isSCMessage) {
 
-        List<PolicyAssertion> policies = null;
+        List<PolicyAssertion> policies;
 
         if (isSCMessage) {
             Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
@@ -608,12 +606,12 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
          */        
         Message message = packet.getMessage();
         WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if(sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()){
             MessagePolicy policy = sph.getMessagePolicy();
             ArrayList list = policy.getPrimaryPolicies();
             Iterator i = list.iterator();
-            boolean breakOuterLoop = false;
+            OUTER:
             while (i.hasNext()) {
                 SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
                 if(PolicyTypeUtil.encryptionPolicy(primaryPolicy)){
@@ -630,13 +628,9 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
                                 encryptionTarget.setValue(issuedToken.getId());
                                 sph.setMessagePolicy(policy);
                                 outMessagePolicyMap.put(operation, sph);
-                                breakOuterLoop = true;
-                                break;
+                                break OUTER;
                             }
                         }
-                    }
-                    if(breakOuterLoop){
-                        break;
                     }
                 }
             }
@@ -644,7 +638,7 @@ public class SecurityClientPipe extends SecurityPipeBase implements SecureConver
     }
 
     //TODO use constants here
-    private CallbackHandler configureClientHandler(Set configAssertions, Properties props) {
+    private CallbackHandler configureClientHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         //Properties props = new Properties();
         String ret = populateConfigProperties(configAssertions, props);
         try {

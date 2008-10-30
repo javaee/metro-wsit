@@ -50,14 +50,13 @@ import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
 import java.util.logging.Level;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 /**
  *
  * @author K.Venugopal@sun.com
  */
 public class AsymmetricBindingProcessor extends BindingProcessor {
-    private AsymmetricBinding binding = null;
+    private final AsymmetricBinding binding;
     
     /** Creates a new instance of AsymmetricBindingProcessor */
     public AsymmetricBindingProcessor(AsymmetricBinding asBinding,XWSSPolicyContainer container,
@@ -88,8 +87,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
                 logger.log(Level.FINEST,"ID of Primary signature policy is "+primarySP.getUUID());
             }
             tokenProcessor.addKeyBinding(primarySP,st,true);
-            SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
-            primarySP.getFeatureBinding();
+            SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             spFB.isPrimarySignature(true);
@@ -137,7 +135,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
     }
     
     protected Token getEncryptionToken(){
-        if((isServer && !isIncoming) || (!isServer && isIncoming)){
+        if(isServer^isIncoming){
             return binding.getInitiatorToken();
         }else{
             return binding.getRecipientToken();
@@ -145,7 +143,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
     }
     
     protected Token getSignatureToken(){
-        if((isServer && !isIncoming) || (!isServer && isIncoming)){
+        if(isServer^isIncoming) {
             return binding.getRecipientToken();
         }else{
             return binding.getInitiatorToken();
@@ -160,8 +158,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         if(sEncPolicy == null){
             sEncPolicy  = new EncryptionPolicy();
             sEncPolicy.setUUID(pid.generateID());
-            Token token = null;
-            token = getEncryptionToken();
+            Token token = getEncryptionToken();
             tokenProcessor.addKeyBinding(sEncPolicy,token,false);
             container.insert(sEncPolicy);
         }

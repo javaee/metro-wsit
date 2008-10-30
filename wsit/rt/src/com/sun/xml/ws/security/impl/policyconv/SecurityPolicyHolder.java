@@ -156,13 +156,13 @@ public class SecurityPolicyHolder {
         }
         Set<PolicyAssertion> assertions = configAssertions.get(assertion.getName().getNamespaceURI());
         if(assertions == null){
-            assertions = new HashSet<com.sun.xml.ws.policy.PolicyAssertion>();
+            assertions = new HashSet<PolicyAssertion>();
             configAssertions.put(assertion.getName().getNamespaceURI(),assertions);
         }
         assertions.add(assertion);
     }
     
-    public Set getConfigAssertions(String namespaceuri){
+    public Set<PolicyAssertion> getConfigAssertions(String namespaceuri){
         if(configAssertions == null){
             return null;
         }

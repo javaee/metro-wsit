@@ -50,7 +50,6 @@ import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,9 +66,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
@@ -276,7 +273,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         soapVersion = pipeConfig.getBinding().getSOAPVersion();
         //addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
-        isSOAP12 = (soapVersion == SOAPVersion.SOAP_12) ? true : false;
+        isSOAP12 = (soapVersion == SOAPVersion.SOAP_12);
         wsPolicyMap = pipeConfig.getPolicyMap();
         soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
@@ -363,7 +360,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     
     protected RuntimeException generateInternalError(PolicyException ex){
-        SOAPFault fault = null;
+        SOAPFault fault  ;
         try {
             if (isSOAP12) {
                 fault = soapFactory.createFault(ex.getMessage(),SOAPConstants.SOAP_SENDER_FAULT);
@@ -443,7 +440,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         LazyStreamBasedMessage lazyStreamMessage = (LazyStreamBasedMessage)message;
         AttachmentSet attachSet = lazyStreamMessage.getAttachments();
-        com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient = null;
+        com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient  ;
         if(attachSet == null || attachSet.isEmpty()){
             recipient =
                       new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion);
@@ -475,7 +472,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
         Message message = packet.getMessage();
-        WSDLBoundOperation operation = null;
+        WSDLBoundOperation operation  ;
         if(isTrustMessage(packet)){
             operation = getWSDLOpFromAction(packet,false);
         }else{
@@ -484,7 +481,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
         
-        MessagePolicy mp = null;
+        MessagePolicy mp  ;
         //if(operation == null){
         //Body could be encrypted. Security will have to infer the
         //policy from the message till the Body is decrypted.
@@ -494,7 +491,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             //empty message policy
             return new MessagePolicy();
         }
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if(sph == null){
             return new MessagePolicy();
         }
@@ -520,7 +517,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     @SuppressWarnings("unchecked")
     protected ProcessingContext initializeInboundProcessingContext(
             Packet packet /*, boolean isSCMessage*/)  {
-        ProcessingContextImpl ctx = null;
+        ProcessingContextImpl ctx  ;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
@@ -570,7 +567,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage) {
-        ProcessingContextImpl ctx = null;
+        ProcessingContextImpl ctx  ;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
@@ -587,7 +584,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
         
         try {
-            MessagePolicy policy = null;
+            MessagePolicy policy  ;
             if (isRMMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
@@ -624,7 +621,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     protected SOAPFault getSOAPFault(WssSoapFaultException sfe) {
         
-        SOAPFault fault = null;
+        SOAPFault fault  ;
         try {
             if (isSOAP12) {
                 fault = soapFactory.createFault(sfe.getFaultString(),SOAPConstants.SOAP_SENDER_FAULT);
@@ -660,14 +657,14 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     protected SOAPFaultException getSOAPFaultException(XWSSecurityException xwse) {
-        QName qname = null;
+        QName qname;
         if (xwse.getCause() instanceof PolicyViolationException) {
             qname = MessageConstants.WSSE_RECEIVER_POLICY_VIOLATION;
         } else {
             qname = MessageConstants.WSSE_FAILED_AUTHENTICATION;
         }
         
-        com.sun.xml.wss.impl.WssSoapFaultException wsfe =
+        WssSoapFaultException wsfe =
                 SecurableSoapMessage.newSOAPFaultException(
                 qname, xwse.getMessage(), xwse);
         
@@ -761,7 +758,6 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
                         operation.getName().getLocalPart());
-                WSDLOperation wsdlOperation = operation.getOperation();
 
                 PolicyMapKey messageKey =  PolicyMap.createWsdlMessageScopeKey(
                         serviceName,portName,operationName);
@@ -783,9 +779,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 }
                 
                 
-                Policy imPolicy = null;
-                
-                imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
+                Policy imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
                 if(imPolicy != null ){
                     policyList.add(imPolicy);
                 }
@@ -798,10 +792,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                     policyList.remove(imPolicy);
                 }
                 //one way
-                SecurityPolicyHolder inPH = null;
+                SecurityPolicyHolder inPH  ;
                 //TODO: Venu to verify this fix later
                 /*if(output != null){*/
-                Policy omPolicy = null;
+                Policy omPolicy  ;
                 omPolicy = wsPolicyMap.getOutputMessageEffectivePolicy(messageKey);
                 if(omPolicy != null){
                     policyList.add(omPolicy);
@@ -824,7 +818,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 while(faults.hasNext()){
                     WSDLFault fault = (WSDLFault) faults.next();
                     
-                    PolicyMapKey fKey = null;
+                    PolicyMapKey fKey  ;
                     fKey = PolicyMap.createWsdlFaultMessageScopeKey(
                             serviceName,portName,operationName,
                             new QName(operationName.getNamespaceURI(), fault.getName()));
@@ -855,12 +849,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return Collections.emptyList();
         }
         SecurityPolicyHolder sph = null;
-        Collection coll = inMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
+
+        for (SecurityPolicyHolder ph : inMessagePolicyMap.values()) {
+            if (ph != null) {
                 sph = ph;
                 break;
             }
@@ -878,12 +869,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return Collections.emptyList();
         }
         SecurityPolicyHolder sph = null;
-        Collection coll = outMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
+
+        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
+            if (ph != null) {
                 sph = ph;
                 break;
             }
@@ -903,14 +891,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if (outMessagePolicyMap == null) {
             return Collections.emptyList();
         }
-        Message message = packet.getMessage();
         SecurityPolicyHolder sph = null;
-        Collection coll = outMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
+        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
+            if (ph != null) {
                 sph = ph;
                 break;
             }
@@ -928,12 +911,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return Collections.emptyList();
         }
         SecurityPolicyHolder sph = null;
-        Collection coll = outMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
-            SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
+
+        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
+            if (ph != null) {
                 sph = ph;
                 break;
             }
@@ -1118,11 +1098,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         
         String action = getAction(packet);
-        if (wsscVer.getSCTRequestAction().equals(action) || 
-                wsscVer.getSCTRenewRequestAction().equals(action)){
-            return true;
-        }
-        return false;
+        return wsscVer.getSCTRequestAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action);
     }
     
     protected boolean isSCCancel(Packet packet){
@@ -1136,11 +1113,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         
         String action = getAction(packet);
-        if(wsscVer.getSCTCancelResponseAction().equals(action) ||
-                wsscVer.getSCTCancelRequestAction().equals(action)) {
-            return true;
-        }
-        return false;
+        return wsscVer.getSCTCancelResponseAction().equals(action) ||
+                wsscVer.getSCTCancelRequestAction().equals(action);
     }
     
     protected boolean isSCRenew(Packet packet){
@@ -1154,11 +1128,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         
         String action = getAction(packet);
-        if(wsscVer.getSCTRenewResponseAction().equals(action) ||
-                wsscVer.getSCTRenewRequestAction().equals(action)) {
-            return true;
-        }
-        return false;
+        return wsscVer.getSCTRenewResponseAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action);
     }
         
     protected boolean isAddressingEnabled() {
@@ -1178,12 +1149,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         
         // Validate 
-         if(wsTrustVer.getValidateRequestAction().equals(action) ||
-                wsTrustVer.getValidateFinalResoponseAction().equals(action)){
-            return true;
-        }
-        
-        return false;
+        return wsTrustVer.getValidateRequestAction().equals(action) ||
+                wsTrustVer.getValidateFinalResoponseAction().equals(action);
         
     }
     
@@ -1276,7 +1243,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         for(PolicyAssertion token:tokenList){
             if(PolicyUtil.isSecureConversationToken(token, spVersion)){
                 NestedPolicy bootstrapPolicy = ((SecureConversationToken)token).getBootstrapPolicy();
-                Policy effectiveBP = null;
+                Policy effectiveBP  ;
                 if(hasTargets(bootstrapPolicy)){
                     effectiveBP = bootstrapPolicy;
                 }else{
@@ -1602,7 +1569,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if (classname == null) {
             return null;
         }
-        Class ret = null;
+        Class ret  ;
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         if (loader != null) {
             try {
