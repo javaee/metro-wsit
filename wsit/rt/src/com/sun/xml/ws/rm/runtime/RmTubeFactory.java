@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.ws.assembler.TubeAppender;
+import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
@@ -51,14 +51,14 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmTubeAppender implements TubeAppender {
+public final class RmTubeFactory implements TubeFactory {
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
      * @param context wsit client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
-    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
 //            return new RMClientTube(
 //                    context.getWsdlPort(),
@@ -77,7 +77,7 @@ public class RmTubeAppender implements TubeAppender {
      * @param context wsit service tubeline assembler context
      * @return new head of the service-side tubeline
      */
-    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
 //            return new RMServerTube(
 //                    context.getWsdlPort(),

@@ -25,7 +25,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.assembler.ClientPipelineHook;
 import com.sun.xml.ws.assembler.ServerPipelineHook;
-import com.sun.xml.ws.assembler.TubeAppender;
+import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.assembler.TubelineAssemblyContextUpdater;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.security.auth.message.config.AuthConfigFactory;
 
-public class SecurityTubeAppender implements TubeAppender, TubelineAssemblyContextUpdater {
+public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
 
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     //Added for Security Pipe Unification with JSR 196 on GlassFish
@@ -71,7 +71,7 @@ public class SecurityTubeAppender implements TubeAppender, TubelineAssemblyConte
         }
     }
 
-    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
         //TEMP: uncomment this ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
         ServerPipelineHook[] hooks = getServerTubeLineHooks();
         ServerPipelineHook hook = null;
@@ -143,7 +143,7 @@ public class SecurityTubeAppender implements TubeAppender, TubelineAssemblyConte
         return context.getTubelineHead();
     }
 
-    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         ClientPipelineHook hook = null;
         ClientPipelineHook[] hooks = getClientTublineHooks(context);
         if (hooks != null && hooks.length > 0) {

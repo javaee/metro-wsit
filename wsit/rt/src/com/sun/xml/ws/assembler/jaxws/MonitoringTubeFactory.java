@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -33,39 +33,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime.testing;
+package com.sun.xml.ws.assembler.jaxws;
 
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeAppender;
+import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
 import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * TubeFactory implementation creating one of the standard JAX-WS RI tubes
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PacketFilteringTubeAppender implements TubeAppender {
+public final class MonitoringTubeFactory implements TubeFactory {
 
-    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-            return new PacketFilteringTube(context);
-        } else {
-            return context.getTubelineHead();
-        }
+    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+        return context.getTubelineHead();
     }
 
-    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            return new PacketFilteringTube(context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
-
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
+    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+        return context.getWrappedContext().createMonitoringTube(context.getTubelineHead());
     }
 }

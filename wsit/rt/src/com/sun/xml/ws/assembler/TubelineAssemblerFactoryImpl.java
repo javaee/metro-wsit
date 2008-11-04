@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.assembler;
 
-
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -54,12 +53,12 @@ import java.util.Collection;
  */
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
-    private static class WsitTubelineAssembler implements TubelineAssembler {
-
+    private static class MetroTubelineAssembler implements TubelineAssembler {
+        
         private final BindingID bindingId;
         private final TubelineAssemblyController tubelineAssemblyController;
 
-        WsitTubelineAssembler(final BindingID bindingId) {
+        MetroTubelineAssembler(final BindingID bindingId) {
             this.bindingId = bindingId;
             this.tubelineAssemblyController = new TubelineAssemblyController();
         }
@@ -68,17 +67,16 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
         public Tube createClient(@NotNull ClientTubeAssemblerContext context) {
             WsitClientTubeAssemblyContext wsitContext = new WsitClientTubeAssemblyContext(context);
 
-            Collection<TubeAppender> appenders = tubelineAssemblyController.getClientSideAppenders();
-            for (TubeAppender appender : appenders) {
-                if (appender instanceof TubelineAssemblyContextUpdater) {
-                    ((TubelineAssemblyContextUpdater) appender).prepareContext(wsitContext);
-                }
+            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getClientSideTubeCreators(wsitContext.getAddress().getURI());
+
+            for (TubeCreator tubeCreator : tubeCreators) {
+                tubeCreator.updateContext(wsitContext);
             }
 
-            for (TubeAppender appender : appenders) {
-                wsitContext.setTubelineHead(appender.appendTube(wsitContext));
+            for (TubeCreator tubeCreator : tubeCreators) {
+                wsitContext.setTubelineHead(tubeCreator.createTube(wsitContext));
             }
-            
+
             return wsitContext.getTubelineHead();
         }
 
@@ -90,22 +88,22 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
                 sd.addFilter(new WsdlDocumentFilter());
             }
 
-            Collection<TubeAppender> appenders = tubelineAssemblyController.getServerSideAppenders();
-            for (TubeAppender appender : appenders) {
-                if (appender instanceof TubelineAssemblyContextUpdater) {
-                    ((TubelineAssemblyContextUpdater) appender).prepareContext(wsitContext);
-                }
+            // FIXME endpoint URI for provider case
+            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getServerSideTubeCreators(wsitContext.getWsdlPort().getAddress().getURI());
+            for (TubeCreator tubeCreator : tubeCreators) {
+                tubeCreator.updateContext(wsitContext);
             }
 
-            for (TubeAppender appender : appenders) {
-                wsitContext.setTubelineHead(appender.appendTube(wsitContext));
+            for (TubeCreator tubeCreator : tubeCreators) {
+                wsitContext.setTubelineHead(tubeCreator.createTube(wsitContext));
             }
 
             return wsitContext.getTubelineHead();
         }
     }
 
+    @Override
     public TubelineAssembler doCreate(final BindingID bindingId) {
-        return new WsitTubelineAssembler(bindingId);
+        return new MetroTubelineAssembler(bindingId);
     }
 }

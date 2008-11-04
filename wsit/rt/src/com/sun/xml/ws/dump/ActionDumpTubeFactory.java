@@ -33,8 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.assembler;
+package com.sun.xml.ws.dump;
 
+import com.sun.xml.ws.assembler.*;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Message;
@@ -43,38 +44,26 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.util.ServiceFinder;
 import javax.xml.ws.WebServiceException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class ActionDumpTubeAppender implements TubeAppender {
+public final class ActionDumpTubeFactory implements TubeFactory {
 
     public static final String CLIENT_NAME = "com.sun.xml.ws.assembler.client.action";
     public static final String SERVER_NAME = "com.sun.xml.ws.assembler.server.action";
 
-    public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         if (Boolean.getBoolean(CLIENT_NAME)) {
-            ActionDumpPipe[] pipes = ServiceFinder.find(ActionDumpPipe.class).toArray();
-            if (pipes.length > 0) {
-                return PipeAdapter.adapt(pipes[0]);
-            }
-
             return new ActionDumpTube(CLIENT_NAME, context.getBinding(), context.getTubelineHead());
         }
         return context.getTubelineHead();
     }
 
-    public Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
         if (Boolean.getBoolean(SERVER_NAME)) {
-            ActionDumpPipe[] pipes = ServiceFinder.find(ActionDumpPipe.class).toArray();
-            if (pipes.length > 0) {
-                return PipeAdapter.adapt(pipes[0]);
-            }
-
             return new ActionDumpTube(SERVER_NAME, context.getEndpoint().getBinding(), context.getTubelineHead());
         }
         return context.getTubelineHead();
@@ -94,10 +83,10 @@ public final class ActionDumpTubeAppender implements TubeAppender {
         /**
          * Copy constructor.
          */
-        private ActionDumpTube(ActionDumpTube that, TubeCloner cloner) {
-            super(that, cloner);
-            this.name = that.name;
-            this.binding = that.binding;
+        private ActionDumpTube(ActionDumpTube original, TubeCloner cloner) {
+            super(original, cloner);
+            this.name = original.name;
+            this.binding = original.binding;
         }
 
         public ActionDumpTube copy(TubeCloner cloner) {

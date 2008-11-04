@@ -43,14 +43,14 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface TubeAppender {    
+public interface TubeFactory {
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      *
      * @param context wsit client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
-    Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException;
+    Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException;
 
     /**
      * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
@@ -58,6 +58,6 @@ public interface TubeAppender {
      * @param context wsit service tubeline assembler context
      * @return new head of the service-side tubeline
      */
-    Tube appendTube(WsitServerTubeAssemblyContext context) throws WebServiceException;
+    Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException;
 
 }
