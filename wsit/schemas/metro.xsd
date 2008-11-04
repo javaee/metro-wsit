@@ -60,7 +60,7 @@
         </xsd:documentation>
         <xsd:appinfo>
             <jaxb:schemaBindings>
-                <jaxb:package name="com.sun.xml.ws.runtime.config"/>
+                <jaxb:package name="com.sun.xml.ws.runtime.config" />
             </jaxb:schemaBindings>
         </xsd:appinfo>
     </xsd:annotation>
@@ -71,6 +71,9 @@
             <xsd:documentation>
                 The root element in Metro configuration file.
             </xsd:documentation>
+            <xsd:appinfo>
+                <jaxb:class name="MetroConfig" />
+            </xsd:appinfo>
         </xsd:annotation>
         <xsd:complexType>
             <xsd:sequence>
@@ -138,6 +141,11 @@
     <!-- Complex Type Definitions -->
 
     <xsd:complexType name="tubelinesConfigCType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:class name="Tubelines" />
+            </xsd:appinfo>
+        </xsd:annotation>
         <xsd:sequence>
             <xsd:element ref="tns:tubeline-mapping" minOccurs="0" maxOccurs="unbounded" />
             <xsd:element ref="tns:tubeline" minOccurs="0" maxOccurs="unbounded" />
@@ -156,6 +164,11 @@
     </xsd:complexType>
 
     <xsd:complexType name="tubelineMappingCType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:class name="TubelineMapping" />
+            </xsd:appinfo>
+        </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="endpoint-ref" type="xsd:anyURI">
                 <xsd:annotation>
@@ -181,8 +194,13 @@
     </xsd:complexType>
 
     <xsd:complexType name="tubelineDefinitionCType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:class name="TubelineDefinition" />
+            </xsd:appinfo>
+        </xsd:annotation>
         <xsd:sequence>
-            <xsd:element name="endpoint-side" type="tns:tubeFactoriesListCType" minOccurs="0">
+            <xsd:element name="endpoint-side" type="tns:tubeFactoryListCType" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
                         Contains the endpoint-side specific ordered list of tube
@@ -193,7 +211,7 @@
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            <xsd:element name="client-side" type="tns:tubeFactoriesListCType" minOccurs="0">
+            <xsd:element name="client-side" type="tns:tubeFactoryListCType" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
                         Contains the client-side specific ordered list of tube factories.
@@ -215,7 +233,12 @@
         <xsd:anyAttribute namespace="##other" processContents="lax" />
     </xsd:complexType>
 
-    <xsd:complexType name="tubeFactoriesListCType">
+    <xsd:complexType name="tubeFactoryListCType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:class name="TubeFactoryList" />
+            </xsd:appinfo>
+        </xsd:annotation>
         <xsd:sequence>
             <xsd:element name="tube-factory" maxOccurs="unbounded" type="tns:tubeFactoryCType">
                 <xsd:annotation>
@@ -225,6 +248,9 @@
                         that declares methods invoked during a tubeline construction
                         in the Metro tubeline assembler.
                     </xsd:documentation>
+                    <xsd:appinfo>
+                        <jaxb:property name="tubeFactoryConfigs" />
+                    </xsd:appinfo>
                 </xsd:annotation>
             </xsd:element>
             <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
@@ -233,6 +259,11 @@
     </xsd:complexType>
 
     <xsd:complexType name="tubeFactoryCType">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <jaxb:class name="TubeFactoryConfig" />
+            </xsd:appinfo>
+        </xsd:annotation>
         <xsd:sequence>
             <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
