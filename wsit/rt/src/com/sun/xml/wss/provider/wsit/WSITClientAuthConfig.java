@@ -42,7 +42,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.message.Packet;
@@ -71,26 +70,22 @@ import java.util.WeakHashMap;
  * @author kumar jayanti
  */
 public class WSITClientAuthConfig implements ClientAuthConfig {
-    
+
     private static final Logger log =
-        Logger.getLogger(
-        LogDomainConstants.WSIT_PVD_DOMAIN,
-        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
-    
+            Logger.getLogger(
+            LogDomainConstants.WSIT_PVD_DOMAIN,
+            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     private String layer = null;
     private String appContext = null;
     private CallbackHandler callbackHandler = null;
     private WSITClientAuthContext clientAuthContext = null;
     //private PolicyMap policyMap = null;
-    
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
-    private String secDisabled = null;
-    private static final String TRUE="true";
-    private static final String FALSE="false";
+    private volatile boolean secEnabled;
     private Map<Object, WSITClientAuthContext> tubetoClientAuthContextHash = Collections.synchronizedMap(new WeakHashMap<Object, WSITClientAuthContext>());
-    
+
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
@@ -98,15 +93,15 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         this.callbackHandler = callbackHandler;
         this.rwLock = new ReentrantReadWriteLock(true);
         this.rLock = rwLock.readLock();
-        this.wLock = rwLock.writeLock(); 
+        this.wLock = rwLock.writeLock();
     }
 
     public ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
-        PolicyMap  pMap = (PolicyMap)map.get("POLICY");
-        WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
+        PolicyMap pMap = (PolicyMap) map.get("POLICY");
+        WSDLPort port = (WSDLPort) map.get("WSDL_MODEL");
         Object tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
         map.put(PipeConstants.AUTH_CONFIG, this);
-        
+
         if (pMap == null || pMap.isEmpty()) {
             return null;
         }
@@ -115,56 +110,57 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             return clientAuthContext;
         }
         //now check if security is enabled
-        //if the policy has changed due to redeploy recheck if security is enabled        
-        if (this.secDisabled == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {            
-            this.wLock.lock();
-            try {                
-                if (this.secDisabled == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
-                    if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
-                        this.secDisabled = TRUE;
-                        return null;
-                    } else {
-                        this.secDisabled = FALSE;
+        //if the policy has changed due to redeploy recheck if security is enabled
+        try {
+            rLock.lock(); // acquire read lock
+            if (!secEnabled || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
+                rLock.unlock(); // must unlock read, before acquiring write lock
+                wLock.lock(); // acquire write lock
+                try {
+                    if (!secEnabled || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) { //re-check
+                        if (!WSITAuthConfigProvider.isSecurityEnabled(pMap, port)) {
+                            return null;
+                        }
+                        secEnabled = true;
                     }
+                } finally {
+                    rLock.lock(); // reacquire read before releasing write lock
+                    wLock.unlock(); //release write lock
                 }
-            } finally {
-                this.wLock.unlock();
             }
+        } finally {
+            rLock.unlock(); // release read lock
         }
-        
-         if (this.secDisabled == TRUE) {
-             return null;
-         }
 
-        
+
         boolean authContextInitialized = false;
         this.rLock.lock();
         try {
             if (clientAuthContext != null) {
-               //probably the app was redeployed
-               //if so reacquire the AuthContext
+                //probably the app was redeployed
+                //if so reacquire the AuthContext
                 if (tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
-                    authContextInitialized = true;    
-                    clientAuthContext = (WSITClientAuthContext)tubetoClientAuthContextHash.get(tubeOrPipe);
+                    authContextInitialized = true;
+                    clientAuthContext = (WSITClientAuthContext) tubetoClientAuthContextHash.get(tubeOrPipe);
                 }
             }
         } finally {
             this.rLock.unlock();
         }
-        
+
         if (!authContextInitialized) {
             this.wLock.lock();
             try {
                 // recheck the precondition, since the rlock was released.                
                 if (clientAuthContext == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
-                    clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);                    
-                    tubetoClientAuthContextHash.put(tubeOrPipe, clientAuthContext);                    
+                    clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);
+                    tubetoClientAuthContextHash.put(tubeOrPipe, clientAuthContext);
                 }
             } finally {
                 this.wLock.unlock();
             }
         }
-       
+
         this.startSecureConversation(map);
         return clientAuthContext;
     }
@@ -191,7 +187,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     public boolean isProtected() {
         return true;
     }
-    
+
     public ClientAuthContext cleanupAuthContext(Object tubeOrPipe) {
         return this.tubetoClientAuthContextHash.remove(tubeOrPipe);
     }
@@ -201,30 +197,29 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         //check if we need to start secure conversation
         JAXBElement ret = null;
         try {
-            MessageInfo info = (MessageInfo)map.get("SECURITY_TOKEN");
+            MessageInfo info = (MessageInfo) map.get("SECURITY_TOKEN");
             if (info != null) {
-                Packet packet = (Packet)info.getMap().get(WSITAuthContextBase.REQ_PACKET);
+                Packet packet = (Packet) info.getMap().get(WSITAuthContextBase.REQ_PACKET);
                 if (packet != null) {
                     if (clientAuthContext != null) {
-                        ret =  ((WSITClientAuthContext)clientAuthContext).startSecureConversation(packet);
+                        ret = ((WSITClientAuthContext) clientAuthContext).startSecureConversation(packet);
                         //map.put("SECURITY_TOKEN", ret);
                         info.getMap().put("SECURITY_TOKEN", ret);
                     } else {
-                        log.log(Level.SEVERE, 
-                                LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());                                
+                        log.log(Level.SEVERE,
+                                LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());
                         throw new WSSecureConversationException(
                                 LogStringsMessages.WSITPVD_0024_NULL_CLIENT_AUTH_CONTEXT());
                     }
                 } else {
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0025_NULL_PACKET());
-                    throw new RuntimeException(LogStringsMessages.WSITPVD_0025_NULL_PACKET());                            
+                    throw new RuntimeException(LogStringsMessages.WSITPVD_0025_NULL_PACKET());
                 }
             }
         } catch (WSSecureConversationException ex) {
-            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0026_ERROR_STARTING_SC(), ex);            
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0026_ERROR_STARTING_SC(), ex);
             throw new RuntimeException(LogStringsMessages.WSITPVD_0026_ERROR_STARTING_SC(), ex);
         }
         return ret;
     }
-    
 }
