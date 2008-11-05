@@ -42,7 +42,6 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -54,29 +53,24 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
-import java.util.concurrent.locks.ReentrantReadWriteLock; 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
  * @author kumar jayanti
  */
 public class WSITServerAuthConfig implements ServerAuthConfig {
-    
+
     private String layer = null;
     private String appContext = null;
     private CallbackHandler callbackHandler = null;
-    
     private WSITServerAuthContext serverAuthContext = null;
     private PolicyMap policyMap = null;
-    private String secDisabled = null;
-    
+    private boolean secEnabled;
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
-    
-    private static final String TRUE="true";
-    private static final String FALSE="false";
-    
+
     /** Creates a new instance of WSITServerAuthConfig */
     public WSITServerAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
@@ -87,59 +81,62 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
         this.wLock = rwLock.writeLock();
     }
 
-    public ServerAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
-         PolicyMap  pMap = (PolicyMap)map.get("POLICY");
-         WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
-         if (pMap == null || pMap.isEmpty()) {
-             //TODO: log warning here if pMap == null
-             return null;
-         }
-         
-         //check if security is enabled
-         //if policy has changed due to redeploy, check if security is enabled
-         if (this.secDisabled == null || (policyMap != pMap)) {
-             this.wLock.lock();
-             try {
-                 if (this.secDisabled == null || (policyMap != pMap)) {
-                     if (!WSITAuthConfigProvider.isSecurityEnabled(pMap,port)) {
-                         this.secDisabled = TRUE;
-                         return null;
-                     } else {
-                         this.secDisabled = FALSE;
-                     }
-                 }
-             } finally {
-                 this.wLock.unlock();
-             }
-         }
-         
-         if (this.secDisabled == TRUE) {
-             return null;
-         }
-         this.rLock.lock();
-         try {
-             if (serverAuthContext != null) {
-                 //return the cached one only if the same policyMap was passed in
-                 if (policyMap == pMap) {
-                     return serverAuthContext;
-                 }
-             }
-         } finally {
-             this.rLock.unlock();
-         }
+    public ServerAuthContext getAuthContext(String operation, Subject subject, Map rawMap) throws AuthException {
+        @SuppressWarnings("unchecked") Map<Object, Object> map = rawMap;
+        PolicyMap pMap = (PolicyMap) map.get("POLICY");
+        WSDLPort port = (WSDLPort) map.get("WSDL_MODEL");
+        if (pMap == null || pMap.isEmpty()) {
+            //TODO: log warning here if pMap == null
+            return null;
+        }
+
+        //check if security is enabled
+        //if policy has changed due to redeploy, check if security is enabled
+        try {
+            rLock.lock(); // acquire read lock
+            if (!secEnabled || policyMap != pMap) {
+                rLock.unlock(); // must unlock read, before acquiring write lock
+                wLock.lock(); // acquire write lock
+                try {
+                    if (!secEnabled || policyMap != pMap) { //re-check
+                        if (!WSITAuthConfigProvider.isSecurityEnabled(pMap, port)) {
+                            return null;
+                        }
+                        secEnabled = true;
+                    }
+                } finally {
+                    rLock.lock(); // reacquire read before releasing write lock
+                    wLock.unlock(); //release write lock
+                }
+            }
+        } finally {
+            rLock.unlock(); // release read lock
+        }
+
+        this.rLock.lock();
+        try {
+            if (serverAuthContext != null) {
+                //return the cached one only if the same policyMap was passed in
+                if (policyMap == pMap) {
+                    return serverAuthContext;
+                }
+            }
+        } finally {
+            this.rLock.unlock();
+        }
         // make sure you don't hold the rlock when you request the wlock
         // or you will encounter dealock
-         this.wLock.lock();
-         try {
-             // recheck the precondition, since the rlock was released.
-             if ((serverAuthContext == null) || (policyMap != pMap)) {
-                 serverAuthContext = new WSITServerAuthContext(operation, subject, map, callbackHandler);
-                 policyMap = pMap;
-             }
-             return serverAuthContext;
-         } finally {
-             this.wLock.unlock();
-         }
+        this.wLock.lock();
+        try {
+            // recheck the precondition, since the rlock was released.
+            if ((serverAuthContext == null) || (policyMap != pMap)) {
+                serverAuthContext = new WSITServerAuthContext(operation, subject, map, callbackHandler);
+                policyMap = pMap;
+            }
+            return serverAuthContext;
+        } finally {
+            this.wLock.unlock();
+        }
     }
 
     public String getMessageLayer() {
@@ -164,6 +161,4 @@ public class WSITServerAuthConfig implements ServerAuthConfig {
     public boolean isProtected() {
         return true;
     }
-    
-    
 }

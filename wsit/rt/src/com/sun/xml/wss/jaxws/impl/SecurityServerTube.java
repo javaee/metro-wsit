@@ -138,7 +138,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     
     // Creates a new instance of SecurityServerTube
     public SecurityServerTube(WsitServerTubeAssemblyContext context, Tube nextTube) {
-        super(new ServerPipeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
+        super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
@@ -195,7 +195,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer));
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
@@ -263,7 +263,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             } else if (wsTrustVer.getIssueRequestAction().equals(reqAction)||
                        wsTrustVer.getValidateRequestAction().equals(reqAction)) {
                 isTrustMessage = true;
-                packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
+                packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
@@ -287,7 +287,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         
         if(!isSCIssueMessage ){
-            cachedOperation = msg.getOperation(pipeConfig.getWSDLPort());
+            cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
             if(cachedOperation == null){
                 if(addVer != null)
                     cachedOperation = getWSDLOpFromAction(packet, true);
@@ -470,7 +470,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
-            ctx.getExtraneousProperties().put(WSDLPORT, pipeConfig.getWSDLPort());
+            ctx.getExtraneousProperties().put(WSDLPORT, tubeConfig.getWSDLPort());
         } catch (XWSSecurityException e) {
             log.log(
                     Level.SEVERE, LogStringsMessages.WSSTUBE_0006_PROBLEM_INIT_OUT_PROC_CONTEXT(), e);
@@ -728,7 +728,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
             // ServletContext context =
             //         ((ServerPipeConfiguration)pipeConfig).getEndpoint().getContainer().getSPI(ServletContext.class);
-            RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerPipeConfiguration)pipeConfig).getEndpoint());
+            RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerTubeConfiguration)tubeConfig).getEndpoint());
             return new DefaultCallbackHandler("server", props, adapter);
             //return new DefaultCallbackHandler("server", props);
         } catch (Exception e) {

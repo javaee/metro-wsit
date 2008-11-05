@@ -85,7 +85,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
     private RmVersion rmVer = null;
-    private PipeConfiguration pipeConfig = null;
+    private TubeConfiguration tubeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
     //private boolean isTrustOrSCMessage = false;
@@ -96,11 +96,11 @@ public class PolicyResolverImpl implements PolicyResolver{
      * Creates a new instance of OperationResolverImpl
      */
     
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,PipeConfiguration pipeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;
-        this.pipeConfig = pipeConfig;
+        this.tubeConfig = tubeConfig;
         this.addVer = addVer;
         this.isClient = isClient;
         this.rmVer = rmVer;
@@ -195,7 +195,7 @@ public class PolicyResolverImpl implements PolicyResolver{
         if(cachedOperation != null){
             operation = cachedOperation;
         }else{
-            operation = msg.getOperation(pipeConfig.getWSDLPort());
+            operation = msg.getOperation(tubeConfig.getWSDLPort());
             if(operation == null)
                 operation = getWSDLOpFromAction();
         }
@@ -269,7 +269,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     private String getAction(Message msg){
         if(addVer != null){
             HeaderList hl = msg.getHeaders();
-            String retVal =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
+            String retVal =  hl.getAction(addVer, tubeConfig.getBinding().getSOAPVersion());
             return retVal;
         }
         return "";

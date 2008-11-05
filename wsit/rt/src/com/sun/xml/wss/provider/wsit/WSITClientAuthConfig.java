@@ -96,7 +96,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         this.wLock = rwLock.writeLock();
     }
 
-    public ClientAuthContext getAuthContext(String operation, Subject subject, Map map) throws AuthException {
+    public ClientAuthContext getAuthContext(String operation, Subject subject, Map rawMap) throws AuthException {
+        @SuppressWarnings("unchecked") Map<Object, Object> map = rawMap;
+
         PolicyMap pMap = (PolicyMap) map.get("POLICY");
         WSDLPort port = (WSDLPort) map.get("WSDL_MODEL");
         Object tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);

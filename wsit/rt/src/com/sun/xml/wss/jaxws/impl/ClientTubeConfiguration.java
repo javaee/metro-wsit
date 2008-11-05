@@ -41,14 +41,14 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.PolicyMap;
 
 /**
- * {@link PipeConfiguration} for client.
+ * {@link TubeConfiguration} for client.
  *
  * @author Kohsuke Kawaguchi
  */
-public final class ClientPipeConfiguration extends PipeConfiguration {
+public final class ClientTubeConfiguration extends TubeConfiguration {
     private final WSBinding binding;
 
-    public ClientPipeConfiguration(PolicyMap policy, WSDLPort wsdlPort, WSBinding binding) {
+    public ClientTubeConfiguration(PolicyMap policy, WSDLPort wsdlPort, WSBinding binding) {
         super(policy, wsdlPort);
         this.binding = binding;
     }

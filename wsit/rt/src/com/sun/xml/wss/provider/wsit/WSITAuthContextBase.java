@@ -87,7 +87,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
-import com.sun.xml.wss.jaxws.impl.PipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -135,8 +135,8 @@ import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.wss.jaxws.impl.ClientPipeConfiguration;
-import com.sun.xml.wss.jaxws.impl.ServerPipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
+import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
@@ -224,7 +224,7 @@ public abstract class WSITAuthContextBase  {
     
     // TODO: Optimized flag to be set based on some conditions (no SignedElements/EncryptedElements)
     protected boolean optimized = true;
-    protected PipeConfiguration pipeConfig = null;
+    protected TubeConfiguration pipeConfig = null;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
     
     // Security Environment reference initialized with a JAAS CallbackHandler
@@ -285,8 +285,7 @@ public abstract class WSITAuthContextBase  {
     }
     
     /** Creates a new instance of WSITAuthContextBase */
-    @SuppressWarnings("unchecked")
-    public WSITAuthContextBase(Map map) {
+    public WSITAuthContextBase(Map<Object, Object> map) {
         
         this.nextPipe= (Pipe)map.get("NEXT_PIPE");
         this.nextTube = (Tube)map.get("NEXT_TUBE");
@@ -295,11 +294,11 @@ public abstract class WSITAuthContextBase  {
         if (this instanceof WSITClientAuthContext) {
 //            WSService service = (WSService)map.get("SERVICE");
             WSBinding binding = (WSBinding)map.get("BINDING");
-            pipeConfig = new ClientPipeConfiguration(
+            pipeConfig = new ClientTubeConfiguration(
                     wsPolicyMap, port, binding);
         } else {
             WSEndpoint endPoint = (WSEndpoint)map.get("ENDPOINT");
-            pipeConfig = new ServerPipeConfiguration(
+            pipeConfig = new ServerTubeConfiguration(
                     wsPolicyMap, port, endPoint);
         }
         

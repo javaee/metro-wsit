@@ -106,7 +106,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Logger;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
@@ -117,9 +116,6 @@ import javax.xml.bind.JAXBElement;
 
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
-import static com.sun.xml.wss.jaxws.impl.Constants.EMPTY_LIST;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
@@ -167,7 +163,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     protected Object tubeOrPipe;
     
     /** Creates a new instance of WSITClientAuthContext */
-    public WSITClientAuthContext(String operation, Subject subject, Map map, CallbackHandler callbackHandler) {
+    public WSITClientAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
         this.authConfig= (WSITClientAuthConfig)map.get(PipeConstants.AUTH_CONFIG);
         this.tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
@@ -236,9 +232,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public AuthStatus secureRequest(
-            MessageInfo messageInfo, Subject clientSubject) throws AuthException {
+    public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException {
 
         try {
 
@@ -253,7 +247,9 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             }
 
             //set the isTrustProperty into MessageInfo
-            messageInfo.getMap().put("IS_TRUST_MSG", Boolean.valueOf(isTrustMsg));
+            @SuppressWarnings("unchecked")
+            Map<Object, Object> msgInfoMap = messageInfo.getMap();
+            msgInfoMap.put("IS_TRUST_MSG", Boolean.valueOf(isTrustMsg));
 
             // keep the message
             //Message msg = packet.getMessage();
@@ -278,7 +274,6 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         return AuthStatus.SEND_SUCCESS;
     }
 
-    @SuppressWarnings("unchecked")
     public Packet secureRequest(
             Packet packet, Subject clientSubject, boolean isSCMessage) throws XWSSecurityException {
         // invoke the Trust Plugin if necessary
@@ -408,7 +403,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
-        ctx.setExtraneousProperty(ctx.OPERATION_RESOLVER,
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
                 new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer));
         Message msg = req.getMessage();
 
@@ -447,6 +442,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         return req;
     }
 
+    @Override
     protected SOAPMessage secureOutboundMessage(SOAPMessage message, ProcessingContext ctx) {
         try {
             ctx.setSOAPMessage(message);
@@ -471,6 +467,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         }
     }
 
+    @Override
     protected Message secureOutboundMessage(Message message, ProcessingContext ctx) {
         try {
             JAXBFilterProcessingContext context = (JAXBFilterProcessingContext) ctx;
@@ -642,8 +639,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {
-                Class handler = loadClass(ret);
-                Object obj = handler.newInstance();
+                Class handlerClass = loadClass(ret);
+                Object obj = handlerClass.newInstance();
                 if (!(obj instanceof CallbackHandler)) {
                     log.log(Level.SEVERE,
                             LogStringsMessages.WSITPVD_0031_INVALID_CALLBACK_HANDLER_CLASS(ret));

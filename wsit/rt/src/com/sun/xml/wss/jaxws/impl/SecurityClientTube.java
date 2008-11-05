@@ -128,7 +128,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     // Creates a new instance of SecurityClientTube
     public SecurityClientTube(WsitClientTubeAssemblyContext wsitContext, Tube nextTube) {
-        super(new ClientPipeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
+        super(new ClientTubeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
         //scPlugin = new WSSCPlugin(null, wsscVer);
         try {            
             Iterator it = outMessagePolicyMap.values().iterator();
@@ -309,7 +309,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, pipeConfig, addVer, true, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, tubeConfig, addVer, true, rmVer));
 
         Message msg = null;
         try {
@@ -382,7 +382,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {                
                 try{
                     SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), 
-                            (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), 
+                            (SecureConversationToken)scToken, tubeConfig.getWSDLPort(), tubeConfig.getBinding(),
                                 this, packet, addVer, scClientAssertion, super.next);                    
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
@@ -449,7 +449,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         if (ctx == null) {
             try{
                 SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), 
-                        (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), 
+                        (SecureConversationToken)tok, tubeConfig.getWSDLPort(), tubeConfig.getBinding(),
                             this, packet, addVer, scClientAssertion, super.next);
                 
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
@@ -643,7 +643,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
          * of policyId of issuedTokenAssertion
          */        
         Message message = packet.getMessage();
-        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
+        WSDLBoundOperation operation = message.getOperation(tubeConfig.getWSDLPort());
         SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
         if(sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()){
             MessagePolicy policy = sph.getMessagePolicy();
@@ -681,7 +681,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     //TODO use constants here
     private CallbackHandler configureClientHandler(Set<PolicyAssertion> configAssertions, Properties props) {
-        CallbackHandlerFeature chf = pipeConfig.getBinding().getFeature(CallbackHandlerFeature.class);
+        CallbackHandlerFeature chf = tubeConfig.getBinding().getFeature(CallbackHandlerFeature.class);
         if(chf!=null)   return chf.getHandler();
 
         //Properties props = new Properties();

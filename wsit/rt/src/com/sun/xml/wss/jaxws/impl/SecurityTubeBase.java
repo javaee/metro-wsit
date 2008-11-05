@@ -159,7 +159,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected Hashtable<String, IssuedTokenContext> issuedTokenContextMap = new Hashtable<String, IssuedTokenContext>();    
         
     
-    protected PipeConfiguration pipeConfig = null;
+    protected TubeConfiguration tubeConfig = null;
     
     //static JAXBContext used across the Tube
     protected static JAXBContext jaxbContext;    
@@ -266,16 +266,16 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
     }
     
-    public SecurityTubeBase(PipeConfiguration config, Tube nextTube) {
+    public SecurityTubeBase(TubeConfiguration config, Tube nextTube) {
         super(nextTube);        
-        this.pipeConfig = config;
+        this.tubeConfig = config;
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
-        soapVersion = pipeConfig.getBinding().getSOAPVersion();
+        soapVersion = tubeConfig.getBinding().getSOAPVersion();
         //addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
         isSOAP12 = (soapVersion == SOAPVersion.SOAP_12);
-        wsPolicyMap = pipeConfig.getPolicyMap();
-        soapFactory = pipeConfig.getBinding().getSOAPVersion().saajSoapFactory;
+        wsPolicyMap = tubeConfig.getPolicyMap();
+        soapFactory = tubeConfig.getBinding().getSOAPVersion().saajSoapFactory;
         this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         //unmarshaller as instance variable of the pipe
@@ -294,14 +294,14 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         //unmarshaller = jaxbContext.createUnmarshaller();
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
+        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, tubeConfig.getWSDLPort());
         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
     }
     
     protected SecurityTubeBase(SecurityTubeBase that, TubeCloner cloner) {
         super(that, cloner);        
-        pipeConfig = that.pipeConfig;
+        tubeConfig = that.tubeConfig;
         transportOptimization = that.transportOptimization;
         optimized = that.optimized;
         disableIncPrefix = that.disableIncPrefix;
@@ -382,7 +382,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setMustUnderstandValue(securityMUValue);
             context.setJAXWSMessage(message, soapVersion);
-            context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
+            context.isOneWayMessage(message.isOneWay(this.tubeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
             context.setEncHeaderContent(encHeaderContent);
             context.setBSP(bsp10);
@@ -476,7 +476,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if(isTrustMessage(packet)){
             operation = getWSDLOpFromAction(packet,false);
         }else{
-            operation =message.getOperation(pipeConfig.getWSDLPort());
+            operation =message.getOperation(tubeConfig.getWSDLPort());
         }
         
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
@@ -501,7 +501,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     protected WSDLBoundOperation getOperation(Message message){
         if(cachedOperation == null){
-            cachedOperation = message.getOperation(pipeConfig.getWSDLPort());
+            cachedOperation = message.getOperation(tubeConfig.getWSDLPort());
         }
         return cachedOperation;
     }
@@ -543,8 +543,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if(isTrustMessage(packet)){
             ctx.isTrustMessage(true);
         }
-        if (pipeConfig.getWSDLPort() != null) {
-            ctx.getExtraneousProperties().put(SecurityTubeBase.WSDLPORT, pipeConfig.getWSDLPort());
+        if (tubeConfig.getWSDLPort() != null) {
+            ctx.getExtraneousProperties().put(SecurityTubeBase.WSDLPORT, tubeConfig.getWSDLPort());
         }
         return ctx;
     }
@@ -691,8 +691,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 return;
             }
             //To check: Is this sufficient, any edge cases I need to take care
-            QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
-            QName portName = pipeConfig.getWSDLPort().getName();
+            QName serviceName = tubeConfig.getWSDLPort().getOwner().getName();
+            QName portName = tubeConfig.getWSDLPort().getName();
             //Review: will this take care of EndpointPolicySubject
             PolicyMerger policyMerge = PolicyMerger.getMerger();
             PolicyMapKey endpointKey =PolicyMap.createWsdlEndpointScopeKey(serviceName,portName);
@@ -755,7 +755,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             if(endpointPolicy != null){
                 policyList.add(endpointPolicy);
             }
-            for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
+            for( WSDLBoundOperation operation: tubeConfig.getWSDLPort().getBinding().getBindingOperations()){
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
                         operation.getName().getLocalPart());
 
@@ -975,10 +975,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     
     protected PolicyMapKey getOperationKey(Message message){
-        WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
+        WSDLBoundOperation operation = message.getOperation(tubeConfig.getWSDLPort());
         WSDLOperation wsdlOperation = operation.getOperation();
-        QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
-        QName portName = pipeConfig.getWSDLPort().getName();
+        QName serviceName = tubeConfig.getWSDLPort().getOwner().getName();
+        QName portName = tubeConfig.getWSDLPort().getName();
         //WSDLInput input = wsdlOperation.getInput();
         //WSDLOutput output = wsdlOperation.getOutput();
         //QName inputMessageName = input.getMessage().getName();
@@ -1060,8 +1060,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     private Policy getMessageLevelBSP() throws PolicyException {
-        QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
-        QName portName = pipeConfig.getWSDLPort().getName();
+        QName serviceName = tubeConfig.getWSDLPort().getOwner().getName();
+        QName portName = tubeConfig.getWSDLPort().getName();
         PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, bsOperationName);
         
         Policy operationLevelEP =  wsPolicyMap.getOperationEffectivePolicy(operationKey);
@@ -1080,7 +1080,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     protected final void cacheOperation(Message msg){
-        cachedOperation = msg.getOperation(pipeConfig.getWSDLPort());
+        cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
     }
     
     protected final void resetCachedOperation(){
@@ -1171,8 +1171,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         //}
         
         HeaderList hl = packet.getMessage().getHeaders();
-        //String action =  hl.getAction(pipeConfig.getBinding().getAddressingVersion(), pipeConfig.getBinding().getSOAPVersion());
-        String action =  hl.getAction(addVer, pipeConfig.getBinding().getSOAPVersion());
+        //String action =  hl.getAction(tubeConfig.getBinding().getAddressingVersion(), tubeConfig.getBinding().getSOAPVersion());
+        String action =  hl.getAction(addVer, tubeConfig.getBinding().getSOAPVersion());
         return action;
     }
     

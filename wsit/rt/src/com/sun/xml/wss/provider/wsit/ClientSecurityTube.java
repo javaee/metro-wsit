@@ -46,7 +46,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.wss.jaxws.impl.PipeConfiguration;
+import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +78,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
 
    
     
-    public ClientSecurityTube(PipeConfiguration config, Tube nextTube) {
+    public ClientSecurityTube(TubeConfiguration config, Tube nextTube) {
         super(nextTube);  
     }
     

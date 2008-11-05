@@ -86,7 +86,6 @@ public class WSITClientAuthModule implements ClientAuthModule {
         supported[1] = Message.class;
     }
 
-    @SuppressWarnings("unchecked")
     public void initialize(MessagePolicy requestPolicy,
 	       MessagePolicy responsePolicy,
 	       CallbackHandler handler,
