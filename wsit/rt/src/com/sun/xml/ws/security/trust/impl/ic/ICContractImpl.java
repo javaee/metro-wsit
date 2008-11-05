@@ -60,7 +60,8 @@ import org.w3c.dom.Element;
 public class ICContractImpl extends WSTrustContractImpl{
     @Override
     protected void handleExtension(BaseSTSRequest request, BaseSTSResponse response, IssuedTokenContext context) throws WSTrustException{
-        handleDisplayToken((RequestSecurityToken)request, (RequestSecurityTokenResponse)response, (Map<QName, List<String>>)context.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES));
+        @SuppressWarnings("unchecked") final Map<QName, List<String>> claimedAttributes = (Map<QName, List<String>>) context.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
+        handleDisplayToken((RequestSecurityToken)request, (RequestSecurityTokenResponse)response, claimedAttributes);
     }
     
     private void handleDisplayToken(RequestSecurityToken rst, RequestSecurityTokenResponse rstr, Map<QName, List<String>> claimedAttrs)throws WSTrustException{

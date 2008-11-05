@@ -46,16 +46,12 @@ import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
-import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
-import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import com.sun.xml.wss.XWSSecurityException;
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.saml.Advice;
 import com.sun.xml.wss.saml.Assertion;
-import com.sun.xml.wss.saml.Attribute;
 import com.sun.xml.wss.saml.AttributeStatement;
 import com.sun.xml.wss.saml.AudienceRestriction;
 import com.sun.xml.wss.saml.AudienceRestrictionCondition;
@@ -123,7 +119,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         String keyType = ctx.getKeyType();
         int tokenLifeSpan = (int)(ctx.getExpirationTime().getTime() - ctx.getCreationTime().getTime());
         String confirMethod = (String)ctx.getOtherProperties().get(IssuedTokenContext.CONFIRMATION_METHOD);
-        Map<QName, List<String>> claimedAttrs = (Map<QName, List<String>>) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
+        @SuppressWarnings("unchecked") Map<QName, List<String>> claimedAttrs = (Map<QName, List<String>>) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
         WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
        // WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
         

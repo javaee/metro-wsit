@@ -56,7 +56,6 @@ import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.X509Data;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBSignContext;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBSignatureFactory;
 import com.sun.xml.ws.security.opt.impl.crypto.SSEData;
-import com.sun.xml.ws.security.opt.impl.dsig.DSigResolver;
 import com.sun.xml.ws.security.opt.impl.dsig.EnvelopedSignedMessageHeader;
 import com.sun.xml.ws.security.opt.impl.dsig.JAXBSignatureHeaderElement;
 import com.sun.xml.ws.security.opt.impl.enc.JAXBEncryptedData;
@@ -72,7 +71,6 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
@@ -83,8 +81,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,7 +129,6 @@ import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.saml.SubjectConfirmation;
 import com.sun.xml.wss.saml.SubjectConfirmationData;
 
-import javax.security.auth.Subject;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
 
@@ -413,7 +408,8 @@ public class SBIssuedSamlTokenContractImpl extends IssueSamlTokenContract{
                         //ex.printStackTrace();
                         throw new WSTrustException("Unable to create KeyInfo",ex);
                     }
-                    x509Data.getContent().add(certElement);
+                    @SuppressWarnings("unchecked") final List<Object> x509DataContent = x509Data.getContent();
+                    x509DataContent.add(certElement);
                     addedClientCert = true;
                     
                 }

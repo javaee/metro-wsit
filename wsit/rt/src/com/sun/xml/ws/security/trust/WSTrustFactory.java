@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.16 2008-04-20 17:04:31 jdg6688 Exp $
+ * $Id: WSTrustFactory.java,v 1.17 2008-11-05 17:53:41 m_potociar Exp $
  */
 
 /*
@@ -106,7 +106,7 @@ public class WSTrustFactory {
         }
         WSTrustContract<BaseSTSRequest, BaseSTSResponse> contract = null;
         try {
-            Class clazz = null;
+            Class<?> clazz = null;
             final ClassLoader loader = Thread.currentThread().getContextClassLoader();
             
             if (loader == null) {
@@ -116,7 +116,9 @@ public class WSTrustFactory {
             }
             
             if (clazz != null) {
-                contract = (WSTrustContract<BaseSTSRequest, BaseSTSResponse>)clazz.newInstance();
+                @SuppressWarnings("unchecked")
+                Class<WSTrustContract<BaseSTSRequest, BaseSTSResponse>> typedClass = (Class<WSTrustContract<BaseSTSRequest, BaseSTSResponse>>) clazz;
+                contract = typedClass.newInstance();
                 contract.init(config);
             }
         } catch (ClassNotFoundException ex) {
