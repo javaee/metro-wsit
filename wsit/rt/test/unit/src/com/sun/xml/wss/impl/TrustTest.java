@@ -147,7 +147,7 @@ public class TrustTest extends TestCase{
                                                                                                                                                              
         return suite;
     }
-
+    @SuppressWarnings("unchecked")
     public static void testTrustIntegrationTest() throws Exception {
     
                 //System.setProperty("com.sun.xml.wss.saml.binding.jaxb", "true");
@@ -223,7 +223,7 @@ public class TrustTest extends TestCase{
                 str.setReference(samlRef);         
                 impl.setAttachedSecurityTokenReference(str);
                 impl.setUnAttachedSecurityTokenReference(str);
-               
+                
 	        map.put(new String("1011"), impl);
     	        context.setIssuedTokenContextMap(map);
         	context.setAlgorithmSuite(alg);
@@ -260,7 +260,7 @@ public class TrustTest extends TestCase{
                 */
     }
 
-
+    @SuppressWarnings("unchecked")
     public static void saveMimeHeaders(SOAPMessage msg, String fileName)
     throws IOException {
                                                                                                                                                  
@@ -341,7 +341,7 @@ public class TrustTest extends TestCase{
 
         return context;
    }
-
+    @SuppressWarnings("unchecked")
     private static Assertion createHOKAssertion(byte[] keyBytes, Document doc) {
         
         Assertion assertion = null;
@@ -384,7 +384,7 @@ public class TrustTest extends TestCase{
 
             SOAPElement binSecret = null;
             kiHB.addBinarySecret(elem);
-            @SuppressWarnings("unchecked")
+            
             List subConfirmation = new ArrayList();
             subConfirmation.add(senderVouchesConfirmation);
 
@@ -393,9 +393,8 @@ public class TrustTest extends TestCase{
                                                                                                                              
                                                                                                                              
             Subject subj = factory.createSubject(nmId, scf);
-            @SuppressWarnings("unchecked")                                                                                                                
+                                                                                                                          
             List attributes = new LinkedList();
-            @SuppressWarnings("unchecked")
             List attributeValues = new LinkedList();
             
             attributeValues.add("ATTRIBUTE1");

@@ -359,7 +359,7 @@ public class TrustDKTTest extends TestCase{
 
         return context;
    }
-
+   @SuppressWarnings("unchecked")
     private static Assertion createHOKAssertion(byte[] keyBytes, Document doc) {
         
         Assertion assertion = null;
@@ -395,7 +395,7 @@ public class TrustDKTTest extends TestCase{
             "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName");           
 
             //default priv key cert req
-            @SuppressWarnings("unchecked")
+           
             SOAPElement elem = (SOAPElement)doc.createElementNS(WSTrustConstants.WST_NAMESPACE, "wst:BinarySecret");
             
             elem.addTextNode(Base64.encode(keyBytes));
@@ -404,7 +404,7 @@ public class TrustDKTTest extends TestCase{
             
             SOAPElement binSecret = null;
             kiHB.addBinarySecret(elem);
-            @SuppressWarnings("unchecked")
+            
             List subConfirmation = new ArrayList();
             subConfirmation.add(senderVouchesConfirmation);
                      
@@ -413,9 +413,9 @@ public class TrustDKTTest extends TestCase{
                                                                                                                              
                                                                                                                              
             Subject subj = factory.createSubject(nmId, scf);
-            @SuppressWarnings("unchecked")                                                                                                           
+                                                                                                                      
             LinkedList attributes = new LinkedList();
-            @SuppressWarnings("unchecked")
+            
             List attributeValues = new LinkedList();
             attributeValues.add("ATTRIBUTE1");
             attributes.add( factory.createAttribute(

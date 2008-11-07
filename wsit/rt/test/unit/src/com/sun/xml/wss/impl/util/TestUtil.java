@@ -57,7 +57,7 @@ public class TestUtil {
     /** Creates a new instance of TestUtil */
     public TestUtil() {
     }
-    
+    @SuppressWarnings("unchecked")
     public static void saveMimeHeaders(SOAPMessage msg, String fileName)
     throws IOException {
                                                                                                                                                  
@@ -69,7 +69,7 @@ public class TestUtil {
         Iterator iterator = mimeHeaders.getAllHeaders();
                                                                                                                                                  
         while(iterator.hasNext()) {
-            @SuppressWarnings("unchecked")
+           
             MimeHeader mimeHeader = (MimeHeader) iterator.next();
             
             hashTable.put(mimeHeader.getName(), mimeHeader.getValue());
