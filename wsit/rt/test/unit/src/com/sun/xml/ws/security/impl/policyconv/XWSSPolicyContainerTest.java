@@ -266,6 +266,7 @@ public class XWSSPolicyContainerTest extends TestCase {
                 System.out.println("KeyBinding : " + p.getKeyBinding().getType());
                 
                 SignaturePolicy.FeatureBinding f1 = (SignaturePolicy.FeatureBinding)p.getFeatureBinding();
+              @SuppressWarnings("unchecked")
                 List<Target> t1 = f1.getTargetBindings();
                 System.out.println("No of Targets : " + t1.size());
                 for ( Target t : t1 ) {
@@ -278,6 +279,7 @@ public class XWSSPolicyContainerTest extends TestCase {
                 System.out.println("KeyBinding : " + p.getKeyBinding().getType());
                 
                 EncryptionPolicy.FeatureBinding f1 = (EncryptionPolicy.FeatureBinding)p.getFeatureBinding();
+                @SuppressWarnings("unchecked")
                 List<Target> t1 = f1.getTargetBindings();
                 System.out.println("No of Targets : " + t1.size());
                 for ( Target t : t1 ) {

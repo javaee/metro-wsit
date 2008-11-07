@@ -395,36 +395,39 @@ public class TrustDKTTest extends TestCase{
             "urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName");           
 
             //default priv key cert req
+            @SuppressWarnings("unchecked")
             SOAPElement elem = (SOAPElement)doc.createElementNS(WSTrustConstants.WST_NAMESPACE, "wst:BinarySecret");
+            
             elem.addTextNode(Base64.encode(keyBytes));
-
+            
             KeyInfoHeaderBlock kiHB = new KeyInfoHeaderBlock(doc);
-
+            
             SOAPElement binSecret = null;
             kiHB.addBinarySecret(elem);
-
+            @SuppressWarnings("unchecked")
             List subConfirmation = new ArrayList();
             subConfirmation.add(senderVouchesConfirmation);
-
+                     
             SubjectConfirmation scf =
             factory.createSubjectConfirmation(subConfirmation, null, kiHB.getAsSoapElement());
                                                                                                                              
                                                                                                                              
             Subject subj = factory.createSubject(nmId, scf);
-                                                                                                                             
-            List attributes = new LinkedList();
+            @SuppressWarnings("unchecked")                                                                                                           
+            LinkedList attributes = new LinkedList();
+            @SuppressWarnings("unchecked")
             List attributeValues = new LinkedList();
             attributeValues.add("ATTRIBUTE1");
             attributes.add( factory.createAttribute(
                 "attribute1",
                 "urn:com:sun:xml:wss:attribute",
                 attributeValues));
-                                                                                                                             
+                                                                                             
             statements.add(
             factory.createAttributeStatement(subj, attributes));
-                                                                                                                             
+                                                                                                                           
             Conditions conditions = factory.createConditions(before, after, null, null, null);
-                                                                                                                             
+                                                                                                                           
             assertion = factory.createAssertion(assertionID, issuer, issueInstant,
             conditions, null, statements);
             assertion.setMajorVersion(BigInteger.ONE);

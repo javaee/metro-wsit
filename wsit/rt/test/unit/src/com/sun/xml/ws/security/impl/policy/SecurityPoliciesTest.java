@@ -376,6 +376,7 @@ public class SecurityPoliciesTest extends TestCase {
                 
                 if ( PolicyTypeUtil.signaturePolicy(pol) ) {
                     SignaturePolicy sigPolicy = (SignaturePolicy)pol;
+                    @SuppressWarnings("unchecked")
                     ArrayList<SignatureTarget> targetList =
                             ((SignaturePolicy.FeatureBinding)pol.getFeatureBinding()).getTargetBindings();
                     for ( SignatureTarget target : targetList ) {
@@ -387,6 +388,7 @@ public class SecurityPoliciesTest extends TestCase {
                 
                 if ( PolicyTypeUtil.encryptionPolicy(pol) ) {
                     EncryptionPolicy encPolicy = (EncryptionPolicy)pol;
+                    @SuppressWarnings("unchecked")
                     ArrayList<EncryptionTarget> targetList =
                             ((EncryptionPolicy.FeatureBinding)pol.getFeatureBinding()).getTargetBindings();
                     for ( EncryptionTarget target : targetList ) {
@@ -730,9 +732,11 @@ public class SecurityPoliciesTest extends TestCase {
         
         //Verify targets
         SignaturePolicy.FeatureBinding f1 = (SignaturePolicy.FeatureBinding)sp1.getFeatureBinding();
+       @SuppressWarnings("unchecked")
         List<Target> t1 = f1.getTargetBindings();
         
         SignaturePolicy.FeatureBinding f2 = (SignaturePolicy.FeatureBinding)sp2.getFeatureBinding();
+        @SuppressWarnings("unchecked")
         List<Target> t2 = f2.getTargetBindings();
         
         if ( t1.size() != t2.size() ) {
@@ -766,9 +770,11 @@ public class SecurityPoliciesTest extends TestCase {
         
         //Verify targets
         EncryptionPolicy.FeatureBinding f1 = (EncryptionPolicy.FeatureBinding)sp1.getFeatureBinding();
+       @SuppressWarnings("unchecked")
         List<Target> t1 = f1.getTargetBindings();
         
         EncryptionPolicy.FeatureBinding f2 = (EncryptionPolicy.FeatureBinding)sp2.getFeatureBinding();
+       @SuppressWarnings("unchecked")
         List<Target> t2 = f2.getTargetBindings();
         
         if ( t1.size() != t2.size() ) {
@@ -949,6 +955,7 @@ public class SecurityPoliciesTest extends TestCase {
                 System.out.println("KeyBinding : " + p.getKeyBinding().getType());
                 
                 SignaturePolicy.FeatureBinding f1 = (SignaturePolicy.FeatureBinding)p.getFeatureBinding();
+               @SuppressWarnings("unchecked")
                 List<Target> t1 = f1.getTargetBindings();
                 System.out.println("No of Targets : " + t1.size());
                 for ( Target t : t1 ) {
@@ -961,6 +968,7 @@ public class SecurityPoliciesTest extends TestCase {
                 System.out.println("KeyBinding : " + p.getKeyBinding().getType());
                 
                 EncryptionPolicy.FeatureBinding f1 = (EncryptionPolicy.FeatureBinding)p.getFeatureBinding();
+               @SuppressWarnings("unchecked")
                 List<Target> t1 = f1.getTargetBindings();
                 System.out.println("No of Targets : " + t1.size());
                 for ( Target t : t1 ) {

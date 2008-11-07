@@ -220,10 +220,10 @@ public class TrustTest extends TestCase{
                 SecurityTokenReference str = new SecurityTokenReference(msg.getSOAPPart());
                 KeyIdentifier samlRef = new SamlKeyIdentifier(msg.getSOAPPart());
                 samlRef.setReferenceValue(assertion.getAssertionID());
-                str.setReference(samlRef);           
+                str.setReference(samlRef);         
                 impl.setAttachedSecurityTokenReference(str);
                 impl.setUnAttachedSecurityTokenReference(str);
-
+               
 	        map.put(new String("1011"), impl);
     	        context.setIssuedTokenContextMap(map);
         	context.setAlgorithmSuite(alg);
@@ -272,6 +272,7 @@ public class TrustTest extends TestCase{
         Iterator iterator = mimeHeaders.getAllHeaders();
                                                                                                                                                  
         while(iterator.hasNext()) {
+            @SuppressWarnings("unchecked")
             MimeHeader mimeHeader = (MimeHeader) iterator.next();
             hashTable.put(mimeHeader.getName(), mimeHeader.getValue());
         }
@@ -383,7 +384,7 @@ public class TrustTest extends TestCase{
 
             SOAPElement binSecret = null;
             kiHB.addBinarySecret(elem);
-
+            @SuppressWarnings("unchecked")
             List subConfirmation = new ArrayList();
             subConfirmation.add(senderVouchesConfirmation);
 
@@ -392,9 +393,11 @@ public class TrustTest extends TestCase{
                                                                                                                              
                                                                                                                              
             Subject subj = factory.createSubject(nmId, scf);
-                                                                                                                             
+            @SuppressWarnings("unchecked")                                                                                                                
             List attributes = new LinkedList();
+            @SuppressWarnings("unchecked")
             List attributeValues = new LinkedList();
+            
             attributeValues.add("ATTRIBUTE1");
             attributes.add( factory.createAttribute(
                 "attribute1",

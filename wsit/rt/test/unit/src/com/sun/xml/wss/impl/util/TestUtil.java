@@ -69,7 +69,9 @@ public class TestUtil {
         Iterator iterator = mimeHeaders.getAllHeaders();
                                                                                                                                                  
         while(iterator.hasNext()) {
+            @SuppressWarnings("unchecked")
             MimeHeader mimeHeader = (MimeHeader) iterator.next();
+            
             hashTable.put(mimeHeader.getName(), mimeHeader.getValue());
         }
                                                                                                                                                  
