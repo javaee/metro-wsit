@@ -146,7 +146,10 @@ public class XWSSPolicyGenerator {
     }
     
     public AlgorithmSuite getBindingLevelAlgSuite(){
-        return _binding.getAlgorithmSuite();
+        if(_binding != null)
+            return _binding.getAlgorithmSuite();
+        else 
+            return new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
     }
     
     public void process(boolean ignoreST) throws PolicyException {
@@ -161,8 +164,13 @@ public class XWSSPolicyGenerator {
         policyBinding =(Binding) binding;
         if(binding == null){
             //log error.
-            logger.log(Level.SEVERE,LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
-            throw new PolicyException(LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
+            //logger.log(Level.SEVERE,LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
+            //throw new PolicyException(LogStringsMessages.SP_0105_ERROR_BINDING_ASSR_NOT_PRESENT());
+            // We handle this now
+            NilBindingProcessor nbp = new NilBindingProcessor(isServer, isIncoming,_policyContainer);
+            nbp.process();
+            processNonBindingAssertions(nbp);
+            return;
         }
         if(PolicyUtil.isTransportBinding(binding, spVersion)){
             if(logger.isLoggable(Level.FINE)){
@@ -228,10 +236,10 @@ public class XWSSPolicyGenerator {
                 throw new PolicyException(LogStringsMessages.SP_0104_ERROR_SIGNATURE_CONFIRMATION_ELEMENT(ex.getMessage()));
             }
         }
-        if(policyBinding.getAlgorithmSuite() != null){
+        if(policyBinding!= null && policyBinding.getAlgorithmSuite() != null){
             mp.setAlgorithmSuite(getAlgoSuite(policyBinding.getAlgorithmSuite()));
         }
-        if(policyBinding.getLayout()!= null){
+        if(policyBinding!= null && policyBinding.getLayout()!= null){
             mp.setLayout(getLayout(policyBinding.getLayout()));
         }
         if(isIncoming && reqElements.size() > 0){

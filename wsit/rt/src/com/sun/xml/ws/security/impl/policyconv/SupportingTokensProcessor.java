@@ -99,10 +99,13 @@ public class SupportingTokensProcessor {
         this.signaturePolicy = sp;
         AlgorithmSuite as = null;
         as = st.getAlgorithmSuite();
-        if( as == null){
+        if( as == null && binding != null){
             as = binding.getAlgorithmSuite();
         }
-        this.iAP = new IntegrityAssertionProcessor(as,binding.isSignContent());
+        boolean signContent = false;
+        if(binding != null)
+            signContent = binding.isSignContent();
+        this.iAP = new IntegrityAssertionProcessor(as,signContent);
         this.eAP = new EncryptionAssertionProcessor(as,false);
         this.stc = iAP.getTargetCreator();
         this.etc = eAP.getTargetCreator();
@@ -164,14 +167,14 @@ public class SupportingTokensProcessor {
         SignaturePolicy sp = new SignaturePolicy();
         sp.setUUID(pid.generateID());
         tokenProcessor.addKeyBinding(sp, token,true);
-        if(binding.getTokenProtection()){
+        if(binding != null && binding.getTokenProtection()){
             protectToken((WSSPolicy) sp.getKeyBinding(), sp);
         }
         SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
         //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
         AlgorithmSuite as = null;
         as = st.getAlgorithmSuite();
-        if( as == null){
+        if( as == null && binding != null){
             as = binding.getAlgorithmSuite();
         }
         SecurityPolicyUtil.setCanonicalizationMethod(spFB, as);
@@ -205,7 +208,7 @@ public class SupportingTokensProcessor {
         if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && 
                 ((UserNameToken)token).hasPassword() && 
                 !((UserNameToken)token).useHashPassword()){
-            if ( token.getTokenId()!= null ) {
+            if ( binding != null && token.getTokenId()!= null ) {
                 EncryptionPolicy.FeatureBinding fb =(EncryptionPolicy.FeatureBinding) encryptionPolicy.getFeatureBinding();
                 EncryptionTarget et = etc.newURIEncryptionTarget(token.getTokenId());
                 fb.addTargetBinding(et);
@@ -228,7 +231,7 @@ public class SupportingTokensProcessor {
     }
     
     protected void addTargets(){
-        if(binding.getProtectionOrder() == Binding.SIGN_ENCRYPT){
+        if(binding != null && binding.getProtectionOrder() == Binding.SIGN_ENCRYPT){
             if(spList != null){
                 populateSignaturePolicy();
             }
