@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
+import java.net.URI;
 import java.util.Collection;
 
 /**
@@ -89,7 +90,8 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             // FIXME endpoint URI for provider case
-            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getServerSideTubeCreators(wsitContext.getWsdlPort().getAddress().getURI());
+            final URI endpointUri = (wsitContext.getWsdlPort() != null) ?  wsitContext.getWsdlPort().getAddress().getURI() : null;
+            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getServerSideTubeCreators(endpointUri);
             for (TubeCreator tubeCreator : tubeCreators) {
                 tubeCreator.updateContext(wsitContext);
             }
