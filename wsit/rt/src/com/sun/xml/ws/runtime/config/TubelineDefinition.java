@@ -37,8 +37,8 @@ import org.w3c.dom.Element;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="endpoint-side" type="{http://java.sun.com/xml/ns/metro}tubeFactoryListCType" minOccurs="0"/>
  *         &lt;element name="client-side" type="{http://java.sun.com/xml/ns/metro}tubeFactoryListCType" minOccurs="0"/>
+ *         &lt;element name="endpoint-side" type="{http://java.sun.com/xml/ns/metro}tubeFactoryListCType" minOccurs="0"/>
  *         &lt;any/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}ID" />
@@ -51,16 +51,16 @@ import org.w3c.dom.Element;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "tubelineDefinitionCType", propOrder = {
-    "endpointSide",
     "clientSide",
+    "endpointSide",
     "any"
 })
 public class TubelineDefinition {
 
-    @XmlElement(name = "endpoint-side")
-    protected TubeFactoryList endpointSide;
     @XmlElement(name = "client-side")
     protected TubeFactoryList clientSide;
+    @XmlElement(name = "endpoint-side")
+    protected TubeFactoryList endpointSide;
     @XmlAnyElement(lax = true)
     protected List<Object> any;
     @XmlAttribute

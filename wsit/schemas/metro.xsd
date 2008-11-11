@@ -200,6 +200,16 @@
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:sequence>
+            <xsd:element name="client-side" type="tns:tubeFactoryListCType" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Contains the client-side specific ordered list of tube factories.
+                        If this optional element is omitted, default application tubeline
+                        definition is used. If default application tubeline definition
+                        also omits this optional element, default Metro tubeline is used.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:element name="endpoint-side" type="tns:tubeFactoryListCType" minOccurs="0" maxOccurs="1">
                 <xsd:annotation>
                     <xsd:documentation>
@@ -208,16 +218,6 @@
                         application tubeline definition is used. If default application
                         tubeline definition also omits this optional element,
                         default Metro tubeline definition is used.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:element name="client-side" type="tns:tubeFactoryListCType" minOccurs="0" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        Contains the client-side specific ordered list of tube factories.
-                        If this optional element is omitted, default application tubeline
-                        definition is used. If default application tubeline definition
-                        also omits this optional element, default Metro tubeline is used.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
