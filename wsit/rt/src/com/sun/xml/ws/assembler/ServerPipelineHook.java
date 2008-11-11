@@ -95,7 +95,7 @@ public class ServerPipelineHook extends com.sun.xml.ws.api.server.ServerPipeline
      *      no additional tube is inserted. If the implementation adds
      *      new tubes, return the new head tube.
      */
-    public @NotNull Tube createSecurityTube(WsitServerTubeAssemblyContext context) {
+    public @NotNull Tube createSecurityTube(ServerTubelineAssemblyContext context) {
         return context.getTubelineHead();
     }    
 }

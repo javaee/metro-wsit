@@ -36,8 +36,8 @@
 package com.sun.xml.ws.assembler.jaxws;
 
 import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -62,7 +62,7 @@ public final class TransportTubeFactory implements TubeFactory {
     private static final String AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
     private static final QName AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION = new QName(AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI, "AutomaticallySelectOptimalTransport");
 
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isOptimizedTransportEnabled(context.getPolicyMap(), context.getWsdlPort(), context.getPortInfo())) {
             return TCPTransportPipeFactory.doCreate(context, false);
         } else {
@@ -70,7 +70,7 @@ public final class TransportTubeFactory implements TubeFactory {
         }
     }
 
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         return context.getTubelineHead();
     }
 

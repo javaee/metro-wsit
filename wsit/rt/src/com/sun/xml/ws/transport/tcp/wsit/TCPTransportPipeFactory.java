@@ -43,7 +43,7 @@ import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -81,7 +81,7 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
         return new TCPTransportPipe(context);
     }
     
-    public static Tube doCreate(@NotNull final WsitClientTubeAssemblyContext context, final boolean checkSchema) {
+    public static Tube doCreate(@NotNull final ClientTubelineAssemblyContext context, final boolean checkSchema) {
         if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
             return null;
         }

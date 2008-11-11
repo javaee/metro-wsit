@@ -49,7 +49,7 @@ public interface TubelineAssemblyContextUpdater {
      * @param context
      * @throws javax.xml.ws.WebServiceException
      */
-    void prepareContext(WsitClientTubeAssemblyContext context) throws WebServiceException;
+    void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException;
     
     /**
      * TODO javadoc
@@ -57,5 +57,5 @@ public interface TubelineAssemblyContextUpdater {
      * @param context
      * @throws javax.xml.ws.WebServiceException
      */
-    void prepareContext(WsitServerTubeAssemblyContext context) throws WebServiceException;
+    void prepareContext(ServerTubelineAssemblyContext context) throws WebServiceException;
 }

@@ -97,6 +97,6 @@ public class ClientPipelineHook extends com.sun.xml.ws.api.client.ClientPipeline
      *      new tubes, return the new head tube.
      */
     public @NotNull
-    Tube createSecurityTube(WsitClientTubeAssemblyContext context) {
+    Tube createSecurityTube(ClientTubelineAssemblyContext context) {
         return context.getTubelineHead();
     }}

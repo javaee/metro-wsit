@@ -27,8 +27,8 @@ import com.sun.xml.ws.assembler.ClientPipelineHook;
 import com.sun.xml.ws.assembler.ServerPipelineHook;
 import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.assembler.TubelineAssemblyContextUpdater;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
@@ -59,19 +59,19 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     private static final String WSDL_MODEL = "WSDL_MODEL";
     private static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
 
-    public void prepareContext(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
             context.setCodec(createSecurityCodec(context.getBinding()));
         }
     }
 
-    public void prepareContext(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public void prepareContext(ServerTubelineAssemblyContext context) throws WebServiceException {
         if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
             context.setCodec(createSecurityCodec(context.getEndpoint().getBinding()));
         }
     }
 
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         //TEMP: uncomment this ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
         ServerPipelineHook[] hooks = getServerTubeLineHooks();
         ServerPipelineHook hook = null;
@@ -143,7 +143,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         return context.getTubelineHead();
     }
 
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         ClientPipelineHook hook = null;
         ClientPipelineHook[] hooks = getClientTublineHooks(context);
         if (hooks != null && hooks.length > 0) {
@@ -200,7 +200,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         }
     }
 
-    private ClientPipelineHook[] getClientTublineHooks(WsitClientTubeAssemblyContext context) {
+    private ClientPipelineHook[] getClientTublineHooks(ClientTubelineAssemblyContext context) {
         try {
             ClientPipelineHook[] hooks = loadSPs(ClientPipelineHook.class);
             if (hooks != null && hooks.length > 0) {
@@ -307,13 +307,13 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         return null;
     }
 
-    private boolean isSecurityConfigPresent(WsitClientTubeAssemblyContext context) {
+    private boolean isSecurityConfigPresent(ClientTubelineAssemblyContext context) {
         // returning true for empty policy map by default for now, because the Client Side Security Config is only 
         // accessible as a Runtime Property on BindingProvider.RequestContext
         return true;
     }
 
-    private boolean isSecurityConfigPresent(WsitServerTubeAssemblyContext context) {
+    private boolean isSecurityConfigPresent(ServerTubelineAssemblyContext context) {
 
         QName serviceQName = context.getEndpoint().getServiceName();
         //TODO: not sure which of the two above will give the service name as specified in DD
@@ -360,16 +360,16 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         return false;
     }
 
-    private Tube initializeXWSSClientTube(WsitClientTubeAssemblyContext context) {
+    private Tube initializeXWSSClientTube(ClientTubelineAssemblyContext context) {
         return PipeAdapter.adapt(new XWSSClientPipe(context.getWsdlPort(), context.getService(), context.getBinding(), context.getAdaptedTubelineHead()));
     }
 
-    private Tube initializeXWSSServerTube(WsitServerTubeAssemblyContext context) {
+    private Tube initializeXWSSServerTube(ServerTubelineAssemblyContext context) {
         return PipeAdapter.adapt(new XWSSServerPipe(context.getEndpoint(), context.getWsdlPort(), context.getAdaptedTubelineHead()));
     }
 
     @SuppressWarnings("unchecked")
-    private Tube createSecurityTube(WsitServerTubeAssemblyContext context) {
+    private Tube createSecurityTube(ServerTubelineAssemblyContext context) {
         HashMap props = new HashMap();
         props.put(POLICY, context.getPolicyMap());
         props.put(SEI_MODEL, context.getSEIModel());

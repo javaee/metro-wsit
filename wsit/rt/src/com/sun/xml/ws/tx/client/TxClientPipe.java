@@ -44,7 +44,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.policy.PolicyMap;
 import static com.sun.xml.ws.policy.PolicyMap.createWsdlOperationScopeKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
@@ -75,7 +75,7 @@ import javax.xml.ws.WebServiceException;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -111,7 +111,7 @@ public class TxClientPipe extends TxBasePipe {
      * @param pcfg ws-policy configuration
      * @param next the next pipe in the chain
      */
-    public TxClientPipe(WsitClientTubeAssemblyContext context, Pipe next) {
+    public TxClientPipe(ClientTubelineAssemblyContext context, Pipe next) {
         super(next);
         this.policyMap = context.getPolicyMap();
         this.wsdlPort = context.getWsdlPort();

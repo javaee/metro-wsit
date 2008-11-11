@@ -66,7 +66,7 @@ import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import javax.xml.soap.SOAPException;
@@ -127,7 +127,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     private Set wsscConfig = null;
 
     // Creates a new instance of SecurityClientTube
-    public SecurityClientTube(WsitClientTubeAssemblyContext wsitContext, Tube nextTube) {
+    public SecurityClientTube(ClientTubelineAssemblyContext wsitContext, Tube nextTube) {
         super(new ClientTubeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
         //scPlugin = new WSSCPlugin(null, wsscVer);
         try {            

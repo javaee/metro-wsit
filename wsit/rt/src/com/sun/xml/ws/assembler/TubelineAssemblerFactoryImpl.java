@@ -65,7 +65,7 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
 
         @NotNull
         public Tube createClient(@NotNull ClientTubeAssemblerContext context) {
-            WsitClientTubeAssemblyContext wsitContext = new WsitClientTubeAssemblyContext(context);
+            ClientTubelineAssemblyContext wsitContext = new ClientTubelineAssemblyContext(context);
 
             Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getClientSideTubeCreators(wsitContext.getAddress().getURI());
 
@@ -82,7 +82,7 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
 
         @NotNull
         public Tube createServer(@NotNull ServerTubeAssemblerContext context) {
-            WsitServerTubeAssemblyContext wsitContext = new WsitServerTubeAssemblyContext(context);
+            ServerTubelineAssemblyContext wsitContext = new ServerTubelineAssemblyContext(context);
             ServiceDefinition sd = wsitContext.getEndpoint().getServiceDefinition();
             if (sd != null) {
                 sd.addFilter(new WsdlDocumentFilter());

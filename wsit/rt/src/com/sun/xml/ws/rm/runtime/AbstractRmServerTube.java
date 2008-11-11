@@ -42,7 +42,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.SequenceTerminatedFault;
@@ -85,7 +85,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     //
     private PacketAdapter requestAdapter;
 
-    static AbstractRmServerTube getInstance(WsitServerTubeAssemblyContext context) {
+    static AbstractRmServerTube getInstance(ServerTubelineAssemblyContext context) {
         Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
         switch (configuration.getRmVersion()) {
             case WSRM10:

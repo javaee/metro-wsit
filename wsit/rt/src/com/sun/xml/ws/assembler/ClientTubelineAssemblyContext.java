@@ -62,7 +62,7 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitClientTubeAssemblyContext extends WsitTubeAssemblyContext {
+public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
 
     private final @NotNull ClientTubeAssemblerContext wrappedContext;
     private final PolicyMap policyMap;
@@ -71,7 +71,7 @@ public class WsitClientTubeAssemblyContext extends WsitTubeAssemblyContext {
     private SecureConversationInitiator scInitiator;
     // TODO: replace the PipeConfiguration
 
-    public WsitClientTubeAssemblyContext(@NotNull ClientTubeAssemblerContext context) {
+    public ClientTubelineAssemblyContext(@NotNull ClientTubeAssemblerContext context) {
         this.wrappedContext = context;
 
         WSDLPort _port = context.getWsdlModel();

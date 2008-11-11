@@ -27,7 +27,7 @@ public final class TxTubeFactory implements TubeFactory {
      * @param context wsit client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
-    public Tube createTube(WsitClientTubeAssemblyContext context) {
+    public Tube createTube(ClientTubelineAssemblyContext context) {
         if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), false)) {
             return PipeAdapter.adapt(new TxClientPipe(context, context.getAdaptedTubelineHead()));
         } else {
@@ -41,7 +41,7 @@ public final class TxTubeFactory implements TubeFactory {
      * @param context wsit service tubeline assembler context
      * @return new head of the service-side tubeline
      */
-    public Tube createTube(WsitServerTubeAssemblyContext context) {
+    public Tube createTube(ServerTubelineAssemblyContext context) {
         if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), true)) {
             return PipeAdapter.adapt(new TxServerPipe(context, context.getAdaptedTubelineHead()));
         } else {

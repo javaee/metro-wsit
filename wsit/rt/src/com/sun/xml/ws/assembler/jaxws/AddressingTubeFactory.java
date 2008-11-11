@@ -37,8 +37,8 @@ package com.sun.xml.ws.assembler.jaxws;
 
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -48,11 +48,11 @@ import javax.xml.ws.WebServiceException;
  */
 public final class AddressingTubeFactory implements TubeFactory {
 
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         return context.getWrappedContext().createWsaTube(context.getTubelineHead());
     }
 
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         return context.getWrappedContext().createWsaTube(context.getTubelineHead());
     }
 }

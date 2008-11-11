@@ -54,7 +54,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -137,7 +137,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     private String reqAction = null;
     
     // Creates a new instance of SecurityServerTube
-    public SecurityServerTube(WsitServerTubeAssemblyContext context, Tube nextTube) {
+    public SecurityServerTube(ServerTubelineAssemblyContext context, Tube nextTube) {
         super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
         
         try {

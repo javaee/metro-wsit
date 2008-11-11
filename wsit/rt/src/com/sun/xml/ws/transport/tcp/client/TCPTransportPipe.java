@@ -56,7 +56,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.io.InputStream;
@@ -81,11 +81,11 @@ public class TCPTransportPipe implements Pipe {
         this(context.getService(), context.getBinding(), context.getCodec(), -1);
     }
 
-    public TCPTransportPipe(final WsitClientTubeAssemblyContext context) {
+    public TCPTransportPipe(final ClientTubelineAssemblyContext context) {
         this(context, -1);
     }
 
-    public TCPTransportPipe(WsitClientTubeAssemblyContext context, int customTCPPort) {
+    public TCPTransportPipe(ClientTubelineAssemblyContext context, int customTCPPort) {
         this(context.getService(), context.getBinding(), context.getCodec(), customTCPPort);
     }
     

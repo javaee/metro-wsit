@@ -38,8 +38,8 @@ package com.sun.xml.ws.rm.runtime.testing;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -48,7 +48,7 @@ import javax.xml.ws.WebServiceException;
  */
 public final class PacketFilteringTubeFactory implements TubeFactory {
 
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isPacketFilteringEnabled(context.getBinding())) {
             return new PacketFilteringTube(context);
         } else {
@@ -56,7 +56,7 @@ public final class PacketFilteringTubeFactory implements TubeFactory {
         }
     }
 
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
             return new PacketFilteringTube(context);
         } else {

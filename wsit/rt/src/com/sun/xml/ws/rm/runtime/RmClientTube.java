@@ -42,7 +42,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
@@ -75,7 +75,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         this.requestPacketCopy = null;
     }
 
-    RmClientTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
+    RmClientTube(ClientTubelineAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {

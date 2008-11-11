@@ -56,23 +56,23 @@ final class TubeCreator {
         // TODO implement initialization mechanism
     }
 
-    Tube createTube(WsitClientTubeAssemblyContext context) {
+    Tube createTube(ClientTubelineAssemblyContext context) {
         // TODO implement passing init parameters (if any) to the factory
         return factory.createTube(context);
     }
 
-    Tube createTube(WsitServerTubeAssemblyContext context) {
+    Tube createTube(ServerTubelineAssemblyContext context) {
         // TODO implement passing init parameters (if any) to the factory
         return factory.createTube(context);
     }
 
-    void updateContext(WsitClientTubeAssemblyContext context) {
+    void updateContext(ClientTubelineAssemblyContext context) {
         if (factory instanceof TubelineAssemblyContextUpdater) {
             ((TubelineAssemblyContextUpdater) factory).prepareContext(context);
         }
     }
 
-    void updateContext(WsitServerTubeAssemblyContext context) {
+    void updateContext(ServerTubelineAssemblyContext context) {
         if (factory instanceof TubelineAssemblyContextUpdater) {
             ((TubelineAssemblyContextUpdater) factory).prepareContext(context);
         }

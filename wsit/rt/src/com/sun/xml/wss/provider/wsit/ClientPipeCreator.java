@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 
 /**
  * This is used by WSClientContainer to return proper 196 security pipe
@@ -75,7 +75,7 @@ public class ClientPipeCreator extends ClientPipelineHook {
     
     
     @Override
-    public @NotNull Tube createSecurityTube(WsitClientTubeAssemblyContext context) {
+    public @NotNull Tube createSecurityTube(ClientTubelineAssemblyContext context) {
         HashMap<Object, Object> propBag = new HashMap<Object, Object>();
         propBag.put(PipeConstants.POLICY, context.getPolicyMap());
         propBag.put(PipeConstants.WSDL_MODEL, context.getWrappedContext().getWsdlModel());

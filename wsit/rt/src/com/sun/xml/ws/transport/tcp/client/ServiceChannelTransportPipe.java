@@ -42,7 +42,7 @@ import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.ContentType;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
@@ -64,11 +64,11 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
         super(context);
     }
 
-    public ServiceChannelTransportPipe(@NotNull final WsitClientTubeAssemblyContext context) {
+    public ServiceChannelTransportPipe(@NotNull final ClientTubelineAssemblyContext context) {
         super(context);
     }
 
-    public ServiceChannelTransportPipe(WsitClientTubeAssemblyContext context, int customTCPPort) {
+    public ServiceChannelTransportPipe(ClientTubelineAssemblyContext context, int customTCPPort) {
         super(context, customTCPPort);
     }
     

@@ -50,7 +50,7 @@ public interface TubeFactory {
      * @param context wsit client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
-    Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException;
+    Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException;
 
     /**
      * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
@@ -58,6 +58,6 @@ public interface TubeFactory {
      * @param context wsit service tubeline assembler context
      * @return new head of the service-side tubeline
      */
-    Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException;
+    Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException;
 
 }

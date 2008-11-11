@@ -40,8 +40,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.Configuration;
@@ -66,7 +66,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         this.filters = original.filters;
     }
 
-    public PacketFilteringTube(WsitClientTubeAssemblyContext context) throws RmRuntimeException {
+    public PacketFilteringTube(ClientTubelineAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = true;
         
@@ -75,7 +75,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         this.filters = getConfiguredFilters(context.getBinding(), (configurations != null && configurations.length > 0) ? configurations[0] : null);
     }
 
-    public PacketFilteringTube(WsitServerTubeAssemblyContext context) throws RmRuntimeException {
+    public PacketFilteringTube(ServerTubelineAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = false;
 

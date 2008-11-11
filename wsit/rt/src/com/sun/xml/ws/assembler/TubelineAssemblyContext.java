@@ -42,10 +42,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * A base tubeline assembly context class providing common methods for both
+ * client and server assembly context classes.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitTubeAssemblyContext {
+public class TubelineAssemblyContext {
 
     private Tube head;
     private Pipe adaptedHead;

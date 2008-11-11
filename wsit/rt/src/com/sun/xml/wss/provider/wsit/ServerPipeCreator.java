@@ -50,7 +50,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 
 /**
  * This is used by JAXWSContainer to return proper 196 security and
@@ -79,7 +79,7 @@ public class ServerPipeCreator extends ServerPipelineHook {
     }    
    
     @Override
-    public @NotNull Tube createSecurityTube(WsitServerTubeAssemblyContext context) {
+    public @NotNull Tube createSecurityTube(ServerTubelineAssemblyContext context) {
 
         HashMap<Object, Object> props = new HashMap<Object, Object>();
         boolean httpBinding = BindingID.XML_HTTP.equals(context.getEndpoint().getBinding().getBindingId());

@@ -44,7 +44,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.at.ATSubCoordinator;
@@ -76,7 +76,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -102,7 +102,7 @@ public class TxServerPipe extends TxBasePipe {
      * @param map  PolicyMap
      * @param next Next pipe to be executed.
      */
-    public TxServerPipe(WsitServerTubeAssemblyContext context, Pipe next) {
+    public TxServerPipe(ServerTubelineAssemblyContext context, Pipe next) {
         super(next);
         unmarshaller = TxJAXBContext.createUnmarshaller();
         this.port = context.getWsdlPort();

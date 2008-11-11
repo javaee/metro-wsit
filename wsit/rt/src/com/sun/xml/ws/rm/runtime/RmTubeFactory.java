@@ -38,8 +38,8 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.WsitClientTubeAssemblyContext;
-import com.sun.xml.ws.assembler.WsitServerTubeAssemblyContext;
+import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
@@ -58,7 +58,7 @@ public final class RmTubeFactory implements TubeFactory {
      * @param context wsit client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
 //            return new RMClientTube(
 //                    context.getWsdlPort(),
@@ -77,7 +77,7 @@ public final class RmTubeFactory implements TubeFactory {
      * @param context wsit service tubeline assembler context
      * @return new head of the service-side tubeline
      */
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
 //            return new RMServerTube(
 //                    context.getWsdlPort(),

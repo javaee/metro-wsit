@@ -55,14 +55,14 @@ public final class ActionDumpTubeFactory implements TubeFactory {
     public static final String CLIENT_NAME = "com.sun.xml.ws.assembler.client.action";
     public static final String SERVER_NAME = "com.sun.xml.ws.assembler.server.action";
 
-    public Tube createTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (Boolean.getBoolean(CLIENT_NAME)) {
             return new ActionDumpTube(CLIENT_NAME, context.getBinding(), context.getTubelineHead());
         }
         return context.getTubelineHead();
     }
 
-    public Tube createTube(WsitServerTubeAssemblyContext context) throws WebServiceException {
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         if (Boolean.getBoolean(SERVER_NAME)) {
             return new ActionDumpTube(SERVER_NAME, context.getEndpoint().getBinding(), context.getTubelineHead());
         }

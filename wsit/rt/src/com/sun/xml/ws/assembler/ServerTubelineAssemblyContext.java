@@ -56,17 +56,18 @@ import com.sun.xml.ws.policy.util.PolicyMapUtil;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * The context is a wrapper around the existing JAX-WS {@link ServerTubeAssemblerContext} with additional features
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsitServerTubeAssemblyContext extends WsitTubeAssemblyContext  {
+public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
 
     private final @NotNull ServerTubeAssemblerContext wrappedContext;
     private final PolicyMap policyMap;
     // TODO: add next tube getter/package-private setter
     // TODO: replace the PipeConfiguration
 
-    public WsitServerTubeAssemblyContext(@NotNull ServerTubeAssemblerContext context) {
+    public ServerTubelineAssemblyContext(@NotNull ServerTubeAssemblerContext context) {
         this.wrappedContext = context;
 
         PolicyMap _map = null;
