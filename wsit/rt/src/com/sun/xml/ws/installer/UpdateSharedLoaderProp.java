@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.Replace;
@@ -62,6 +61,7 @@ public class UpdateSharedLoaderProp extends Task {
         this.catalinaProps = catalinaProps;
     }
     
+    @Override
     public void execute() {
         if (tomcatLib == null) {
             // Default to shared/lib
