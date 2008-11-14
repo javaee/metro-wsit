@@ -33,9 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.policy.jaxws;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -67,20 +65,19 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PolicyConfigParser {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);    
-    
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     // Prefixing with META-INF/ instead of /META-INF/. /META-INF/ is working fine
     // when loading from a JAR file but not when loading from a plain directory.
     private static final String JAR_PREFIX = "META-INF/";
     private static final String WAR_PREFIX = "/WEB-INF/";
-    
+
     /**
      * Private constructor for the utility class to prevend class instantiation
      */
     private PolicyConfigParser() {
-    }    
-   
+    }
+
     /**
      * This is a helper method that returns directly {@link PolicyMap} instance populated
      * from information in WSIT config file. For more details on the whole process see
@@ -101,7 +98,7 @@ public final class PolicyConfigParser {
      * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
      */
-    public static PolicyMap parse(final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators)
+    public static PolicyMap parse(final String configFileIdentifier, final Container container, final PolicyMapMutator... mutators)
             throws PolicyException {
         LOGGER.entering(configFileIdentifier, container, mutators);
         PolicyMap map = null;
@@ -111,7 +108,7 @@ public final class PolicyConfigParser {
             LOGGER.exiting(map);
         }
     }
-    
+
     /**
      * This is a helper method that returns directly {@link PolicyMap} instance populated
      * from information in WSIT config file. For more details on the whole process see
@@ -139,7 +136,7 @@ public final class PolicyConfigParser {
             LOGGER.exiting(map);
         }
     }
-    
+
     /**
      * Utility method that tries to retrieve a {@link PolicyMap} object from a given
      * {@link WSDLModel}. When succesfull, {@link PolicyMap} instance is returned,
@@ -158,7 +155,7 @@ public final class PolicyConfigParser {
         try {
             if (model != null) {
                 final WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-                
+
                 if (wrapper != null) {
                     result = wrapper.getPolicyMap();
                 }
@@ -168,7 +165,7 @@ public final class PolicyConfigParser {
             LOGGER.exiting(result);
         }
     }
-    
+
     /**
      * The function uses {@code configFileIdentifier} parameter to construct a WSIT config
      * file name according to following pattern:
@@ -207,7 +204,7 @@ public final class PolicyConfigParser {
      * @throws PolicyException in case of any problems that may occur while reading WSIT config file
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
      */
-    public static WSDLModel parseModel(final String configFileIdentifier, final Container container, final PolicyMapMutator...  mutators)
+    public static WSDLModel parseModel(final String configFileIdentifier, final Container container, final PolicyMapMutator... mutators)
             throws PolicyException {
         LOGGER.entering(configFileIdentifier, container, mutators);
         WSDLModel model = null;
@@ -217,39 +214,26 @@ public final class PolicyConfigParser {
                 LOGGER.finest(LocalizationMessages.WSP_1037_CONFIG_FILE_IS(configFileName));
             }
 
-            String examinedPath = null;
-            final boolean isClientConfig = PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier);
-
-            // First try loading config file from container
-            URL configFileUrl = loadResource(container, configFileName);
-
-            // If we did not get a config file from the container, fall back to class path
-            if (configFileUrl == null) {
-                // Try META-INF
-                examinedPath = JAR_PREFIX + configFileName;
-                configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(examinedPath);
-                // Try root of class path
-                if (configFileUrl == null && isClientConfig) {
-                    examinedPath = examinedPath + File.pathSeparator + configFileName;
-                    configFileUrl = PolicyUtils.ConfigFile.loadFromClasspath(configFileName);
-                }
+            // Try loading config file
+            URL configFileUrl;
+            final WsitConfigResourceLoader loader = new WsitConfigResourceLoader(container);
+            try {
+                configFileUrl = loader.getResource(configFileName);
+            } catch (MalformedURLException e) {
+                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1054_FAILED_RESOURCE_FROM_LOADER(configFileName, loader), e));
             }
-            
-            if (configFileUrl == null) {
-                if (LOGGER.isLoggable(Level.CONFIG)) {
-                    LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(configFileIdentifier, examinedPath));
-                }
-            } else {
-                model = parseModel(configFileUrl, isClientConfig, mutators);
+
+            if (configFileUrl != null) {
+                model = parseModel(configFileUrl, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier), mutators);
                 LOGGER.info(LocalizationMessages.WSP_1049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
             }
-            
+
             return model;
         } finally {
             LOGGER.exiting(model);
         }
     }
-    
+
     /**
      * Reads the WSIT config from a file denoted by {@code configFileUrl} parameter.
      * If the file exists it is parsed and resulting {@link WSDLModel} object containig the
@@ -275,16 +259,15 @@ public final class PolicyConfigParser {
             if (null == configFileUrl) {
                 throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
-            
+
             final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
-            final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
+            final XMLEntityResolver.Parser parser = new XMLEntityResolver.Parser(doc);
             model = WSDLModel.WSDLParser.parse(
                     parser,
                     new PolicyConfigResolver(),
                     isClient,
-                    new WSDLParserExtension[] { new PolicyWSDLParserExtension(true, mutators) }
-            );
-            
+                    new WSDLParserExtension[]{new PolicyWSDLParserExtension(true, mutators)});
+
             return model;
         } catch (XMLStreamException ex) {
             throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
@@ -296,64 +279,89 @@ public final class PolicyConfigParser {
             LOGGER.exiting(model);
         }
     }
-    
-    /**
-     * Retrieve resource from resource loader or context in container.
-     * 
-     * This method first tries to get a ResourceLoader from the container and load
-     * the resource with it. If that does not succeed, the method tries to retrieve
-     * a javax.servlet.ServletContext from the container and load the resource with
-     * it. If that does not succeed, it returns null.
-     * 
-     * @param container A container that may contain a ResourceLoader or ServletContext.
-     * May be null.
-     * @param resourceName The name of the resource to be loaded. Needs to have the
-     * relative path to the root of the context. May not be null.
-     * @return A URL to the resource. Null otherwise.
-     * @throws PolicyException If the ResourceLoader throws an exception
-     */
-    private static URL loadResource(final Container container, final String resourceName) throws PolicyException {
-        LOGGER.entering(container, resourceName);
-        URL resource = null;
 
-        if (container == null) {
-            LOGGER.exiting(resource);
-            return resource;
+    /**
+     * This ResourceLoader instance is implemented to retrieve a WSIT config file
+     * resource URL from underlying parent resource loader. If that strategy does
+     * not succeed, the resource loader tries to retrieve a javax.servlet.ServletContext
+     * from the container and load the WSIT config file resource URL with it. If that
+     * does not succeed either, it tries to locate the WSIT config file resource URL
+     * directly from a class path using a current thread's context class loader.
+     */
+    private static class WsitConfigResourceLoader extends ResourceLoader {
+
+        Container container; // TODO remove the field together with the code path using it (see below)
+        ResourceLoader parentLoader;
+
+        WsitConfigResourceLoader(ResourceLoader parentLoader) {
+            this.parentLoader = parentLoader;
         }
-        
-        final ResourceLoader loader = container.getSPI(ResourceLoader.class);
-        if (loader != null) {
-            try {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(LocalizationMessages.WSP_1053_RESOURCE_FROM_LOADER(resourceName, loader));
-                }
-                resource = loader.getResource(resourceName);
-            } catch (MalformedURLException e) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1054_FAILED_RESOURCE_FROM_LOADER(resourceName, loader), e));
-            }
+
+        WsitConfigResourceLoader(Container container) {
+            this((container != null) ? container.getSPI(ResourceLoader.class) : null);
+            this.container = container;
         }
-        else {
-            Object context = null;
+
+        @Override
+        public URL getResource(String resource) throws MalformedURLException {
+            LOGGER.entering(resource);
+            URL resourceUrl = null;
             try {
-                final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
-                context = container.getSPI(contextClass);
-                if (context != null) {
+
+                if (parentLoader != null) {
                     if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine(LocalizationMessages.WSP_1055_RESOURCE_FROM_CONTEXT(resourceName, context));
+                        LOGGER.fine(LocalizationMessages.WSP_1053_RESOURCE_FROM_LOADER(resource, parentLoader));
                     }
-                    resource = PolicyUtils.ConfigFile.loadFromContext(WAR_PREFIX + resourceName, context);
+
+                    resourceUrl = parentLoader.getResource(resource);
                 }
-            } catch (ClassNotFoundException e) {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(LocalizationMessages.WSP_1043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+
+                if (resourceUrl == null && container != null) {
+                    // TODO: we should remove this code path, the config file should be loaded using ResourceLoader only
+                    Object context = null;
+                    try {
+                        final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
+                        context = container.getSPI(contextClass);
+                        if (context != null) {
+                            if (LOGGER.isLoggable(Level.FINE)) {
+                                LOGGER.fine(LocalizationMessages.WSP_1055_RESOURCE_FROM_CONTEXT(resource, context));
+                            }
+                            resourceUrl = PolicyUtils.ConfigFile.loadFromContext(WAR_PREFIX + resource, context);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        if (LOGGER.isLoggable(Level.FINE)) {
+                            LOGGER.fine(LocalizationMessages.WSP_1043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+                        }
+                    }
+                    if (LOGGER.isLoggable(Level.FINEST)) {
+                        LOGGER.finest(LocalizationMessages.WSP_1036_CONTEXT_IS(context));
+                    }
                 }
-            }
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest(LocalizationMessages.WSP_1036_CONTEXT_IS(context));
+
+                // If we did not get a config file from the container, fall back to class path
+                if (resourceUrl == null) {
+                    // Try META-INF
+                    StringBuilder examinedPath = new StringBuilder(JAR_PREFIX).append(resource);
+                    resourceUrl = PolicyUtils.ConfigFile.loadFromClasspath(examinedPath.toString());
+
+                    // Try root of class path
+                    if (resourceUrl == null && isClientConfig(resource)) {
+                        examinedPath.append(File.pathSeparator).append(resource);
+                        resourceUrl = PolicyUtils.ConfigFile.loadFromClasspath(resource);
+                    }
+                    if (resourceUrl == null && LOGGER.isLoggable(Level.CONFIG)) {
+                        LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(resource, examinedPath));
+                    }
+                }
+
+                return resourceUrl;
+            } finally {
+                LOGGER.exiting(resourceUrl);
             }
         }
-        
-        LOGGER.exiting(resource);
-        return resource;
+
+        private boolean isClientConfig(String resource) {
+            return ("wsit-" + PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER + ".xml").equals(resource);
+        }
     }
 }
