@@ -44,10 +44,6 @@ import java.util.logging.Level;
  * @author Marek Potociar
  */
 public final class RmLogger {
-    /**
-     * If we run with JAX-WS, we are using its logging domain (appended with ".wspolicy").
-     * Otherwise we default to "wspolicy".
-     */
     private static final String LOGGING_SUBSYSTEM_NAME = "javax.enterprise.resource.webservices.rm";
     private static final Level METHOD_CALL_LEVEL_VALUE = Level.FINEST;        
     
@@ -55,7 +51,7 @@ public final class RmLogger {
     private final java.util.logging.Logger logger;
     
     /**
-     * Prevents creation of a new instance of this PolicyLogger
+     * Prevents creation of a new instance of this RmLogger
      */
     private RmLogger(final String componentName) {
         this.componentClassName = "[" + componentName + "] ";
@@ -63,7 +59,7 @@ public final class RmLogger {
     }
     
     /**
-     * The factory method returns preconfigured PolicyLogger wrapper for the class. Since there is no caching implemented,
+     * The factory method returns preconfigured RmLogger wrapper for the class. Since there is no caching implemented,
      * it is advised that the method is called only once per a class in order to initialize a final static logger variable,
      * which is then used through the class to perform actual logging tasks.
      *
