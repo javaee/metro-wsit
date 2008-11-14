@@ -245,6 +245,13 @@
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
 
+        <!-- Copying the default Metro configuration file into META-INF folder -->
+        <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
+            <fileset dir="../etc/META-INF">
+                <include name="metro-default.xml"/>
+            </fileset>
+        </copy>
+
         <!--This step is required so that jaxrpc and xwss can run at the
             same time. When jars are getting merged in webservices-rt.jar
             the toolPlugin of one overwrites the other. This ToolPlugin.xml 
@@ -278,12 +285,19 @@
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
 
+        <!-- Copying the default Metro configuration file into META-INF folder -->
+        <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
+            <fileset dir="../etc/META-INF">
+                <include name="metro-default.xml"/>
+            </fileset>
+        </copy>
+
         <!--This step is required so that jaxrpc and xwss can run at the
             same time. When jars are getting merged in webservices-rt.jar
             the toolPlugin of one overwrites the other. This ToolPlugin.xml
             is a consolidated version of both
             -->
-        <copy todir="${rtjar-tmpdir}/META-INF/jaxrpc" overwrite="true">
+        <copy todir="${rtjar-tmpdir-v3}/META-INF/jaxrpc" overwrite="true">
             <fileset dir="toolPlugin">
                 <include name="ToolPlugin.xml"/>
             </fileset>
