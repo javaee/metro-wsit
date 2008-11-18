@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="MacRoman"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
@@ -42,8 +42,8 @@
 -->
 
 <metro  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-   xmlns='http://java.sun.com/xml/ns/metro'
-   xsi:schemaLocation='http://java.sun.com/xml/ns/metro metro.xsd' version="1.0">
+   xmlns='http://java.sun.com/xml/ns/metro/config'
+   version="1.0">
     <tubelines default="#default-metro-tubeline">
         <tubeline name="default-metro-tubeline">
             <client-side>
@@ -56,16 +56,16 @@
                 <tube-factory className="com.sun.xml.ws.tx.runtime.TxTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rm.runtime.RmTubeFactory" />
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
-                <!--tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rm.runtime.testing.PacketFilteringTubeFactory" />
-                <tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" /-->
+                <tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory" />
             </client-side>
             <endpoint-side>
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory" />
-                <!--tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rm.runtime.testing.PacketFilteringTubeFactory" />
-                <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" /-->
+                <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.AddressingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rm.runtime.RmTubeFactory" />
