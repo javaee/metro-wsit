@@ -44,7 +44,6 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
-import java.net.URI;
 import java.util.Collection;
 
 /**
@@ -65,42 +64,42 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
         }
 
         @NotNull
-        public Tube createClient(@NotNull ClientTubeAssemblerContext context) {
-            ClientTubelineAssemblyContext wsitContext = new ClientTubelineAssemblyContext(context);
+        public Tube createClient(@NotNull ClientTubeAssemblerContext jaxwsContext) {
+            ClientTubelineAssemblyContext context = new ClientTubelineAssemblyContext(jaxwsContext);
 
-            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getClientSideTubeCreators(wsitContext.getAddress().getURI());
+            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                tubeCreator.updateContext(wsitContext);
+                tubeCreator.updateContext(context);
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                wsitContext.setTubelineHead(tubeCreator.createTube(wsitContext));
+                context.setTubelineHead(tubeCreator.createTube(context));
             }
 
-            return wsitContext.getTubelineHead();
+            return context.getTubelineHead();
         }
 
         @NotNull
-        public Tube createServer(@NotNull ServerTubeAssemblerContext context) {
-            ServerTubelineAssemblyContext wsitContext = new ServerTubelineAssemblyContext(context);
-            ServiceDefinition sd = wsitContext.getEndpoint().getServiceDefinition();
+        public Tube createServer(@NotNull ServerTubeAssemblerContext jaxwsContext) {
+            ServerTubelineAssemblyContext context = new ServerTubelineAssemblyContext(jaxwsContext);
+            ServiceDefinition sd = context.getEndpoint().getServiceDefinition();
             if (sd != null) {
                 sd.addFilter(new WsdlDocumentFilter());
             }
 
             // FIXME endpoint URI for provider case
-            final URI endpointUri = (wsitContext.getWsdlPort() != null) ?  wsitContext.getWsdlPort().getAddress().getURI() : null;
-            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getServerSideTubeCreators(endpointUri);
+//            final URI endpointUri = (context.getWsdlPort() != null) ?  context.getWsdlPort().getAddress().getURI() : null;
+            Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
             for (TubeCreator tubeCreator : tubeCreators) {
-                tubeCreator.updateContext(wsitContext);
+                tubeCreator.updateContext(context);
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                wsitContext.setTubelineHead(tubeCreator.createTube(wsitContext));
+                context.setTubelineHead(tubeCreator.createTube(context));
             }
 
-            return wsitContext.getTubelineHead();
+            return context.getTubelineHead();
         }
     }
 

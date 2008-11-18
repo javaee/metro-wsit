@@ -35,99 +35,24 @@
  */
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.tx.runtime.TxTubeFactory;
-import com.sun.xml.ws.dump.ActionDumpTubeFactory;
-import com.sun.xml.ws.assembler.jaxws.*;
-import com.sun.xml.ws.messagedump.MessageDumpingTubeFactory;
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.ResourceLoader;
 
-import com.sun.xml.ws.rm.runtime.RmTubeFactory;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilteringTubeFactory;
-import com.sun.xml.ws.runtime.config.TubelineDefinition;
-import com.sun.xml.wss.provider.wsit.SecurityTubeFactory;
+import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
+import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import java.net.URI;
-import java.util.Arrays;
+import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.namespace.QName;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class TubelineAssemblyController {
-
-    private static final String BEFORE_SUFFIX = ".before";
-    private static final String AFTER_SUFFIX = ".after";
-    private static final String TRANSPORT_SUFFIX = ".transport";
-    private static final String WSS_SUFFIX = ".wss";
-    private static final String WSA_SUFFIX = ".wsa";
-    private static final String WSRM_SUFFIX = ".wsrm";
-    private static final String WSTX_SUFFIX = ".wstx";
-    //
-    private static final TubeCreator transportTubeCreator = new TubeCreator(new TransportTubeFactory());
-    private static final TubeCreator messageDumpingTubeCreator = new TubeCreator(new MessageDumpingTubeFactory());
-    private static final TubeCreator packetFilteringTubeCreator = new TubeCreator(new PacketFilteringTubeFactory());
-    private static final TubeCreator actionDumpTubeCreator = new TubeCreator(new ActionDumpTubeFactory());
-    private static final TubeCreator securityTubeCreator = new TubeCreator(new SecurityTubeFactory());
-    private static final TubeCreator reliableMessagingTubeCreator = new TubeCreator(new RmTubeFactory());
-    private static final TubeCreator transactionsTubeCreator = new TubeCreator(new TxTubeFactory());
-    private static final TubeCreator addressingTubeCreator = new TubeCreator(new AddressingTubeFactory());
-    private static final TubeCreator monitoringTubeCreator = new TubeCreator(new MonitoringTubeFactory());
-    private static final TubeCreator mustUnderstandTubeCreator = new TubeCreator(new MustUnderstandTubeFactory());
-    private static final TubeCreator validationTubeCreator = new TubeCreator(new ValidationTubeFactory());
-    private static final TubeCreator handlerTubeCreator = new TubeCreator(new HandlerTubeFactory());
-    private static final TubeCreator terminalTubeCreator = new TubeCreator(new TerminalTubeFactory());
-//
-    private static final TubeCreator[] clientCreators = new TubeCreator[]{
-        transportTubeCreator,
-        messageDumpingTubeCreator,
-        packetFilteringTubeCreator,
-        new TubeCreator(new DumpTubeFactory("")),
-        actionDumpTubeCreator,
-        new TubeCreator(new DumpTubeFactory(TRANSPORT_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(WSS_SUFFIX + AFTER_SUFFIX)),
-        securityTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSS_SUFFIX + BEFORE_SUFFIX)),
-        // TODO MEX pipe here
-        new TubeCreator(new DumpTubeFactory(WSRM_SUFFIX + AFTER_SUFFIX)),
-        reliableMessagingTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSRM_SUFFIX + BEFORE_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(WSTX_SUFFIX + AFTER_SUFFIX)),
-        transactionsTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSTX_SUFFIX + BEFORE_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(WSA_SUFFIX + AFTER_SUFFIX)),
-        addressingTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSA_SUFFIX + BEFORE_SUFFIX)),
-        monitoringTubeCreator,
-        mustUnderstandTubeCreator,
-        validationTubeCreator,
-        handlerTubeCreator,
-        terminalTubeCreator
-
-    };
-    private static final TubeCreator[] serverCreators = new TubeCreator[]{
-        terminalTubeCreator,
-        validationTubeCreator,
-        handlerTubeCreator,
-        mustUnderstandTubeCreator,
-        monitoringTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSTX_SUFFIX + AFTER_SUFFIX)),
-        transactionsTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSTX_SUFFIX + BEFORE_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(WSRM_SUFFIX + AFTER_SUFFIX)),
-        reliableMessagingTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSRM_SUFFIX + BEFORE_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(WSA_SUFFIX + AFTER_SUFFIX)),
-        addressingTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSA_SUFFIX + BEFORE_SUFFIX)),
-        // TODO MEX pipe here ?
-        new TubeCreator(new DumpTubeFactory(WSS_SUFFIX + AFTER_SUFFIX)),
-        securityTubeCreator,
-        new TubeCreator(new DumpTubeFactory(WSS_SUFFIX + BEFORE_SUFFIX)),
-        new TubeCreator(new DumpTubeFactory(TRANSPORT_SUFFIX)),
-        actionDumpTubeCreator,
-        new TubeCreator(new DumpTubeFactory("")),
-        packetFilteringTubeCreator,
-        messageDumpingTubeCreator,
-        transportTubeCreator};
 
     /**
      * Provides a ordered collection of WSIT/Metro client-side tube creators that are be used to
@@ -146,9 +71,16 @@ public class TubelineAssemblyController {
      *
      * @return collection of WSIT/Metro client-side tube creators
      */
-    Collection<TubeCreator> getClientSideTubeCreators(URI endpointUri) {
-        return Arrays.asList(clientCreators);
-        // TODO implement loading from file
+    Collection<TubeCreator> getTubeCreators(ClientTubelineAssemblyContext context) {
+        URI endpointUri;
+        if (context.getPortInfo() != null) {
+            endpointUri = createEndpointComponentUri(context.getPortInfo().getServiceName(), context.getPortInfo().getPortName());
+        } else {
+            endpointUri = null;
+        }
+
+        MetroConfigLoader configLoader = new MetroConfigLoader(context.getContainer().getSPI(ResourceLoader.class));
+        return initializeTubeCreators(configLoader.getClientSideTubeFactories(endpointUri));
     }
 
     /**
@@ -168,20 +100,39 @@ public class TubelineAssemblyController {
      *
      * @return collection of WSIT/Metro client-side tube creators
      */
-    Collection<TubeCreator> getServerSideTubeCreators(URI endpointUri) {
-        return Arrays.asList(serverCreators);
-        // TODO implement loading from file
+    Collection<TubeCreator> getTubeCreators(ServerTubelineAssemblyContext context) {
+        URI endpointUri;
+        if (context.getEndpoint() != null) {
+            endpointUri = createEndpointComponentUri(context.getEndpoint().getServiceName(), context.getEndpoint().getPortName());
+        } else {
+            endpointUri = null;
+        }
+
+        MetroConfigLoader configLoader = new MetroConfigLoader(context.getEndpoint().getContainer().getSPI(ResourceLoader.class));
+        return initializeTubeCreators(configLoader.getEndpointSideTubeFactories(endpointUri));
     }
 
-    private TubelineDefinition getTubelineDefinition(URI endpointUri) {
-        return null; // TODO implement
+    private Collection<TubeCreator> initializeTubeCreators(TubeFactoryList tfl) {
+        LinkedList<TubeCreator> tubeCreators = new LinkedList<TubeCreator>();
+        for (TubeFactoryConfig tubeFactoryConfig : tfl.getTubeFactoryConfigs()) {
+            tubeCreators.addFirst(new TubeCreator(tubeFactoryConfig));
+        }
+        return tubeCreators;
     }
 
-    private TubelineDefinition getDefaultApplicationTubelineDefinition() {
-        return null; // TODO implement
-    }
-
-    private TubelineDefinition getDefaultMetroTubelineDefinition() {
-        return null; // TODO implement
+    /*
+     * Example WSDL component URI: http://org.sample#wsdl11.port(PingService/HttpPingPort)
+     */
+    private URI createEndpointComponentUri(@NotNull QName serviceName, @NotNull QName portName) {
+        StringBuilder sb = new StringBuilder(serviceName.getNamespaceURI()).append("#wsdl11.port(").append(serviceName.getLocalPart()).append('/').append(portName.getLocalPart()).append(')');
+        try {
+            return new URI(sb.toString());
+        } catch (URISyntaxException ex) {
+            // TODO L10N
+            Logger.getLogger(TubelineAssemblyController.class.getName()).log(Level.WARNING,
+                    String.format("Unable to create a new URI instance for generated endpoint URI string '%s'", sb.toString()),
+                    ex);
+            return null;
+        }
     }
 }

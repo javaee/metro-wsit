@@ -37,6 +37,8 @@ package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class that encapsulates logic of loading TubeFactory 
@@ -53,7 +55,33 @@ final class TubeCreator {
     }
 
     TubeCreator(TubeFactoryConfig config) {
-        // TODO implement initialization mechanism
+        try {
+            Class<?> factoryClass = Class.forName(config.getClassName());
+            if (TubeFactory.class.isAssignableFrom(factoryClass)) {
+                @SuppressWarnings("unchecked") 
+                // We can suppress "unchecked" warning here as we are checking for the correct type in the if statement above
+                Class<TubeFactory> typedClass = (Class<TubeFactory>) factoryClass;
+                this.factory = typedClass.newInstance();
+            } else {
+                // TODO L10N
+                throw new RuntimeException(String.format("Class '%s' does not implement '%s' interface", factoryClass.getName(), TubeFactory.class.getName()));
+            }
+        } catch (InstantiationException ex) {
+            // TODO L10N
+            String message = String.format("Unable to instantiate tube factory class");
+            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
+            throw new RuntimeException(message, ex);
+        } catch (IllegalAccessException ex) {
+            // TODO L10N
+            String message = String.format("Unable to instantiate tube factory class");
+            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
+            throw new RuntimeException(message, ex);
+        } catch (ClassNotFoundException ex) {
+            // TODO L10N
+            String message = String.format("Unable to load tube factory class");
+            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
+            throw new RuntimeException(message, ex);
+        }
     }
 
     Tube createTube(ClientTubelineAssemblyContext context) {

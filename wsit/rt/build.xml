@@ -66,7 +66,7 @@
             <updateManifestWithVersion file="@{tmpdirtowork}/MANIFEST.MF"
             class-path="webservices-api.jar webservices-extra.jar webservices-rt_l10n.jar webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar"/>
             <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
-                <fileset dir="@{libdir}">
+                    <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     
                     <exclude name="*javadocs*.jar"/>
@@ -144,7 +144,7 @@
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
-          <delete dir="${extraapijar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
+            <delete dir="${extraapijar-tmpdir}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
         </sequential>
     </macrodef>
@@ -228,11 +228,27 @@
     </macrodef>
 
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
-         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
+        <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
             <metainf>
                 <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
                         <include name="*.*"/>
+                    </fileset>
+                </copy>
+                <!-- Copying the default Metro configuration file into META-INF folder -->
+                <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
+                    <fileset dir="../etc/META-INF">
+                        <include name="metro-default.xml"/>
+                    </fileset>
+                </copy>
+                <!--This step is required so that jaxrpc and xwss can run at the
+                    same time. When jars are getting merged in webservices-rt.jar
+                    the toolPlugin of one overwrites the other. This ToolPlugin.xml
+                    is a consolidated version of both
+                    -->
+                <copy todir="${rtjar-tmpdir}/META-INF/jaxrpc" overwrite="true">
+                    <fileset dir="toolPlugin">
+                        <include name="ToolPlugin.xml"/>
                     </fileset>
                 </copy>
             </metainf>
@@ -244,32 +260,30 @@
         <copy todir="${rtjar-tmpdir}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
         </copy>
-
-        <!-- Copying the default Metro configuration file into META-INF folder -->
-        <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
-            <fileset dir="../etc/META-INF">
-                <include name="metro-default.xml"/>
-            </fileset>
-        </copy>
-
-        <!--This step is required so that jaxrpc and xwss can run at the
-            same time. When jars are getting merged in webservices-rt.jar
-            the toolPlugin of one overwrites the other. This ToolPlugin.xml 
-            is a consolidated version of both 
-            -->
-        <copy todir="${rtjar-tmpdir}/META-INF/jaxrpc" overwrite="true">
-            <fileset dir="toolPlugin">
-                <include name="ToolPlugin.xml"/>
-            </fileset>
-        </copy>
     </target>
 
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
-         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
+        <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
             <metainf>
                 <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
                         <include name="*.*"/>
+                    </fileset>
+                </copy>
+                <!-- Copying the default Metro configuration file into META-INF folder -->
+                <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
+                    <fileset dir="../etc/META-INF">
+                        <include name="metro-default.xml"/>
+                    </fileset>
+                </copy>
+                <!--This step is required so that jaxrpc and xwss can run at the
+                    same time. When jars are getting merged in webservices-rt.jar
+                    the toolPlugin of one overwrites the other. This ToolPlugin.xml
+                    is a consolidated version of both
+                    -->
+                <copy todir="${rtjar-tmpdir-v3}/META-INF/jaxrpc" overwrite="true">
+                    <fileset dir="toolPlugin">
+                        <include name="ToolPlugin.xml"/>
                     </fileset>
                 </copy>
             </metainf>
@@ -283,24 +297,6 @@
         <mkdir dir="${rtjar-tmpdir-v3}/WEB-INF"/>
         <copy todir="${rtjar-tmpdir-v3}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
-        </copy>
-
-        <!-- Copying the default Metro configuration file into META-INF folder -->
-        <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
-            <fileset dir="../etc/META-INF">
-                <include name="metro-default.xml"/>
-            </fileset>
-        </copy>
-
-        <!--This step is required so that jaxrpc and xwss can run at the
-            same time. When jars are getting merged in webservices-rt.jar
-            the toolPlugin of one overwrites the other. This ToolPlugin.xml
-            is a consolidated version of both
-            -->
-        <copy todir="${rtjar-tmpdir-v3}/META-INF/jaxrpc" overwrite="true">
-            <fileset dir="toolPlugin">
-                <include name="ToolPlugin.xml"/>
-            </fileset>
         </copy>
     </target>
 
