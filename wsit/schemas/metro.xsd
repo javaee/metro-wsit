@@ -46,10 +46,10 @@
 
 <xsd:schema
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:tns="http://java.sun.com/xml/ns/metro"
+    xmlns:tns="http://java.sun.com/xml/ns/metro/config"
     xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 
-    targetNamespace="http://java.sun.com/xml/ns/metro"
+    targetNamespace="http://java.sun.com/xml/ns/metro/config"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified"
     jaxb:version="2.1">
@@ -147,8 +147,20 @@
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:sequence>
-            <xsd:element ref="tns:tubeline-mapping" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element ref="tns:tubeline" minOccurs="0" maxOccurs="unbounded" />
+            <xsd:element ref="tns:tubeline-mapping" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <jaxb:property name="tubelineMappings" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element ref="tns:tubeline" minOccurs="0" maxOccurs="unbounded">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <jaxb:property name="tubelineDefinitions" />
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
             <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="default" type="xsd:anyURI" use="optional">
