@@ -107,7 +107,7 @@ public abstract class AbstractRmSoapFault extends RmException {
             if (configuration.getSoapVersion() == SOAPVersion.SOAP_11) {
                 Header faultHeader;
                 if (configuration.getRmVersion() == RmVersion.WSRM10) {
-                    faultHeader = Headers.create(RmVersion.WSRM11.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rm.v200502.SequenceFaultElement(subcode));
+                    faultHeader = Headers.create(RmVersion.WSRM10.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rm.v200502.SequenceFaultElement(subcode));
                 } else {
                     faultHeader = Headers.create(RmVersion.WSRM11.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rm.v200702.SequenceFaultElement(subcode));
                 }
