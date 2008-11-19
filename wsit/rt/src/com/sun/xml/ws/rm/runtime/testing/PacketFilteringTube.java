@@ -44,8 +44,8 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.policy.ConfigurationManager;
+import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.runtime.ConfigurationManager;
 import java.io.IOException;
 import java.util.List;
 import javax.xml.ws.WebServiceException;
@@ -70,17 +70,17 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(context.getTubelineHead());
         this.isClientSide = true;
         
-        Configuration[] configurations = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives();
+        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
         
-        this.filters = getConfiguredFilters(context.getBinding(), (configurations != null && configurations.length > 0) ? configurations[0] : null);
+        this.filters = getConfiguredFilters(context.getBinding(), configuration);
     }
 
     public PacketFilteringTube(ServerTubelineAssemblyContext context) throws RmRuntimeException {
         super(context.getTubelineHead());
         this.isClientSide = false;
 
-        Configuration[] configurations = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives();
-        this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), (configurations != null && configurations.length > 0) ? configurations[0] : null);
+        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+        this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), configuration);
     }
 
     @Override

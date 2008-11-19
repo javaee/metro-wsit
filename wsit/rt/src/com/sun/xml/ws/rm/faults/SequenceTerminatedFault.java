@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rm.faults;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 
 /**
  *

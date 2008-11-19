@@ -35,7 +35,9 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -43,8 +45,8 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
+import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.policy.Configuration;
 
 /**
  * <wsrm:RMAssertion [wsp:Optional="true"]? ... >
@@ -59,7 +61,7 @@ import com.sun.xml.ws.rm.policy.Configuration;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Rm10Assertion extends SimpleAssertion {
+public final class Rm10Assertion extends SimpleAssertion implements RmAssertionTranslator {
 
     public static final QName NAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "RMAssertion");
     private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "InactivityTimeout");
@@ -85,10 +87,10 @@ public final class Rm10Assertion extends SimpleAssertion {
     private Rm10Assertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
 
-        long _inactivityTimeout = Configuration.DEFAULT_INACTIVITY_TIMEOUT;
-        long _retransmittionInterval = Configuration.UNSPECIFIED;
+        long _inactivityTimeout = ReliableMessagingFeature.DEFAULT_INACTIVITY_TIMEOUT;
+        long _retransmittionInterval = ReliableMessagingFeature.UNSPECIFIED;
         boolean _useExponentialBackoffAlgorithm = false;
-        long _acknowledgementInterval = Configuration.UNSPECIFIED;
+        long _acknowledgementInterval = ReliableMessagingFeature.UNSPECIFIED;
 
         if (assertionParameters != null) {
             for (PolicyAssertion parameter : assertionParameters) {
@@ -124,5 +126,18 @@ public final class Rm10Assertion extends SimpleAssertion {
 
     public long getAcknowledgementInterval() {
         return acknowledgementInterval;
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        builder.version(RmVersion.WSRM10)
+                .inactivityTimeout(inactivityTimeout)
+                .baseRetransmissionInterval(retransmittionInterval)
+                .acknowledgementInterval(acknowledgementInterval);
+
+        if (useExponentialBackoffAlgorithm) {
+            builder.retransmissionBackoffAlgorithm(BackoffAlgorithm.EXPONENTIAL);
+        }
+
+        return builder;
     }
 }

@@ -41,6 +41,8 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -54,7 +56,7 @@ import javax.xml.namespace.QName;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class AllowDuplicatesAssertion extends SimpleAssertion {
+public class AllowDuplicatesAssertion extends SimpleAssertion implements RmAssertionTranslator {
     public static final QName NAME = new QName(Constants.sunVersion, "AllowDuplicates");
     
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
@@ -69,5 +71,9 @@ public class AllowDuplicatesAssertion extends SimpleAssertion {
     
     public AllowDuplicatesAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
-    }   
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.deliveryAssurance(DeliveryAssurance.AT_LEAST_ONCE);
+    }
 }

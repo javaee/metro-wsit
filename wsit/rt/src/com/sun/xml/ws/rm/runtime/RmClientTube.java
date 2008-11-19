@@ -46,8 +46,6 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.policy.ConfigurationManager;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
@@ -83,15 +81,11 @@ final class RmClientTube extends AbstractFilterTubeImpl {
             scInitiator = context.getScInitiator();
         }
 
-        // TODO don't take the first config alternative automatically...
-        Configuration configuration = ConfigurationManager.createClientConfigurationManager(context.getWsdlPort(), context.getBinding()).getConfigurationAlternatives()[0];
-//        if (configuration.getAddressingVersion() != AddressingVersion.W3C) {
-//            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(configuration.getAddressingVersion().toString()));
-//        }
+        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
         
         this.session = ClientSession.create(
                 configuration,
-                new ProtocolCommunicator(super.next, scInitiator, configuration));
+                new ProtocolCommunicator(super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion()));
         this.wsdlPort = context.getWsdlPort();
 
         this.requestPacketCopy = null;

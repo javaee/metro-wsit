@@ -35,8 +35,8 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
-import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
-import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rm.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

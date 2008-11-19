@@ -36,50 +36,16 @@
 
 package com.sun.xml.ws.rm.policy.assertion;
 
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.SimpleAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
-import java.util.Collection;
-import javax.xml.namespace.QName;
 
 /**
- * <sunc:ResendInterval Milliseconds="..." />
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-/**
- * Specifies a time period for client attempts to resend unacknowledged messages.
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
- */
-public class ResendIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.sunClientVersion, "ResendInterval");
-    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+public interface RmAssertionTranslator {
 
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new ResendIntervalClientAssertion(data, assertionParameters);
-        }
-    };
-    
-    public static RmAssertionInstantiator getInstantiator() {
-        return instantiator;
-    }
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder);
 
-    private final long interval;
-    
-    public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
-        super(data, assertionParameters);
-        
-        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
-    }
-   
-    public long getInterval() {
-        return interval;
-    }
-
-    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.baseRetransmissionInterval(interval);
-    }
+    // TODO need to solve the backwards translation but it should be via a static method
+    //public PolicyAssertion createFrom(ReliableMessagingFeature feature);
 }

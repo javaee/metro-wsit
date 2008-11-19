@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -46,8 +47,8 @@ import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration.DeliveryAssurance;
-import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 
 /**
  * <wsrmp:RMAssertion [wsp:Optional="true"]? ... >
@@ -70,7 +71,8 @@ import com.sun.xml.ws.rm.policy.Configuration.SecurityBinding;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Rm11Assertion extends ComplexAssertion {
+public final class Rm11Assertion extends ComplexAssertion implements RmAssertionTranslator {
+    // TODO: add new assertions for acknowledgement interval and backoff algorithm
 
     public static final QName NAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "RMAssertion");
     private static final RmLogger LOGGER = RmLogger.getLogger(Rm11Assertion.class);
@@ -137,5 +139,12 @@ public final class Rm11Assertion extends ComplexAssertion {
         } else {
             throw LOGGER.logSevereException(new AssertionCreationException(data, LocalizationMessages.WSRM_1005_MULTIPLE_SECURITY_BINDINGS_IN_POLICY()));
         }
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.version(RmVersion.WSRM11)
+                .deliveryAssurance(deliveryAssurance)
+                .orderedDelivery(isOrderedDelivery)
+                .securityBinding(securityBinding);
     }
 }

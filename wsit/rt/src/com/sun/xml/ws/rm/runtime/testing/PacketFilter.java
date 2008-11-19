@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm.runtime.testing;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 import com.sun.xml.ws.rm.runtime.PacketAdapter;
 
 /**

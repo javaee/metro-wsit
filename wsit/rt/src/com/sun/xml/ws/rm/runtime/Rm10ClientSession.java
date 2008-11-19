@@ -42,7 +42,6 @@ import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.v200502.AcceptType;
 import com.sun.xml.ws.rm.v200502.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;

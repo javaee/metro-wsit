@@ -36,15 +36,10 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -59,12 +54,8 @@ public final class RmTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-//            return new RMClientTube(
-//                    context.getWsdlPort(),
-//                    context.getBinding(),
-//                    context.getScInitiator(),
-//                    context.getTubelineHead());
+//        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+        if (context.getBinding().isFeatureEnabled(ReliableMessagingFeature.class)) {
              return new RmClientTube(context);
         } else {
             return context.getTubelineHead();
@@ -78,39 +69,36 @@ public final class RmTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-//            return new RMServerTube(
-//                    context.getWsdlPort(),
-//                    context.getEndpoint().getBinding(),
-//                    context.getTubelineHead());
+//        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
+        if (context.getEndpoint().getBinding().isFeatureEnabled(ReliableMessagingFeature.class)) {
              return AbstractRmServerTube.getInstance(context);
         } else {
             return context.getTubelineHead();
         }
     }
 
-    /**
-     * Checks to see whether WS-ReliableMessaging is enabled or not.
-     *
-     * @param policyMap policy map for {@link this} assembler
-     * @param port wsdl:port
-     * @return true if ReliableMessaging is enabled, false otherwise
-     */
-    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) throws WebServiceException {
-        if (policyMap == null || port == null) {
-            return false;
-        }
-
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-            if (policy == null) {
-                return false;
-            } else {
-                return policy.contains(RmVersion.WSRM10.policyNamespaceUri) || policy.contains(RmVersion.WSRM11.policyNamespaceUri);
-            }
-        } catch (PolicyException e) {
-            throw new WebServiceException(e);
-        }
-    }
+//    /**
+//     * Checks to see whether WS-ReliableMessaging is enabled or not.
+//     *
+//     * @param policyMap policy map for {@link this} assembler
+//     * @param port wsdl:port
+//     * @return true if ReliableMessaging is enabled, false otherwise
+//     */
+//    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) throws WebServiceException {
+//        if (policyMap == null || port == null) {
+//            return false;
+//        }
+//
+//        try {
+//            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
+//            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
+//            if (policy == null) {
+//                return false;
+//            } else {
+//                return policy.contains(RmVersion.WSRM10.policyNamespaceUri) || policy.contains(RmVersion.WSRM11.policyNamespaceUri);
+//            }
+//        } catch (PolicyException e) {
+//            throw new WebServiceException(e);
+//        }
+//    }
 }

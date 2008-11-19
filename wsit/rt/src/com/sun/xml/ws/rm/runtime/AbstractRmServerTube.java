@@ -43,14 +43,13 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.SequenceTerminatedFault;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
-import com.sun.xml.ws.rm.policy.ConfigurationManager;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
@@ -86,7 +85,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     private PacketAdapter requestAdapter;
 
     static AbstractRmServerTube getInstance(ServerTubelineAssemblyContext context) {
-        Configuration configuration = ConfigurationManager.createServiceConfigurationManager(context.getWsdlPort(), context.getEndpoint().getBinding()).getConfigurationAlternatives()[0];
+        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
         switch (configuration.getRmVersion()) {
             case WSRM10:
                 return new Rm10ServerTube(configuration, context.getTubelineHead());
@@ -471,6 +470,6 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     }
 
     private boolean duplicatesNotAllowed() {
-        return configuration.getDeliveryAssurance() != Configuration.DeliveryAssurance.AT_LEAST_ONCE;
+        return configuration.getDeliveryAssurance() != ReliableMessagingFeature.DeliveryAssurance.AT_LEAST_ONCE;
     }
 }

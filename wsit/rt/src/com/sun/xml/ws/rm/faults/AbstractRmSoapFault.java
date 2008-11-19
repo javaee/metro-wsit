@@ -45,7 +45,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 import java.util.Locale;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;

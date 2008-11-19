@@ -34,52 +34,38 @@
  * holder.
  */
 
-package com.sun.xml.ws.rm.policy.assertion;
+package com.sun.xml.ws.rm;
 
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.SimpleAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
-import java.util.Collection;
-import javax.xml.namespace.QName;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
+import static com.sun.xml.ws.rm.ReliableMessagingFeature.*;
 
 /**
- * <sunc:ResendInterval Milliseconds="..." />
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-/**
- * Specifies a time period for client attempts to resend unacknowledged messages.
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
- */
-public class ResendIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.sunClientVersion, "ResendInterval");
-    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
+public @interface ReliableMessaging {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
 
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new ResendIntervalClientAssertion(data, assertionParameters);
-        }
-    };
-    
-    public static RmAssertionInstantiator getInstantiator() {
-        return instantiator;
-    }
-
-    private final long interval;
-    
-    public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
-        super(data, assertionParameters);
-        
-        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
-    }
-   
-    public long getInterval() {
-        return interval;
-    }
-
-    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.baseRetransmissionInterval(interval);
-    }
+    RmVersion version() default RmVersion.WSRM11;
+    long inactivityTimeout() default DEFAULT_INACTIVITY_TIMEOUT;
+    long bufferQuota() default UNSPECIFIED;
+    boolean orderedDelivery() default false;
+    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
+    SecurityBinding securityBinding() default SecurityBinding.NONE;
+    long acknowledgementInterval() default UNSPECIFIED;
+    // Client-specific RM config values
+    long baseRetransmissionInterval() default UNSPECIFIED;
+    BackoffAlgorithm retransmissionBackoffAlgorithm() default BackoffAlgorithm.LINEAR;
+    long ackRequestInterval() default UNSPECIFIED;
+    long closeSequenceOperationTimeout() default DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
 }

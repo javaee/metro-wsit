@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -52,7 +53,7 @@ import javax.xml.namespace.QName;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class CloseTimeoutClientAssertion extends SimpleAssertion {
+public class CloseTimeoutClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
     public static final QName NAME = new QName(Constants.sunClientVersion, "CloseTimeout");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
@@ -76,5 +77,9 @@ public class CloseTimeoutClientAssertion extends SimpleAssertion {
    
     public long getTimeout() {
         return timeout;
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.closeSequenceOperationTimeout(timeout);
     }
 }

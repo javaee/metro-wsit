@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -53,7 +54,7 @@ import javax.xml.namespace.QName;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class AckRequestIntervalClientAssertion extends SimpleAssertion {
+public class AckRequestIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
     public static final QName NAME = new QName(Constants.sunClientVersion, "AckRequestInterval");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
@@ -77,5 +78,9 @@ public class AckRequestIntervalClientAssertion extends SimpleAssertion {
    
     public long getInterval() {
         return interval;
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.ackRequestInterval(interval);
     }
 }

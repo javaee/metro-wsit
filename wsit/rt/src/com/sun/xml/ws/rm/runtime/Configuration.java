@@ -33,10 +33,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.policy;
+package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rm.RmVersion;
 
 /**
@@ -50,22 +53,6 @@ public interface Configuration {
     public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
 //    public static final SecurityBinding DEFAULT_SECURITY_BINDING = SecurityBinding.NONE;
 //    public static final DeliveryAssurance DEFAULT_DELIVERY_ASSURANCE = DeliveryAssurance.EXACTLY_ONCE;
-
-    public static enum SecurityBinding {
-        STR,
-        TRANSPORT,
-        NONE
-    }
-
-    public static enum DeliveryAssurance {
-        EXACTLY_ONCE,
-        AT_LEAST_ONCE,
-        AT_MOST_ONCE;
-
-        public static DeliveryAssurance getDefault() {
-            return DeliveryAssurance.EXACTLY_ONCE;
-        }
-    }
 
     /**
      * Provides information about the RM protocol version used for the sequence.
@@ -143,7 +130,7 @@ public interface Configuration {
      * @return a period of time (in miliseconds) the RM source is expected to wait 
      * before retransmitting the message.
      */
-    public long getMessageRetransmissionInterval();
+    public long getBaseRetransmissionInterval();
         
     /**
      * Specifies whether Exponetial backoff retransmission interval adjustment 
@@ -152,7 +139,7 @@ public interface Configuration {
      * @return {@code true} if the Exponetial backoff retransmission interval adjustment 
      * algorithm should be used on the client side; {@code false} otherwise
      */
-    public boolean useExponetialBackoffRetransmission();    
+    public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
     
     /**
      * Specifies the duration after which the RM source will transmit an acknowledgement request.

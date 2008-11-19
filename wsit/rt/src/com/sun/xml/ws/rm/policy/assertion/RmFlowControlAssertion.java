@@ -41,6 +41,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.Collection;
@@ -56,7 +57,7 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmFlowControlAssertion extends ComplexAssertion {
+public class RmFlowControlAssertion extends ComplexAssertion implements RmAssertionTranslator {
 
     public static final QName NAME = new QName(Constants.microsoftVersion, "RmFlowControl");
     //    
@@ -97,5 +98,9 @@ public class RmFlowControlAssertion extends ComplexAssertion {
 
     public long getMaximumBufferSize() {
         return maxBufferSize;
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.bufferQuota(maxBufferSize);
     }
 }

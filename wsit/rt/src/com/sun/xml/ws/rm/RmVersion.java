@@ -92,6 +92,10 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200702.TerminateSequenceResponseElement.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class);
+
+    static RmVersion getDefault() {
+        return RmVersion.WSRM11; // if changed, update also in ReliableMesaging annotation
+    }
     //
     private static final RmLogger LOGGER = RmLogger.getLogger(RmVersion.class);
     /**
@@ -185,7 +189,7 @@ public enum RmVersion {
 
                 Map<Class, Class> eprClassReplacementMap = new HashMap<Class, Class>();
                 eprClassReplacementMap.put(EndpointReference.class, av.eprType.eprClass);
-                
+
                 this.jaxbContexts.put(av, JAXBRIContext.newInstance(
                         jaxbElementClasses.toArray(rmProtocolClasses),
                         null,

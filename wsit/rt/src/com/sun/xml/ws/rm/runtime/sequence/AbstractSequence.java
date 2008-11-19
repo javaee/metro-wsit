@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime.sequence;
 
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

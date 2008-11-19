@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rm.policy.assertion;
 
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 import com.sun.xml.ws.rm.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

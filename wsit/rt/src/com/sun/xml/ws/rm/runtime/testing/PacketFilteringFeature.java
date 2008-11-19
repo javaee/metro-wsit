@@ -37,7 +37,7 @@ package com.sun.xml.ws.rm.runtime.testing;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
+import com.sun.xml.ws.rm.runtime.Configuration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

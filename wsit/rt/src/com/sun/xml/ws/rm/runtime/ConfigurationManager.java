@@ -33,53 +33,48 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.rm.runtime;
 
-package com.sun.xml.ws.rm.policy.assertion;
-
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.SimpleAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
-import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
-import java.util.Collection;
-import javax.xml.namespace.QName;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 
 /**
- * <sunc:ResendInterval Milliseconds="..." />
- */
-/**
- * Specifies a time period for client attempts to resend unacknowledged messages.
- * 
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ResendIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.sunClientVersion, "ResendInterval");
-    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+public enum ConfigurationManager {
+    INSTANCE;
 
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new ResendIntervalClientAssertion(data, assertionParameters);
+    public Configuration createConfiguration(WSDLPort wsdlPort, WSBinding binding) {
+
+        return new ConfigurationImpl(
+                binding.getFeature(ReliableMessagingFeature.class),
+                binding.getSOAPVersion(),
+                binding.getAddressingVersion(),
+                checkForRequestResponseOperations(wsdlPort));
+    }
+
+   /**
+     * Determine whether wsdl port contains any two-way operations.
+     * 
+     * @param port WSDL port to check
+     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
+     */
+    private static boolean checkForRequestResponseOperations(WSDLPort port) {
+        WSDLBoundPortType portType;
+        if (port == null || null == (portType = port.getBinding())) {
+            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
+            return false;
         }
-    };
-    
-    public static RmAssertionInstantiator getInstantiator() {
-        return instantiator;
-    }
 
-    private final long interval;
-    
-    public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
-        super(data, assertionParameters);
-        
-        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
-    }
-   
-    public long getInterval() {
-        return interval;
-    }
-
-    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.baseRetransmissionInterval(interval);
+        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
+            if (!boundOperation.getOperation().isOneWay()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

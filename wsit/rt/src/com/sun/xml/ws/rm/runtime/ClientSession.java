@@ -44,7 +44,6 @@ import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.concurrent.CountDownLatch;
@@ -99,7 +98,7 @@ abstract class ClientSession {
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
-        this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
+        this.resendTask = new PeriodicFiberResumeTask(configuration.getBaseRetransmissionInterval());
     }
 
     abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;

@@ -33,49 +33,37 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.policy;
+
+package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.policy.assertion.AllowDuplicatesAssertion;
-import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
-import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
-import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 
-class Rm10ServiceConfiguration implements Configuration {
+/**
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
+ */
+class ConfigurationImpl implements Configuration {
 
-    private SOAPVersion soapVersion;
-    private AddressingVersion addressingVersion;
-    private final long inactivityTimeout;
-    private final long bufferQuota;
-    private final boolean orderedDelivery;
-    private final DeliveryAssurance deliveryAssurance;
-    private final long acknowledgementInterval;
+    private final ReliableMessagingFeature feature;
+    private final SOAPVersion soapVersion;
+    private final AddressingVersion addressingVersion;
     private final boolean requestResponseDetected;
 
-    Rm10ServiceConfiguration(AssertionSet alternative, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+    ConfigurationImpl(ReliableMessagingFeature feature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+        this.feature = feature;
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
-        
-        Rm10Assertion rmAssertion = ConfigurationManager.extractAssertion(alternative, Rm10Assertion.NAME, Rm10Assertion.class);
-        inactivityTimeout = rmAssertion.getInactivityTimeout();
-        acknowledgementInterval = rmAssertion.getAcknowledgementInterval();
-        
-        RmFlowControlAssertion rmFlowControlAssertion = ConfigurationManager.extractAssertion(alternative, RmFlowControlAssertion.NAME, RmFlowControlAssertion.class);
-        bufferQuota = (rmFlowControlAssertion != null) ? rmFlowControlAssertion.getMaximumBufferSize() : UNSPECIFIED;
-        
-        AllowDuplicatesAssertion allowDuplicatesAssertion = ConfigurationManager.extractAssertion(alternative, AllowDuplicatesAssertion.NAME, AllowDuplicatesAssertion.class);
-        deliveryAssurance = (allowDuplicatesAssertion != null) ? DeliveryAssurance.AT_LEAST_ONCE : DeliveryAssurance.EXACTLY_ONCE;
-        
-        OrderedDeliveryAssertion orderedDeliveryAssertion = ConfigurationManager.extractAssertion(alternative, OrderedDeliveryAssertion.NAME, OrderedDeliveryAssertion.class);
-        orderedDelivery = orderedDeliveryAssertion != null;
     }
 
     public RmVersion getRmVersion() {
-        return RmVersion.WSRM10;
+        return feature.getVersion();
     }
 
     public SOAPVersion getSoapVersion() {
@@ -89,44 +77,44 @@ class Rm10ServiceConfiguration implements Configuration {
     public boolean requestResponseOperationsDetected() {
         return requestResponseDetected;
     }
-    
+
     public long getInactivityTimeout() {
-        return inactivityTimeout;
+        return feature.getInactivityTimeout();
     }
 
     public long getSequenceAcknowledgementInterval() {
-        return acknowledgementInterval;
+        return feature.getSequenceAcknowledgementInterval();
     }
 
     public SecurityBinding getSecurityBinding() {
-        return SecurityBinding.NONE;
+        return feature.getSecurityBinding();
     }
 
     public DeliveryAssurance getDeliveryAssurance() {
-        return deliveryAssurance;
+        return feature.getDeliveryAssurance();
     }
 
     public boolean isOrderedDelivery() {
-        return orderedDelivery;
+        return feature.isOrderedDelivery();
     }
 
     public long getDestinationBufferQuota() {
-        return bufferQuota;
+        return feature.getDestinationBufferQuota();
     }
 
-    public long getMessageRetransmissionInterval() {
-        throw new UnsupportedOperationException("Not supported on the service side.");
+    public long getBaseRetransmissionInterval() {
+        return feature.getBaseRetransmissionInterval();
     }
 
-    public boolean useExponetialBackoffRetransmission() {
-        throw new UnsupportedOperationException("Not supported on the service side.");
+    public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
+        return feature.getRetransmissionBackoffAlgorithm();
     }
 
     public long getAcknowledgementRequestInterval() {
-        throw new UnsupportedOperationException("Not supported on the service side.");
+        return feature.getAcknowledgementRequestInterval();
     }
 
     public long getCloseSequenceOperationTimeout() {
-        throw new UnsupportedOperationException("Not supported on the service side.");
+        return feature.getCloseSequenceOperationTimeout();
     }
 }

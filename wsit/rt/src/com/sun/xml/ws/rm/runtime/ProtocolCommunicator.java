@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
@@ -44,7 +46,6 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.policy.Configuration;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
@@ -72,13 +73,13 @@ final class ProtocolCommunicator {
     private final AtomicReference<Packet> musterRequestPacket;
     private final Tube tubeline;
     private final SecureConversationInitiator scInitiator;
-    private final Configuration configuration;
+    private final AddressingVersion addressingVersion;
 
-    ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, Configuration configuration) {
+    ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, AddressingVersion addressingVersion, SOAPVersion soapVersion) {
         this.tubeline = tubeline;
         this.scInitiator = scInitiator;
-        this.configuration = configuration;
-        this.soapMustUnderstandAttributeName = new QName(configuration.getSoapVersion().nsUri, "mustUnderstand");
+        this.addressingVersion = addressingVersion;
+        this.soapMustUnderstandAttributeName = new QName(soapVersion.nsUri, "mustUnderstand");
         this.musterRequestPacket = new AtomicReference<Packet>();
     }
 
@@ -133,7 +134,7 @@ final class ProtocolCommunicator {
      */
     WSEndpointReference getDestination() {
         Packet packet = musterRequestPacket.get();
-        return (packet != null) ? new WSEndpointReference(packet.endpointAddress.toString(), configuration.getAddressingVersion()) : null;
+        return (packet != null) ? new WSEndpointReference(packet.endpointAddress.toString(), addressingVersion) : null;
     }
         
     /**
