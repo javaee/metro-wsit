@@ -36,8 +36,11 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.v200502.AckRequestedElement;
@@ -56,8 +59,8 @@ import java.util.List;
  */
 class Rm10PacketAdapter extends PacketAdapter {
 
-    Rm10PacketAdapter(Configuration configuration, @NotNull Packet packet) {
-        super(configuration, packet);
+    Rm10PacketAdapter(@NotNull SOAPVersion soapVersion, @NotNull AddressingVersion addressingVersion, @NotNull Packet packet) {
+        super(RmVersion.WSRM10, soapVersion, addressingVersion, packet);
     }
 
     @Override

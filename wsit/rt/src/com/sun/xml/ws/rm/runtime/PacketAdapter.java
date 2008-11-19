@@ -78,7 +78,6 @@ public abstract class PacketAdapter {
     // TODO remove this workaround
     private boolean messageConsumed;
     //
-    private final Configuration configuration;
     private final RmVersion rmVersion;
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
@@ -95,26 +94,27 @@ public abstract class PacketAdapter {
      * @return new empty {@link PacketAdapter} instance
      */
     public static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
-        switch (configuration.getRmVersion()) {
+        return getInstance(configuration.getRmVersion(), configuration.getSoapVersion(), configuration.getAddressingVersion(), packet);
+    }
+
+    public static PacketAdapter getInstance(@NotNull RmVersion rmVersion, @NotNull SOAPVersion soapVersion, @NotNull AddressingVersion addressingVersion, @NotNull Packet packet) {
+        switch (rmVersion) {
             case WSRM10:
-                return new Rm10PacketAdapter(configuration, packet);
+                return new Rm10PacketAdapter(soapVersion, addressingVersion, packet);
             case WSRM11:
-                return new Rm11PacketAdapter(configuration, packet);
+                return new Rm11PacketAdapter(soapVersion, addressingVersion, packet);
             default:
-                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
+                throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(rmVersion.namespaceUri));
         }
     }
 
     /**
      * TODO javadoc
      */
-    PacketAdapter(@NotNull Configuration configuration, @NotNull Packet packet) {
-        this.configuration = configuration;
-
-        // cache frequently accessed config data
-        this.rmVersion = configuration.getRmVersion();
-        this.soapVersion = configuration.getSoapVersion();
-        this.addressingVersion = configuration.getAddressingVersion();
+    PacketAdapter(@NotNull RmVersion rmVersion, @NotNull SOAPVersion soapVersion, @NotNull AddressingVersion addressingVersion, @NotNull Packet packet) {
+        this.rmVersion = rmVersion;
+        this.soapVersion = soapVersion;
+        this.addressingVersion = addressingVersion;
         this.jaxbUnmarshaller = rmVersion.createUnmarshaller(addressingVersion);
 
         insertPacket(packet);
@@ -158,7 +158,7 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */
     public final PacketAdapter createServerResponse(Object jaxbElement, String wsaAction) {
-        return PacketAdapter.getInstance(configuration, packet.createServerResponse(
+        return PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet.createServerResponse(
                 Messages.create(rmVersion.getJaxbContext(addressingVersion), jaxbElement, soapVersion),
                 addressingVersion,
                 soapVersion,
@@ -169,7 +169,7 @@ public abstract class PacketAdapter {
      * TODO javadoc
      */
     public final PacketAdapter createEmptyServerResponse(String wsaAction) {
-        return PacketAdapter.getInstance(configuration, packet.createServerResponse(
+        return PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet.createServerResponse(
                 Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
@@ -195,7 +195,7 @@ public abstract class PacketAdapter {
         this.packet.transportBackChannel.close();
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(this.packet.invocationProperties);
-        return PacketAdapter.getInstance(configuration, emptyReturnPacket);
+        return PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, emptyReturnPacket);
     }
 
     /**

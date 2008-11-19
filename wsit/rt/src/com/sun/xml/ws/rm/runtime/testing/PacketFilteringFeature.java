@@ -93,7 +93,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
         for (Class<? extends PacketFilter> filterClass : filterClasses) {
             try {
                 final PacketFilter filter = filterClass.newInstance();
-                filter.configure(configuration);
+                filter.configure(configuration.getRmVersion(), configuration.getSoapVersion(), configuration.getAddressingVersion());
                 filters.add(filter);
             } catch (InstantiationException ex) {
                 LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);

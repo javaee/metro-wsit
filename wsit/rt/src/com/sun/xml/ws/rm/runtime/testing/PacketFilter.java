@@ -35,10 +35,11 @@
  */
 package com.sun.xml.ws.rm.runtime.testing;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.RmLogger;
-import com.sun.xml.ws.rm.runtime.Configuration;
 import com.sun.xml.ws.rm.runtime.PacketAdapter;
 
 /**
@@ -50,13 +51,9 @@ public abstract class PacketFilter {
     protected static final long UNSPECIFIED = -1;
     private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilter.class);
     
-    private Configuration rmConfiguration;
-
-    /**
-     * @deprecated Use no-parameter constructor instead
-     */
-    protected PacketFilter(RmVersion rmVersion) {
-    }
+    private RmVersion rmVersion;
+    private SOAPVersion soapVersion;
+    private AddressingVersion addressingVersion;
 
     protected PacketFilter() {
     }
@@ -95,11 +92,11 @@ public abstract class PacketFilter {
      */
     protected final String getSequenceId(Packet packet) {
         try {
-            if (rmConfiguration == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
+            if (notInitialized(packet)) {
                 return null;
             }
 
-            PacketAdapter pa = PacketAdapter.getInstance(rmConfiguration, packet);
+            PacketAdapter pa = PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet);
             return pa.getSequenceId(); 
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
@@ -117,11 +114,11 @@ public abstract class PacketFilter {
      */
     protected final long getMessageId(Packet packet) {
         try {
-            if (rmConfiguration == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null) {
+            if (notInitialized(packet)) {
                 return UNSPECIFIED;
             }
             
-            PacketAdapter pa = PacketAdapter.getInstance(rmConfiguration, packet);
+            PacketAdapter pa = PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet);
             return pa.getMessageNumber(); 
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
@@ -136,10 +133,16 @@ public abstract class PacketFilter {
      * @return RM version configured on the current WS port or {@code null} if RM is not enabled.
      */
     protected final RmVersion getRmVersion() {
-        return (rmConfiguration != null) ? rmConfiguration.getRmVersion() : null;
+        return rmVersion;
     }
 
-    final void configure(Configuration configuration) {
-        this.rmConfiguration = configuration;
+    final void configure(RmVersion rmVersion, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
+        this.rmVersion = rmVersion;
+        this.soapVersion = soapVersion;
+        this.addressingVersion = addressingVersion;
+    }
+
+    private boolean notInitialized(Packet packet) {
+        return rmVersion == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null;
     }
 }
