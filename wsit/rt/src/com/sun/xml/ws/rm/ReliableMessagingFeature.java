@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.ws.api.FeatureConstructor;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -45,9 +44,7 @@ import javax.xml.ws.WebServiceFeature;
  */
 public class ReliableMessagingFeature extends WebServiceFeature {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(ReliableMessagingFeature.class);
-    //
-    public static final String ID = "com.sun.xml.ws.rm.RmFeature";
+    public static final String ID = "com.sun.xml.ws.rm.ReliableMessagingFeature";
     //
     public static final long UNSPECIFIED = -1;
     public static final long DEFAULT_INACTIVITY_TIMEOUT = 600000;
