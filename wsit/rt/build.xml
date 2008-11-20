@@ -229,15 +229,6 @@
 
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
          <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
-            <!--The wsit/etc/META-INF/services folder
-            has entries for
-            javax.xml.stream.XMLEventFactory
-            javax.xml.stream.XMLInputFactory
-            javax.xml.stream.XMLOutputFactory
-            which are currently pointing to sjsxp implementation classes
-            if we have to change these to woodstox this is the place where it
-            needs to be replaced
-            -->
             <metainf>
                 <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
@@ -268,18 +259,6 @@
 
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
          <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
-            <expandfiles>
-                <exclude name="jaxb*.jar"/>
-            </expandfiles>
-            <!--The wsit/etc/META-INF/services folder
-            has entries for
-            javax.xml.stream.XMLEventFactory
-            javax.xml.stream.XMLInputFactory
-            javax.xml.stream.XMLOutputFactory
-            which are currently pointing to woodstox implementation classes
-            if we have to change these to sjsxp this is the place where it
-            needs to be replaced
-            -->
             <metainf>
                 <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services">
@@ -287,6 +266,9 @@
                     </fileset>
                 </copy>
             </metainf>
+            <expandfiles>
+                <exclude name="jaxb*.jar"/>
+            </expandfiles>
         </expand-jars-macro>
 
         <!-- include wsdl files for wstx resource lookups -->
@@ -294,6 +276,17 @@
         <mkdir dir="${rtjar-tmpdir-v3}/WEB-INF"/>
         <copy todir="${rtjar-tmpdir-v3}/WEB-INF" overwrite="true">
             <fileset dir="${tx.tmp.webinf}"/>
+        </copy>
+
+        <!--This step is required so that jaxrpc and xwss can run at the
+            same time. When jars are getting merged in webservices-rt.jar
+            the toolPlugin of one overwrites the other. This ToolPlugin.xml
+            is a consolidated version of both
+            -->
+        <copy todir="${rtjar-tmpdir-v3}/META-INF/jaxrpc" overwrite="true">
+            <fileset dir="toolPlugin">
+                <include name="ToolPlugin.xml"/>
+            </fileset>
         </copy>
     </target>
 
