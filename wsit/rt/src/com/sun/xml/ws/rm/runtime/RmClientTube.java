@@ -43,9 +43,9 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
@@ -59,7 +59,7 @@ import javax.xml.ws.WebServiceException;
  */
 final class RmClientTube extends AbstractFilterTubeImpl {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmClientTube.class);
+    private static final Logger LOGGER = Logger.getLogger(RmClientTube.class);
     private final ClientSession session;
     private final WSDLPort wsdlPort;
     private Packet requestPacketCopy;

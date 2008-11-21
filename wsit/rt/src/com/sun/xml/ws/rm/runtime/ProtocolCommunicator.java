@@ -44,8 +44,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
@@ -63,7 +63,7 @@ import javax.xml.namespace.QName;
  */
 final class ProtocolCommunicator {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(ProtocolCommunicator.class);
+    private static final Logger LOGGER = Logger.getLogger(ProtocolCommunicator.class);
 
     final QName soapMustUnderstandAttributeName;
     //

@@ -35,8 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,7 +54,7 @@ import java.util.WeakHashMap;
  */
 final class OutboundSequence extends AbstractSequence {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(OutboundSequence.class);
+    private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
     private final List<Long> unackedMessageIdentifiers;
     private final Map<Long, Object> weakMessageStorage;

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -43,7 +44,6 @@ import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -61,7 +61,7 @@ public class RmFlowControlAssertion extends ComplexAssertion implements RmAssert
 
     public static final QName NAME = new QName(Constants.microsoftVersion, "RmFlowControl");
     //    
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmFlowControlAssertion.class);
+    private static final Logger LOGGER = Logger.getLogger(RmFlowControlAssertion.class);
     private static final QName BUFFER_SIZE_ASSERTION_QNAME = new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
     private static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
     //

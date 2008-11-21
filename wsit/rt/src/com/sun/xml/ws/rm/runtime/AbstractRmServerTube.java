@@ -43,13 +43,13 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.SequenceTerminatedFault;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManagerFactory;
@@ -64,7 +64,7 @@ import java.util.logging.Level;
  */
 abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(AbstractRmServerTube.class);
+    private static final Logger LOGGER = Logger.getLogger(AbstractRmServerTube.class);
     private static final Lock FLOW_CONTROL_ACCESS_LOCK = new ReentrantLock();
     /**
      * The property wih this key may be set by JCaps in the message context to indicate 

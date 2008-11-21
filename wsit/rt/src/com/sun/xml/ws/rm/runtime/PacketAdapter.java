@@ -44,12 +44,12 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.runtime.util.Session;
@@ -65,7 +65,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 public abstract class PacketAdapter {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(PacketAdapter.class);
+    private static final Logger LOGGER = Logger.getLogger(PacketAdapter.class);
     //
     Message message;
     //

@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.commons.Logger;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -49,7 +49,7 @@ import java.util.logging.Level;
  */
 final class PeriodicFiberResumeTask implements Runnable {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(PeriodicFiberResumeTask.class);
+    private static final Logger LOGGER = Logger.getLogger(PeriodicFiberResumeTask.class);
 
     private static class FiberRegistration {
 

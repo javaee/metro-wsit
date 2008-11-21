@@ -35,9 +35,9 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 //
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
@@ -54,7 +54,7 @@ import com.sun.xml.ws.security.trust.elements.str.Reference;
  */
 final class Utilities {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(Utilities.class);
+    private static final Logger LOGGER = Logger.getLogger(Utilities.class);
 
     /**
      * Non-instantiable constructor

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
+import com.sun.xml.ws.commons.Logger;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -45,7 +46,6 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
 
 /**
@@ -64,7 +64,7 @@ import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
  */
 public class DeliveryAssuranceAssertion extends ComplexAssertion {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(DeliveryAssuranceAssertion.class);
+    private static final Logger LOGGER = Logger.getLogger(DeliveryAssuranceAssertion.class);
     private static final QName EXACTLY_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "ExactlyOnce");
     private static final QName AT_LEAST_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "AtLeastOnce");
     private static final QName AT_MOST_ONCE_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "AtMostOnce");

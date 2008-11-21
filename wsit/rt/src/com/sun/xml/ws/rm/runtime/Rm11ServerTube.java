@@ -40,11 +40,11 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.v200702.AcceptType;
 import com.sun.xml.ws.rm.v200702.CloseSequenceElement;
@@ -65,7 +65,7 @@ import java.util.Calendar;
  */
 final class Rm11ServerTube extends AbstractRmServerTube {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(Rm11ServerTube.class);
+    private static final Logger LOGGER = Logger.getLogger(Rm11ServerTube.class);
 
     Rm11ServerTube(Configuration configuration, Tube tubelineHead) {
         super(configuration, tubelineHead);

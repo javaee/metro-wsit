@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.commons.Logger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -54,7 +54,7 @@ enum FlowControledFibers {
 
     INSTANCE;
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(FlowControledFibers.class);
+    private static final Logger LOGGER = Logger.getLogger(FlowControledFibers.class);
     private static class FiberRegistration implements Comparable<FiberRegistration>{
 
         final PacketAdapter packetAdapter;

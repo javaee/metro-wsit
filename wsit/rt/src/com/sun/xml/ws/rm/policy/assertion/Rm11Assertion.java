@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.policy.assertion;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -46,7 +47,6 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 
@@ -75,7 +75,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
     // TODO: add new assertions for acknowledgement interval and backoff algorithm
 
     public static final QName NAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "RMAssertion");
-    private static final RmLogger LOGGER = RmLogger.getLogger(Rm11Assertion.class);
+    private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
     private static final QName SEQUENCE_STR_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceSTR");
     private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {

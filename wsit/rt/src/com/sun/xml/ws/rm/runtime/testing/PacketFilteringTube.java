@@ -42,8 +42,8 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmRuntimeException;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.Configuration;
 import com.sun.xml.ws.rm.runtime.ConfigurationManager;
 import java.io.IOException;
@@ -56,7 +56,7 @@ import javax.xml.ws.WebServiceException;
  */
 class PacketFilteringTube extends AbstractFilterTubeImpl {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringTube.class);
+    private static final Logger LOGGER = Logger.getLogger(PacketFilteringTube.class);
     private final boolean isClientSide;
     private final List<PacketFilter> filters;
 

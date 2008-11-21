@@ -35,8 +35,8 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +52,7 @@ import java.util.TreeSet;
  */
 final class InboundSequence extends AbstractSequence {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(InboundSequence.class);
+    private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     //
     private final Set<Long> unackedMessageIdentifiers;
 

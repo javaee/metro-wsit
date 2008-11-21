@@ -36,7 +36,6 @@
 package com.sun.xml.ws.assembler;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.ResourceLoader;
 
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
@@ -79,7 +78,7 @@ public class TubelineAssemblyController {
             endpointUri = null;
         }
 
-        MetroConfigLoader configLoader = new MetroConfigLoader(context.getContainer().getSPI(ResourceLoader.class));
+        MetroConfigLoader configLoader = new MetroConfigLoader(context.getContainer());
         return initializeTubeCreators(configLoader.getClientSideTubeFactories(endpointUri));
     }
 
@@ -108,7 +107,7 @@ public class TubelineAssemblyController {
             endpointUri = null;
         }
 
-        MetroConfigLoader configLoader = new MetroConfigLoader(context.getEndpoint().getContainer().getSPI(ResourceLoader.class));
+        MetroConfigLoader configLoader = new MetroConfigLoader(context.getEndpoint().getContainer());
         return initializeTubeCreators(configLoader.getEndpointSideTubeFactories(endpointUri));
     }
 

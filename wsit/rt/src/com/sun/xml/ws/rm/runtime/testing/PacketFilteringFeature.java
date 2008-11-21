@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime.testing;
 
 import com.sun.xml.ws.api.FeatureConstructor;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.runtime.Configuration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +52,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature";
     //
-    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilteringFeature.class);
+    private static final Logger LOGGER = Logger.getLogger(PacketFilteringFeature.class);
     //
     private final List<Class<? extends PacketFilter>> filterClasses;
 

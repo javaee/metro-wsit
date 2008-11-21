@@ -39,6 +39,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -47,7 +48,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.policy.assertion.RmAssertionTranslator;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -58,7 +58,7 @@ import javax.xml.namespace.QName;
  */
 public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
     // TODO implement PolicyMapUpdateProvider as well
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmModelConfigurationProvider.class);
+    private static final Logger LOGGER = Logger.getLogger(RmModelConfigurationProvider.class);
 
     /**
      * process WS-RM policy assertions and if found and is not optional then RM is enabled on the

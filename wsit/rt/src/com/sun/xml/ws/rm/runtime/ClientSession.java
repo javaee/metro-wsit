@@ -40,10 +40,10 @@ import com.sun.xml.ws.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.concurrent.CountDownLatch;
@@ -67,7 +67,7 @@ import java.util.logging.Level;
  */
 abstract class ClientSession {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(ClientSession.class);
+    private static final Logger LOGGER = Logger.getLogger(ClientSession.class);
     private static final int MAX_INITIATE_SESSION_ATTEMPTS = 3;
     //
     String inboundSequenceId = null;

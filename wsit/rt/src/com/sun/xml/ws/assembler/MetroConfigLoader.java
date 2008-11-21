@@ -35,17 +35,20 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.ResourceLoader;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.runtime.config.MetroConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import com.sun.xml.ws.runtime.config.TubelineDefinition;
 import com.sun.xml.ws.runtime.config.TubelineMapping;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
@@ -56,10 +59,10 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-// TODO Logging and L10N
 // TODO Move the logic of this class directly into MetroConfig class.
 class MetroConfigLoader {
 
+    private static final Logger LOGGER = Logger.getLogger(MetroConfigLoader.class);
     private static final String APP_METRO_CFG_NAME = "metro.xml";
     private static final String DEFAULT_METRO_CFG_NAME = "metro-default.xml";
 
@@ -84,17 +87,37 @@ class MetroConfigLoader {
     private final URL defaultConfigUrl;
     private final MetroConfig appConfig;
     private final URL appConfigUrl;
+    private final ResourceLoader resourceLoader;
 
-    MetroConfigLoader(ResourceLoader loader) {
-        this.defaultConfigUrl = locateResource(loader, DEFAULT_METRO_CFG_NAME);
+    MetroConfigLoader(Container container) {
+
+        this.resourceLoader = new MetroConfigUrlLoader(container);
+
+        this.defaultConfigUrl = locateResource(DEFAULT_METRO_CFG_NAME);
+        if (defaultConfigUrl == null) {
+            throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not found.")); // TODO L10N
+        }
+
+        LOGGER.info(String.format("Default metro-default.xml configuration file located at: '%s'", defaultConfigUrl)); // TODO L10N
         this.defaultConfig = MetroConfigLoader.loadMetroConfig(defaultConfigUrl);
-        // TODO check that these are not null:
-        // - defaultConfigUrl, defaultConfig
-        // - defaultConfig.getTubelines()
-        // - defaultConfig.getTubelines().getDefault()
+        if (defaultConfig == null) {
+            throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not loaded")); // TODO L10N
+        }
+        if (defaultConfig.getTubelines() == null) {
+            throw LOGGER.logSevereException(new IllegalStateException("No <tubelines> section found in the default metro-default.xml configuration file")); // TODO L10N
+        }
+        if (defaultConfig.getTubelines().getDefault() == null) {
+            throw LOGGER.logSevereException(new IllegalStateException("No default tubeline is defined in the default metro-default.xml configuration file")); // TODO L10N
+        }
 
-        this.appConfigUrl = locateResource(loader, APP_METRO_CFG_NAME);
-        this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
+        this.appConfigUrl = locateResource(APP_METRO_CFG_NAME);
+        if (appConfigUrl != null) {
+            LOGGER.info(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
+            this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
+        } else {
+            LOGGER.info("No application metro.xml configuration file found."); // TODO L10N
+            this.appConfig = null;
+        }
     }
 
     TubeFactoryList getEndpointSideTubeFactories(URI endpointReference) {
@@ -156,36 +179,21 @@ class MetroConfigLoader {
         try {
             return new URI(reference);
         } catch (URISyntaxException ex) {
-            // TODO log properly + L10N
-            final String message = String.format("Invalid URI reference: \'%s\'", reference);
-            Logger.getLogger(MetroConfigLoader.class.getName()).log(Level.SEVERE, message, ex);
-            throw new WebServiceException(message, ex);
+            throw LOGGER.logSevereException(new WebServiceException(String.format("Invalid URI reference: \'%s\'", reference), ex)); // TODO L10N
         }
     }
 
-    private static URL locateResource(ResourceLoader loader, String resourceName) {
-        URL resourceUrl = null;
 
+    private URL locateResource(String resource) {
         try {
-            if (loader != null) {
-                resourceUrl = loader.getResource(resourceName);
-            }
+            return resourceLoader.getResource(resource);
         } catch (MalformedURLException ex) {
-            Logger.getLogger(MetroConfigLoader.class.getName()).log(Level.SEVERE, "Unable to resolve resource URL - see nested exception for more details.", ex);
+            LOGGER.severe(String.format("Cannot form a valid URL from the resource name '%s'. For more details see the nested exception.", resource), ex); // TODO L10N
         }
-
-        if (resourceUrl == null) {
-            resourceUrl = loadFromClasspath("META-INF/" + resourceName);
-        }
-
-        return resourceUrl;
+        return null;
     }
 
-    private static MetroConfig loadMetroConfig(URL resourceUrl) {
-        if (resourceUrl == null) {
-            return null;
-        }
-
+    private static MetroConfig loadMetroConfig(@NotNull URL resourceUrl) {
         MetroConfig result = null;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(MetroConfig.class.getPackage().getName());
@@ -193,18 +201,93 @@ class MetroConfigLoader {
             final JAXBElement<MetroConfig> configElement = unmarshaller.unmarshal(XMLInputFactory.newInstance().createXMLStreamReader(resourceUrl.openStream()), MetroConfig.class);
             result = configElement.getValue();
         } catch (Exception e) {
-            // TODO log properly + L10N
-            Logger.getLogger(MetroConfigLoader.class.getName()).log(Level.WARNING, String.format("Unable to unmarshall metro config file from location: '%s'", resourceUrl.toString()), e);
+            // TODO L10N
+            LOGGER.warning(String.format("Unable to unmarshall metro config file from location: '%s'", resourceUrl.toString()), e); // TODO L10N
         }
         return result;
     }
 
-    private static URL loadFromClasspath(final String resource) {
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        if (cl == null) {
-            return ClassLoader.getSystemResource(resource);
-        } else {
-            return cl.getResource(resource);
+    private static class MetroConfigUrlLoader extends ResourceLoader {
+
+        Container container; // TODO remove the field together with the code path using it (see below)
+        ResourceLoader parentLoader;
+
+        MetroConfigUrlLoader(ResourceLoader parentLoader) {
+            this.parentLoader = parentLoader;
+        }
+
+        MetroConfigUrlLoader(Container container) {
+            this((container != null) ? container.getSPI(ResourceLoader.class) : null);
+            this.container = container;
+        }
+
+        @Override
+        public URL getResource(String resource) throws MalformedURLException {
+            LOGGER.entering(resource);
+            URL resourceUrl = null;
+            try {
+                if (parentLoader != null) {
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.fine(String.format("Trying to load '%s' via parent resouce loader '%s'", resource, parentLoader)); // TODO L10N
+                    }
+
+                    resourceUrl = parentLoader.getResource(resource);
+                }
+
+                if (resourceUrl == null) {
+                    resourceUrl = loadViaClassLoaders("META-INF/" + resource);
+                }
+
+                if (resourceUrl == null && container != null) {
+                    // TODO: we should remove this code path, the config file should be loaded using ResourceLoader only
+                    resourceUrl = loadFromServletContext(resource);
+                }
+
+                return resourceUrl;
+            } finally {
+                LOGGER.exiting(resourceUrl);
+            }
+        }
+
+        private static URL loadViaClassLoaders(final String resource) {
+            URL resourceUrl = tryLoadFromClassLoader(resource, Thread.currentThread().getContextClassLoader());
+            if (resourceUrl == null) {
+                resourceUrl = tryLoadFromClassLoader(resource, MetroConfigLoader.class.getClassLoader());
+                if (resourceUrl == null) {
+                    return ClassLoader.getSystemResource(resource);
+                }
+            }
+
+            return resourceUrl;
+        }
+
+        private static URL tryLoadFromClassLoader(final String resource, final ClassLoader loader) {
+            return (loader != null) ? loader.getResource(resource) : null;
+        }
+
+        private URL loadFromServletContext(String resource) throws RuntimeException {
+            Object context = null;
+            try {
+                final Class<?> contextClass = Class.forName("javax.servlet.ServletContext");
+                context = container.getSPI(contextClass);
+                if (context != null) {
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.fine(String.format("Trying to load '%s' via servlet context '%s'", resource, context)); // TODO L10N
+                    }
+                    try {
+                        final Method method = context.getClass().getMethod("getResource", String.class);
+                        final Object result = method.invoke(context, "/WEB-INF/" + resource);
+                        return URL.class.cast(result);
+                    } catch (Exception e) {
+                        throw LOGGER.logSevereException(new RuntimeException("Unable to invoke getResource() method on servlet context instance"), e); // TODO L10N
+                    }
+                }
+            } catch (ClassNotFoundException e) {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine("Unable to load javax.servlet.ServletContext class"); // TODO L10N
+                }
+            }
+            return null;
         }
     }
 }

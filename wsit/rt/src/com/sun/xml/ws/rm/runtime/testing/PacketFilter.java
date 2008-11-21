@@ -38,8 +38,8 @@ package com.sun.xml.ws.rm.runtime.testing;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.runtime.PacketAdapter;
 
 /**
@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.runtime.PacketAdapter;
 public abstract class PacketFilter {
 
     protected static final long UNSPECIFIED = -1;
-    private static final RmLogger LOGGER = RmLogger.getLogger(PacketFilter.class);
+    private static final Logger LOGGER = Logger.getLogger(PacketFilter.class);
     
     private RmVersion rmVersion;
     private SOAPVersion soapVersion;

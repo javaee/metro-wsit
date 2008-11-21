@@ -38,7 +38,7 @@ package com.sun.xml.ws.rm;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rm.localization.RmLogger;
+import com.sun.xml.ws.commons.Logger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -97,7 +97,7 @@ public enum RmVersion {
         return RmVersion.WSRM11; // if changed, update also in ReliableMesaging annotation
     }
     //
-    private static final RmLogger LOGGER = RmLogger.getLogger(RmVersion.class);
+    private static final Logger LOGGER = Logger.getLogger(RmVersion.class);
     /**
      * General constants
      */

@@ -36,12 +36,12 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rm.localization.RmLogger;
 import com.sun.xml.ws.rm.v200502.AcceptType;
 import com.sun.xml.ws.rm.v200502.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
@@ -60,7 +60,7 @@ import java.util.Calendar;
  */
 final class Rm10ClientSession extends ClientSession {
 
-    private static final RmLogger LOGGER = RmLogger.getLogger(Rm10ClientSession.class);
+    private static final Logger LOGGER = Logger.getLogger(Rm10ClientSession.class);
 
     Rm10ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
         super(configuration, communicator);
