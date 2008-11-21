@@ -36,6 +36,7 @@
 package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.api.ResourceLoader;
+import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import java.net.MalformedURLException;
@@ -92,18 +93,32 @@ public class MetroConfigLoaderTest extends TestCase {
 //        result = configLoader.getTubeline(new URI("#non-existent-tubeline"));
 //        assertNull(result);
 //    }
+    
+    private Container createMockupContainer(final ResourceLoader loader) {
+        return new Container() {
+
+            @Override
+            public <T> T getSPI(Class<T> spiType) {
+                if (ResourceLoader.class.isAssignableFrom(spiType)) {
+                    return spiType.cast(loader);
+                } else {
+                    return null;
+                }
+            }
+        };
+    }
 
     /**
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader.
      */
     public void testGetEndpointSideTubeFactoriesTest() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(new ResourceLoader() {
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
 
             @Override
             public URL getResource(String resource) throws MalformedURLException {
                 return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + resource);
             }
-        });
+        }));
 
         TubeFactoryList result;
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -120,7 +135,7 @@ public class MetroConfigLoaderTest extends TestCase {
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader - loading from default Metro config
      */
     public void testGetEndpointSideTubeFactoriesLoadFromDefaultConfig() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(new ResourceLoader() {
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
 
             @Override
             public URL getResource(String resource) throws MalformedURLException {
@@ -130,7 +145,7 @@ public class MetroConfigLoaderTest extends TestCase {
                     return null;
                 }
             }
-        });
+        }));
 
         TubeFactoryList result;
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -149,13 +164,13 @@ public class MetroConfigLoaderTest extends TestCase {
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader.
      */
     public void testGetClientSideTubeFactoriesTest() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(new ResourceLoader() {
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
 
             @Override
             public URL getResource(String resource) throws MalformedURLException {
                 return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + resource);
             }
-        });
+        }));
 
         TubeFactoryList result;
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -172,7 +187,7 @@ public class MetroConfigLoaderTest extends TestCase {
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader - loading from default Metro config
      */
     public void testGetClientSideTubeFactoriesLoadFromDefaultConfig() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(new ResourceLoader() {
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
 
             @Override
             public URL getResource(String resource) throws MalformedURLException {
@@ -182,7 +197,7 @@ public class MetroConfigLoaderTest extends TestCase {
                     return null;
                 }
             }
-        });
+        }));
 
         TubeFactoryList result;
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));

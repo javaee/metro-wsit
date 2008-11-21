@@ -56,7 +56,14 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.ws.WebServiceException;
 
 /**
- *
+ * This class is responsible for locating and loading Metro configuration files 
+ * (both application metro.xml and default metro-default.xml).
+ * <p />
+ * Once the configuration is loaded the class is able to resolve which tubeline 
+ * configuration belongs to each endpoint or endpoint client. This information is
+ * then used in {@link TubelineAssemblyController} to construct the list of
+ * {@link TubeCreator} objects that are used in the actual tubeline construction.
+ * 
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 // TODO Move the logic of this class directly into MetroConfig class.
@@ -87,13 +94,13 @@ class MetroConfigLoader {
     private final URL defaultConfigUrl;
     private final MetroConfig appConfig;
     private final URL appConfigUrl;
-    private final ResourceLoader resourceLoader;
 
     MetroConfigLoader(Container container) {
+        this(new MetroConfigUrlLoader(container));
+    }
 
-        this.resourceLoader = new MetroConfigUrlLoader(container);
-
-        this.defaultConfigUrl = locateResource(DEFAULT_METRO_CFG_NAME);
+    private MetroConfigLoader(ResourceLoader loader) {
+        this.defaultConfigUrl = locateResource(DEFAULT_METRO_CFG_NAME, loader);
         if (defaultConfigUrl == null) {
             throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not found.")); // TODO L10N
         }
@@ -110,7 +117,7 @@ class MetroConfigLoader {
             throw LOGGER.logSevereException(new IllegalStateException("No default tubeline is defined in the default metro-default.xml configuration file")); // TODO L10N
         }
 
-        this.appConfigUrl = locateResource(APP_METRO_CFG_NAME);
+        this.appConfigUrl = locateResource(APP_METRO_CFG_NAME, loader);
         if (appConfigUrl != null) {
             LOGGER.info(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
             this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
@@ -184,9 +191,9 @@ class MetroConfigLoader {
     }
 
 
-    private URL locateResource(String resource) {
+    private static URL locateResource(String resource, ResourceLoader loader) {
         try {
-            return resourceLoader.getResource(resource);
+            return loader.getResource(resource);
         } catch (MalformedURLException ex) {
             LOGGER.severe(String.format("Cannot form a valid URL from the resource name '%s'. For more details see the nested exception.", resource), ex); // TODO L10N
         }
