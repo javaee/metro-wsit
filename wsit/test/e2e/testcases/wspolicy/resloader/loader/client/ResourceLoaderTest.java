@@ -39,8 +39,6 @@ import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.WSService.InitParams;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.ResourceLoader;
-import com.sun.xml.ws.api.server.Container;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.xml.namespace.QName;
