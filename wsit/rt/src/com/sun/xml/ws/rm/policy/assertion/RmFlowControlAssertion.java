@@ -101,6 +101,6 @@ public class RmFlowControlAssertion extends ComplexAssertion implements RmAssert
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.bufferQuota(maxBufferSize);
+        return builder.destinationBufferQuota(maxBufferSize);
     }
 }

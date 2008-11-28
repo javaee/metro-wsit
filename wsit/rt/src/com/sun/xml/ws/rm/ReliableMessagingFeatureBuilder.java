@@ -45,13 +45,13 @@ public final class ReliableMessagingFeatureBuilder {
     // General RM config values
     private boolean enabled = true;
     private RmVersion version = RmVersion.getDefault();
-    private long inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT;
-    private long bufferQuota = DEFAULT_DESTINATION_BUFFER_QUOTA;
+    private long inactivityTimeout = DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
+    private long destinationBufferQuota = DEFAULT_DESTINATION_BUFFER_QUOTA;
     private boolean orderedDelivery = false;
     private DeliveryAssurance deliveryAssurance = DeliveryAssurance.getDefault();
     private SecurityBinding securityBinding = SecurityBinding.getDefault();
     // Client-specific RM config values
-    private long baseRetransmissionInterval = DEFAULT_BASE_RETRANSMISSION_INTERVAL;
+    private long messageRetransmissionInterval = DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL;
     private BackoffAlgorithm retransmissionBackoffAlgorithm = BackoffAlgorithm.getDefault();
     private long ackRequestInterval = DEFAULT_ACK_REQUESTED_INTERVAL;
     private long closeSequenceOperationTimeout = DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
@@ -68,61 +68,91 @@ public final class ReliableMessagingFeatureBuilder {
                 this.enabled,
                 this.version,
                 this.inactivityTimeout,
-                this.bufferQuota,
+                this.destinationBufferQuota,
                 this.orderedDelivery,
                 this.deliveryAssurance,
                 this.securityBinding,
-                this.baseRetransmissionInterval,
+                this.messageRetransmissionInterval,
                 this.retransmissionBackoffAlgorithm,
                 this.ackRequestInterval,
                 this.closeSequenceOperationTimeout);
     }
 
+    /**
+     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
+     */
     public ReliableMessagingFeatureBuilder ackRequestInterval(long ackRequestInterval) {
         this.ackRequestInterval = ackRequestInterval;
         return this;
     }
 
-    public ReliableMessagingFeatureBuilder baseRetransmissionInterval(long baseRetransmissionInterval) {
-        this.baseRetransmissionInterval = baseRetransmissionInterval;
+    /**
+     * @see ReliableMessagingFeature#getMessageRetransmissionInterval() 
+     */
+    public ReliableMessagingFeatureBuilder messageRetransmissionInterval(long messageRetransmissionInterval) {
+        this.messageRetransmissionInterval = messageRetransmissionInterval;
         return this;
     }
 
-    public ReliableMessagingFeatureBuilder bufferQuota(long bufferQuota) {
-        this.bufferQuota = bufferQuota;
+    /**
+     * @see ReliableMessagingFeature#getDestinationBufferQuota()
+     */
+    public ReliableMessagingFeatureBuilder destinationBufferQuota(long bufferQuota) {
+        this.destinationBufferQuota = bufferQuota;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout()
+     */
     public ReliableMessagingFeatureBuilder closeSequenceOperationTimeout(long closeSequenceOperationTimeout) {
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#getDeliveryAssurance()
+     */
     public ReliableMessagingFeatureBuilder deliveryAssurance(DeliveryAssurance deliveryAssurance) {
         this.deliveryAssurance = deliveryAssurance;
         return this;
     }
 
-    public ReliableMessagingFeatureBuilder inactivityTimeout(long inactivityTimeout) {
+    /**
+     * @see ReliableMessagingFeature#getSequenceInactivityTimeout()
+     */
+    public ReliableMessagingFeatureBuilder sequenceInactivityTimeout(long inactivityTimeout) {
         this.inactivityTimeout = inactivityTimeout;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#isOrderedDelivery()
+     */
     public ReliableMessagingFeatureBuilder orderedDelivery(boolean orderedDelivery) {
         this.orderedDelivery = orderedDelivery;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
+     */
     public ReliableMessagingFeatureBuilder retransmissionBackoffAlgorithm(BackoffAlgorithm retransmissionBackoffAlgorithm) {
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#getVersion()
+     */
     public ReliableMessagingFeatureBuilder version(RmVersion version) {
         this.version = version;
         return this;
     }
 
+    /**
+     * @see ReliableMessagingFeature#getSecurityBinding()
+     */
     public ReliableMessagingFeatureBuilder securityBinding(SecurityBinding securityBinding) {
         this.securityBinding = securityBinding;
         return this;

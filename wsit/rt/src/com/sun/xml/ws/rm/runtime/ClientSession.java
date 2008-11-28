@@ -98,7 +98,7 @@ abstract class ClientSession {
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
-        this.resendTask = new PeriodicFiberResumeTask(configuration.getBaseRetransmissionInterval());
+        this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
     abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;

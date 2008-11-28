@@ -77,9 +77,9 @@ public interface Configuration {
     public boolean requestResponseOperationsDetected();
     
     /**
-     * @see ReliableMessagingFeature#getInactivityTimeout()
+     * @see ReliableMessagingFeature#getSequenceInactivityTimeout() 
      */
-    public long getInactivityTimeout();
+    public long getSequenceInactivityTimeout();
 
     /**
      * @see ReliableMessagingFeature#getSecurityBinding()
@@ -102,9 +102,9 @@ public interface Configuration {
     public long getDestinationBufferQuota();
     
     /**
-     * @see ReliableMessagingFeature#getBaseRetransmissionInterval()
+     * @see ReliableMessagingFeature#getMessageRetransmissionInterval()
      */
-    public long getBaseRetransmissionInterval();
+    public long getMessageRetransmissionInterval();
         
     /**
      * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()

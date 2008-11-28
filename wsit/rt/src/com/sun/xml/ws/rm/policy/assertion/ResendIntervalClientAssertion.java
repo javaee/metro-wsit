@@ -80,6 +80,6 @@ public class ResendIntervalClientAssertion extends SimpleAssertion implements Rm
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.baseRetransmissionInterval(interval);
+        return builder.messageRetransmissionInterval(interval);
     }
 }

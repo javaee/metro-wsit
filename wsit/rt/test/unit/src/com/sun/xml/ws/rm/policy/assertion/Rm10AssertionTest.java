@@ -71,7 +71,7 @@ public class Rm10AssertionTest extends TestCase {
      * Test of getInactivityTimeout method, of class Rm10Assertion.
      */
     public void testGetInactivityTimeout() {
-        assertEquals(ReliableMessagingFeature.DEFAULT_INACTIVITY_TIMEOUT, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
+        assertEquals(ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
         assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
     }
 
@@ -79,7 +79,7 @@ public class Rm10AssertionTest extends TestCase {
      * Test of getBaseRetransmittionInterval method, of class Rm10Assertion.
      */
     public void testGetBaseRetransmittionInterval() {
-        assertEquals(ReliableMessagingFeature.DEFAULT_BASE_RETRANSMISSION_INTERVAL, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
+        assertEquals(ReliableMessagingFeature.DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
         assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
     }
 

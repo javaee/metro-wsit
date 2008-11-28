@@ -85,8 +85,8 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     private Rm10Assertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
 
-        long _inactivityTimeout = ReliableMessagingFeature.DEFAULT_INACTIVITY_TIMEOUT;
-        long _retransmittionInterval = ReliableMessagingFeature.DEFAULT_BASE_RETRANSMISSION_INTERVAL;
+        long _inactivityTimeout = ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
+        long _retransmittionInterval = ReliableMessagingFeature.DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL;
         boolean _useExponentialBackoffAlgorithm = false;
 
         if (assertionParameters != null) {
@@ -120,8 +120,8 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         builder.version(RmVersion.WSRM10)
-                .inactivityTimeout(inactivityTimeout)
-                .baseRetransmissionInterval(retransmittionInterval);
+                .sequenceInactivityTimeout(inactivityTimeout)
+                .messageRetransmissionInterval(retransmittionInterval);
 
         if (useExponentialBackoffAlgorithm) {
             builder.retransmissionBackoffAlgorithm(BackoffAlgorithm.EXPONENTIAL);

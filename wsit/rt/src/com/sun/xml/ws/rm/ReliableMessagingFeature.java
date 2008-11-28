@@ -45,42 +45,175 @@ import javax.xml.ws.WebServiceFeature;
 public class ReliableMessagingFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.ReliableMessagingFeature";
-    //
-    public static final long DEFAULT_INACTIVITY_TIMEOUT = 600000;
+    /**
+     * A constant specifying the default value of sequence inactivity timeout.
+     * Currently the default value is set to 600000.
+     */
+    public static final long DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT = 600000;
+    /**
+     * A constant specifying the default value of destination flow control buffer quota.
+     * Currently the default value is set to 32.
+     */
     public static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
-    public static final long DEFAULT_BASE_RETRANSMISSION_INTERVAL = 2000;
+    /**
+     * A constant specifying the default value of base message retransmission interval.
+     * Currently the default value is set to 2000.
+     */
+    public static final long DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL = 2000;
+    /**
+     * A constant specifying the default value of interval between sending subsequent 
+     * acknowledgement request messages. Currently the default value is set to 200.
+     */
     public static final long DEFAULT_ACK_REQUESTED_INTERVAL = 200;
+    /**
+     * A constant specifying the default value of close sequence operation timeout.
+     * Currently the default value is set to 3000.
+     */
     public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
-//    public static final SecurityBinding DEFAULT_SECURITY_BINDING = SecurityBinding.NONE;
-//    public static final DeliveryAssurance DEFAULT_DELIVERY_ASSURANCE = DeliveryAssurance.EXACTLY_ONCE;
 
+    /**
+     * This enumeration defines possible security binding mechanism options that
+     * can be applied to a created sequence.
+     *
+     * @see SecurityBinding#NONE
+     * @see SecurityBinding#STR
+     * @see SecurityBinding#TRANSPORT
+     */
     public static enum SecurityBinding {
 
+        /**
+         * An RM Sequence MUST be bound to an explicit token that is referenced
+         * from a wsse:SecurityTokenReference in the CreateSequence message.
+         *
+         * @see SecurityBinding
+         */
         STR,
+        /**
+         * <p>
+         * An RM Sequence MUST be bound to the session(s) of the underlying transport-level
+         * security protocol (e.g. SSL/TLS) used to carry the {@code CreateSequence}
+         * and {@code CreateSequenceResponse} messages.
+         * </p>
+         * <p>
+         * The assertion specifying this requirement MUST be used in conjunction
+         * with the sp:TransportBinding assertion that requires the use of some
+         * transport-level security mechanism (e.g. sp:HttpsToken)."
+         * </p>
+         *
+         * @see SecurityBinding
+         */
         TRANSPORT,
+        /**
+         * There are no security binding requirements specified for the message.
+         *
+         * @see SecurityBinding
+         */
         NONE;
 
+        /**
+         * Provides a default security binding value.
+         *
+         * @return a default security binding value. Currnetly returns {@link #NONE}.
+         *
+         * @see SecurityBinding
+         */
         public static SecurityBinding getDefault() {
             return NONE; // if changed, update also in ReliableMesaging annotation
         }
     }
 
+    /**
+     * This enumeration defines a number of Delivery Assurance options, which
+     * can be supported by RM Sources and RM Destinations.
+     *
+     * @see DeliveryAssurance#EXACTLY_ONCE
+     * @see DeliveryAssurance#AT_LEAST_ONCE
+     * @see DeliveryAssurance#AT_MOST_ONCE
+     */
     public static enum DeliveryAssurance {
 
+        /**
+         * Each message is to be delivered exactly once; if a message cannot be
+         * delivered then an error will be raised by the RM Source and/or RM Destination.
+         * The requirement on an RM Source is that it should retry transmission of
+         * every message sent by the Application Source until it receives an acknowledgement
+         * from the RM Destination. The requirement on the RM Destination is that it
+         * should retry the transfer to the Application Destination of any message
+         * that it accepts from the RM Source until that message has been successfully
+         * delivered, and that it must not deliver a duplicate of a message that
+         * has already been delivered.
+         *
+         * @see DeliveryAssurance
+         */
         EXACTLY_ONCE,
+        /**
+         * Each message is to be delivered at least once, or else an error will
+         * be raised by the RM Source and/or RM Destination. The requirement on
+         * an RM Source is that it should retry transmission of every message sent
+         * by the Application Source until it receives an acknowledgement from the
+         * RM Destination. The requirement on the RM Destination is that it should
+         * retry the transfer to the Application Destination of any message that it
+         * accepts from the RM Source, until that message has been successfully delivered.
+         * There is no requirement for the RM Destination to apply duplicate message
+         * filtering.
+         *
+         * @see DeliveryAssurance
+         */
         AT_LEAST_ONCE,
+        /**
+         * Each message is to be delivered at most once. The RM Source may retry
+         * transmission of unacknowledged messages, but is not required to do so.
+         * The requirement on the RM Destination is that it must filter out duplicate
+         * messages, i.e. that it must not deliver a duplicate of a message that
+         * has already been delivered.
+         *
+         * @see DeliveryAssurance
+         */
         AT_MOST_ONCE;
 
+        /**
+         * Provides a default delivery assurance value.
+         *
+         * @return a default delivery assurance value. Currnetly returns {@link #EXACTLY_ONCE}.
+         *
+         * @see DeliveryAssurance
+         */
         public static DeliveryAssurance getDefault() {
             return DeliveryAssurance.EXACTLY_ONCE; // if changed, update also in ReliableMesaging annotation
         }
     }
 
+        /**
+         * This enumeration defines all possible backoff algortihms that can be applied
+         * for to message retransmission.
+         *
+         * @see BackoffAlgorithm#LINEAR
+         * @see BackoffAlgorithm#EXPONENTIAL
+         */
     public static enum BackoffAlgorithm {
 
+        /**
+         * This algorithm ensures that a message retransmission rate remains constant
+         * at all times.
+         *
+         * @see BackoffAlgorithm
+         */
         LINEAR,
+        /**
+         * This algorithm ensures that a message retransmission rate is multiplicatively
+         * decreased with each resend of the particular message.
+         *
+         * @see BackoffAlgorithm
+         */
         EXPONENTIAL;
 
+        /**
+         * Provides a default back-off algorithm value.
+         *
+         * @return a default back-off algorithm value. Currnetly returns {@link #LINEAR}.
+         *
+         * @see BackoffAlgorithm
+         */
         public static BackoffAlgorithm getDefault() {
             return BackoffAlgorithm.LINEAR; // if changed, update also in ReliableMesaging annotation
         }
@@ -88,13 +221,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
 
     // General RM config values
     private final RmVersion version;
-    private final long inactivityTimeout;
-    private final long bufferQuota;
+    private final long sequenceInactivityTimeout;
+    private final long destinationBufferQuota;
     private final boolean orderedDelivery;
     private final DeliveryAssurance deliveryAssurance;
     private final SecurityBinding securityBinding;
     // Client-specific RM config values
-    private final long baseRetransmissionInterval;
+    private final long messageRetransmissionInterval;
     private final BackoffAlgorithm retransmissionBackoffAlgorithm;
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
@@ -104,36 +237,33 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this(true);
     }
 
+    /**
+     * This constructor is here just to satisfy JAX-WS specification requirements
+     */
     public ReliableMessagingFeature(boolean enabled) {
-        // this constructor is here just to satisfy JAX-WS specification requirements
         this(
                 enabled, // this.enabled
                 RmVersion.getDefault(), // this.rmVersion
-                DEFAULT_INACTIVITY_TIMEOUT, // this.inactivityTimeout
+                DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, // this.inactivityTimeout
                 DEFAULT_DESTINATION_BUFFER_QUOTA, // this.bufferQuota
                 false, // this.orderedDelivery
                 DeliveryAssurance.getDefault(), // this.deliveryAssurance
                 SecurityBinding.getDefault(), // this.securityBinding
-                DEFAULT_BASE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
+                DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT // this.closeSequenceOperationTimeout
                 );
-
     }
 
     @FeatureConstructor({
         "enabled",
         "version",
-        "inactivityTimeout",
-        "bufferQuota",
+        "sequenceInactivityTimeout",
+        "destinationBufferQuota",
         "orderedDelivery",
         "deliveryAssurance",
-        "securityBinding",
-        "baseRetransmissionInterval",
-        "retransmissionBackoffAlgorithm",
-        "ackRequestInterval",
-        "closeSequenceOperationTimeout"
+        "securityBinding"
     })
     public ReliableMessagingFeature(
             boolean enabled,
@@ -142,25 +272,49 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long bufferQuota,
             boolean orderedDelivery,
             DeliveryAssurance deliveryAssurance,
+            SecurityBinding securityBinding) {
+
+        this(
+                enabled, // this.enabled
+                version, // this.rmVersion
+                inactivityTimeout, // this.inactivityTimeout
+                bufferQuota, // this.bufferQuota
+                orderedDelivery, // this.orderedDelivery
+                deliveryAssurance, // this.deliveryAssurance
+                securityBinding, // this.securityBinding
+                DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
+                BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
+                DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
+                DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT // this.closeSequenceOperationTimeout
+                );
+    }
+
+    public ReliableMessagingFeature(
+            boolean enabled,
+            RmVersion version,
+            long inactivityTimeout,
+            long bufferQuota,
+            boolean orderedDelivery,
+            DeliveryAssurance deliveryAssurance,
             SecurityBinding securityBinding,
-            long baseRetransmissionInterval,
+            long messageRetransmissionInterval,
             BackoffAlgorithm retransmissionBackoffAlgorithm,
             long ackRequestInterval,
             long closeSequenceOperationTimeout) {
 
         super.enabled = enabled;
         this.version = version;
-        this.inactivityTimeout = inactivityTimeout;
-        this.bufferQuota = bufferQuota;
+        this.sequenceInactivityTimeout = inactivityTimeout;
+        this.destinationBufferQuota = bufferQuota;
         this.orderedDelivery = orderedDelivery;
         this.deliveryAssurance = deliveryAssurance;
         this.securityBinding = securityBinding;
-        this.baseRetransmissionInterval = baseRetransmissionInterval;
+        this.messageRetransmissionInterval = messageRetransmissionInterval;
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
         this.ackRequestInterval = ackRequestInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
     }
-    
+
     @Override
     public String getID() {
         return ID;
@@ -181,36 +335,21 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * Specifies a period of inactivity for a Sequence in ms.
      *
      * @return currently configured sequence inactivity timeout. If not set explicitly, 
-     *         the default value is specified by {@link ReliableMessagingFeature#DEFAULT_INACTIVITY_TIMEOUT}
+     *         the default value is specified by {@link #DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT}
      *         constant.
      */
-    public long getInactivityTimeout() {
-        return inactivityTimeout;
+    public long getSequenceInactivityTimeout() {
+        return sequenceInactivityTimeout;
     }
 
     /**
      * Specifies whether each created RM sequence must be bound to a specific
      * underlying security token or secured transport.
-     * <dl>
-     *   <dt>STR</dt>
-     *   <dd>
-     *     an RM Sequence MUST be bound to an explicit token that is referenced
-     *     from a wsse:SecurityTokenReference in the CreateSequence message.
-     *   </dd>
-     *   <dt>TRANSPORT</dt>
-     *   <dd>
-     *     an RM Sequence MUST be bound to the session(s) of the underlying transport-level
-     *     security protocol (e.g. SSL/TLS) used to carry the {@code CreateSequence}
-     *     and {@code CreateSequenceResponse} messages.
-     *     <p />
-     *     The assertion specifying this requirement MUST be used in conjunction
-     *     with the sp:TransportBinding assertion that requires the use of some
-     *     transport-level security mechanism (e.g. sp:HttpsToken)."
-     *   </dd>
-     * </dl>
      *
      * @return configured security binding requirement. If not set explicitly, the 
      *         default value is specified by a call to {@link SecurityBinding#getDefault()}.
+     *
+     * @see SecurityBinding
      */
     public SecurityBinding getSecurityBinding() {
         return securityBinding;
@@ -229,16 +368,31 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * @return currently configured delivery assurance mode. If not set explicitly, 
      *         the default value is specified by a call to {@link DeliveryAssurance#getDefault()}.
+     *
+     * @see DeliveryAssurance
      */
     public DeliveryAssurance getDeliveryAssurance() {
         return deliveryAssurance;
     }
 
     /**
-     * Specifies a requirement that all request messages must be processed by an
-     * RM destination in the same order as they were sent by RM source.
-     * This order is defined by an RM sequence message number assigned to each
-     * request message.
+     * <p>
+     * Specifies a requirement that messages from each individual Sequence are
+     * to be delivered in the same order they have been sent by the Application
+     * Source. The RM Source will ensure that the ordinal position of
+     * each message in the Sequence (as indicated by a message Sequence number)
+     * is consistent with the order in which the messages have been sent from
+     * the Application Source. The RM Destination will deliver received messages
+     * for each Sequence in the order indicated by the message numbering.
+     * </p>
+     * <p>
+     * In-order delivery can be used in combination with any of the {@link DeliveryAssurance} values,
+     * and the requirements of those values will also be met. In particular if the
+     * {@link DeliveryAssurance#AT_LEAST_ONCE} or {@link DeliveryAssurance#EXACTLY_ONCE}
+     * value is applied and the RM Destination detects  a gap in the Sequence then
+     * the RM Destination will not deliver any subsequent messages from that Sequence
+     * until the missing messages are received or until the Sequence is closed.
+     * </p>
      *
      * @return {@code true} if the ordered delivery si required, {@code false} otherwise.
      *         If not set explicitly, the default value is {@code false}.
@@ -254,11 +408,11 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * destination before the RM destination starts rejecting new request messages.
      *
      * @return currently configured flow control buffer on the destination. If not 
-     *         set explicitly, the default value is specified by {@link ReliableMessagingFeature#DEFAULT_DESTINATION_BUFFER_QUOTA}
+     *         set explicitly, the default value is specified by {@link #DEFAULT_DESTINATION_BUFFER_QUOTA}
      *         constant.
      */
     public long getDestinationBufferQuota() {
-        return bufferQuota;
+        return destinationBufferQuota;
     }
 
     /**
@@ -266,11 +420,11 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * before retransmitting the message if no acknowledgement arrives.
      *
      * @return currently configured base retransmission interval. If not set explicitly, 
-     *         the default value is specified by {@link ReliableMessagingFeature#DEFAULT_BASE_RETRANSMISSION_INTERVAL}
+     *         the default value is specified by {@link #DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL}
      *         constant.
      */
-    public long getBaseRetransmissionInterval() {
-        return baseRetransmissionInterval;
+    public long getMessageRetransmissionInterval() {
+        return messageRetransmissionInterval;
     }
 
     /**
@@ -280,6 +434,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * @return currently configured retransmission back-off algorithm that should be
      *         used. If not set explicitly, the default value is specified by a
      *         call to {@link BackoffAlgorithm#getDefault()}.
+     *
+     * @see BackoffAlgorithm
      */
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
         return retransmissionBackoffAlgorithm;
@@ -290,7 +446,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * by an RM Source in case of any unacknowledged messages on the sequence.
      * 
      * @return currently configured acknowledgement request interval. If not set explicitly, 
-     *         the default value is specified by the {@link ReliableMessagingFeature#DEFAULT_ACK_REQUESTED_INTERVAL}
+     *         the default value is specified by the {@link #DEFAULT_ACK_REQUESTED_INTERVAL}
      *         constant.
      */
     public long getAcknowledgementRequestInterval() {
@@ -303,7 +459,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * automatically closed by the RM source and all associated resources are released.
      *
      * @return currently configured close sequence operation timeout. If not set explicitly,
-     *         the default value is specified by the {@link ReliableMessagingFeature#DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT}
+     *         the default value is specified by the {@link #DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT}
      *         constant.
      */
     public long getCloseSequenceOperationTimeout() {

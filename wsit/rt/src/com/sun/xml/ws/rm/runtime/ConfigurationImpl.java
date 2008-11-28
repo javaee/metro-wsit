@@ -78,8 +78,8 @@ class ConfigurationImpl implements Configuration {
         return requestResponseDetected;
     }
 
-    public long getInactivityTimeout() {
-        return feature.getInactivityTimeout();
+    public long getSequenceInactivityTimeout() {
+        return feature.getSequenceInactivityTimeout();
     }
 
     public SecurityBinding getSecurityBinding() {
@@ -98,8 +98,8 @@ class ConfigurationImpl implements Configuration {
         return feature.getDestinationBufferQuota();
     }
 
-    public long getBaseRetransmissionInterval() {
-        return feature.getBaseRetransmissionInterval();
+    public long getMessageRetransmissionInterval() {
+        return feature.getMessageRetransmissionInterval();
     }
 
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {

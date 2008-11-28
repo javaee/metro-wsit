@@ -81,7 +81,7 @@ public class InactivityTimeoutAssertion extends SimpleAssertion implements RmAss
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.inactivityTimeout(timeout);
+        return builder.sequenceInactivityTimeout(timeout);
     }
     
     
