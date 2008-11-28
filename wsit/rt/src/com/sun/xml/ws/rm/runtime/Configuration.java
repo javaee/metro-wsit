@@ -37,6 +37,7 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
@@ -47,17 +48,9 @@ import com.sun.xml.ws.rm.RmVersion;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface Configuration {
-    public static final long UNSPECIFIED = -1;
     
-    public static final long DEFAULT_INACTIVITY_TIMEOUT = 600000;
-    public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
-//    public static final SecurityBinding DEFAULT_SECURITY_BINDING = SecurityBinding.NONE;
-//    public static final DeliveryAssurance DEFAULT_DELIVERY_ASSURANCE = DeliveryAssurance.EXACTLY_ONCE;
-
     /**
-     * Provides information about the RM protocol version used for the sequence.
-     * 
-     * @return the RM protocol version that will be used for the sequence.
+     * @see ReliableMessagingFeature#getVersion() 
      */
     public RmVersion getRmVersion();
 
@@ -76,83 +69,55 @@ public interface Configuration {
     public AddressingVersion getAddressingVersion();
     
     /**
-     * Provides information if the port, which this configuration belongs to, has any request/response operations 
+     * Provides information if the port, which this configuration belongs to, has 
+     * any request/response operations.
+     *
      * @return {@code true} in case the port has any request/response operations; {@code false} otherwise
      */
     public boolean requestResponseOperationsDetected();
     
     /**
-     * Specifies a period of inactivity for the sequence (in miliseconds).
-     * 
-     * @return a period of inactivity for the sequence in milliseconds.
+     * @see ReliableMessagingFeature#getInactivityTimeout()
      */
     public long getInactivityTimeout();
 
     /**
-     * Specifies the duration after which the RM Destination will transmit a sequence acknowledgement.
-     * 
-     * @return the duration after which the RM Destination will transmit a sequence acknowledgement.
-     */
-    public long getSequenceAcknowledgementInterval();
-
-    /**
-     * Specifies if the RM session must be bound to an explicit token referenced from a 
-     * {@code wsse:SecurityTokenReference} in the {@code CreateSequence} message or to 
-     * the session of the underlying transport-level protocol used to carry {@code CreateSequence} 
-     * and {@code CreateSequenceResponse} message.
-     * 
-     * @return security binding requirement status.
+     * @see ReliableMessagingFeature#getSecurityBinding()
      */
     public SecurityBinding getSecurityBinding();
 
     /**
-     * TODO delivery assurance javadoc
-     * @return
+     * @see ReliableMessagingFeature#getDeliveryAssurance()
      */
     public DeliveryAssurance getDeliveryAssurance();
 
     /**
-     * TODO oredered delivery javadoc
-     * @return
+     * @see ReliableMessagingFeature#isOrderedDelivery()
      */
     public boolean isOrderedDelivery();
 
     /**
-     * TODO flow control settings javadoc
-     * @return
+     * @see ReliableMessagingFeature#getDestinationBufferQuota()
      */
     public long getDestinationBufferQuota();
     
     /**
-     * Specifies how long (in miliseconds) the RM source is expected to wait before 
-     * retransmitting the message.
-     * 
-     * @return a period of time (in miliseconds) the RM source is expected to wait 
-     * before retransmitting the message.
+     * @see ReliableMessagingFeature#getBaseRetransmissionInterval()
      */
     public long getBaseRetransmissionInterval();
         
     /**
-     * Specifies whether Exponetial backoff retransmission interval adjustment 
-     * algorithm should be used on the client side or not.
-     * 
-     * @return {@code true} if the Exponetial backoff retransmission interval adjustment 
-     * algorithm should be used on the client side; {@code false} otherwise
+     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
      */
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
     
     /**
-     * Specifies the duration after which the RM source will transmit an acknowledgement request.
-     * 
-     * @return the duration after which the RM source will transmit an acknowledgement request.
+     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
      */
     public long getAcknowledgementRequestInterval();    
     
     /**
-     * Specifies the timeout for the "Close sequence" operation that occurs when sequence
-     * is being closed and terminated on the client side.
-     * 
-     * @return the timeout for the "Close sequence" operation.
+     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout() 
      */
     public long getCloseSequenceOperationTimeout();
 }

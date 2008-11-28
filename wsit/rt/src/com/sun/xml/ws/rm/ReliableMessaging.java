@@ -58,14 +58,13 @@ public @interface ReliableMessaging {
 
     RmVersion version() default RmVersion.WSRM11;
     long inactivityTimeout() default DEFAULT_INACTIVITY_TIMEOUT;
-    long bufferQuota() default UNSPECIFIED;
+    long bufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
     boolean orderedDelivery() default false;
     DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
     SecurityBinding securityBinding() default SecurityBinding.NONE;
-    long acknowledgementInterval() default UNSPECIFIED;
     // Client-specific RM config values
-    long baseRetransmissionInterval() default UNSPECIFIED;
+    long baseRetransmissionInterval() default DEFAULT_BASE_RETRANSMISSION_INTERVAL;
     BackoffAlgorithm retransmissionBackoffAlgorithm() default BackoffAlgorithm.LINEAR;
-    long ackRequestInterval() default UNSPECIFIED;
+    long ackRequestInterval() default DEFAULT_ACK_REQUESTED_INTERVAL;
     long closeSequenceOperationTimeout() default DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
 }

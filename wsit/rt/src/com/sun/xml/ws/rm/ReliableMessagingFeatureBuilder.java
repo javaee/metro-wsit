@@ -46,15 +46,14 @@ public final class ReliableMessagingFeatureBuilder {
     private boolean enabled = true;
     private RmVersion version = RmVersion.getDefault();
     private long inactivityTimeout = DEFAULT_INACTIVITY_TIMEOUT;
-    private long bufferQuota = UNSPECIFIED;
+    private long bufferQuota = DEFAULT_DESTINATION_BUFFER_QUOTA;
     private boolean orderedDelivery = false;
     private DeliveryAssurance deliveryAssurance = DeliveryAssurance.getDefault();
     private SecurityBinding securityBinding = SecurityBinding.getDefault();
-    private long acknowledgementInterval = UNSPECIFIED;
     // Client-specific RM config values
-    private long baseRetransmissionInterval = UNSPECIFIED;
+    private long baseRetransmissionInterval = DEFAULT_BASE_RETRANSMISSION_INTERVAL;
     private BackoffAlgorithm retransmissionBackoffAlgorithm = BackoffAlgorithm.getDefault();
-    private long ackRequestInterval = UNSPECIFIED;
+    private long ackRequestInterval = DEFAULT_ACK_REQUESTED_INTERVAL;
     private long closeSequenceOperationTimeout = DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
 
     public ReliableMessagingFeatureBuilder() {
@@ -73,7 +72,6 @@ public final class ReliableMessagingFeatureBuilder {
                 this.orderedDelivery,
                 this.deliveryAssurance,
                 this.securityBinding,
-                this.acknowledgementInterval,
                 this.baseRetransmissionInterval,
                 this.retransmissionBackoffAlgorithm,
                 this.ackRequestInterval,
@@ -82,11 +80,6 @@ public final class ReliableMessagingFeatureBuilder {
 
     public ReliableMessagingFeatureBuilder ackRequestInterval(long ackRequestInterval) {
         this.ackRequestInterval = ackRequestInterval;
-        return this;
-    }
-
-    public ReliableMessagingFeatureBuilder acknowledgementInterval(long acknowledgementInterval) {
-        this.acknowledgementInterval = acknowledgementInterval;
         return this;
     }
 

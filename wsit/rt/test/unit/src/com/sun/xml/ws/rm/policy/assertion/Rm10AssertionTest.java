@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rm.policy.assertion;
 
-import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.testutil.ResourceLoader;
 import junit.framework.TestCase;
 
@@ -71,7 +71,7 @@ public class Rm10AssertionTest extends TestCase {
      * Test of getInactivityTimeout method, of class Rm10Assertion.
      */
     public void testGetInactivityTimeout() {
-        assertEquals(Configuration.DEFAULT_INACTIVITY_TIMEOUT, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
+        assertEquals(ReliableMessagingFeature.DEFAULT_INACTIVITY_TIMEOUT, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
         assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
     }
 
@@ -79,7 +79,7 @@ public class Rm10AssertionTest extends TestCase {
      * Test of getBaseRetransmittionInterval method, of class Rm10Assertion.
      */
     public void testGetBaseRetransmittionInterval() {
-        assertEquals(Configuration.UNSPECIFIED, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
+        assertEquals(ReliableMessagingFeature.DEFAULT_BASE_RETRANSMISSION_INTERVAL, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
         assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getBaseRetransmittionInterval());
     }
 
@@ -89,13 +89,5 @@ public class Rm10AssertionTest extends TestCase {
     public void testUseExponentialBackoffAlgorithm() {
         assertEquals(false, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).useExponentialBackoffAlgorithm());
         assertEquals(true, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).useExponentialBackoffAlgorithm());
-    }
-
-    /**
-     * Test of getAcknowledgementInterval method, of class Rm10Assertion.
-     */
-    public void testGetAcknowledgementInterval() {
-        assertEquals(Configuration.UNSPECIFIED, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getAcknowledgementInterval());
-        assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getAcknowledgementInterval());
     }
 }

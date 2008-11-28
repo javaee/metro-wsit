@@ -95,13 +95,13 @@ final class Rm10ServerTube extends AbstractRmServerTube {
     PacketAdapter handleCreateSequenceAction( PacketAdapter requestAdapter) throws CreateSequenceRefusedFault {
         CreateSequenceElement csElement = requestAdapter.unmarshallMessage();
 
-        long expirationTime = Configuration.UNSPECIFIED;
+        long expirationTime = Sequence.NO_EXPIRATION;
         if (csElement.getExpires() != null && !"PT0S".equals(csElement.getExpires().getValue().toString())) {
             expirationTime = csElement.getExpires().getValue().getTimeInMillis(Calendar.getInstance()) + System.currentTimeMillis();
         }
 
         String offeredId = null;
-        long offeredExpirationTime = Configuration.UNSPECIFIED;
+        long offeredExpirationTime = Sequence.NO_EXPIRATION;
         OfferType offerElement = csElement.getOffer();
         if (offerElement != null) {
             Identifier id = offerElement.getIdentifier();

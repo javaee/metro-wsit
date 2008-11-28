@@ -204,7 +204,7 @@ abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isExpired() {
-        return (expirationTime == Configuration.UNSPECIFIED) ? false : System.currentTimeMillis() < expirationTime;
+        return (expirationTime == Sequence.NO_EXPIRATION) ? false : System.currentTimeMillis() < expirationTime;
     }
 
     public long getLastActivityTime() {

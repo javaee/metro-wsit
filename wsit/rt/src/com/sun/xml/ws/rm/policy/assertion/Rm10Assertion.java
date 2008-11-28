@@ -67,7 +67,6 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "InactivityTimeout");
     private static final QName RETRANSMITTION_INTERVAL_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "BaseRetransmissionInterval");
     private static final QName EXPONENTIAL_BACKOFF_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "ExponentialBackoff");
-    private static final QName ACKNOWLEDGEMENT_INTERVAL_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "AcknowledgementInterval");
     private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
@@ -82,15 +81,13 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     private final long inactivityTimeout;
     private final long retransmittionInterval;
     private final boolean useExponentialBackoffAlgorithm;
-    private final long acknowledgementInterval;
 
     private Rm10Assertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
 
         long _inactivityTimeout = ReliableMessagingFeature.DEFAULT_INACTIVITY_TIMEOUT;
-        long _retransmittionInterval = ReliableMessagingFeature.UNSPECIFIED;
+        long _retransmittionInterval = ReliableMessagingFeature.DEFAULT_BASE_RETRANSMISSION_INTERVAL;
         boolean _useExponentialBackoffAlgorithm = false;
-        long _acknowledgementInterval = ReliableMessagingFeature.UNSPECIFIED;
 
         if (assertionParameters != null) {
             for (PolicyAssertion parameter : assertionParameters) {
@@ -100,8 +97,6 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
                     _retransmittionInterval = Long.parseLong(parameter.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
                 } else if (EXPONENTIAL_BACKOFF_QNAME.equals(parameter.getName())) {
                     _useExponentialBackoffAlgorithm = true;
-                } else if (ACKNOWLEDGEMENT_INTERVAL_QNAME.equals(parameter.getName())) {
-                    _acknowledgementInterval = Long.parseLong(parameter.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
                 }
             }
         }
@@ -109,7 +104,6 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
         inactivityTimeout = _inactivityTimeout;
         retransmittionInterval = _retransmittionInterval;
         useExponentialBackoffAlgorithm = _useExponentialBackoffAlgorithm;
-        acknowledgementInterval = _acknowledgementInterval;
     }
 
     public long getInactivityTimeout() {
@@ -124,15 +118,10 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
         return useExponentialBackoffAlgorithm;
     }
 
-    public long getAcknowledgementInterval() {
-        return acknowledgementInterval;
-    }
-
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         builder.version(RmVersion.WSRM10)
                 .inactivityTimeout(inactivityTimeout)
-                .baseRetransmissionInterval(retransmittionInterval)
-                .acknowledgementInterval(acknowledgementInterval);
+                .baseRetransmissionInterval(retransmittionInterval);
 
         if (useExponentialBackoffAlgorithm) {
             builder.retransmissionBackoffAlgorithm(BackoffAlgorithm.EXPONENTIAL);

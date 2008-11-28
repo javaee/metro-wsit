@@ -42,6 +42,7 @@ import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.v200502.AcceptType;
 import com.sun.xml.ws.rm.v200502.CreateSequenceElement;
 import com.sun.xml.ws.rm.v200502.CreateSequenceResponseElement;
@@ -100,7 +101,7 @@ final class Rm10ClientSession extends ClientSession {
 
         outboundSequenceId = csrElement.getIdentifier().getValue();
 
-        long expirationTime = Configuration.UNSPECIFIED;
+        long expirationTime = Sequence.NO_EXPIRATION;
         if (csrElement.getExpires() != null && !"PT0S".equals(csrElement.getExpires().getValue().toString())) {
             expirationTime = csrElement.getExpires().getValue().getTimeInMillis(Calendar.getInstance()) + System.currentTimeMillis();
         }
@@ -115,7 +116,7 @@ final class Rm10ClientSession extends ClientSession {
                 throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
             }
             inboundSequenceId = offerInboundSequenceId;
-            sequenceManager.createInboundSequence(inboundSequenceId, (strType != null) ? strType.getId() : null, Configuration.UNSPECIFIED);
+            sequenceManager.createInboundSequence(inboundSequenceId, (strType != null) ? strType.getId() : null, Sequence.NO_EXPIRATION);
         }
     }
 

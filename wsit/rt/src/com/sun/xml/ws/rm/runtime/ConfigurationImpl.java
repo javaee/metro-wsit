@@ -82,10 +82,6 @@ class ConfigurationImpl implements Configuration {
         return feature.getInactivityTimeout();
     }
 
-    public long getSequenceAcknowledgementInterval() {
-        return feature.getSequenceAcknowledgementInterval();
-    }
-
     public SecurityBinding getSecurityBinding() {
         return feature.getSecurityBinding();
     }

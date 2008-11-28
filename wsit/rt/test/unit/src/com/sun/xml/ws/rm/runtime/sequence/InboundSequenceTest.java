@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
+import com.sun.xml.ws.rm.runtime.Configuration;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.TestCase;
@@ -54,7 +55,7 @@ public class InboundSequenceTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
+        inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION);
         super.setUp();
     }
 
@@ -174,7 +175,7 @@ public class InboundSequenceTest extends TestCase {
     }
 
     public void testStatus() throws Exception {
-        Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, -1);
+        Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION);
         assertEquals(Sequence.Status.CREATED, inbound.getStatus());
 
         // TODO test closing
