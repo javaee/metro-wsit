@@ -40,7 +40,6 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -54,7 +53,7 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class ResendIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.sunClientVersion, "ResendInterval");
+    public static final QName NAME = ProprietaryNamespace.SUN_CLIENT_200603.getQName("ResendInterval");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {

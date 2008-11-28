@@ -49,9 +49,7 @@ import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
-import static com.sun.xml.ws.rm.Constants.microsoftVersion;
-import static com.sun.xml.ws.rm.Constants.sunVersion;
-import static com.sun.xml.ws.rm.Constants.sunClientVersion;
+import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -60,6 +58,8 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
 
     private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(5);
     private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(8);
+
+    private static final ArrayList<String> supportedDomains = new ArrayList<String>();
 
     static {
         serverSideSupportedAssertions.add(Rm10Assertion.NAME);
@@ -75,6 +75,10 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
         clientSideSupportedAssertions.add(ResendIntervalClientAssertion.NAME);
         clientSideSupportedAssertions.add(CloseTimeoutClientAssertion.NAME);
         clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
+
+        supportedDomains.add(RmVersion.WSRM10.policyNamespaceUri);
+        supportedDomains.add(RmVersion.WSRM11.policyNamespaceUri);
+        supportedDomains.addAll(ProprietaryNamespace.getAll());
     }
 
     public RmAssertionValidator() {
@@ -96,6 +100,6 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
     }
 
     public String[] declareSupportedDomains() {
-        return new String[]{RmVersion.WSRM10.policyNamespaceUri, RmVersion.WSRM11.policyNamespaceUri, microsoftVersion, sunVersion, sunClientVersion};
+        return supportedDomains.toArray(new String[supportedDomains.size()]);
     }
 }

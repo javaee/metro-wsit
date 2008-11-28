@@ -40,7 +40,6 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -55,7 +54,7 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class InactivityTimeoutAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.microsoftVersion3_5, "InactivityTimeout");
+    public static final QName NAME = ProprietaryNamespace.MICROSOFT_200702.getQName("InactivityTimeout");
     private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
 
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {

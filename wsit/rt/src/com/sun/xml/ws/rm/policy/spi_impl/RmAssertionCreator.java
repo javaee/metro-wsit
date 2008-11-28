@@ -40,7 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
-import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
@@ -84,10 +84,10 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
     private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(Arrays.asList(
         RmVersion.WSRM10.policyNamespaceUri,
         RmVersion.WSRM11.policyNamespaceUri,
-        Constants.sunVersion,
-        Constants.sunClientVersion,
-        Constants.microsoftVersion,
-        Constants.microsoftVersion3_5));
+        ProprietaryNamespace.SUN_200603.toString(),
+        ProprietaryNamespace.SUN_CLIENT_200603.toString(),
+        ProprietaryNamespace.MICROSOFT_200502.toString(),
+        ProprietaryNamespace.MICROSOFT_200702.toString()));
 
     public String[] getSupportedDomainNamespaceURIs() {
         return SUPPORTED_DOMAINS.toArray(new String[SUPPORTED_DOMAINS.size()]);

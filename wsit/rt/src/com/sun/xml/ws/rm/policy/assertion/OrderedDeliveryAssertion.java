@@ -40,7 +40,6 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -54,7 +53,7 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OrderedDeliveryAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = new QName(Constants.sunVersion, "Ordered");
+    public static final QName NAME = ProprietaryNamespace.SUN_200603.getQName("Ordered");
     
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){

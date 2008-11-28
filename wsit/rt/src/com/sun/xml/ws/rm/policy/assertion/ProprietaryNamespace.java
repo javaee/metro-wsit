@@ -33,22 +33,44 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.policy.assertion;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
- * Class contains  constants for faults defined by the 02/2005 version of the
- * WS-RM specification.
- * @author Bhakti Mehta
+ * Class contains constants for policy namespaces used by this RM implementation.
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class Constants {
+public enum ProprietaryNamespace {
 
-    public static final String microsoftVersion = "http://schemas.microsoft.com/net/2005/02/rm/policy";
-    public static final String microsoftVersion3_5 = "http://schemas.microsoft.com/ws-rx/wsrmp/200702";
-    public static final String sunVersion = "http://sun.com/2006/03/rm";
-    public static final String sunClientVersion = "http://sun.com/2006/03/rm/client";
-    /*
-     * RequestContext / MessageContext property names
-     */
-    public static final String sequenceProperty = "com.sun.xml.ws.sequence";
-    public static final String messageNumberProperty = "com.sun.xml.ws.messagenumber";
+    MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy"),
+    MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702"),
+    SUN_200603("http://sun.com/2006/03/rm"),
+    SUN_CLIENT_200603("http://sun.com/2006/03/rm/client");
+
+    public static Collection<String> getAll() {
+        Collection<String> retVal = new ArrayList<String>(ProprietaryNamespace.values().length);
+        for (ProprietaryNamespace pns : ProprietaryNamespace.values()) {
+            retVal.add(pns.toString());
+        }
+        return retVal;
+    }
+
+    private final String namespace;
+
+    private ProprietaryNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    @Override
+    public String toString() {
+        return namespace;
+    }
+
+    public QName getQName(String name) {
+        return new QName(namespace, name);
+    }
 }

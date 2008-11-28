@@ -45,7 +45,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 import com.sun.xml.ws.rm.RmException;
 import com.sun.xml.ws.rm.RmRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
@@ -66,6 +66,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public abstract class PacketAdapter {
 
     private static final Logger LOGGER = Logger.getLogger(PacketAdapter.class);
+    private static final String SEQUENCE_PROPERTY = "com.sun.xml.ws.sequence";
+    private static final String MESSAGE_NUMBER_PROPERTY = "com.sun.xml.ws.messagenumber";
     //
     Message message;
     //
@@ -527,8 +529,8 @@ public abstract class PacketAdapter {
     }
 
     public void exposeSequenceDataToUser() {
-        packet.invocationProperties.put(Constants.sequenceProperty, sequenceId);
-        packet.invocationProperties.put(Constants.messageNumberProperty, messageNumber);
+        packet.invocationProperties.put(SEQUENCE_PROPERTY, sequenceId);
+        packet.invocationProperties.put(MESSAGE_NUMBER_PROPERTY, messageNumber);
     }
     
     /**

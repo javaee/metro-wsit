@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.policy.spi_impl;
 
 import com.sun.xml.ws.policy.spi.PrefixMapper;
-import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 import com.sun.xml.ws.rm.RmVersion;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,10 +53,10 @@ public class RmPrefixMapper implements PrefixMapper {
     static {
         prefixMap.put(RmVersion.WSRM10.policyNamespaceUri, "wsrmp10");
         prefixMap.put(RmVersion.WSRM11.policyNamespaceUri, "wsrmp");
-        prefixMap.put(Constants.microsoftVersion, "net30rmp");
-        prefixMap.put(Constants.microsoftVersion3_5, "net35rmp");
-        prefixMap.put(Constants.sunVersion, "sunrmp");
-        prefixMap.put(Constants.sunClientVersion, "sunrmcp");
+        prefixMap.put(ProprietaryNamespace.MICROSOFT_200502.toString(), "net30rmp");
+        prefixMap.put(ProprietaryNamespace.MICROSOFT_200702.toString(), "net35rmp");
+        prefixMap.put(ProprietaryNamespace.SUN_200603.toString(), "sunrmp");
+        prefixMap.put(ProprietaryNamespace.SUN_CLIENT_200603.toString(), "sunrmcp");
     }
         
     public Map<String, String> getPrefixMap() {

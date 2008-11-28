@@ -41,7 +41,6 @@ import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
-import com.sun.xml.ws.rm.Constants;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import java.util.Collection;
@@ -59,10 +58,10 @@ import javax.xml.namespace.QName;
  */
 public class RmFlowControlAssertion extends ComplexAssertion implements RmAssertionTranslator {
 
-    public static final QName NAME = new QName(Constants.microsoftVersion, "RmFlowControl");
+    public static final QName NAME = ProprietaryNamespace.MICROSOFT_200502.getQName("RmFlowControl");
     //    
     private static final Logger LOGGER = Logger.getLogger(RmFlowControlAssertion.class);
-    private static final QName BUFFER_SIZE_ASSERTION_QNAME = new QName(Constants.microsoftVersion, "MaxReceiveBufferSize");
+    private static final QName BUFFER_SIZE_ASSERTION_QNAME = ProprietaryNamespace.MICROSOFT_200502.getQName("MaxReceiveBufferSize");
     private static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
     //
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
