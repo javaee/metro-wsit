@@ -58,7 +58,7 @@ public class IPingImpl {
     @WebMethod
     public void ping(String message) {
         MessageContext msgCtx = wsContext.getMessageContext();        
-        long msgNumber = (Long) msgCtx.get(Constants.messageNumberProperty);
+        long msgNumber = (Long) msgCtx.get("com.sun.xml.ws.messagenumber");
 
         if (msgNumber == 1) {
             if (FIRST_MESSAGE_ALREADY_REJECTED.compareAndSet(false, true)) {

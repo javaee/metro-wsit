@@ -58,7 +58,7 @@ public class IPingImpl {
     @WebMethod
     public void ping(String s) {        
         MessageContext msgCtx = wsContext.getMessageContext();
-        long msgNumber = (Long) msgCtx.get(Constants.messageNumberProperty);
+        long msgNumber = (Long) msgCtx.get("com.sun.xml.ws.messagenumber");
         
         LOGGER.log(Level.ALL, String.format("==============  Message [ %d ]: On server side received %s  ===============", msgNumber, s));
         long value = CURRENT_PING_VALUE.getAndIncrement();
