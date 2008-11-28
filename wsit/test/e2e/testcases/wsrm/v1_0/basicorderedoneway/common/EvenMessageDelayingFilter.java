@@ -1,7 +1,6 @@
 package wsrm.v1_0.basicorderedoneway.common;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.runtime.testing.PacketFilter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -18,7 +17,7 @@ public class EvenMessageDelayingFilter extends PacketFilter {
     private static final AtomicLong CURRENT_MSG_ID = new AtomicLong(1);
 
     public EvenMessageDelayingFilter() {
-        super(RmVersion.WSRM10);
+        super();
     }
 
     @Override

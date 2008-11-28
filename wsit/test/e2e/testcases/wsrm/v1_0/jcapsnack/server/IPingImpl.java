@@ -35,7 +35,7 @@
  */
 package wsrm.v1_0.jcapsnack.server;
 
-import com.sun.xml.ws.rm.Constants;
+import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
