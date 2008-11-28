@@ -64,8 +64,8 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
     static {
         serverSideSupportedAssertions.add(Rm10Assertion.NAME);
         serverSideSupportedAssertions.add(Rm11Assertion.NAME);
-//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceSTR"));
-//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity"));
+//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM200702.policyNamespaceUri, "SequenceSTR"));
+//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM200702.policyNamespaceUri, "SequenceTransportSecurity"));
         serverSideSupportedAssertions.add(OrderedDeliveryAssertion.NAME);
         serverSideSupportedAssertions.add(AllowDuplicatesAssertion.NAME);
         serverSideSupportedAssertions.add(RmFlowControlAssertion.NAME);
@@ -76,8 +76,8 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
         clientSideSupportedAssertions.add(CloseTimeoutClientAssertion.NAME);
         clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
 
-        supportedDomains.add(RmVersion.WSRM10.policyNamespaceUri);
-        supportedDomains.add(RmVersion.WSRM11.policyNamespaceUri);
+        supportedDomains.add(RmVersion.WSRM200502.policyNamespaceUri);
+        supportedDomains.add(RmVersion.WSRM200702.policyNamespaceUri);
         supportedDomains.addAll(ProprietaryNamespace.getAll());
     }
 

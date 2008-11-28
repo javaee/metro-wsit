@@ -74,10 +74,10 @@ import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 public final class Rm11Assertion extends ComplexAssertion implements RmAssertionTranslator {
     // TODO: add new assertions for acknowledgement interval and backoff algorithm
 
-    public static final QName NAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "RMAssertion");
+    public static final QName NAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "RMAssertion");
     private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
-    private static final QName SEQUENCE_STR_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceSTR");
-    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RmVersion.WSRM11.policyNamespaceUri, "SequenceTransportSecurity");
+    private static final QName SEQUENCE_STR_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "SequenceSTR");
+    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "SequenceTransportSecurity");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
@@ -142,7 +142,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.version(RmVersion.WSRM11)
+        return builder.version(RmVersion.WSRM200702)
                 .deliveryAssurance(deliveryAssurance)
                 .orderedDelivery(isOrderedDelivery)
                 .securityBinding(securityBinding);

@@ -51,8 +51,8 @@ public class RmPrefixMapper implements PrefixMapper {
     private static final Map<String, String> prefixMap = new HashMap<String, String>();
 
     static {
-        prefixMap.put(RmVersion.WSRM10.policyNamespaceUri, "wsrmp10");
-        prefixMap.put(RmVersion.WSRM11.policyNamespaceUri, "wsrmp");
+        prefixMap.put(RmVersion.WSRM200502.policyNamespaceUri, "wsrmp10");
+        prefixMap.put(RmVersion.WSRM200702.policyNamespaceUri, "wsrmp");
         prefixMap.put(ProprietaryNamespace.MICROSOFT_200502.toString(), "net30rmp");
         prefixMap.put(ProprietaryNamespace.MICROSOFT_200702.toString(), "net35rmp");
         prefixMap.put(ProprietaryNamespace.SUN_200603.toString(), "sunrmp");

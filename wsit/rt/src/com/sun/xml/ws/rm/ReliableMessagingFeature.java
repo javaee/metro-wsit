@@ -113,7 +113,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         /**
          * Provides a default security binding value.
          *
-         * @return a default security binding value. Currnetly returns {@link #NONE}.
+         * @return a default security binding value. Currently returns {@link #NONE}.
          *
          * @see SecurityBinding
          */
@@ -174,7 +174,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         /**
          * Provides a default delivery assurance value.
          *
-         * @return a default delivery assurance value. Currnetly returns {@link #EXACTLY_ONCE}.
+         * @return a default delivery assurance value. Currently returns {@link #EXACTLY_ONCE}.
          *
          * @see DeliveryAssurance
          */
@@ -210,7 +210,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         /**
          * Provides a default back-off algorithm value.
          *
-         * @return a default back-off algorithm value. Currnetly returns {@link #LINEAR}.
+         * @return a default back-off algorithm value. Currently returns {@link #LINEAR}.
          *
          * @see BackoffAlgorithm
          */

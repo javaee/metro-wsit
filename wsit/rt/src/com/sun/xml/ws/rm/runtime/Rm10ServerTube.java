@@ -213,7 +213,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
         inboundSequence.acknowledgeMessageId(requestAdapter.getMessageNumber());
         inboundSequence.close();
 
-        return requestAdapter.createAckResponse(inboundSequence, RmVersion.WSRM10.lastAction);
+        return requestAdapter.createAckResponse(inboundSequence, RmVersion.WSRM200502.lastAction);
     }
 
     @Override
@@ -235,7 +235,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
                 Identifier id = new Identifier(outboundSeqence.getId());
                 terminateSeqResponse.setIdentifier(id);
 
-                PacketAdapter responseAdapter = requestAdapter.createServerResponse(terminateSeqResponse, RmVersion.WSRM10.terminateSequenceAction);
+                PacketAdapter responseAdapter = requestAdapter.createServerResponse(terminateSeqResponse, RmVersion.WSRM200502.terminateSequenceAction);
                 responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence);
 
                 return responseAdapter;

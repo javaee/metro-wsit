@@ -49,12 +49,31 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
 
 /**
- * This is the class which will determine which RM version we are dealing with
- * WSRM 1.0 or WSRM 1.1
+ * This enumeration contains all currently supported WS-ReliableMessaging versions.
+ * The used reliable messaging version affects the WS-ReliableMessaging Policy assertions displayed
+ * int the web service's WSDL, XML namespace of RM protocol element being created
+ * as well as RM protocol message processing logic.
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
+ *
+ * @see #WSRM200502
+ * @see #WSRM200702
  */
 public enum RmVersion {
 
-    WSRM10(
+    /**
+     * <p>
+     * This value represents the outdated and obsolete WS-ReliableMessaging v1.0 protocol.
+     * </p>
+     * <p>
+     * You may want to choose this version for your WS endpoints to ensure maximum
+     * backward compatibility with clients running on older systems, such as
+     * Metro 1.0 or .NET 3.0
+     * </p>
+     *
+     * @see RmVersion
+     */
+    WSRM200502(
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
     "http://schemas.xmlsoap.org/ws/2005/02/rm/policy",
     com.sun.xml.ws.rm.v200502.AcceptType.class,
@@ -68,7 +87,19 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200502.SequenceElement.class,
     com.sun.xml.ws.rm.v200502.SequenceFaultElement.class,
     com.sun.xml.ws.rm.v200502.TerminateSequenceElement.class),
-    WSRM11(
+    /**
+     * <p>
+     * This value represents the version of WS-ReliableMessaging protocol standardized
+     * by OASIS organization. This is currently the most up-to-date version.
+     * </p>
+     * <p>
+     * You should primarily use this version for your WS endpoints. It is compatible with
+     * clients running on Metro 1.3 or .NET 3.5 and later.
+     * </p>
+     *
+     * @see RmVersion
+     */
+    WSRM200702(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
     "http://docs.oasis-open.org/ws-rx/wsrmp/200702",
     com.sun.xml.ws.rm.v200702.AcceptType.class,
@@ -93,8 +124,15 @@ public enum RmVersion {
     com.sun.xml.ws.rm.v200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rm.v200702.UsesSequenceSTR.class);
 
+    /**
+     * Provides a default reliable messaging version value.
+     *
+     * @return a default reliable messaging version value. Currently returns {@link #WSRM200702}.
+     *
+     * @see RmVersion
+     */
     static RmVersion getDefault() {
-        return RmVersion.WSRM11; // if changed, update also in ReliableMesaging annotation
+        return RmVersion.WSRM200702; // if changed, update also in ReliableMesaging annotation
     }
     //
     private static final Logger LOGGER = Logger.getLogger(RmVersion.class);

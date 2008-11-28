@@ -87,9 +87,9 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 
     @Override
     PacketAdapter processVersionSpecificProtocolRequest( PacketAdapter requestAdapter) throws AbstractRmSoapFault {
-        if (RmVersion.WSRM11.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
+        if (RmVersion.WSRM200702.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
             return handleCloseSequenceAction(requestAdapter);
-        } else if (RmVersion.WSRM11.makeConnectionAction.equals(requestAdapter.getWsaAction())) {
+        } else if (RmVersion.WSRM200702.makeConnectionAction.equals(requestAdapter.getWsaAction())) {
             return handleMakeConnectionAction(requestAdapter);
         } else {
             return super.processVersionSpecificProtocolRequest(requestAdapter);
@@ -225,7 +225,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
         CloseSequenceResponseElement closeSeqResponseElement = new CloseSequenceResponseElement();
         closeSeqResponseElement.setIdentifier(new Identifier(inboundSequence.getId()));
 
-        PacketAdapter responseAdapter = requestAdapter.createServerResponse(closeSeqResponseElement, RmVersion.WSRM11.closeSequenceResponseAction);
+        PacketAdapter responseAdapter = requestAdapter.createServerResponse(closeSeqResponseElement, RmVersion.WSRM200702.closeSequenceResponseAction);
         responseAdapter.appendSequenceAcknowledgementHeader(inboundSequence);
         return responseAdapter;
     }
@@ -250,14 +250,14 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 //                Identifier id = new Identifier(outboundSeqence.getId());
 //                terminateSeqResponse.setIdentifier(id);
 //
-//                responseAction = RmVersion.WSRM11.terminateSequenceAction;
+//                responseAction = RmVersion.WSRM200702.terminateSequenceAction;
 //                responseObject = terminateSeqResponse;
 //            } else {
                 TerminateSequenceResponseElement terminateSeqResponse = new TerminateSequenceResponseElement();
                 Identifier id = new Identifier(inboundSequence.getId());
                 terminateSeqResponse.setIdentifier(id);
 
-                responseAction = RmVersion.WSRM11.terminateSequenceResponseAction;
+                responseAction = RmVersion.WSRM200702.terminateSequenceResponseAction;
                 responseObject = terminateSeqResponse;
 //            }
 

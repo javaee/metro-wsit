@@ -87,9 +87,9 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     static AbstractRmServerTube getInstance(ServerTubelineAssemblyContext context) {
         Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
         switch (configuration.getRmVersion()) {
-            case WSRM10:
+            case WSRM200502:
                 return new Rm10ServerTube(configuration, context.getTubelineHead());
-            case WSRM11:
+            case WSRM200702:
                 return new Rm11ServerTube(configuration, context.getTubelineHead());
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));

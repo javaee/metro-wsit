@@ -103,13 +103,13 @@ public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
     private boolean isRmAssertionPresentAndMandatory(AssertionSet alternative) throws PolicyException {
         Collection<PolicyAssertion> assertions;
 
-        assertions = getAssertionsWithName(alternative, RmVersion.WSRM10.rmPolicyAssertionQName);
+        assertions = getAssertionsWithName(alternative, RmVersion.WSRM200502.rmPolicyAssertionQName);
         for (PolicyAssertion assertion : assertions) {
             if (!assertion.isOptional()) {
                 return true;
             }
         }
-        assertions = getAssertionsWithName(alternative, RmVersion.WSRM11.rmPolicyAssertionQName);
+        assertions = getAssertionsWithName(alternative, RmVersion.WSRM200702.rmPolicyAssertionQName);
         for (PolicyAssertion assertion : assertions) {
             if (!assertion.isOptional()) {
                 return true;

@@ -59,7 +59,7 @@ public class RMPolicyResolver {
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        rmVersion = RmVersion.WSRM10;
+        rmVersion = RmVersion.WSRM200502;
     }
     
     public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion) {
@@ -72,13 +72,13 @@ public class RMPolicyResolver {
         try {
             String rmMessagePolicy = "rm-msglevel-policy.xml";            
             if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM10.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmVersion.WSRM200502.namespaceUri.equals(rmVersion.namespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmVersion.WSRM200702.namespaceUri.equals(rmVersion.namespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sx.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmVersion.WSRM200702.namespaceUri.equals(rmVersion.namespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             

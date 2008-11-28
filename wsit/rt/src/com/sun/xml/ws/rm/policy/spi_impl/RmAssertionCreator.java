@@ -82,8 +82,8 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
     }    
     
     private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(Arrays.asList(
-        RmVersion.WSRM10.policyNamespaceUri,
-        RmVersion.WSRM11.policyNamespaceUri,
+        RmVersion.WSRM200502.policyNamespaceUri,
+        RmVersion.WSRM200702.policyNamespaceUri,
         ProprietaryNamespace.SUN_200603.toString(),
         ProprietaryNamespace.SUN_CLIENT_200603.toString(),
         ProprietaryNamespace.MICROSOFT_200502.toString(),

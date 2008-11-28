@@ -101,9 +101,9 @@ public abstract class PacketAdapter {
 
     public static PacketAdapter getInstance(@NotNull RmVersion rmVersion, @NotNull SOAPVersion soapVersion, @NotNull AddressingVersion addressingVersion, @NotNull Packet packet) {
         switch (rmVersion) {
-            case WSRM10:
+            case WSRM200502:
                 return new Rm10PacketAdapter(soapVersion, addressingVersion, packet);
-            case WSRM11:
+            case WSRM200702:
                 return new Rm11PacketAdapter(soapVersion, addressingVersion, packet);
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(rmVersion.namespaceUri));

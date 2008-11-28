@@ -83,9 +83,9 @@ abstract class ClientSession {
 
     static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
-            case WSRM10:
+            case WSRM200502:
                 return new Rm10ClientSession(configuration, communicator);
-            case WSRM11:
+            case WSRM200702:
                 return new Rm11ClientSession(configuration, communicator);
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));

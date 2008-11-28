@@ -90,7 +90,7 @@ final class Rm11ClientSession extends ClientSession {
 
 
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
-        requestAdapter.setRequestMessage(csElement, RmVersion.WSRM11.createSequenceAction);
+        requestAdapter.setRequestMessage(csElement, RmVersion.WSRM200702.createSequenceAction);
 
         if (strType != null) {
             UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
@@ -135,7 +135,7 @@ final class Rm11ClientSession extends ClientSession {
 
         requestAdapter.setRequestMessage(
                 new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
-                RmVersion.WSRM11.closeSequenceAction);
+                RmVersion.WSRM200702.closeSequenceAction);
         if (inboundSequenceId != null) {
             requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
         }
@@ -166,7 +166,7 @@ final class Rm11ClientSession extends ClientSession {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setRequestMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
-                RmVersion.WSRM11.terminateSequenceAction);
+                RmVersion.WSRM200702.terminateSequenceAction);
 
         PacketAdapter responseAdapter = null;
         try {
@@ -188,11 +188,11 @@ final class Rm11ClientSession extends ClientSession {
             }
 
             String responseAction = responseAdapter.getWsaAction();
-            if (RmVersion.WSRM11.terminateSequenceAction.equals(responseAction)) {
+            if (RmVersion.WSRM200702.terminateSequenceAction.equals(responseAction)) {
                 TerminateSequenceElement tsElement = responseAdapter.unmarshallMessage();
 
                 sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
-            } else if (RmVersion.WSRM11.terminateSequenceResponseAction.equals(responseAction)) {
+            } else if (RmVersion.WSRM200702.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseElement tsrElement = responseAdapter.unmarshallMessage();
                 
                 if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {

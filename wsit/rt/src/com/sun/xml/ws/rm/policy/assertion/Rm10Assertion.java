@@ -63,10 +63,10 @@ import com.sun.xml.ws.rm.RmVersion;
  */
 public final class Rm10Assertion extends SimpleAssertion implements RmAssertionTranslator {
 
-    public static final QName NAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "RMAssertion");
-    private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "InactivityTimeout");
-    private static final QName RETRANSMITTION_INTERVAL_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "BaseRetransmissionInterval");
-    private static final QName EXPONENTIAL_BACKOFF_QNAME = new QName(RmVersion.WSRM10.policyNamespaceUri, "ExponentialBackoff");
+    public static final QName NAME = new QName(RmVersion.WSRM200502.policyNamespaceUri, "RMAssertion");
+    private static final QName INACTIVITY_TIMEOUT_QNAME = new QName(RmVersion.WSRM200502.policyNamespaceUri, "InactivityTimeout");
+    private static final QName RETRANSMITTION_INTERVAL_QNAME = new QName(RmVersion.WSRM200502.policyNamespaceUri, "BaseRetransmissionInterval");
+    private static final QName EXPONENTIAL_BACKOFF_QNAME = new QName(RmVersion.WSRM200502.policyNamespaceUri, "ExponentialBackoff");
     private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
     private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
 
@@ -119,7 +119,7 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        builder.version(RmVersion.WSRM10)
+        builder.version(RmVersion.WSRM200502)
                 .sequenceInactivityTimeout(inactivityTimeout)
                 .messageRetransmissionInterval(retransmittionInterval);
 

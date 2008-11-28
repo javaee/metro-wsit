@@ -60,7 +60,7 @@ import java.util.List;
 class Rm11PacketAdapter extends PacketAdapter {
 
     public Rm11PacketAdapter(@NotNull SOAPVersion soapVersion, @NotNull AddressingVersion addressingVersion, @NotNull Packet packet) {
-        super(RmVersion.WSRM11, soapVersion, addressingVersion, packet);
+        super(RmVersion.WSRM200702, soapVersion, addressingVersion, packet);
     }
 
     @Override
