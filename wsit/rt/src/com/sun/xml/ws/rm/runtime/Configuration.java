@@ -92,9 +92,14 @@ public interface Configuration {
     public DeliveryAssurance getDeliveryAssurance();
 
     /**
-     * @see ReliableMessagingFeature#isOrderedDelivery()
+     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
      */
-    public boolean isOrderedDelivery();
+    public boolean isOrderedDeliveryEnabled();
+
+    /**
+     * @see ReliableMessagingFeature#isMakeConnectionEnabled()
+     */
+    public boolean isMakeConnectionEnabled();
 
     /**
      * @see ReliableMessagingFeature#getDestinationBufferQuota()

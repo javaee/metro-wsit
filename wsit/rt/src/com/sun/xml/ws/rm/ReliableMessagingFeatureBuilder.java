@@ -48,6 +48,7 @@ public final class ReliableMessagingFeatureBuilder {
     private long inactivityTimeout = DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
     private long destinationBufferQuota = DEFAULT_DESTINATION_BUFFER_QUOTA;
     private boolean orderedDelivery = false;
+    private boolean makeConnection = false;
     private DeliveryAssurance deliveryAssurance = DeliveryAssurance.getDefault();
     private SecurityBinding securityBinding = SecurityBinding.getDefault();
     // Client-specific RM config values
@@ -70,6 +71,7 @@ public final class ReliableMessagingFeatureBuilder {
                 this.inactivityTimeout,
                 this.destinationBufferQuota,
                 this.orderedDelivery,
+                this.makeConnection,
                 this.deliveryAssurance,
                 this.securityBinding,
                 this.messageRetransmissionInterval,
@@ -127,10 +129,18 @@ public final class ReliableMessagingFeatureBuilder {
     }
 
     /**
-     * @see ReliableMessagingFeature#isOrderedDelivery()
+     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
      */
-    public ReliableMessagingFeatureBuilder orderedDelivery(boolean orderedDelivery) {
-        this.orderedDelivery = orderedDelivery;
+    public ReliableMessagingFeatureBuilder enableOrderedDelivery() {
+        this.orderedDelivery = true;
+        return this;
+    }
+
+    /**
+     * @see ReliableMessagingFeature#isMakeConnectionEnabled()
+     */
+    public ReliableMessagingFeatureBuilder enableMakeConnection() {
+        this.makeConnection = true;
         return this;
     }
 

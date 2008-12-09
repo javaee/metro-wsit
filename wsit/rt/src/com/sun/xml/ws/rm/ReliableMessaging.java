@@ -59,7 +59,8 @@ public @interface ReliableMessaging {
     RmVersion version() default RmVersion.WSRM200702;
     long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
     long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
-    boolean orderedDelivery() default false;
+    boolean orderedDeliveryEnabled() default false;
+    boolean makeConnectionEnabled() default false;
     DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
     SecurityBinding securityBinding() default SecurityBinding.NONE;
 }

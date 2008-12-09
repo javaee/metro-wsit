@@ -90,8 +90,12 @@ class ConfigurationImpl implements Configuration {
         return feature.getDeliveryAssurance();
     }
 
-    public boolean isOrderedDelivery() {
-        return feature.isOrderedDelivery();
+    public boolean isOrderedDeliveryEnabled() {
+        return feature.isOrderedDeliveryEnabled();
+    }
+
+    public boolean isMakeConnectionEnabled() {
+        return feature.isMakeConnectionEnabled();
     }
 
     public long getDestinationBufferQuota() {

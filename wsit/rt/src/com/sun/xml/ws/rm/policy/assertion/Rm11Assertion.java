@@ -142,9 +142,12 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        if (isOrderedDelivery) {
+            builder = builder.enableOrderedDelivery();
+        }
+
         return builder.version(RmVersion.WSRM200702)
                 .deliveryAssurance(deliveryAssurance)
-                .orderedDelivery(isOrderedDelivery)
                 .securityBinding(securityBinding);
     }
 }

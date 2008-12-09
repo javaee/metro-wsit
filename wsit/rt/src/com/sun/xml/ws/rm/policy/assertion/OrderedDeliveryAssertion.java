@@ -70,6 +70,6 @@ public class OrderedDeliveryAssertion extends SimpleAssertion implements RmAsser
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.orderedDelivery(true);
+        return builder.enableOrderedDelivery();
     }
 }

@@ -155,7 +155,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                 }
                 requestAdapter.exposeSequenceDataToUser();
 
-                if (configuration.isOrderedDelivery() && !isMessageInOrder(requestAdapter)) {
+                if (configuration.isOrderedDeliveryEnabled() && !isMessageInOrder(requestAdapter)) {
                     boolean finerLoggable = LOGGER.isLoggable(Level.FINER);
 
                     if (FlowControledFibers.INSTANCE.getUsedBufferSize(inboundSequence.getId()) > configuration.getDestinationBufferQuota()) {
@@ -245,7 +245,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     responseAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequence.getId()));
                 }
 
-                if (configuration.isOrderedDelivery()) {
+                if (configuration.isOrderedDeliveryEnabled()) {
                     try {
                         if (LOGGER.isLoggable(Level.FINER)) {
                             LOGGER.finer(String.format("Request [ %d ] processed. Trying to resume next request", requestAdapter.getMessageNumber()));
