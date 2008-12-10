@@ -39,7 +39,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
@@ -64,7 +64,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException {
+    public void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RxRuntimeException {
         SequenceElement sequenceHeaderElement = new SequenceElement();
         sequenceHeaderElement.setNumber(messageNumber);
         sequenceHeaderElement.setId(sequenceId);
@@ -73,7 +73,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException {
+    public void appendAckRequestedHeader(@NotNull String sequenceId) throws RxRuntimeException {
         AckRequestedElement ackRequestedElement = new AckRequestedElement();
         ackRequestedElement.setId(sequenceId);
 
@@ -81,7 +81,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    public void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException {
+    public void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RxRuntimeException {
         SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
         Identifier identifier = new Identifier();
         identifier.setValue(sequence.getId());
@@ -111,7 +111,7 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    void initSequenceHeaderData() throws RmRuntimeException {
+    void initSequenceHeaderData() throws RxRuntimeException {
         SequenceElement sequenceElement = this.readHeaderAsUnderstood("Sequence");
         if (sequenceElement != null) {
             this.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
@@ -119,13 +119,13 @@ class Rm11PacketAdapter extends PacketAdapter {
     }
 
     @Override
-    String initAckRequestedHeaderData() throws RmRuntimeException {
+    String initAckRequestedHeaderData() throws RxRuntimeException {
         AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood("AckRequested");
         return (ackRequestedElement != null) ? ackRequestedElement.getId() : null;
     }
 
     @Override
-    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException {
+    public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RxRuntimeException {
         SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
 
         if (ackElement != null) {

@@ -36,14 +36,14 @@
 
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  *
  * @author m_potociar
  */
-public final class MessageNumberRolloverException extends RmRuntimeException {
+public final class MessageNumberRolloverException extends RxRuntimeException {
 
     private long messageNumber;
     private String sequenceId;

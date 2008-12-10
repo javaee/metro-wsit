@@ -39,14 +39,20 @@ import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * This factory class is responsible for instantiating RX tubes based on 
+ * the actual configuration of RX-related web services features.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
+ *
+ * @see ReliableMessagingFeature
+ * @see MakeConnectionSupportedFeature
  */
-public final class RmTubeFactory implements TubeFactory {
+public final class RxTubeFactory implements TubeFactory {
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
@@ -54,12 +60,18 @@ public final class RmTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-//        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-        if (context.getBinding().isFeatureEnabled(ReliableMessagingFeature.class)) {
-             return new RmClientTube(context);
-        } else {
-            return context.getTubelineHead();
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
+
+        Tube newTubelineHead = context.getTubelineHead();
+
+        if (configuration.isMakeConnectionSupportEnabled()) {
+            newTubelineHead = new McClientTube(configuration, newTubelineHead);
         }
+        if (configuration.isReliableMessagingEnabled()) {
+             newTubelineHead = new RmClientTube(configuration, newTubelineHead, context);
+        }
+
+        return newTubelineHead;
     }
 
     /**
@@ -69,12 +81,18 @@ public final class RmTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-//        if (isReliableMessagingEnabled(context.getPolicyMap(), context.getWsdlPort())) {
-        if (context.getEndpoint().getBinding().isFeatureEnabled(ReliableMessagingFeature.class)) {
-             return AbstractRmServerTube.getInstance(context);
-        } else {
-            return context.getTubelineHead();
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+
+        Tube newTubelineHead = context.getTubelineHead();
+
+        if (configuration.isReliableMessagingEnabled()) {
+             newTubelineHead = AbstractRmServerTube.getInstance(configuration, newTubelineHead);
         }
+        if (configuration.isMakeConnectionSupportEnabled()) {
+            newTubelineHead = new McServerTube(configuration, newTubelineHead);
+        }
+        
+        return newTubelineHead;
     }
 
 //    /**

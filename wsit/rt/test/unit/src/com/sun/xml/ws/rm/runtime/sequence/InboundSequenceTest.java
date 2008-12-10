@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.runtime.RxConfiguration;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.TestCase;

@@ -48,8 +48,18 @@ import com.sun.xml.ws.rm.RmVersion;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface Configuration {
+public interface RxConfiguration {
     
+    /**
+     * @see ReliableMessagingFeature
+     */
+    public boolean isReliableMessagingEnabled();
+
+    /**
+     * @see MakeConnectionSupportedFeature
+     */
+    public boolean isMakeConnectionSupportEnabled();
+
     /**
      * @see ReliableMessagingFeature#getVersion() 
      */
@@ -96,11 +106,6 @@ public interface Configuration {
      * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
      */
     public boolean isOrderedDeliveryEnabled();
-
-    /**
-     * @see MakeConnectionSupportedFeature
-     */
-    public boolean isMakeConnectionSupported();
 
     /**
      * @see ReliableMessagingFeature#getDestinationBufferQuota()

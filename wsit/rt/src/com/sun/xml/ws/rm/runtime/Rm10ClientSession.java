@@ -37,8 +37,8 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.TerminateSequenceException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
@@ -63,12 +63,12 @@ final class Rm10ClientSession extends ClientSession {
 
     private static final Logger LOGGER = Logger.getLogger(Rm10ClientSession.class);
 
-    Rm10ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+    Rm10ClientSession(RxConfiguration configuration, ProtocolCommunicator communicator) {
         super(configuration, communicator);
     }
 
     @Override
-    void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException {
+    void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(configuration.getAddressingVersion().anonymousEpr.toSpec());
 
@@ -89,11 +89,11 @@ final class Rm10ClientSession extends ClientSession {
 
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
         if (responseAdapter == null) {
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequence")));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CreateSequence")));
         }
         if (responseAdapter.isFault()) {
             // FIXME: pass fault value into the exception
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CreateSequence")));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CreateSequence")));
         }
 
         CreateSequenceResponseElement csrElement = responseAdapter.unmarshallMessage();
@@ -111,9 +111,9 @@ final class Rm10ClientSession extends ClientSession {
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
             if (accept == null || accept.getAcksTo() == null) {
-                throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, communicator.getDestination()));
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, communicator.getDestination()));
             } else if (!communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
-                throw new RmRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
             }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, (strType != null) ? strType.getId() : null, Sequence.NO_EXPIRATION);
@@ -121,7 +121,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    void closeOutboundSequence() throws RmException {
+    void closeOutboundSequence() throws RxException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setEmptyRequestMessage(RmVersion.WSRM200502.lastAction);
         if (inboundSequenceId != null) {
@@ -141,8 +141,8 @@ final class Rm10ClientSession extends ClientSession {
             if (responseAdapter.containsMessage()) {
                 processInboundMessageHeaders(responseAdapter, false);
                 if (responseAdapter.isFault()) {
-                    // FIXME: refactor the exception creation - we should not pass the SOAP fault directly into the exception
-                    throw new RmException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("Last message"), responseAdapter.message);
+                    // FIXME: refactor the exception creation - we should somehow pass the SOAP fault information into the exception
+                    throw new RxException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("Last message"));
                 }
             }
         } finally {
@@ -153,7 +153,7 @@ final class Rm10ClientSession extends ClientSession {
     }
 
     @Override
-    void terminateOutboundSequence() throws RmException {
+    void terminateOutboundSequence() throws RxException {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
         requestAdapter.setRequestMessage(new TerminateSequenceElement(outboundSequenceId), RmVersion.WSRM200502.terminateSequenceAction);
         if (inboundSequenceId != null) {
@@ -175,8 +175,8 @@ final class Rm10ClientSession extends ClientSession {
             processInboundMessageHeaders(responseAdapter, false);
 
             if (responseAdapter.isFault()) {
-                // FIXME: refactor the exception creation - we should not pass the SOAP fault directly into the exception
-                throw new TerminateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("TerminateSequence"), responseAdapter.message);
+                // FIXME: refactor the exception creation - we should somehow pass the SOAP fault information into the exception
+                throw new TerminateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("TerminateSequence"));
             }
 
             String responseAction = responseAdapter.getWsaAction();

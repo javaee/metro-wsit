@@ -41,7 +41,7 @@ import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RxException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
@@ -67,7 +67,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 
     private static final Logger LOGGER = Logger.getLogger(Rm11ServerTube.class);
 
-    Rm11ServerTube(Configuration configuration, Tube tubelineHead) {
+    Rm11ServerTube(RxConfiguration configuration, Tube tubelineHead) {
         super(configuration, tubelineHead);
     }
 
@@ -144,7 +144,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
             }
             try {
                 receivedSctId = Utilities.extractSecurityContextTokenId(strType);
-            } catch (RmException ex) {
+            } catch (RxException ex) {
                 throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),
@@ -289,7 +289,7 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 //        sequenceId = element.getIdentifier().getValue();
 //        OutboundSequence outboundSequence = RMDestination.getRMDestination().getOutboundSequence(sequenceId);
 //        if (outboundSequence == null) {
-//            throw LOGGER.logSevereException(new RmException(LocalizationMessages.WSRM_3025_INVALID_SEQUENCE_ID_IN_MAKECONNECTION_MESSAGE(sequenceId)));
+//            throw LOGGER.logSevereException(new RxException(LocalizationMessages.WSRM_3025_INVALID_SEQUENCE_ID_IN_MAKECONNECTION_MESSAGE(sequenceId)));
 //        }
 //
 //        //see if we can find a message in the sequence that needs to be resent.

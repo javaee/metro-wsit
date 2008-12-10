@@ -41,8 +41,8 @@ import com.sun.xml.ws.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
@@ -72,7 +72,7 @@ abstract class ClientSession {
     //
     String inboundSequenceId = null;
     String outboundSequenceId = null;
-    final Configuration configuration;
+    final RxConfiguration configuration;
     final SequenceManager sequenceManager;
     final ProtocolCommunicator communicator;
     //
@@ -81,7 +81,7 @@ abstract class ClientSession {
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
     private final PeriodicFiberResumeTask resendTask;
 
-    static ClientSession create(Configuration configuration, ProtocolCommunicator communicator) {
+    static ClientSession create(RxConfiguration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
                 return new Rm10ClientSession(configuration, communicator);
@@ -92,7 +92,7 @@ abstract class ClientSession {
         }
     }
 
-    ClientSession(Configuration configuration, ProtocolCommunicator communicator) {
+    ClientSession(RxConfiguration configuration, ProtocolCommunicator communicator) {
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
@@ -101,20 +101,20 @@ abstract class ClientSession {
         this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
     }
 
-    abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RmRuntimeException;
+    abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException;
 
-    abstract void closeOutboundSequence() throws RmException;
+    abstract void closeOutboundSequence() throws RxException;
 
-    abstract void terminateOutboundSequence() throws RmException;
+    abstract void terminateOutboundSequence() throws RxException;
 
-    final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RmRuntimeException {
+    final void processInboundMessageHeaders(PacketAdapter responseAdapter, boolean expectSequenceHeader) throws RxRuntimeException {
         if (expectSequenceHeader) {
             String sequenceId = responseAdapter.getSequenceId();
             if (sequenceId != null) {
                 Utilities.assertSequenceId(inboundSequenceId, sequenceId);
                 sequenceManager.getSequence(sequenceId).acknowledgeMessageId(responseAdapter.getMessageNumber());
             } else {
-                throw new RmRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1118_MANDATORY_HEADER_NOT_PRESENT("wsrm:Sequence"));
             }
         }
 
@@ -127,7 +127,7 @@ abstract class ClientSession {
         responseAdapter.processAcknowledgements(sequenceManager, outboundSequenceId);
     }
 
-    final void requestAcknowledgement() throws RmException {
+    final void requestAcknowledgement() throws RxException {
         PacketAdapter responseAdapter = null;
         try {
             PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
@@ -135,14 +135,14 @@ abstract class ClientSession {
 
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
             if (!responseAdapter.containsMessage()) {
-                throw new RmException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
+                throw new RxException(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
             }
 
             processInboundMessageHeaders(responseAdapter, false);
 
             if (responseAdapter.isFault()) {
-                // FIXME: refactor the exception creation - we should not pass the SOAP fault directly into the exception
-                throw new RmException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST(), responseAdapter.message);
+                // FIXME: refactor the exception creation - we should somehow pass the SOAP fault information into the exception
+                throw new RxException(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST());
             }
         } finally {
             if (responseAdapter != null) {
@@ -173,7 +173,7 @@ abstract class ClientSession {
         return requestAdapter.getPacket();
     }
 
-    final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RmRuntimeException {
+    final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RxRuntimeException {
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
         if (responseAdapter.containsMessage()) {
             processInboundMessageHeaders(responseAdapter, !responseToOneWayRequest && !responseAdapter.isProtocolMessage());
@@ -200,7 +200,7 @@ abstract class ClientSession {
             if (outboundSequenceId != null && sequenceManager.isValid(outboundSequenceId)) {
                 try {
                     closeOutboundSequence();
-                } catch (RmException ex) {
+                } catch (RxException ex) {
                     LOGGER.logException(ex, Level.WARNING);
                 } finally {
                     try {
@@ -213,7 +213,7 @@ abstract class ClientSession {
                 try {
                     waitUntilAllRequestsAckedOrTimeout();
                     terminateOutboundSequence();
-                } catch (RmException ex) {
+                } catch (RxException ex) {
                     LOGGER.logException(ex, Level.WARNING);
                 } finally {
                     try {
@@ -244,7 +244,7 @@ abstract class ClientSession {
      * Performs late initialization of sequences and timer task, provided those have not yet been initialized.
      * The actual initialization thus happens only once in the lifetime of each client RM session object.
      */
-    private void initializeIfNecessary(PacketAdapter request) throws RmRuntimeException {
+    private void initializeIfNecessary(PacketAdapter request) throws RxRuntimeException {
         initLock.lock();
         try {
             if (!isInitialized()) {
@@ -261,7 +261,7 @@ abstract class ClientSession {
                         LOGGER.warning(LocalizationMessages.WSRM_1106_RM_SESSION_INIT_ATTEMPT_FAILED(), ex);
                     } finally {
                         if (++numberOfInitiateSessionAttempts > MAX_INITIATE_SESSION_ATTEMPTS) {
-                            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1107_MAX_RM_SESSION_INIT_ATTEMPTS_REACHED()));
+                            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1107_MAX_RM_SESSION_INIT_ATTEMPTS_REACHED()));
                         }
                     }
                 }
@@ -293,14 +293,14 @@ abstract class ClientSession {
                         requestAcknowledgement();
                         lastAckRequestedTime.set(System.currentTimeMillis());
                     }
-                } catch (RmException ex) {
+                } catch (RxException ex) {
                     LOGGER.warning(LocalizationMessages.WSRM_1110_ACK_REQUEST_FAILED(), ex);
                 }
             }
         };
     }
 
-    private boolean isPendingAckRequest() throws RmRuntimeException {
+    private boolean isPendingAckRequest() throws RxRuntimeException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
     }

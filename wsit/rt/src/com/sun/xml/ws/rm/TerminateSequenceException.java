@@ -35,8 +35,6 @@
  */
 package com.sun.xml.ws.rm;
 
-import com.sun.xml.ws.api.message.Message;
-
 /**
  * Subclass of <code>RMException</code> thrown from errors resulting
  *  because the endpoint has encountered an unrecoverable condition or
@@ -45,7 +43,7 @@ import com.sun.xml.ws.api.message.Message;
  * @author Bhakti Mehta
  *
  */
-public class TerminateSequenceException extends RmException {
+public class TerminateSequenceException extends RxException {
 
     private String sequenceId;
 
@@ -56,10 +54,6 @@ public class TerminateSequenceException extends RmException {
     public TerminateSequenceException(String message, String id) {
         super(message);
         this.sequenceId = id;
-    }
-
-    public TerminateSequenceException(String info, Message faultMessage) {
-        super(info, faultMessage);
     }
 
     public TerminateSequenceException(String message, Throwable cause) {

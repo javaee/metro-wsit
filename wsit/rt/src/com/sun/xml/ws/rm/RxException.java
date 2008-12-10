@@ -1,4 +1,8 @@
 /*
+ * $Id: RxException.java,v 1.1 2008-12-10 17:54:33 m_potociar Exp $
+ */
+
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
@@ -33,50 +37,20 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.runtime;
-
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rm.ReliableMessagingFeature;
+package com.sun.xml.ws.rm;
 
 /**
- *
+ * Represents all exceptions that may possibly be recovered in the client code.
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public enum ConfigurationManager {
-    INSTANCE;
-
-    public Configuration createConfiguration(WSDLPort wsdlPort, WSBinding binding) {
-
-        return new ConfigurationImpl(
-                binding.getFeature(ReliableMessagingFeature.class),
-                binding.getFeature(MakeConnectionSupportedFeature.class),
-                binding.getSOAPVersion(),
-                binding.getAddressingVersion(),
-                checkForRequestResponseOperations(wsdlPort));
+public class RxException extends Exception {
+    
+    public RxException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-   /**
-     * Determine whether wsdl port contains any two-way operations.
-     * 
-     * @param port WSDL port to check
-     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
-     */
-    private static boolean checkForRequestResponseOperations(WSDLPort port) {
-        WSDLBoundPortType portType;
-        if (port == null || null == (portType = port.getBinding())) {
-            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
-            return false;
-        }
-
-        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
-            if (!boundOperation.getOperation().isOneWay()) {
-                return true;
-            }
-        }
-        return false;
+    public RxException(String message) {
+        super(message);
     }
 }

@@ -288,14 +288,14 @@ public enum RmVersion {
      *  
      * @return created JAXB unmarshaller
      * 
-     * @exception RmRuntimeException in case the creation of unmarshaller failed
+     * @exception RxRuntimeException in case the creation of unmarshaller failed
      */
-    public Unmarshaller createUnmarshaller(AddressingVersion av) throws RmRuntimeException {
+    public Unmarshaller createUnmarshaller(AddressingVersion av) throws RxRuntimeException {
         try {
             return jaxbContexts.get(av).createUnmarshaller();
         } catch (JAXBException ex) {
             LOGGER.severe("Unable to create JAXB unmarshaller", ex);
-            throw new RmRuntimeException("Unable to create JAXB unmarshaller", ex);
+            throw new RxRuntimeException("Unable to create JAXB unmarshaller", ex);
         }
     }
 

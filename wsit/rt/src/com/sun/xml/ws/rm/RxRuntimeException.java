@@ -34,23 +34,23 @@
  * holder.
  */
 
-/*
- * InvalidMessageNumberException.java
- *
- * @author Mike Grogan
- * Created on February 11, 2006, 9:45 AM
- *
- */
 package com.sun.xml.ws.rm;
 
-/**
- * Subclass of <code>RMException</code> thrown from errors resulting
- * from erroneous sequence identifiers.
- *
- */
-public class InvalidMessageNumberException extends RmException {
+import javax.xml.ws.WebServiceException;
 
-    public InvalidMessageNumberException(String message) {
-        super(message);
+/**
+ * Represents all generally unrecoverable exceptions that may occur during RX runtime
+ * processing
+ * 
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
+public class RxRuntimeException extends WebServiceException {
+
+    public RxRuntimeException(String message, Throwable cause) {
+        super(message, cause);
     }
+
+    public RxRuntimeException(String message) {
+        super(message);
+    }    
 }

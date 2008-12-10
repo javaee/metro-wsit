@@ -36,13 +36,13 @@
 
 package com.sun.xml.ws.rm.runtime.sequence.persistent;
 
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PersistenceException extends RmRuntimeException {
+public final class PersistenceException extends RxRuntimeException {
 
     public PersistenceException(String message) {
         super(message);

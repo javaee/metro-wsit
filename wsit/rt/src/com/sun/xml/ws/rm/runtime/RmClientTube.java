@@ -40,11 +40,12 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
@@ -73,23 +74,19 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         this.requestPacketCopy = null;
     }
 
-    RmClientTube(ClientTubelineAssemblyContext context) throws RmRuntimeException {
-        super(context.getTubelineHead());
+    RmClientTube(RxConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
+        super(tubelineHead); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {
             // TODO remove this condition and remove context.getScInitiator() method
             scInitiator = context.getScInitiator();
         }
-
-        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
         
         this.session = ClientSession.create(
                 configuration,
                 new ProtocolCommunicator(super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion()));
         this.wsdlPort = context.getWsdlPort();
-
         this.requestPacketCopy = null;
-
     }
 
     @Override
@@ -118,7 +115,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
             }
 //        } catch (RmSoapFaultException ex) {
 //            return doReturnWith(ex.getSoapFaultResponse());
-        } catch (RmRuntimeException ex) {
+        } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
@@ -144,7 +141,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 return super.processResponse(responsePacket);
             }
 
-        } catch (RmRuntimeException ex) {
+        } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             releaseResendResources();
             return doThrow(ex);

@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.RmVersion;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class ConfigurationImpl implements Configuration {
+class RxConfigurationImpl implements RxConfiguration {
 
     private final ReliableMessagingFeature rmFeature;
     private final boolean mcSupported;
@@ -57,16 +57,24 @@ class ConfigurationImpl implements Configuration {
     private final AddressingVersion addressingVersion;
     private final boolean requestResponseDetected;
 
-    ConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+    RxConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
         this.rmFeature = rmFeature;
-        this.mcSupported = (mcFeature != null) ? mcFeature.isEnabled() : false;
+        this.mcSupported = mcFeature != null && mcFeature.isEnabled();
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
     }
 
+    public boolean isReliableMessagingEnabled() {
+        return rmFeature != null && rmFeature.isEnabled();
+    }
+
+    public boolean isMakeConnectionSupportEnabled() {
+        return mcSupported;
+    }
+
     public RmVersion getRmVersion() {
-        return rmFeature.getVersion();
+        return (rmFeature == null) ? null : rmFeature.getVersion();
     }
 
     public SOAPVersion getSoapVersion() {
@@ -82,42 +90,38 @@ class ConfigurationImpl implements Configuration {
     }
 
     public long getSequenceInactivityTimeout() {
-        return rmFeature.getSequenceInactivityTimeout();
+        return (rmFeature == null) ? null : rmFeature.getSequenceInactivityTimeout();
     }
 
     public SecurityBinding getSecurityBinding() {
-        return rmFeature.getSecurityBinding();
+        return (rmFeature == null) ? null : rmFeature.getSecurityBinding();
     }
 
     public DeliveryAssurance getDeliveryAssurance() {
-        return rmFeature.getDeliveryAssurance();
+        return (rmFeature == null) ? null : rmFeature.getDeliveryAssurance();
     }
 
     public boolean isOrderedDeliveryEnabled() {
-        return rmFeature.isOrderedDeliveryEnabled();
-    }
-
-    public boolean isMakeConnectionSupported() {
-        return mcSupported;
+        return (rmFeature == null) ? null : rmFeature.isOrderedDeliveryEnabled();
     }
 
     public long getDestinationBufferQuota() {
-        return rmFeature.getDestinationBufferQuota();
+        return (rmFeature == null) ? null : rmFeature.getDestinationBufferQuota();
     }
 
     public long getMessageRetransmissionInterval() {
-        return rmFeature.getMessageRetransmissionInterval();
+        return (rmFeature == null) ? null : rmFeature.getMessageRetransmissionInterval();
     }
 
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
-        return rmFeature.getRetransmissionBackoffAlgorithm();
+        return (rmFeature == null) ? null : rmFeature.getRetransmissionBackoffAlgorithm();
     }
 
     public long getAcknowledgementRequestInterval() {
-        return rmFeature.getAcknowledgementRequestInterval();
+        return (rmFeature == null) ? null : rmFeature.getAcknowledgementRequestInterval();
     }
 
     public long getCloseSequenceOperationTimeout() {
-        return rmFeature.getCloseSequenceOperationTimeout();
+        return (rmFeature == null) ? null : rmFeature.getCloseSequenceOperationTimeout();
     }
 }

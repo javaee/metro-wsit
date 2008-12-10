@@ -33,32 +33,65 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
+
+package com.sun.xml.ws.rm.runtime;
+
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.commons.Logger;
 
 /**
- * Subclass of <code>RMException</code> thrown from errors resulting
- *  when a response to create sequence request cannot be satisfied
- * @author Bhakti Mehta
  *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class CreateSequenceException extends RmException {
+public class McServerTube extends AbstractFilterTubeImpl {
+    private static final Logger LOGGER = Logger.getLogger(Rm10ServerTube.class);
 
-    private String sequenceId;
+    private final RxConfiguration configuration;
 
-    public CreateSequenceException(String message) {
-        super(message);
+    McServerTube(McServerTube original, TubeCloner cloner) {
+        super(original, cloner);
+
+        this.configuration = original.configuration;
     }
 
-    public CreateSequenceException(String message, String id) {
-        super(message);
-        this.sequenceId = id;
+    McServerTube(RxConfiguration configuration, Tube tubelineHead) {
+        super(tubelineHead);
+
+        this.configuration = configuration;
     }
 
-    public CreateSequenceException(String message, com.sun.xml.ws.api.message.Message fault) {
-        super(message, fault);
+    @Override
+    public AbstractTubeImpl copy(TubeCloner cloner) {
+        LOGGER.entering();
+        try {
+            return new McServerTube(this, cloner);
+        } finally {
+            LOGGER.exiting();
+        }
     }
 
-    public String getSequenceId() {
-        return sequenceId;
+    @Override
+    public void preDestroy() {
+        super.preDestroy();
+    }
+
+    @Override
+    public NextAction processException(Throwable t) {
+        return super.processException(t);
+    }
+
+    @Override
+    public NextAction processRequest(Packet request) {
+        return super.processRequest(request);
+    }
+
+    @Override
+    public NextAction processResponse(Packet response) {
+        return super.processResponse(response);
     }
 }

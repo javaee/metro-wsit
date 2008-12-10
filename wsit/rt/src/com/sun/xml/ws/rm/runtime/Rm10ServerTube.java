@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RxException;
 import com.sun.xml.ws.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
@@ -64,7 +64,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
 
     private static final Logger LOGGER = Logger.getLogger(Rm10ServerTube.class);
 
-    Rm10ServerTube(Configuration configuration, Tube tubelineHead) {
+    Rm10ServerTube(RxConfiguration configuration, Tube tubelineHead) {
         super(configuration, tubelineHead);
     }
 
@@ -139,7 +139,7 @@ final class Rm10ServerTube extends AbstractRmServerTube {
             }
             try {
                 receivedSctId = Utilities.extractSecurityContextTokenId(strType);
-            } catch (RmException ex) {
+            } catch (RxException ex) {
                 throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
                         configuration,
                         requestAdapter.getPacket(),

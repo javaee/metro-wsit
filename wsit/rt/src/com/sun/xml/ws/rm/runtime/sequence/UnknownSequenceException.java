@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
@@ -49,7 +49,7 @@ import com.sun.xml.ws.rm.localization.LocalizationMessages;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class UnknownSequenceException extends RmRuntimeException {
+public final class UnknownSequenceException extends RxRuntimeException {
     private final String sequenceId;
     
     /**

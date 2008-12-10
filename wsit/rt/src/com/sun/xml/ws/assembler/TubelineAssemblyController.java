@@ -97,7 +97,7 @@ public class TubelineAssemblyController {
      * 
      * @param endpointUri URI of the endpoint for which the collection of tube factories should be returned
      *
-     * @return collection of WSIT/Metro client-side tube creators
+     * @return collection of WSIT/Metro server-side tube creators
      */
     Collection<TubeCreator> getTubeCreators(ServerTubelineAssemblyContext context) {
         URI endpointUri;

@@ -37,7 +37,7 @@ package com.sun.xml.ws.rm.runtime.testing;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.runtime.RxConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,7 +87,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
         return ID;
     }
 
-    List<PacketFilter> createFilters(Configuration configuration) {
+    List<PacketFilter> createFilters(RxConfiguration configuration) {
         List<PacketFilter> filters = new ArrayList<PacketFilter>(filterClasses.size());
         
         for (Class<? extends PacketFilter> filterClass : filterClasses) {

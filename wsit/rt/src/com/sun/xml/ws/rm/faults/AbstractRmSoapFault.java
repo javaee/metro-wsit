@@ -42,10 +42,10 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.runtime.RxConfiguration;
 import java.util.Locale;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -55,11 +55,11 @@ import javax.xml.soap.SOAPFault;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public abstract class AbstractRmSoapFault extends RmException {
+public abstract class AbstractRmSoapFault extends RxException {
 
     private final transient Packet soapFaultResponse;
 
-    public AbstractRmSoapFault(Configuration configuration, Packet request, QName subcode, String reason) {
+    public AbstractRmSoapFault(RxConfiguration configuration, Packet request, QName subcode, String reason) {
         super(reason);
         this.soapFaultResponse = createRmProcessingSoapFaultResponse(configuration, request, subcode, reason);
     }
@@ -80,9 +80,9 @@ public abstract class AbstractRmSoapFault extends RmException {
      * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
      * @param reason English language reason element
      * @return response packet filled with a generated SOAP fault
-     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
+     * @throws RxRuntimeException in case of any errors while creating the SOAP fault response packet
      */
-    protected static Packet createRmProcessingSoapFaultResponse(Configuration configuration, Packet request, QName subcode, String reason) throws RmRuntimeException {
+    protected static Packet createRmProcessingSoapFaultResponse(RxConfiguration configuration, Packet request, QName subcode, String reason) throws RxRuntimeException {
         try {
             SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
 
@@ -100,7 +100,7 @@ public abstract class AbstractRmSoapFault extends RmException {
                     soapFault.appendFaultSubcode(subcode);
                     break;
                 default:
-                    throw new RmRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
+                    throw new RxRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
             }
 
             Message soapFaultMessage = Messages.create(soapFault);
@@ -120,7 +120,7 @@ public abstract class AbstractRmSoapFault extends RmException {
                     configuration.getSoapVersion(),
                     getProperFaultActionForAddressingVersion(configuration));
         } catch (SOAPException ex) {
-            throw new RmRuntimeException("Error creating a SOAP fault", ex);
+            throw new RxRuntimeException("Error creating a SOAP fault", ex);
         }
     }
 
@@ -131,9 +131,9 @@ public abstract class AbstractRmSoapFault extends RmException {
      * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
      * @param reason English language reason element
      * @return response packet filled with a generated SOAP fault
-     * @throws RmRuntimeException in case of any errors while creating the SOAP fault response packet
+     * @throws RxRuntimeException in case of any errors while creating the SOAP fault response packet
      */
-    protected static Packet createCreateSequenceProcessingSoapFaultResponse(Configuration configuration, Packet request, QName subcode, String reason) throws RmRuntimeException {
+    protected static Packet createCreateSequenceProcessingSoapFaultResponse(RxConfiguration configuration, Packet request, QName subcode, String reason) throws RxRuntimeException {
         try {
             SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
 
@@ -153,7 +153,7 @@ public abstract class AbstractRmSoapFault extends RmException {
                     soapFault.appendFaultSubcode(subcode);
                     break;
                 default:
-                    throw new RmRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
+                    throw new RxRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
             }
 
             Message soapFaultMessage = Messages.create(soapFault);
@@ -163,7 +163,7 @@ public abstract class AbstractRmSoapFault extends RmException {
                     configuration.getSoapVersion(),
                     getProperFaultActionForAddressingVersion(configuration));
         } catch (SOAPException ex) {
-            throw new RmRuntimeException("Error creating a SOAP fault", ex);
+            throw new RxRuntimeException("Error creating a SOAP fault", ex);
         }
     }
 
@@ -172,7 +172,7 @@ public abstract class AbstractRmSoapFault extends RmException {
      * 
      * @return
      */
-    private static String getProperFaultActionForAddressingVersion(Configuration configuration) {
+    private static String getProperFaultActionForAddressingVersion(RxConfiguration configuration) {
         return (configuration.getAddressingVersion() == AddressingVersion.MEMBER) ? configuration.getAddressingVersion().getDefaultFaultAction() : configuration.getRmVersion().wsrmFaultAction;
     }
 }

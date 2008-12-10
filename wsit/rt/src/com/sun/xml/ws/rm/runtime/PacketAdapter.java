@@ -45,8 +45,8 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmException;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.runtime.sequence.Sequence;
@@ -94,7 +94,7 @@ public abstract class PacketAdapter {
      * 
      * @return new empty {@link PacketAdapter} instance
      */
-    public static PacketAdapter getInstance(@NotNull Configuration configuration, @NotNull Packet packet) {
+    public static PacketAdapter getInstance(@NotNull RxConfiguration configuration, @NotNull Packet packet) {
         return getInstance(configuration.getRmVersion(), configuration.getSoapVersion(), configuration.getAddressingVersion(), packet);
     }
 
@@ -184,9 +184,9 @@ public abstract class PacketAdapter {
      * @param inboundSequence
      * @param wsaAction
      * @return
-     * @throws RmRuntimeException
+     * @throws RxRuntimeException
      */
-    public final PacketAdapter createAckResponse(Sequence sequence, String wsaAction) throws RmRuntimeException {
+    public final PacketAdapter createAckResponse(Sequence sequence, String wsaAction) throws RxRuntimeException {
         PacketAdapter responseAdapter = this.createEmptyServerResponse(wsaAction);
         responseAdapter.appendSequenceAcknowledgementHeader(sequence);
         return responseAdapter;
@@ -216,17 +216,17 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RmRuntimeException;
+    public abstract void appendSequenceHeader(@NotNull String sequenceId, long messageNumber) throws RxRuntimeException;
 
     /**
      * TODO javadoc
      */
-    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RmRuntimeException;
+    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RxRuntimeException;
 
     /**
      * TODO javadoc
      */
-    public abstract void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RmRuntimeException;
+    public abstract void appendSequenceAcknowledgementHeader(@NotNull Sequence sequence) throws RxRuntimeException;
 
     /**
      * TODO javadoc
@@ -405,7 +405,7 @@ public abstract class PacketAdapter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    public final <T> T readHeaderAsUnderstood(String name) throws RmRuntimeException {
+    public final <T> T readHeaderAsUnderstood(String name) throws RxRuntimeException {
         checkMessageReadyState();
 
         Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
@@ -417,7 +417,7 @@ public abstract class PacketAdapter {
             @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(jaxbUnmarshaller);
             return result;
         } catch (JAXBException ex) {
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
         }
     }
 
@@ -426,16 +426,16 @@ public abstract class PacketAdapter {
      *  
      * @return message content unmarshalled JAXB bean
      * 
-     * @throws com.sun.xml.ws.rm.RmException in case the message unmarshalling failed
+     * @throws com.sun.xml.ws.rm.RxException in case the message unmarshalling failed
      */
-    public final <T> T unmarshallMessage() throws RmRuntimeException {
+    public final <T> T unmarshallMessage() throws RxRuntimeException {
         checkMessageReadyState();
 
         try {
             @SuppressWarnings("unchecked") T result = (T) message.readPayloadAsJAXB(jaxbUnmarshaller);
             return result;
         } catch (JAXBException e) {
-            throw LOGGER.logSevereException(new RmRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1123_ERROR_UNMARSHALLING_MESSAGE(), e));
         } finally {
             messageConsumed = true; // TODO remove this workaround
         }
@@ -444,7 +444,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public final String getSequenceId() throws RmRuntimeException {
+    public final String getSequenceId() throws RxRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
@@ -455,7 +455,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public final long getMessageNumber() throws RmRuntimeException {
+    public final long getMessageNumber() throws RxRuntimeException {
         if (!isSequenceDataInit) {
             initSequenceHeaderData();
             isSequenceDataInit = true;
@@ -466,7 +466,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    abstract void initSequenceHeaderData() throws RmRuntimeException;
+    abstract void initSequenceHeaderData() throws RxRuntimeException;
 
     /**
      * TODO javadoc
@@ -479,12 +479,12 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    abstract String initAckRequestedHeaderData() throws RmRuntimeException;
+    abstract String initAckRequestedHeaderData() throws RxRuntimeException;
 
     /**
      * TODO javadoc
      */
-    public final String getAckRequestedHeaderSequenceId() throws RmRuntimeException {
+    public final String getAckRequestedHeaderSequenceId() throws RxRuntimeException {
         if (!isAckRequestedHeaderDataInit) {
             ackRequestedHeaderSequenceId = initAckRequestedHeaderData();
             isAckRequestedHeaderDataInit = true;
@@ -496,7 +496,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RmRuntimeException;
+    public abstract void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RxRuntimeException;
 
     /**
      * TODO javadoc

@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rm.RmException;
+import com.sun.xml.ws.rm.RxException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 //
 import com.sun.xml.ws.runtime.util.Session;
@@ -77,12 +77,12 @@ final class Utilities {
         }
     }
 
-    static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RmException {
+    static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RxException {
         Reference strReference = WSTrustElementFactory.newInstance().createSecurityTokenReference(
                 new ObjectFactory().createSecurityTokenReference(strType)).getReference();
         if (!(strReference instanceof DirectReference)) {
             throw LOGGER.logSevereException(
-                    new RmException(LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
+                    new RxException(LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
         }
         return ((DirectReference) strReference).getURIAttr().toString();
     }

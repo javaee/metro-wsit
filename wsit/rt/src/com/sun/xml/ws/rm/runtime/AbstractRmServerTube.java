@@ -42,10 +42,9 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rm.faults.SequenceTerminatedFault;
 import com.sun.xml.ws.rm.faults.UnknownSequenceFault;
@@ -79,18 +78,17 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
      */
     private static final String RM_ACK_PROPERTY_KEY = "RM_ACK";
     //
-    final Configuration configuration;
+    final RxConfiguration configuration;
     final SequenceManager sequenceManager;
     //
     private PacketAdapter requestAdapter;
 
-    static AbstractRmServerTube getInstance(ServerTubelineAssemblyContext context) {
-        Configuration configuration = ConfigurationManager.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+    static AbstractRmServerTube getInstance(RxConfiguration configuration, Tube tubelineHead) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
-                return new Rm10ServerTube(configuration, context.getTubelineHead());
+                return new Rm10ServerTube(configuration, tubelineHead);
             case WSRM200702:
-                return new Rm11ServerTube(configuration, context.getTubelineHead());
+                return new Rm11ServerTube(configuration, tubelineHead);
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
@@ -105,7 +103,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         this.requestAdapter = null;
     }
 
-    AbstractRmServerTube(Configuration configuration, Tube tubelineHead) {
+    AbstractRmServerTube(RxConfiguration configuration, Tube tubelineHead) {
         super(tubelineHead);
 
         this.configuration = configuration;
@@ -113,10 +111,10 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         // TODO don't take the first config alternative automatically...
 
         if (this.configuration.getAddressingVersion() == null) {
-            throw new RmRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
+            throw new RxRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
         }
 //        if (this.configuration.getAddressingVersion() != AddressingVersion.W3C) {
-//            throw new RmRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
+//            throw new RxRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
 //        }
 
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager();
@@ -134,14 +132,14 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
                     PacketAdapter protocolResponseAdapter = processProtocolRequest(requestAdapter);
                     return doReturnWith(protocolResponseAdapter.getPacket());
                 } else {
-                    return doThrow(new RmRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
+                    return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(requestAdapter.getWsaAction())));
                 }
             } else {
                 Sequence inboundSequence = getSequenceOrSoapFault(requestAdapter.getPacket(), requestAdapter.getSequenceId());
 
                 if (!requestAdapter.isSecurityContextTokenIdValid(inboundSequence.getBoundSecurityTokenReferenceId())) {
                     // TODO L10N + maybe throw SOAP fault exception?
-                    throw new RmRuntimeException("Security context token on the message does not match the token bound to the sequence");
+                    throw new RxRuntimeException("Security context token on the message does not match the token bound to the sequence");
                 }
 
                 processNonSequenceRmHeaders(requestAdapter);
@@ -190,7 +188,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
             }
         } catch (AbstractRmSoapFault ex) {
             return doReturnWith(ex.getSoapFaultResponse());
-        } catch (RmRuntimeException ex) {
+        } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
@@ -285,7 +283,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private PacketAdapter createResponseForDuplicate(Sequence inboundSequence, PacketAdapter requestAdapter) throws RmRuntimeException, AssertionError, UnknownSequenceException, UnsupportedOperationException {
+    private PacketAdapter createResponseForDuplicate(Sequence inboundSequence, PacketAdapter requestAdapter) throws RxRuntimeException, AssertionError, UnknownSequenceException, UnsupportedOperationException {
         Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequence.getId());
         Object storedMessage = (outboundSequence != null) ? outboundSequence.retrieveMessage(requestAdapter.getMessageNumber()) : null;
 

@@ -36,14 +36,14 @@
 
 package com.sun.xml.ws.rm.runtime.sequence;
 
-import com.sun.xml.ws.rm.RmRuntimeException;
+import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class IllegalMessageIdentifierException extends RmRuntimeException {
+public final class IllegalMessageIdentifierException extends RxRuntimeException {
     private final long messageId;
     
     public IllegalMessageIdentifierException(long messageIdentifier) {

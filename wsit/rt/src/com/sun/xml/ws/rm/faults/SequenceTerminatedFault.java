@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rm.faults;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.runtime.Configuration;
+import com.sun.xml.ws.rm.runtime.RxConfiguration;
 
 /**
  *
@@ -45,7 +45,7 @@ import com.sun.xml.ws.rm.runtime.Configuration;
  */
 public class SequenceTerminatedFault extends AbstractRmSoapFault {
 
-    public SequenceTerminatedFault(Configuration configuration, Packet request, String reason) {
+    public SequenceTerminatedFault(RxConfiguration configuration, Packet request, String reason) {
         super(createRmProcessingSoapFaultResponse(
                 configuration, 
                 request, 

@@ -1,8 +1,4 @@
 /*
- * $Id: RmException.java,v 1.6 2008-06-02 14:53:32 m_potociar Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
@@ -37,40 +33,66 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm;
 
-import com.sun.xml.ws.api.message.Message;
+package com.sun.xml.ws.rm.runtime;
+
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rm.RxRuntimeException;
 
 /**
- * Represents all exceptions that may possibly be recovered in the client code.
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class RmException extends Exception {
-    private final transient Message fault;
-    
-    public RmException(String message, Throwable cause) {
-        super(message, cause);
-        fault = null;
+public class McClientTube extends AbstractFilterTubeImpl {
+    private static final Logger LOGGER = Logger.getLogger(Rm10ServerTube.class);
+
+    private final RxConfiguration configuration;
+
+    McClientTube(McClientTube original, TubeCloner cloner) {
+        super(original, cloner);
+
+        this.configuration = original.configuration;
     }
 
-    public RmException(String message) {
-        super(message);
-        fault = null;
-    }
-    
-    public RmException(String message, Message fault) {
-        super(message);
-        this.fault = fault;
+    McClientTube(RxConfiguration configuration, Tube tubelineHead) throws RxRuntimeException {
+        super(tubelineHead);
+
+        this.configuration = configuration;
     }
 
-    /**
-     * Returns a Message containign a Fault defined by WS-RM.
-     *
-     * @return The Fault message or null if there is no mapped Fault message
-     */
-    // FIXME avoid storing transient Message instances in the exceptions
-    public Message getFault() {
-        return fault;
-    }    
+    @Override
+    public AbstractTubeImpl copy(TubeCloner cloner) {
+        LOGGER.entering();
+        try {
+            return new McClientTube(this, cloner);
+        } finally {
+            LOGGER.exiting();
+        }
+    }
+
+    @Override
+    public void preDestroy() {
+        super.preDestroy();
+    }
+
+    @Override
+    public NextAction processException(Throwable t) {
+        return super.processException(t);
+    }
+
+    @Override
+    public NextAction processRequest(Packet request) {
+        return super.processRequest(request);
+    }
+
+    @Override
+    public NextAction processResponse(Packet response) {
+        return super.processResponse(response);
+    }
 }
