@@ -224,7 +224,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final long sequenceInactivityTimeout;
     private final long destinationBufferQuota;
     private final boolean orderedDelivery;
-    private boolean makeConnection;
     private final DeliveryAssurance deliveryAssurance;
     private final SecurityBinding securityBinding;
     // Client-specific RM config values
@@ -233,13 +232,15 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
 
+    /**
+     * This constructor is here to satisfy JAX-WS specification requirements
+     */
     public ReliableMessagingFeature() {
-        // this constructor is here just to satisfy JAX-WS specification requirements
         this(true);
     }
 
     /**
-     * This constructor is here just to satisfy JAX-WS specification requirements
+     * This constructor is here to satisfy JAX-WS specification requirements
      */
     public ReliableMessagingFeature(boolean enabled) {
         this(
@@ -248,7 +249,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, // this.inactivityTimeout
                 DEFAULT_DESTINATION_BUFFER_QUOTA, // this.bufferQuota
                 false, // this.orderedDelivery
-                false, // this.makeConnection
                 DeliveryAssurance.getDefault(), // this.deliveryAssurance
                 SecurityBinding.getDefault(), // this.securityBinding
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
@@ -274,7 +274,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long inactivityTimeout,
             long bufferQuota,
             boolean orderedDelivery,
-            boolean makeConnection,
             DeliveryAssurance deliveryAssurance,
             SecurityBinding securityBinding) {
 
@@ -284,7 +283,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 inactivityTimeout, // this.inactivityTimeout
                 bufferQuota, // this.bufferQuota
                 orderedDelivery, // this.orderedDelivery
-                makeConnection, // this.makeConnection
                 deliveryAssurance, // this.deliveryAssurance
                 securityBinding, // this.securityBinding
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
@@ -300,7 +298,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long inactivityTimeout,
             long bufferQuota,
             boolean orderedDelivery,
-            boolean makeConnection,
             DeliveryAssurance deliveryAssurance,
             SecurityBinding securityBinding,
             long messageRetransmissionInterval,
@@ -313,7 +310,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.sequenceInactivityTimeout = inactivityTimeout;
         this.destinationBufferQuota = bufferQuota;
         this.orderedDelivery = orderedDelivery;
-        this.makeConnection = makeConnection;
         this.deliveryAssurance = deliveryAssurance;
         this.securityBinding = securityBinding;
         this.messageRetransmissionInterval = messageRetransmissionInterval;
@@ -406,10 +402,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      */
     public boolean isOrderedDeliveryEnabled() {
         return orderedDelivery;
-    }
-
-    public boolean isMakeConnectionEnabled() {
-        return makeConnection;
     }
 
     /**

@@ -56,15 +56,15 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class AllowDuplicatesAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = ProprietaryNamespace.SUN_200603.getQName("AllowDuplicates");
+    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("AllowDuplicates");
     
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
             return new AllowDuplicatesAssertion(data, assertionParameters);
         }
     };
     
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
     

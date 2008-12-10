@@ -38,14 +38,44 @@ package com.sun.xml.ws.rm.policy.assertion;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
- *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * <wsmc:MCSupported ...>...</wsmc:MCSupported>
  */
-public interface RmAssertionInstantiator {
-    public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException;
+/**
+ * <p>
+ * The MakeConnection policy assertion indicates that the MakeConnection protocol
+ * (operation and the use of the MakeConnection URI template in EndpointReferences)
+ * is required for messages sent from this endpoint.
+ * </p>
+ * <p>
+ * This assertion has Endpoint Policy Subject
+ * </p>
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
+ */
+public class MakeConnectionSupportedAssertion extends SimpleAssertion {
+    public static final QName NAME = AssertionNamespace.WSMC_200702.getQName("MCSupported");
+
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            return new MakeConnectionSupportedAssertion(data, assertionParameters);
+        }
+    };
+
+    public static AssertionInstantiator getInstantiator() {
+        return instantiator;
+    }
+
+    public MakeConnectionSupportedAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
+    }
+
+    public MakeConnectionSupportedAssertion() {
+        super(AssertionData.createAssertionData(NAME), null);
+    }
 }

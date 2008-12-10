@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 
 /**
@@ -52,6 +53,7 @@ public enum ConfigurationManager {
 
         return new ConfigurationImpl(
                 binding.getFeature(ReliableMessagingFeature.class),
+                binding.getFeature(MakeConnectionSupportedFeature.class),
                 binding.getSOAPVersion(),
                 binding.getAddressingVersion(),
                 checkForRequestResponseOperations(wsdlPort));

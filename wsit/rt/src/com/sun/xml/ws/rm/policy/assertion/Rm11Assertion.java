@@ -74,18 +74,19 @@ import com.sun.xml.ws.rm.ReliableMessagingFeature.SecurityBinding;
 public final class Rm11Assertion extends ComplexAssertion implements RmAssertionTranslator {
     // TODO: add new assertions for acknowledgement interval and backoff algorithm
 
-    public static final QName NAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "RMAssertion");
     private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
-    private static final QName SEQUENCE_STR_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "SequenceSTR");
-    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "SequenceTransportSecurity");
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    //
+    public static final QName NAME = AssertionNamespace.WSRMP_200702.getQName("RMAssertion");
+    private static final QName SEQUENCE_STR_QNAME = AssertionNamespace.WSRMP_200702.getQName("SequenceSTR");
+    private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = AssertionNamespace.WSRMP_200702.getQName("SequenceTransportSecurity");
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
             return new Rm11Assertion(data, assertionParameters, nestedAlternative);
         }
     };
 
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
     private final SecurityBinding securityBinding;

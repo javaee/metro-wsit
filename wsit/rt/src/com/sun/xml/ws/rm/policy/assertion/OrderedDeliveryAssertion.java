@@ -53,15 +53,15 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OrderedDeliveryAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = ProprietaryNamespace.SUN_200603.getQName("Ordered");
+    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("Ordered");
     
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
             return new OrderedDeliveryAssertion(data, assertionParameters);
         }
     };
     
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
 

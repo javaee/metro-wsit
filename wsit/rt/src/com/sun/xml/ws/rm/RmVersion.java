@@ -39,6 +39,7 @@ import com.sun.xml.bind.api.JAXBRIContext;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rm.policy.assertion.AssertionNamespace;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -75,7 +76,7 @@ public enum RmVersion {
      */
     WSRM200502(
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
-    "http://schemas.xmlsoap.org/ws/2005/02/rm/policy",
+    AssertionNamespace.WSRMP_200502.toString(),
     com.sun.xml.ws.rm.v200502.AcceptType.class,
     com.sun.xml.ws.rm.v200502.AckRequestedElement.class,
     com.sun.xml.ws.rm.v200502.CreateSequenceElement.class,
@@ -101,7 +102,7 @@ public enum RmVersion {
      */
     WSRM200702(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
-    "http://docs.oasis-open.org/ws-rx/wsrmp/200702",
+    AssertionNamespace.WSRMP_200702.toString(),
     com.sun.xml.ws.rm.v200702.AcceptType.class,
     com.sun.xml.ws.rm.v200702.AckRequestedElement.class,
     com.sun.xml.ws.rm.v200702.Address.class,
@@ -156,16 +157,6 @@ public enum RmVersion {
     public final String terminateSequenceAction;
     public final String terminateSequenceResponseAction;
     /**
-     * QName constants
-     */
-    public final QName ackRequestedQName;
-    public final QName inactivityTimeoutAssertionQName;
-    public final QName rmPolicyAssertionQName;
-    public final QName sequenceAcknowledgementQName;
-    public final QName sequenceQName;
-    public final QName sequenceSTRAssertionQName;
-    public final QName sequenceTransportSecurityAssertionQName;
-    /**
      * Fault codes
      */
     public final QName sequenceTerminatedFaultCode;
@@ -196,14 +187,6 @@ public enum RmVersion {
         this.wsrmFaultAction = namespaceUri + "/fault";
         this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
         this.terminateSequenceResponseAction = namespaceUri + "/TerminateSequenceResponse";
-
-        this.ackRequestedQName = new QName(namespaceUri, "AckRequested");
-        this.inactivityTimeoutAssertionQName = new QName(policyNamespaceUri, "InactivityTimeout");
-        this.rmPolicyAssertionQName = new QName(policyNamespaceUri, "RMAssertion");
-        this.sequenceAcknowledgementQName = new QName(namespaceUri, "SequenceAcknowledgement");
-        this.sequenceQName = new QName(namespaceUri, "Sequence");
-        this.sequenceSTRAssertionQName = new QName(policyNamespaceUri, "SequenceSTR");
-        this.sequenceTransportSecurityAssertionQName = new QName(policyNamespaceUri, "SequenceTransportSecurity");
 
         this.sequenceTerminatedFaultCode = new QName(namespaceUri, "SequenceTerminated");
         this.unknownSequenceFaultCode = new QName(namespaceUri, "UnknownSequence");

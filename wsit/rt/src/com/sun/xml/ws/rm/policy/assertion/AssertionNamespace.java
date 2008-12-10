@@ -33,33 +33,53 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.rm.policy.assertion;
 
-package com.sun.xml.ws.rm;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
-import static com.sun.xml.ws.rm.ReliableMessagingFeature.*;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
+ * Class contains constants for policy namespaces used by this RM implementation.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
-public @interface ReliableMessaging {
-    /**
-     * Specifies if this feature is enabled or disabled.
-     */
-    boolean enabled() default true;
+public enum AssertionNamespace {
 
-    RmVersion version() default RmVersion.WSRM200702;
-    long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
-    long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
-    boolean orderedDeliveryEnabled() default false;
-    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
-    SecurityBinding securityBinding() default SecurityBinding.NONE;
+    WSRMP_200502("http://schemas.xmlsoap.org/ws/2005/02/rm/policy", "wsrmp10"),
+    WSRMP_200702("http://docs.oasis-open.org/ws-rx/wsrmp/200702", "wsrmp"),
+    WSMC_200702("http://docs.oasis-open.org/ws-rx/wsmc/200702", "wsmc"),
+    MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy", "net30rmp"),
+    MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702", "net35rmp"),
+    SUN_200603("http://sun.com/2006/03/rm", "sunrmp"),
+    SUN_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp");
+    
+    public static List<String> namespacesList() {
+        List<String> retVal = new ArrayList<String>(AssertionNamespace.values().length);
+        for (AssertionNamespace pns : AssertionNamespace.values()) {
+            retVal.add(pns.toString());
+        }
+        return retVal;
+    }
+
+    private final String namespace;
+    private final String prefix;
+
+    private AssertionNamespace(String namespace, String prefix) {
+        this.namespace = namespace;
+        this.prefix = prefix;
+    }
+
+    public String prefix() {
+        return prefix;
+    }
+
+    @Override
+    public String toString() {
+        return namespace;
+    }
+
+    public QName getQName(String name) {
+        return new QName(namespace, name);
+    }
 }

@@ -36,8 +36,8 @@
 package com.sun.xml.ws.rm.policy.spi_impl;
 
 import com.sun.xml.ws.policy.spi.PrefixMapper;
-import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.policy.assertion.AssertionNamespace;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,17 +46,17 @@ import java.util.Map;
  * @author Fabian Ritzmann
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmPrefixMapper implements PrefixMapper {
+public class RxPrefixMapper implements PrefixMapper {
 
-    private static final Map<String, String> prefixMap = new HashMap<String, String>();
+    private static final Map<String, String> prefixMap;
+
 
     static {
-        prefixMap.put(RmVersion.WSRM200502.policyNamespaceUri, "wsrmp10");
-        prefixMap.put(RmVersion.WSRM200702.policyNamespaceUri, "wsrmp");
-        prefixMap.put(ProprietaryNamespace.MICROSOFT_200502.toString(), "net30rmp");
-        prefixMap.put(ProprietaryNamespace.MICROSOFT_200702.toString(), "net35rmp");
-        prefixMap.put(ProprietaryNamespace.SUN_200603.toString(), "sunrmp");
-        prefixMap.put(ProprietaryNamespace.SUN_CLIENT_200603.toString(), "sunrmcp");
+        HashMap<String, String> tempMap = new HashMap<String, String>();
+        for (AssertionNamespace ns : AssertionNamespace.values()) {
+            tempMap.put(ns.toString(), ns.prefix());
+        }
+        prefixMap = Collections.unmodifiableMap(tempMap);
     }
         
     public Map<String, String> getPrefixMap() {

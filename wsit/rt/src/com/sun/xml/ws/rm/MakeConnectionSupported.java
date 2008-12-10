@@ -33,44 +33,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rm.policy.assertion;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.xml.namespace.QName;
+package com.sun.xml.ws.rm;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 
 /**
- * Class contains constants for policy namespaces used by this RM implementation.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum ProprietaryNamespace {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = MakeConnectionSupportedFeature.ID, bean = MakeConnectionSupportedFeature.class)
+public @interface MakeConnectionSupported {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
 
-    MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy"),
-    MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702"),
-    SUN_200603("http://sun.com/2006/03/rm"),
-    SUN_CLIENT_200603("http://sun.com/2006/03/rm/client");
-
-    public static Collection<String> getAll() {
-        Collection<String> retVal = new ArrayList<String>(ProprietaryNamespace.values().length);
-        for (ProprietaryNamespace pns : ProprietaryNamespace.values()) {
-            retVal.add(pns.toString());
-        }
-        return retVal;
-    }
-
-    private final String namespace;
-
-    private ProprietaryNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    @Override
-    public String toString() {
-        return namespace;
-    }
-
-    public QName getQName(String name) {
-        return new QName(namespace, name);
-    }
 }

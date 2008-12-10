@@ -34,32 +34,18 @@
  * holder.
  */
 
-package com.sun.xml.ws.rm;
+package com.sun.xml.ws.rm.policy.assertion;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
-import static com.sun.xml.ws.rm.ReliableMessagingFeature.*;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.spi.AssertionCreationException;
+import java.util.Collection;
 
 /**
  *
- * @author Marek Potociar <marek.potociar at sun.com>
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
-public @interface ReliableMessaging {
-    /**
-     * Specifies if this feature is enabled or disabled.
-     */
-    boolean enabled() default true;
-
-    RmVersion version() default RmVersion.WSRM200702;
-    long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
-    long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
-    boolean orderedDeliveryEnabled() default false;
-    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
-    SecurityBinding securityBinding() default SecurityBinding.NONE;
+public interface AssertionInstantiator {
+    public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException;
 }

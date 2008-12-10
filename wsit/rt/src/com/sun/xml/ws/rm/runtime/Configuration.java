@@ -37,6 +37,7 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
@@ -55,14 +56,14 @@ public interface Configuration {
     public RmVersion getRmVersion();
 
     /**
-     * Provides information about the SOAP protocol version used on the RM-enabled endpoint.
+     * Provides information about the SOAP protocol version used on the endpoint.
      * 
      * @return the SOAP protocol version used on the RM-enabled endpoint
      */
     public SOAPVersion getSoapVersion();
 
     /**
-     * Provides information about the WS-Addressing protocol version used on the RM-enabled endpoint.
+     * Provides information about the WS-Addressing protocol version used on the endpoint.
      * 
      * @return the WS-Addressing protocol version used on the RM-enabled endpoint
      */
@@ -97,9 +98,9 @@ public interface Configuration {
     public boolean isOrderedDeliveryEnabled();
 
     /**
-     * @see ReliableMessagingFeature#isMakeConnectionEnabled()
+     * @see MakeConnectionSupportedFeature
      */
-    public boolean isMakeConnectionEnabled();
+    public boolean isMakeConnectionSupported();
 
     /**
      * @see ReliableMessagingFeature#getDestinationBufferQuota()

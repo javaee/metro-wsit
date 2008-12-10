@@ -44,7 +44,6 @@ import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
-import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
 
@@ -65,19 +64,19 @@ import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
 public class DeliveryAssuranceAssertion extends ComplexAssertion {
 
     private static final Logger LOGGER = Logger.getLogger(DeliveryAssuranceAssertion.class);
-    private static final QName EXACTLY_ONCE_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "ExactlyOnce");
-    private static final QName AT_LEAST_ONCE_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "AtLeastOnce");
-    private static final QName AT_MOST_ONCE_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "AtMostOnce");
-    private static final QName IN_ORDER_QNAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "InOrder");
-    public static final QName NAME = new QName(RmVersion.WSRM200702.policyNamespaceUri, "DeliveryAssurance");
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static final QName EXACTLY_ONCE_QNAME = AssertionNamespace.WSRMP_200702.getQName("ExactlyOnce");
+    private static final QName AT_LEAST_ONCE_QNAME = AssertionNamespace.WSRMP_200702.getQName("AtLeastOnce");
+    private static final QName AT_MOST_ONCE_QNAME = AssertionNamespace.WSRMP_200702.getQName("AtMostOnce");
+    private static final QName IN_ORDER_QNAME = AssertionNamespace.WSRMP_200702.getQName("InOrder");
+    public static final QName NAME = AssertionNamespace.WSRMP_200702.getQName("DeliveryAssurance");
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
             return new DeliveryAssuranceAssertion(data, assertionParameters, nestedAlternative);
         }
     };
 
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
     private final DeliveryAssurance deliveryAssurance;

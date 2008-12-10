@@ -40,7 +40,6 @@ import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
-import com.sun.xml.ws.rm.RmVersion;
 
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rm.policy.assertion.AckRequestIntervalClientAssertion;
@@ -49,50 +48,48 @@ import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
-import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
+import com.sun.xml.ws.rm.policy.assertion.AssertionNamespace;
 
+import com.sun.xml.ws.rm.policy.assertion.MakeConnectionSupportedAssertion;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class RmAssertionValidator implements PolicyAssertionValidator {
+public class RxAssertionValidator implements PolicyAssertionValidator {
 
-    private static final ArrayList<QName> serverSideSupportedAssertions = new ArrayList<QName>(5);
-    private static final ArrayList<QName> clientSideSupportedAssertions = new ArrayList<QName>(8);
+    private static final ArrayList<QName> SERVER_SIDE_ASSERTIONS = new ArrayList<QName>(5);
+    private static final ArrayList<QName> CLIENT_SIDE_ASSERTIONS = new ArrayList<QName>(8);
 
-    private static final ArrayList<String> supportedDomains = new ArrayList<String>();
+    private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(AssertionNamespace.namespacesList());
 
     static {
-        serverSideSupportedAssertions.add(Rm10Assertion.NAME);
-        serverSideSupportedAssertions.add(Rm11Assertion.NAME);
-//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM200702.policyNamespaceUri, "SequenceSTR"));
-//        serverSideSupportedAssertions.add(new QName(RMVersion.WSRM200702.policyNamespaceUri, "SequenceTransportSecurity"));
-        serverSideSupportedAssertions.add(OrderedDeliveryAssertion.NAME);
-        serverSideSupportedAssertions.add(AllowDuplicatesAssertion.NAME);
-        serverSideSupportedAssertions.add(RmFlowControlAssertion.NAME);
-        serverSideSupportedAssertions.add(InactivityTimeoutAssertion.NAME);        
+        SERVER_SIDE_ASSERTIONS.add(Rm10Assertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(Rm11Assertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(MakeConnectionSupportedAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(OrderedDeliveryAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(AllowDuplicatesAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(RmFlowControlAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(InactivityTimeoutAssertion.NAME);
 
-        clientSideSupportedAssertions.add(AckRequestIntervalClientAssertion.NAME);
-        clientSideSupportedAssertions.add(ResendIntervalClientAssertion.NAME);
-        clientSideSupportedAssertions.add(CloseTimeoutClientAssertion.NAME);
-        clientSideSupportedAssertions.addAll(serverSideSupportedAssertions);
-
-        supportedDomains.add(RmVersion.WSRM200502.policyNamespaceUri);
-        supportedDomains.add(RmVersion.WSRM200702.policyNamespaceUri);
-        supportedDomains.addAll(ProprietaryNamespace.getAll());
+        CLIENT_SIDE_ASSERTIONS.add(AckRequestIntervalClientAssertion.NAME);
+        CLIENT_SIDE_ASSERTIONS.add(ResendIntervalClientAssertion.NAME);
+        CLIENT_SIDE_ASSERTIONS.add(CloseTimeoutClientAssertion.NAME);
+        CLIENT_SIDE_ASSERTIONS.addAll(SERVER_SIDE_ASSERTIONS);
     }
 
-    public RmAssertionValidator() {
+    public RxAssertionValidator() {
     }
 
     public Fitness validateClientSide(PolicyAssertion assertion) {
-        return clientSideSupportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+        return CLIENT_SIDE_ASSERTIONS.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
 
     public Fitness validateServerSide(PolicyAssertion assertion) {
         QName assertionName = assertion.getName();
-        if (serverSideSupportedAssertions.contains(assertionName)) {
+        if (SERVER_SIDE_ASSERTIONS.contains(assertionName)) {
             return Fitness.SUPPORTED;
-        } else if (clientSideSupportedAssertions.contains(assertionName)) {
+        } else if (CLIENT_SIDE_ASSERTIONS.contains(assertionName)) {
             return Fitness.UNSUPPORTED;
         } else {
             return Fitness.UNKNOWN;
@@ -100,6 +97,6 @@ public class RmAssertionValidator implements PolicyAssertionValidator {
     }
 
     public String[] declareSupportedDomains() {
-        return supportedDomains.toArray(new String[supportedDomains.size()]);
+        return SUPPORTED_DOMAINS.toArray(new String[SUPPORTED_DOMAINS.size()]);
     }
 }

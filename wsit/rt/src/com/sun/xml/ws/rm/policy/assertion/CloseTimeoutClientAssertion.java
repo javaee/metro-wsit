@@ -53,16 +53,16 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class CloseTimeoutClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = ProprietaryNamespace.SUN_CLIENT_200603.getQName("CloseTimeout");
+    public static final QName NAME = AssertionNamespace.SUN_CLIENT_200603.getQName("CloseTimeout");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
             return new CloseTimeoutClientAssertion(data, assertionParameters);
         }
     };
     
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
 

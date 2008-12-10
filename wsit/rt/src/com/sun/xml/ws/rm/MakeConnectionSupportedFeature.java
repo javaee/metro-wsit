@@ -33,33 +33,38 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
-import static com.sun.xml.ws.rm.ReliableMessagingFeature.*;
+import com.sun.xml.ws.api.FeatureConstructor;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
-public @interface ReliableMessaging {
-    /**
-     * Specifies if this feature is enabled or disabled.
-     */
-    boolean enabled() default true;
+public class MakeConnectionSupportedFeature extends WebServiceFeature {
 
-    RmVersion version() default RmVersion.WSRM200702;
-    long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
-    long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
-    boolean orderedDeliveryEnabled() default false;
-    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
-    SecurityBinding securityBinding() default SecurityBinding.NONE;
+    public static final String ID = "com.sun.xml.ws.rm.MakeConnectionSupportedFeature";
+
+    /**
+     * This constructor is here to satisfy JAX-WS specification requirements
+     */
+    public MakeConnectionSupportedFeature() {
+        this(true);
+    }
+
+    /**
+     * This constructor is here to satisfy JAX-WS specification requirements
+     */
+    @FeatureConstructor({
+        "enabled"
+    })
+    public MakeConnectionSupportedFeature(boolean enabled) {
+        super.enabled = enabled;
+    }
+
+    @Override
+    public String getID() {
+        return ID;
+    }
 }

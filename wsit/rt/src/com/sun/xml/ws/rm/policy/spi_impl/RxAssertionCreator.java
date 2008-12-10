@@ -40,8 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
-import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.policy.assertion.AssertionNamespace;
 import com.sun.xml.ws.rm.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.DeliveryAssuranceAssertion;
@@ -52,8 +51,8 @@ import com.sun.xml.ws.rm.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rm.policy.assertion.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rm.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rm.policy.assertion.ResendIntervalClientAssertion;
-import com.sun.xml.ws.rm.policy.assertion.RmAssertionInstantiator;
-import java.util.Arrays;
+import com.sun.xml.ws.rm.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rm.policy.assertion.MakeConnectionSupportedAssertion;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,14 +64,15 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class RmAssertionCreator implements PolicyAssertionCreator {
+public final class RxAssertionCreator implements PolicyAssertionCreator {
 
-    private static final Map<QName, RmAssertionInstantiator> instantiationMap = new HashMap<QName, RmAssertionInstantiator>();
+    private static final Map<QName, AssertionInstantiator> instantiationMap = new HashMap<QName, AssertionInstantiator>();
     static {
         instantiationMap.put(RmFlowControlAssertion.NAME, RmFlowControlAssertion.getInstantiator());
         instantiationMap.put(Rm10Assertion.NAME, Rm10Assertion.getInstantiator());
         instantiationMap.put(DeliveryAssuranceAssertion.NAME, DeliveryAssuranceAssertion.getInstantiator());
         instantiationMap.put(Rm11Assertion.NAME, Rm11Assertion.getInstantiator());
+        instantiationMap.put(MakeConnectionSupportedAssertion.NAME, MakeConnectionSupportedAssertion.getInstantiator());
         instantiationMap.put(AckRequestIntervalClientAssertion.NAME, AckRequestIntervalClientAssertion.getInstantiator());
         instantiationMap.put(AllowDuplicatesAssertion.NAME, AllowDuplicatesAssertion.getInstantiator());
         instantiationMap.put(CloseTimeoutClientAssertion.NAME, CloseTimeoutClientAssertion.getInstantiator());
@@ -81,20 +81,14 @@ public final class RmAssertionCreator implements PolicyAssertionCreator {
         instantiationMap.put(InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.getInstantiator());
     }    
     
-    private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(Arrays.asList(
-        RmVersion.WSRM200502.policyNamespaceUri,
-        RmVersion.WSRM200702.policyNamespaceUri,
-        ProprietaryNamespace.SUN_200603.toString(),
-        ProprietaryNamespace.SUN_CLIENT_200603.toString(),
-        ProprietaryNamespace.MICROSOFT_200502.toString(),
-        ProprietaryNamespace.MICROSOFT_200702.toString()));
+    private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(AssertionNamespace.namespacesList());
 
     public String[] getSupportedDomainNamespaceURIs() {
         return SUPPORTED_DOMAINS.toArray(new String[SUPPORTED_DOMAINS.size()]);
     }
 
     public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
-        RmAssertionInstantiator instantiator = instantiationMap.get(data.getName());
+        AssertionInstantiator instantiator = instantiationMap.get(data.getName());
         if (instantiator != null) {
             return instantiator.newInstance(data, assertionParameters, nestedAlternative);
         } else {

@@ -46,8 +46,11 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
+import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rm.policy.assertion.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
+import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rm.policy.assertion.RmAssertionTranslator;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -56,9 +59,9 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
+public class RxModelConfigurationProvider implements ModelConfiguratorProvider {
     // TODO implement PolicyMapUpdateProvider as well
-    private static final Logger LOGGER = Logger.getLogger(RmModelConfigurationProvider.class);
+    private static final Logger LOGGER = Logger.getLogger(RxModelConfigurationProvider.class);
 
     /**
      * process WS-RM policy assertions and if found and is not optional then RM is enabled on the
@@ -76,15 +79,18 @@ public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
                 Policy policy = policyMap.getEndpointEffectivePolicy(PolicyMap.createWsdlEndpointScopeKey(service.getName(), port.getName()));
                 if (policy != null) {
                     for (AssertionSet alternative : policy) {
-                        if (isRmAssertionPresentAndMandatory(alternative)) { // TODO: RM assertion is present and not optional
-                            ReliableMessagingFeatureBuilder featureBuilder = new ReliableMessagingFeatureBuilder();
+                        if (isPresentAndMandatory(alternative, Rm10Assertion.NAME) || isPresentAndMandatory(alternative, Rm11Assertion.NAME)) {
+                            ReliableMessagingFeatureBuilder rmFeatureBuilder = new ReliableMessagingFeatureBuilder();
                             for (PolicyAssertion assertion : alternative) {
                                 if (assertion instanceof RmAssertionTranslator) {
-                                    RmAssertionTranslator.class.cast(assertion).update(featureBuilder);
+                                    rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
                                 }
                             } // next assertion
-                            port.addFeature(featureBuilder.build());
+                            port.addFeature(rmFeatureBuilder.build());
                         } // end-if RM assertion is present and not optional
+                        if (isPresentAndMandatory(alternative, MakeConnectionSupportedAssertion.NAME)) {
+                            port.addFeature(new MakeConnectionSupportedFeature());
+                        } // end-if MC assertion is present and not optional
                     } // next alternative
                 } // end-if policy not null
             } // end foreach port
@@ -100,16 +106,10 @@ public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
         return assertions;
     }
 
-    private boolean isRmAssertionPresentAndMandatory(AssertionSet alternative) throws PolicyException {
+    private boolean isPresentAndMandatory(AssertionSet alternative, QName assertionName) throws PolicyException {
         Collection<PolicyAssertion> assertions;
 
-        assertions = getAssertionsWithName(alternative, RmVersion.WSRM200502.rmPolicyAssertionQName);
-        for (PolicyAssertion assertion : assertions) {
-            if (!assertion.isOptional()) {
-                return true;
-            }
-        }
-        assertions = getAssertionsWithName(alternative, RmVersion.WSRM200702.rmPolicyAssertionQName);
+        assertions = getAssertionsWithName(alternative, assertionName);
         for (PolicyAssertion assertion : assertions) {
             if (!assertion.isOptional()) {
                 return true;
@@ -118,5 +118,4 @@ public class RmModelConfigurationProvider implements ModelConfiguratorProvider {
 
         return false;
     }
-
 }

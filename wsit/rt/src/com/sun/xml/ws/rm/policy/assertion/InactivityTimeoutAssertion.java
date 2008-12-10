@@ -54,16 +54,16 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class InactivityTimeoutAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = ProprietaryNamespace.MICROSOFT_200702.getQName("InactivityTimeout");
+    public static final QName NAME = AssertionNamespace.MICROSOFT_200702.getQName("InactivityTimeout");
     private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
 
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
             return new InactivityTimeoutAssertion(data, assertionParameters);
         }
     };
     
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
 

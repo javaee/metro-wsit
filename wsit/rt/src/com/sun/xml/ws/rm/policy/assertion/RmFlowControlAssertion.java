@@ -58,20 +58,20 @@ import javax.xml.namespace.QName;
  */
 public class RmFlowControlAssertion extends ComplexAssertion implements RmAssertionTranslator {
 
-    public static final QName NAME = ProprietaryNamespace.MICROSOFT_200502.getQName("RmFlowControl");
+    public static final QName NAME = AssertionNamespace.MICROSOFT_200502.getQName("RmFlowControl");
     //    
     private static final Logger LOGGER = Logger.getLogger(RmFlowControlAssertion.class);
-    private static final QName BUFFER_SIZE_ASSERTION_QNAME = ProprietaryNamespace.MICROSOFT_200502.getQName("MaxReceiveBufferSize");
+    private static final QName BUFFER_SIZE_ASSERTION_QNAME = AssertionNamespace.MICROSOFT_200502.getQName("MaxReceiveBufferSize");
     private static final long DEFAULT_DESTINATION_BUFFER_QUOTA = 32;
     //
-    private static RmAssertionInstantiator instantiator = new RmAssertionInstantiator() {
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
 
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) throws AssertionCreationException {
             return new RmFlowControlAssertion(data, assertionParameters, nestedAlternative);
         }
     };
 
-    public static RmAssertionInstantiator getInstantiator() {
+    public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
     private final long maxBufferSize;
