@@ -71,6 +71,8 @@ public class RxMapUpdateProvider implements PolicyMapUpdateProvider {
 
             updateMakeConnectionSettings(wsBinding, model, policyMap, policyMapMutator);
 
+            // TODO : update map with RM policy based on RM feature
+
         } finally {
             LOGGER.exiting();
         }
