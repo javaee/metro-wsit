@@ -89,7 +89,6 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             // FIXME endpoint URI for provider case
-//            final URI endpointUri = (context.getWsdlPort() != null) ?  context.getWsdlPort().getAddress().getURI() : null;
             Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
             for (TubeCreator tubeCreator : tubeCreators) {
                 tubeCreator.updateContext(context);
