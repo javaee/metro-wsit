@@ -198,14 +198,22 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          *
          * @see BackoffAlgorithm
          */
-        LINEAR,
+        LINEAR() {
+            public long nextResendTime(int resendAttemptNumber, long baseRate) {
+                return System.currentTimeMillis() + baseRate;
+            }
+        },
         /**
          * This algorithm ensures that a message retransmission rate is multiplicatively
          * decreased with each resend of the particular message.
          *
          * @see BackoffAlgorithm
          */
-        EXPONENTIAL;
+        EXPONENTIAL() {
+            public long nextResendTime(int resendAttemptNumber, long baseRate) {
+                return System.currentTimeMillis() + resendAttemptNumber * baseRate;
+            }
+        };
 
         /**
          * Provides a default back-off algorithm value.
@@ -217,6 +225,16 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         public static BackoffAlgorithm getDefault() {
             return BackoffAlgorithm.LINEAR; // if changed, update also in ReliableMesaging annotation
         }
+
+        /**
+         * Calculates the next possible scheduled resume time based on the resend attempt number.
+         *
+         * @param resendAttemptNumber number of the resend attempt for a message
+         * @param baseRate base resend interval
+         *
+         * @return next scheduled resume time
+         */
+        public abstract long nextResendTime(int resendAttemptNumber, long baseRate);
     }
 
     // General RM config values

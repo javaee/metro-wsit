@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 final class ScheduledTaskManager {
 
     private static final long DELAY = 2000;
-    private static final long PERIOD = 2000;
+    private static final long PERIOD = 100;
     private final ScheduledExecutorService scheduler;
     private final Queue<ScheduledFuture<?>> scheduledTaskHandles;
 
@@ -88,14 +88,23 @@ final class ScheduledTaskManager {
 
     /**
      * Adds a new task for scheduled execution.
-     * 
-     * @param task new task to be executed regularly
+     *
+     * @param task new task to be executed regularly at a defined rate
      */
-    ScheduledFuture<?> startTask(Runnable task) {
-        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, DELAY, PERIOD, TimeUnit.MILLISECONDS);
+    ScheduledFuture<?> startTask(Runnable task, long delay, long period) {
+        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
             // TODO: handle error condition
         }
         return taskHandle;
+    }
+
+    /**
+     * Adds a new task for scheduled execution.
+     *
+     * @param task new task to be executed regularly at a predefined rate
+     */
+    ScheduledFuture<?> startTask(Runnable task) {
+        return startTask(task, DELAY, PERIOD);
     }
 }

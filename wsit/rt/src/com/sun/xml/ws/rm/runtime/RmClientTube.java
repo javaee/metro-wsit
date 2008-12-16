@@ -63,7 +63,9 @@ final class RmClientTube extends AbstractFilterTubeImpl {
     private static final Logger LOGGER = Logger.getLogger(RmClientTube.class);
     private final ClientSession session;
     private final WSDLPort wsdlPort;
+    // resend resources
     private Packet requestPacketCopy;
+    private int resendCounter;
 
     RmClientTube(RmClientTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -72,6 +74,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         this.wsdlPort = original.wsdlPort;
 
         this.requestPacketCopy = null;
+        this.resendCounter = 0;
     }
 
     RmClientTube(RxConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
@@ -86,7 +89,9 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 configuration,
                 new ProtocolCommunicator(super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion()));
         this.wsdlPort = context.getWsdlPort();
+
         this.requestPacketCopy = null;
+        this.resendCounter = 0;
     }
 
     @Override
@@ -104,13 +109,13 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             if (isResendAttempt()) {
-                session.registerForResend(Fiber.current(), requestPacket);
+                session.registerForResend(Fiber.current(), requestPacket, resendCounter);
                 return doSuspend(next);
             } else { // this is a first-time processing
                 // we do not modify original packet in case we wanted to reuse it later                
                 
                 requestPacket = session.processOutgoingPacket(requestPacket);
-                prepareForResend(requestPacket);
+                initResendResources(requestPacket);
                 return super.processRequest(requestPacket);
             }
 //        } catch (RmSoapFaultException ex) {
@@ -137,13 +142,13 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
                 return doResend();
             } else {
-                releaseResendResources();
+                resetResendResources();
                 return super.processResponse(responsePacket);
             }
 
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
-            releaseResendResources();
+            resetResendResources();
             return doThrow(ex);
         } finally {
             LOGGER.exiting();
@@ -158,7 +163,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 // eat exception and forward processing to this.processRequest() (INVOKE_AND_FORGET) for request message resend
                 return doResend();
             } else {
-                releaseResendResources();
+                resetResendResources();
                 return super.processException(throwable);
             }
         } finally {
@@ -192,6 +197,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
     }
 
     private NextAction doResend() {
+        resendCounter++;
         return super.doInvokeAndForget(this, requestPacketCopy.copy(true));
     }
 
@@ -199,12 +205,13 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         return requestPacketCopy != null;
     }
 
-    private void prepareForResend(Packet requestPacket) {
+    private void initResendResources(Packet requestPacket) {
         requestPacketCopy = requestPacket.copy(true);
     }
     
-    private void releaseResendResources() {
+    private void resetResendResources() {
         requestPacketCopy = null;
+        resendCounter = 0;
     }
 
     private boolean responseNotAvailableYet(Packet responsePacket) {

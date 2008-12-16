@@ -79,7 +79,7 @@ abstract class ClientSession {
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
-    private final PeriodicFiberResumeTask resendTask;
+    private final ScheduledFiberResumeTask resendTask;
 
     static ClientSession create(RxConfiguration configuration, ProtocolCommunicator communicator) {
         switch (configuration.getRmVersion()) {
@@ -98,7 +98,7 @@ abstract class ClientSession {
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
-        this.resendTask = new PeriodicFiberResumeTask(configuration.getMessageRetransmissionInterval());
+        this.resendTask = new ScheduledFiberResumeTask();
     }
 
     abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException;
@@ -186,10 +186,15 @@ abstract class ClientSession {
      * Registers given fiber for a resend (resume)
      * 
      * @param fiber a fiber to be resumed after resend interval has passed
+     * @param packet packet to be passed into the resumed fiber
+     * @param resendAttemptNumber number of the resend attempt for a given packet
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
-    final boolean registerForResend(Fiber fiber, Packet packet) {
-        return resendTask.registerForResume(fiber, packet);
+    final boolean registerForResend(Fiber fiber, Packet packet, int resendAttemptNumber) {
+        return resendTask.registerForResume(
+                fiber,
+                packet,
+                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendAttemptNumber, configuration.getMessageRetransmissionInterval()));
     }
 
     /**
@@ -211,7 +216,7 @@ abstract class ClientSession {
                 }
 
                 try {
-                    waitUntilAllRequestsAckedOrTimeout();
+                    waitUntilAllRequestsAckedOrCloseOperationTimeout();
                     terminateOutboundSequence();
                 } catch (RxException ex) {
                     LOGGER.logException(ex, Level.WARNING);
@@ -266,7 +271,8 @@ abstract class ClientSession {
                     }
                 }
 
-                scheduledTaskManager.startTasks(resendTask, createAckRequesterTask());
+                scheduledTaskManager.startTask(resendTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
+                scheduledTaskManager.startTask(createAckRequesterTask(), configuration.getAcknowledgementRequestInterval(), configuration.getAcknowledgementRequestInterval());
             }
         } finally {
             initLock.unlock();
@@ -305,7 +311,7 @@ abstract class ClientSession {
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
     }
 
-    private void waitUntilAllRequestsAckedOrTimeout() {
+    private void waitUntilAllRequestsAckedOrCloseOperationTimeout() {
         final CountDownLatch doneSignal = new CountDownLatch(1);
         ScheduledFuture<?> taskHandle = scheduledTaskManager.startTask(new Runnable() {
 
