@@ -45,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 import org.xml.sax.SAXException;
 
 import com.sun.xml.ws.api.ResourceLoader;
+import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -265,8 +266,8 @@ public final class PolicyConfigParser {
             model = WSDLModel.WSDLParser.parse(
                     parser,
                     new PolicyConfigResolver(),
-                    isClient,
-                    new WSDLParserExtension[]{new PolicyWSDLParserExtension(true, mutators)});
+                    isClient,Container.NONE,PolicyResolverFactory.DEFAULT_POLICY_RESOLVER,
+                    new WSDLParserExtension[]{});
 
             return model;
         } catch (XMLStreamException ex) {
