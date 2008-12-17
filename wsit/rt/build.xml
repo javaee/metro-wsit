@@ -235,6 +235,15 @@
                         <include name="*.*"/>
                     </fileset>
                 </copy>
+                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider.diff"
+                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider"
+                       ignorewhitespace="true"/>
+                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PolicyAssertionValidator.diff"
+                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+                       ignorewhitespace="true"/>
+                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PrefixMapper.diff"
+                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PrefixMapper"
+                       ignorewhitespace="true"/>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
                     <fileset dir="../etc/META-INF">
