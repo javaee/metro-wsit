@@ -44,7 +44,6 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelCreator;
 import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
@@ -101,9 +100,8 @@ public class PolicyConnectionManagementSettingsHolder
     static ConnectionManagementSettings createSettingsInstance(final @NotNull WSDLPort port) {
         try {
             WSDLModel model = port.getBinding().getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                PolicyMap policyMap = mapWrapper.getPolicyMap();
+            PolicyMap policyMap = model.getPolicyMap();
+            if (policyMap != null) {
                 PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(com.sun.xml.ws.transport.tcp.util.TCPConstants.SERVICE_CHANNEL_WS_NAME,
                         com.sun.xml.ws.transport.tcp.util.TCPConstants.SERVICE_CHANNEL_WS_PORT_NAME);
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);

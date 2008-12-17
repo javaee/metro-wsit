@@ -37,12 +37,9 @@
 package com.sun.xml.ws.encoding.policy;
 
 import com.sun.xml.ws.api.fastinfoset.FastInfosetFeature;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 import junit.framework.TestCase;
@@ -64,8 +61,6 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureFastInfosetAssertionPresentAndEnabled() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetEnabled.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
         assertNotNull(service);
         
@@ -87,8 +82,6 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureFastInfosetAssertionPresentAndDisabled() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetDisabled.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
         assertNotNull(service);
         
@@ -110,8 +103,6 @@ public class FastInfosetModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureFastInfosetAssertionNotPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderFastInfosetPolicyNotPresent.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         WSDLService service = model.getService(new QName("http://example.org","DictionaryService"));
         assertNotNull(service);
         

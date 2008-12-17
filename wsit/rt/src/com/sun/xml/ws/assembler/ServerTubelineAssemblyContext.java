@@ -43,17 +43,12 @@ package com.sun.xml.ws.assembler;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.policy.util.PolicyMapUtil;
-import javax.xml.ws.WebServiceException;
 
 /**
  * The context is a wrapper around the existing JAX-WS {@link ServerTubeAssemblerContext} with additional features
@@ -69,25 +64,7 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
 
     public ServerTubelineAssemblyContext(@NotNull ServerTubeAssemblerContext context) {
         this.wrappedContext = context;
-
-        PolicyMap _map = null;
-        WSDLPort wsdlPort = context.getWsdlModel();
-        if (wsdlPort != null) {
-            WSDLModel model = wsdlPort.getBinding().getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                _map = mapWrapper.getPolicyMap();
-            }
-
-            if (_map != null) {
-                try {
-                    PolicyMapUtil.rejectAlternatives(_map);
-                } catch (PolicyException e) {
-                    throw new WebServiceException(e);
-                }
-            }
-        }
-        this.policyMap = _map;
+        this.policyMap = context.getEndpoint().getPolicyMap();
     }
     
     public PolicyMap getPolicyMap() {
@@ -160,7 +137,7 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
      * encode/decode entire MIME messages in SOAP binding)
      *
      * @return codec to be used for web service requests
-     * @see {@link Codecs}
+     * @see {@link com.sun.xml.ws.api.pipe.Codecs}
      */
     public @NotNull Codec getCodec() {
         return wrappedContext.getCodec();
@@ -182,7 +159,7 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
      * serving requests concurrently.
      *
      * @param codec codec to be used for web service requests
-     * @see {@link Codecs}
+     * @see {@link com.sun.xml.ws.api.pipe.Codecs}
      */
     public void setCodec(@NotNull Codec codec) {
         wrappedContext.setCodec(codec);

@@ -50,7 +50,6 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.net.URI;
@@ -164,13 +163,12 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final EndpointAddress address = new EndpointAddress(ADDRESS_URL);
         final WSDLPort port = null;
         final WSDLModel clientModel = parseConfigFile(configFileName);
-        final WSDLPolicyMapWrapper mapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
-        final PolicyMap map = mapWrapper.getPolicyMap();
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
+        final PolicyMap map = portInfo.getPolicyMap();
         final WSBinding binding = bindingId.createBinding(new PolicyFeature(map, clientModel, portInfo), new AddressingFeature(true));
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, serviceDelegate, binding, container);
+                address, port, portInfo, binding, container);
 
         return getAssembler(bindingId).createClient(context);
     }

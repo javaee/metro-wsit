@@ -50,7 +50,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.transport.tcp.client.*;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
@@ -117,10 +116,8 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
     private static int retrieveCustomTCPPort(WSDLPort port) {
         try {
             WSDLModel model = port.getBinding().getOwner();
-            WSDLPolicyMapWrapper mapWrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-
-            if (mapWrapper != null) {
-                PolicyMap policyMap = mapWrapper.getPolicyMap();
+            PolicyMap policyMap = model.getPolicyMap();
+            if (policyMap != null) {
                 PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(), port.getName());
                 Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
 

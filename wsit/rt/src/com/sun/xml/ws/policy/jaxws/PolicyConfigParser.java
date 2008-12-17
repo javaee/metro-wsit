@@ -104,7 +104,7 @@ public final class PolicyConfigParser {
         LOGGER.entering(configFileIdentifier, container, mutators);
         PolicyMap map = null;
         try {
-            return map = extractPolicyMap(parseModel(configFileIdentifier, container, mutators));
+            return map = parseModel(configFileIdentifier, container, mutators).getPolicyMap();
         } finally {
             LOGGER.exiting(map);
         }
@@ -132,38 +132,9 @@ public final class PolicyConfigParser {
         LOGGER.entering(configFileUrl, isClient, mutators);
         PolicyMap map = null;
         try {
-            return map = extractPolicyMap(parseModel(configFileUrl, isClient, mutators));
+            return map = parseModel(configFileUrl, isClient, mutators).getPolicyMap();
         } finally {
             LOGGER.exiting(map);
-        }
-    }
-
-    /**
-     * Utility method that tries to retrieve a {@link PolicyMap} object from a given
-     * {@link WSDLModel}. When succesfull, {@link PolicyMap} instance is returned,
-     * otherwise result is {@code null}.
-     *
-     * @param model A {@link WSDLModel} (possibly) with a {@link PolicyMap} object
-     *        populated with information read from the WSIT config file. May be {@code null};
-     *        in that case, {@code null} is returned as a result of this function call.
-     *
-     * @return {@link PolicyMap} instance retrieved from a given {@link WSDLModel}
-     *         if successful, {@code null} otherwise.
-     */
-    public static PolicyMap extractPolicyMap(final WSDLModel model) {
-        LOGGER.entering(model);
-        PolicyMap result = null;
-        try {
-            if (model != null) {
-                final WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-
-                if (wrapper != null) {
-                    result = wrapper.getPolicyMap();
-                }
-            }
-            return result;
-        } finally {
-            LOGGER.exiting(result);
         }
     }
 
