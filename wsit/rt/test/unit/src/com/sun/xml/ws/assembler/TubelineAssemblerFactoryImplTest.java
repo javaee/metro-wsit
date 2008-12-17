@@ -52,6 +52,8 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.binding.BindingImpl;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -168,7 +170,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final WSBinding binding = bindingId.createBinding(new PolicyFeature(map, clientModel, portInfo), new AddressingFeature(true));
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, portInfo, binding, container);
+                address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
 
         return getAssembler(bindingId).createClient(context);
     }
