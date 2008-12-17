@@ -81,7 +81,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                     parser,
                     new PolicyConfigResolver(),
                     true,
-                    new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
+                    new WSDLParserExtension[] {}
             );
             
             assertNotNull(model);
@@ -98,7 +98,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 parser,
                 new PolicyConfigResolver(),
                 true,
-                new WSDLParserExtension[] { new PolicyWSDLParserExtension(true) }
+                new WSDLParserExtension[] {}
         );
         
         assertNotNull(model);
