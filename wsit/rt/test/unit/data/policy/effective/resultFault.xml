@@ -42,11 +42,5 @@
 			<tns:MessagePolicyTestAssertion7/>
 			<tns:MessagePolicyTestAssertion8/>
 		</wsp:All>
-		<wsp:All>
-			<tns:MessagePolicyTestAssertion5/>
-			<tns:MessagePolicyTestAssertion6/>
-			<tns:MessagePolicyTestAssertion7/>
-			<tns:MessagePolicyTestAssertion8/>
-		</wsp:All>
 	</wsp:ExactlyOne>
 </wsp:Policy>

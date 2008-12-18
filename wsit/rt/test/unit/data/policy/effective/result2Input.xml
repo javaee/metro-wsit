@@ -37,7 +37,7 @@
             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
 	<wsp:ExactlyOne>
 		<wsp:All>
-			<tns:MessagePolicyTestAssertion2/>
+			<tns:MessagePolicyTestAssertion4/>
 			<tns:MessagePolicyTestAssertion6/>
 			<tns:MessagePolicyTestAssertion7/>
 			<tns:MessagePolicyTestAssertion8/>

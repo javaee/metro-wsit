@@ -37,10 +37,10 @@
             xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
 	<wsp:ExactlyOne>
 		<wsp:All>
-			<tns:MessagePolicyTestAssertion2/>
-			<tns:MessagePolicyTestAssertion6/>
-			<tns:MessagePolicyTestAssertion7/>
-			<tns:MessagePolicyTestAssertion8/>
+			<tns:OperationPolicyTestAssertion4/>
+			<tns:OperationPolicyTestAssertion6/>
+			<tns:OperationPolicyTestAssertion7/>
+			<tns:OperationPolicyTestAssertion8/>
 		</wsp:All>
 	</wsp:ExactlyOne>
 </wsp:Policy>
