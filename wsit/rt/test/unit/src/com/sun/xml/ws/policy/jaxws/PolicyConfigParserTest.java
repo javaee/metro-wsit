@@ -293,7 +293,7 @@ public class PolicyConfigParserTest extends TestCase {
     
     private PolicyMap parseConfigFile(String configFile) throws Exception {
         URL url = PolicyUtils.ConfigFile.loadFromClasspath(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile);
-        return PolicyConfigParser.parse(url, false);
+        return PolicyConfigParser.parse(url, true);
     }
 
     /**
