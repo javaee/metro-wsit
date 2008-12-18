@@ -103,7 +103,7 @@ public class WsitPolicyUtil {
      * @param clientPolicyMap
      * @return merged PolicayMap
      */
-    public PolicyMap mergePolicyMap(PolicyMap policyMap, PolicyMap clientPolicyMap) throws PolicyException {
+    public static PolicyMap mergePolicyMap(PolicyMap policyMap, PolicyMap clientPolicyMap) throws PolicyException {
         final PolicyMapExtender mapExtender = PolicyMapExtender.createPolicyMapExtender();
         final String clientWsitConfigId = PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER;
         if (policyMap != null) {

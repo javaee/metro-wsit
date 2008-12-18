@@ -67,9 +67,10 @@ public class WsitPolicyResolver implements PolicyResolver {
             }
             if (configPolicyMap == null)
                 LOGGER.fine(LocalizationMessages.WSP_1034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
-
-            //Validate server-side Policies such that there exists a single alternative in each scope.
-            WsitPolicyUtil.validateServerPolicyMap(configPolicyMap);
+            else {
+                //Validate server-side Policies such that there exists a single alternative in each scope.
+                WsitPolicyUtil.validateServerPolicyMap(configPolicyMap);
+            }    
             return configPolicyMap;
         }
 
@@ -85,19 +86,17 @@ public class WsitPolicyResolver implements PolicyResolver {
                 effectivePolicyMap = context.getPolicyMap();
             } else {
                 //Merge Policy Configuration from WSDL and configuration file.
-                effectivePolicyMap = mergePolicyMap(context.getPolicyMap(), clientConfigPolicyMap);
+                effectivePolicyMap = WsitPolicyUtil.mergePolicyMap(context.getPolicyMap(), clientConfigPolicyMap);
             }
         } catch (PolicyException e) {
             throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e));
         }
         // Chooses best alternative and sets it as effective Policy in each scope.
-        return WsitPolicyUtil.doAlternativeSelection(effectivePolicyMap);
+        if(effectivePolicyMap != null)
+            return WsitPolicyUtil.doAlternativeSelection(effectivePolicyMap);
+        else
+            return null;
     }
 
-    private PolicyMap mergePolicyMap(PolicyMap a, PolicyMap b) {
-        return null;
-    }
-
-    
     private final static PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
 }
