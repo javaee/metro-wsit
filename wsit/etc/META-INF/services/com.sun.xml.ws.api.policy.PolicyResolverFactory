@@ -1,2 +1,2 @@
-com.sun.xml.ws.policy.jaxws.WsitPolicyResolver
+com.sun.xml.ws.policy.jaxws.WsitPolicyResolverFactory
 
