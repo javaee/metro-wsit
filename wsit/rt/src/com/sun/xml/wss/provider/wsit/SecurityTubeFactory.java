@@ -36,6 +36,7 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
 import com.sun.xml.xwss.XWSSClientPipe;
@@ -332,16 +333,21 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         String serverName = "server";
         if (ctxt != null) {
 
-            String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
-            URL url = SecurityUtil.loadFromContext(serverConfig, ctxt);
+            try {
+                String serverConfig = "/WEB-INF/" + serverName + "_" + "security_config.xml";
+                URL url = SecurityUtil.loadFromContext(serverConfig, ctxt);
 
-            if (url == null) {
-                serverConfig = "/WEB-INF/" + serviceLocalName + "_" + "security_config.xml";
-                url = SecurityUtil.loadFromContext(serverConfig, ctxt);
-            }
+                if (url == null) {
+                    serverConfig = "/WEB-INF/" + serviceLocalName + "_" + "security_config.xml";
+                    url = SecurityUtil.loadFromContext(serverConfig, ctxt);
+                }
 
-            if (url != null) {
-                return true;
+                if (url != null) {
+                    return true;
+                }
+            } catch (XWSSecurityRuntimeException ex) {
+                //loadFromContext could throw IllegalAccessException on some containers
+                return false;
             }
         } else {
             //this could be an EJB or JDK6 endpoint
