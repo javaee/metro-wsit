@@ -137,7 +137,7 @@
             <unzip src="${tmpdir}/jaxws-ri.zip" dest="${tmpdir}"/>
 
             <!-- unzip the JAR source zips -->
-            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/build/jaxws-libs.src.zip"
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-libs.src.zip"
                     dest="${tmpdir}/jaxws-libs.src.zip"/>
             <unzip src="${tmpdir}/jaxws-libs.src.zip" dest="${tmpdir}"/>
 
