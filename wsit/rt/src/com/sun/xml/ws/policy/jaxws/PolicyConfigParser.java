@@ -104,7 +104,11 @@ public final class PolicyConfigParser {
         LOGGER.entering(configFileIdentifier, container, mutators);
         PolicyMap map = null;
         try {
-            return map = parseModel(configFileIdentifier, container, mutators).getPolicyMap();
+            WSDLModel configModel= parseModel(configFileIdentifier, container, mutators);
+            //configModel is null in absense of wsit configuration file.
+            if(configModel!= null)
+                map = configModel.getPolicyMap();
+            return map;
         } finally {
             LOGGER.exiting(map);
         }
