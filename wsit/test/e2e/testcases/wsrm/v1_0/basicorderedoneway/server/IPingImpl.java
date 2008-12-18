@@ -35,7 +35,6 @@
  */
 package wsrm.v1_0.basicorderedoneway.server;
 
-import com.sun.xml.ws.rm.policy.assertion.ProprietaryNamespace;
 import javax.annotation.Resource;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
