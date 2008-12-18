@@ -112,7 +112,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
         PolicyMap map = getPolicyMap("parser/testPolicyReferences.wsdl");
         assertNotNull("PolicyMap can not be null", map);
         
-        map = PolicyConfigParser.parse(PolicyResourceLoader.getResourceUrl("parser/testPolicyReferences.wsdl"), false);
+        map = PolicyConfigParser.parse(PolicyResourceLoader.getResourceUrl("parser/testPolicyReferences.wsdl"), true);
         assertNotNull("PolicyMap can not be null", map);
     }
     
