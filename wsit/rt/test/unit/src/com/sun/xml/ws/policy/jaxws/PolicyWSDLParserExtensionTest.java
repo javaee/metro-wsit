@@ -797,4 +797,11 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
                 new QName("STSUserAuth_svc_app", "fault1")));
         assertEquals("casaBinding1_fault1_Policy", policy.getId());
     }
+
+    public void testPolicyMapToString() throws Exception {
+        PolicyMap policyMap = getPolicyMap("bug_reproduction/simple.wsdl");
+        String result = policyMap.toString();
+        assertNotNull(result);
+    }
+    
 }

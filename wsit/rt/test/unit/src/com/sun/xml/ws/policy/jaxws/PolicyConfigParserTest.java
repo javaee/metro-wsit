@@ -45,6 +45,8 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getResourceUrl;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -257,6 +259,38 @@ public class PolicyConfigParserTest extends TestCase {
         assertEquals("http://example.org/AddNumbers/porttype#AddNumbersServicePolicy", policy.getName());
     }
         
+    public void testGetOperationEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultOperation.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlOperationScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getOperationEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
+    public void testGetInputMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultInput.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getInputMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
+    public void testGetFaultMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
+    public void testGetFaultMessageWithTwoServicesEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/twoservices.wsdl"), false);
+        Policy expectedPolicy = loadPolicy("effective/resultFault.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        assertEquals(expectedPolicy, policy);
+    }
+    
     private PolicyMap parseConfigFile(String configFile) throws Exception {
         URL url = PolicyUtils.ConfigFile.loadFromClasspath(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile);
         return PolicyConfigParser.parse(url, false);
