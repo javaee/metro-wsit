@@ -43,9 +43,8 @@ import com.sun.xml.ws.api.policy.PolicyResolver;
  * @author Rama Pulavarthi
  */
 public class WsitPolicyResolverFactory extends PolicyResolverFactory {
-    public static PolicyResolver create() {
+    public PolicyResolver doCreate() {
         // return WSIT Policy resolver that parses the WSIT config files and return the effective policy.
         return new WsitPolicyResolver();
-
     }
 }
