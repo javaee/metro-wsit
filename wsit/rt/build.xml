@@ -235,6 +235,9 @@
                         <include name="*.*"/>
                     </fileset>
                 </copy>
+                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider.diff"
+                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider"
+                       ignorewhitespace="true"/>
                 <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider.diff"
                        originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider"
                        ignorewhitespace="true"/>
@@ -279,6 +282,9 @@
                         <include name="*.*"/>
                     </fileset>
                 </copy>
+                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider.diff"
+                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider"
+                       ignorewhitespace="true"/>
                 <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider.diff"
                        originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider"
                        ignorewhitespace="true"/>
