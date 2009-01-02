@@ -39,14 +39,15 @@ import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
-import com.sun.xml.xwss.XWSSClientPipe;
-import com.sun.xml.xwss.XWSSServerPipe;
+
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 import javax.security.auth.message.config.AuthConfigFactory;
+import src.com.sun.xml.xwss.XWSSClientTube;
+import src.com.sun.xml.xwss.XWSSServerTube;
 
 public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
 
@@ -309,9 +310,23 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     }
 
     private boolean isSecurityConfigPresent(ClientTubelineAssemblyContext context) {
-        // returning true for empty policy map by default for now, because the Client Side Security Config is only 
-        // accessible as a Runtime Property on BindingProvider.RequestContext
-        return true;
+        //look for XWSS 2.0 style config file in META-INF classpath
+        try {
+            String configUrl = "META-INF/client_security_config.xml";
+            URL url = SecurityUtil.loadFromClasspath(configUrl);
+            if (url != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
+            return bool;
+        }
+        //returning true by default for now, because the Client Side Security Config is
+        //only accessible as a Runtime Property on BindingProvider.RequestContext
+        //With Metro 2.0 we are disabling the default rule above and one would need to
+        //set System Property USE_XWSS_SECURITY to enable the client pipeline.
+        boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
+        return bool;
     }
 
     private boolean isSecurityConfigPresent(ServerTubelineAssemblyContext context) {
@@ -367,11 +382,11 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     }
 
     private Tube initializeXWSSClientTube(ClientTubelineAssemblyContext context) {
-        return PipeAdapter.adapt(new XWSSClientPipe(context.getWsdlPort(), context.getService(), context.getBinding(), context.getAdaptedTubelineHead()));
+        return new XWSSClientTube(context.getWsdlPort(), context.getService(), context.getBinding(), context.getTubelineHead());
     }
 
     private Tube initializeXWSSServerTube(ServerTubelineAssemblyContext context) {
-        return PipeAdapter.adapt(new XWSSServerPipe(context.getEndpoint(), context.getWsdlPort(), context.getAdaptedTubelineHead()));
+        return new XWSSServerTube(context.getEndpoint(), context.getWsdlPort(), context.getTubelineHead());
     }
 
     @SuppressWarnings("unchecked")
