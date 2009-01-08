@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustFactory.java,v 1.17 2008-11-05 17:53:41 m_potociar Exp $
+ * $Id: WSTrustFactory.java,v 1.18 2009-01-08 00:39:54 jdg6688 Exp $
  */
 
 /*
@@ -175,7 +175,7 @@ public class WSTrustFactory {
         STSAttributeProvider attrProvider = null;
         final ServiceFinder<STSAttributeProvider> finder = 
                 ServiceFinder.find(STSAttributeProvider.class);
-	java.util.Iterator it = finder.iterator();
+        java.util.Iterator it = finder.iterator();
         if(it.hasNext()){
             attrProvider = (STSAttributeProvider)it.next();
         } else {
@@ -189,7 +189,7 @@ public class WSTrustFactory {
         STSTokenProvider tokenProvider = null;
         final ServiceFinder<STSTokenProvider> finder = 
                 ServiceFinder.find(STSTokenProvider.class);
-	java.util.Iterator it = finder.iterator();
+        java.util.Iterator it = finder.iterator();
         if(it.hasNext()){
             tokenProvider = (STSTokenProvider)it.next();
         } else {
@@ -202,7 +202,7 @@ public class WSTrustFactory {
         STSConfigurationProvider configProvider = null;
         final ServiceFinder<STSConfigurationProvider> finder = 
                 ServiceFinder.find(STSConfigurationProvider.class);
-	java.util.Iterator it = finder.iterator();
+        java.util.Iterator it = finder.iterator();
         if(it.hasNext()){
             configProvider = (STSConfigurationProvider)it.next();
         }
