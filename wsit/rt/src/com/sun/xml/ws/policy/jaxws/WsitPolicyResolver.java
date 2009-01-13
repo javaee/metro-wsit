@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+* Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -63,10 +63,10 @@ public class WsitPolicyResolver implements PolicyResolver {
             try {
                 configPolicyMap = PolicyConfigParser.parse(configId, context.getContainer());
             } catch (PolicyException e) {
-                LOGGER.fine(LocalizationMessages.WSP_1027_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
+                LOGGER.fine(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
             }
             if (configPolicyMap == null)
-                LOGGER.fine(LocalizationMessages.WSP_1034_CREATE_POLICY_MAP_FOR_CONFIG(configId));
+                LOGGER.fine(LocalizationMessages.WSP_5008_CREATE_POLICY_MAP_FOR_CONFIG(configId));
             else {
                 //Validate server-side Policies such that there exists a single alternative in each scope.
                 WsitPolicyUtil.validateServerPolicyMap(configPolicyMap);
@@ -82,14 +82,14 @@ public class WsitPolicyResolver implements PolicyResolver {
         try {
             clientConfigPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
             if (clientConfigPolicyMap == null) {
-                LOGGER.config(LocalizationMessages.WSP_1040_CLIENT_CONFIG_PROCESSING_SKIPPED());
+                LOGGER.config(LocalizationMessages.WSP_5014_CLIENT_CONFIG_PROCESSING_SKIPPED());
                 effectivePolicyMap = context.getPolicyMap();
             } else {
                 //Merge Policy Configuration from WSDL and configuration file.
                 effectivePolicyMap = WsitPolicyUtil.mergePolicyMap(context.getPolicyMap(), clientConfigPolicyMap);
             }
         } catch (PolicyException e) {
-            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_1017_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e));
+            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5004_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e));
         }
         // Chooses best alternative and sets it as effective Policy in each scope.
         if(effectivePolicyMap != null)

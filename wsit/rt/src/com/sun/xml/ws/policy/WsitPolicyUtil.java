@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -68,7 +68,7 @@ public class WsitPolicyUtil {
                     for (PolicyAssertion assertion : assertionSet) {
                         PolicyAssertionValidator.Fitness validationResult = validationProcessor.validateServerSide(assertion);
                         if (validationResult != PolicyAssertionValidator.Fitness.SUPPORTED) {
-                            throw new PolicyException(LocalizationMessages.WSP_1046_SERVER_SIDE_ASSERTION_VALIDATION_FAILED(
+                            throw new PolicyException(LocalizationMessages.WSP_5017_SERVER_SIDE_ASSERTION_VALIDATION_FAILED(
                                     assertion.getName(),
                                     validationResult));
                         }
@@ -144,7 +144,7 @@ public class WsitPolicyUtil {
                     // setting subject to provided URL of client WSIT config
                     mapExtender.putFaultMessageSubject(key, new PolicySubject(clientWsitConfigId, policy));
                 }
-                LOGGER.fine(LocalizationMessages.WSP_1041_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
+                LOGGER.fine(LocalizationMessages.WSP_5015_CLIENT_CFG_POLICIES_TRANSFERED_INTO_FINAL_POLICY_MAP(policyMap));
             } catch (FactoryConfigurationError ex) {
                 throw LOGGER.logSevereException(new PolicyException(ex));
             }
