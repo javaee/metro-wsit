@@ -144,7 +144,7 @@
             <!-- copy to relevant directories -->
             <copy todir="${lib.runtime.dir}" overwrite="true" verbose="${verbose}">
                 <fileset dir="${tmpdir}/jaxws-ri/lib" includes="*.jar" excludes="jaxb-xjc.*, *-tools.*"/>
-                <fileset dir="${tmpdir}" includes="*.zip" excludes="jaxb-xjc.*, *-tools.*"/>
+                <fileset dir="${tmpdir}" includes="*.zip" excludes="jaxb-xjc.*, *-tools.*, jaxws-ri.zip, jaxws-lib.src.zip"/>
             </copy>
             <copy todir="${lib.tooltime.dir}" overwrite="true" verbose="${verbose}">
                 <fileset dir="${tmpdir}/jaxws-ri/lib" includes="jaxb-xjc.*, *-tools.*"/>
