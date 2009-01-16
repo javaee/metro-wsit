@@ -53,13 +53,8 @@
     </organization>
     <licenses>
         <license>
-            <name>COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0</name>
-            <url>http://www.opensource.org/licenses/cddl1.php</url>
-            <distribution>repo</distribution>
-        </license>
-        <license>
-            <name>GPL 2.0</name>
-            <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+            <name>Dual License: CDDL 1.0 and GPL V2 with Classpath Exception</name>
+            <url>https://glassfish.dev.java.net/public/CDDL+GPL.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
