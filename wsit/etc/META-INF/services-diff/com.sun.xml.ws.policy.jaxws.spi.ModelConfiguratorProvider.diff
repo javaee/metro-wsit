@@ -34,8 +34,10 @@
 --- jaxws-ri/rt/etc/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider
 +++ etc/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider
 @@ -2,3 +2,4 @@
+ com.sun.xml.ws.addressing.policy.AddressingModelConfiguratorProvider
  com.sun.xml.ws.encoding.policy.MtomModelConfiguratorProvider
  com.sun.xml.ws.encoding.policy.FastInfosetModelConfiguratorProvider
  com.sun.xml.ws.encoding.policy.SelectOptimalEncodingModelConfiguratorProvider
 +com.sun.xml.ws.rm.policy.spi_impl.RxModelConfigurationProvider
++ com.sun.xml.ws.addressing.policy.WsawAddressingModelConfiguratorProvider
 \ No newline at end of file
