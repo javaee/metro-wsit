@@ -56,13 +56,13 @@
             For more information on the different command line options
             refer to docs/index.html
         -->
-        <element name="arguments" />                        
+        <element name="arguments" />
         <sequential>
             <antcall target="prepare"/>
             
             <!-- BEGIN: Emma code coverage specific stuff -->
             <emma enabled="${emma.enabled}" >
-                <instr 
+                <instr
                     destdir="${out.instr.dir}"	
                     metadatafile="${coverage.dir}/metadata.emma"
                     merge="true"
@@ -87,7 +87,7 @@
                     <filter includes="com.sun.xml.wss.jaxws.*"/>
                     <filter includes="com.sun.xml.wss.provider.*"/>
                 </instr>
-            </emma>            
+            </emma>
             <!-- END: Emma code coverage specific stuff -->
             
             <java jar="${test.lib.dir}/harness.jar" fork="true">
@@ -95,24 +95,24 @@
                 <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
                 <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/>
                 <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>
-                
-                
+
+
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
-                
+
                 <!-- BEGIN: Emma code coverage specific stuff -->
                 <arg value="-cp:override" />
-                <arg pathref="instr.override.path" />                
+                <arg pathref="instr.override.path" />
                 <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
                 <jvmarg value="-Demma.coverage.out.merge=true" />
-                <!-- END: Emma code coverage specific stuff -->    
+                <!-- END: Emma code coverage specific stuff -->
 
                 <arguments />
                 <arg line="${args}"/>
-                
+
                 <!-->
                 <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
-		<jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xdebug"/>
                 <!-->
             </java>
             
