@@ -82,7 +82,7 @@
         <mkdir dir="${dist.image.wsit.v3.dir}"/>
         <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
              failok="false"
-             output="${dist.image.wsit.v3.dir}/webservices.jar"
+             output="${dist.image.wsit.v3.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
 
         <copy todir="${dist.image.wsit.v3.dir}">
@@ -192,8 +192,8 @@
     
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.1/promotion/latest/Good%20for%20jax-ws/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb.jar"
-             dest="${lib.osgi.dir}/jaxb.jar" />
+        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.1/promotion/latest/Good%20for%20jax-ws/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
+             dest="${lib.osgi.dir}/jaxb-osgi.jar" />
     </target>
 
     <target name="integrate-xwss30-hudson"
@@ -472,12 +472,12 @@
         <property name="module.revision" value="${metro.hudson.pushed.build.number}" /-->
 
         <property name="webservices.jar.source.url" value="http://download.java.net/maven/2/com/sun/xml/ws/webservices/1.4-RC1/webservices-1.4-RC1-osgi.jar" />
-        <!--property name="webservices.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices.jar" /-->
-        <!--property name="webservices.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/webservices.jar" /-->
+        <!--property name="webservices.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices-osgi.jar" /-->
+        <!--property name="webservices.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/webservices-osgi.jar" /-->
 
         <property name="jaxb.jar.source.url" value="http://download.java.net/maven/2/com/sun/xml/bind/jaxb/2.1.9-RC1/jaxb-2.1.9-RC1-osgi.jar" />
-        <!--property name="jaxb.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb.jar" /-->
-        <!--property name="jaxb.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/jaxb.jar" /-->
+        <!--property name="jaxb.jar.source.url" value="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb-osgi.jar" /-->
+        <!--property name="jaxb.jar.source.url" value="/net/koori.sfbay/onestop/wsit/1.4/promoted/fcs/b01/binaries/metro/for_v3/jaxb-osgi.jar" /-->
 
         <property name="jsr109.jar.source.url" value="http://javaweb.sfbay/~bhakti/109oct20/jsr109-impl.jar" />
         <!--property name="jsr109.jar.source.url" value="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar" /-->
