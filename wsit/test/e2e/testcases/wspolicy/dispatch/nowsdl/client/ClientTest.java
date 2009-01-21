@@ -125,6 +125,6 @@ public class ClientTest extends TestCase {
         SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
         // Make sure that the message exchange actually used the policy configuration
         RmVersion version = TestFilter.getVersion();
-        assertEquals(RmVersion.WSRM11, version);
+        assertEquals(RmVersion.WSRM200702, version);
     }
 }
