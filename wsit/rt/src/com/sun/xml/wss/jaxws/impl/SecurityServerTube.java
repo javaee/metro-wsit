@@ -467,7 +467,11 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
             // set the policy, issued-token-map, and extraneous properties
             //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+            if (isSCMessage){
+                ctx.setAlgorithmSuite(policy.getAlgorithmSuite());
+            }else{
+                ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+            }
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
             ctx.getExtraneousProperties().put(WSDLPORT, tubeConfig.getWSDLPort());

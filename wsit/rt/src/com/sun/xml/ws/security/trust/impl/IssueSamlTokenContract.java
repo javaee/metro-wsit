@@ -256,7 +256,8 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
                 if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
                     tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){
                     confirMethod = SAML_SENDER_VOUCHES_1_0;
-                } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
+                } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)||
+                    tokenType.equals(WSTrustConstants.SAML20_WSS_TOKEN_TYPE)){
                     confirMethod = SAML_SENDER_VOUCHES_2_0;
                 }
                 if (confirMethod != null){

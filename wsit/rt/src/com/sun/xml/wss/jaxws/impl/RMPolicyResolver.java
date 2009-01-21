@@ -71,14 +71,11 @@ public class RMPolicyResolver {
         PolicySourceModel model;
         try {
             String rmMessagePolicy = "rm-msglevel-policy.xml";            
-            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM200502.namespaceUri.equals(rmVersion.namespaceUri)){
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200502 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM200702.namespaceUri.equals(rmVersion.namespaceUri)){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200702  == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sx.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM200702.namespaceUri.equals(rmVersion.namespaceUri)){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && RmVersion.WSRM200702 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             

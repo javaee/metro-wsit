@@ -83,16 +83,36 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processException(Throwable t) {
+        /**
+         * process WS-MC faults
+         */
+
         return super.processException(t);
     }
 
     @Override
     public NextAction processRequest(Packet request) {
+        /**
+         * 1. attach WS-MC anonymous URI
+         * 2. send message
+         */
+
         return super.processRequest(request);
     }
 
     @Override
     public NextAction processResponse(Packet response) {
+        /**
+         * A. process WS-MC header:
+         *    1. if message is pending and we have suspended fiber(s) waiting for a message,
+         *       signal that WS-MC message should be sent
+         *
+         *
+         * B. if response is required and no response is received, then:
+         *    1. register as awaiting response
+         *    2. suspend the fiber
+         */
+
         return super.processResponse(response);
     }
 }

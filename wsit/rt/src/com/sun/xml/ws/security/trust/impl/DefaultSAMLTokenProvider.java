@@ -135,7 +135,8 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
             WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
             assertion = createSAML11Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
-        } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+        } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)||
+                   WSTrustConstants.SAML20_WSS_TOKEN_TYPE.equals(tokenType)){
             String authnCtx = (String)ctx.getOtherProperties().get(IssuedTokenContext.AUTHN_CONTEXT);
             assertion = createSAML20Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType, authnCtx);
         } else{
