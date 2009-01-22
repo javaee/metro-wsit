@@ -50,30 +50,34 @@ import javax.xml.ws.WebServiceException;
 
 /**
  * @author Rama Pulavarthi
+ * @author Fabian Ritzmann
  */
 public class WsitPolicyResolver implements PolicyResolver {
+
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
+
     public PolicyMap resolve(ServerContext context) throws WebServiceException {
-        final PolicyMap map = context.getPolicyMap();
-        if((map != null) && context.hasWsdl()) {
-            //Server-side, there should be only one policy configuration either wsdl or WSIT config.
-            return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
-        } else {
+        if (!context.hasWsdl()) {
             //parse WSIT -config file.
+            PolicyMap map = null;
             final String configId = context.getEndpointClass().getName();
             try {
-                configPolicyMap = PolicyConfigParser.parse(configId, context.getContainer(), context.getMutators());
+                map = PolicyConfigParser.parse(configId, context.getContainer(), context.getMutators());
             } catch (PolicyException e) {
-                throw new LOGGER.error(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e));
             }
-            if (configPolicyMap == null)
-                LOGGER.fine(LocalizationMessages.WSP_5008_CREATE_POLICY_MAP_FOR_CONFIG(configId));
+            if (map == null)
+                LOGGER.config(LocalizationMessages.WSP_5008_CREATE_POLICY_MAP_FOR_CONFIG(configId));
             else {
                 //Validate server-side Policies such that there exists a single alternative in each scope.
-                WsitPolicyUtil.validateServerPolicyMap(configPolicyMap);
+                WsitPolicyUtil.validateServerPolicyMap(map);
             }    
-            return configPolicyMap;
+            return map;
         }
-
+        else {
+            //Server-side, there should be only one policy configuration either wsdl or WSIT config.
+            return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
+        }
     }
 
     public PolicyMap resolve(ClientContext context) {
@@ -97,6 +101,4 @@ public class WsitPolicyResolver implements PolicyResolver {
         else
             return null;
     }
-
-    private final static PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
 }
