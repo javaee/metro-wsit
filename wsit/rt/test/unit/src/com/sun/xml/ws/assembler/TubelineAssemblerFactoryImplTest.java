@@ -50,9 +50,10 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+import com.sun.xml.ws.binding.BindingImpl;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -101,17 +102,22 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
     /**
      * Test client creation with parameters that correspond to a dispatch client
-     * with no wsit-client.xml.
+     * with no wsit-client.xml and with no WSDL.
      */
     public void testCreateDispatchClientNoConfig() throws Exception {
         final BindingID bindingId = BindingID.SOAP11_HTTP;
         final WSBinding binding = bindingId.createBinding();
         final EndpointAddress address = new EndpointAddress(ADDRESS_URL);
         final WSDLPort port = null;
-        final WSService service = null;
+        final QName serviceName = new QName(NAMESPACE, "Service1Service");
+        WSService service =  WSService.create(serviceName);
+        final QName portName = new QName(NAMESPACE, "Service1Port");
+        // Corresponds to Service.addPort(portName, bindingId, address)
+        service.addPort(portName, bindingId.toString(), ADDRESS_URL.toString());
+        final WSPortInfo portInfo = ((WSServiceDelegate) service).safeGetPort(portName);
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, service, binding, container);
+                address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
         final Tube tubeline = getAssembler(bindingId).createClient(context);
         assertNotNull(tubeline);
     }
@@ -164,13 +170,12 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final EndpointAddress address = new EndpointAddress(ADDRESS_URL);
         final WSDLPort port = null;
         final WSDLModel clientModel = parseConfigFile(configFileName);
-        final WSDLPolicyMapWrapper mapWrapper = clientModel.getExtension(WSDLPolicyMapWrapper.class);
-        final PolicyMap map = mapWrapper.getPolicyMap();
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
+        final PolicyMap map = portInfo.getPolicyMap();
         final WSBinding binding = bindingId.createBinding(new PolicyFeature(map, clientModel, portInfo), new AddressingFeature(true));
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, serviceDelegate, binding, container);
+                address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
 
         return getAssembler(bindingId).createClient(context);
     }

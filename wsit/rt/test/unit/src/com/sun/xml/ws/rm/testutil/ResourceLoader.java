@@ -45,8 +45,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
-import com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -122,8 +120,7 @@ public class ResourceLoader {
             throws PolicyException {
 
         WSDLModel model = loadWSDLModel(resourceName, isClient);
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        return wrapper.getPolicyMap();
+        return model.getPolicyMap();
     }
 
     public static WSDLModel loadWSDLModel(String resourceName, boolean isClient) throws PolicyException {
@@ -132,7 +129,7 @@ public class ResourceLoader {
         SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
         try {
             Parser parser = new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[]{new PolicyWSDLParserExtension()});
+            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[]{});
             return model;
         } catch (XMLStreamException ex) {
             throw new RuntimeException("Failed to parse document", ex);

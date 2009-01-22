@@ -48,13 +48,10 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
-import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 
 /**
@@ -73,36 +70,9 @@ public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
 
     public ClientTubelineAssemblyContext(@NotNull ClientTubeAssemblerContext context) {
         this.wrappedContext = context;
-
-        WSDLPort _port = context.getWsdlModel();
-        WSPortInfo _portInfo = null;
-        PolicyMap _policyMap = null;
-        if (_port != null) {
-            // Usually, the WSDL model holds the server and client policy maps merged into one
-            WSDLPolicyMapWrapper mapWrapper = _port.getBinding().getOwner().getExtension(WSDLPolicyMapWrapper.class);
-            if (mapWrapper != null) {
-                _policyMap = mapWrapper.getPolicyMap();
-            }
-        } else { 
-            // In dispatch mode, wsdlPort is null and we don't have a server policy map, so we read the
-            // client policy map only
-            PolicyFeature feature = context.getBinding().getFeature(PolicyFeature.class);
-            if (feature != null) {
-                _policyMap = feature.getPolicyMap();
-                _portInfo = feature.getPortInfo();
-
-                // Dispatch client: Extract WSDLPort from client config (if we have one).
-                if (_portInfo != null && feature.getWsdlModel() != null) {
-                    WSDLService service = feature.getWsdlModel().getService(_portInfo.getServiceName());
-                    if (service != null) {
-                        _port = service.get(_portInfo.getPortName());
-                    }
-                }
-            }
-        }        
-        this.wsdlPort = _port;
-        this.portInfo = _portInfo;
-        this.policyMap = _policyMap;
+        this.wsdlPort = context.getWsdlModel();
+        this.portInfo = context.getPortInfo();
+        this.policyMap = context.getPortInfo().getPolicyMap();
     }
 
     public PolicyMap getPolicyMap() {
@@ -118,7 +88,7 @@ public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
      * Null if the service isn't associated with any port definition in WSDL,
      * and otherwise non-null.
      * 
-     * Replaces {@link ClientTubeAssemblerContext#getWSDLModel()}
+     * Replaces {@link com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext#getWsdlModel()}
      */
     public WSDLPort getWsdlPort() {
         return wsdlPort;
@@ -183,7 +153,7 @@ public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
     }
 
     /**
-     * Interception point to change {@link Codec} during {@link Tube}line assembly. The
+     * Interception point to change {@link Codec} during {@link com.sun.xml.ws.api.pipe.Tube}line assembly. The
      * new codec will be used by jax-ws client runtime for encoding/decoding web service
      * request/response messages. The new codec should be used by the transport tubes.
      *

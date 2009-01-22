@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -105,7 +105,7 @@ public final class XmlFilteringUtils {
                 namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)));
         }
         
         return new QName(namespaceURI, localName);
@@ -139,7 +139,7 @@ public final class XmlFilteringUtils {
                 value = invocation.getArgument(3).toString();
                 break;
             default:
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1009_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)));
         }
         
         return new AttributeInfo(new QName(namespaceURI, localName), value);
@@ -147,10 +147,10 @@ public final class XmlFilteringUtils {
     
     private static void checkInvocationParameter(final Invocation invocation, final XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1038_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5012_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
         } else {
             if (invocation.getMethodType() != expectedType) {
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1039_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5013_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));
             }
         }
     }

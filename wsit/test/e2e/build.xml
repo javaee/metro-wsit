@@ -63,7 +63,7 @@
             <!-- BEGIN: Emma code coverage specific stuff -->
             <emma enabled="${emma.enabled}" >
                 <instr
-                    destdir="${out.instr.dir}"
+                    destdir="${out.instr.dir}"	
                     metadatafile="${coverage.dir}/metadata.emma"
                     merge="true"
                 >
@@ -112,7 +112,7 @@
 
                 <!-->
                 <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
-		<jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xdebug"/>
                 <!-->
             </java>
 

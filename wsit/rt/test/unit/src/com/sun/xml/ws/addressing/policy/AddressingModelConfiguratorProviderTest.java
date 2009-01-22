@@ -39,8 +39,6 @@ package com.sun.xml.ws.addressing.policy;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import junit.framework.*;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import javax.xml.namespace.QName;
 import javax.xml.ws.soap.AddressingFeature;
 
@@ -60,8 +58,6 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureW3CAddressingAssertionPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrW3C.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
                 getFirstPort().getFeature(AddressingFeature.class).isEnabled());
     }
@@ -72,8 +68,6 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureMEMBERAddressingAssertionPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrMEMBER.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         assertTrue(model.getService(new QName("http://example.org","DictionaryService")).
                 getFirstPort().getFeature(MemberSubmissionAddressingFeature.class).isEnabled());
     }
@@ -84,8 +78,6 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
      */
     public void testConfigureAddressingAssertionNotPresent() throws Exception {
         WSDLModel model = getWSDLModel("jaxws-spi/testModelConfigProviderAddrPolicyNotPresent.wsdl");
-        PolicyMap policyMap = model.getExtension(WSDLPolicyMapWrapper.class).getPolicyMap();
-        
         assertNull(model.getService(new QName("http://example.org","DictionaryService")).
                 getFirstPort().getFeature(AddressingFeature.class));
     }

@@ -45,8 +45,6 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
-import com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension;
-import com.sun.xml.ws.policy.jaxws.WSDLPolicyMapWrapper;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -132,16 +130,14 @@ public final class PolicyResourceLoader {
         throws PolicyException {
         
         WSDLModel model = getWSDLModel(resourceName, true);
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        return wrapper.getPolicyMap();
+        return model.getPolicyMap();
     }
     
     public static PolicyMap getPolicyMap(String resourceName, boolean isClient)
         throws PolicyException {
         
         WSDLModel model = getWSDLModel(resourceName, isClient);
-        WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-        return wrapper.getPolicyMap();
+        return model.getPolicyMap();
     }
 
     public static WSDLModel getWSDLModel(String resourceName) throws PolicyException {
@@ -155,7 +151,7 @@ public final class PolicyResourceLoader {
         SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
         try {
             Parser parser = new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[] {new PolicyWSDLParserExtension()});
+            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[] {});
             return model;
         } catch (XMLStreamException ex) {
             throw new PolicyException("Failed to parse document", ex);

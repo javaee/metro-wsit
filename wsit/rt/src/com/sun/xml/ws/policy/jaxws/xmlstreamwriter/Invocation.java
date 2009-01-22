@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.util.Queue;
-import static com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages.WSP_1052_NO_ARGUMENTS_IN_INVOCATION;
+import static com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages.WSP_5019_NO_ARGUMENTS_IN_INVOCATION;
 import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType.WRITE_CHARACTERS;
 
 /**
@@ -170,7 +170,7 @@ public final class Invocation {
      */
     public Object getArgument(final int index) throws ArrayIndexOutOfBoundsException {
         if (arguments == null) {
-            throw LOGGER.logSevereException(new ArrayIndexOutOfBoundsException(WSP_1052_NO_ARGUMENTS_IN_INVOCATION(this.toString())));
+            throw LOGGER.logSevereException(new ArrayIndexOutOfBoundsException(WSP_5019_NO_ARGUMENTS_IN_INVOCATION(this.toString())));
         }
         return arguments[index];
     }

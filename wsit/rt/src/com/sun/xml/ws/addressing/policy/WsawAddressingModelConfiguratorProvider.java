@@ -40,9 +40,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.model.wsdl.WSDLBoundPortTypeImpl;
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
@@ -50,6 +48,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+
 import java.util.Iterator;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
@@ -57,21 +56,25 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.AddressingFeature;
 
 /**
+ * This Policy extension configures the WSDLModel with AddressingFeature when
+ * wsaw:UsingAddressing assertion is present in the PolicyMap.
  *
- * @author japod
+ * This class exists in WSIT to provide functionality for backwards compatibility with previously generated
+ * wsaw:UsingAddressing assertion.
+ *
+ * @author Rama Pulavarthi
  */
-public class AddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
+public class WsawAddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AddressingModelConfiguratorProvider.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingModelConfiguratorProvider.class);
 
-    private static final QName[] ADDRESSING_ASSERTIONS = {
-        new QName(AddressingVersion.MEMBER.policyNsUri, "UsingAddressing"),
-        new QName(AddressingVersion.W3C.policyNsUri, "UsingAddressing")};
+    private static final QName WSAW_ADDRESSING_ASSERTION =
+        new QName(AddressingVersion.W3C.policyNsUri, "UsingAddressing");
 
     /**
      * Creates a new instance of AddressingModelConfiguratorProvider
      */
-    public AddressingModelConfiguratorProvider() {
+    public WsawAddressingModelConfiguratorProvider() {
     }
 
     /**
@@ -91,16 +94,15 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
             for (WSDLPort port : service.getPorts()) {
                 final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(service.getName(),port.getName());
                 final Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                for (QName addressingAssertionQName : ADDRESSING_ASSERTIONS) {
-                    if (null!=policy && policy.contains(addressingAssertionQName)) {
-                        final Iterator <AssertionSet> assertions = policy.iterator();
-                        while(assertions.hasNext()){
+                    if (null != policy && policy.contains(WSAW_ADDRESSING_ASSERTION)) {
+                        final Iterator<AssertionSet> assertions = policy.iterator();
+                        while (assertions.hasNext()) {
                             final AssertionSet assertionSet = assertions.next();
                             final Iterator<PolicyAssertion> policyAssertion = assertionSet.iterator();
-                            while(policyAssertion.hasNext()){
+                            while (policyAssertion.hasNext()) {
                                 final PolicyAssertion assertion = policyAssertion.next();
-                                if(assertion.getName().equals(addressingAssertionQName)){
-                                    final WebServiceFeature feature = AddressingVersion.getFeature(addressingAssertionQName.getNamespaceURI(), true, !assertion.isOptional());
+                                if (assertion.getName().equals(WSAW_ADDRESSING_ASSERTION)) {
+                                    final WebServiceFeature feature = new AddressingFeature(true, !assertion.isOptional());
                                     port.addFeature(feature);
                                     if (LOGGER.isLoggable(Level.FINE)) {
                                         LOGGER.fine("Added addressing feature \"" + feature + "\" to port \"" + port + "\"");
@@ -109,36 +111,7 @@ public class AddressingModelConfiguratorProvider implements ModelConfiguratorPro
                             } // next assertion
                         } // next alternative
                     } // end-if policy contains wsa assertion
-                } //end foreach addr assertion
-                
-                // Deal with WS-Addressing 1.0 Metadata assertions
-                if (policy != null && policy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "Addressing"))) {
-                    for (AssertionSet assertions : policy) {
-                        for (PolicyAssertion assertion : assertions) {
-                            if (assertion.getName().equals(new QName("http://www.w3.org/2007/05/addressing/metadata", "Addressing"))) {
-                                //TODO take care of nested assertions later.
-                                /*
-                                NestedPolicy nestedPolicy = assertion.getNestedPolicy();
-                                boolean requiresAnonymousResponses = false;
-                                boolean requiresNonAnonymousResponses = false;
-                                if (nestedPolicy != null) {
-                                    requiresAnonymousResponses = nestedPolicy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "AnonymousResponses"));
-                                    requiresNonAnonymousResponses = nestedPolicy.contains(new QName("http://www.w3.org/2007/05/addressing/metadata", "NonAnonymousResponses"));
-                                }
-                                WSDLBoundPortTypeImpl binding = (WSDLBoundPortTypeImpl) port.getBinding();
-                                */
-                                // Set addressing properties here:
-                                // binding.set...
-                                final WebServiceFeature feature = new AddressingFeature(true, !assertion.isOptional());
-                                port.addFeature(feature);
-                                if (LOGGER.isLoggable(Level.FINE)) {
-                                    LOGGER.fine("Added addressing feature \"" + feature + "\" to port \"" + port + "\"");
-                                }
-                            }
-                        }
-                    }
-                }
-                
+
             } // end foreach port
         } // end foreach service
         LOGGER.exiting();

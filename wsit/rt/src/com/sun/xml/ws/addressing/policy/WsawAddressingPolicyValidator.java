@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -34,39 +34,45 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.addressing.policy;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundFault;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLObject;
-import org.xml.sax.Locator;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+
+import java.util.ArrayList;
+import javax.xml.namespace.QName;
 
 /**
- * We need data from the WSDL operation that the default WSDLBoundFault does not
- * give us. This class holds all the necessary data.
+ * This class validates the wsaw:UsingAddressing assertion.
+ * This class exists in WSIT to provide functionality for backwards compatibility with previously generated
+ * wsaw:UsingAddressing assertion.
  *
- * @author Fabian Ritzmann
+ * @author Rama Pulavarthi
  */
-class WSDLBoundFaultContainer implements WSDLObject {
-    
-    private final WSDLBoundFault boundFault;
-    private final WSDLBoundOperation boundOperation;
-    
-    public WSDLBoundFaultContainer(final WSDLBoundFault fault, final WSDLBoundOperation operation) {
-        this.boundFault = fault;
-        this.boundOperation = operation;
-    }
-    
-    public Locator getLocation() {
-        return null;
+public class WsawAddressingPolicyValidator implements PolicyAssertionValidator{
+
+    private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
+
+    static {
+        supportedAssertions.add(new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing"));
     }
 
-    public WSDLBoundFault getBoundFault() {
-        return this.boundFault;
+    /**
+     * Creates a new instance of AddressingPolicyValidator
+     */
+    public WsawAddressingPolicyValidator() {
     }
 
-    public WSDLBoundOperation getBoundOperation() {
-        return this.boundOperation;
+    public Fitness validateClientSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
     }
-    
+
+    public Fitness validateServerSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {AddressingVersion.W3C.policyNsUri};
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,27 +33,34 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.addressing.policy;
 
-package com.sun.xml.ws.policy.jaxws.spi;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.policy.spi.PrefixMapper;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * The service provider implementing this interface will be discovered and called to configure
- * wsdl model based on PolicyMap bound to it.
+ * This supplies the prefixes for the namespaces under Addressing domain that are not covered by the default
+ * Addressing Policy provider in JAX-WS.
  *
- * @author japod
+ * This class exists in WSIT to provide functionality for backwards compatibility with previously generated
+ * wsaw:UsingAddressing assertion.
+ *
+ * @author Rama Pulavarthi
  */
-public interface ModelConfiguratorProvider {
-    
-    /**
-     * A callback method that allows to retrieve policy related information from provided PolicyMap
-     * and to configure the WSDLModel accordingly.
-     *
-     * @param model which is to be configured
-     * @param map provides policies as a source of information on proper configuration
-     */
-    void configure(WSDLModel model, PolicyMap map) throws PolicyException;
+public class WsawAddressingPrefixMapper implements PrefixMapper {
+
+    private static final Map<String, String> prefixMap = new HashMap<String, String>();
+
+    static {
+        prefixMap.put(AddressingVersion.W3C.policyNsUri, "wsapw3c");
+        prefixMap.put(AddressingVersion.W3C.nsUri, "wsaw3c");
+    }
+
+    public Map<String, String> getPrefixMap() {
+        return prefixMap;
+    }
+
 }

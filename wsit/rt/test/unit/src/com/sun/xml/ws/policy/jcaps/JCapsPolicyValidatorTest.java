@@ -36,7 +36,6 @@
 package com.sun.xml.ws.policy.jcaps;
 
 
-import com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
@@ -82,7 +81,7 @@ public class JCapsPolicyValidatorTest extends TestCase {
                 parser,
                 new PolicyConfigResolver(),
                 isClient,
-                new WSDLParserExtension[] { new PolicyWSDLParserExtension(false) }
+                new WSDLParserExtension[] {}
         );        
     }
 }

@@ -45,6 +45,8 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getResourceUrl;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -257,9 +259,89 @@ public class PolicyConfigParserTest extends TestCase {
         assertEquals("http://example.org/AddNumbers/porttype#AddNumbersServicePolicy", policy.getName());
     }
         
+    public void testGetOperationEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), true);
+        Policy expectedPolicy1 = loadPolicy("effective/resultOperation.xml");
+        Policy expectedPolicy2 = loadPolicy("effective/result2Operation.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlOperationScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getOperationEffectivePolicy(policyMapKey);
+        boolean policyEquals1 = expectedPolicy1.equals(policy);
+        boolean policyEquals2 = expectedPolicy2.equals(policy);
+        // One of the policy alternatives is randomly selected. That means one of the
+        // expected policies must match but not both of them may match.
+        if (policyEquals1 && policyEquals2) {
+            fail("Both policies are matching. Expected only one to match. Computed policy = "
+                 + policy + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+        if (!policyEquals1 && !policyEquals2) {
+            fail("None of the expected policies matched. Computed policy = " + policy 
+                 + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+    }
+    
+    public void testGetInputMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), true);
+        Policy expectedPolicy1 = loadPolicy("effective/resultInput.xml");
+        Policy expectedPolicy2 = loadPolicy("effective/result2Input.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"));
+        Policy policy = policyMap.getInputMessageEffectivePolicy(policyMapKey);
+        boolean policyEquals1 = expectedPolicy1.equals(policy);
+        boolean policyEquals2 = expectedPolicy2.equals(policy);
+        // One of the policy alternatives is randomly selected. That means one of the
+        // expected policies must match but not both of them may match.
+        if (policyEquals1 && policyEquals2) {
+            fail("Both policies are matching. Expected only one to match. Computed policy = "
+                 + policy + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+        if (!policyEquals1 && !policyEquals2) {
+            fail("None of the expected policies matched. Computed policy = " + policy 
+                 + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+    }
+    
+    public void testGetFaultMessageEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/all.wsdl"), true);
+        Policy expectedPolicy1 = loadPolicy("effective/resultFault.xml");
+        Policy expectedPolicy2 = loadPolicy("effective/result2Fault.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        boolean policyEquals1 = expectedPolicy1.equals(policy);
+        boolean policyEquals2 = expectedPolicy2.equals(policy);
+        // One of the policy alternatives is randomly selected. That means one of the
+        // expected policies must match but not both of them may match.
+        if (policyEquals1 && policyEquals2) {
+            fail("Both policies are matching. Expected only one to match. Computed policy = "
+                 + policy + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+        if (!policyEquals1 && !policyEquals2) {
+            fail("None of the expected policies matched. Computed policy = " + policy 
+                 + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+    }
+    
+    public void testGetFaultMessageWithTwoServicesEffectivePolicy() throws Exception {
+        PolicyMap policyMap = PolicyConfigParser.parse(getResourceUrl("effective/twoservices.wsdl"), true);
+        Policy expectedPolicy1 = loadPolicy("effective/resultFault.xml");
+        Policy expectedPolicy2 = loadPolicy("effective/result2Fault.xml");
+        PolicyMapKey policyMapKey = PolicyMap.createWsdlFaultMessageScopeKey(new QName("http://example.org/","Service"),new QName("http://example.org/","Port"),new QName("http://example.org/","Operation"),new QName("http://example.org/","Fault"));
+        Policy policy = policyMap.getFaultMessageEffectivePolicy(policyMapKey);
+        boolean policyEquals1 = expectedPolicy1.equals(policy);
+        boolean policyEquals2 = expectedPolicy2.equals(policy);
+        // One of the policy alternatives is randomly selected. That means one of the
+        // expected policies must match but not both of them may match.
+        if (policyEquals1 && policyEquals2) {
+            fail("Both policies are matching. Expected only one to match. Computed policy = "
+                 + policy + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+        if (!policyEquals1 && !policyEquals2) {
+            fail("None of the expected policies matched. Computed policy = " + policy 
+                 + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
+        }
+    }
+    
     private PolicyMap parseConfigFile(String configFile) throws Exception {
         URL url = PolicyUtils.ConfigFile.loadFromClasspath(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile);
-        return PolicyConfigParser.parse(url, false);
+        return PolicyConfigParser.parse(url, true);
     }
 
     /**

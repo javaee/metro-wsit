@@ -78,8 +78,8 @@
     <property name="tmpdir" value="${basedir}/build/tmp"/>
     <property name="apijar-tmpdir" value="${tmpdir}/apijars"/>
     <property name="apijar-tmpdir-v3" value="${tmpdir}/apijars-v3"/>
-    <property name="rtjar-tmpdir" value="${tmpdir}/rtjars"/>
-    <property name="rtjar-tmpdir-v3" value="${tmpdir}/rtjars-v3"/>
+    <property name="rtjar-tmpdir" value="build/rtjars"/>
+    <property name="rtjar-tmpdir-v3" value="build/rtjars-v3"/>
     <property name="toolsjar-tmpdir" value="${tmpdir}/toolsjars"/>
     <property name="extrajar-tmpdir" value="${tmpdir}/extrajars"/>
     <property name="extraapijar-tmpdir" value="${tmpdir}/extraapijars"/>

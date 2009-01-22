@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 import org.xml.sax.SAXException;
 
 import com.sun.xml.ws.api.ResourceLoader;
+import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.api.server.SDDocumentSource;
@@ -103,7 +104,11 @@ public final class PolicyConfigParser {
         LOGGER.entering(configFileIdentifier, container, mutators);
         PolicyMap map = null;
         try {
-            return map = extractPolicyMap(parseModel(configFileIdentifier, container, mutators));
+            WSDLModel configModel= parseModel(configFileIdentifier, container, mutators);
+            //configModel is null in absense of wsit configuration file.
+            if(configModel!= null)
+                map = configModel.getPolicyMap();
+            return map;
         } finally {
             LOGGER.exiting(map);
         }
@@ -131,38 +136,9 @@ public final class PolicyConfigParser {
         LOGGER.entering(configFileUrl, isClient, mutators);
         PolicyMap map = null;
         try {
-            return map = extractPolicyMap(parseModel(configFileUrl, isClient, mutators));
+            return map = parseModel(configFileUrl, isClient, mutators).getPolicyMap();
         } finally {
             LOGGER.exiting(map);
-        }
-    }
-
-    /**
-     * Utility method that tries to retrieve a {@link PolicyMap} object from a given
-     * {@link WSDLModel}. When succesfull, {@link PolicyMap} instance is returned,
-     * otherwise result is {@code null}.
-     *
-     * @param model A {@link WSDLModel} (possibly) with a {@link PolicyMap} object
-     *        populated with information read from the WSIT config file. May be {@code null};
-     *        in that case, {@code null} is returned as a result of this function call.
-     *
-     * @return {@link PolicyMap} instance retrieved from a given {@link WSDLModel}
-     *         if successful, {@code null} otherwise.
-     */
-    public static PolicyMap extractPolicyMap(final WSDLModel model) {
-        LOGGER.entering(model);
-        PolicyMap result = null;
-        try {
-            if (model != null) {
-                final WSDLPolicyMapWrapper wrapper = model.getExtension(WSDLPolicyMapWrapper.class);
-
-                if (wrapper != null) {
-                    result = wrapper.getPolicyMap();
-                }
-            }
-            return result;
-        } finally {
-            LOGGER.exiting(result);
         }
     }
 
@@ -211,7 +187,7 @@ public final class PolicyConfigParser {
         try {
             final String configFileName = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
             if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest(LocalizationMessages.WSP_1037_CONFIG_FILE_IS(configFileName));
+                LOGGER.finest(LocalizationMessages.WSP_5011_CONFIG_FILE_IS(configFileName));
             }
 
             // Try loading config file
@@ -220,12 +196,12 @@ public final class PolicyConfigParser {
             try {
                 configFileUrl = loader.getResource(configFileName);
             } catch (MalformedURLException e) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1054_FAILED_RESOURCE_FROM_LOADER(configFileName, loader), e));
+                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5021_FAILED_RESOURCE_FROM_LOADER(configFileName, loader), e));
             }
 
             if (configFileUrl != null) {
                 model = parseModel(configFileUrl, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier), mutators);
-                LOGGER.info(LocalizationMessages.WSP_1049_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
+                LOGGER.info(LocalizationMessages.WSP_5018_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
             }
 
             return model;
@@ -257,7 +233,7 @@ public final class PolicyConfigParser {
         WSDLModel model = null;
         try {
             if (null == configFileUrl) {
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_1028_FAILED_TO_READ_NULL_WSIT_CFG()));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5007_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
 
             final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
@@ -265,16 +241,16 @@ public final class PolicyConfigParser {
             model = WSDLModel.WSDLParser.parse(
                     parser,
                     new PolicyConfigResolver(),
-                    isClient,
-                    new WSDLParserExtension[]{new PolicyWSDLParserExtension(true, mutators)});
+                    isClient,Container.NONE,PolicyResolverFactory.DEFAULT_POLICY_RESOLVER,
+                    new WSDLParserExtension[]{});
 
             return model;
         } catch (XMLStreamException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (IOException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (SAXException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_1002_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } finally {
             LOGGER.exiting(model);
         }
@@ -310,7 +286,7 @@ public final class PolicyConfigParser {
 
                 if (parentLoader != null) {
                     if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine(LocalizationMessages.WSP_1053_RESOURCE_FROM_LOADER(resource, parentLoader));
+                        LOGGER.fine(LocalizationMessages.WSP_5020_RESOURCE_FROM_LOADER(resource, parentLoader));
                     }
 
                     resourceUrl = parentLoader.getResource(resource);
@@ -324,17 +300,17 @@ public final class PolicyConfigParser {
                         context = container.getSPI(contextClass);
                         if (context != null) {
                             if (LOGGER.isLoggable(Level.FINE)) {
-                                LOGGER.fine(LocalizationMessages.WSP_1055_RESOURCE_FROM_CONTEXT(resource, context));
+                                LOGGER.fine(LocalizationMessages.WSP_5022_RESOURCE_FROM_CONTEXT(resource, context));
                             }
                             resourceUrl = PolicyUtils.ConfigFile.loadFromContext(WAR_PREFIX + resource, context);
                         }
                     } catch (ClassNotFoundException e) {
                         if (LOGGER.isLoggable(Level.FINE)) {
-                            LOGGER.fine(LocalizationMessages.WSP_1043_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
+                            LOGGER.fine(LocalizationMessages.WSP_5016_CAN_NOT_FIND_CLASS(SERVLET_CONTEXT_CLASSNAME));
                         }
                     }
                     if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest(LocalizationMessages.WSP_1036_CONTEXT_IS(context));
+                        LOGGER.finest(LocalizationMessages.WSP_5010_CONTEXT_IS(context));
                     }
                 }
 
@@ -350,7 +326,7 @@ public final class PolicyConfigParser {
                         resourceUrl = PolicyUtils.ConfigFile.loadFromClasspath(resource);
                     }
                     if (resourceUrl == null && LOGGER.isLoggable(Level.CONFIG)) {
-                        LOGGER.config(LocalizationMessages.WSP_1035_COULD_NOT_LOCATE_WSIT_CFG_FILE(resource, examinedPath));
+                        LOGGER.config(LocalizationMessages.WSP_5009_COULD_NOT_LOCATE_WSIT_CFG_FILE(resource, examinedPath));
                     }
                 }
 

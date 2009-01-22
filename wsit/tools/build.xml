@@ -62,11 +62,15 @@
         </taskdef>
         
         <mkdir dir="${build.gen-src.dir}"/>
-        
+
+        <!-- Workaround to deal with cvs pruning emopty dirs as there are no sources under tools now
+          by adding this, it will work as as normal if in future any sources are added to under tools/src-->
+        <mkdir dir="${src.dir}"/>
+
         <resgen destdir="${build.gen-src.dir}">
             <resource dir="${src.dir}" includes="com/sun/xml/ws/**/*.properties" />
         </resgen>
-        
+
     </target>
     
     <target name="-pre-compile" depends="resgen"
