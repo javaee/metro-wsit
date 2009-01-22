@@ -52,18 +52,18 @@ import javax.xml.ws.WebServiceException;
  * @author Rama Pulavarthi
  */
 public class WsitPolicyResolver implements PolicyResolver {
-    public PolicyMap resolve(ServerContext context) {
-        if(context.getPolicyMap() != null) {
+    public PolicyMap resolve(ServerContext context) throws WebServiceException {
+        final PolicyMap map = context.getPolicyMap();
+        if((map != null) && context.hasWsdl()) {
             //Server-side, there should be only one policy configuration either wsdl or WSIT config.
             return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
         } else {
             //parse WSIT -config file.
             final String configId = context.getEndpointClass().getName();
-            PolicyMap configPolicyMap = null;
             try {
-                configPolicyMap = PolicyConfigParser.parse(configId, context.getContainer());
+                configPolicyMap = PolicyConfigParser.parse(configId, context.getContainer(), context.getMutators());
             } catch (PolicyException e) {
-                LOGGER.fine(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
+                throw new LOGGER.error(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e);
             }
             if (configPolicyMap == null)
                 LOGGER.fine(LocalizationMessages.WSP_5008_CREATE_POLICY_MAP_FOR_CONFIG(configId));
