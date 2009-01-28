@@ -122,7 +122,7 @@ class MetroConfigLoader {
             LOGGER.info(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
             this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
         } else {
-            LOGGER.info("No application metro.xml configuration file found."); // TODO L10N
+            LOGGER.config("No application metro.xml configuration file found."); // TODO L10N
             this.appConfig = null;
         }
     }
