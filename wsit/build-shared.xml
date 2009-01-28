@@ -42,6 +42,15 @@
     
     <import file="properties.xml"/>
 
+    <!-- The built-in Ant core task patch requires an external utility on the -->
+    <!-- path. Therefore we rather use this platform-independent utility.     -->
+    <taskdef classname="org.apache.tools.ant.taskdefs.Merge"
+             name="merge">
+        <classpath>
+            <pathelement location="../etc/lib/ant_merge.jar" />
+        </classpath>
+    </taskdef>
+
     <macrodef name="updateManifestWithVersion"
               description="updates a jar manifest file with the version information">
         <attribute name="file" />

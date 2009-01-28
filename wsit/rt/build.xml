@@ -230,23 +230,17 @@
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
             <metainf>
-                <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
-                    <fileset dir="../etc/META-INF/services">
-                        <include name="*.*"/>
-                    </fileset>
-                </copy>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PolicyAssertionValidator.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PrefixMapper.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PrefixMapper"
-                       ignorewhitespace="true"/>
+                <mkdir dir="build/diff"/>
+                <!-- This task examines if the files in the todir and the fileset -->
+                <!-- differ and merges the differences into the todir.            -->
+                <merge todir="${rtjar-tmpdir}/META-INF/services"
+                       diffdir="build/diff"
+                       ignorewhitespace="true"
+                       difftype="-n"
+                       backups="false"
+                       quiet="true">
+                    <fileset dir="../etc/META-INF/services"/>
+                </merge>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
                     <fileset dir="../etc/META-INF">
@@ -277,23 +271,17 @@
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
             <metainf>
-                <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
-                    <fileset dir="../etc/META-INF/services">
-                        <include name="*.*"/>
-                    </fileset>
-                </copy>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PolicyAssertionValidator.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
-                       ignorewhitespace="true"/>
-                <patch patchfile="../etc/META-INF/services-diff/com.sun.xml.ws.policy.spi.PrefixMapper.diff"
-                       originalfile="${rtjar-tmpdir}/META-INF/services/com.sun.xml.ws.policy.spi.PrefixMapper"
-                       ignorewhitespace="true"/>
+                <mkdir dir="build/diff"/>
+                <!-- This task examines if the files in the todir and the fileset -->
+                <!-- differ and merges the differences into the todir.            -->
+                <merge todir="${rtjar-tmpdir-v3}/META-INF/services"
+                       diffdir="build/diff"
+                       ignorewhitespace="true"
+                       difftype="-n"
+                       backups="false"
+                       quiet="true">
+                    <fileset dir="../etc/META-INF/services"/>
+                </merge>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
                     <fileset dir="../etc/META-INF">
