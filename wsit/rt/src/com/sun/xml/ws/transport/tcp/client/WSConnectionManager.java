@@ -67,9 +67,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.ws.BindingProvider;
@@ -87,7 +87,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     private static final WSConnectionManager instance = new WSConnectionManager();
     
     // set of locked connections, which are in use
-    private final Map<ConnectionSession, Thread> lockedConnections = new HashMap<ConnectionSession, Thread>();
+    private final Map<ConnectionSession, Thread> lockedConnections = new WeakHashMap<ConnectionSession, Thread>();
     
     public static WSConnectionManager getInstance() {
         return instance;
@@ -172,7 +172,7 @@ public class WSConnectionManager implements ConnectionFinder<ConnectionSession>,
     public void freeConnection(@NotNull final ConnectionSession connectionSession) {
         connectionCache.release(connectionSession, 0);
         synchronized(connectionSession) {
-            lockedConnections.put(connectionSession, null);
+            lockedConnections.remove(connectionSession);
             connectionSession.notify();
         }
     }

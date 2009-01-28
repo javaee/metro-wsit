@@ -40,8 +40,10 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.NextAction;
+import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.VersionMismatchException;
@@ -54,9 +56,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import java.io.InputStream;
@@ -66,7 +66,7 @@ import javax.xml.ws.WebServiceException;
 /**
  * @author Alexey Stashok
  */
-public class TCPTransportPipe implements Pipe {
+public class TCPTransportPipe extends AbstractTubeImpl {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
@@ -77,15 +77,11 @@ public class TCPTransportPipe implements Pipe {
     final protected WSService wsService;
     final protected int customTCPPort;
     
-    public TCPTransportPipe(final ClientPipeAssemblerContext context) {
-        this(context.getService(), context.getBinding(), context.getCodec(), -1);
-    }
-
-    public TCPTransportPipe(final ClientTubelineAssemblyContext context) {
+    public TCPTransportPipe(final ClientTubeAssemblerContext context) {
         this(context, -1);
     }
 
-    public TCPTransportPipe(ClientTubelineAssemblyContext context, int customTCPPort) {
+    public TCPTransportPipe(ClientTubeAssemblerContext context, int customTCPPort) {
         this(context.getService(), context.getBinding(), context.getCodec(), customTCPPort);
     }
     
@@ -97,21 +93,35 @@ public class TCPTransportPipe implements Pipe {
         this.customTCPPort = customTCPPort;
     }
     
-    protected TCPTransportPipe(final TCPTransportPipe that, final PipeCloner cloner) {
+    protected TCPTransportPipe(final TCPTransportPipe that, final TubeCloner cloner) {
         this(that.wsService, that.wsBinding, that.defaultCodec.copy(), that.customTCPPort);
         cloner.add(that, this);
     }
-    
+
     public void preDestroy() {
         if (clientTransport != null && clientTransport.getConnectionContext() != null) {
             WSConnectionManager.getInstance().closeChannel(clientTransport.getConnectionContext());
         }
     }
-    
-    public Pipe copy(final PipeCloner cloner) {
+
+    @Override
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new TCPTransportPipe(this, cloner);
     }
-    
+
+    public NextAction processRequest(Packet request) {
+        return doReturnWith(process(request));
+    }
+
+    public NextAction processResponse(Packet response) {
+        throw new IllegalStateException("TCPTransportPipe's processResponse shouldn't be called.");
+    }
+
+    public NextAction processException(Throwable t) {
+        throw new IllegalStateException("TCPTransportPipe's processException shouldn't be called.");
+    }
+
+    @Override
     public Packet process(final Packet packet) {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1010_TCP_TP_PROCESS_ENTER(packet.endpointAddress));

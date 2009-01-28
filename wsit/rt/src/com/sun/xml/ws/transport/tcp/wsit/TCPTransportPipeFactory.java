@@ -39,18 +39,16 @@ package com.sun.xml.ws.transport.tcp.wsit;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.transport.tcp.client.*;
+import com.sun.xml.ws.transport.tcp.client.ServiceChannelTransportPipe;
+import com.sun.xml.ws.transport.tcp.client.TCPTransportPipe;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import javax.xml.namespace.QName;
@@ -63,11 +61,11 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
     private static final QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
 
     @Override
-    public Pipe doCreate(@NotNull final ClientPipeAssemblerContext context) {
+    public Tube doCreate(ClientTubeAssemblerContext context) {
         return doCreate(context, true);
     }
-    
-    public static Pipe doCreate(@NotNull final ClientPipeAssemblerContext context, final boolean checkSchema) {
+
+    public static Tube doCreate(@NotNull final ClientTubeAssemblerContext context, final boolean checkSchema) {
         if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
             return null;
         }
@@ -78,22 +76,7 @@ public class TCPTransportPipeFactory extends com.sun.xml.ws.transport.tcp.client
         }
         
         return new TCPTransportPipe(context);
-    }
-    
-    public static Tube doCreate(@NotNull final ClientTubelineAssemblyContext context, final boolean checkSchema) {
-        if (checkSchema && !TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
-            return null;
-        }
-        
-        initializeConnectionManagement(context.getWsdlPort());
-        int customTCPPort = retrieveCustomTCPPort(context.getWsdlPort());
-        
-        if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
-            return PipeAdapter.adapt(new ServiceChannelTransportPipe(context, customTCPPort));
-        }
-        
-        return PipeAdapter.adapt(new TCPTransportPipe(context, customTCPPort));
-    }
+    }    
     
     /**
      * Sets the client ConnectionManagement settings, which are passed via cliend

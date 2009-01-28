@@ -93,6 +93,7 @@ public class GrizzlyTCPConnector implements WSTCPConnector {
             selectorThread.setAddress(InetAddress.getByName(host));
             selectorThread.setPort(port);
             selectorThread.setBufferSize(TCPConstants.DEFAULT_FRAME_SIZE);
+            selectorThread.setMaxKeepAliveRequests(-1);
             selectorThread.initEndpoint();
             selectorThread.start();
         } catch (IOException e) {

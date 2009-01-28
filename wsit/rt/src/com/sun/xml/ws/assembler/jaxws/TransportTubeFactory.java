@@ -64,7 +64,7 @@ public final class TransportTubeFactory implements TubeFactory {
 
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isOptimizedTransportEnabled(context.getPolicyMap(), context.getWsdlPort(), context.getPortInfo())) {
-            return TCPTransportPipeFactory.doCreate(context, false);
+            return TCPTransportPipeFactory.doCreate(context.getWrappedContext(), false);
         } else {
             return context.getWrappedContext().createTransportTube();
         }

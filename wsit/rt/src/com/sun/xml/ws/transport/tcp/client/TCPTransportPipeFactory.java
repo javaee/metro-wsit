@@ -36,10 +36,9 @@
 
 package com.sun.xml.ws.transport.tcp.client;
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.TransportPipeFactory;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
+import com.sun.xml.ws.api.pipe.TransportTubeFactory;
+import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.servicechannel.stubs.ServiceChannelWSImplService;
 import javax.xml.namespace.QName;
@@ -47,19 +46,19 @@ import javax.xml.namespace.QName;
 /**
  * @author Alexey Stashok
  */
-public class TCPTransportPipeFactory extends TransportPipeFactory {
+public class TCPTransportPipeFactory extends TransportTubeFactory {
     private static final QName serviceChannelServiceName = new ServiceChannelWSImplService().getServiceName();
     
     @Override
-    public Pipe doCreate(@NotNull final ClientPipeAssemblerContext context) {
+    public Tube doCreate(ClientTubeAssemblerContext context) {
         if (!TCPConstants.PROTOCOL_SCHEMA.equalsIgnoreCase(context.getAddress().getURI().getScheme())) {
             return null;
         }
-        
+
         if (context.getService().getServiceName().equals(serviceChannelServiceName)) {
             return new ServiceChannelTransportPipe(context);
         }
-        
+
         return new TCPTransportPipe(context);
     }
     

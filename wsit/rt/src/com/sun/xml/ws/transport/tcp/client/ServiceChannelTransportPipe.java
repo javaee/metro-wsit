@@ -38,11 +38,10 @@ package com.sun.xml.ws.transport.tcp.client;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.ContentType;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.PipeCloner;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.ConnectionSession;
@@ -60,19 +59,15 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
     private static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".client");
     
-    public ServiceChannelTransportPipe(@NotNull final ClientPipeAssemblerContext context) {
+    public ServiceChannelTransportPipe(@NotNull final ClientTubeAssemblerContext context) {
         super(context);
     }
 
-    public ServiceChannelTransportPipe(@NotNull final ClientTubelineAssemblyContext context) {
-        super(context);
-    }
-
-    public ServiceChannelTransportPipe(ClientTubelineAssemblyContext context, int customTCPPort) {
+    public ServiceChannelTransportPipe(ClientTubeAssemblerContext context, int customTCPPort) {
         super(context, customTCPPort);
     }
     
-    private ServiceChannelTransportPipe(final ServiceChannelTransportPipe that, final PipeCloner cloner) {
+    private ServiceChannelTransportPipe(final ServiceChannelTransportPipe that, final TubeCloner cloner) {
         super(that, cloner);
     }
     
@@ -153,8 +148,7 @@ public final class ServiceChannelTransportPipe extends TCPTransportPipe {
     }
     
     @Override
-    public Pipe copy(final PipeCloner cloner) {
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new ServiceChannelTransportPipe(this, cloner);
     }
-    
 }
