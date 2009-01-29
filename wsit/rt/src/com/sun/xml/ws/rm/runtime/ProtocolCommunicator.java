@@ -41,8 +41,6 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Engine;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.localization.LocalizationMessages;
@@ -50,8 +48,6 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
@@ -67,16 +63,13 @@ final class ProtocolCommunicator {
 
     final QName soapMustUnderstandAttributeName;
     //
-    private volatile Engine fiberEngine;
-    //
-    private final ReadWriteLock fiberEngineLock = new ReentrantReadWriteLock();
     private final AtomicReference<Packet> musterRequestPacket;
-    private final Tube tubeline;
     private final SecureConversationInitiator scInitiator;
     private final AddressingVersion addressingVersion;
+    private final FiberExecutor fiberExecutor;
 
     ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, AddressingVersion addressingVersion, SOAPVersion soapVersion) {
-        this.tubeline = tubeline;
+        this.fiberExecutor = new FiberExecutor("RmProtocolCommunicator", tubeline);
         this.scInitiator = scInitiator;
         this.addressingVersion = addressingVersion;
         this.soapMustUnderstandAttributeName = new QName(soapVersion.nsUri, "mustUnderstand");
@@ -119,9 +112,7 @@ final class ProtocolCommunicator {
      * @return response {@link Message} wrapped in a response {@link Packet} received
      */
     Packet send(Packet request) {
-        Fiber fiber = getFiberEngine().createFiber(); // TODO: could we possibly reuse the same fiber?
-
-        return fiber.runSync(tubeline, request);
+        return fiberExecutor.runSync(request);
     }
 
     /**
@@ -145,26 +136,5 @@ final class ProtocolCommunicator {
      */    
     Packet createEmptyRequestPacket() {
         return musterRequestPacket.get().copy(false);
-    }
-
-    private Engine getFiberEngine() {
-        try {
-            fiberEngineLock.readLock().lock();
-            if (fiberEngine == null) {
-                fiberEngineLock.readLock().unlock();
-                try {
-                    fiberEngineLock.writeLock().lock();
-                    if (fiberEngine == null) {
-                        fiberEngine = Fiber.current().owner;
-                    }
-                } finally {
-                    fiberEngineLock.readLock().lock();
-                    fiberEngineLock.writeLock().unlock();
-                }
-            }
-            return fiberEngine;
-        } finally {
-            fiberEngineLock.readLock().unlock();
-        }
     }
 }

@@ -39,6 +39,7 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rm.McVersion;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
@@ -75,6 +76,10 @@ class RxConfigurationImpl implements RxConfiguration {
 
     public RmVersion getRmVersion() {
         return (rmFeature == null) ? null : rmFeature.getVersion();
+    }
+
+    public McVersion getMcVersion() {
+        return (mcSupported) ? McVersion.WSMC200702 : null;
     }
 
     public SOAPVersion getSoapVersion() {

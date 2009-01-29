@@ -40,14 +40,8 @@ import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.policy.assertion.AssertionNamespace;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
 
 /**
  * This enumeration contains all currently supported WS-ReliableMessaging versions.
@@ -170,11 +164,11 @@ public enum RmVersion {
     /**
      * Private fields
      */
-    private final Map<AddressingVersion, JAXBRIContext> jaxbContexts;
+    private final JaxbContextRepository jaxbContextRepository;
 
-    private RmVersion(String nsUri, String policynsuri, Class<?>... rmProtocolClasses) {
+    private RmVersion(String nsUri, String policyNsUri, Class<?>... rmProtocolClasses) {
         this.namespaceUri = nsUri;
-        this.policyNamespaceUri = policynsuri;
+        this.policyNamespaceUri = policyNsUri;
 
         this.ackRequestedAction = namespaceUri + "/AckRequested";
         this.createSequenceAction = namespaceUri + "/CreateSequence";
@@ -197,34 +191,7 @@ public enum RmVersion {
         this.sequenceClosedFaultCode = new QName(namespaceUri, "SequenceClosed"); // since WS-RM 1.1
         this.wsrmRequiredFaultCode = new QName(namespaceUri, "WSRMRequired"); // since WS-RM 1.1
 
-        try {
-            /**
-             * We need to add all supported WS-A EndpointReference implementation classes to the array
-             * before we pass the array to the JAXBRIContext factory method.
-             */
-            this.jaxbContexts = new HashMap<AddressingVersion, JAXBRIContext>();
-            LinkedList<Class<?>> jaxbElementClasses = new LinkedList<Class<?>>(Arrays.asList(rmProtocolClasses));
-
-            for (AddressingVersion av : AddressingVersion.values()) {
-                jaxbElementClasses.add(av.eprType.eprClass);
-
-                Map<Class, Class> eprClassReplacementMap = new HashMap<Class, Class>();
-                eprClassReplacementMap.put(EndpointReference.class, av.eprType.eprClass);
-
-                this.jaxbContexts.put(av, JAXBRIContext.newInstance(
-                        jaxbElementClasses.toArray(rmProtocolClasses),
-                        null,
-                        eprClassReplacementMap,
-                        null,
-                        false,
-                        null));
-
-                jaxbElementClasses.removeLast();
-            }
-
-        } catch (JAXBException e) {
-            throw new Error(e);
-        }
+        this.jaxbContextRepository = new JaxbContextRepository(rmProtocolClasses);
     }
 
     /**
@@ -277,7 +244,7 @@ public enum RmVersion {
     }
 
     /**
-     * Creates JAXB {@link Unmarshaller} that is able to unmarshall Rm protocol elements for given WS-RM version.
+     * Creates JAXB {@link Unmarshaller} that is able to unmarshall protocol elements for given WS-RM version.
      * <p />
      * As JAXB unmarshallers are not thread-safe, this method should be used to create a new {@link Unmarshaller} 
      * instance whenever there is a chance that the same instance might be invoked concurrently from multiple
@@ -291,12 +258,7 @@ public enum RmVersion {
      * @exception RxRuntimeException in case the creation of unmarshaller failed
      */
     public Unmarshaller createUnmarshaller(AddressingVersion av) throws RxRuntimeException {
-        try {
-            return jaxbContexts.get(av).createUnmarshaller();
-        } catch (JAXBException ex) {
-            LOGGER.severe("Unable to create JAXB unmarshaller", ex);
-            throw new RxRuntimeException("Unable to create JAXB unmarshaller", ex);
-        }
+        return jaxbContextRepository.createUnmarshaller(av);
     }
 
     /**
@@ -307,6 +269,6 @@ public enum RmVersion {
      * @return JAXB context that is intitialized based on a given addressing version.
      */
     public JAXBRIContext getJaxbContext(AddressingVersion av) {
-        return jaxbContexts.get(av);
+        return jaxbContextRepository.getJaxbContext(av);
     }
 }

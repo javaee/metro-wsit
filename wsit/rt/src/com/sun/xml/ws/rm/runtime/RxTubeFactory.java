@@ -64,9 +64,10 @@ public final class RxTubeFactory implements TubeFactory {
 
         Tube newTubelineHead = context.getTubelineHead();
 
-        if (configuration.isMakeConnectionSupportEnabled()) {
-            newTubelineHead = new McClientTube(configuration, newTubelineHead);
-        }
+// TODO: uncomment WS-MC tube
+//        if (configuration.isMakeConnectionSupportEnabled()) {
+//            newTubelineHead = new McClientTube(configuration, newTubelineHead, context);
+//        }
         if (configuration.isReliableMessagingEnabled()) {
              newTubelineHead = new RmClientTube(configuration, newTubelineHead, context);
         }
@@ -88,9 +89,11 @@ public final class RxTubeFactory implements TubeFactory {
         if (configuration.isReliableMessagingEnabled()) {
              newTubelineHead = AbstractRmServerTube.getInstance(configuration, newTubelineHead);
         }
-        if (configuration.isMakeConnectionSupportEnabled()) {
-            newTubelineHead = new McServerTube(configuration, newTubelineHead);
-        }
+
+// TODO: uncomment WS-MC tube
+//        if (configuration.isMakeConnectionSupportEnabled()) {
+//            newTubelineHead = new McServerTube(configuration, newTubelineHead);
+//        }
         
         return newTubelineHead;
     }

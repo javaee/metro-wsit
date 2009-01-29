@@ -112,7 +112,7 @@ class Rm11PacketAdapter extends PacketAdapter {
 
     @Override
     void initSequenceHeaderData() throws RxRuntimeException {
-        SequenceElement sequenceElement = this.readHeaderAsUnderstood("Sequence");
+        SequenceElement sequenceElement = this.readHeaderAsUnderstood(RmVersion.WSRM200702.namespaceUri, "Sequence");
         if (sequenceElement != null) {
             this.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
         }
@@ -120,13 +120,13 @@ class Rm11PacketAdapter extends PacketAdapter {
 
     @Override
     String initAckRequestedHeaderData() throws RxRuntimeException {
-        AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood("AckRequested");
+        AckRequestedElement ackRequestedElement = this.readHeaderAsUnderstood(RmVersion.WSRM200702.namespaceUri, "AckRequested");
         return (ackRequestedElement != null) ? ackRequestedElement.getId() : null;
     }
 
     @Override
     public void processAcknowledgements(SequenceManager sequenceManager, String expectedAckedSequenceId) throws RxRuntimeException {
-        SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood("SequenceAcknowledgement");
+        SequenceAcknowledgementElement ackElement = this.readHeaderAsUnderstood(RmVersion.WSRM200702.namespaceUri, "SequenceAcknowledgement");
 
         if (ackElement != null) {
             if (expectedAckedSequenceId != null) {

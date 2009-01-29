@@ -405,10 +405,10 @@ public abstract class PacketAdapter {
      * 
      * @return RM header with the specified name in the form of JAXB element or {@code null} in case no such header was found
      */
-    public final <T> T readHeaderAsUnderstood(String name) throws RxRuntimeException {
+    public final <T> T readHeaderAsUnderstood(String nsUri, String name) throws RxRuntimeException {
         checkMessageReadyState();
 
-        Header header = message.getHeaders().get(rmVersion.namespaceUri, name, true);
+        Header header = message.getHeaders().get(nsUri, name, true);
         if (header == null) {
             return null;
         }
@@ -417,7 +417,7 @@ public abstract class PacketAdapter {
             @SuppressWarnings("unchecked") T result = (T) header.readAsJAXB(jaxbUnmarshaller);
             return result;
         } catch (JAXBException ex) {
-            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(rmVersion.namespaceUri + "#" + name), ex));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1122_ERROR_MARSHALLING_RM_HEADER(nsUri + "#" + name), ex));
         }
     }
 

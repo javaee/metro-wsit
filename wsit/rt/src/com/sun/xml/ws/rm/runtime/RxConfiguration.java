@@ -38,6 +38,7 @@ package com.sun.xml.ws.rm.runtime;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rm.McVersion;
 import com.sun.xml.ws.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rm.ReliableMessagingFeature.DeliveryAssurance;
@@ -64,6 +65,15 @@ public interface RxConfiguration {
      * @see ReliableMessagingFeature#getVersion() 
      */
     public RmVersion getRmVersion();
+
+    /**
+     * Specifies which WS-MC version SOAP messages and SOAP message headers should
+     * be used for communication between MC initiator and MC receiver
+     *
+     * @return MC version currently configured. If not set explicitly,
+     *         the default value is specified by a call to {@link McVersion#getDefault()}.
+     */
+    public McVersion getMcVersion();
 
     /**
      * Provides information about the SOAP protocol version used on the endpoint.
