@@ -43,7 +43,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.WsitPolicyUtil;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 
 import javax.xml.ws.WebServiceException;
@@ -82,9 +81,8 @@ public class WsitPolicyResolver implements PolicyResolver {
 
     public PolicyMap resolve(ClientContext context) {
         PolicyMap effectivePolicyMap;
-        PolicyMap clientConfigPolicyMap;
         try {
-            clientConfigPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
+            final PolicyMap clientConfigPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
             if (clientConfigPolicyMap == null) {
                 LOGGER.config(LocalizationMessages.WSP_5014_CLIENT_CONFIG_PROCESSING_SKIPPED());
                 effectivePolicyMap = context.getPolicyMap();
