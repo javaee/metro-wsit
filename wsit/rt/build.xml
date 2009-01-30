@@ -279,6 +279,7 @@
                        diffdir="build/diff"
                        ignorewhitespace="true"
                        difftype="-n"
+                       forcediff="true"
                        backups="false"
                        quiet="true">
                     <fileset dir="../etc/META-INF/services"/>
