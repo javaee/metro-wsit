@@ -230,18 +230,10 @@
     <target name="expand-jars-runtime" unless="runtime.jars.expanded">
         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir}" >
             <metainf>
-                <mkdir dir="build/diff"/>
-                <!-- This task examines if the files in the todir and the fileset -->
-                <!-- differ and merges the differences into the todir.            -->
-                <merge todir="${rtjar-tmpdir}/META-INF/services"
-                       diffdir="build/diff"
-                       ignorewhitespace="true"
-                       difftype="-n"
-                       forcediff="true"
-                       backups="false"
-                       quiet="true">
+                <!-- Replace JAX-WS services files with ours -->
+                <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services"/>
-                </merge>
+                </copy>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir}/META-INF" overwrite="true">
                     <fileset dir="../etc/META-INF">
@@ -272,18 +264,10 @@
     <target name="expand-jars-v3-runtime" unless="runtime.jars.expanded">
         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
             <metainf>
-                <mkdir dir="build/diff"/>
-                <!-- This task examines if the files in the todir and the fileset -->
-                <!-- differ and merges the differences into the todir.            -->
-                <merge todir="${rtjar-tmpdir-v3}/META-INF/services"
-                       diffdir="build/diff"
-                       ignorewhitespace="true"
-                       difftype="-n"
-                       forcediff="true"
-                       backups="false"
-                       quiet="true">
+                <!-- Replace JAX-WS services files with ours -->
+                <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services"/>
-                </merge>
+                </copy>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
                     <fileset dir="../etc/META-INF">
