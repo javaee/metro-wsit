@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -35,16 +35,13 @@
  */
 package com.sun.xml.ws.rm.policy.spi_impl;
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.model.wsdl.WSDLService;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
 import com.sun.xml.ws.rm.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rm.ReliableMessagingFeatureBuilder;
@@ -52,8 +49,11 @@ import com.sun.xml.ws.rm.policy.assertion.MakeConnectionSupportedAssertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rm.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rm.policy.assertion.RmAssertionTranslator;
+
 import java.util.Collection;
+import java.util.LinkedList;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  *
@@ -67,34 +67,33 @@ public class RxModelConfigurationProvider implements ModelConfiguratorProvider {
      * process WS-RM policy assertions and if found and is not optional then RM is enabled on the
      * {@link WSDLPort}
      *
-     * @param model must be non-null
+     * @param key Key that identifies the endpoint scope
      * @param policyMap must be non-null
+     * @return The list of features
+     * @throws PolicyException If retrieving the policy triggered an exception
      */
-    public void configure(@NotNull WSDLModel model, @NotNull PolicyMap policyMap) throws PolicyException {
-        assert model != null;
-        assert policyMap != null;
-
-        for (WSDLService service : model.getServices().values()) {
-            for (WSDLPort port : service.getPorts()) {
-                Policy policy = policyMap.getEndpointEffectivePolicy(PolicyMap.createWsdlEndpointScopeKey(service.getName(), port.getName()));
-                if (policy != null) {
-                    for (AssertionSet alternative : policy) {
-                        if (isPresentAndMandatory(alternative, Rm10Assertion.NAME) || isPresentAndMandatory(alternative, Rm11Assertion.NAME)) {
-                            ReliableMessagingFeatureBuilder rmFeatureBuilder = new ReliableMessagingFeatureBuilder();
-                            for (PolicyAssertion assertion : alternative) {
-                                if (assertion instanceof RmAssertionTranslator) {
-                                    rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
-                                }
-                            } // next assertion
-                            port.addFeature(rmFeatureBuilder.build());
-                        } // end-if RM assertion is present and not optional
-                        if (isPresentAndMandatory(alternative, MakeConnectionSupportedAssertion.NAME)) {
-                            port.addFeature(new MakeConnectionSupportedFeature());
-                        } // end-if MC assertion is present and not optional
-                    } // next alternative
-                } // end-if policy not null
-            } // end foreach port
-        } // end foreach service
+    public Collection<WebServiceFeature> getFeatures(PolicyMapKey key, PolicyMap policyMap) throws PolicyException {
+        final Collection<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
+        if ((key != null) && (policyMap != null)) {
+            Policy policy = policyMap.getEndpointEffectivePolicy(key);
+            if (policy != null) {
+                for (AssertionSet alternative : policy) {
+                    if (isPresentAndMandatory(alternative, Rm10Assertion.NAME) || isPresentAndMandatory(alternative, Rm11Assertion.NAME)) {
+                        ReliableMessagingFeatureBuilder rmFeatureBuilder = new ReliableMessagingFeatureBuilder();
+                        for (PolicyAssertion assertion : alternative) {
+                            if (assertion instanceof RmAssertionTranslator) {
+                                rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
+                            }
+                        } // next assertion
+                        features.add(rmFeatureBuilder.build());
+                    } // end-if RM assertion is present and not optional
+                    if (isPresentAndMandatory(alternative, MakeConnectionSupportedAssertion.NAME)) {
+                        features.add(new MakeConnectionSupportedFeature());
+                    } // end-if MC assertion is present and not optional
+                } // next alternative
+            } // end-if policy not null
+        }
+        return features;
     }
 
     private Collection<PolicyAssertion> getAssertionsWithName(AssertionSet alternative, QName name) throws PolicyException {
