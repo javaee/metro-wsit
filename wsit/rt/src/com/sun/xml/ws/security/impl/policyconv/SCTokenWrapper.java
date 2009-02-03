@@ -194,8 +194,21 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
                 for(PolicyAssertion assertion:bpSet){
                     if(PolicyUtil.isAsymmetricBinding(assertion, spVersion)){
                         AsymmetricBinding sb =  (AsymmetricBinding)assertion;
-                        addToken(sb.getInitiatorToken());
-                        addToken(sb.getRecipientToken());
+                         Token iToken = sb.getInitiatorToken();
+                        if (iToken != null){
+                            addToken(iToken);
+                        }else{
+                            addToken(sb.getInitiatorSignatureToken());
+                            addToken(sb.getInitiatorEncryptionToken());
+                        }
+
+                        Token rToken = sb.getRecipientToken();
+                        if (rToken != null){
+                            addToken(rToken);
+                        }else{
+                            addToken(sb.getRecipientSignatureToken());
+                            addToken(sb.getRecipientEncryptionToken());
+                        }
                     }else if(PolicyUtil.isSymmetricBinding(assertion, spVersion)){
                         SymmetricBinding sb = (SymmetricBinding)assertion;
                         Token token = sb.getProtectionToken();

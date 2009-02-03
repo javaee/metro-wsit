@@ -80,6 +80,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.IssuedToken);
         implementedAssertions.add(Constants.Issuer);
         implementedAssertions.add(Constants.InitiatorToken);
+        implementedAssertions.add(Constants.InitiatorSignatureToken);
+        implementedAssertions.add(Constants.InitiatorEncryptionToken);
         
         implementedAssertions.add(Constants.KerberosToken);
         
@@ -89,6 +91,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         implementedAssertions.add(Constants.ProtectionToken);
         
         implementedAssertions.add(Constants.RecipientToken);
+        implementedAssertions.add(Constants.RecipientSignatureToken);
+        implementedAssertions.add(Constants.RecipientEncryptionToken);
         implementedAssertions.add(Constants.RelToken);
         implementedAssertions.add(Constants.RequestSecurityTokenTemplate);
         implementedAssertions.add(Constants.RequiredElements);

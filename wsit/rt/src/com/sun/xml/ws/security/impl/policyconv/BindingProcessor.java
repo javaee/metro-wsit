@@ -107,6 +107,9 @@ public abstract class BindingProcessor {
      */
     
     protected void protectPrimarySignature()throws PolicyException{
+        if (primarySP == null){
+            return;
+        }
         boolean encryptSignConfirm = (isServer && !isIncoming) || (!isServer && isIncoming);
         if(protectionOrder == Binding.ENCRYPT_SIGN){
             EncryptionPolicy ep = getSecondaryEncryptionPolicy();
@@ -129,15 +132,20 @@ public abstract class BindingProcessor {
     }
     
     protected void protectTimestamp(TimestampPolicy tp){
-        SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
-        iAP.getTargetCreator().addTransform(target);
-        SecurityPolicyUtil.setName(target, tp);
-        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
-        spFB.addTargetBinding(target);
+        if (primarySP != null){
+            SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
+            iAP.getTargetCreator().addTransform(target);
+            SecurityPolicyUtil.setName(target, tp);
+            SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
+            spFB.addTargetBinding(target);
+        }
     }
     
     //TODO:WS-SX Spec:If we have a secondary signature should it protect the token too ?
     protected void protectToken(WSSPolicy token){
+        if (primarySP == null){
+            return;
+        }
         protectToken(token,false);
     }
     
@@ -197,43 +205,56 @@ public abstract class BindingProcessor {
     
     
     protected void addPrimaryTargets()throws PolicyException{
-        SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
-        EncryptionPolicy.FeatureBinding epFB = (EncryptionPolicy.FeatureBinding)primaryEP.getFeatureBinding();
-        if(spFB.getCanonicalizationAlgorithm() == null || spFB.getCanonicalizationAlgorithm().equals("")){
-            spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+        SignaturePolicy.FeatureBinding spFB = null;
+        if (primarySP != null){
+            spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
         }
-        
-        //TODO:: Merge SignedElements.
-        
-        for(SignedElements se : signedElements){
-            iAP.process(se,spFB);
+        EncryptionPolicy.FeatureBinding epFB = null;
+        if (primaryEP != null){
+            epFB = (EncryptionPolicy.FeatureBinding)primaryEP.getFeatureBinding();
         }
-        /*
-            If Empty SignParts is present then remove rest of the SignParts
-            as we will be signing all HEADERS and Body. Question to WS-SX:
-            Are SignedParts headers targeted to ultimate reciever role.
-         */
-        for(SignedParts sp : signedParts){
-            if(SecurityPolicyUtil.isSignedPartsEmpty(sp)){
-                signedParts.removeAllElements();
-                signedParts.add(sp);
-                break;
+
+        if (spFB != null){
+            if(spFB.getCanonicalizationAlgorithm() == null || spFB.getCanonicalizationAlgorithm().equals("")){
+                spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
+            }
+
+            //TODO:: Merge SignedElements.
+
+            for(SignedElements se : signedElements){
+                iAP.process(se,spFB);
+            }
+            /*
+                If Empty SignParts is present then remove rest of the SignParts
+                as we will be signing all HEADERS and Body. Question to WS-SX:
+                Are SignedParts headers targeted to ultimate reciever role.
+             */
+            for(SignedParts sp : signedParts){
+                if(SecurityPolicyUtil.isSignedPartsEmpty(sp)){
+                    signedParts.removeAllElements();
+                    signedParts.add(sp);
+                    break;
+                }
+            }
+            for(SignedParts sp : signedParts){
+                iAP.process(sp,spFB);
+            }
+
+            if(isWSS11() && requireSC()){
+                iAP.process(SIGNATURE_CONFIRMATION,spFB);
             }
         }
-        for(SignedParts sp : signedParts){
-            iAP.process(sp,spFB);
-        }
-        for(EncryptedParts ep :encryptedParts){
-            foundEncryptTargets = true;
-            eAP.process(ep,epFB);
-        }
-        
-        for(EncryptedElements encEl : encryptedElements){
-            foundEncryptTargets = true;
-            eAP.process(encEl,epFB);
-        }
-        if(isWSS11() && requireSC()){
-            iAP.process(SIGNATURE_CONFIRMATION,spFB);
+
+        if (epFB != null){
+            for(EncryptedParts ep :encryptedParts){
+                foundEncryptTargets = true;
+                eAP.process(ep,epFB);
+            }
+
+            for(EncryptedElements encEl : encryptedElements){
+                foundEncryptTargets = true;
+                eAP.process(encEl,epFB);
+            }
         }
     }
     

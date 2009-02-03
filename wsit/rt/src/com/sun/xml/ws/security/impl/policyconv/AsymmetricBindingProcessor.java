@@ -136,17 +136,36 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
     
     protected Token getEncryptionToken(){
         if(isServer^isIncoming){
-            return binding.getInitiatorToken();
+              Token token = binding.getInitiatorToken();
+             if (token == null){
+                token = binding.getRecipientEncryptionToken();
+            }
+            return token;
         }else{
-            return binding.getRecipientToken();
+            Token token= binding.getRecipientToken();
+            if (token == null){
+                token = binding.getInitiatorEncryptionToken();
+            }
+
+            return token;
         }
     }
     
     protected Token getSignatureToken(){
-        if(isServer^isIncoming) {
-            return binding.getRecipientToken();
+        if(isServer^isIncoming){
+            Token token = binding.getRecipientToken();
+            if (token == null){
+                 token = binding.getRecipientSignatureToken();
+            }
+
+            return token;
         }else{
-            return binding.getInitiatorToken();
+            Token token= binding.getInitiatorToken();
+            if (token == null){
+                token = binding.getInitiatorSignatureToken();
+            }
+
+            return token;
         }
     }
     

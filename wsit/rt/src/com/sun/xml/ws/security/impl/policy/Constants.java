@@ -122,6 +122,8 @@ public class Constants {
     public final static String UsernameToken = "UsernameToken";
     public final static String OnlySignEntireHeadersAndBody =  "OnlySignEntireHeadersAndBody";
     public final static String InitiatorToken = "InitiatorToken";
+    public final static String InitiatorSignatureToken = "InitiatorSignatureToken";
+    public final static String InitiatorEncryptionToken = "InitiatorEncryptionToken";
     public final static String WssSamlV20Token11 = "WssSamlV20Token11";
     public final static String WssSamlV10Token11 = "WssSamlV10Token11";
     public final static String Basic256 = "Basic256";
@@ -161,6 +163,8 @@ public class Constants {
     public final static String WssX509V1Token11 = "WssX509V1Token11";
     public final static String WssX509V3Token11 = "WssX509V3Token11";
     public final static String RecipientToken = "RecipientToken";
+    public final static String RecipientSignatureToken = "RecipientSignatureToken";
+    public final static String RecipientEncryptionToken = "RecipientEncryptionToken";
     public final static String EncryptionToken = "EncryptionToken";
     public final static String Lax = "Lax";
     public final static String Layout = "Layout";
