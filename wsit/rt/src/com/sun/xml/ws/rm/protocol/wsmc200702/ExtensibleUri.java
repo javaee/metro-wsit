@@ -52,6 +52,14 @@ public class ExtensibleUri {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public ExtensibleUri() {
+        // empty
+    }
+
+    public ExtensibleUri(String value) {
+        this.value = value;
+    }
+
     /**
      * Gets the value of the value property.
      * 

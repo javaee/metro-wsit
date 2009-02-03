@@ -65,6 +65,18 @@ public class MakeConnection {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public MakeConnection() {
+        // empty
+    }
+
+    public MakeConnection(String address) {
+        this(new ExtensibleUri(address));
+    }
+
+    public MakeConnection(ExtensibleUri address) {
+        this.address = address;
+    }
+
     /**
      * Gets the value of the address property.
      * 

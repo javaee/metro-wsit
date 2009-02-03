@@ -62,7 +62,7 @@ public enum McVersion {
     /**
      * Action constants
      */
-    public final String wsmc;
+    public final String wsmcAction;
     public final String wsmcFaultAction;
     /**
      * Header names
@@ -81,8 +81,7 @@ public enum McVersion {
     McVersion(String nsUri, String policyNsUri, Class<?>... protocolClasses) {
         this.namespaceUri = nsUri;
         this.policyNamespaceUri = policyNsUri;
-
-        this.wsmc = nsUri + "/MakeConnection";
+        this.wsmcAction = nsUri + "/MakeConnection";
         this.wsmcFaultAction = nsUri + "/fault";
 
         this.messagePendingHeaderName = new QName(namespaceUri, "MessagePending");
@@ -125,8 +124,8 @@ public enum McVersion {
      *
      * @exception RxRuntimeException in case the creation of unmarshaller failed
      */
-    public Unmarshaller createUnmarshaller(AddressingVersion av) throws RxRuntimeException {
-        return jaxbContextRepository.createUnmarshaller(av);
+    public Unmarshaller getUnmarshaller(AddressingVersion av) throws RxRuntimeException {
+        return jaxbContextRepository.getUnmarshaller(av);
     }
 
     /**

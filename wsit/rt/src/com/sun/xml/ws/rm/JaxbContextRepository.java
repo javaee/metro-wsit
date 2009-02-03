@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rm;
 
 import com.sun.xml.bind.api.JAXBRIContext;
@@ -52,9 +51,26 @@ import javax.xml.ws.EndpointReference;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 class JaxbContextRepository {
+
     private static final Logger LOGGER = Logger.getLogger(JaxbContextRepository.class);
     //
     private Map<AddressingVersion, JAXBRIContext> jaxbContexts;
+    private ThreadLocal<Map<AddressingVersion, Unmarshaller>> threadLocalUnmarshallers = new ThreadLocal<Map<AddressingVersion, Unmarshaller>>() {
+
+        @Override
+        protected Map<AddressingVersion, Unmarshaller> initialValue() {
+            Map<AddressingVersion, Unmarshaller> result = new HashMap<AddressingVersion, Unmarshaller>();
+            for (Map.Entry<AddressingVersion, JAXBRIContext> entry : jaxbContexts.entrySet()) {
+                try {
+                    result.put(entry.getKey(), entry.getValue().createUnmarshaller());
+                } catch (JAXBException ex) {
+                    LOGGER.severe("Unable to create JAXB unmarshaller", ex);
+                    throw new RxRuntimeException("Unable to create JAXB unmarshaller", ex);
+                }
+            }
+            return result;
+        }
+    };
 
     JaxbContextRepository(Class<?>... classes) throws RxRuntimeException {
         this.jaxbContexts = new HashMap<AddressingVersion, JAXBRIContext>();
@@ -85,6 +101,7 @@ class JaxbContextRepository {
             throw new RxRuntimeException("Unable to create JAXB RI Context", ex);
         }
     }
+
     /**
      * Creates JAXB {@link Unmarshaller} that is able to unmarshall elements for specified classes.
      * <p />
@@ -99,13 +116,8 @@ class JaxbContextRepository {
      *
      * @exception RxRuntimeException in case the creation of unmarshaller failed
      */
-    public Unmarshaller createUnmarshaller(AddressingVersion av) throws RxRuntimeException {
-        try {
-            return jaxbContexts.get(av).createUnmarshaller();
-        } catch (JAXBException ex) {
-            LOGGER.severe("Unable to create JAXB unmarshaller", ex);
-            throw new RxRuntimeException("Unable to create JAXB unmarshaller", ex);
-        }
+    public Unmarshaller getUnmarshaller(AddressingVersion av) throws RxRuntimeException {
+        return threadLocalUnmarshallers.get().get(av);
     }
 
     /**
@@ -118,5 +130,4 @@ class JaxbContextRepository {
     JAXBRIContext getJaxbContext(AddressingVersion av) {
         return jaxbContexts.get(av);
     }
-
 }

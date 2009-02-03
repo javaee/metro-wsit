@@ -258,7 +258,7 @@ public enum RmVersion {
      * @exception RxRuntimeException in case the creation of unmarshaller failed
      */
     public Unmarshaller createUnmarshaller(AddressingVersion av) throws RxRuntimeException {
-        return jaxbContextRepository.createUnmarshaller(av);
+        return jaxbContextRepository.getUnmarshaller(av);
     }
 
     /**
