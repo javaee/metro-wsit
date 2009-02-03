@@ -37,13 +37,13 @@
 -->
 
 <!--
- $Id: build.xml,v 1.5 2008-02-26 06:35:41 ofung Exp $
+ $Id: build.xml,v 1.6 2009-02-03 09:27:51 ritzmann Exp $
 
  Copyright (c) 2005 Sun Microsystems, Inc.
  All rights reserved.
 -->
 
-<project name="wsit.dev.java.net unit tests" default="main" basedir=".">
+<project name="WSIT tests" default="main" basedir=".">
 
     <target name="main" depends="e2e"/>
 

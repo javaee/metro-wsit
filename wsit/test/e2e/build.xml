@@ -36,7 +36,7 @@
  holder.
 -->
 
-<project name="wsit.dev.java.net main" default="main" basedir=".">
+<project name="WSIT e2e tests" default="main" basedir=".">
     <property file="${basedir}/build.properties"/>
     <import file="properties.xml"/>
 
