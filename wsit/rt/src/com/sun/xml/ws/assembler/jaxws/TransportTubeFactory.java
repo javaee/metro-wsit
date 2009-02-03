@@ -41,15 +41,10 @@ import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.transport.SelectOptimalTransportFeature;
+import com.sun.xml.ws.transport.TcpTransportFeature;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
-import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -59,11 +54,8 @@ import javax.xml.ws.WebServiceException;
  */
 public final class TransportTubeFactory implements TubeFactory {
 
-    private static final String AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI = "http://java.sun.com/xml/ns/wsit/2006/09/policy/transport/client";
-    private static final QName AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION = new QName(AUTO_OPTIMIZED_TRANSPORT_POLICY_NAMESPACE_URI, "AutomaticallySelectOptimalTransport");
-
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isOptimizedTransportEnabled(context.getPolicyMap(), context.getWsdlPort(), context.getPortInfo())) {
+        if (isOptimizedTransportEnabled(context.getWsdlPort(), context.getPortInfo())) {
             return TCPTransportPipeFactory.doCreate(context.getWrappedContext(), false);
         } else {
             return context.getWrappedContext().createTransportTube();
@@ -77,53 +69,33 @@ public final class TransportTubeFactory implements TubeFactory {
     /**
      * Checks to see whether OptimizedTransport is enabled or not.
      *
-     * @param policyMap policy map for {@link this} assembler
      * @param port the WSDLPort object
      * @param portInfo the WSPortInfo object
      * @return true if OptimizedTransport is enabled, false otherwise
      */
-    private boolean isOptimizedTransportEnabled(PolicyMap policyMap, WSDLPort port, WSPortInfo portInfo) {
-        if (policyMap == null || (port == null && portInfo == null)) {
+    private boolean isOptimizedTransportEnabled(WSDLPort port, WSPortInfo portInfo) {
+        if (port == null && portInfo == null) {
             return false;
         }
+
         String schema;
-        QName serviceName;
-        QName portName;
         if (port != null) {
             schema = port.getAddress().getURI().getScheme();
-            serviceName = port.getOwner().getName();
-            portName = port.getName();
         } else {
             schema = portInfo.getEndpointAddress().getURI().getScheme();
-            serviceName = portInfo.getServiceName();
-            portName = portInfo.getPortName();
         }
+
         if (TCPConstants.PROTOCOL_SCHEMA.equals(schema)) {
             // if target endpoint URI starts with TCP schema - dont check policies, just return true
             return true;
-        }
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-            if (policy != null && policy.contains(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION) && policy.contains(AUTO_OPTIMIZED_TRANSPORT_POLICY_ASSERTION)) {
-                /* if client set to choose optimal transport and server has TCP transport policy
-                then need to check server side policy "enabled" attribute*/
-                for (AssertionSet assertionSet : policy) {
-                    for (PolicyAssertion assertion : assertionSet) {
-                        if (assertion.getName().equals(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
-                            String value = assertion.getAttributeValue(new QName("enabled"));
-                            if (value == null) {
-                                return false;
-                            }
-                            value = value.trim();
-                            return Boolean.valueOf(value) || value.equalsIgnoreCase("yes");
-                        }
-                    }
-                }
-            }
+        } else if (port == null) {
             return false;
-        } catch (PolicyException e) {
-            throw new WebServiceException(e);
         }
+
+        TcpTransportFeature tcpTransportFeature = port.getFeature(TcpTransportFeature.class);
+        SelectOptimalTransportFeature optimalTransportFeature = port.getFeature(SelectOptimalTransportFeature.class);
+
+        return (tcpTransportFeature != null && tcpTransportFeature.isEnabled()) &&
+                (optimalTransportFeature != null && optimalTransportFeature.isEnabled());
     }
 }
