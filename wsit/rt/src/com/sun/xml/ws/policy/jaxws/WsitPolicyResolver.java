@@ -41,10 +41,12 @@ import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.WsitPolicyUtil;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 
+import java.util.Collection;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -61,7 +63,9 @@ public class WsitPolicyResolver implements PolicyResolver {
             PolicyMap map = null;
             final String configId = context.getEndpointClass().getName();
             try {
-                map = PolicyConfigParser.parse(configId, context.getContainer(), context.getMutators());
+                Collection<PolicyMapMutator> mutators = context.getMutators();
+                map = PolicyConfigParser.parse(configId, context.getContainer(),
+                                               mutators.toArray(new PolicyMapMutator[mutators.size()]));
             } catch (PolicyException e) {
                 throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e));
             }
