@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.assembler.jaxws;
 
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
@@ -55,7 +56,7 @@ import javax.xml.ws.WebServiceException;
 public final class TransportTubeFactory implements TubeFactory {
 
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isOptimizedTransportEnabled(context.getWsdlPort(), context.getPortInfo())) {
+        if (isOptimizedTransportEnabled(context.getWsdlPort(), context.getPortInfo(), context.getBinding())) {
             return TCPTransportPipeFactory.doCreate(context.getWrappedContext(), false);
         } else {
             return context.getWrappedContext().createTransportTube();
@@ -73,7 +74,7 @@ public final class TransportTubeFactory implements TubeFactory {
      * @param portInfo the WSPortInfo object
      * @return true if OptimizedTransport is enabled, false otherwise
      */
-    private boolean isOptimizedTransportEnabled(WSDLPort port, WSPortInfo portInfo) {
+    private boolean isOptimizedTransportEnabled(WSDLPort port, WSPortInfo portInfo, WSBinding binding) {
         if (port == null && portInfo == null) {
             return false;
         }
@@ -88,12 +89,12 @@ public final class TransportTubeFactory implements TubeFactory {
         if (TCPConstants.PROTOCOL_SCHEMA.equals(schema)) {
             // if target endpoint URI starts with TCP schema - dont check policies, just return true
             return true;
-        } else if (port == null) {
+        } else if (binding == null) {
             return false;
         }
 
-        TcpTransportFeature tcpTransportFeature = port.getFeature(TcpTransportFeature.class);
-        SelectOptimalTransportFeature optimalTransportFeature = port.getFeature(SelectOptimalTransportFeature.class);
+        TcpTransportFeature tcpTransportFeature = binding.getFeature(TcpTransportFeature.class);
+        SelectOptimalTransportFeature optimalTransportFeature = binding.getFeature(SelectOptimalTransportFeature.class);
 
         return (tcpTransportFeature != null && tcpTransportFeature.isEnabled()) &&
                 (optimalTransportFeature != null && optimalTransportFeature.isEnabled());
