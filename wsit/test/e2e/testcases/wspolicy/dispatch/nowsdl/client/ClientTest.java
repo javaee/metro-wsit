@@ -36,11 +36,14 @@
 
 package wspolicy.dispatch.nowsdl.client;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilter;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature;
+import com.sun.xml.ws.developer.JAXWSProperties;
 import java.util.Iterator;
+import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -54,7 +57,6 @@ import javax.xml.soap.Text;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
-import javax.xml.ws.soap.AddressingFeature;
 import javax.xml.ws.soap.SOAPBinding;
 import junit.framework.TestCase;
 
@@ -63,35 +65,6 @@ import junit.framework.TestCase;
  * @author Fabian Ritzmann
  */
 public class ClientTest extends TestCase {
-
-    public static class TestFilter extends PacketFilter {
-
-        private static volatile RmVersion version;
-
-        public Packet filterClientRequest(Packet request) throws Exception {
-            if (version == null) {
-                version = getRmVersion();
-            }
-            else {
-                assertEquals(version, getRmVersion());
-            }
-            return request;
-        }
-
-        public Packet filterServerResponse(Packet response) throws Exception {
-            if (version == null) {
-                version = getRmVersion();
-            }
-            else {
-                assertEquals(version, getRmVersion());
-            }
-            return response;
-        }
-
-        public static RmVersion getVersion() {
-            return version;
-        }
-    }
 
     public void testDispatch() throws SOAPException {
         EchoService echoService = new EchoService();
@@ -117,16 +90,20 @@ public class ClientTest extends TestCase {
             fail("Failed to find echoPortAddress in system properties.");
         }
         service.addPort(portName, SOAPBinding.SOAP11HTTP_BINDING, echoPortAddress);
-        PacketFilteringFeature filterFeature = new PacketFilteringFeature(TestFilter.class);
-        Dispatch dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE,
-                                                   new AddressingFeature(),
-                                                   filterFeature);
+        Dispatch dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE);
         dispatch.getRequestContext().put(BindingProvider.SOAPACTION_USE_PROPERTY, true);
         dispatch.getRequestContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, "http://server.wsdl.dispatch.wspolicy/action/echo");
 
         SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
 
         assertNotNull(response);
+
+        // Make sure that the message exchange actually used the policy configuration
+        Map<String, Object> responseContext = dispatch.getResponseContext();
+        HeaderList headerList = (HeaderList) responseContext.get(JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
+        String to = headerList.getTo(AddressingVersion.W3C, SOAPVersion.SOAP_11);
+        assertEquals(AddressingVersion.W3C.anonymousUri, to);
+
         SOAPBody responseBody = response.getSOAPBody();
         assertNotNull(responseBody);
         Iterator elements = responseBody.getChildElements();
@@ -140,8 +117,5 @@ public class ClientTest extends TestCase {
         assertFalse(elements.hasNext());
         String result = textNode.getTextContent();
         assertEquals("Helloellolloloo", result);
-        // Make sure that the message exchange actually used the policy configuration
-        RmVersion version = TestFilter.getVersion();
-        assertEquals(RmVersion.WSRM200702, version);
     }
 }

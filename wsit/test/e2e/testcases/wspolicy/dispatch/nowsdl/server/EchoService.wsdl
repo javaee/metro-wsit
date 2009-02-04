@@ -35,17 +35,15 @@
  holder.
 -->
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://server.wsdl.dispatch.wspolicy/" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
-             xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
              xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
-             xmlns:wsrm="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+             xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
              targetNamespace="http://server.wsdl.dispatch.wspolicy/" name="EchoService">
     
     <wsp:Policy wsu:Id="TestWebServicePortBindingPolicy">
         <wsp:ExactlyOne>
             <wsp:All>
-                <wsam:Addressing wsp:Optional="false"/>
-                <wsrm:RMAssertion/>
+                <wsam:Addressing/>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
