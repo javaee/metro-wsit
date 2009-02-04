@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rm.RmVersion;
 import com.sun.xml.ws.rm.runtime.testing.PacketFilter;
 import com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature;
+import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -49,6 +50,7 @@ import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.Text;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.Service;
@@ -123,6 +125,21 @@ public class ClientTest extends TestCase {
         dispatch.getRequestContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, "http://server.wsdl.dispatch.wspolicy/action/echo");
 
         SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
+
+        assertNotNull(response);
+        SOAPBody responseBody = response.getSOAPBody();
+        assertNotNull(responseBody);
+        Iterator elements = responseBody.getChildElements();
+        SOAPElement responseElement = (SOAPElement) elements.next();
+        assertFalse(elements.hasNext());
+        elements = responseElement.getChildElements();
+        SOAPElement returnElement = (SOAPElement) elements.next();
+        assertFalse(elements.hasNext());
+        elements = returnElement.getChildElements();
+        Text textNode = (Text) elements.next();
+        assertFalse(elements.hasNext());
+        String result = textNode.getTextContent();
+        assertEquals("Helloellolloloo", result);
         // Make sure that the message exchange actually used the policy configuration
         RmVersion version = TestFilter.getVersion();
         assertEquals(RmVersion.WSRM200702, version);
