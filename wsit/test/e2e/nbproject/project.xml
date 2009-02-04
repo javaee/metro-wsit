@@ -76,7 +76,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
                 <package-root>testcases</package-root>
-                <classpath mode="compile">lib/harness-lib.jar:lib/harness.jar:../../lib/runtime/jaxws-api.jar:../../lib/runtime/jaxws-rt.jar</classpath>
+                <classpath mode="compile">lib/harness-lib.jar:lib/harness.jar:../../lib/runtime/jaxws-api.jar:../../lib/runtime/jaxws-rt.jar:../../rt/src</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
