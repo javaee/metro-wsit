@@ -37,6 +37,9 @@ package com.sun.xml.ws.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.EndpointAddress;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -52,8 +55,10 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rm.RxRuntimeException;
 import com.sun.xml.ws.rm.protocol.wsmc200702.MakeConnection;
+import com.sun.xml.ws.rm.runtime.McClientTube.SuspendedFiberStorage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -69,33 +74,61 @@ public class McClientTube extends AbstractFilterTubeImpl {
     static enum SuspendedFiberStorage {
         INSTANCE;
         //
-        private final Map<Object, Fiber> msgIdToFiberMap = new HashMap<Object, Fiber>();
-        private final ReadWriteLock mapRwLock = new ReentrantReadWriteLock();
+        private static class FiberReqistration {
+            final long timestamp;
+            final Fiber fiber;
+
+            public FiberReqistration(Fiber fiber) {
+                this.timestamp = System.currentTimeMillis();
+                this.fiber = fiber;
+            }
+        }
+        //
+        private final PriorityQueue<Long> timestampQueue = new PriorityQueue<Long>();
+        private final Map<Object, FiberReqistration> idToFiberMap = new HashMap<Object, FiberReqistration>();
+        private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
         void register(@NotNull Object correlationId, @NotNull Fiber fiber) {
             try {
-                mapRwLock.writeLock().lock();
-                msgIdToFiberMap.put(correlationId, fiber);
+                FiberReqistration fr = new FiberReqistration(fiber);
+                rwLock.writeLock().lock();
+                idToFiberMap.put(correlationId, fr);
+                timestampQueue.offer(fr.timestamp);
             } finally {
-                mapRwLock.writeLock().unlock();
+                rwLock.writeLock().unlock();
             }
         }
 
         Fiber remove(@NotNull Object correlationId) {
             try {
-                mapRwLock.writeLock().lock();
-                return msgIdToFiberMap.remove(correlationId);
+                rwLock.writeLock().lock();
+                FiberReqistration fr = idToFiberMap.remove(correlationId);
+                if (fr != null) {
+                    timestampQueue.remove(fr.timestamp);
+                    return fr.fiber;
+                }
+
+                return null;
             } finally {
-                mapRwLock.writeLock().unlock();
+                rwLock.writeLock().unlock();
             }
         }
 
         boolean isEmpty() {
             try {
-                mapRwLock.readLock().lock();
-                return msgIdToFiberMap.isEmpty();
+                rwLock.readLock().lock();
+                return idToFiberMap.isEmpty();
             } finally {
-                mapRwLock.readLock().unlock();
+                rwLock.readLock().unlock();
+            }
+        }
+
+        long getOldestRegistrationTimestamp() {
+            try {
+                rwLock.readLock().lock();
+                return timestampQueue.peek();
+            } finally {
+                rwLock.readLock().unlock();
             }
         }
     }
@@ -105,34 +138,44 @@ public class McClientTube extends AbstractFilterTubeImpl {
         private final RxConfiguration configuration;
         private final FiberExecutor fiberExecutor;
         private final String wsmcAnonymousAddress;
+        private final EndpointAddress endpointAddress;
         private long lastMcMessageTimestamp;
 
-        MakeConnectionSenderTask(final String wsmcAnonymousAddress, final RxConfiguration configuration, final FiberExecutor fiberExecutor) {
+        MakeConnectionSenderTask(final EndpointAddress endpointAddress, final String wsmcAnonymousAddress, final RxConfiguration configuration, final FiberExecutor fiberExecutor) {
             this.configuration = configuration;
             this.fiberExecutor = fiberExecutor;
             this.wsmcAnonymousAddress = wsmcAnonymousAddress;
+            this.endpointAddress = endpointAddress;
 
             this.lastMcMessageTimestamp = System.currentTimeMillis();
         }
 
         public synchronized void run() {
-            if (!SuspendedFiberStorage.INSTANCE.isEmpty() && resendMakeConnectionIntervalPassed()) {
-                // FIXME P1 we need to send only WS-MC request if there is a long-waiting suspended fiber
+            if (suspendedFibersReadyForResend() && resendMakeConnectionIntervalPassed()) {
                 sendMakeConnectionMessageNow();
             }
         }
 
+        private boolean suspendedFibersReadyForResend() {
+            // TODO P2 make configurable
+            return !SuspendedFiberStorage.INSTANCE.isEmpty() &&
+                    System.currentTimeMillis() - SuspendedFiberStorage.INSTANCE.getOldestRegistrationTimestamp() > 2000;
+        }
+
         private synchronized boolean resendMakeConnectionIntervalPassed() {
             // TODO P2 make configurable
-            return lastMcMessageTimestamp - System.currentTimeMillis() > 2000;
+            return System.currentTimeMillis() - lastMcMessageTimestamp > 2000;
         }
 
         synchronized void sendMakeConnectionMessageNow() {
             Packet mcRequest = createRequestPacket(
+                    this.endpointAddress,
                     configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()),
                     new MakeConnection(wsmcAnonymousAddress),
                     configuration.getMcVersion().wsmcAction,
-                    configuration
+                    configuration.getSoapVersion(),
+                    configuration.getAddressingVersion(),
+                    true
                     );
 
             fiberExecutor.start(mcRequest, new WsMcResponseHandler(configuration, this));
@@ -140,17 +183,23 @@ public class McClientTube extends AbstractFilterTubeImpl {
             lastMcMessageTimestamp = System.currentTimeMillis();
         }
 
-        private static final Packet createRequestPacket(JAXBRIContext jaxbContext, Object jaxbElement, String wsaAction, RxConfiguration configuration) {
+        private static final Packet createRequestPacket(
+                EndpointAddress endpointAddress,
+                JAXBRIContext jaxbContext,
+                Object jaxbElement,
+                String wsaAction,
+                SOAPVersion soapVersion,
+                AddressingVersion addressingVersion,
+                boolean expectReply) {
             // TODO P3 merge with PacketAdapter
-            Message message = Messages.create(jaxbContext, jaxbElement, configuration.getSoapVersion());
+            Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
             Packet packet = new Packet(message);
-
-            // TODO P1 initialize packet.endpointAddress
-
+            packet.endpointAddress = endpointAddress;
+            packet.expectReply = expectReply;
             message.getHeaders().fillRequestAddressingHeaders(
                     packet,
-                    configuration.getAddressingVersion(),
-                    configuration.getSoapVersion(),
+                    addressingVersion,
+                    soapVersion,
                     false,
                     wsaAction);
 
@@ -180,7 +229,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.mcSenderTask = original.mcSenderTask;
     }
 
-    McClientTube(RxConfiguration configuration, Tube tubelineHead) throws RxRuntimeException {
+    McClientTube(RxConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
         super(tubelineHead);
 
         this.configuration = configuration;
@@ -192,7 +241,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         final WSEndpointReference wsmcAnnonymousEpr = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnnonymousEpr.createHeader(configuration.getAddressingVersion().replyToTag);
 
-        this.mcSenderTask = new MakeConnectionSenderTask(wsmcAnonymousAddress, configuration, this.fiberExecutor);
+        this.mcSenderTask = new MakeConnectionSenderTask(endpointAddress, wsmcAnonymousAddress, configuration, this.fiberExecutor);
         this.scheduler = new ScheduledTaskManager();
         // TODO P2 make it configurable
         this.scheduler.startTask(mcSenderTask, 2000, 500);
