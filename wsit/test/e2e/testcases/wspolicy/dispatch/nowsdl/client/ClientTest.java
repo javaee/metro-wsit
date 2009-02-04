@@ -91,11 +91,8 @@ public class ClientTest extends TestCase {
         }
         service.addPort(portName, SOAPBinding.SOAP11HTTP_BINDING, echoPortAddress);
         Dispatch dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE);
-        dispatch.getRequestContext().put(BindingProvider.SOAPACTION_USE_PROPERTY, true);
-        dispatch.getRequestContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, "http://server.wsdl.dispatch.wspolicy/action/echo");
 
         SOAPMessage response = (SOAPMessage)dispatch.invoke(message);
-
         assertNotNull(response);
 
         // Make sure that the message exchange actually used the policy configuration
