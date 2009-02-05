@@ -39,8 +39,6 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.rx.RxConfigurationFactory;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import javax.xml.ws.WebServiceException;
@@ -62,11 +60,11 @@ public final class McTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
-
-        if (configuration.isMakeConnectionSupportEnabled()) {
-            return new McClientTube(configuration, context.getTubelineHead(), context.getAddress());
-        }
+//        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
+//
+//        if (configuration.isMakeConnectionSupportEnabled()) {
+//            return new McClientTube(configuration, context.getTubelineHead(), context.getAddress());
+//        }
 
         return context.getTubelineHead();
     }
@@ -78,11 +76,11 @@ public final class McTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
-
-        if (configuration.isMakeConnectionSupportEnabled()) {
-            return new McServerTube(configuration, context.getTubelineHead());
-        }
+//        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+//
+//        if (configuration.isMakeConnectionSupportEnabled()) {
+//            return new McServerTube(configuration, context.getTubelineHead());
+//        }
         
         return context.getTubelineHead();
     }

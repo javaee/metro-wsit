@@ -59,6 +59,7 @@
                 <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" /-->
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.AddressingTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.rx.mc.runtime.McTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.tx.runtime.TxTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.MonitoringTubeFactory" />
@@ -82,6 +83,7 @@
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.AddressingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.tx.runtime.TxTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.rx.mc.runtime.McTubeFactory" />
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
                 <!--tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rx.testing.PacketFilteringTubeFactory" />
