@@ -137,7 +137,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;

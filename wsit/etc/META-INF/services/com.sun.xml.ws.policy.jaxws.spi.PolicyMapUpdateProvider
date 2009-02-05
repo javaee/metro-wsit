@@ -2,6 +2,6 @@ com.sun.xml.ws.encoding.policy.MtomMapUpdateProvider
 com.sun.xml.ws.addressing.policy.AddressingMapUpdateProvider
 com.sun.xml.ws.addressing.policy.WsawAddressingMapUpdateProvider
 com.sun.xml.ws.tx.common.TxMapUpdateProvider
-com.sun.xml.ws.rm.policy.spi_impl.RxMapUpdateProvider
+com.sun.xml.ws.rx.policy.spi_impl.RxMapUpdateProvider
 com.sun.xml.ws.transport.tcp.policy.TCPTransportMapUpdateProvider
 com.sun.xml.ws.transport.tcp.policy.OptimalTransportMapUpdateProvider

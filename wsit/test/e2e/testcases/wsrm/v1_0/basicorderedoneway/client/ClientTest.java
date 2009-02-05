@@ -35,7 +35,7 @@
  */
 package wsrm.v1_0.basicorderedoneway.client;
 
-import com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature;
+import com.sun.xml.ws.rx.testing.PacketFilteringFeature;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;

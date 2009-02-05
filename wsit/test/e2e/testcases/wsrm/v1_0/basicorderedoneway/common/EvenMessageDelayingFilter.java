@@ -1,7 +1,7 @@
 package wsrm.v1_0.basicorderedoneway.common;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilter;
+import com.sun.xml.ws.rx.testing.PacketFilter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;

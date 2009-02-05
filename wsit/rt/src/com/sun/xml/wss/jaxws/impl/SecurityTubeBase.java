@@ -124,7 +124,7 @@ import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;

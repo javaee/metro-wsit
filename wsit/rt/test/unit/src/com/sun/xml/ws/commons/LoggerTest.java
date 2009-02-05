@@ -73,8 +73,8 @@ public class LoggerTest extends TestCase {
         String result = Logger.getSystemLoggerName(LoggerTest.class);
         assertEquals("javax.enterprise.resource.webservices.commons", result);
 
-        result = Logger.getSystemLoggerName(com.sun.xml.ws.rm.RmVersion.class);
-        assertEquals("javax.enterprise.resource.webservices.rm", result);
+        result = Logger.getSystemLoggerName(com.sun.xml.ws.rx.rm.RmVersion.class);
+        assertEquals("javax.enterprise.resource.webservices.rx", result);
 
         result = Logger.getSystemLoggerName(com.sun.xml.ws.api.security.CallbackHandlerFeature.class);
         assertEquals("javax.enterprise.resource.webservices.security", result);

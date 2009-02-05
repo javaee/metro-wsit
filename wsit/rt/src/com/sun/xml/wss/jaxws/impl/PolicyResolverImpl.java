@@ -64,7 +64,7 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;

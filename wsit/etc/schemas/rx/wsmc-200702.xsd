@@ -66,7 +66,6 @@
             </jaxb:schemaBindings>
         </xsd:appinfo>
     </xsd:annotation>
-
     <xsd:complexType name="MessagePendingCType">
         <xsd:annotation>
             <xsd:documentation>
@@ -139,7 +138,7 @@
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
 
-    <xsd:element name="UnsupportedSelection">
+    <xsd:simpleType name="UnsupportedSelectionSType">
         <xsd:annotation>
             <xsd:documentation>
                 The QName of the unsupported element(s) are included in the detail.
@@ -148,8 +147,6 @@
                 <jaxb:class name="UnsupportedSelection" />
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:QName"/>
-        </xsd:simpleType>
-    </xsd:element>
+        <xsd:restriction base="xsd:QName"/>
+    </xsd:simpleType>
 </xsd:schema>

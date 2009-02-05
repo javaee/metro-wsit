@@ -37,9 +37,9 @@
 package wspolicy.provider.base.client;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rm.RmVersion;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilter;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature;
+import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.testing.PacketFilter;
+import com.sun.xml.ws.rx.testing.PacketFilteringFeature;
 import junit.framework.TestCase;
 
 /**

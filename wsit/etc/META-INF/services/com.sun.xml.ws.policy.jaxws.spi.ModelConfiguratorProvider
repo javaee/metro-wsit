@@ -4,5 +4,5 @@ com.sun.xml.ws.encoding.policy.FastInfosetModelConfiguratorProvider
 com.sun.xml.ws.encoding.policy.SelectOptimalEncodingModelConfiguratorProvider
 com.sun.xml.ws.transport.tcp.policy.TCPTransportConfigurationProvider
 com.sun.xml.ws.transport.tcp.policy.OptimalTransportConfigurationProvider
-com.sun.xml.ws.rm.policy.spi_impl.RxModelConfigurationProvider
+com.sun.xml.ws.rx.policy.spi_impl.RxModelConfigurationProvider
 com.sun.xml.ws.addressing.policy.WsawAddressingModelConfiguratorProvider
