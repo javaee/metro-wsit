@@ -1,4 +1,0 @@
-
-
- pingPort.ping(new Holder("1"), new Holder("sun"), new Holder("Passed!"));
- pingPort.close();
