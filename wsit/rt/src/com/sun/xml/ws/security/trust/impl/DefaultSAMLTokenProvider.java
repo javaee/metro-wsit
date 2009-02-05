@@ -413,19 +413,20 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                 AuthnContext ctx = samlFac.createAuthnContext(authnCtx, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx, null, null);
                 statements.add(statement); 
-            }//else{
-               // final AttributeStatement statement = samlFac.createAttributeStatement(null);
-               // statements.add(statement);
-            //}
+            }else{
+                final AttributeStatement statement = samlFac.createAttributeStatement(null);
+                statements.add(statement);
+            }
             
             final NameID issuerID = samlFac.createNameID(issuer, null, null);
             
             // Create Assertion
             assertion =
-                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
-             if (!claimedAttrs.isEmpty()){
-                return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
+                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, null, statements);
+            if (!claimedAttrs.isEmpty()){
+                assertion = WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
             }
+            ((com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion)assertion).setSubject((com.sun.xml.wss.saml.internal.saml20.jaxb20.SubjectType)subj);
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);

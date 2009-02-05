@@ -87,7 +87,7 @@ public class ICContractImpl extends WSTrustContractImpl{
                 Element rdt = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "RequestedDisplayToken");
                 rdt.setAttribute("xmlns", "http://schemas.xmlsoap.org/ws/2005/05/identity");
                 Element dt = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayToken");
-                //dt.setAttribute("xml:lang", "en-us");
+                dt.setAttribute("xml:lang", "en-us");
                 rdt.appendChild(dt);
                 final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
                 for(Map.Entry<QName, List<String>> entry : entries){
@@ -96,6 +96,7 @@ public class ICContractImpl extends WSTrustContractImpl{
                     if (values != null && values.size() > 0){
                         if (!STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart())){
                             Element dc = doc.createElementNS("http://schemas.xmlsoap.org/ws/2005/05/identity", "DisplayClaim");
+                            dc.setAttribute("xmlns", "http://schemas.xmlsoap.org/ws/2005/05/identity");
                             String uri = attrKey.getNamespaceURI()+"/" + attrKey.getLocalPart();
                             dc.setAttribute("Uri", uri);
                             dt.appendChild(dc);
