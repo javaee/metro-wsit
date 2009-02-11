@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -61,14 +61,9 @@
         <available file="${as.home}/modules" type="dir"/>
     </condition>
 
-    <!-- Check if we are running JAVA SE 6 update release 3 or older --> 
+    <!-- Check if we are running JAVA SE 6 --> 
     <condition property="jdk6">
-        <or>
-            <contains string="${java.version}" substring="1.6.0.0"/>
-            <contains string="${java.version}" substring="1.6.0_1"/>
-            <contains string="${java.version}" substring="1.6.0_2"/>
-            <contains string="${java.version}" substring="1.6.0_03"/>
-        </or>
+        <contains string="${java.version}" substring="1.6.0"/>
     </condition>
 
     <condition property="endorsed-api-flagged">
@@ -76,14 +71,14 @@
     </condition>
 
     <target name="jdk6-message" if="jdk6">
-        <echo message="NOTE: Metro is being installed using JDK6."/>
+        <echo message="NOTE: Metro is being installed using Java SE 6."/>
         <echo/>
         <echo message="  The file 'web-services-api.jar' must be installed"/>
         <echo message="  into $JAVA_HOME/lib/endorsed for Metro to prevent"/>
-        <echo message="  conflicts between the JAX-WS 2.0 classes"/>
-        <echo message="  bundled with Java SE 6 and JAX-WS 2.1 bundled with Metro."/>
+        <echo message="  conflicts between the JAX-WS classes bundled"/>
+        <echo message="  with Java SE 6 and JAX-WS 2.2 bundled with Metro."/>
         <echo/>
-        <echo message="  You must have write-permissions on the JDK 6 directory."/>
+        <echo message="  You must have write-permissions on the Java SE 6 directory."/>
         <echo message="  This is a concern when using a system-wide JDK installation."/>
         <echo/>
         <echo message="  To install webservices-api.jar:"/>
