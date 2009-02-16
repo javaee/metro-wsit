@@ -45,6 +45,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * TODO javadoc
+ *
+ * <b>
+ * WARNING: This class is a private utility class used by WS-RX implementation. Any usage outside
+ * the intedned scope is strongly discouraged. The API exposed by this class may be changed, replaced
+ * or removed without any advance notice.
+ * </b>
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
