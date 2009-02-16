@@ -110,8 +110,6 @@ public enum RmVersion {
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.Expires.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.Identifier.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.IncompleteSequenceBehaviorType.class,
-    com.sun.xml.ws.rx.rm.protocol.wsrm200702.MakeConnectionElement.class,
-    com.sun.xml.ws.rx.rm.protocol.wsrm200702.MessagePendingElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.OfferType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceAcknowledgementElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceElement.class,

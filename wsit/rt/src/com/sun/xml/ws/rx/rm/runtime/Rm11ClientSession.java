@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.commons.Logger;
@@ -66,14 +67,14 @@ final class Rm11ClientSession extends ClientSession {
 
     private static final Logger LOGGER = Logger.getLogger(Rm11ClientSession.class);
 
-    Rm11ClientSession(RxConfiguration configuration, ProtocolCommunicator communicator) {
-        super(configuration, communicator);
+    Rm11ClientSession(RxConfiguration configuration, WSEndpointReference rmsEndpointReference, Communicator communicator) {
+        super(configuration, rmsEndpointReference, communicator);
     }
 
     @Override
     void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
-        csElement.setAcksTo(configuration.getAddressingVersion().anonymousEpr.toSpec());
+        csElement.setAcksTo(super.rmSourceReference.toSpec());
 
         if (offerInboundSequenceId != null) {
             Identifier offerIdentifier = new Identifier();
@@ -90,7 +91,7 @@ final class Rm11ClientSession extends ClientSession {
         }
 
 
-        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
+        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(true));
         requestAdapter.setRequestMessage(csElement, RmVersion.WSRM200702.createSequenceAction);
 
         if (strType != null) {
@@ -121,9 +122,9 @@ final class Rm11ClientSession extends ClientSession {
         if (offerInboundSequenceId != null) {
             AcceptType accept = csrElement.getAccept();
             if (accept == null || accept.getAcksTo() == null) {
-                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, communicator.getDestination()));
-            } else if (!communicator.getDestination().getAddress().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
-                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestination()));
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, communicator.getDestinationAddress()));
+            } else if (!communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(accept.getAcksTo()).getAddress())) {
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(accept.getAcksTo().toString(), communicator.getDestinationAddress()));
             }
             inboundSequenceId = offerInboundSequenceId;
             sequenceManager.createInboundSequence(inboundSequenceId, (strType != null) ? strType.getId() : null, Sequence.NO_EXPIRATION);
@@ -132,7 +133,7 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     void closeOutboundSequence() throws RxException {
-        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
+        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(true));
 
         requestAdapter.setRequestMessage(
                 new CloseSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
@@ -163,7 +164,7 @@ final class Rm11ClientSession extends ClientSession {
 
     @Override
     void terminateOutboundSequence() throws RxException {
-        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
+        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(true));
         requestAdapter.setRequestMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM200702.terminateSequenceAction);

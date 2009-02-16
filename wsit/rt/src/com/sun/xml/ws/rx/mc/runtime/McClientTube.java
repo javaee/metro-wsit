@@ -35,19 +35,14 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.util.ScheduledTaskManager;
-import com.sun.xml.ws.rx.util.FiberExecutor;
-import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.EndpointAddress;
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -57,14 +52,11 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnection;
-import com.sun.xml.ws.rx.mc.runtime.McClientTube.SuspendedFiberStorage;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolResponseHandler;
+import com.sun.xml.ws.rx.util.Communicator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 
@@ -73,151 +65,19 @@ import javax.xml.stream.XMLStreamException;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class McClientTube extends AbstractFilterTubeImpl {
-
-    static enum SuspendedFiberStorage {
-        INSTANCE;
-        //
-        private static class FiberReqistration {
-            final long timestamp;
-            final Fiber fiber;
-
-            public FiberReqistration(Fiber fiber) {
-                this.timestamp = System.currentTimeMillis();
-                this.fiber = fiber;
-            }
-        }
-        //
-        private final PriorityQueue<Long> timestampQueue = new PriorityQueue<Long>();
-        private final Map<Object, FiberReqistration> idToFiberMap = new HashMap<Object, FiberReqistration>();
-        private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-
-        void register(@NotNull Object correlationId, @NotNull Fiber fiber) {
-            try {
-                FiberReqistration fr = new FiberReqistration(fiber);
-                rwLock.writeLock().lock();
-                idToFiberMap.put(correlationId, fr);
-                timestampQueue.offer(fr.timestamp);
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-        }
-
-        Fiber remove(@NotNull Object correlationId) {
-            try {
-                rwLock.writeLock().lock();
-                FiberReqistration fr = idToFiberMap.remove(correlationId);
-                if (fr != null) {
-                    timestampQueue.remove(fr.timestamp);
-                    return fr.fiber;
-                }
-
-                return null;
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-        }
-
-        boolean isEmpty() {
-            try {
-                rwLock.readLock().lock();
-                return idToFiberMap.isEmpty();
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-
-        long getOldestRegistrationTimestamp() {
-            try {
-                rwLock.readLock().lock();
-                return timestampQueue.peek();
-            } finally {
-                rwLock.readLock().unlock();
-            }
-        }
-    }
-
-    static class MakeConnectionSenderTask implements Runnable {
-
-        private final RxConfiguration configuration;
-        private final FiberExecutor fiberExecutor;
-        private final String wsmcAnonymousAddress;
-        private final EndpointAddress endpointAddress;
-        private long lastMcMessageTimestamp;
-
-        MakeConnectionSenderTask(final EndpointAddress endpointAddress, final String wsmcAnonymousAddress, final RxConfiguration configuration, final FiberExecutor fiberExecutor) {
-            this.configuration = configuration;
-            this.fiberExecutor = fiberExecutor;
-            this.wsmcAnonymousAddress = wsmcAnonymousAddress;
-            this.endpointAddress = endpointAddress;
-
-            this.lastMcMessageTimestamp = System.currentTimeMillis();
-        }
-
-        public synchronized void run() {
-            if (suspendedFibersReadyForResend() && resendMakeConnectionIntervalPassed()) {
-                sendMakeConnectionMessageNow();
-            }
-        }
-
-        private boolean suspendedFibersReadyForResend() {
-            // TODO P2 make configurable
-            return !SuspendedFiberStorage.INSTANCE.isEmpty() &&
-                    System.currentTimeMillis() - SuspendedFiberStorage.INSTANCE.getOldestRegistrationTimestamp() > 2000;
-        }
-
-        private synchronized boolean resendMakeConnectionIntervalPassed() {
-            // TODO P2 make configurable
-            return System.currentTimeMillis() - lastMcMessageTimestamp > 2000;
-        }
-
-        synchronized void sendMakeConnectionMessageNow() {
-            Packet mcRequest = createRequestPacket(
-                    this.endpointAddress,
-                    configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()),
-                    new MakeConnection(wsmcAnonymousAddress),
-                    configuration.getMcVersion().wsmcAction,
-                    configuration.getSoapVersion(),
-                    configuration.getAddressingVersion(),
-                    true
-                    );
-
-            fiberExecutor.start(mcRequest, new WsMcResponseHandler(configuration, this));
-
-            lastMcMessageTimestamp = System.currentTimeMillis();
-        }
-
-        private static final Packet createRequestPacket(
-                EndpointAddress endpointAddress,
-                JAXBRIContext jaxbContext,
-                Object jaxbElement,
-                String wsaAction,
-                SOAPVersion soapVersion,
-                AddressingVersion addressingVersion,
-                boolean expectReply) {
-            // TODO P3 merge with PacketAdapter
-            Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
-            Packet packet = new Packet(message);
-            packet.endpointAddress = endpointAddress;
-            packet.expectReply = expectReply;
-            message.getHeaders().fillRequestAddressingHeaders(
-                    packet,
-                    addressingVersion,
-                    soapVersion,
-                    false,
-                    wsaAction);
-
-            return packet;
-        }
-    }
     //
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
     //
     private final RxConfiguration configuration;
     private final Unmarshaller unmarshaller;
     private final Header wsmcAnnonymousReplyToHeader;
-    private final FiberExecutor fiberExecutor;
+    private final Communicator communicator;
     private final ScheduledTaskManager scheduler;
+    private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private final MakeConnectionSenderTask mcSenderTask;
+    private final List<ProtocolResponseHandler> protocolResponseHandlers;
+
+    private final WSEndpointReference wsmcAnonymousEndpointReference;
 
     McClientTube(McClientTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -227,9 +87,13 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
 
         this.wsmcAnnonymousReplyToHeader = original.wsmcAnnonymousReplyToHeader;
-        this.fiberExecutor = original.fiberExecutor;
+        this.communicator = original.communicator;
+        this.suspendedFiberStorage = original.suspendedFiberStorage;
         this.scheduler = original.scheduler;
         this.mcSenderTask = original.mcSenderTask;
+
+        this.wsmcAnonymousEndpointReference = original.wsmcAnonymousEndpointReference;
+        this.protocolResponseHandlers = original.protocolResponseHandlers;
     }
 
     McClientTube(RxConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
@@ -238,13 +102,27 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.configuration = configuration;
 
         this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
-        this.fiberExecutor = new FiberExecutor("MakeConnectionClient", tubelineHead);
+        this.communicator = new Communicator(
+                "McClientTubeCommunicator",
+                endpointAddress,
+                tubelineHead,
+                null,
+                configuration.getAddressingVersion(),
+                configuration.getSoapVersion(),
+                configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
+
+        this.protocolResponseHandlers = new LinkedList<ProtocolResponseHandler>();
 
         final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
-        final WSEndpointReference wsmcAnnonymousEpr = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
-        this.wsmcAnnonymousReplyToHeader = wsmcAnnonymousEpr.createHeader(configuration.getAddressingVersion().replyToTag);
+        this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
+        this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
 
-        this.mcSenderTask = new MakeConnectionSenderTask(endpointAddress, wsmcAnonymousAddress, configuration, this.fiberExecutor);
+        this.suspendedFiberStorage = new TimestampedCollection<String, Fiber>();
+        this.mcSenderTask = new MakeConnectionSenderTask(
+                communicator,
+                suspendedFiberStorage,
+                wsmcAnonymousAddress,
+                configuration);
         this.scheduler = new ScheduledTaskManager();
         // TODO P2 make it configurable
         this.scheduler.startTask(mcSenderTask, 2000, 500);
@@ -263,25 +141,26 @@ public class McClientTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet request) {
         final Message message = request.getMessage();
-
         if (!message.hasHeaders()) {
             // TODO L10N
             throw LOGGER.logSevereException(new RxRuntimeException("Required WS-Addressing headers not found: No SOAP headers present on a client request message."));
         }
 
-
         String correlationId = message.getID(configuration.getAddressingVersion(), configuration.getSoapVersion());
-
         Fiber.CompletionCallback responseHandler;
-        if (hasAnnonymousReplyToHeader(message.getHeaders())) { // most likely Req-Resp MEP
-            setMcAnnonymousReplyToHeader(message.getHeaders());
-            responseHandler = new RequestResponseMepHandler(configuration, mcSenderTask, correlationId);
+        assert request.expectReply != null;
+
+        if (request.expectReply) { // most likely Req-Resp MEP
+            if (needToSetWsmcAnnonymousReplyToHeader(message.getHeaders())) {
+                setMcAnnonymousReplyToHeader(message.getHeaders());
+            }
+            responseHandler = new RequestResponseMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
         } else { // most likely One-Way MEP
-            responseHandler = new OneWayMepHandler(configuration, mcSenderTask, correlationId);
+            responseHandler = new OneWayMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
         }
 
-        SuspendedFiberStorage.INSTANCE.register(correlationId, Fiber.current());
-        fiberExecutor.start(request, responseHandler);
+        suspendedFiberStorage.register(correlationId, Fiber.current());
+        communicator.sendAsync(request, responseHandler);
 
         return super.doSuspend();
     }
@@ -298,12 +177,27 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     @Override
     public void preDestroy() {
-        this.scheduler.stopAll();
+        scheduler.stopAll();
 
         super.preDestroy();
     }
 
-    private boolean hasAnnonymousReplyToHeader(final HeaderList headers) {
+    /**
+     *  Used by RM client tube
+     */
+    public final WSEndpointReference getWsmcAnonymousEndpointReference(){
+        return wsmcAnonymousEndpointReference;
+    }
+
+    public final void registerProtocolResponseHandler(ProtocolResponseHandler handler) {
+        protocolResponseHandlers.add(handler);
+    }
+
+    /**
+     * Method check if the WS-A {@code ReplyTo} header is present or not. If it is not present, or if it is present but is annonymous,
+     * method returns true. If the WS-A {@code ReplyTo} header is present and non-annonymous, mehod returns false.
+     */
+    private boolean needToSetWsmcAnnonymousReplyToHeader(final HeaderList headers) {
         Header replyToHeader = headers.get(configuration.getAddressingVersion().replyToTag, false);
         if (replyToHeader != null) {
             try {
@@ -314,7 +208,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
             }
         }
 
-        return false;
+        return true;
     }
 
     private void setMcAnnonymousReplyToHeader(final HeaderList headers) {

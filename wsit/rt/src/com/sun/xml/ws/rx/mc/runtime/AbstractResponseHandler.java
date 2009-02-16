@@ -35,13 +35,14 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePending;
+import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
 import com.sun.xml.ws.rx.RxConfiguration;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -55,18 +56,21 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
     //
     protected final RxConfiguration configuration;
     //
-    private final McClientTube.MakeConnectionSenderTask mcSenderTask;
+    private final MakeConnectionSenderTask mcSenderTask;
+    private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private String correlationId;
 
-    protected AbstractResponseHandler(RxConfiguration configuration, McClientTube.MakeConnectionSenderTask mcSenderTask, String correlationId) {
+    protected AbstractResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
+        this.suspendedFiberStorage = suspendedFiberStorage;
         this.correlationId = correlationId;
     }
 
-    protected AbstractResponseHandler(RxConfiguration configuration, McClientTube.MakeConnectionSenderTask mcSenderTask) {
+    protected AbstractResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
+        this.suspendedFiberStorage = suspendedFiberStorage;
         this.correlationId = null;
     }
 
@@ -75,7 +79,7 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
     }
 
     protected final Fiber getParentFiber() {
-        return McClientTube.SuspendedFiberStorage.INSTANCE.remove(correlationId);
+        return suspendedFiberStorage.remove(correlationId);
     }
 
     protected final void resumeParentFiber(Packet response) throws RxRuntimeException {
@@ -107,10 +111,10 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
         if (responseMessage != null) {
             // process WS-MC header
             if (responseMessage.hasHeaders()) {
-                MessagePending messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
+                MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
                 if (messagePendingHeader.isPending()) {
-                    if (!McClientTube.SuspendedFiberStorage.INSTANCE.isEmpty()) {
-                        mcSenderTask.sendMakeConnectionMessageNow();
+                    if (!suspendedFiberStorage.isEmpty()) {
+                        mcSenderTask.executeNow();
                     }
                 }
             }

@@ -33,57 +33,80 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm.runtime;
+package com.sun.xml.ws.rx.util;
 
-import com.sun.xml.ws.rx.util.FiberExecutor;
+import com.sun.xml.bind.api.JAXBRIContext;
+import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 /**
  * Transmits standalone protocol messages over the wire. Provides also some additional utility mehtods for creating and
  * unmarshalling JAXWS {@link Message} and {@link Header} objects.
- * 
+ *
+ * <b>
+ * WARNING: This class is a private utility class used by WS-RX implementation. Any usage outside
+ * the intedned scope is strongly discouraged. The API exposed by this class may be changed, replaced
+ * or removed without any advance notice.
+ * </b>
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class ProtocolCommunicator {
+public final class Communicator {
 
-    private static final Logger LOGGER = Logger.getLogger(ProtocolCommunicator.class);
-
-    final QName soapMustUnderstandAttributeName;
+    private static final Logger LOGGER = Logger.getLogger(Communicator.class);
+    public final QName soapMustUnderstandAttributeName;
     //
-    private final AtomicReference<Packet> musterRequestPacket;
     private final SecureConversationInitiator scInitiator;
     private final AddressingVersion addressingVersion;
+    private final SOAPVersion soapVersion;
     private final FiberExecutor fiberExecutor;
+    private final JAXBRIContext jaxbContext;
+    private final EndpointAddress destinationAddress;
 
-    ProtocolCommunicator(Tube tubeline, SecureConversationInitiator scInitiator, AddressingVersion addressingVersion, SOAPVersion soapVersion) {
-        this.fiberExecutor = new FiberExecutor("RmProtocolCommunicator", tubeline);
+    public Communicator(
+            String name,
+            EndpointAddress destinationAddress,
+            Tube tubeline,
+            SecureConversationInitiator scInitiator,
+            AddressingVersion addressingVersion,
+            SOAPVersion soapVersion,
+            JAXBRIContext jaxbContext) {
+        this.destinationAddress = destinationAddress;
+        this.fiberExecutor = new FiberExecutor(name, tubeline);
         this.scInitiator = scInitiator;
         this.addressingVersion = addressingVersion;
+        this.soapVersion = soapVersion;
         this.soapMustUnderstandAttributeName = new QName(soapVersion.nsUri, "mustUnderstand");
-        this.musterRequestPacket = new AtomicReference<Packet>();
+        this.jaxbContext = jaxbContext;
     }
 
-    /**
-     * This method must be called before the {@link ProtocolCommunicator} is used for the first time to send a message.
-     * 
-     * @param muster a packet that will be used as a muster for creating new request packets used to carry the messages.
-     */
-    void registerMusterRequestPacket(Packet muster) {
-        musterRequestPacket.set(muster);
+    public final Packet createRequestPacket(Object jaxbElement, String wsaAction, boolean expectReply) {
+        Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
+        Packet packet = new Packet(message);
+        packet.endpointAddress = destinationAddress;
+        packet.expectReply = expectReply;
+        message.getHeaders().fillRequestAddressingHeaders(
+                packet,
+                addressingVersion,
+                soapVersion,
+                false,
+                wsaAction);
+
+        return packet;
     }
 
     /**
@@ -91,13 +114,13 @@ final class ProtocolCommunicator {
      * 
      * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
      */
-    SecurityTokenReferenceType tryStartSecureConversation() {
+    public SecurityTokenReferenceType tryStartSecureConversation() {
         SecurityTokenReferenceType strType = null;
         if (scInitiator != null) {
             try {
-                @SuppressWarnings("unchecked") 
-                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(musterRequestPacket.get().copy(false));
-                
+                @SuppressWarnings("unchecked")
+                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(createEmptyRequestPacket(false));
+
                 strType = (strElement != null) ? strElement.getValue() : null;
             } catch (WSSecureConversationException ex) {
                 LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
@@ -108,12 +131,18 @@ final class ProtocolCommunicator {
 
     /**
      * Sends the request {@link Packet} and returns the corresponding response {@link Packet}.
-     * 
+     * This method should be used for Req-Resp MEP
+     *
      * @param request {@link Packet} containing the message to be send
      * @return response {@link Message} wrapped in a response {@link Packet} received
      */
-    Packet send(Packet request) {
+    public Packet send(Packet request) {
+        request.expectReply = Boolean.TRUE;
         return fiberExecutor.runSync(request);
+    }
+
+    public void sendAsync(Packet request, Fiber.CompletionCallback completionCallbackHandler) {
+        fiberExecutor.start(request, completionCallbackHandler);
     }
 
     /**
@@ -124,18 +153,21 @@ final class ProtocolCommunicator {
      * @return destination endpoint reference or {@code null} in case the {@link ProtocolCommunicator} instance has not 
      *         been initialized yet
      */
-    WSEndpointReference getDestination() {
-        Packet packet = musterRequestPacket.get();
-        return (packet != null) ? new WSEndpointReference(packet.endpointAddress.toString(), addressingVersion) : null;
+    public EndpointAddress getDestinationAddress() {
+        return destinationAddress;
     }
-        
+
     /**
      * Creates a new empty request packet based on the muster packet registered 
      * with this {@link ProtocolCommunicator} instance.
      * 
      * @return a new empty request packet
-     */    
-    Packet createEmptyRequestPacket() {
-        return musterRequestPacket.get().copy(false);
+     */
+    public Packet createEmptyRequestPacket(boolean expectReply) {
+        Packet packet = new Packet();
+        packet.endpointAddress = destinationAddress;
+        packet.expectReply = expectReply;
+
+        return packet;
     }
 }

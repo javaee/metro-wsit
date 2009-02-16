@@ -52,9 +52,9 @@ public enum McVersion {
     "http://docs.oasis-open.org/ws-rx/wsmc/200702",
     "http://docs.oasis-open.org/ws-rx/wsmc/200702",
 
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnection.class,
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePending.class,
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.UnsupportedSelection.class);
+    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement.class,
+    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement.class,
+    com.sun.xml.ws.rx.mc.protocol.wsmc200702.UnsupportedSelectionType.class);
 
     /**
      * General constants

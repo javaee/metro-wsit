@@ -36,10 +36,12 @@
 
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rx.mc.runtime.McClientTube.MakeConnectionSenderTask;
+import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.rx.mc.runtime.MakeConnectionSenderTask;
 
 /**
  *
@@ -47,8 +49,8 @@ import com.sun.xml.ws.rx.mc.runtime.McClientTube.MakeConnectionSenderTask;
  */
 class OneWayMepHandler extends AbstractResponseHandler {
 
-    public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, String correlationId) {
-        super(configuration, mcSenderTask, correlationId);
+    public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
+        super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
     }
 
     public void onCompletion(Packet response) {

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -42,7 +43,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.runtime.McClientTube.MakeConnectionSenderTask;
+import com.sun.xml.ws.rx.mc.runtime.MakeConnectionSenderTask;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 
@@ -54,8 +55,8 @@ class WsMcResponseHandler extends AbstractResponseHandler {
 
     private static final Logger LOGGER = Logger.getLogger(WsMcResponseHandler.class);
 
-    public WsMcResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask) {
-        super(configuration, mcSenderTask);
+    public WsMcResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
+        super(configuration, mcSenderTask, suspendedFiberStorage);
     }
 
     public void onCompletion(Packet response) {

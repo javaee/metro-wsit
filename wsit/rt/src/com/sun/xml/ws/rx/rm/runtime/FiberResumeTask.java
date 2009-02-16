@@ -39,72 +39,67 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
-import java.util.Comparator;
-import java.util.Queue;
-import java.util.concurrent.PriorityBlockingQueue;
+import com.sun.xml.ws.rx.util.TimestampedCollection;
 import java.util.logging.Level;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class ScheduledFiberResumeTask implements Runnable {
+final class FiberResumeTask implements Runnable {
 
-    private static final Logger LOGGER = Logger.getLogger(ScheduledFiberResumeTask.class);
+    private static final Logger LOGGER = Logger.getLogger(FiberResumeTask.class);
 
     private static class FiberRegistration {
 
-        private final long timestamp;
         @NotNull private final Fiber fiber;
         private final Packet packet;
-        private final long resumeTime;
 
-        FiberRegistration(Fiber fiber, Packet packet, long resumeTime) {
-            this.timestamp = System.currentTimeMillis();
+        FiberRegistration(Fiber fiber, Packet packet) {
             this.fiber = fiber;
             this.packet = packet;
-            this.resumeTime = resumeTime;
-        }
-
-        boolean expired() {
-            return System.currentTimeMillis() >= resumeTime;
         }
     }
-    private final Queue<FiberRegistration> fiberResumeQueue = new PriorityBlockingQueue<FiberRegistration>(10, new Comparator<FiberRegistration> () {
 
-        public int compare(FiberRegistration fr1, FiberRegistration fr2) {
-            return (fr1.resumeTime < fr2.resumeTime) ? -1 : (fr1.resumeTime == fr2.resumeTime) ? 0 : 1;
-        }
+    private final TimestampedCollection<Object, FiberRegistration> suspendedFibers = new TimestampedCollection<Object, FiberRegistration>();
+    private final ClientSession session;
 
-    });
-
-    ScheduledFiberResumeTask() {
-        super();
+    public FiberResumeTask(ClientSession session) {
+        this.session = session;
     }
 
     public void run() {
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Periodic fiber task executed - resume queue size: [ %d ]", fiberResumeQueue.size()));
+            LOGGER.finest(String.format("Periodic fiber resume task executed - suspended queue size: [ %d ]", suspendedFibers.size()));
         }
-        while (!fiberResumeQueue.isEmpty() && fiberResumeQueue.peek().expired()) {
-            FiberRegistration registration = fiberResumeQueue.poll();
-            registration.fiber.resume(registration.packet);
+        while (!suspendedFibers.isEmpty() && expired(suspendedFibers.getOldestRegistrationTimestamp())) {
+            FiberRegistration registration = suspendedFibers.removeOldest();
+
+            registration.fiber.resume(session.appendOutgoingAcknowledgementHeaders(registration.packet));
+
             if (LOGGER.isLoggable(Level.FINER)) {
                 LOGGER.finer(String.format("Fiber %s resumed with packet%n%s", registration.fiber, registration.packet));
             }
         }
     }
 
+    private final boolean expired(long resumeTime) {
+        return System.currentTimeMillis() >= resumeTime;
+    }
+
     /**
-     * Registers given fiber for a resume
-     * 
-     * @param fiber a fiber to be resumed after preconfigured interval has passed
-     * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
+     * Registers data for a timed execution
+     *
+     * @param fiber a fiber to be resumed at a given {@code executionTime}.
+     * @param packet a Packet to resume a given {@code fiber} with.
+     * @param executionTime determines the time of execution for a given data
+     *
+     * @return {@code true} if the {@code request} has been successfully registered, {@code false} otherwise.
      */
-    final boolean registerForResume(@NotNull Fiber fiber, Packet packet, long resumeTime) {
+    final boolean register(@NotNull Fiber fiber, Packet packet, long executionTime) {
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(String.format("Fiber %s registered for resume with packet%n%s", fiber, packet));
         }
-        return fiberResumeQueue.offer(new FiberRegistration(fiber, packet, resumeTime));
+        return suspendedFibers.register(executionTime, new FiberRegistration(fiber, packet));
     }
 }

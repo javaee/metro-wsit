@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.util.Communicator;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -47,6 +49,7 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import java.io.IOException;
@@ -85,10 +88,22 @@ final class RmClientTube extends AbstractFilterTubeImpl {
             // TODO remove this condition and remove context.getScInitiator() method
             scInitiator = context.getScInitiator();
         }
-        
+
+        // TODO we should also tak into account addressable clients
+        final WSEndpointReference clientEndpointReference;
+        if (configuration.isMakeConnectionSupportEnabled()) {
+            final McClientTube mcClientTube = context.getImplementation(McClientTube.class);
+            assert mcClientTube != null;
+
+            clientEndpointReference = mcClientTube.getWsmcAnonymousEndpointReference();
+        } else {
+            clientEndpointReference = configuration.getAddressingVersion().anonymousEpr;
+        }
+
         this.session = ClientSession.create(
                 configuration,
-                new ProtocolCommunicator(super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion()));
+                clientEndpointReference,
+                new Communicator("RmClientTubeCommunicator", context.getAddress(), super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion(), configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
         this.wsdlPort = context.getWsdlPort();
 
         this.requestPacketCopy = null;
@@ -109,18 +124,18 @@ final class RmClientTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet requestPacket) {
         LOGGER.entering();
         try {
-            if (isResendAttempt()) {
+            if (isResendAttempt()) { // resend of reqest/response processing
                 session.registerForResend(Fiber.current(), requestPacket, resendCounter);
                 return doSuspend(next);
             } else { // this is a first-time processing
-                // we do not modify original packet in case we wanted to reuse it later                
-                
-                requestPacket = session.processOutgoingPacket(requestPacket);
+                // we do not modify original packet in case we wanted to reuse it later
+
+                requestPacket = session.registerOutgoingRequest(requestPacket);
                 initResendResources(requestPacket);
+
+                requestPacket = session.appendOutgoingAcknowledgementHeaders(requestPacket);
                 return super.processRequest(requestPacket);
             }
-//        } catch (RmSoapFaultException ex) {
-//            return doReturnWith(ex.getSoapFaultResponse());
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
@@ -136,16 +151,19 @@ final class RmClientTube extends AbstractFilterTubeImpl {
             boolean responseToOneWayRequest = requestPacketCopy.getMessage().isOneWay(wsdlPort);
             responsePacket = session.processIncommingPacket(responsePacket, responseToOneWayRequest);
 
-            if (
-                    (responseToOneWayRequest && requestNotAcknowledged(requestPacketCopy)) ||
-                    (!responseToOneWayRequest && responseNotAvailableYet(responsePacket))
-            ) {
-                LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
-                return doResend();
-            } else {
-                resetResendResources();
-                return super.processResponse(responsePacket);
+            if (responseToOneWayRequest) { // One-way
+                if (!session.isRequestAcknowledged(requestPacketCopy)) {
+                    session.registerForResend(requestPacketCopy, resendCounter); // don't need to do another request packet copy
+                }
+            } else { // Request/Response
+                if (session.isRequestAcknowledged(requestPacketCopy) || responseNotAvailableYet(responsePacket)) {
+                    LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
+                    return doResend();
+                }
             }
+
+            resetResendResources();
+            return super.processResponse(responsePacket);
 
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
@@ -185,7 +203,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private boolean isResendPossible(Throwable throwable) {
+    static boolean isResendPossible(Throwable throwable) {
         if (throwable instanceof IOException) {
             return true;
         } else if (throwable instanceof WebServiceException) {
@@ -209,7 +227,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
     private void initResendResources(Packet requestPacket) {
         requestPacketCopy = requestPacket.copy(true);
     }
-    
+
     private void resetResendResources() {
         requestPacketCopy = null;
         resendCounter = 0;
@@ -222,9 +240,5 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         // In such case we also need to retry.
         Message responseMessage = responsePacket.getMessage();
         return responseMessage != null && !responseMessage.hasPayload();
-    }
-    
-    private boolean requestNotAcknowledged(Packet requestPacket) {
-        return !session.sequenceManager.getSequence(session.outboundSequenceId).isAcknowledged(PacketAdapter.getInstance(session.configuration, requestPacket).getMessageNumber());
     }
 }

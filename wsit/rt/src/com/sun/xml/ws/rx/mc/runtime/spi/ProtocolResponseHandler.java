@@ -34,41 +34,38 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.mc.runtime;
+package com.sun.xml.ws.rx.mc.runtime.spi;
 
-import com.sun.xml.ws.rx.util.TimestampedCollection;
-import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.rx.mc.runtime.MakeConnectionSenderTask;
 
 /**
+ * Implementations of this interface that are registered with 
+ * {@link com.sun.xml.ws.rx.mc.runtime.WsMcResponseHandler#processResponse(Packet)}
+ * are invoked to handle protocol response messages that don't correlate with any 
+ * client request.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class RequestResponseMepHandler extends AbstractResponseHandler {
+public interface ProtocolResponseHandler {
 
-
-
-    public RequestResponseMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
-        super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
-    }
-
-    public void onCompletion(Packet response) {
-        Message responseMessage = response.getMessage();
-        super.processMakeConnectionHeaders(responseMessage);
-
-        if (responseMessage != null && responseMessage.hasPayload()) {
-            super.resumeParentFiber(response);
-        } else {
-            // do nothing; we'll keep the fiber suspended until a non-empty response
-            // arrives as a response to WS-MakeConnection request
-        }
-    }
-
-    public void onCompletion(Throwable error) {
-        super.resumeParentFiber(error);
-    }
-
+    /**
+     * <p>
+     * This method is invoked from {@link com.sun.xml.ws.rx.mc.runtime.WsMcResponseHandler#processResponse(Packet)}
+     * in case it is not possible to resolve WS-A {@code RelatesTo} header from the response message to an existing
+     * suspended fiber. In such case it is assumed that the response may contain some general WS-* protocol message
+     * and chain of registered {@link ProtocolResponseHandler}s is invoked to handle the response message.
+     * </p>
+     *
+     * <p>
+     * Implementation of this method is expected to scan the response message and process it if possible. If the message
+     * has been identified as an understood protocol message and processed, method is expected to return {@code true}.
+     * In all other cases, {@code false} should be returned.
+     * </p>
+     *
+     * @param response an unmatched protocol response to be handled
+     *
+     * @return {@code true} if the message has been identified as an understood protocol message and processed,
+     *         {@code false} otherwise.
+     */
+    public boolean processProtocolResponse(Packet response);
 }

@@ -121,6 +121,15 @@ public abstract class PacketAdapter {
         insertPacket(packet);
     }
 
+    /**
+     * This method sets the {@link Packet}'s {@code expectReply} flag to {@code true}
+     */
+    void setExpectReply() {
+        checkPacketReadyState();
+
+        this.packet.expectReply = Boolean.TRUE;
+    }
+
     private final void insertPacket(Packet packet) {
         this.packet = packet;
         if (packet.getMessage() != null) {
@@ -221,7 +230,7 @@ public abstract class PacketAdapter {
     /**
      * TODO javadoc
      */
-    public abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RxRuntimeException;
+    protected abstract void appendAckRequestedHeader(@NotNull String sequenceId) throws RxRuntimeException;
 
     /**
      * TODO javadoc

@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.util.Communicator;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
@@ -76,31 +78,35 @@ abstract class ClientSession {
     String outboundSequenceId = null;
     final RxConfiguration configuration;
     final SequenceManager sequenceManager;
-    final ProtocolCommunicator communicator;
+    final Communicator communicator;
+
+    final WSEndpointReference rmSourceReference;
     //
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
-    private final ScheduledFiberResumeTask resendTask;
+    private final FiberResumeTask fiberResumeTask;
+    //
 
-    static ClientSession create(RxConfiguration configuration, ProtocolCommunicator communicator) {
+    static ClientSession create(RxConfiguration configuration, WSEndpointReference rmSourceReference, Communicator communicator) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
-                return new Rm10ClientSession(configuration, communicator);
+                return new Rm10ClientSession(configuration, rmSourceReference, communicator);
             case WSRM200702:
-                return new Rm11ClientSession(configuration, communicator);
+                return new Rm11ClientSession(configuration, rmSourceReference, communicator);
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
     }
 
-    ClientSession(RxConfiguration configuration, ProtocolCommunicator communicator) {
+    ClientSession(RxConfiguration configuration, WSEndpointReference rmsEndpointReference, Communicator communicator) {
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
+        this.rmSourceReference = rmsEndpointReference;
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
-        this.resendTask = new ScheduledFiberResumeTask();
+        this.fiberResumeTask = new FiberResumeTask(this);
     }
 
     abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException;
@@ -132,7 +138,7 @@ abstract class ClientSession {
     final void requestAcknowledgement() throws RxException {
         PacketAdapter responseAdapter = null;
         try {
-            PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket());
+            PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(false));
             requestAdapter.setEmptyRequestMessage(configuration.getRmVersion().ackRequestedAction).appendAckRequestedHeader(outboundSequenceId);
 
             responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
@@ -153,21 +159,34 @@ abstract class ClientSession {
         }
     }
 
-    final Packet processOutgoingPacket(Packet requestPacket) {
+    /**
+     * Initalizes this client session if necessary and assigns Sequence and MessageId
+     * RM headers to the outgoing request.
+     */
+    final Packet registerOutgoingRequest(Packet requestPacket) {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         initializeIfNecessary(requestAdapter);
 
         requestAdapter.appendSequenceHeader(
                 outboundSequenceId,
                 sequenceManager.getSequence(outboundSequenceId).generateNextMessageId());
-        if (isPendingAckRequest()) {
+
+        return requestAdapter.getPacket();
+    }
+
+    /**
+     * Appends AcksRequested and/or SequenceAcknowledgement headers to the outgoing request
+     */
+    final Packet appendOutgoingAcknowledgementHeaders(Packet requestPacket) throws RxRuntimeException {
+        PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
+        if (sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements()) {
             requestAdapter.appendAckRequestedHeader(outboundSequenceId);
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
         if (inboundSequenceId != null) {
             Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
-
-            if (inboundSequence.getLastMessageId() > 0 /*sequence has been used already*/) { // FIXME: create an API method to test this
+            if (inboundSequence.getLastMessageId() > 0) {
+                // FIXME: create an API method to test this
                 requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
             }
         }
@@ -185,18 +204,42 @@ abstract class ClientSession {
     }
 
     /**
-     * Registers given fiber for a resend (resume)
+     * Registers given fiber for a resume in an attempt to resend a request which
+     * is part of a request-response MEP.
      * 
      * @param fiber a fiber to be resumed after resend interval has passed
-     * @param packet packet to be passed into the resumed fiber
-     * @param resendAttemptNumber number of the resend attempt for a given packet
+     * @param request request packet to be passed into the resumed fiber
+     * @param resendCounter number of the resend attempt for a given packet
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
-    final boolean registerForResend(Fiber fiber, Packet packet, int resendAttemptNumber) {
-        return resendTask.registerForResume(
+    final boolean registerForResend(Fiber fiber, Packet request, int resendCounter) {
+        return fiberResumeTask.register(
                 fiber,
-                packet,
-                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendAttemptNumber, configuration.getMessageRetransmissionInterval()));
+                request,
+                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendCounter, configuration.getMessageRetransmissionInterval()));
+    }
+
+    /**
+     * Registers given one-way packet for a resend
+     *
+     * @param packet packet to be resent
+     * @param resendCounter number of the resend attempt for a given packet
+     * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
+     */
+    final boolean registerForResend(Packet packet, int resendCounter) {
+        // TODO implement
+//        return requestResendTask.register(
+//                packet,
+//                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendCounter, configuration.getMessageRetransmissionInterval()));
+        return false;
+    }
+
+    final boolean isRequestAcknowledged(Packet request) {
+        return isRequestAcknowledged(PacketAdapter.getInstance(configuration, request));
+    }
+
+    final boolean isRequestAcknowledged(PacketAdapter request) {
+        return sequenceManager.getSequence(outboundSequenceId).isAcknowledged(request.getMessageNumber());
     }
 
     /**
@@ -255,7 +298,7 @@ abstract class ClientSession {
         initLock.lock();
         try {
             if (!isInitialized()) {
-                communicator.registerMusterRequestPacket(request.copyPacket(false));
+// TODO remove                communicator.registerMusterRequestPacket(request.copyPacket(false));
 
                 int numberOfInitiateSessionAttempts = 0;
                 while (true) {
@@ -273,7 +316,7 @@ abstract class ClientSession {
                     }
                 }
 
-                scheduledTaskManager.startTask(resendTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
+                scheduledTaskManager.startTask(fiberResumeTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
                 scheduledTaskManager.startTask(createAckRequesterTask(), configuration.getAcknowledgementRequestInterval(), configuration.getAcknowledgementRequestInterval());
             }
         } finally {
@@ -297,7 +340,7 @@ abstract class ClientSession {
 
             public void run() {
                 try {
-                    if (isPendingAckRequest()) {
+                    if (isAutomaticAckRequestPending()) {
                         requestAcknowledgement();
                         lastAckRequestedTime.set(System.currentTimeMillis());
                     }
@@ -308,7 +351,7 @@ abstract class ClientSession {
         };
     }
 
-    private boolean isPendingAckRequest() throws RxRuntimeException {
+    private boolean isAutomaticAckRequestPending() throws RxRuntimeException {
         return lastAckRequestedTime.get() - System.currentTimeMillis() > configuration.getAcknowledgementRequestInterval() &&
                 sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements();
     }
