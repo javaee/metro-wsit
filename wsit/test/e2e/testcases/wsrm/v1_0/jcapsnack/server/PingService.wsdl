@@ -60,6 +60,7 @@
                     <wsrm:InactivityTimeout Milliseconds="600000" />
                     <wsrm:AcknowledgementInterval Milliseconds="200" />
                 </wsrm:RMAssertion>
+                <sunrm:Ordered />
                 <netrm:RmFlowControl>
                     <netrm:MaxReceiveBufferSize>32</netrm:MaxReceiveBufferSize>
                 </netrm:RmFlowControl>
