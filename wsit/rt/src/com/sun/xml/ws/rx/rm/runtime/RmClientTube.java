@@ -156,7 +156,7 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                     session.registerForResend(requestPacketCopy, resendCounter); // don't need to do another request packet copy
                 }
             } else { // Request/Response
-                if (session.isRequestAcknowledged(requestPacketCopy) || responseNotAvailableYet(responsePacket)) {
+                if (!session.isRequestAcknowledged(requestPacketCopy) || responseNotAvailableYet(responsePacket)) {
                     LOGGER.fine(LocalizationMessages.WSRM_1102_RESENDING_DROPPED_MESSAGE());
                     return doResend();
                 }
