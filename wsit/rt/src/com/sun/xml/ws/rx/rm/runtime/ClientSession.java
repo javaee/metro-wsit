@@ -85,7 +85,8 @@ abstract class ClientSession {
     private final Lock initLock;
     private final ScheduledTaskManager scheduledTaskManager;
     private final AtomicLong lastAckRequestedTime = new AtomicLong(0);
-    private final FiberResumeTask fiberResumeTask;
+    private final FiberResumeTask fiberResumeTask; // resumes Req/Resp resend processing
+    private final RequestResendTask requestResendTask; // resumes On-Way request processing
     //
 
     static ClientSession create(RxConfiguration configuration, WSEndpointReference rmSourceReference, Communicator communicator) {
@@ -107,6 +108,7 @@ abstract class ClientSession {
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
         this.fiberResumeTask = new FiberResumeTask(this);
+        this.requestResendTask = new RequestResendTask(communicator, this);
     }
 
     abstract void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException;
@@ -227,11 +229,10 @@ abstract class ClientSession {
      * @return {@code true} if the fiber was successfully registered; {@code false} otherwise.
      */
     final boolean registerForResend(Packet packet, int resendCounter) {
-        // TODO implement
-//        return requestResendTask.register(
-//                packet,
-//                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendCounter, configuration.getMessageRetransmissionInterval()));
-        return false;
+        return requestResendTask.register(
+                packet,
+                resendCounter,
+                configuration.getRetransmissionBackoffAlgorithm().nextResendTime(resendCounter, configuration.getMessageRetransmissionInterval()));
     }
 
     final boolean isRequestAcknowledged(Packet request) {
@@ -298,8 +299,6 @@ abstract class ClientSession {
         initLock.lock();
         try {
             if (!isInitialized()) {
-// TODO remove                communicator.registerMusterRequestPacket(request.copyPacket(false));
-
                 int numberOfInitiateSessionAttempts = 0;
                 while (true) {
                     try {
@@ -317,6 +316,7 @@ abstract class ClientSession {
                 }
 
                 scheduledTaskManager.startTask(fiberResumeTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
+                scheduledTaskManager.startTask(requestResendTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
                 scheduledTaskManager.startTask(createAckRequesterTask(), configuration.getAcknowledgementRequestInterval(), configuration.getAcknowledgementRequestInterval());
             }
         } finally {
