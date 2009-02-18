@@ -56,7 +56,7 @@ public class SecurityContextImpl implements SecurityContext {
     private Method serverGenCred =null;
     private Method getSubject = null;
     private Constructor ctor = null;
-    
+    @SuppressWarnings("unchecked")
     public SecurityContextImpl() {
         try {
             Class[] params = new Class[]{};
@@ -119,6 +119,7 @@ public class SecurityContextImpl implements SecurityContext {
             }
             Object secContext = ctor.newInstance(args);
             params = new Class[]{secContext.getClass()};
+            @SuppressWarnings("unchecked")
             Method setCurrent = c.getMethod("setCurrent", params);
             args = new Object[]{secContext};
             if (setCurrent == null) {

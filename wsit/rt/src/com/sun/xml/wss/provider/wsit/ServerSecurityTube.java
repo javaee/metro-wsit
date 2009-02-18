@@ -104,6 +104,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public NextAction processRequest(Packet request) {
 
         info = new PacketMapMessageInfo(request, new Packet());
@@ -147,7 +148,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 return doInvoke(super.next, validatedRequest);
             } else {
                 final Tube nextTube = super.next;
-                final Packet valRequest = validatedRequest;
+                final Packet valRequest = validatedRequest;                
                 try {
                     return (NextAction) Subject.doAsPrivileged(clientSubject, new PrivilegedExceptionAction() {
 

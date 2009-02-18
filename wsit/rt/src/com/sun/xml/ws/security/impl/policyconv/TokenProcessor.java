@@ -44,6 +44,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+import com.sun.xml.ws.security.impl.policy.UsernameToken;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
@@ -55,6 +56,7 @@ import com.sun.xml.ws.security.policy.X509Token;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
+import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
@@ -135,11 +137,47 @@ public class TokenProcessor {
             kerberosBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
         }
     }
+    protected void setUsernameTokenRefType(UsernameTokenBinding untBinding, UsernameToken unToken) {
+         untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+              
+    }
     
     public void addKeyBinding(WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion(tokenAssertion);
-        if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
+        if(PolicyUtil.isUsernameToken(tokenAssertion, spVersion)){
+            AuthenticationTokenPolicy.UsernameTokenBinding untBinding =new AuthenticationTokenPolicy.UsernameTokenBinding();
+            UsernameToken unToken = (UsernameToken)tokenAssertion;
+            untBinding.setUUID(token.getTokenId());            
+            setUsernameTokenRefType(untBinding,unToken);
+            //this code need not be called for UT
+            setTokenInclusion(untBinding,(Token) tokenAssertion);
+            setTokenValueType(untBinding, tokenAssertion);
+            
+            if(unToken.getIssuer() != null){
+                Address addr = unToken.getIssuer().getAddress();
+                if(addr != null)
+                    untBinding.setIssuer(addr.getURI().toString());
+            } else if(unToken.getIssuerName() != null){
+                untBinding.setIssuer(unToken.getIssuerName().getIssuerName());
+            }
+            
+            if(unToken.getClaims() != null){
+                untBinding.setClaims(unToken.getClaims().getClaimsAsBytes());
+            }                      
+            
+            if(!ignoreDK && unToken.isRequireDerivedKeys()){
+                DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
+                dtKB.setOriginalKeyBinding(untBinding);
+                policy.setKeyBinding(dtKB);
+                dtKB.setUUID(pid.generateID());
+                
+            }else{
+                policy.setKeyBinding(untBinding);
+            }
+            
+           // throw new UnsupportedOperationException("usernametoken not implemented yet");
+        }else if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();
             X509Token x509Token = (X509Token)tokenAssertion;
@@ -491,6 +529,22 @@ public class TokenProcessor {
             }
         }
     }
-    
+
+    void setTokenValueType(AuthenticationTokenPolicy.UsernameTokenBinding utb, PolicyAssertion tokenAssertion) {
+        NestedPolicy policy = tokenAssertion.getNestedPolicy();
+        if (policy == null) {
+            return;
+        }
+        AssertionSet as = policy.getAssertionSet();
+        Iterator<PolicyAssertion> itr = as.iterator();
+        while (itr.hasNext()) {
+            PolicyAssertion policyAssertion = (PolicyAssertion) itr.next();
+            if (policyAssertion.getName().getLocalPart().equals(Constants.WssUsernameToken10) || policyAssertion.getName().getLocalPart().equals(Constants.WssUsernameToken11)) {
+                utb.setValueType(MessageConstants.USERNAME_TOKEN_NS);
+            } else if (policyAssertion.getName().getLocalPart().equals(Constants.WssUsernameToken10) || policyAssertion.getName().getLocalPart().equals(Constants.WssUsernameToken11)) {
+                utb.setValueType(MessageConstants.USERNAME_TOKEN_NS);
+            }
+        }
+    }
     
 }

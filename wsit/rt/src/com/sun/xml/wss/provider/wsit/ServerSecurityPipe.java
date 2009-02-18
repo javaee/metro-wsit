@@ -130,7 +130,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 
         return response;
     }    
-
+    @SuppressWarnings("unchecked")
     private Packet processRequest(Packet request) throws Exception {
 
         AuthStatus status = AuthStatus.SUCCESS;

@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.security.policy;
 
+import java.util.Set;
+
 /**
  * Represents UsernameToken Assertion
  * @author K.Venugopal@sun.com
@@ -77,4 +79,7 @@ public interface UserNameToken extends Token{
      */ 
     public Claims getClaims();
     
+    public boolean isRequireDerivedKeys();
+
+    public Set getTokenRefernceType() ;
 }
