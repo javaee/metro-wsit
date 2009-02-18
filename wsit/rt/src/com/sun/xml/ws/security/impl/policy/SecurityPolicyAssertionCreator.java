@@ -239,7 +239,7 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         return policyAssertionCreator.createAssertion(assertionData,nestedAssertions,nestedAlternative,policyAssertionCreator);
         
     }
-    
+    @SuppressWarnings("unchecked")
     private Constructor getConstructor(Class cl) throws NoSuchMethodException{
         Constructor [] cList = cl.getConstructors();
         return cl.getConstructor(com.sun.xml.ws.policy.sourcemodel.AssertionData.class,java.util.Collection.class,com.sun.xml.ws.policy.AssertionSet.class);
