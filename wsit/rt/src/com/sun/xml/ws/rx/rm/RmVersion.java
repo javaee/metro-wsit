@@ -40,7 +40,6 @@ import com.sun.xml.ws.rx.util.JaxbContextRepository;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
@@ -129,8 +128,6 @@ public enum RmVersion {
     static RmVersion getDefault() {
         return RmVersion.WSRM200702; // if changed, update also in ReliableMesaging annotation
     }
-    //
-    private static final Logger LOGGER = Logger.getLogger(RmVersion.class);
     /**
      * General constants
      */
@@ -145,7 +142,6 @@ public enum RmVersion {
     public final String closeSequenceAction;
     public final String closeSequenceResponseAction;
     public final String lastAction;
-    public final String makeConnectionAction;
     public final String sequenceAcknowledgementAction;
     public final String wsrmFaultAction;
     public final String terminateSequenceAction;
@@ -176,7 +172,6 @@ public enum RmVersion {
         this.closeSequenceAction = namespaceUri + "/CloseSequence";
         this.closeSequenceResponseAction = namespaceUri + "/CloseSequenceResponse";
         this.lastAction = namespaceUri + "/LastMessage";
-        this.makeConnectionAction = namespaceUri + "/MakeConnection";
         this.sequenceAcknowledgementAction = namespaceUri + "/SequenceAcknowledgement";
         this.wsrmFaultAction = namespaceUri + "/fault";
         this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
@@ -217,7 +212,6 @@ public enum RmVersion {
                 createSequenceAction.equals(wsaAction) ||
                 closeSequenceAction.equals(wsaAction) ||
                 lastAction.equals(wsaAction) ||
-                makeConnectionAction.equals(wsaAction) ||
                 terminateSequenceAction.equals(wsaAction));
     }
 

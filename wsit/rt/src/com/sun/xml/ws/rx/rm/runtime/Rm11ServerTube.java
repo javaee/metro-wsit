@@ -90,8 +90,6 @@ final class Rm11ServerTube extends AbstractRmServerTube {
     PacketAdapter processVersionSpecificProtocolRequest( PacketAdapter requestAdapter) throws AbstractRmSoapFault {
         if (RmVersion.WSRM200702.closeSequenceAction.equals(requestAdapter.getWsaAction())) {
             return handleCloseSequenceAction(requestAdapter);
-        } else if (RmVersion.WSRM200702.makeConnectionAction.equals(requestAdapter.getWsaAction())) {
-            return handleMakeConnectionAction(requestAdapter);
         } else {
             return super.processVersionSpecificProtocolRequest(requestAdapter);
         }
@@ -276,34 +274,5 @@ final class Rm11ServerTube extends AbstractRmServerTube {
                 }
             }
         }
-    }
-
-    /**
-     * TODO javadoc
-     */
-    PacketAdapter handleMakeConnectionAction(PacketAdapter requestAdapter) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    // TODO
-//        MakeConnectionElement mcElement = requestAdapter.unmarshallMessage();
-//        Sequence outboundSequence = sequenceManager.getBoundSequence(mcElement.getIdentifier().getValue());
-
-//        sequenceId = element.getIdentifier().getValue();
-//        OutboundSequence outboundSequence = RMDestination.getRMDestination().getOutboundSequence(sequenceId);
-//        if (outboundSequence == null) {
-//            throw LOGGER.logSevereException(new RxException(LocalizationMessages.WSRM_3025_INVALID_SEQUENCE_ID_IN_MAKECONNECTION_MESSAGE(sequenceId)));
-//        }
-//
-//        //see if we can find a message in the sequence that needs to be resent.
-//        Packet ret = new Packet();
-//
-//        RMMessage unacknowledgedMessage = outboundSequence.getUnacknowledgedMessage();
-//        if (unacknowledgedMessage != null) {
-//            ret.setMessage(unacknowledgedMessage.getCopy());
-//        } else {
-//            ret.setMessage(Messages.createEmpty(getConfig().getSoapVersion()));
-//        }
-//
-//        ret.invocationProperties.putAll(packet.invocationProperties);
-//        return ret;
     }
 }
