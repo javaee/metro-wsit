@@ -43,6 +43,8 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import java.util.Map;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 
@@ -53,9 +55,18 @@ import javax.xml.soap.SOAPFault;
 class WsMcResponseHandler extends AbstractResponseHandler {
 
     private static final Logger LOGGER = Logger.getLogger(WsMcResponseHandler.class);
+    //
+    private final Map<String, ProtocolMessageHandler> actionToProtocolHandlerMap;
 
-    public WsMcResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
+    public WsMcResponseHandler(
+            final RxConfiguration configuration,
+            final MakeConnectionSenderTask mcSenderTask,
+            final TimestampedCollection<String, Fiber> suspendedFiberStorage,
+            final Map<String, ProtocolMessageHandler> protocolHandlerMap) {
+
         super(configuration, mcSenderTask, suspendedFiberStorage);
+
+        this.actionToProtocolHandlerMap = protocolHandlerMap;
     }
 
     public void onCompletion(Packet response) {
@@ -85,24 +96,49 @@ class WsMcResponseHandler extends AbstractResponseHandler {
             return;
         }
 
-        Header relatesToHeader;
-        if (!responseMessage.hasHeaders() || (relatesToHeader = responseMessage.getHeaders().get(configuration.getAddressingVersion().relatesToTag, false)) == null) {
+        if (!responseMessage.hasHeaders()) {
             // TODO L10N
-            LOGGER.severe("Unable to find request for a response: The response to a WS-MakeConnection request returned for a WS-MakeConnection request" +
-                    "does not contain wsa:RelatesTo header");
-            return;
+            LOGGER.severe("Unable to find a proper response receiver: " +
+                    "The response to a WS-MakeConnection request does not contain any headers.");
+            return;            
+        }
+        
+        Header wsaRelatesToHeader = responseMessage.getHeaders().get(configuration.getAddressingVersion().relatesToTag, false);
+        if (wsaRelatesToHeader != null) {
+            // find original request fiber
+            setCorrelationId(wsaRelatesToHeader.getStringContent()); // initializing correlation id for getParentFiber()
+            Fiber originalFiber = getParentFiber();
+            if (originalFiber != null) {
+                originalFiber.resume(response);
+                return;
+            } else {
+                // TODO L10N
+                LOGGER.warning("No suspended fiber found for a response to a WS-MakeConnection request");
+            }
         }
 
-        // find original request fiber
-        setCorrelationId(relatesToHeader.getStringContent()); // initializing correlation id for getParentFiber()
-        Fiber originalFiber = getParentFiber();
-        if (originalFiber == null) {
-            // TODO L10N
-            LOGGER.warning("No suspended fiber found for a response to a WS-MakeConnection request");
-            return;
-        }
+        // TODO L10N
+        LOGGER.finer("Proceeding with processing the response as a protocol message.");
+        Header wsaActionHeader = responseMessage.getHeaders().get(configuration.getAddressingVersion().actionTag, false);
+        if (wsaActionHeader != null) {
+            String wsaAction = wsaActionHeader.getStringContent();
+            ProtocolMessageHandler handler = actionToProtocolHandlerMap.get(wsaAction);
+            if (handler != null) {
+                LOGGER.finer(String.format(
+                        "Processing WS-MC response with WS-Addressing action [ %s ] using ProtocolMessageHandler of class [ %s ]",
+                        wsaAction,
+                        handler.getClass().getName()));
 
-        originalFiber.resume(response);
+                handler.processProtocolMessage(response);
+            } else {
+                LOGGER.warning(String.format(
+                        "Unable to find a ProtocolMessageHandler to process WS-MC response with WS-Addressing action [ %s ]",
+                        wsaAction));
+            }
+        } else {
+            LOGGER.severe("Unable to find a proper response receiver: " +
+                    "The response to a WS-MakeConnection request does not contain WS-Addressing Action header.");
+        }
     }
 
     public void onCompletion(Throwable error) {

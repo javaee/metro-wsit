@@ -52,10 +52,8 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolResponseHandler;
+import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
@@ -75,7 +73,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
     private final ScheduledTaskManager scheduler;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private final MakeConnectionSenderTask mcSenderTask;
-    private final List<ProtocolResponseHandler> protocolResponseHandlers;
 
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
@@ -93,7 +90,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.mcSenderTask = original.mcSenderTask;
 
         this.wsmcAnonymousEndpointReference = original.wsmcAnonymousEndpointReference;
-        this.protocolResponseHandlers = original.protocolResponseHandlers;
     }
 
     McClientTube(RxConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
@@ -110,8 +106,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
                 configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
-
-        this.protocolResponseHandlers = new LinkedList<ProtocolResponseHandler>();
 
         final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
@@ -189,8 +183,8 @@ public class McClientTube extends AbstractFilterTubeImpl {
         return wsmcAnonymousEndpointReference;
     }
 
-    public final void registerProtocolResponseHandler(ProtocolResponseHandler handler) {
-        protocolResponseHandlers.add(handler);
+    public final void registerProtocolResponseHandler(ProtocolMessageHandler handler) {
+        mcSenderTask.register(handler);
     }
 
     /**

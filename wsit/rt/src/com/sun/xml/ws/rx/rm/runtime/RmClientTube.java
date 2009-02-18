@@ -91,8 +91,8 @@ final class RmClientTube extends AbstractFilterTubeImpl {
 
         // TODO we should also tak into account addressable clients
         final WSEndpointReference clientEndpointReference;
+        final McClientTube mcClientTube = context.getImplementation(McClientTube.class);
         if (configuration.isMakeConnectionSupportEnabled()) {
-            final McClientTube mcClientTube = context.getImplementation(McClientTube.class);
             assert mcClientTube != null;
 
             clientEndpointReference = mcClientTube.getWsmcAnonymousEndpointReference();
@@ -104,6 +104,12 @@ final class RmClientTube extends AbstractFilterTubeImpl {
                 configuration,
                 clientEndpointReference,
                 new Communicator("RmClientTubeCommunicator", context.getAddress(), super.next, scInitiator, configuration.getAddressingVersion(), configuration.getSoapVersion(), configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
+
+        if (configuration.isMakeConnectionSupportEnabled()) {
+            assert mcClientTube != null;
+            mcClientTube.registerProtocolResponseHandler(session.getRmProtocolResponseHandler());
+        }
+
         this.wsdlPort = context.getWsdlPort();
 
         this.requestPacketCopy = null;

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
@@ -50,6 +51,9 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -195,6 +199,40 @@ abstract class ClientSession {
 
         return requestAdapter.getPacket();
     }
+
+    final ProtocolMessageHandler getRmProtocolResponseHandler() {
+        return new ProtocolMessageHandler() {
+            Collection<String> SUPPORTED_WSA_ACTIONS = Collections.unmodifiableCollection(Arrays.asList(new String[] {
+                    configuration.getRmVersion().ackRequestedAction,
+                    // configuration.getRmVersion().closeSequenceAction,
+                    // configuration.getRmVersion().closeSequenceResponseAction,
+                    // configuration.getRmVersion().createSequenceAction,
+                    // configuration.getRmVersion().createSequenceResponseAction,
+                    // configuration.getRmVersion().lastAction,
+                    configuration.getRmVersion().sequenceAcknowledgementAction,
+                    // configuration.getRmVersion().terminateSequenceAction,
+                    // configuration.getRmVersion().terminateSequenceResponseAction,
+                    // configuration.getRmVersion().wsrmFaultAction
+                }));
+
+            public Collection<String> getSuportedWsaActions() {
+                return SUPPORTED_WSA_ACTIONS;
+            }
+
+            public void processProtocolMessage(Packet protocolMessagePacket) {
+                PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, protocolMessagePacket);
+                if (responseAdapter.isProtocolMessage()) {
+                    // TODO L10N
+                    LOGGER.finer("Processing RM protocol message.");
+                    processInboundMessageHeaders(responseAdapter, false);
+                } else {
+                    // TODO L10N
+                    LOGGER.severe("Unable to process packet - the packet was not identified as an RM protocol message");
+                }
+            }
+        };
+    }
+
 
     final Packet processIncommingPacket(Packet responsePacket, boolean responseToOneWayRequest) throws RxRuntimeException {
         PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);

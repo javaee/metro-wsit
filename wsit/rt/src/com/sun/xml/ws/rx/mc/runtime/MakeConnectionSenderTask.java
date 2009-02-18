@@ -37,10 +37,15 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
+import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.TimestampedCollection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  *
@@ -48,11 +53,14 @@ import com.sun.xml.ws.rx.util.TimestampedCollection;
  */
 final class MakeConnectionSenderTask implements Runnable {
 
+    private static final Logger LOGGER = Logger.getLogger(MakeConnectionSenderTask.class);
+    //
     private final String wsmcAnonymousAddress;
     private long lastMcMessageTimestamp;
     private final Communicator communicator;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private final RxConfiguration configuration;
+    private final Map<String, ProtocolMessageHandler> actionToProtocolHandlerMap;
 
     MakeConnectionSenderTask(final Communicator communicator, final TimestampedCollection<String, Fiber> suspendedFiberStorage, final String wsmcAnonymousAddress, final RxConfiguration configuration) {
         this.communicator = communicator;
@@ -60,10 +68,11 @@ final class MakeConnectionSenderTask implements Runnable {
         this.wsmcAnonymousAddress = wsmcAnonymousAddress;
         this.configuration = configuration;
         this.lastMcMessageTimestamp = System.currentTimeMillis();
+        this.actionToProtocolHandlerMap = new HashMap<String, ProtocolMessageHandler>();
     }
 
     public synchronized void run() {
-        while(readyToExecute()) {
+        while (readyToExecute()) {
             executeNow();
         }
     }
@@ -82,9 +91,32 @@ final class MakeConnectionSenderTask implements Runnable {
         return System.currentTimeMillis() - lastMcMessageTimestamp > 2000;
     }
 
-    public synchronized void executeNow() {
+    synchronized void register(ProtocolMessageHandler handler) {
+        for (String wsaAction : handler.getSuportedWsaActions()) {
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(String.format(
+                        "Registering ProtocolMessageHandler of class [ %s ] to process WS-A action [ %s ]",
+                        handler.getClass().getName(),
+                        wsaAction));
+            }
+
+            final ProtocolMessageHandler oldHandler = actionToProtocolHandlerMap.put(wsaAction, handler);
+
+            if (oldHandler != null && LOGGER.isLoggable(Level.WARNING)) {
+                // TODO L10N
+                LOGGER.warning(String.format(
+                        "Duplicate ProtocolMessageHandler registration detected for WS-A action [ %s ].%n" +
+                        "Previously registered handler of class [ %s ] has been replaced with a new handler of class [ %s ]",
+                        wsaAction,
+                        oldHandler.getClass().getName(),
+                        handler.getClass().getName()));
+            }
+        }
+    }
+
+    synchronized void executeNow() {
         Packet mcRequest = communicator.createRequestPacket(new MakeConnectionElement(wsmcAnonymousAddress), configuration.getMcVersion().wsmcAction, true);
-        communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage));
+        communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage, actionToProtocolHandlerMap));
         lastMcMessageTimestamp = System.currentTimeMillis();
     }
 }

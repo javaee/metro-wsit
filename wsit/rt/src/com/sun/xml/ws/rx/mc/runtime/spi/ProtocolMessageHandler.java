@@ -36,7 +36,9 @@
 
 package com.sun.xml.ws.rx.mc.runtime.spi;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Packet;
+import java.util.Collection;
 
 /**
  * Implementations of this interface that are registered with 
@@ -46,26 +48,31 @@ import com.sun.xml.ws.api.message.Packet;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public interface ProtocolResponseHandler {
+public interface ProtocolMessageHandler {
+
+    /**
+     * Provides information about all WS-Addressing actions that this handler understands and can process.
+     *
+     * @return collection of all WS-Addressing actions that this handler understands and can process.
+     *         Must not return {@code null}.
+     */
+    public @NotNull Collection<String> getSuportedWsaActions();
 
     /**
      * <p>
      * This method is invoked from {@link com.sun.xml.ws.rx.mc.runtime.WsMcResponseHandler#processResponse(Packet)}
      * in case it is not possible to resolve WS-A {@code RelatesTo} header from the response message to an existing
      * suspended fiber. In such case it is assumed that the response may contain some general WS-* protocol message
-     * and chain of registered {@link ProtocolResponseHandler}s is invoked to handle the response message.
+     * and collection of registered {@link ProtocolMessageHandler}s is consulted.
      * </p>
      *
      * <p>
-     * Implementation of this method is expected to scan the response message and process it if possible. If the message
-     * has been identified as an understood protocol message and processed, method is expected to return {@code true}.
-     * In all other cases, {@code false} should be returned.
+     * In case the WS-Addressing {@code wsa:Action} header matches one of the supported WS-Addressing actions returned 
+     * from {@link #getSuportedWsaActions()} method, the {@link #processProtocolMessage(com.sun.xml.ws.api.message.Packet)}
+     * is invoked on {@link ProtocolMessageHandler} instance to process the protocol message.
      * </p>
      *
-     * @param response an unmatched protocol response to be handled
-     *
-     * @return {@code true} if the message has been identified as an understood protocol message and processed,
-     *         {@code false} otherwise.
+     * @param protocolMessage a protocol message to be handled
      */
-    public boolean processProtocolResponse(Packet response);
+    public void processProtocolMessage(Packet protocolMessage);
 }
