@@ -126,6 +126,13 @@ public class SupportingTokensProcessor {
             Token token = (Token) tokens.next();
             SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
             WSSPolicy policy = tokenProcessor.getWSSToken(token);
+            if (this instanceof EndorsingSupportingTokensProcessor) {
+                if (PolicyUtil.isUsernameToken((PolicyAssertion)token,spVersion)) {
+                    AuthenticationTokenPolicy.UsernameTokenBinding utb =
+                            (AuthenticationTokenPolicy.UsernameTokenBinding) policy;
+                    utb.isEndorsing(true);
+                }
+            }
             if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion) && 
                     this instanceof EndorsingSupportingTokensProcessor){                
                 ((IssuedTokenKeyBinding)policy).setSTRID(null);

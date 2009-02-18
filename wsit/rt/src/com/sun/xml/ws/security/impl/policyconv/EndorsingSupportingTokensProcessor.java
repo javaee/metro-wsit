@@ -36,12 +36,17 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
+import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
@@ -77,5 +82,9 @@ public class EndorsingSupportingTokensProcessor extends SupportingTokensProcesso
     
     protected void correctSAMLBinding(WSSPolicy policy) {
         ((AuthenticationTokenPolicy.SAMLAssertionBinding)policy).setAssertionType(AuthenticationTokenPolicy.SAMLAssertionBinding.HOK_ASSERTION);
+    }
+    
+    @Override
+    protected void encryptToken(Token token, SecurityPolicyVersion spVersion)throws PolicyException{
     }
 }

@@ -40,6 +40,7 @@ import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+import com.sun.xml.ws.security.impl.policy.UsernameToken;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
@@ -321,7 +322,38 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             tokenProcessor.setTokenInclusion(sct,(Token) tokenAssertion);
             //sct.setPolicyToken((Token) tokenAssertion);
             sct.setUUID(((Token)tokenAssertion).getTokenId());
-        }else{
+        }else if(PolicyUtil.isUsernameToken(tokenAssertion, spVersion)){
+            AuthenticationTokenPolicy.UsernameTokenBinding utb=new AuthenticationTokenPolicy.UsernameTokenBinding();
+            UsernameToken unt = (UsernameToken)tokenAssertion;
+            utb.setUUID(token.getTokenId());
+            utb.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+            tokenProcessor.setTokenValueType(utb, tokenAssertion);
+            tokenProcessor.setTokenInclusion(utb,(Token) tokenAssertion);
+            tokenProcessor.setUsernameTokenRefType(utb, unt);
+            if(unt.getIssuer() != null){
+                Address addr = unt.getIssuer().getAddress();
+                if(addr != null)
+                    utb.setIssuer(addr.getURI().toString());
+            } else if(unt.getIssuerName() != null){
+                utb.setIssuer(unt.getIssuerName().getIssuerName());
+            }
+            
+            if(unt.getClaims() != null){
+                utb.setClaims(unt.getClaims().getClaimsAsBytes());
+            }
+            //utb.setNoPassword(true);
+            if(unt.isRequireDerivedKeys()){
+            DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
+            skb.setKeyBinding(utb);
+            policy.setKeyBinding(dtKB);
+            dtKB.setOriginalKeyBinding(skb);
+            dtKB.setUUID(pid.generateID());
+            } else{
+                skb.setKeyBinding(utb);
+                policy.setKeyBinding(skb);
+            }            
+        }
+        else{
             throw new UnsupportedOperationException("addKeyBinding for "+ token + "is not supported");
         }
     }

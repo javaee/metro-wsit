@@ -45,7 +45,7 @@ import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
@@ -68,6 +68,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private Issuer issuer = null;
     private IssuerName issuerName = null;
     private Claims claims = null;
+    private boolean reqDK=false;    
     
     /**
      * Creates a new instance of UsernameToken
@@ -75,7 +76,7 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     public UsernameToken() {
          id= PolicyUtil.randomUUID();
          itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
-         includeToken = spVersion.includeTokenAlways;
+         includeToken = spVersion.includeTokenAlways;        
     }
     
     public UsernameToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
@@ -84,8 +85,8 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
         String nsUri = getName().getNamespaceURI();
         spVersion = PolicyUtil.getSecurityPolicyVersion(nsUri);
         itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
-        includeToken = spVersion.includeTokenAlways;
-    }
+        includeToken = spVersion.includeTokenAlways;        
+    }    
     
     public void setType(String type) {
         this.tokenType = type;
@@ -145,6 +146,11 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
         return useHashPassword;
     }
     
+    public boolean isRequireDerivedKeys() {
+        populate();
+        return reqDK;
+    }
+    
     private synchronized AssertionFitness populate(boolean isServer) {
         if(!populated){
             if(this.getAttributeValue(itQname) != null){
@@ -160,13 +166,15 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
             }
             AssertionSet assertionSet = policy.getAssertionSet();
             for(PolicyAssertion assertion: assertionSet){
-                if(PolicyUtil.isUsernameTokenType(assertion, spVersion)){
+                if (PolicyUtil.isUsernameTokenType(assertion, spVersion)) {
                     tokenType = assertion.getName().getLocalPart();
-                }else if(PolicyUtil.hasPassword(assertion, spVersion)){
+                } else if (PolicyUtil.hasPassword(assertion, spVersion)) {
                     hasPassword = false;
                 } else if(PolicyUtil.isHashPassword(assertion, spVersion)){
                     useHashPassword = true;
-                } else{
+                } else if (PolicyUtil.isRequireDerivedKeys(assertion, spVersion)){
+                       reqDK = true;
+                }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,"UsernameToken");
                         fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
@@ -202,5 +210,9 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
 
     public SecurityPolicyVersion getSecurityPolicyVersion() {
         return spVersion;
+    }
+
+    public Set getTokenRefernceType() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
