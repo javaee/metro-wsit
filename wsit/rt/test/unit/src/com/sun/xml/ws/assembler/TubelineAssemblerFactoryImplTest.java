@@ -50,7 +50,6 @@ import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
-import com.sun.xml.ws.policy.jaxws.client.PolicyFeature;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.binding.BindingImpl;
 
@@ -172,7 +171,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final WSDLModel clientModel = parseConfigFile(configFileName);
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
         final PolicyMap map = portInfo.getPolicyMap();
-        final WSBinding binding = bindingId.createBinding(new PolicyFeature(map, clientModel, portInfo), new AddressingFeature(true));
+        final WSBinding binding = bindingId.createBinding(new AddressingFeature(true));
         final Container container = Container.NONE;
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
                 address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
