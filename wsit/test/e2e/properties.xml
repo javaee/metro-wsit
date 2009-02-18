@@ -37,13 +37,12 @@
 -->
 
 <project name="wsit.dev.java.net test properties">
-    <property name="testcases" value="testcases"/>
+    <property name="testcases" value="testcases"/> <!-- /wspolicy/dispatch/base -->
     <property name="test.lib.dir" value="${basedir}/lib"/>
     <property name="test.docs.dir" value="${basedir}/docs"/>
     <property name="test.src.dir" value="${basedir}/src"/>
     <property name="test.etc.dir" value="${basedir}/etc"/>
     <property name="wsit.dir" value="${basedir}/../../"/>
-    <property name="debug" value="false"/>
     <property name="verbose" value="false"/>
     <property name="logs.dir" value="${basedir}/logs"/>
     <property environment="env" />
