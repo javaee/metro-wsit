@@ -96,6 +96,20 @@ public enum McVersion {
 
     /**
      * TODO javadoc
+     * 
+     * @param replyToAddress
+     * @return
+     */
+    public String getClientId(String eprAddress) {
+        final String mcAnnonymousAddressPrefix = namespaceUri + "/anonymous?id=";
+        if (eprAddress.startsWith(mcAnnonymousAddressPrefix)) {
+            return eprAddress.substring(mcAnnonymousAddressPrefix.length());
+        }
+        return null;
+    }
+
+    /**
+     * TODO javadoc
      *
      * @return
      */

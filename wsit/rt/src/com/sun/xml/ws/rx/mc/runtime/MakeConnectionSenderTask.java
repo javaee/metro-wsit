@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
@@ -45,6 +46,7 @@ import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.TimestampedCollection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 /**
@@ -56,29 +58,44 @@ final class MakeConnectionSenderTask implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(MakeConnectionSenderTask.class);
     //
     private final String wsmcAnonymousAddress;
+    private final Header wsmcAnnonymousReplyToHeader;
     private long lastMcMessageTimestamp;
+    private final AtomicBoolean isMcRequestPending;
+    private int scheduledMcRequestCounter;
+    private final RxConfiguration configuration;
     private final Communicator communicator;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
-    private final RxConfiguration configuration;
-    private final Map<String, ProtocolMessageHandler> actionToProtocolHandlerMap;
+    private final Map<String, ProtocolMessageHandler> mapOfRegisteredProtocolMessageHandlers;
 
-    MakeConnectionSenderTask(final Communicator communicator, final TimestampedCollection<String, Fiber> suspendedFiberStorage, final String wsmcAnonymousAddress, final RxConfiguration configuration) {
+    MakeConnectionSenderTask(final Communicator communicator, final TimestampedCollection<String, Fiber> suspendedFiberStorage, final String wsmcAnonymousAddress, final Header wsmcAnnonymousReplyToHeader, final RxConfiguration configuration) {
         this.communicator = communicator;
         this.suspendedFiberStorage = suspendedFiberStorage;
         this.wsmcAnonymousAddress = wsmcAnonymousAddress;
+        this.wsmcAnnonymousReplyToHeader = wsmcAnnonymousReplyToHeader;
         this.configuration = configuration;
+        this.mapOfRegisteredProtocolMessageHandlers = new HashMap<String, ProtocolMessageHandler>();
+
         this.lastMcMessageTimestamp = System.currentTimeMillis();
-        this.actionToProtocolHandlerMap = new HashMap<String, ProtocolMessageHandler>();
+        this.isMcRequestPending = new AtomicBoolean(false);
+        this.scheduledMcRequestCounter = 0;
     }
 
+    /**
+     * This method is resumed periodicaly by a Timer. First, it checks if ALL of the following conditions
+     * are satisfied:
+     * <ul>
+     *   <li>There is no MakeConnection request already pending</li>
+     *   <li>A preconfigured interval has passed since last MakeConnection request</li>
+     *   <li>There are suspended fibers waiting for a response or there are pending MC
+     *       requests that were scheduled programatically via {@link #scheduleMcRequest()} method</li>
+     * </ul>
+     * If all the above conditions are astisfied a new MakeConnection request is sent. If not,
+     * method terminates without any further action.
+     */
     public synchronized void run() {
-        while (readyToExecute()) {
-            executeNow();
+        if (!isMcRequestPending.get() && resendMakeConnectionIntervalPassed() /*&& (scheduledMcRequestCounter > 0 || suspendedFibersReadyForResend())*/) {
+            sendMcRequest();
         }
-    }
-
-    private boolean readyToExecute() {
-        return resendMakeConnectionIntervalPassed() && suspendedFibersReadyForResend();
     }
 
     private boolean suspendedFibersReadyForResend() {
@@ -100,7 +117,7 @@ final class MakeConnectionSenderTask implements Runnable {
                         wsaAction));
             }
 
-            final ProtocolMessageHandler oldHandler = actionToProtocolHandlerMap.put(wsaAction, handler);
+            final ProtocolMessageHandler oldHandler = mapOfRegisteredProtocolMessageHandlers.put(wsaAction, handler);
 
             if (oldHandler != null && LOGGER.isLoggable(Level.WARNING)) {
                 // TODO L10N
@@ -114,9 +131,26 @@ final class MakeConnectionSenderTask implements Runnable {
         }
     }
 
-    synchronized void executeNow() {
+    synchronized void scheduleMcRequest() {
+        scheduledMcRequestCounter++;
+    }
+
+    private void sendMcRequest() {
         Packet mcRequest = communicator.createRequestPacket(new MakeConnectionElement(wsmcAnonymousAddress), configuration.getMcVersion().wsmcAction, true);
-        communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage, actionToProtocolHandlerMap));
-        lastMcMessageTimestamp = System.currentTimeMillis();
+        McClientTube.setMcAnnonymousReplyToHeader(mcRequest.getMessage().getHeaders(), configuration.getAddressingVersion(), wsmcAnnonymousReplyToHeader);
+
+        isMcRequestPending.set(true);
+        try {
+            communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage, mapOfRegisteredProtocolMessageHandlers));
+        } finally {
+            lastMcMessageTimestamp = System.currentTimeMillis();
+            if (--scheduledMcRequestCounter < 0) {
+                scheduledMcRequestCounter = 0;
+            }
+        }
+    }
+
+    synchronized void clearMcRequestPendingFlag() {
+        isMcRequestPending.set(false);
     }
 }

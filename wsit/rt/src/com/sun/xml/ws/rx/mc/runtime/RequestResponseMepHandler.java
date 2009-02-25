@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.util.TimestampedCollection;
@@ -48,26 +47,24 @@ import com.sun.xml.ws.api.pipe.Fiber;
  */
 class RequestResponseMepHandler extends AbstractResponseHandler {
 
-
-
     public RequestResponseMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
     }
 
     public void onCompletion(Packet response) {
         Message responseMessage = response.getMessage();
-        super.processMakeConnectionHeaders(responseMessage);
+        if (responseMessage != null) {
+            super.processMakeConnectionHeaders(responseMessage);
 
-        if (responseMessage != null && responseMessage.hasPayload()) {
-            super.resumeParentFiber(response);
-        } else {
-            // do nothing; we'll keep the fiber suspended until a non-empty response
-            // arrives as a response to WS-MakeConnection request
+            if (responseMessage.hasPayload()) {
+                super.resumeParentFiber(response);
+            }
         }
+        // otherwise do nothing; we'll keep the fiber suspended until a non-empty response
+        // arrives as a response to WS-MakeConnection request
     }
 
     public void onCompletion(Throwable error) {
         super.resumeParentFiber(error);
     }
-
 }

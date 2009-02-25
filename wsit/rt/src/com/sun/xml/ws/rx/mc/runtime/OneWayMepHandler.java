@@ -41,6 +41,7 @@ import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
+import java.io.IOException;
 
 /**
  *
@@ -55,12 +56,37 @@ class OneWayMepHandler extends AbstractResponseHandler {
     public void onCompletion(Packet response) {
         Message responseMessage = response.getMessage();
 
-        super.processMakeConnectionHeaders(responseMessage);
+        if (responseMessage != null) {
+            super.processMakeConnectionHeaders(responseMessage);
+        } else if (configuration.isReliableMessagingEnabled()) {
+            // FIXME: This is an temporary workaround to be interoperable with MSFT:
+            // if response message is null with RM turned on, it means that MSFT did not
+            // send back anything (not even a sequence acknowledgement) and is waiting
+            // for us until we send a MakeConnection message.
+            super.mcSenderTask.scheduleMcRequest();
+        }
+
         super.resumeParentFiber(response);
     }
 
     public void onCompletion(Throwable error) {
+        if (configuration.isReliableMessagingEnabled() && isIOError(error)) {
+            // FIXME: This is an temporary workaround to be interoperable with MSFT:
+            // if response message is null with RM turned on, it means that MSFT did not
+            // send back anything (not even a sequence acknowledgement) and is waiting
+            // for us until we send a MakeConnection message.
+            //
+            // investigation shows that when MSFT returns HTTP 202, a SocketException is
+            // raised in our transport layer
+            super.mcSenderTask.scheduleMcRequest();
+        }
+
         super.resumeParentFiber(error);
     }
 
+    private boolean isIOError(Throwable error) {
+        // normally the IOException comes wrapped into WebServiceException
+
+        return error instanceof IOException || error.getCause() instanceof IOException;
+    }
 }

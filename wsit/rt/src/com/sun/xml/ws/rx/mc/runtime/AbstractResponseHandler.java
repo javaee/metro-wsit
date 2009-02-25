@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
@@ -52,11 +53,12 @@ import javax.xml.namespace.QName;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
+
     private static final Logger LOGGER = Logger.getLogger(AbstractResponseHandler.class);
     //
     protected final RxConfiguration configuration;
     //
-    private final MakeConnectionSenderTask mcSenderTask;
+    protected final MakeConnectionSenderTask mcSenderTask;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private String correlationId;
 
@@ -107,16 +109,14 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
         parent.resume(error);
     }
 
-    protected final void processMakeConnectionHeaders(Message responseMessage) throws RxRuntimeException {
-        if (responseMessage != null) {
-            // process WS-MC header
-            if (responseMessage.hasHeaders()) {
-                MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
-                if (messagePendingHeader.isPending()) {
-                    if (!suspendedFiberStorage.isEmpty()) {
-                        mcSenderTask.executeNow();
-                    }
-                }
+    protected final void processMakeConnectionHeaders(@NotNull Message responseMessage) throws RxRuntimeException {
+        assert responseMessage != null;
+
+        // process WS-MC header
+        if (responseMessage.hasHeaders()) {
+            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
+            if (messagePendingHeader.isPending()) {
+                mcSenderTask.scheduleMcRequest();
             }
         }
     }

@@ -35,15 +35,14 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rx.rm.CloseSequenceException;
-import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
-import com.sun.xml.ws.rx.rm.TerminateSequenceException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.AcceptType;
@@ -72,7 +71,7 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    void openRmSession( String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException {
+    void openRmSession(String offerInboundSequenceId, SecurityTokenReferenceType strType) throws RxRuntimeException {
         CreateSequenceElement csElement = new CreateSequenceElement();
         csElement.setAcksTo(super.rmSourceReference.toSpec());
 
@@ -132,7 +131,7 @@ final class Rm11ClientSession extends ClientSession {
     }
 
     @Override
-    void closeOutboundSequence() throws RxException {
+    void closeOutboundSequence() {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(true));
 
         requestAdapter.setRequestMessage(
@@ -142,68 +141,87 @@ final class Rm11ClientSession extends ClientSession {
             requestAdapter.appendSequenceAcknowledgementHeader(sequenceManager.getSequence(inboundSequenceId));
         }
 
-        PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
-        if (!responseAdapter.containsMessage()) {
-            throw new CloseSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CloseSequence"));
-        }
+        communicator.sendAsync(requestAdapter.getPacket(), new Fiber.CompletionCallback() {
 
-        processInboundMessageHeaders(responseAdapter, false);
+            public void onCompletion(Packet responsePacket) {
+                PacketAdapter responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
+                if (!responseAdapter.containsMessage()) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("CloseSequence"));
+                }
 
-        if (responseAdapter.isFault()) {
-            // FIXME need to find a way how to pass fault information into the exception
-            throw new CloseSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CloseSequence"));
-        }
+                processInboundMessageHeaders(responseAdapter, false);
 
-        CloseSequenceResponseElement csrElement = responseAdapter.unmarshallMessage(); // consuming message here
-        responseAdapter.getPacket();
+                if (responseAdapter.isFault()) {
+                    // FIXME need to find a way how to pass fault information into the exception
+                    LOGGER.warning(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("CloseSequence"));
+                }
 
-        if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
-            throw new CloseSequenceException(LocalizationMessages.WSRM_1119_UNEXPECTED_SEQUENCE_ID_IN_CLOSE_SR(csrElement.getIdentifier().getValue(), outboundSequenceId));
-        }
+                CloseSequenceResponseElement csrElement = responseAdapter.unmarshallMessage(); // consuming message here
+                responseAdapter.getPacket();
+
+                if (!outboundSequenceId.equals(csrElement.getIdentifier().getValue())) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1119_UNEXPECTED_SEQUENCE_ID_IN_CLOSE_SR(csrElement.getIdentifier().getValue(), outboundSequenceId));
+                }
+            }
+
+            public void onCompletion(Throwable error) {
+                // TODO L10N
+                LOGGER.warning("Unexpected exception while trying to close sequence", error);
+            }
+        });
     }
 
     @Override
-    void terminateOutboundSequence() throws RxException {
+    void terminateOutboundSequence() {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, communicator.createEmptyRequestPacket(true));
         requestAdapter.setRequestMessage(
                 new TerminateSequenceElement(outboundSequenceId, sequenceManager.getSequence(outboundSequenceId).getLastMessageId()),
                 RmVersion.WSRM200702.terminateSequenceAction);
 
-        PacketAdapter responseAdapter = null;
-        try {
-            responseAdapter = PacketAdapter.getInstance(configuration, communicator.send(requestAdapter.getPacket()));
-            if (!responseAdapter.containsMessage()) {
-                if (inboundSequenceId != null) {
-                    // we should get the TerminateSequence response back
-                    throw new TerminateSequenceException(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequence"));
-                } else {
-                    return;
+        communicator.sendAsync(requestAdapter.getPacket(), new Fiber.CompletionCallback() {
+
+            public void onCompletion(Packet responsePacket) {
+                PacketAdapter responseAdapter = null;
+                try {
+                    responseAdapter = PacketAdapter.getInstance(configuration, responsePacket);
+                    if (!responseAdapter.containsMessage()) {
+                        if (inboundSequenceId != null) {
+                            // we should get the TerminateSequence response back
+                            LOGGER.warning(LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST("TerminateSequence"));
+                        } else {
+                            return;
+                        }
+                    }
+
+                    processInboundMessageHeaders(responseAdapter, false);
+
+                    if (responseAdapter.isFault()) {
+                        LOGGER.warning(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("TerminateSequence"));
+                    }
+
+                    String responseAction = responseAdapter.getWsaAction();
+                    if (RmVersion.WSRM200702.terminateSequenceAction.equals(responseAction)) {
+                        TerminateSequenceElement tsElement = responseAdapter.unmarshallMessage();
+
+                        sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
+                    } else if (RmVersion.WSRM200702.terminateSequenceResponseAction.equals(responseAction)) {
+                        TerminateSequenceResponseElement tsrElement = responseAdapter.unmarshallMessage();
+
+                        if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
+                            LOGGER.warning(LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(tsrElement.getIdentifier().getValue(), outboundSequenceId));
+                        }
+                    }
+                } finally {
+                    if (responseAdapter != null) {
+                        responseAdapter.consume();
+                    }
                 }
             }
 
-            processInboundMessageHeaders(responseAdapter, false);
-
-            if (responseAdapter.isFault()) {
-                throw new TerminateSequenceException(LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED("TerminateSequence"));
+            public void onCompletion(Throwable error) {
+                // TODO L10N
+                LOGGER.warning("Unexpected exception while trying to terminate sequence", error);
             }
-
-            String responseAction = responseAdapter.getWsaAction();
-            if (RmVersion.WSRM200702.terminateSequenceAction.equals(responseAction)) {
-                TerminateSequenceElement tsElement = responseAdapter.unmarshallMessage();
-
-                sequenceManager.terminateSequence(tsElement.getIdentifier().getValue());
-            } else if (RmVersion.WSRM200702.terminateSequenceResponseAction.equals(responseAction)) {
-                TerminateSequenceResponseElement tsrElement = responseAdapter.unmarshallMessage();
-                
-                if (!outboundSequenceId.equals(tsrElement.getIdentifier().getValue())) {
-                    throw new TerminateSequenceException(
-                            LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(tsrElement.getIdentifier().getValue(), outboundSequenceId));
-                }
-            }
-        } finally {
-            if (responseAdapter != null) {
-                responseAdapter.consume();
-            }
-        }
+        });
     }
 }

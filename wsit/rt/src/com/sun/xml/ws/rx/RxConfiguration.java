@@ -51,6 +51,7 @@ import com.sun.xml.ws.rx.rm.RmVersion;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public interface RxConfiguration {
+    public static final String ACK_REQUESTED_HEADER_SET = RxConfiguration.class.getName() + ".ACK_REQUESTED_HEADER_SET";
     
     /**
      * @see ReliableMessagingFeature
