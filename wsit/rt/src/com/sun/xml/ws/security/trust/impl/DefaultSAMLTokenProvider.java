@@ -123,7 +123,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         String keyType = ctx.getKeyType();
         int tokenLifeSpan = (int)(ctx.getExpirationTime().getTime() - ctx.getCreationTime().getTime());
         String confirMethod = (String)ctx.getOtherProperties().get(IssuedTokenContext.CONFIRMATION_METHOD);
-        Map<QName, List<String>> claimedAttrs = (Map<QName, List<String>>) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
+        @SuppressWarnings("unchecked") Map<QName, List<String>> claimedAttrs = (Map<QName, List<String>>) ctx.getOtherProperties().get(IssuedTokenContext.CLAIMED_ATTRUBUTES);
         WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
        // WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
         
@@ -354,13 +354,13 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
-            
+
             // Create Conditions
             final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
             final GregorianCalendar issueInst = new GregorianCalendar(utcTimeZone);
             final GregorianCalendar notOnOrAfter = new GregorianCalendar(utcTimeZone);
             notOnOrAfter.add(Calendar.MILLISECOND, lifeSpan);
-            
+
             List<AudienceRestriction> arc = null;
             KeyInfoConfirmationData keyInfoConfData = null;
             if (confirMethod == null){
@@ -380,12 +380,12 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     }
                 }
             }
-            
+
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
-               
+
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
                     null, keyInfoConfData, confirMethod);
-            
+
             com.sun.xml.wss.saml.Subject subj = null;
             //final List<Attribute> attrs = new ArrayList<Attribute>();
             QName idName = null;
@@ -405,30 +405,31 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     //}
                 }
             }
-            
+
             if (idName != null){
                 claimedAttrs.remove(idName);
             }
-        
+
             final List<Object> statements = new ArrayList<Object>();
             //if (attrs.isEmpty()){
             if (claimedAttrs.isEmpty()){
                 AuthnContext ctx = samlFac.createAuthnContext(authnCtx, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx, null, null);
-                statements.add(statement); 
-            }//else{
-               // final AttributeStatement statement = samlFac.createAttributeStatement(null);
-               // statements.add(statement);
-            //}
-            
+                statements.add(statement);
+            }else{
+                final AttributeStatement statement = samlFac.createAttributeStatement(null);
+                statements.add(statement);
+            }
+
             final NameID issuerID = samlFac.createNameID(issuer, null, null);
-            
+
             // Create Assertion
             assertion =
-                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
-             if (!claimedAttrs.isEmpty()){
-                return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
+                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, null, statements);
+            if (!claimedAttrs.isEmpty()){
+                assertion = WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
             }
+            ((com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion)assertion).setSubject((com.sun.xml.wss.saml.internal.saml20.jaxb20.SubjectType)subj);
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
@@ -440,7 +441,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             throw new WSTrustException(
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
         }
-        
+
         return assertion;
     }
      

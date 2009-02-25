@@ -68,6 +68,7 @@ import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -413,30 +414,30 @@ public class WSTrustUtil {
     public static Assertion addSamlAttributes(Assertion assertion, Map<QName, List<String>> claimedAttrs)throws WSTrustException {
         try {
             String version = assertion.getVersion();
+            SAMLAssertionFactory samlFac = null;
+
             if ("2.0".equals(version)){
-                assertion.getStatements().add(createAttributeStatement(null, claimedAttrs, "urn:oasis:names:tc:SAML:2.0:assertion", "saml2"));
+                samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
             }else{
-                SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
-                Element assertionEle = assertion.toElement(null);
-                String samlNS = assertionEle.getNamespaceURI();
-                String samlPrefix = assertionEle.getPrefix();
-                NodeList asList = assertionEle.getElementsByTagNameNS(samlNS, "AttributeStatement");
-                Node as = null;
-                if (asList.getLength() > 0){
-                    as = asList.item(0);
-                }
-                createAttributeStatement(as, claimedAttrs, samlNS, samlPrefix);
-               
-                assertion = samlFac.createAssertion(assertionEle);
+                samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML1_1);
             }
-                
-            return assertion;
+            Element assertionEle = assertion.toElement(null);
+            String samlNS = assertionEle.getNamespaceURI();
+            String samlPrefix = assertionEle.getPrefix();
+            NodeList asList = assertionEle.getElementsByTagNameNS(samlNS, "AttributeStatement");
+            Node as = null;
+            if (asList.getLength() > 0){
+                as = asList.item(0);
+            }
+            createAttributeStatement(as, claimedAttrs, samlNS, samlPrefix);
+
+            return  samlFac.createAssertion(assertionEle);
         }catch (Exception ex){
             ex.printStackTrace();
             throw new WSTrustException(ex.getMessage());
         }
     }
-    
+
     private static Node createAttributeStatement(Node as, Map<QName, List<String>> claimedAttrs, String samlNS, String samlPrefix)throws WSTrustException{
         try{
             Document doc = null;
@@ -456,7 +457,7 @@ public class WSTrustUtil {
                 Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
                 attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
                 attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
-  
+
                 Iterator valueIt = values.iterator();
                 while (valueIt.hasNext()){
                     Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
@@ -466,7 +467,7 @@ public class WSTrustUtil {
                 }
                 as.appendChild(attrEle);
             }
-            
+
             return as;
         }catch (Exception ex){
             throw new WSTrustException(ex.getMessage());

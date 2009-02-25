@@ -502,13 +502,13 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         Assertion assertion = null;
         try{
             final SAMLAssertionFactory samlFac = SAMLAssertionFactory.newInstance(SAMLAssertionFactory.SAML2_0);
-            
+
             // Create Conditions
             final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
             final GregorianCalendar issueInst = new GregorianCalendar(utcTimeZone);
             final GregorianCalendar notOnOrAfter = new GregorianCalendar(utcTimeZone);
             notOnOrAfter.add(Calendar.MILLISECOND, (int)stsConfig.getIssuedTokenTimeout());
-            
+
             List<AudienceRestriction> arc = null;
             KeyInfoConfirmationData keyInfoConfData = null;
             String confirMethod = (String)stsConfig.getOtherOptions().get(WSTrustConstants.SAML_CONFIRMATION_METHOD);
@@ -529,18 +529,18 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     }
                 }
             }
-            
+
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
-            
+
             // Create Subject
-            
+
             // SubjectConfirmationData subjComfData = samlFac.createSubjectConfirmationData(
             // null, null, null, null, appliesTo, keyInfo.getElement());
-           
-            
+
+
             final SubjectConfirmation subjectConfirm = samlFac.createSubjectConfirmation(
                     null, keyInfoConfData, confirMethod);
-            
+
             com.sun.xml.wss.saml.Subject subj = null;
             //final List<Attribute> attrs = new ArrayList<Attribute>();
             QName idName = null;
@@ -560,30 +560,32 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
                     //}
                 }
             }
-            
+
             if (idName != null){
                 claimedAttrs.remove(idName);
             }
-        
+
             final List<Object> statements = new ArrayList<Object>();
             //if (attrs.isEmpty()){
             if (claimedAttrs.isEmpty()){
                 AuthnContext ctx = samlFac.createAuthnContext(this.authnCtxClass, null);
                 final AuthnStatement statement = samlFac.createAuthnStatement(issueInst, null, ctx, null, null);
-                statements.add(statement); 
-            }//else{
-               // final AttributeStatement statement = samlFac.createAttributeStatement(null);
-                //statements.add(statement);
-            //}
-            
+                statements.add(statement);
+            }else{
+                final AttributeStatement statement = samlFac.createAttributeStatement(null);
+                statements.add(statement);
+            }
+
             final NameID issuerID = samlFac.createNameID(issuer, null, null);
-            
+
             // Create Assertion
             assertion =
-                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, subj, statements);
-             if (!claimedAttrs.isEmpty()){
-                return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
+                    samlFac.createAssertion(assertionId, issuerID, issueInst, conditions, null, null, statements);
+            if (!claimedAttrs.isEmpty()){
+                assertion = WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
             }
+            ((com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion)assertion).setSubject((com.sun.xml.wss.saml.internal.saml20.jaxb20.SubjectType)subj);
+            //return assertion;
         }catch(SAMLException ex){
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
@@ -595,7 +597,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             throw new WSTrustException(
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
         }
-        
+
         return assertion;
     }
 }
