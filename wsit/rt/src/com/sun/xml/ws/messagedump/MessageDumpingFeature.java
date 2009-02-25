@@ -100,15 +100,15 @@ public final class MessageDumpingFeature extends WebServiceFeature {
         messageLoggingStatus.set(false);
     }
 
-    boolean getMessageLoggingStatus() {
+    public boolean getMessageLoggingStatus() {
         return messageLoggingStatus.get();
     }
 
-    String getMessageLoggingRoot() {
+    public String getMessageLoggingRoot() {
         return messageLoggingRoot;
     }
 
-    Level getMessageLoggingLevel() {
+    public Level getMessageLoggingLevel() {
         return messageLoggingLevel;
     }
 

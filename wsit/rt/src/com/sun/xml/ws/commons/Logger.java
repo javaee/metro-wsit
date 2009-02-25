@@ -67,9 +67,15 @@ public final class Logger {
     }
 
     /**
-     * The factory method returns preconfigured RmLogger wrapper for the class. Since there is no caching implemented,
-     * it is advised that the method is called only once per a class in order to initialize a final static logger variable,
-     * which is then used through the class to perform actual logging tasks.
+     * <p>
+     * The factory method returns preconfigured Logger wrapper for the class. Method calls
+     * {@link #getSystemLoggerName(java.lang.Class)} to generate default logger name.
+     * </p>
+     * <p>
+     * Since there is no caching implemented, it is advised that the method is called only once
+     * per a class in order to initialize a final static logger variable, which is then used
+     * through the class to perform actual logging tasks.
+     * </p>
      *
      * @param componentClass class of the component that will use the logger instance. Must not be {@code null}.
      * @return logger instance preconfigured for use with the component
@@ -77,6 +83,26 @@ public final class Logger {
      */
     public static @NotNull Logger getLogger(final @NotNull Class<?> componentClass) {
         return new Logger(getSystemLoggerName(componentClass), componentClass.getName());
+    }
+
+    /**
+     * The factory method returns preconfigured Logger wrapper for the class. Since there is no caching implemented,
+     * it is advised that the method is called only once per a class in order to initialize a final static logger variable,
+     * which is then used through the class to perform actual logging tasks.
+     *
+     * This method should be only used in a special cases when overriding of a default logger name derived from the
+     * package of the component class is needed. For all common use cases please use {@link #getLogger(java.lang.Class)}
+     * method.
+     *
+     * @param customLoggerName custom name of the logger.
+     * @param componentClass class of the component that will use the logger instance. Must not be {@code null}.
+     * @return logger instance preconfigured for use with the component
+     * @throws NullPointerException if the componentClass parameter is {@code null}.
+     *
+     * @see #getLogger(java.lang.Class)
+     */
+    public static @NotNull Logger getLogger(final @NotNull String customLoggerName, final @NotNull Class<?> componentClass) {
+        return new Logger(customLoggerName, componentClass.getName());
     }
 
     /**

@@ -36,17 +36,20 @@
 package com.sun.xml.ws.messagedump;
 
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.util.pipe.DumpTube;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -57,12 +60,30 @@ import javax.xml.stream.XMLStreamWriter;
  */
 final class MessageDumpingTube extends AbstractFilterTubeImpl {
 
+    private static enum MessageType {
+        Request("Request message"),
+        Response("Response message"),
+        Exception("Response exception");
+
+        private final String name;
+
+        private MessageType(final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
     static final String DEFAULT_MSGDUMP_LOGGING_ROOT = com.sun.xml.ws.util.Constants.LoggingDomain + ".messagedump";
-    private static final Logger TUBE_LOGGER = Logger.getLogger(DEFAULT_MSGDUMP_LOGGING_ROOT);
+    private static final com.sun.xml.ws.commons.Logger TUBE_LOGGER = com.sun.xml.ws.commons.Logger.getLogger(DEFAULT_MSGDUMP_LOGGING_ROOT, MessageDumpingTube.class);
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     //
     private final XMLOutputFactory xmlOutputFactory;
-    private final Logger messageLogger;
+    private final java.util.logging.Logger messageLogger;
     private final MessageDumpingFeature messageDumpingFeature;
+    private final int tubeId;
     //
     private AtomicBoolean logMissingStaxUtilsWarning;
 
@@ -80,12 +101,13 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
      */
     MessageDumpingTube(Tube next, MessageDumpingFeature feature) {
         super(next);
-        
+
         this.xmlOutputFactory = XMLOutputFactory.newInstance();
         this.logMissingStaxUtilsWarning = new AtomicBoolean(false);
 
-        this.messageLogger = Logger.getLogger(feature.getMessageLoggingRoot());
+        this.messageLogger = java.util.logging.Logger.getLogger(feature.getMessageLoggingRoot());
         this.messageDumpingFeature = feature;
+        this.tubeId = ID_GENERATOR.incrementAndGet();
     //staxOut.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES,true);
     }
 
@@ -100,6 +122,7 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
 
         this.messageLogger = that.messageLogger;
         this.messageDumpingFeature = that.messageDumpingFeature;
+        this.tubeId = ID_GENERATOR.incrementAndGet();
     }
 
     public AbstractTubeImpl copy(TubeCloner cloner) {
@@ -108,45 +131,68 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processRequest(Packet request) {
-        dump(request);
+        dump(MessageType.Request, packetToString(request), Fiber.current().owner.id);
         return super.processRequest(request);
     }
 
     @Override
     public NextAction processResponse(Packet response) {
-        dump(response);
+        dump(MessageType.Response, packetToString(response), Fiber.current().owner.id);
         return super.processResponse(response);
     }
 
-    private void dump(Packet packet) {
+    @Override
+    public NextAction processException(Throwable t) {
         StringWriter stringOut = new StringWriter();
-        if (packet.getMessage() == null) {
-            stringOut.write("[null]");
-        } else {
-            XMLStreamWriter writer = null;
-            try {
-                writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
-                writer = createIndenter(writer);
-                packet.getMessage().copy().writeTo(writer);
-            } catch (XMLStreamException e) {
-                TUBE_LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (XMLStreamException ignored) {
+        t.printStackTrace(new PrintWriter(stringOut));
+
+        dump(MessageType.Exception, stringOut.toString(), Fiber.current().owner.id);
+
+        return super.processException(t);
+    }
+
+    private void dump(MessageType messageType, String message, String engineId) {
+        String logMessage = String.format("%s received on DumpingTube [ %d ] Engine [ %s ] Thread [ %s ]:%n%s", messageType, tubeId, engineId, Thread.currentThread().getName(), message);
+        if (messageDumpingFeature.getMessageLoggingStatus()) {
+            messageLogger.log(messageDumpingFeature.getMessageLoggingLevel(), logMessage);
+        }
+        messageDumpingFeature.offerMessage(logMessage);
+    }
+
+    private String packetToString(Packet packet) {
+        StringWriter stringOut = null;
+        try {
+            stringOut = new StringWriter();
+            if (packet.getMessage() == null) {
+                stringOut.write("[Empty response]");
+            } else {
+                XMLStreamWriter writer = null;
+                try {
+                    writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
+                    writer = createIndenter(writer);
+                    packet.getMessage().copy().writeTo(writer);
+                } catch (XMLStreamException e) {
+                    TUBE_LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
+                } finally {
+                    if (writer != null) {
+                        try {
+                            writer.close();
+                        } catch (XMLStreamException ignored) {
+                            TUBE_LOGGER.fine("Unexpected exception occured while closing XMLStreamWriter", ignored);
+                        }
                     }
                 }
             }
+            return stringOut.toString();
+        } finally {
+            if (stringOut != null) {
+                try {
+                    stringOut.close();
+                } catch (IOException ex) {
+                    TUBE_LOGGER.finest("An exception occured when trying to close StringWriter", ex);
+                }
+            }
         }
-
-        String message = stringOut.toString();
-
-        if (messageDumpingFeature.getMessageLoggingStatus()) {
-            messageLogger.log(messageDumpingFeature.getMessageLoggingLevel(), message);
-        }
-
-        messageDumpingFeature.offerMessage(message);
     }
 
     /**
@@ -157,9 +203,9 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
      */
     private XMLStreamWriter createIndenter(XMLStreamWriter writer) {
         try {
-            Class clazz = getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
-            Constructor c = clazz.getConstructor(XMLStreamWriter.class);
-            writer = (XMLStreamWriter) c.newInstance(writer);
+            Class<?> clazz = this.getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
+            Constructor<?> c = clazz.getConstructor(XMLStreamWriter.class);
+            writer = XMLStreamWriter.class.cast(c.newInstance(writer));
         } catch (Exception ex) {
             // if stax-utils.jar is not in the classpath, this will fail
             // so, we'll just have to do without indentation
