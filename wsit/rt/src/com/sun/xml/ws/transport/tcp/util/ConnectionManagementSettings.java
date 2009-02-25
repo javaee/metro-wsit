@@ -116,7 +116,7 @@ public class ConnectionManagementSettings {
     private static boolean createDefaultHolder() {
         boolean isOk = true;
         try {
-            Class policyHolderClass = 
+            Class<?> policyHolderClass =
                     Class.forName("com.sun.xml.ws.transport.tcp.wsit.PolicyConnectionManagementSettingsHolder");
             Method getSingltonMethod = policyHolderClass.getMethod("getInstance");
             holder = (ConnectionManagementSettingsHolder) getSingltonMethod.invoke(null);

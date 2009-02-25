@@ -52,7 +52,7 @@ import java.util.logging.Level;
  * This class handles all address calculations for the wstx-service enpoints
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  */
 public class AddressManager {
@@ -151,7 +151,7 @@ public class AddressManager {
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("static initializer", "getting host and port from AS...");
             }
-            Class c = Class.forName("com.sun.enterprise.webservice.WsTxUtils");
+            Class<?> c = Class.forName("com.sun.enterprise.webservice.WsTxUtils");
             Object instance = c.newInstance();
             Method m = c.getMethod("getDefaultVirtualServerHostAndPort", boolean.class);
             hostAndPort = (String) m.invoke(instance, false);

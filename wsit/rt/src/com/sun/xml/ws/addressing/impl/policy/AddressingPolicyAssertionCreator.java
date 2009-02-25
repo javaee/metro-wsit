@@ -75,11 +75,11 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
         return NS_SUPPORTED_LIST;
     }
     
-    protected Class getClass(final AssertionData assertionData) throws AssertionCreationException {
+    protected Class<?> getClass(final AssertionData assertionData) throws AssertionCreationException {
         LOGGER.entering(assertionData);
         try {
             final String className = assertionData.getName().getLocalPart();
-            final Class result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
+            final Class<?> result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
             LOGGER.exiting();
             return result;
         } catch (ClassNotFoundException ex) {
@@ -91,10 +91,8 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
     public PolicyAssertion createAssertion(AssertionData assertionData, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative,PolicyAssertionCreator policyAssertionCreator) throws AssertionCreationException {
         String localName = assertionData.getName().getLocalPart();
         if(implementedAssertions.contains(localName)){
-            Class cl=null;
-            cl = getClass(assertionData);
-            //            try {
-            Constructor cons = null;
+            Class<?> cl = this.getClass(assertionData);
+            Constructor<?> cons = null;
             try {
                 
                 cons = getConstructor(cl);
@@ -115,7 +113,7 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
             }
             if(cons != null){
                 try {
-                    return (PolicyAssertion)cons.newInstance(assertionData,nestedAssertions,nestedAlternative);
+                    return PolicyAssertion.class.cast(cons.newInstance(assertionData,nestedAssertions,nestedAlternative));
                 } catch (IllegalArgumentException ex) {
                     if(LOGGER.isLoggable(Level.SEVERE)){
                         LOGGER.log(Level.SEVERE,LocalizationMessages.WSA_0003_ERROR_INSTANTIATING(assertionData.getName()));
@@ -160,8 +158,7 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
         
     }
     
-    private Constructor getConstructor(Class cl) throws NoSuchMethodException{
-        Constructor [] cList = cl.getConstructors();
+    private <T> Constructor<T> getConstructor(Class<T> cl) throws NoSuchMethodException{
         return cl.getConstructor(com.sun.xml.ws.policy.sourcemodel.AssertionData.class,java.util.Collection.class,com.sun.xml.ws.policy.AssertionSet.class);
     }
     

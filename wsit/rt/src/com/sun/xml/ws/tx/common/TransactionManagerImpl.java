@@ -36,9 +36,7 @@
 
 package com.sun.xml.ws.tx.common;
 
-import com.sun.xml.ws.tx.at.CoordinationXid;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 
@@ -46,9 +44,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.transaction.*;
-import javax.transaction.xa.Xid;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Access hosting JTA 1.1 TransactionManager and TransactionSynchronizationRegistry.
@@ -213,7 +208,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         putResource("WSCOOR-SUN", coordCtx);
     }
     
-    static private Method getMethod(Class theClass, String methodName, Class param) {
+    static private Method getMethod(Class<?> theClass, String methodName, Class<?> param) {
         Method method = null;
         try {
             if (param == null) {
