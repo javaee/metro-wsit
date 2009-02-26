@@ -115,7 +115,7 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
         // process WS-MC header
         if (responseMessage.hasHeaders()) {
             MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
-            if (messagePendingHeader.isPending()) {
+            if (messagePendingHeader != null && messagePendingHeader.isPending()) {
                 mcSenderTask.scheduleMcRequest();
             }
         }
