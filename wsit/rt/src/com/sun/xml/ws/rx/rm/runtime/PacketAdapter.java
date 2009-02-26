@@ -121,6 +121,11 @@ public abstract class PacketAdapter {
         insertPacket(packet);
     }
 
+    void setAckRequestdFlag() {
+        checkPacketReadyState();
+        this.packet.invocationProperties.put(RxConfiguration.ACK_REQUESTED_HEADER_SET, true);
+    }
+
     /**
      * This method sets the {@link Packet}'s {@code expectReply} flag to {@code true}
      */

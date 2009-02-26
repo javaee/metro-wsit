@@ -187,6 +187,7 @@ abstract class ClientSession {
         PacketAdapter requestAdapter = PacketAdapter.getInstance(configuration, requestPacket);
         if (sequenceManager.getSequence(outboundSequenceId).hasPendingAcknowledgements()) {
             requestAdapter.appendAckRequestedHeader(outboundSequenceId);
+            requestAdapter.setAckRequestdFlag();
             lastAckRequestedTime.set(System.currentTimeMillis());
         }
         if (inboundSequenceId != null) {
@@ -285,6 +286,7 @@ abstract class ClientSession {
      * Closes and terminates associated sequences and releases other resources associated with this RM session
      */
     final void close() {
+        // TODO: make sure we have all the acknowledgements and no requests pending a resend before closing
         try {
             if (outboundSequenceId != null && sequenceManager.isValid(outboundSequenceId)) {
                 try {
