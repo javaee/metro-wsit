@@ -123,7 +123,7 @@ public abstract class PacketAdapter {
 
     void setAckRequestdFlag() {
         checkPacketReadyState();
-        this.packet.invocationProperties.put(RxConfiguration.ACK_REQUESTED_HEADER_SET, true);
+        this.packet.invocationProperties.put(RxConfiguration.ACK_REQUESTED_HEADER_SET, Boolean.TRUE);
     }
 
     /**

@@ -35,8 +35,10 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Packet;
@@ -48,7 +50,15 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
+import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
 import com.sun.xml.ws.rx.util.FiberExecutor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -56,45 +66,94 @@ import javax.xml.stream.XMLStreamException;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class McServerTube extends AbstractFilterTubeImpl {
+
     private static final class ResponseStorage {
-        void offer(Packet response, String clientUID) {
-            // TODO implement
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-    
-        void offer(Throwable exception, String clientUID) {
-            // TODO implement
-            throw new UnsupportedOperationException("Not implemented yet");
+
+        final Map<String, Queue<Packet>> storage = new HashMap<String, Queue<Packet>>();
+        final ReentrantReadWriteLock storageLock = new ReentrantReadWriteLock();
+
+        void store(@NotNull Packet response, @NotNull String clientUID) {
+            if (!getClientQueue(clientUID).offer(response)) {
+                // TODO L10N
+                LOGGER.severe(String.format("Storing response fo client UUID [ %s ] has failed.", clientUID));
+            }
         }
 
-        private boolean hasPendingResponse(String clientUID) {
-            // TODO implement
-            throw new UnsupportedOperationException("Not implemented yet");
+        private Packet getPendingResponsePacket(@NotNull String clientUID) {
+            try {
+                storageLock.readLock().lock();
+
+                final Queue<Packet> clientQueue = storage.get(clientUID);
+                return (clientQueue == null) ? null : clientQueue.poll();
+            } finally {
+                storageLock.readLock().unlock();
+            }
+        }
+
+        private boolean hasPendingResponse(@NotNull String clientUID) {
+            try {
+                storageLock.readLock().lock();
+
+                final Queue<Packet> clientQueue = storage.get(clientUID);
+                return clientQueue != null && !clientQueue.isEmpty();
+            } finally {
+                storageLock.readLock().unlock();
+            }
+        }
+
+        private Queue<Packet> getClientQueue(@NotNull String clientUID) {
+            try {
+                storageLock.readLock().lock();
+                Queue<Packet> clientQueue = storage.get(clientUID);
+                if (clientQueue == null) {
+                    storageLock.readLock().unlock();
+
+                    try {
+                        storageLock.writeLock().lock();
+                        clientQueue = storage.get(clientUID);
+                        if (clientQueue == null) { // recheck
+                            clientQueue = new ConcurrentLinkedQueue<Packet>();
+                            storage.put(clientUID, clientQueue);
+                        }
+                        storageLock.readLock().lock();
+                    } finally {
+                        storageLock.writeLock().unlock();
+                    }
+                }
+
+                return clientQueue;
+            } finally {
+                storageLock.readLock().unlock();
+            }
         }
     }
 
     private static final class AppRequestProcessingCallback implements Fiber.CompletionCallback {
+
         private static final Logger LOGGER = Logger.getLogger(AppRequestProcessingCallback.class);
         private final ResponseStorage responseStorage;
         private final String clientUID;
 
-        public AppRequestProcessingCallback(ResponseStorage responseStorage, String clientUID) {
+        public AppRequestProcessingCallback(@NotNull ResponseStorage responseStorage, @NotNull String clientUID) {
             this.responseStorage = responseStorage;
             this.clientUID = clientUID;
         }
 
         public void onCompletion(Packet response) {
-            responseStorage.offer(response, clientUID);
+            // TODO replace annonymous addressing To hearder
+            // TODO L10N
+            LOGGER.finer(String.format("Request processing finished. Storing a response for client UUID [ %s ]", clientUID));
+            responseStorage.store(response, clientUID);
         }
 
         public void onCompletion(Throwable error) {
+            // TODO L10N
             LOGGER.severe(String.format("An exception has been thrown during a request processing for the client UID [ %s ]", clientUID), error);
-            responseStorage.offer(error, clientUID);
         }
     }
-
+    //
     private static final Logger LOGGER = Logger.getLogger(McServerTube.class);
-
+    //
     private final RxConfiguration configuration;
     private final FiberExecutor fiberExecutor;
     private final ResponseStorage responseStorage;
@@ -127,42 +186,108 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processRequest(Packet request) {
-        final Message message = request.getMessage();
-        assert message != null : "Unexpected [null] message in the server-side Tube.processRequest()";
+        try {
+            LOGGER.entering();
 
-        if (isMakeConnectionRequest(message)) {
-            return handleMakeConnectionRequest(request);
+            assert request.getMessage() != null : "Unexpected [null] message in the server-side Tube.processRequest()";
+
+            String clientUID = getClientUID(request);
+            if (isMakeConnectionRequest(request)) {
+                return handleMakeConnectionRequest(request, clientUID);
+            }
+
+            if (clientUID == null) {
+                // don't bother - this is not a WS-MC enabled request
+                return super.processRequest(request);
+            } else {
+                // TODO replace with proper code that replaces only address
+
+                // removing replyTo header and faultTo header to prevent addressing server tube from
+                // treating this request as non-anonymous
+                request.getMessage().getHeaders().remove(configuration.getAddressingVersion().replyToTag);
+                request.getMessage().getHeaders().remove(configuration.getAddressingVersion().faultToTag);
+            }
+
+            Packet requestCopy = request.copy(true);
+            fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID));
+            return super.doReturnWith(createEmptyResponse(requestCopy));
+        } finally {
+            LOGGER.exiting();
         }
-
-        String clientUID = getClientUID(message);
-        if (clientUID == null) {
-            // don't bother - this is not a WS-MC enabled request
-            return super.processRequest(request);
-        }
-
-        fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID));
-        return super.doReturnWith(request.createServerResponse(null, null, null, ""));
     }
 
     @Override
     public NextAction processResponse(Packet response) {
-        Message message = response.getMessage();
-        if (message != null) {
-            String clientUID = getClientUID(message);
-            if (clientUID != null) {
-                if (responseStorage.hasPendingResponse(clientUID)) {
-                    // TODO append Pending header if there are pending messages
-                    throw new UnsupportedOperationException("Not implemented yet");
+        try {
+            LOGGER.entering();
+
+            // with WS-MC enabled messages, this method gets never invoked
+            return super.processResponse(response);
+        } finally {
+            LOGGER.exiting();
+        }
+    }
+
+    private NextAction handleMakeConnectionRequest(Packet request, String clientUID) {
+        try {
+            LOGGER.entering();
+
+            String selectionUID;
+            try {
+                MakeConnectionElement mcElement = request.getMessage().readPayloadAsJAXB(configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
+                selectionUID = configuration.getMcVersion().getClientId(mcElement.getAddress().getValue());
+            } catch (JAXBException ex) {
+                throw LOGGER.logSevereException(new RxRuntimeException("Error unmarshalling content of a MakeConnection message", ex));
+            }
+
+            if (selectionUID == null) {
+                // TODO return a MissingSelection SOAP fault
+                // TODO L10N
+                throw LOGGER.logSevereException(new RxRuntimeException("Selection address is [null]."));
+            }
+
+            if (!selectionUID.equals(clientUID)) {
+                // TODO return a SOAP fault?
+                // TODO L10N
+                throw LOGGER.logSevereException(new RxRuntimeException("Selection address does not match ReplyTo address."));
+            }
+
+            Packet response = null;
+            if (selectionUID != null && responseStorage.hasPendingResponse(selectionUID)) {
+                // TODO L10N
+                LOGGER.finer(String.format("A pending message found for selection UUID [ %s ]", selectionUID));
+                response = responseStorage.getPendingResponsePacket(selectionUID);
+            }
+
+            if (response == null) {
+                // TODO L10N
+                LOGGER.finer(String.format("No pending message found for selection UUID [ %s ]", selectionUID));
+                response = createEmptyResponse(request);
+            } else {
+                Message message = response.getMessage();
+                if (message != null) {
+                    HeaderList headers = message.getHeaders();
+                    headers.add(Headers.create(
+                            configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()),
+                            new MessagePendingElement(Boolean.valueOf(selectionUID != null && responseStorage.hasPendingResponse(selectionUID)))));
                 }
             }
-        }
 
-        return super.processResponse(response);
+            return super.doReturnWith(response);
+        } finally {
+            LOGGER.exiting();
+        }
     }
 
     @Override
     public NextAction processException(Throwable t) {
-        return super.processException(t);
+        try {
+            LOGGER.entering();
+
+            return super.processException(t);
+        } finally {
+            LOGGER.exiting();
+        }
     }
 
     @Override
@@ -170,10 +295,8 @@ public class McServerTube extends AbstractFilterTubeImpl {
         super.preDestroy();
     }
 
-    private String getClientUID(Message message) {
-        HeaderList headers = message.getHeaders();
-
-        Header replyToHeader = headers.get(configuration.getAddressingVersion().replyToTag, false);
+    private String getClientUID(Packet request) {
+        Header replyToHeader = request.getMessage().getHeaders().get(configuration.getAddressingVersion().replyToTag, false);
         if (replyToHeader != null) {
             try {
                 String replyToAddress = replyToHeader.readAsEPR(configuration.getAddressingVersion()).getAddress();
@@ -187,19 +310,11 @@ public class McServerTube extends AbstractFilterTubeImpl {
         return null;
     }
 
-    private NextAction handleMakeConnectionRequest(Packet request) {
-        Packet response = null;
-
-        // TODO implement retrieve one of the pending messages for the client (if any) and create a response
-        //      if there are pending exceptions, return as well
-        throw new UnsupportedOperationException("Not implemented yet");
+    private boolean isMakeConnectionRequest(final Packet request) {
+        return configuration.getMcVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
-    private boolean isMakeConnectionRequest(final Message message) {
-        final HeaderList headers = message.getHeaders();
-        if (headers == null) {
-            return false;
-        }
-        return configuration.getMcVersion().wsmcAction.equals(headers.getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+    private Packet createEmptyResponse(Packet request) {
+        return request.createServerResponse(null, null, null, "");
     }
 }

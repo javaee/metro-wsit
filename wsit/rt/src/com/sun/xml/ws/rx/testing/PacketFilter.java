@@ -143,6 +143,6 @@ public abstract class PacketFilter {
     }
 
     private boolean notInitialized(Packet packet) {
-        return rmVersion == null || packet == null || packet.getMessage() == null || packet.getMessage().getHeaders() == null;
+        return rmVersion == null || packet == null || packet.getMessage() == null;
     }
 }

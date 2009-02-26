@@ -59,6 +59,7 @@ final class MakeConnectionSenderTask implements Runnable {
     //
     private final String wsmcAnonymousAddress;
     private final Header wsmcAnnonymousReplyToHeader;
+    private final Header wsmcAnnonymousFaultToHeader;
     private long lastMcMessageTimestamp;
     private final AtomicBoolean isMcRequestPending;
     private int scheduledMcRequestCounter;
@@ -67,11 +68,18 @@ final class MakeConnectionSenderTask implements Runnable {
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private final Map<String, ProtocolMessageHandler> mapOfRegisteredProtocolMessageHandlers;
 
-    MakeConnectionSenderTask(final Communicator communicator, final TimestampedCollection<String, Fiber> suspendedFiberStorage, final String wsmcAnonymousAddress, final Header wsmcAnnonymousReplyToHeader, final RxConfiguration configuration) {
+    MakeConnectionSenderTask(
+            final Communicator communicator,
+            final TimestampedCollection<String, Fiber> suspendedFiberStorage,
+            final String wsmcAnonymousAddress,
+            final Header wsmcAnnonymousReplyToHeader,
+            final Header wsmcAnnonymousFaultToHeader,
+            final RxConfiguration configuration) {
         this.communicator = communicator;
         this.suspendedFiberStorage = suspendedFiberStorage;
         this.wsmcAnonymousAddress = wsmcAnonymousAddress;
         this.wsmcAnnonymousReplyToHeader = wsmcAnnonymousReplyToHeader;
+        this.wsmcAnnonymousFaultToHeader = wsmcAnnonymousFaultToHeader;
         this.configuration = configuration;
         this.mapOfRegisteredProtocolMessageHandlers = new HashMap<String, ProtocolMessageHandler>();
 
@@ -93,7 +101,7 @@ final class MakeConnectionSenderTask implements Runnable {
      * method terminates without any further action.
      */
     public synchronized void run() {
-        if (!isMcRequestPending.get() && resendMakeConnectionIntervalPassed() /*&& (scheduledMcRequestCounter > 0 || suspendedFibersReadyForResend())*/) {
+        if (!isMcRequestPending.get() && resendMakeConnectionIntervalPassed() && (scheduledMcRequestCounter > 0 || suspendedFibersReadyForResend())) {
             sendMcRequest();
         }
     }
@@ -137,7 +145,11 @@ final class MakeConnectionSenderTask implements Runnable {
 
     private void sendMcRequest() {
         Packet mcRequest = communicator.createRequestPacket(new MakeConnectionElement(wsmcAnonymousAddress), configuration.getMcVersion().wsmcAction, true);
-        McClientTube.setMcAnnonymousReplyToHeader(mcRequest.getMessage().getHeaders(), configuration.getAddressingVersion(), wsmcAnnonymousReplyToHeader);
+        McClientTube.setMcAnnonymousHeaders(
+                mcRequest.getMessage().getHeaders(),
+                configuration.getAddressingVersion(),
+                wsmcAnnonymousReplyToHeader,
+                wsmcAnnonymousFaultToHeader);
 
         isMcRequestPending.set(true);
         try {

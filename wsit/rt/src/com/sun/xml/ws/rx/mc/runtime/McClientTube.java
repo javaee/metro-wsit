@@ -65,16 +65,17 @@ import javax.xml.stream.XMLStreamException;
  */
 public class McClientTube extends AbstractFilterTubeImpl {
     //
+
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
     //
     private final RxConfiguration configuration;
     private final Unmarshaller unmarshaller;
     private final Header wsmcAnnonymousReplyToHeader;
+    private final Header wsmcAnnonymousFaultToHeader;
     private final Communicator communicator;
     private final ScheduledTaskManager scheduler;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private final MakeConnectionSenderTask mcSenderTask;
-
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
     McClientTube(RxConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
@@ -95,6 +96,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
+        this.wsmcAnnonymousFaultToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().faultToTag);
 
         this.suspendedFiberStorage = new TimestampedCollection<String, Fiber>();
         this.mcSenderTask = new MakeConnectionSenderTask(
@@ -102,6 +104,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 suspendedFiberStorage,
                 wsmcAnonymousAddress,
                 wsmcAnnonymousReplyToHeader,
+                wsmcAnnonymousFaultToHeader,
                 configuration);
         this.scheduler = new ScheduledTaskManager();
         // TODO P2 make it configurable
@@ -116,6 +119,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
 
         this.wsmcAnnonymousReplyToHeader = original.wsmcAnnonymousReplyToHeader;
+        this.wsmcAnnonymousFaultToHeader = original.wsmcAnnonymousFaultToHeader;
         this.communicator = original.communicator;
         this.suspendedFiberStorage = original.suspendedFiberStorage;
         this.scheduler = original.scheduler;
@@ -142,22 +146,29 @@ public class McClientTube extends AbstractFilterTubeImpl {
             throw LOGGER.logSevereException(new RxRuntimeException("Required WS-Addressing headers not found: No SOAP headers present on a client request message."));
         }
 
-        String correlationId = message.getID(configuration.getAddressingVersion(), configuration.getSoapVersion());
-        Fiber.CompletionCallback responseHandler;
 
-        if (needToSetWsmcAnnonymousReplyToHeader(request)) {
-            setMcAnnonymousReplyToHeader(message.getHeaders(), configuration.getAddressingVersion(), wsmcAnnonymousReplyToHeader);
+        if (needToSetWsmcAnnonymousHeaders(request)) { // annonymous request
+            setMcAnnonymousHeaders(
+                    message.getHeaders(),
+                    configuration.getAddressingVersion(),
+                    wsmcAnnonymousReplyToHeader,
+                    wsmcAnnonymousFaultToHeader);
+
+            String correlationId = message.getID(configuration.getAddressingVersion(), configuration.getSoapVersion());
+            Fiber.CompletionCallback responseHandler;
+            if (request.expectReply != null && request.expectReply) { // most likely Req-Resp MEP
+                responseHandler = new RequestResponseMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
+            } else { // most likely One-Way MEP
+                responseHandler = new OneWayMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
+            }
+
+            suspendedFiberStorage.register(correlationId, Fiber.current());
+            communicator.sendAsync(request, responseHandler);
+
+            return super.doSuspend();
+        } else { // not annonymous request - don't care
+            return super.processRequest(request);
         }
-        if (request.expectReply != null && request.expectReply) { // most likely Req-Resp MEP
-            responseHandler = new RequestResponseMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
-        } else { // most likely One-Way MEP
-            responseHandler = new OneWayMepHandler(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
-        }
-
-        suspendedFiberStorage.register(correlationId, Fiber.current());
-        communicator.sendAsync(request, responseHandler);
-
-        return super.doSuspend();
     }
 
     @Override
@@ -180,7 +191,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
     /**
      *  Used by RM client tube
      */
-    public final WSEndpointReference getWsmcAnonymousEndpointReference(){
+    public final WSEndpointReference getWsmcAnonymousEndpointReference() {
         return wsmcAnonymousEndpointReference;
     }
 
@@ -192,10 +203,8 @@ public class McClientTube extends AbstractFilterTubeImpl {
      * Method check if the WS-A {@code ReplyTo} header is present or not. If it is not present, or if it is present but is annonymous,
      * method returns true. If the WS-A {@code ReplyTo} header is present and non-annonymous, mehod returns false.
      */
-    private boolean needToSetWsmcAnnonymousReplyToHeader(final Packet request) {
-        HeaderList headers = request.getMessage().getHeaders();
-
-        Header replyToHeader = headers.get(configuration.getAddressingVersion().replyToTag, false);
+    private boolean needToSetWsmcAnnonymousHeaders(final Packet request) {
+        Header replyToHeader = request.getMessage().getHeaders().get(configuration.getAddressingVersion().replyToTag, false);
         if (replyToHeader != null) {
             try {
                 return replyToHeader.readAsEPR(configuration.getAddressingVersion()).isAnonymous();
@@ -207,11 +216,21 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         // this request seems to be one-way, need to check if there are any RM-Acks set on it.
         // FIXME: this should be made in a RM-agnostic way
-        return Boolean.valueOf((Boolean) request.invocationProperties.get(RxConfiguration.ACK_REQUESTED_HEADER_SET));
+        return isBooleanFlagSet(request, RxConfiguration.ACK_REQUESTED_HEADER_SET);
     }
 
-    static void setMcAnnonymousReplyToHeader(final HeaderList headers, AddressingVersion av, Header wsmcAnnonymousHeader) {
+    static void setMcAnnonymousHeaders(final HeaderList headers, AddressingVersion av, Header wsmcReplyToHeader, Header wsmcFaultToHeader) {
         headers.remove(av.replyToTag);
-        headers.add(wsmcAnnonymousHeader);
+        headers.add(wsmcReplyToHeader);
+
+        if (headers.remove(av.faultToTag) != null) {
+            headers.add(wsmcFaultToHeader);
+        }
+
+    }
+
+    private Boolean isBooleanFlagSet(Packet packet, Object flag) {
+        Boolean value = Boolean.class.cast(packet.invocationProperties.get(flag));
+        return value != null && value.booleanValue();
     }
 }
