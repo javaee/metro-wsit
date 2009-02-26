@@ -36,15 +36,9 @@
 package com.sun.xml.ws.rx.testutil;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -56,7 +50,6 @@ import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -114,30 +107,6 @@ public class ResourceLoader {
 
     private static Policy translateModel(PolicySourceModel model) throws PolicyException {
         return PolicyModelTranslator.getTranslator().translate(model);
-    }
-
-    public static PolicyMap loadPolicyMap(String resourceName, boolean isClient)
-            throws PolicyException {
-
-        WSDLModel model = loadWSDLModel(resourceName, isClient);
-        return model.getPolicyMap();
-    }
-
-    public static WSDLModel loadWSDLModel(String resourceName, boolean isClient) throws PolicyException {
-        URL resourceUrl = getResourceUrl(resourceName);
-        XMLStreamBuffer resourceBuffer = getResourceAsXmlBuffer(resourceName);
-        SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
-        try {
-            Parser parser = new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[]{});
-            return model;
-        } catch (XMLStreamException ex) {
-            throw new RuntimeException("Failed to parse document", ex);
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to parse document", ex);
-        } catch (SAXException ex) {
-            throw new RuntimeException("Failed to parse document", ex);
-        }
     }
 
     public static <T extends PolicyAssertion> T getAssertionFromPolicy(String resourceName, Class<T> assertionClass) {
