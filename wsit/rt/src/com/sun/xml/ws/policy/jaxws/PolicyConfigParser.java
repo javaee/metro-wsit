@@ -45,12 +45,8 @@ import javax.xml.stream.XMLStreamException;
 import org.xml.sax.SAXException;
 
 import com.sun.xml.ws.api.ResourceLoader;
-import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
@@ -236,15 +232,7 @@ public final class PolicyConfigParser {
                 throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5007_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
 
-            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
-            final XMLEntityResolver.Parser parser = new XMLEntityResolver.Parser(doc);
-            model = WSDLModel.WSDLParser.parse(
-                    parser,
-                    new PolicyConfigResolver(),
-                    isClient,Container.NONE,PolicyResolverFactory.DEFAULT_POLICY_RESOLVER,
-                    new WSDLParserExtension[]{});
-
-            return model;
+            return PolicyResourceLoader.getWsdlModel(configFileUrl, isClient);
         } catch (XMLStreamException ex) {
             throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (IOException ex) {

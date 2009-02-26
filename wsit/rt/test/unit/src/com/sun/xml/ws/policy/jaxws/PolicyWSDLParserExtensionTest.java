@@ -38,22 +38,16 @@ package com.sun.xml.ws.policy.jaxws;
 
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
 
-import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import javax.xml.stream.XMLInputFactory;
@@ -72,38 +66,8 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     }
     
     public void testClientParsingWithDifferentlyCreatedSDDocumentSource() throws Exception {
-        InputStream configFileIS = null;
         final URL configFileUrl = PolicyResourceLoader.getResourceUrl("parser/wsit-client.xml");
-        try {
-            WSDLModel model = null;
-            configFileIS = configFileUrl.openStream();
-            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(XML_INPUT_FACTORY.createXMLStreamReader(configFileIS));
-            final SDDocumentSource doc = SDDocumentSource.create(configFileUrl, buffer);
-            final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
-            model = WSDLModel.WSDLParser.parse(
-                    parser,
-                    new PolicyConfigResolver(),
-                    true,
-                    new WSDLParserExtension[] {}
-            );
-            
-            assertNotNull(model);
-        } finally {
-            PolicyUtils.IO.closeResource(configFileIS);
-        }
-        
-// What about when document source is created in a different way:
-        
-        WSDLModel model = null;
-        final SDDocumentSource doc = SDDocumentSource.create(configFileUrl);
-        final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
-        model = WSDLModel.WSDLParser.parse(
-                parser,
-                new PolicyConfigResolver(),
-                true,
-                new WSDLParserExtension[] {}
-        );
-        
+        WSDLModel model = com.sun.xml.ws.policy.jaxws.PolicyResourceLoader.getWsdlModel(configFileUrl, true);
         assertNotNull(model);
     }
     

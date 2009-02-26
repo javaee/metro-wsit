@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,13 +38,9 @@ package com.sun.xml.ws.policy.testutils;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -61,6 +57,7 @@ import org.xml.sax.SAXException;
  * This class provides utility methods to load resources and unmarshall policy source model.
  *
  * @author Marek Potociar
+ * @author Fabian Ritzmann
  */
 public final class PolicyResourceLoader {
     public static final String POLICY_UNIT_TEST_RESOURCE_ROOT = "policy/";
@@ -147,12 +144,8 @@ public final class PolicyResourceLoader {
     // reads wsdl model from given wsdl document
     public static WSDLModel getWSDLModel(String resourceName, boolean isClient) throws PolicyException {        
         URL resourceUrl = getResourceUrl(resourceName);
-        XMLStreamBuffer resourceBuffer = getResourceXmlBuffer(resourceName);
-        SDDocumentSource doc = SDDocumentSource.create(resourceUrl, resourceBuffer);
         try {
-            Parser parser = new Parser(doc);
-            WSDLModel model = WSDLModel.WSDLParser.parse(parser, new PolicyConfigResolver(), isClient, new WSDLParserExtension[] {});
-            return model;
+            return com.sun.xml.ws.policy.jaxws.PolicyResourceLoader.getWsdlModel(resourceUrl, isClient);
         } catch (XMLStreamException ex) {
             throw new PolicyException("Failed to parse document", ex);
         } catch (IOException ex) {

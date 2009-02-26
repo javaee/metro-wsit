@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -35,22 +35,15 @@
  */
 package com.sun.xml.ws.policy.jcaps;
 
-
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
-import com.sun.xml.ws.api.server.SDDocumentSource;
-import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
-import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigResolver;
+import com.sun.xml.ws.policy.jaxws.PolicyResourceLoader;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.io.IOException;
 import java.net.URL;
-import javax.xml.stream.XMLStreamException;
 import junit.framework.TestCase;
-import org.xml.sax.SAXException;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Fabian Ritzmann
  */
 public class JCapsPolicyValidatorTest extends TestCase {
     public JCapsPolicyValidatorTest(String testName) {
@@ -69,19 +62,9 @@ public class JCapsPolicyValidatorTest extends TestCase {
         URL cfgFileUrl = PolicyUtils.ConfigFile.loadFromClasspath("policy/jcaps/test.wsdl");
         assertNotNull("Unable to locate test WSDL", cfgFileUrl);        
         
-        parseFile(cfgFileUrl, false);
-        parseFile(cfgFileUrl, true);
+        PolicyResourceLoader.getWsdlModel(cfgFileUrl, false);
+        PolicyResourceLoader.getWsdlModel(cfgFileUrl, true);
         
     }
 
-    private void parseFile(URL cfgFileUrl, boolean isClient) throws IOException, XMLStreamException, SAXException {
-        final SDDocumentSource doc = SDDocumentSource.create(cfgFileUrl);
-        final XMLEntityResolver.Parser parser =  new XMLEntityResolver.Parser(doc);
-        WSDLModel.WSDLParser.parse(
-                parser,
-                new PolicyConfigResolver(),
-                isClient,
-                new WSDLParserExtension[] {}
-        );        
-    }
 }
