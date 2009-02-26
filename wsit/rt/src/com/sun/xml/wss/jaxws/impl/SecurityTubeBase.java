@@ -956,8 +956,21 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             for(PolicyAssertion assertion:assertionSet){
                 if(PolicyUtil.isAsymmetricBinding(assertion, spVersion)){
                     AsymmetricBinding sb =  (AsymmetricBinding)assertion;
-                    addToken(sb.getInitiatorToken(),tokenList);
-                    addToken(sb.getRecipientToken(),tokenList);
+                    Token iToken = sb.getInitiatorToken();
+                        if (iToken != null){
+                            addToken(iToken, tokenList);
+                        }else{
+                            addToken(sb.getInitiatorSignatureToken(), tokenList);
+                            addToken(sb.getInitiatorEncryptionToken(), tokenList);
+                        }
+
+                        Token rToken = sb.getRecipientToken();
+                        if (rToken != null){
+                            addToken(rToken, tokenList);
+                        }else{
+                            addToken(sb.getRecipientSignatureToken(), tokenList);
+                            addToken(sb.getRecipientEncryptionToken(), tokenList);
+                        }
                 }else if(PolicyUtil.isSymmetricBinding(assertion, spVersion)){
                     SymmetricBinding sb = (SymmetricBinding)assertion;
                     Token token = sb.getProtectionToken();
@@ -990,6 +1003,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
     }
     private void addToken(Token token,ArrayList<PolicyAssertion> list){
+         if (token == null){
+            return;
+        }
         if(PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion) ||
                 PolicyUtil.isIssuedToken((PolicyAssertion)token, spVersion) ||
                 PolicyUtil.isKerberosToken((PolicyAssertion)token, spVersion)){

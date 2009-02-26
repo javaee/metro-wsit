@@ -34,46 +34,28 @@
  * holder.
  */
 
-package com.sun.xml.ws.security.impl.policyconv;
+package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.policy.Binding;
-import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-import com.sun.xml.ws.security.policy.Token;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
-import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import java.util.Collection;
+
 
 /**
  *
- * @author ashutosh.shahi@sun.com
+ * @author K.Venugopal@sun.com
  */
-public class EncryptedSupportingTokensProcessor extends SupportingTokensProcessor{
-    private boolean isIssuedTokenAsEncryptedSupportingToken = false;
+public class InitiatorSignatureToken extends com.sun.xml.ws.security.impl.policy.Token{
     
-    /** Creates a new instance of EncryptedSupportingTokensProcessor */
-    public EncryptedSupportingTokensProcessor(EncryptedSupportingTokens st,TokenProcessor tokenProcessor,Binding binding,
-            XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
-        super(st,tokenProcessor,binding,container,sp,ep,pid);
+    /** Creates a new instance of InitiatorToken */
+    
+    public InitiatorSignatureToken(){
+        
     }
-    
-    protected void encryptToken(Token token, SecurityPolicyVersion spVersion)throws PolicyException{    
-        if (encryptionPolicy != null && token.getTokenId()!= null ) {
-            EncryptionPolicy.FeatureBinding fb =(EncryptionPolicy.FeatureBinding) encryptionPolicy.getFeatureBinding();
-            EncryptionTarget et = etc.newURIEncryptionTarget(token.getTokenId());
-            fb.addTargetBinding(et);
-            
-            if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)){
-                isIssuedTokenAsEncryptedSupportingToken = true;
-            }
-        }   
+    public InitiatorSignatureToken(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
+        super(name,nestedAssertions,nestedAlternative);
+        
     }
-    
-    protected boolean isIssuedTokenAsEncryptedSupportingToken(){
-        return isIssuedTokenAsEncryptedSupportingToken;
-    }
-    
+
 }

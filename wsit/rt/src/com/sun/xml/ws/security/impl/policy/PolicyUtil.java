@@ -141,6 +141,10 @@ public class PolicyUtil {
             return true;
         }else if(pa.getName().getLocalPart().equals(InitiatorToken)) {
             return true;
+        }else if(pa.getName().getLocalPart().equals(InitiatorSignatureToken)) {
+            return true;
+        }else if(pa.getName().getLocalPart().equals(InitiatorEncryptionToken)) {
+            return true;
         }else if(pa.getName().getLocalPart().equals(HttpsToken)) {
             return true;
         }else if(pa.getName().getLocalPart().equals(IssuedToken)) {
@@ -150,6 +154,10 @@ public class PolicyUtil {
         }else if(pa.getName().getLocalPart().equals(ProtectionToken)) {
             return true;
         }else if(pa.getName().getLocalPart().equals(RecipientToken)) {
+            return true;
+        }else if(pa.getName().getLocalPart().equals(RecipientSignatureToken)) {
+            return true;
+        }else if(pa.getName().getLocalPart().equals(RecipientEncryptionToken)) {
             return true;
         }else if(pa.getName().getLocalPart().equals(SupportingTokens)) {
             return true;
@@ -1237,6 +1245,28 @@ public class PolicyUtil {
         }
         return false;
     }
+
+    public static boolean isInitiatorEncryptionToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+
+        if ( assertion.getName().getLocalPart().equals(InitiatorEncryptionToken)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isInitiatorSignatureToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+
+        if ( assertion.getName().getLocalPart().equals(InitiatorSignatureToken)) {
+            return true;
+        }
+        return false;
+    }
     
     public static boolean isRecipientToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
         if ( !isSecurityPolicyNS(assertion, spVersion)) {
@@ -1244,6 +1274,28 @@ public class PolicyUtil {
         }
         
         if ( assertion.getName().getLocalPart().equals(RecipientToken)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isRecipientSignatureToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+
+        if ( assertion.getName().getLocalPart().equals(RecipientSignatureToken)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isRecipientEncryptionToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if ( !isSecurityPolicyNS(assertion, spVersion)) {
+            return false;
+        }
+
+        if ( assertion.getName().getLocalPart().equals(RecipientEncryptionToken)) {
             return true;
         }
         return false;
