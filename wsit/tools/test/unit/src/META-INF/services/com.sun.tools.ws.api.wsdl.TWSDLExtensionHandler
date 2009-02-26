@@ -1,2 +1,2 @@
-com.sun.tools.ws.policy.jaxws.PolicyExtensionHandler
+com.sun.tools.ws.wsdl.parser.PolicyExtensionHandler
 
