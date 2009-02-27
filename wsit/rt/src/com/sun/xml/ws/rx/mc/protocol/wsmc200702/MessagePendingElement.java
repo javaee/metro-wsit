@@ -68,6 +68,14 @@ public class MessagePendingElement {
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
+    public MessagePendingElement() {
+    }
+
+
+    public MessagePendingElement(Boolean pending) {
+        this.pending = pending;
+    }
+
     /**
      * Gets the value of the any property.
      * 
