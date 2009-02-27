@@ -133,16 +133,26 @@ public class McServerTube extends AbstractFilterTubeImpl {
         private static final Logger LOGGER = Logger.getLogger(AppRequestProcessingCallback.class);
         private final ResponseStorage responseStorage;
         private final String clientUID;
+        private final RxConfiguration configuration;
 
-        public AppRequestProcessingCallback(@NotNull ResponseStorage responseStorage, @NotNull String clientUID) {
+        public AppRequestProcessingCallback(@NotNull ResponseStorage responseStorage, @NotNull String clientUID, @NotNull RxConfiguration configuration) {
             this.responseStorage = responseStorage;
             this.clientUID = clientUID;
+            this.configuration = configuration;
         }
 
         public void onCompletion(Packet response) {
-            // TODO replace annonymous addressing To hearder
             // TODO L10N
             LOGGER.finer(String.format("Request processing finished. Storing a response for client UUID [ %s ]", clientUID));
+
+            if (response.getMessage() != null) {
+                final HeaderList headers = response.getMessage().getHeaders();
+                headers.remove(configuration.getAddressingVersion().toTag);
+                headers.add(Headers.create(
+                        configuration.getAddressingVersion().toTag, 
+                        configuration.getMcVersion().getWsmcAnonymousAddress(clientUID)));
+            }
+
             responseStorage.store(response, clientUID);
         }
 
@@ -209,7 +219,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
 
             Packet requestCopy = request.copy(true);
-            fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID));
+            fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID, configuration));
             return super.doReturnWith(createEmptyResponse(requestCopy));
         } finally {
             LOGGER.exiting();
