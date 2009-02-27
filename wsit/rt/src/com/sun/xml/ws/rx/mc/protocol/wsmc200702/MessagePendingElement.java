@@ -71,7 +71,6 @@ public class MessagePendingElement {
     public MessagePendingElement() {
     }
 
-
     public MessagePendingElement(Boolean pending) {
         this.pending = pending;
     }
