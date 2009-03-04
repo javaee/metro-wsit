@@ -38,6 +38,7 @@ package player;
 import com.sun.xml.ws.developer.StreamingDataHandler;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 
 /**
  *
@@ -52,7 +53,10 @@ public class Main {
             System.out.println("Creating and configuring stream service reference... ");
             provider.AudioStreamerService service = new provider.AudioStreamerService();
             provider.AudioStreamer port = service.getAudioStreamerPort();
-            System.out.println("DONE");
+            System.out.println("DONE. Press <Enter> to start audio streaming...");
+
+            Scanner scanner = new Scanner(System.in);
+            scanner.nextLine();
 
             System.out.println("Geting data handler... ");
             sdh = (StreamingDataHandler) port.getWavStream();
