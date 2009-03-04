@@ -118,7 +118,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 //            throw new RxRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
 //        }
 
-        this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager(this.configuration.getManagedObjectManager());
         this.requestAdapter = null;
     }
 

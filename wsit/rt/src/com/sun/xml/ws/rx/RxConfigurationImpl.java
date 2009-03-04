@@ -45,6 +45,7 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -57,13 +58,15 @@ class RxConfigurationImpl implements RxConfiguration {
     private final SOAPVersion soapVersion;
     private final AddressingVersion addressingVersion;
     private final boolean requestResponseDetected;
+    private final ManagedObjectManager managedObjectManager;
 
-    RxConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected) {
+    RxConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
         this.rmFeature = rmFeature;
         this.mcSupported = mcFeature != null && mcFeature.isEnabled();
         this.soapVersion = soapVersion;
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
+	this.managedObjectManager = managedObjectManager;
     }
 
     public boolean isReliableMessagingEnabled() {
@@ -128,5 +131,9 @@ class RxConfigurationImpl implements RxConfiguration {
 
     public long getCloseSequenceOperationTimeout() {
         return (rmFeature == null) ? null : rmFeature.getCloseSequenceOperationTimeout();
+    }
+
+    public ManagedObjectManager getManagedObjectManager() {
+	return managedObjectManager;
     }
 }

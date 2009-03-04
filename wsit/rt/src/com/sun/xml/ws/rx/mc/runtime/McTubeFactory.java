@@ -62,7 +62,7 @@ public final class McTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding(), null);
 
         if (configuration.isMakeConnectionSupportEnabled()) {
             return new McClientTube(configuration, context.getTubelineHead(), context.getAddress());
@@ -78,7 +78,7 @@ public final class McTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager());
 
         if (configuration.isMakeConnectionSupportEnabled()) {
             return new McServerTube(configuration, context.getTubelineHead());

@@ -108,7 +108,7 @@ abstract class ClientSession {
         this.initLock = new ReentrantLock();
         this.configuration = configuration;
         this.rmSourceReference = rmsEndpointReference;
-        this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager();
+        this.sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(this.configuration.getManagedObjectManager());
         this.communicator = communicator;
         this.scheduledTaskManager = new ScheduledTaskManager();
         this.fiberResumeTask = new FiberResumeTask(this);

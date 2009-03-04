@@ -36,21 +36,36 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import java.sql.Connection;
+import java.util.Map;
 import java.util.UUID;
 
+import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedObject;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  * @author Jungwook Chae
  */
+@ManagedObject
+@Description("Persistent RM Sequence Manager")
 public final class PersistentSequenceManager implements SequenceManager {
     private final Connection sqlConnection = null; // TODO initialize properly
+    private ManagedObjectManager managedObjectManager;
     
+    public Map<String, AbstractSequence> sequences() {
+	return null;
+    }
+
+    public Map<String, String> boundSequences() {
+	return null;
+    }
     public void closeSequence(String sequenceId) throws UnknownSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -86,6 +101,14 @@ public final class PersistentSequenceManager implements SequenceManager {
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrService) {
+	this.managedObjectManager = managedObjectManager;
+	if (managedObjectManager != null) {
+	    managedObjectManager.registerAtRoot(this, clientOrService);
+	}
+    }
+
 
 //
 //    private final Map<String, Sequence> sequences = new HashMap<String, Sequence>();

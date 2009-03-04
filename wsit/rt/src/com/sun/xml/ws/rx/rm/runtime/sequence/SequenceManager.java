@@ -35,12 +35,28 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import java.util.Map;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedObject;
+import org.glassfish.gmbal.ManagedObjectManager;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
+@ManagedObject
+@Description("RM Sequence Manager")
 public interface SequenceManager {
     
+    @ManagedAttribute
+    @Description("All RM sequences")
+    public Map<String, AbstractSequence> sequences();
+
+    @ManagedAttribute
+    @Description("Collection of sequence ID pairs that form an RM session")
+    public Map<String, String> boundSequences();
+
     /**
      * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
      * 
@@ -140,4 +156,10 @@ public interface SequenceManager {
      * @exception UnknownSequenceExceptio in case no such reference sequence is registered within the sequence manager
      */
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException;
+
+    /**
+     * Used to set the JMX/GMBAL manager.
+     * Needed because DefaultInMemorySequenceManager is a enum singleton.
+     */
+    public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrServer);
 }

@@ -36,11 +36,16 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import java.util.List;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedObject;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
+@ManagedObject
+@Description("RM Sequence")
 public interface Sequence {
 
     public static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly
@@ -92,6 +97,8 @@ public interface Sequence {
      * 
      * @return unique sequence identifier
      */
+    @ManagedAttribute
+    @Description("Unique sequence identifier")
     public String getId();
 
     /**
@@ -194,6 +201,8 @@ public interface Sequence {
      * 
      * @return last message identifier registered on this sequence
      */
+    @ManagedAttribute
+    @Description("Last message identifier register on this sequence")
     public long getLastMessageId();
 
     /**
@@ -208,6 +217,8 @@ public interface Sequence {
      * 
      * @return {@code true} if the sequence has any unacknowledged message identifiers, {@code false} otherwise
      */
+    @ManagedAttribute
+    @Description("True if the sequence has unacknowledged message identifiers")
     public boolean hasPendingAcknowledgements();
 
     /**
@@ -236,6 +247,8 @@ public interface Sequence {
      * 
      * @return {@code true} if the AckRequested flag is set, {@code false} otherwise
      */
+    @ManagedAttribute
+    @Description("True if AckRequested flag set")
     public boolean isAckRequested();
     
     /**
@@ -243,6 +256,8 @@ public interface Sequence {
      * 
      * @return security token reference identifier to which this sequence is bound to.
      */
+    @ManagedAttribute
+    @Description("The security token reference identifier to which this sequence is bound")
     public String getBoundSecurityTokenReferenceId();
 
     /**
@@ -259,6 +274,8 @@ public interface Sequence {
      * 
      * @return {@code true} if the sequence has been closed, {@code false} otherwise
      */
+    @ManagedAttribute
+    @Description("True if the sequence has been closed")
     public boolean isClosed();
 
     /**
@@ -266,13 +283,17 @@ public interface Sequence {
      * 
      * @return {@code true} if the sequence has already expired, {@code false} otherwise
      */
+    @ManagedAttribute
+    @Description("True if the sequence has expired")
     public boolean isExpired();
     
     /**
      * Provides information on the last activity time of this sequence
      * 
-     * @return last actiit time on the sequence in miliseconds
+     * @return last activity time on the sequence in milliseconds
      */
+    @ManagedAttribute
+    @Description("Last activity time on the sequence in milliseconds")
     public long getLastActivityTime();
     
     /**

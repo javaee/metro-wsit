@@ -41,16 +41,30 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedObject;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
+@ManagedObject
+@Description("In Memory RM Sequence Manager")
 final class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
     private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();
     private final Map<String, String> boundSequences = new HashMap<String, String>();
+    private ManagedObjectManager managedObjectManager;
+
+    public Map<String, AbstractSequence> sequences() {
+	return sequences;
+    }
+
+    public Map<String, String> boundSequences() {
+	return boundSequences;
+    }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
@@ -104,6 +118,11 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
 
                 sequence.preDestroy();
 
+
+		if (managedObjectManager != null) {
+		    managedObjectManager.unregister(sequence);
+		}
+
                 return sequence;
             } else {
                 throw new UnknownSequenceException(sequenceId);
@@ -125,7 +144,10 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
                 throw new DuplicateSequenceException(sequence.getId());
             } else {
                 sequences.put(sequence.getId(), sequence);
-            }
+		if (managedObjectManager != null) {
+		    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+		}
+	    }
 
             return sequence;
         } finally {
@@ -165,5 +187,12 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
         } finally {
             internalDataAccessLock.readLock().unlock();
         }
+    }
+
+    public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrService) {
+	this.managedObjectManager = managedObjectManager;
+	if (managedObjectManager != null) {
+	    managedObjectManager.registerAtRoot(this, clientOrService);
+	}
     }
 }

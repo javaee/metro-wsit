@@ -70,7 +70,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(context.getTubelineHead());
         this.isClientSide = true;
         
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding());
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getBinding(), null);
         
         this.filters = getConfiguredFilters(context.getBinding(), configuration);
     }
@@ -79,7 +79,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(context.getTubelineHead());
         this.isClientSide = false;
 
-        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding());
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(context.getWsdlPort(), context.getEndpoint().getBinding(),  context.getWrappedContext().getEndpoint().getManagedObjectManager());
         this.filters = getConfiguredFilters(context.getEndpoint().getBinding(), configuration);
     }
 

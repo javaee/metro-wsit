@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import org.glassfish.gmbal.ManagedObjectManager;
+
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
@@ -52,11 +54,13 @@ public enum SequenceManagerFactory {
         this.serverSequenceManager = new DefaultInMemorySequenceManager();
     }
 
-    public SequenceManager getClientSequenceManager() {
+    public SequenceManager getClientSequenceManager(ManagedObjectManager managedObjectManager) {
+	this.clientSequenceManager.setManagedObjectManager(managedObjectManager, "client");
         return this.clientSequenceManager;
     }
 
-    public SequenceManager getServerSequenceManager() {
+    public SequenceManager getServerSequenceManager(ManagedObjectManager managedObjectManager) {
+	this.serverSequenceManager.setManagedObjectManager(managedObjectManager, "service");
         return this.serverSequenceManager;
     }
 }

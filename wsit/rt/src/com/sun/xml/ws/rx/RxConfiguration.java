@@ -44,6 +44,7 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  * TODO split into sperate configurations for WS-Mc and WS-RM
@@ -143,4 +144,9 @@ public interface RxConfiguration {
      * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout() 
      */
     public long getCloseSequenceOperationTimeout();
+
+    /**
+     * GMBAL/JMX manager
+     */
+    public ManagedObjectManager getManagedObjectManager();
 }

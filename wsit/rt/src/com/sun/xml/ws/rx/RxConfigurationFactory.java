@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -49,14 +50,15 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 public enum RxConfigurationFactory {
     INSTANCE;
 
-    public RxConfiguration createConfiguration(WSDLPort wsdlPort, WSBinding binding) {
+    public RxConfiguration createConfiguration(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
 
         return new RxConfigurationImpl(
                 binding.getFeature(ReliableMessagingFeature.class),
                 binding.getFeature(MakeConnectionSupportedFeature.class),
                 binding.getSOAPVersion(),
                 binding.getAddressingVersion(),
-                checkForRequestResponseOperations(wsdlPort));
+                checkForRequestResponseOperations(wsdlPort),
+		managedObjectManager);
     }
 
    /**
