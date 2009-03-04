@@ -52,7 +52,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-abstract class AbstractSequence implements Sequence {
+public abstract class AbstractSequence implements Sequence {
 
     protected final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables     
     //
