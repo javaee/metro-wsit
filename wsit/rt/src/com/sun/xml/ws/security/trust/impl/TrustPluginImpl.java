@@ -109,6 +109,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Map;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
@@ -540,7 +541,7 @@ public class TrustPluginImpl implements TrustPlugin {
 //            dispatch.getRequestContext().put(WSTrustConstants.USE_KEY_SIGNATURE_ID, id);
 //        }
 
-        dispatch.getRequestContext().putAll(stsConfig.getOtherOptions());
+        setMessageProperties(dispatch.getRequestContext(), stsConfig);
 
         //RequestSecurityTokenResponse rstr = null;
         // try{
@@ -696,5 +697,12 @@ public class TrustPluginImpl implements TrustPlugin {
             ((RequestSecurityTokenResponse)rstr).setRequestedSecurityToken(rdst);
         }
         return rstr;
+    }
+
+    private void setMessageProperties(Map<String, Object> context, STSIssuedTokenConfiguration stsConfig){
+        context.putAll(stsConfig.getOtherOptions());
+        if (context.containsKey(com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION)){
+            context.remove(com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION);
+        }
     }
 }
