@@ -82,7 +82,7 @@
         <mkdir dir="${dist.image.wsit.v3.dir}"/>
         <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
              failok="false"
-             output="${dist.image.wsit.v3.dir}/webservices.jar"
+             output="${dist.image.wsit.v3.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
 
         <copy todir="${dist.image.wsit.v3.dir}">
@@ -192,8 +192,8 @@
     
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.1/promotion/latest/Good%20for%20jax-ws/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb.jar"
-             dest="${lib.osgi.dir}/jaxb.jar" />
+        <get src="http://hudson.sfbay/view/JAXB%202.1/job/jaxb-ri-2.1/793/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
+             dest="${lib.osgi.dir}/jaxb-osgi.jar" />
     </target>
 
     <target name="integrate-xwss30-hudson" 
