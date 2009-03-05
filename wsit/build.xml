@@ -82,7 +82,7 @@
         <mkdir dir="${dist.image.wsit.v3.dir}"/>
         <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
              failok="false"
-             output="${dist.image.wsit.v3.dir}/webservices-osgi.jar"
+             output="${dist.image.wsit.v3.dir}/webservices.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
 
         <copy todir="${dist.image.wsit.v3.dir}">
