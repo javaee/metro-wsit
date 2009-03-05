@@ -193,7 +193,7 @@
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
         <get src="http://hudson.sfbay/view/JAXB%202.1/job/jaxb-ri-2.1/793/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
-             dest="${lib.osgi.dir}/jaxb-osgi.jar" />
+             dest="${lib.osgi.dir}/jaxb.jar" />
     </target>
 
     <target name="integrate-xwss30-hudson" 
