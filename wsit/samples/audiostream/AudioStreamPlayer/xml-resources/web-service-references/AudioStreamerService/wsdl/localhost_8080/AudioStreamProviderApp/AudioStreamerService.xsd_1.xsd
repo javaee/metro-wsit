@@ -5,7 +5,9 @@
 <xs:element name="getWavStreamResponse" type="tns:getWavStreamResponse" />
 
 <xs:complexType name="getWavStream">
-<xs:sequence />
+<xs:sequence>
+<xs:element name="arg0" type="xs:string" minOccurs="0" />
+</xs:sequence>
 </xs:complexType>
 
 <xs:complexType name="getWavStreamResponse">

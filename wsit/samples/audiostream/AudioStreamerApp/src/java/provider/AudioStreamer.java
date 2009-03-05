@@ -54,16 +54,12 @@ public class AudioStreamer {
      * Web service operation
      */
     @WebMethod(operationName = "getWavStream")
-    public @XmlMimeType("application/octet-stream") DataHandler getWavStream() {
+    public @XmlMimeType("application/octet-stream") DataHandler getWavStream(String name) {
         try {
-            File audioFile = new File(System.getProperty("user.home") + File.separator + "tmp/resources/audio.wav");
+            File audioFile = new File(System.getProperty("user.home") + File.separator + "tmp/resources/" + name + ".wav");
             return new DataHandler(audioFile.toURL());
         } catch (Exception ex) {
             throw new WebServiceException(ex);
         }
-    }
-
-    public static void main(String[] args) {
-        
     }
 }
