@@ -64,6 +64,9 @@ public class PolicyResourceLoader {
     /**
      * Parse the given URL and return the resulting WSDLModel.
      *
+     * Note that this method uses the PolicyResolverFactory.DEFAULT_POLICY_RESOLVER
+     * instead of the PolicyResolver that is injected at runtime.
+     *
      * @param resourceUrl URL for a valid WSDL document.
      * @param isClient True if client-side parser, false otherwise.
      * @return The WSDLModel that corresponds to the given WSDL document.
