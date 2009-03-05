@@ -53,6 +53,7 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
     private boolean populated = false;
     private static final QName useXWSSCallbacks = new QName("useXWSSCallbacks");
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
+    private static final QName iterationsForPDK = new QName("iterationsForPDK");
     /** Creates a new instance of CallbackHandlerConfiguration */
     public CallbackHandlerConfiguration() {
     }
@@ -84,6 +85,13 @@ public class CallbackHandlerConfiguration extends PolicyAssertion implements com
             return this.getAttributeValue(timestampTimeout);
         }
         return null;
+    }
+
+    public String getiterationsForPDK() {
+        if(this.getAttributes().containsKey(iterationsForPDK)) {
+            return this.getAttributeValue(iterationsForPDK);
+        }
+        return "0";
     }
     public String getUseXWSSCallbacks() {
         return this.getAttributeValue(useXWSSCallbacks);

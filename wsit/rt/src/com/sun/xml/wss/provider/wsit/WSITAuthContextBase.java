@@ -262,6 +262,7 @@ public abstract class WSITAuthContextBase  {
     
     //milliseconds
     protected long timestampTimeOut = 0;
+    protected int iterationsForPDK = 0;
 
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
@@ -1222,6 +1223,9 @@ public abstract class WSITAuthContextBase  {
         if (conf.getUseXWSSCallbacks() != null) {
             props.put(DefaultCallbackHandler.USE_XWSS_CALLBACKS, conf.getUseXWSSCallbacks());
         }
+        if(conf.getiterationsForPDK() != null) {
+            this.iterationsForPDK = Integer.parseInt(conf.getiterationsForPDK());
+        }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {
             PolicyAssertion p = (PolicyAssertion)it.next();
@@ -1453,6 +1457,7 @@ public abstract class WSITAuthContextBase  {
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         
         ctx.setTimestampTimeout(this.timestampTimeOut);
+        ctx.setiterationsForPDK(iterationsForPDK);
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));

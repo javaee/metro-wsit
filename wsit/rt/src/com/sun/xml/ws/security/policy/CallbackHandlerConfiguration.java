@@ -46,4 +46,5 @@ public interface CallbackHandlerConfiguration {
     public Iterator<? extends PolicyAssertion> getCallbackHandlers();
     public String getTimestampTimeout();
     public String getUseXWSSCallbacks();
+    public String getiterationsForPDK();
 }

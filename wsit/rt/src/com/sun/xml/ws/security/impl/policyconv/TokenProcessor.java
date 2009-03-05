@@ -45,6 +45,8 @@ import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.impl.policy.UsernameToken;
+import com.sun.xml.ws.security.policy.AsymmetricBinding;
+import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.KerberosToken;
 import com.sun.xml.ws.security.policy.SamlToken;
@@ -68,6 +70,7 @@ import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.logger;
 import com.sun.xml.ws.security.policy.KeyValueToken;
 import com.sun.xml.ws.security.policy.RsaToken;
+import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -76,6 +79,7 @@ public class TokenProcessor {
     protected boolean isServer = false;
     protected boolean isIncoming = false;
     private PolicyID pid = null;
+    SymmetricKeyBinding skb = new SymmetricKeyBinding();
     /** Creates a new instance of TokenProcessor */
     public TokenProcessor(boolean isServer,boolean isIncoming, PolicyID pid) {
         this.isServer =isServer;
@@ -140,9 +144,9 @@ public class TokenProcessor {
     protected void setUsernameTokenRefType(UsernameTokenBinding untBinding, UsernameToken unToken) {
          untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
               
-    }
-    
-    public void addKeyBinding(WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
+    }    
+
+    public void addKeyBinding(Binding binding,WSSPolicy policy, Token token,boolean ignoreDK) throws PolicyException{
         PolicyAssertion tokenAssertion = (PolicyAssertion)token;
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion(tokenAssertion);
         if(PolicyUtil.isUsernameToken(tokenAssertion, spVersion)){
@@ -165,18 +169,29 @@ public class TokenProcessor {
             if(unToken.getClaims() != null){
                 untBinding.setClaims(unToken.getClaims().getClaimsAsBytes());
             }                      
-            
-            if(!ignoreDK && unToken.isRequireDerivedKeys()){
-                DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
-                dtKB.setOriginalKeyBinding(untBinding);
-                policy.setKeyBinding(dtKB);
+
+            if (!ignoreDK && unToken.isRequireDerivedKeys()) {
+                DerivedTokenKeyBinding dtKB = new DerivedTokenKeyBinding();
+                //Support for PasswordDerivedKeys
+                if ((binding instanceof AsymmetricBinding) && (((AsymmetricBinding) binding).getInitiatorToken() != null)) {
+                    skb.setKeyBinding(untBinding);
+                    dtKB.setOriginalKeyBinding(skb);
+                    policy.setKeyBinding(dtKB);
+                } else {
+                    dtKB.setOriginalKeyBinding(untBinding);
+                    policy.setKeyBinding(dtKB);
+                }
                 dtKB.setUUID(pid.generateID());
-                
-            }else{
-                policy.setKeyBinding(untBinding);
-            }
-            
-           // throw new UnsupportedOperationException("usernametoken not implemented yet");
+
+            } else {
+                    if((binding instanceof AsymmetricBinding) && (((AsymmetricBinding)binding).getInitiatorToken() != null)){
+                        skb.setKeyBinding(untBinding);
+                        policy.setKeyBinding(skb);
+                    }else {
+                        policy.setKeyBinding(untBinding);
+                    }
+           
+                }
         }else if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();

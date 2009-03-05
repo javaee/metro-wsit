@@ -38,6 +38,7 @@ package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.UserNameToken;
@@ -173,7 +174,7 @@ public class SupportingTokensProcessor {
     protected void createSupportingSignature(Token token) throws PolicyException{
         SignaturePolicy sp = new SignaturePolicy();
         sp.setUUID(pid.generateID());
-        tokenProcessor.addKeyBinding(sp, token,true);
+        tokenProcessor.addKeyBinding(binding,sp,token,true);
         if(binding != null && binding.getTokenProtection()){
             protectToken((WSSPolicy) sp.getKeyBinding(), sp);
         }

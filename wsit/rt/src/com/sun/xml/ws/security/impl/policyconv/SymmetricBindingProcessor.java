@@ -64,7 +64,6 @@ import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 import com.sun.xml.ws.security.policy.IssuedToken;
 /**
  *
@@ -123,9 +122,14 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             primarySP.setUUID(pid.generateID());
             primaryEP = new EncryptionPolicy();
             primaryEP.setUUID(pid.generateID());
+            PolicyAssertion tokenAssertion = (PolicyAssertion)pt;
+            SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion(tokenAssertion);
             addSymmetricKeyBinding(primarySP,pt);
             addSymmetricKeyBinding(primaryEP,pt);
-            
+            //share the keybinding
+            if (PolicyUtil.isUsernameToken(tokenAssertion,spVersion)) {
+                ((WSSPolicy)primaryEP).setKeyBinding((WSSPolicy)primarySP.getKeyBinding());
+            }
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
             primarySP.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);

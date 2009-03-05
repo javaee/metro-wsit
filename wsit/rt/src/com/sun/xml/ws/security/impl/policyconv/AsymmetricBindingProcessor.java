@@ -37,10 +37,10 @@
 package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
+import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.Token;
@@ -85,8 +85,8 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             primarySP.setUUID(pid.generateID());
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"ID of Primary signature policy is "+primarySP.getUUID());
-            }
-            tokenProcessor.addKeyBinding(primarySP,st,true);
+            }            
+            tokenProcessor.addKeyBinding(binding,primarySP,st,true);
             SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)primarySP.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
@@ -94,8 +94,8 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         }
         if(et != null){
             primaryEP = new EncryptionPolicy();
-            primaryEP.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(primaryEP,et,false);
+            primaryEP.setUUID(pid.generateID());            
+            tokenProcessor.addKeyBinding(binding,primaryEP,et,false);
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"ID of Encryption policy is "+primaryEP.getUUID());
             }
@@ -178,7 +178,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             sEncPolicy  = new EncryptionPolicy();
             sEncPolicy.setUUID(pid.generateID());
             Token token = getEncryptionToken();
-            tokenProcessor.addKeyBinding(sEncPolicy,token,false);
+            tokenProcessor.addKeyBinding(binding,sEncPolicy,token,false);
             container.insert(sEncPolicy);
         }
         return sEncPolicy;

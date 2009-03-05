@@ -222,6 +222,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected Policy bpMSP = null;
     //milliseconds
     protected long timestampTimeOut = 0;
+    protected int iterationsForPDK = 0;
     /**
      * Constants for RM Security Processing
      */
@@ -330,6 +331,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.hasReliableMessaging = that.hasReliableMessaging;
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
+        this.iterationsForPDK = that.iterationsForPDK;
         try {            
             this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
             this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
@@ -579,6 +581,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         ctx.setTimestampTimeout(this.timestampTimeOut);
+        ctx.setiterationsForPDK(this.iterationsForPDK);
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
@@ -1465,6 +1468,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         if (conf.getUseXWSSCallbacks() != null) {
             props.put(DefaultCallbackHandler.USE_XWSS_CALLBACKS, conf.getUseXWSSCallbacks());
+        }
+        if(conf.getiterationsForPDK() != null) {
+            this.iterationsForPDK = Integer.parseInt(conf.getiterationsForPDK());
         }
         Iterator it = conf.getCallbackHandlers();
         for (; it.hasNext();) {

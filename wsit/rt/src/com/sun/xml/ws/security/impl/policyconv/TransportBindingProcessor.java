@@ -37,6 +37,7 @@
 package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedElements;
@@ -130,7 +131,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             sp.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding(sp, token,false);            
+            tokenProcessor.addKeyBinding((AsymmetricBinding)binding,sp,token,false);
            // container.insert(sp.getKeyBinding());
             
             if(tp != null ){
@@ -170,7 +171,7 @@ public class TransportBindingProcessor extends BindingProcessor {
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
-            tokenProcessor.addKeyBinding(sp, token,false);
+            tokenProcessor.addKeyBinding((AsymmetricBinding) binding,sp,token,false);
            
             //protect primary signature
             
