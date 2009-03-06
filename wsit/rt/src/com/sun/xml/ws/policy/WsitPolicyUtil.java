@@ -93,6 +93,8 @@ public class WsitPolicyUtil {
             EffectiveAlternativeSelector.doSelection(modifier);
         } catch (PolicyException e) {
             throw new WebServiceException(e);
+        } finally {
+            modifier.disconnect();
         }
         return policyMap;
     }
