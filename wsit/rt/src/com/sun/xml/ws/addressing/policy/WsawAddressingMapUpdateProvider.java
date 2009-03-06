@@ -54,7 +54,7 @@ public class WsawAddressingMapUpdateProvider implements PolicyMapUpdateProvider 
             }
             if ((addressingFeature != null) && addressingFeature.isEnabled()) {
                 //add wsaw:UsingAddressing for WSIT compatibility.
-                addWsawUsingAddressingForCompatiility(policyMapMutator, policyMap, model, addressingFeature);
+                addWsawUsingAddressingForCompatibility(policyMapMutator, policyMap, model, addressingFeature);
 
             }
         } // endif policy map not null
@@ -62,7 +62,7 @@ public class WsawAddressingMapUpdateProvider implements PolicyMapUpdateProvider 
     }
 
 
-    private void addWsawUsingAddressingForCompatiility(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, AddressingFeature addressingFeature) throws PolicyException {
+    private void addWsawUsingAddressingForCompatibility(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, AddressingFeature addressingFeature) throws PolicyException {
         final AddressingVersion addressingVersion = AddressingVersion.fromFeature(addressingFeature);
         final QName usingAddressing = new QName(addressingVersion.policyNsUri, "UsingAddressing");
         final PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
