@@ -51,7 +51,7 @@
         </classpath>
     </taskdef>
 
-    <target name="-do-jar-without-manifest" depends="image, bundle">
+    <target name="-do-jar-without-manifest" depends="image, bundle, create-pom-files">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
         <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
@@ -91,7 +91,17 @@
             </fileset>
         </copy>
     </target>
-    
+
+    <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
+        <delete dir="${dist.dir}/maven"/>
+        
+        <filter token="metro.version" value="${release.impl.version}-${release.impl.version.suffix}"/>
+        <filter token="jaxb.version" value="${jaxb.osgi.dependency.version}"/>
+        <copy todir="${dist.dir}/maven" filtering="true">
+            <fileset dir="${etc.dir}/maven" includes="**/pom*.xml" />
+        </copy>
+    </target>
+
     <target name="image" description="Create the Metro tool and runtime jars.">
         <filter token="release.impl.version" value="${release.impl.version}"/>
         <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
