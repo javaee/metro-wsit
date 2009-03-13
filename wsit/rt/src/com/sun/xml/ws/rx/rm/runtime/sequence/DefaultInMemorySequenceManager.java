@@ -114,14 +114,13 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
 
                 if (boundSequences.containsKey(sequenceId)) {
                     boundSequences.remove(sequenceId);
+
+		    if (managedObjectManager != null) {
+			managedObjectManager.unregister(sequence);
+		    }
                 }
 
                 sequence.preDestroy();
-
-
-		if (managedObjectManager != null) {
-		    managedObjectManager.unregister(sequence);
-		}
 
                 return sequence;
             } else {
