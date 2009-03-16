@@ -59,11 +59,11 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
     private ManagedObjectManager managedObjectManager;
 
     public Map<String, AbstractSequence> sequences() {
-	return sequences;
+        return sequences;
     }
 
     public Map<String, String> boundSequences() {
-	return boundSequences;
+        return boundSequences;
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
@@ -115,9 +115,9 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
                 if (boundSequences.containsKey(sequenceId)) {
                     boundSequences.remove(sequenceId);
 
-		    if (managedObjectManager != null) {
-			managedObjectManager.unregister(sequence);
-		    }
+                    if (managedObjectManager != null) {
+                        managedObjectManager.unregister(sequence);
+                    }
                 }
 
                 sequence.preDestroy();
@@ -143,10 +143,10 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
                 throw new DuplicateSequenceException(sequence.getId());
             } else {
                 sequences.put(sequence.getId(), sequence);
-		if (managedObjectManager != null) {
-		    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
-		}
-	    }
+                if (managedObjectManager != null) {
+                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+                }
+            }
 
             return sequence;
         } finally {
@@ -189,9 +189,9 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
     }
 
     public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrService) {
-	this.managedObjectManager = managedObjectManager;
-	if (managedObjectManager != null) {
-	    managedObjectManager.registerAtRoot(this, clientOrService);
-	}
+        this.managedObjectManager = managedObjectManager;
+        if (managedObjectManager != null) {
+            managedObjectManager.registerAtRoot(this, clientOrService);
+        }
     }
 }
