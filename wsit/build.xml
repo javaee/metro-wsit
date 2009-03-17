@@ -202,7 +202,7 @@
     
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.1/promotion/latest/Good%20for%20jax-ws/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
+        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2-dist/promotion/latest/Good%20for%20jax-ws%202.2/artifact/osgi/build/jaxb-osgi.jar"
              dest="${lib.osgi.dir}/jaxb-osgi.jar" />
     </target>
 
