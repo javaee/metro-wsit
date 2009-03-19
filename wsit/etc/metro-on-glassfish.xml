@@ -37,7 +37,6 @@
 -->
 
 <project name="Metro on GlassFish" default="help" basedir=".">
-    <property file="../build.properties"/>
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
