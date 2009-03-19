@@ -234,4 +234,29 @@ public abstract class AbstractSequence implements Sequence {
     final void setStatus(Status newStatus) {
         status.set(newStatus);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstractSequence other = (AbstractSequence) obj;
+        if ((this.sequenceId == null) ? (other.sequenceId != null) : !this.sequenceId.equals(other.sequenceId)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + (this.sequenceId != null ? this.sequenceId.hashCode() : 0);
+        return hash;
+    }
 }
