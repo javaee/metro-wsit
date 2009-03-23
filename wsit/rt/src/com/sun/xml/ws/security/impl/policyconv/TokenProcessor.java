@@ -183,15 +183,26 @@ public class TokenProcessor {
                 }
                 dtKB.setUUID(pid.generateID());
 
-            } else {
-                    if((binding instanceof AsymmetricBinding) && (((AsymmetricBinding)binding).getInitiatorToken() != null)){
-                        skb.setKeyBinding(untBinding);
-                        policy.setKeyBinding(skb);
-                    }else {
-                        policy.setKeyBinding(untBinding);
-                    }
-           
+            } else if (unToken.isRequireDerivedKeys()) {
+                DerivedTokenKeyBinding dtKB = new DerivedTokenKeyBinding();
+                if ((binding instanceof AsymmetricBinding) && (((AsymmetricBinding) binding).getInitiatorToken() != null)) {
+                    skb.setKeyBinding(untBinding);
+                    dtKB.setOriginalKeyBinding(skb);
+                    policy.setKeyBinding(dtKB);
+                } else {
+                    dtKB.setOriginalKeyBinding(untBinding);
+                    policy.setKeyBinding(dtKB);
                 }
+                dtKB.setUUID(pid.generateID());
+            } else {
+                if ((binding instanceof AsymmetricBinding) && (((AsymmetricBinding) binding).getInitiatorToken() != null)) {
+                    skb.setKeyBinding(untBinding);
+                    policy.setKeyBinding(skb);
+                } else {
+                    policy.setKeyBinding(untBinding);
+                }
+
+            }
         }else if(PolicyUtil.isX509Token(tokenAssertion, spVersion)){
             AuthenticationTokenPolicy.X509CertificateBinding x509CB =new AuthenticationTokenPolicy.X509CertificateBinding();
             //        (AuthenticationTokenPolicy.X509CertificateBinding)policy.newX509CertificateKeyBinding();

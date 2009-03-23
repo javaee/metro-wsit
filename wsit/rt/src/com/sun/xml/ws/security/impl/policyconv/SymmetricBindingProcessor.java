@@ -127,7 +127,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             addSymmetricKeyBinding(primarySP,pt);
             addSymmetricKeyBinding(primaryEP,pt);
             //share the keybinding
-            if (PolicyUtil.isUsernameToken(tokenAssertion,spVersion)) {
+            if (PolicyUtil.isUsernameToken(tokenAssertion,spVersion)&& (!PolicyTypeUtil.derivedTokenKeyBinding(primarySP.getKeyBinding())||(!PolicyTypeUtil.derivedTokenKeyBinding(primaryEP.getKeyBinding())))) {
                 ((WSSPolicy)primaryEP).setKeyBinding((WSSPolicy)primarySP.getKeyBinding());
             }
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)
