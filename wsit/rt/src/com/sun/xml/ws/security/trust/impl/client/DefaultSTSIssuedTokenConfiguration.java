@@ -93,6 +93,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import java.security.cert.X509Certificate;
 
 
 /**
@@ -136,6 +137,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     private String encryptWith = null;
     
     private Claims claims = null;
+
+    public DefaultSTSIssuedTokenConfiguration(){
+        
+    }
     
     public DefaultSTSIssuedTokenConfiguration(String protocol, IssuedToken issuedToken, PolicyAssertion localToken){
         if (protocol != null){
@@ -160,7 +165,26 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                           String stsWSDLLocation, String stsServiceName, String stsPortName, String stsNamespace){
         super(protocol, stsEndpoint, stsWSDLLocation, stsServiceName, stsPortName, stsNamespace);
     }
-    
+
+    public void setProtocol(String protocol){
+        this.protocol = protocol;
+    }
+
+    public void setSTSInfo(String stsEndpoint, String stsMEXAddress){
+        this.stsEndpoint = stsEndpoint;
+        this.stsMEXAddress = stsMEXAddress;
+    }
+
+    public void setSTSInfo (String protocol, String stsEndpoint,
+                            String stsWSDLLocation, String stsServiceName, String stsPortName, String stsNamespace){
+        this.protocol = protocol;
+        this.stsEndpoint = stsEndpoint;
+        this.stsWSDLLocation = stsWSDLLocation;
+        this.stsServiceName = stsServiceName;
+        this.stsPortName = stsPortName;
+        this.stsNamespace = stsNamespace;
+    }
+
     public void setTokenType(String tokenType){
         this.tokenType = tokenType;
     }
@@ -203,6 +227,14 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     
     public void setOBOToken(Token token){
         this.oboToken = token;
+    }
+
+    public void setOBOToken(String username, String password){
+        //ToDo
+    }
+
+    public void setOBOToken(X509Certificate cert){
+        //ToDo
     }
     
     public String getTokenType(){
@@ -391,6 +423,72 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         this.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
         this.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
         this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
+    }
+
+    public void copy(STSIssuedTokenConfiguration config){
+        if (config.getProtocol() != null){
+            this.protocol = config.getProtocol();
+        }
+
+        if (config.getSTSEndpoint() != null){
+            this.stsEndpoint = config.getSTSEndpoint();
+            if (config.getSTSMEXAddress()!= null){
+                this.stsMEXAddress = config.getSTSMEXAddress();
+            }else if (config.getSTSWSDLLocation()!= null){
+                this.stsWSDLLocation = config.getSTSWSDLLocation();
+                this.stsServiceName = config.getSTSServiceName();
+                this.stsPortName = config.getSTSServiceName();
+                this.stsNamespace = config.getSTSNamespace();
+            }
+        }
+
+        if (config.getTokenType() != null){
+            this.tokenType = config.getTokenType();
+        }
+
+        if (config.getKeyType() != null){
+            this.keyType = config.getKeyType();
+        }
+
+        if (config.getKeySize() > 0){
+            this.keySize = config.getKeySize();
+        }
+
+        if (config.getSignatureAlgorithm() != null){
+            this.signatureAlg = config.getSignatureAlgorithm();
+        }
+
+        if (config.getEncryptionAlgorithm() != null){
+            this.encAlg = config.getEncryptionAlgorithm();
+        }
+
+        if (config.getCanonicalizationAlgorithm() != null){
+            this.canAlg = config.getCanonicalizationAlgorithm();
+        }
+
+        if (config.getKeyWrapAlgorithm() != null){
+            this.keyWrapAlg = config.getKeyWrapAlgorithm();
+        }
+
+        if (config.getSignWith() != null){
+            this.signWith = config.getSignWith();
+        }
+        if (config.getEncryptWith() != null){
+            this.encryptWith = config.getEncryptWith();
+        }
+
+        if (config.getOBOToken() != null){
+            this.oboToken = config.getOBOToken();
+        }
+
+        if (config.getClaims() != null){
+            this.claims = config.getClaims();
+        }
+
+        this.getOtherOptions().putAll(config.getOtherOptions());
+        if (config.getOtherOptions().containsKey(ISSUED_TOKEN)){
+            this.getOtherOptions().remove(ISSUED_TOKEN);
+        }
     }
 }
 

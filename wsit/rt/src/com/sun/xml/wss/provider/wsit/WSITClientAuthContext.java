@@ -74,6 +74,7 @@ import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.GenericToken;
+import com.sun.xml.ws.security.trust.STSIssuedTokenFeature;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
@@ -712,9 +713,9 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     }
 
     private void invokeTrustPlugin(Packet packet, boolean isSCMessage) {
-
         List<PolicyAssertion> policies = null;
 
+        // Get IssuedToken policies from the service
         if (isSCMessage) {
             Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
             policies = getIssuedTokenPoliciesFromBootstrapPolicy(scToken);
@@ -722,59 +723,64 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             policies = getIssuedTokenPolicies(packet, OPERATION_SCOPE);
         }
 
+        // Get PreConfiguredSTS policy on the client side
         PolicyAssertion preSetSTSAssertion = null;
         if (trustConfig != null) {
             Iterator it = trustConfig.iterator();
             while (it != null && it.hasNext()) {
                 preSetSTSAssertion = (PolicyAssertion) it.next();
             }
-        //serviceName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_SERVICE_NAME);
-        //portName = (QName)packet.invocationProperties.get(WSTrustConstants.PROPERTY_PORT_NAME);
         }
 
+        // Get issued tokens
         for (PolicyAssertion issuedTokenAssertion : policies) {
-            //IssuedTokenContext ctx = trustPlugin.process(issuedTokenAssertion, preSetSTSAssertion, packet.endpointAddress.toString());
-            //ToDo: Handling mixed trust versions??
-            if (issuedTokenContextMap.get(
-                    ((Token) issuedTokenAssertion).getTokenId()) == null) {
+            // Get run time STSIssuedTokenConfiguration
+            STSIssuedTokenConfiguration rtConfig = null;
+            STSIssuedTokenFeature stsFeature = pipeConfig.getBinding().getFeature(STSIssuedTokenFeature.class);
+            if (stsFeature != null) {
+                rtConfig = stsFeature.getSTSIssuedTokenConfiguration();
+            }
+
+            // Create the configuration
+            STSIssuedTokenConfiguration config = null;
+            if (issuedTokenContextMap.get(((Token) issuedTokenAssertion).getTokenId()) == null || rtConfig != null) {
                 try {
-                   STSIssuedTokenConfiguration config = null;
-                    // Get STS information from Run time configuration
-                    String stsEndpoint = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_ENDPOINT);
-                    if (stsEndpoint != null){
-                        String stsMEXAddress = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_MEX_ADDRESS);
-                        if (stsMEXAddress == null){
-                            String stsNamespace = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_NAMESPACE);
-                            String stsWSDLLocation = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_WSDL_LOCATION);
-                            String stsServiceName = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_SERVICE_NAME);
-                            String stsPortName = (String)packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_PORT_NAME);
+                    // Get STS information from message context
+                    String stsEndpoint = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_ENDPOINT);
+                    if (stsEndpoint != null) {
+                        String stsMEXAddress = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_MEX_ADDRESS);
+                        if (stsMEXAddress == null) {
+                            String stsNamespace = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_NAMESPACE);
+                            String stsWSDLLocation = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_WSDL_LOCATION);
+                            String stsServiceName = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_SERVICE_NAME);
+                            String stsPortName = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_PORT_NAME);
                             config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), stsEndpoint, stsWSDLLocation, stsServiceName, stsPortName, stsNamespace);
-                        }else{
+                        } else {
                             config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), stsEndpoint, stsMEXAddress);
                         }
                     }
-                    if (config == null){ 
+
+                    // Create config from IssuedToken and PreConfiguredSTS
+                    if (config == null) {
                         config = new DefaultSTSIssuedTokenConfiguration(wsTrustVer.getNamespaceURI(), (IssuedToken) issuedTokenAssertion, preSetSTSAssertion);
                     }
-                    //String userName = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
-                    //String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
-                    //if (userName != null) {
-                      //  config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, userName);
-                    //}
-                    //if (password != null) {
-                      //  config.getOtherOptions().put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
-                    //}
+
                     config.getOtherOptions().putAll(packet.invocationProperties);
-                    if(container != null){
-                        config.getOtherOptions().put("CONTAINER", container);
+
+                    // get entries from run time configuration
+                    if (rtConfig != null){
+                        rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);
+                        ((DefaultSTSIssuedTokenConfiguration)config).copy(rtConfig);
                     }
+
+                    // Obtain issued token from STS
                     IssuedTokenContext ctx = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(
                             ((Token) issuedTokenAssertion).getTokenId(), ctx);
-                    
+
                     updateMPForIssuedTokenAsEncryptedSupportingToken(packet, ctx, ((Token) issuedTokenAssertion).getTokenId());
-                    
+
                 } catch (WSTrustException se) {
                     log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
                     throw new WebServiceException(LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
