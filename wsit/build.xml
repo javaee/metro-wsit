@@ -78,12 +78,27 @@
                 <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
             </filterset>
         </copy>
+
+        <copy file="${basedir}/etc/bnd/webservices-api.bnd" todir="${build.dir}/bnd">
+            <filterset>
+                <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
+            </filterset>
+        </copy>
         
         <mkdir dir="${dist.image.wsit.v3.dir}"/>
-        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
+        <bnd classpath="rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
              failok="false"
              output="${dist.image.wsit.v3.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
+
+
+        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar"
+             failok="false"
+             output="${dist.image.wsit.v3.dir}/webservices-api-osgi.jar"
+             files="${build.dir}/bnd/webservices-api.bnd"/>
+
+
+
 
         <copy todir="${dist.image.wsit.v3.dir}">
             <fileset dir="${lib.osgi.dir}">
