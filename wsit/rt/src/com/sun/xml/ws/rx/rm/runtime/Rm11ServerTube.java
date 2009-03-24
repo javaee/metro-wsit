@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxConfiguration;
@@ -68,8 +69,8 @@ final class Rm11ServerTube extends AbstractRmServerTube {
 
     private static final Logger LOGGER = Logger.getLogger(Rm11ServerTube.class);
 
-    Rm11ServerTube(RxConfiguration configuration, Tube tubelineHead) {
-        super(configuration, tubelineHead);
+    Rm11ServerTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
+        super(configuration, tubelineHead, context);
     }
 
     Rm11ServerTube(Rm11ServerTube original, TubeCloner cloner) {

@@ -41,6 +41,7 @@ import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractRmSoapFault;
@@ -65,8 +66,8 @@ final class Rm10ServerTube extends AbstractRmServerTube {
 
     private static final Logger LOGGER = Logger.getLogger(Rm10ServerTube.class);
 
-    Rm10ServerTube(RxConfiguration configuration, Tube tubelineHead) {
-        super(configuration, tubelineHead);
+    Rm10ServerTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
+        super(configuration, tubelineHead, context);
     }
 
     Rm10ServerTube(Rm10ServerTube original, TubeCloner cloner) {

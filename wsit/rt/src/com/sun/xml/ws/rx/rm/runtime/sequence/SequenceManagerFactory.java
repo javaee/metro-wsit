@@ -43,24 +43,16 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 public enum SequenceManagerFactory {
     INSTANCE;
-    
-    // FIXME: instead of creating two managers, distinguish between creating inbound and outbound sequences
-    private SequenceManager clientSequenceManager;
-    private SequenceManager serverSequenceManager;
-    
+        
     private SequenceManagerFactory() {
         // TODO: load from external configuration and revert to default if not present
-        this.clientSequenceManager = new DefaultInMemorySequenceManager();
-        this.serverSequenceManager = new DefaultInMemorySequenceManager();
     }
 
     public SequenceManager getClientSequenceManager(ManagedObjectManager managedObjectManager) {
-	this.clientSequenceManager.setManagedObjectManager(managedObjectManager, "client");
-        return this.clientSequenceManager;
+        return new DefaultInMemorySequenceManager(SequenceManager.Type.CLIENT, managedObjectManager);
     }
 
     public SequenceManager getServerSequenceManager(ManagedObjectManager managedObjectManager) {
-	this.serverSequenceManager.setManagedObjectManager(managedObjectManager, "service");
-        return this.serverSequenceManager;
+        return new DefaultInMemorySequenceManager(SequenceManager.Type.SERVICE, managedObjectManager);
     }
 }

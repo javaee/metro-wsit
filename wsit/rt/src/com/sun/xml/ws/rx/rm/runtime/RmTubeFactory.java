@@ -85,7 +85,7 @@ public final class RmTubeFactory implements TubeFactory {
                 context.getWrappedContext().getEndpoint().getManagedObjectManager());
 
         if (configuration.isReliableMessagingEnabled()) {
-             return AbstractRmServerTube.getInstance(configuration, context.getTubelineHead());
+             return AbstractRmServerTube.getInstance(configuration, context.getTubelineHead(), context);
         }
 
         return context.getTubelineHead();

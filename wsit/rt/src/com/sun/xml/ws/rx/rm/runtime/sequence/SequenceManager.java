@@ -39,7 +39,6 @@ import java.util.Map;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedObject;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -48,6 +47,21 @@ import org.glassfish.gmbal.ManagedObjectManager;
 @ManagedObject
 @Description("RM Sequence Manager")
 public interface SequenceManager {
+    public static enum Type {
+        CLIENT("client"),
+        SERVICE("service");
+
+        private final String identifier;
+
+        private Type(String identifier) {
+            this.identifier = identifier;
+        }
+
+        @Override
+        public String toString() {
+            return identifier;
+        }        
+    }
     
     @ManagedAttribute
     @Description("All RM sequences")
@@ -156,10 +170,4 @@ public interface SequenceManager {
      * @exception UnknownSequenceExceptio in case no such reference sequence is registered within the sequence manager
      */
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException;
-
-    /**
-     * Used to set the JMX/GMBAL manager.
-     * Needed because DefaultInMemorySequenceManager is a enum singleton.
-     */
-    public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrServer);
 }

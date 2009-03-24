@@ -58,6 +58,13 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
     private final Map<String, String> boundSequences = new HashMap<String, String>();
     private ManagedObjectManager managedObjectManager;
 
+    public DefaultInMemorySequenceManager(SequenceManager.Type type, ManagedObjectManager managedObjectManager) {
+        this.managedObjectManager = managedObjectManager;
+        if (managedObjectManager != null) {
+            managedObjectManager.registerAtRoot(this, type.toString());
+        }
+    }
+
     public Map<String, AbstractSequence> sequences() {
         return sequences;
     }
@@ -185,13 +192,6 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
             }
         } finally {
             internalDataAccessLock.readLock().unlock();
-        }
-    }
-
-    public void setManagedObjectManager(ManagedObjectManager managedObjectManager, String clientOrService) {
-        this.managedObjectManager = managedObjectManager;
-        if (managedObjectManager != null) {
-            managedObjectManager.registerAtRoot(this, clientOrService);
         }
     }
 }

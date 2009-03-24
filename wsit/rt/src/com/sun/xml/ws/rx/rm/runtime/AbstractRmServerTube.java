@@ -43,6 +43,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
@@ -84,12 +85,12 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
     //
     private PacketAdapter requestAdapter;
 
-    static AbstractRmServerTube getInstance(RxConfiguration configuration, Tube tubelineHead) {
+    static AbstractRmServerTube getInstance(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
-                return new Rm10ServerTube(configuration, tubelineHead);
+                return new Rm10ServerTube(configuration, tubelineHead, context);
             case WSRM200702:
-                return new Rm11ServerTube(configuration, tubelineHead);
+                return new Rm11ServerTube(configuration, tubelineHead, context);
             default:
                 throw new IllegalStateException(LocalizationMessages.WSRM_1104_RM_VERSION_NOT_SUPPORTED(configuration.getRmVersion().namespaceUri));
         }
@@ -104,7 +105,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
         this.requestAdapter = null;
     }
 
-    AbstractRmServerTube(RxConfiguration configuration, Tube tubelineHead) {
+    AbstractRmServerTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
         super(tubelineHead);
 
         this.configuration = configuration;
@@ -117,7 +118,7 @@ abstract class AbstractRmServerTube extends AbstractFilterTubeImpl {
 //        if (this.configuration.getAddressingVersion() != AddressingVersion.W3C) {
 //            throw new RxRuntimeException(LocalizationMessages.WSRM_1120_UNSUPPORTED_WSA_VERSION(this.configuration.getAddressingVersion()));
 //        }
-
+        
         this.sequenceManager = SequenceManagerFactory.INSTANCE.getServerSequenceManager(this.configuration.getManagedObjectManager());
         this.requestAdapter = null;
     }
