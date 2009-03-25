@@ -131,8 +131,8 @@ public class TransportBindingProcessor extends BindingProcessor {
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
             sp.setUUID(pid.generateID());
-            tokenProcessor.addKeyBinding((AsymmetricBinding)binding,sp,token,false);
-           // container.insert(sp.getKeyBinding());
+            tokenProcessor.addKeyBinding(binding,sp,token,false);
+            // container.insert(sp.getKeyBinding());
             
             if(tp != null ){
                 SignatureTarget target = iAP.getTargetCreator().newURISignatureTarget(tp.getUUID());
@@ -171,8 +171,8 @@ public class TransportBindingProcessor extends BindingProcessor {
             SignaturePolicy.FeatureBinding spFB = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
             //spFB.setCanonicalizationAlgorithm(CanonicalizationMethod.EXCLUSIVE);
             SecurityPolicyUtil.setCanonicalizationMethod(spFB, binding.getAlgorithmSuite());
-            tokenProcessor.addKeyBinding((AsymmetricBinding) binding,sp,token,false);
-           
+            tokenProcessor.addKeyBinding( binding,sp,token,false);
+
             //protect primary signature
             
             if(tp != null){
