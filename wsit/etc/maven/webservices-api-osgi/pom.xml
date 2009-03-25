@@ -47,13 +47,14 @@
         <artifactId>webservices</artifactId>
         <version>@metro.version@</version>
 
-        <relativePath>./pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>webservices-v3</artifactId>
-    <packaging>pom</packaging>
+    <groupId>javax.xml</groupId>
+    <artifactId>webservices-api-osgi</artifactId>
+    <packaging>jar</packaging>
     
-    <name>Metro OSGi bundles for GlassFish V3</name>
+    <name>Metro OSGi API bundle for GlassFish V3</name>
 
     <description>
         Metro is a high-performance, extensible, easy-to-use web service stack.
@@ -66,9 +67,27 @@
         for a Maven distribution of Metro, please use com.sun.xml.ws.webservices.
     </description>
 
-    <modules>
-        <module>webservices-api-osgi</module>
-        <module>webservices-osgi</module>
-    </modules>
+    <build>
+        <plugins>
+            <!-- fake out maven and install the binary artifact -->
+            <plugin>
+                <groupId>org.jvnet.maven-antrun-extended-plugin</groupId>
+                <artifactId>maven-antrun-extended-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <attachArtifact file="../../image/metro/for_v3/webservices-api-osgi.jar"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 
