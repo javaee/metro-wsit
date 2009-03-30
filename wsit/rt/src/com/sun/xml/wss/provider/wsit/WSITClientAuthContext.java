@@ -770,6 +770,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     // get entries from run time configuration
                     if (rtConfig != null){
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);
+                        rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.APPLIES_TO, packet.endpointAddress.toString());
                         ((DefaultSTSIssuedTokenConfiguration)config).copy(rtConfig);
                     }
 

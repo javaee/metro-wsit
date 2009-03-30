@@ -355,7 +355,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if (claims == null){
             claims = stsConfig.getClaims();
             if (claims != null){
-                rst.setClaims(claims);
+                rst.setClaims(fact.createClaims(claims));
             }
         }
 

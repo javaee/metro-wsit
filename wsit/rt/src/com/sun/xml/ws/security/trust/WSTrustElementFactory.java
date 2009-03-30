@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.23 2008-07-16 17:41:50 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.24 2009-03-30 18:45:46 jdg6688 Exp $
  */
 
 /*
@@ -332,7 +332,8 @@ public abstract class WSTrustElementFactory {
     public abstract RequestSecurityTokenResponseCollection createRSTRCollectionFrom(Element elem);
     
     public abstract Claims createClaims(Element elem)throws WSTrustException;
-    
+
+    public abstract Claims createClaims(Claims claims) throws WSTrustException;
     
     /**
      * create an RST from JAXBElement

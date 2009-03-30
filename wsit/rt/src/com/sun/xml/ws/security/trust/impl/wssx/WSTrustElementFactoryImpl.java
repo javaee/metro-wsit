@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.19 2008-09-02 18:12:59 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.20 2009-03-30 18:45:47 jdg6688 Exp $
  */
 
 /*
@@ -224,6 +224,15 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
     public Claims createClaims(Element elem)throws WSTrustException {
         return new ClaimsImpl(ClaimsImpl.fromElement(elem));
+    }
+
+     public Claims createClaims(Claims claims) throws WSTrustException {
+        ClaimsImpl newClaims = new ClaimsImpl();
+        newClaims.setDialect(claims.getDialect());
+        newClaims.getAny().addAll(claims.getAny());
+        newClaims.getOtherAttributes().putAll(claims.getOtherAttributes());
+
+        return newClaims;
     }
     
     public Status createStatus(String code, String reason){

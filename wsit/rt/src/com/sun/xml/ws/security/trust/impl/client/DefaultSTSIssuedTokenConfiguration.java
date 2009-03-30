@@ -430,7 +430,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             this.protocol = config.getProtocol();
         }
 
-        if (config.getSTSEndpoint() != null){
+        if (stsEndpoint == null && config.getSTSEndpoint() != null){
             this.stsEndpoint = config.getSTSEndpoint();
             if (config.getSTSMEXAddress()!= null){
                 this.stsMEXAddress = config.getSTSMEXAddress();
@@ -442,23 +442,23 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             }
         }
 
-        if (config.getTokenType() != null){
+        if (tokenType == null && config.getTokenType() != null){
             this.tokenType = config.getTokenType();
         }
 
-        if (config.getKeyType() != null){
+        if (keyType == null && config.getKeyType() != null){
             this.keyType = config.getKeyType();
         }
 
-        if (config.getKeySize() > 0){
+        if (keySize < 1 && config.getKeySize() > 0){
             this.keySize = config.getKeySize();
         }
 
-        if (config.getSignatureAlgorithm() != null){
+        if (signatureAlg == null && config.getSignatureAlgorithm() != null){
             this.signatureAlg = config.getSignatureAlgorithm();
         }
 
-        if (config.getEncryptionAlgorithm() != null){
+        if (encAlg == null && config.getEncryptionAlgorithm() != null){
             this.encAlg = config.getEncryptionAlgorithm();
         }
 
@@ -466,14 +466,14 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             this.canAlg = config.getCanonicalizationAlgorithm();
         }
 
-        if (config.getKeyWrapAlgorithm() != null){
+        if (keyWrapAlg == null && config.getKeyWrapAlgorithm() != null){
             this.keyWrapAlg = config.getKeyWrapAlgorithm();
         }
 
-        if (config.getSignWith() != null){
+        if (signWith == null && config.getSignWith() != null){
             this.signWith = config.getSignWith();
         }
-        if (config.getEncryptWith() != null){
+        if (encryptWith == null && config.getEncryptWith() != null){
             this.encryptWith = config.getEncryptWith();
         }
 
@@ -481,7 +481,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             this.oboToken = config.getOBOToken();
         }
 
-        if (config.getClaims() != null){
+        if (claims == null && config.getClaims() != null){
             this.claims = config.getClaims();
         }
 
