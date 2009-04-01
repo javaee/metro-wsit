@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.messagedump;
+package com.sun.xml.ws.dump;
 
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;

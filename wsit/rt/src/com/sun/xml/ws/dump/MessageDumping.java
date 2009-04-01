@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.messagedump;
+package com.sun.xml.ws.dump;
 
 
 import java.lang.annotation.ElementType;

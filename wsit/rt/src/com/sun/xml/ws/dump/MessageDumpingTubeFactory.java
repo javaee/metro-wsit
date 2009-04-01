@@ -1,4 +1,4 @@
-package com.sun.xml.ws.messagedump;
+package com.sun.xml.ws.dump;
 
 import com.sun.xml.ws.assembler.*;
 import com.sun.xml.ws.api.pipe.Tube;

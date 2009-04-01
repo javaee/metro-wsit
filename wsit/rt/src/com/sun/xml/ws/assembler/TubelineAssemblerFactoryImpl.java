@@ -43,8 +43,11 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.dump.WrapperDumpTube;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
 import java.util.Collection;
+import java.util.logging.Level;
 
 /**
  * WSIT Tubeline assembler factory
@@ -54,7 +57,8 @@ import java.util.Collection;
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
     private static class MetroTubelineAssembler implements TubelineAssembler {
-        
+        private static final Logger LOGGER = Logger.getLogger(MetroTubelineAssembler.class);
+
         private final BindingID bindingId;
         private final TubelineAssemblyController tubelineAssemblyController;
 
@@ -74,7 +78,7 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(tubeCreator.createTube(context));
+                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context)));
             }
 
             return context.getTubelineHead();
@@ -95,10 +99,59 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(tubeCreator.createTube(context));
+                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context)));
             }
 
             return context.getTubelineHead();
+        }
+
+        private Tube setupMessageDumping(Tube newTube) {
+            String msgDumpSystemPropertyBase = newTube.getClass().getName();
+
+            boolean logBefore = false;
+            boolean logAfter = false;
+            Level logLevel = Level.INFO;
+
+            String value = System.getProperty(msgDumpSystemPropertyBase);
+            if (value != null) {
+                logBefore = Boolean.valueOf(value);
+                logAfter = logBefore;
+                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase, logBefore));
+            }
+
+            value = System.getProperty(msgDumpSystemPropertyBase + ".before");
+            if (value != null) {
+                // if value is not null => property is set, we will override the base property settings
+                logBefore = Boolean.valueOf(value);
+                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase + ".before", logBefore));
+            }
+
+            value = System.getProperty(msgDumpSystemPropertyBase + ".after");
+            if (value != null) {
+                // if value is not null => property is set, we will override the base property settings
+                logAfter = Boolean.valueOf(value);
+                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase + ".after", logAfter));
+            }
+
+            value = System.getProperty(msgDumpSystemPropertyBase + ".level");
+            if (value != null) {
+                // if value is not null => property is set, we will try to override the default logging level
+                LOGGER.fine(String.format("%s system property detected to be set to value %s", msgDumpSystemPropertyBase + ".level", value));
+                try {
+                    logLevel = Level.parse(value);
+                } catch (IllegalArgumentException ex) {
+                    // TODO L10N
+                    LOGGER.warning(
+                            String.format("Illegal logging level value stored in %s system property: '%s'. Using default logging level.", msgDumpSystemPropertyBase + ".level", value),
+                            ex);
+                }
+            }
+
+            if (logBefore || logAfter) {
+                return new WrapperDumpTube(logBefore, logAfter, logLevel, newTube);
+            }
+
+            return newTube;
         }
     }
 

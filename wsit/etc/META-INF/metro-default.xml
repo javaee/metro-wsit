@@ -59,12 +59,12 @@
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rx.testing.PacketFilteringTubeFactory" />
-                <tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.dump.MessageDumpingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory" />
             </client-side>
             <endpoint-side>
                 <tube-factory className="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory" />
-                <tube-factory className="com.sun.xml.ws.messagedump.MessageDumpingTubeFactory" />
+                <tube-factory className="com.sun.xml.ws.dump.MessageDumpingTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.rx.testing.PacketFilteringTubeFactory" />
                 <tube-factory className="com.sun.xml.ws.dump.ActionDumpTubeFactory" />
                 <tube-factory className="com.sun.xml.wss.provider.wsit.SecurityTubeFactory" />
