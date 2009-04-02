@@ -57,6 +57,22 @@ import java.util.logging.Level;
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
     private static class MetroTubelineAssembler implements TubelineAssembler {
+        private static enum Side {
+            Client("client"),
+            Endpoint("endpoint");
+
+            private final String name;
+
+            private Side(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        }
+
         private static final Logger LOGGER = Logger.getLogger(MetroTubelineAssembler.class);
 
         private final BindingID bindingId;
@@ -78,7 +94,7 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context)));
+                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context), Side.Client));
             }
 
             return context.getTubelineHead();
@@ -99,52 +115,55 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context)));
+                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context), Side.Endpoint));
             }
 
             return context.getTubelineHead();
         }
 
-        private Tube setupMessageDumping(Tube newTube) {
+        private Tube setupMessageDumping(Tube newTube, Side side) {
             String msgDumpSystemPropertyBase = newTube.getClass().getName();
 
             boolean logBefore = false;
             boolean logAfter = false;
             Level logLevel = Level.INFO;
 
-            String value = System.getProperty(msgDumpSystemPropertyBase);
+            // checking general properties
+            Boolean value = getBooleanValue(msgDumpSystemPropertyBase);
             if (value != null) {
-                logBefore = Boolean.valueOf(value);
-                logAfter = logBefore;
-                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase, logBefore));
+                logBefore = value.booleanValue();
+                logAfter = value.booleanValue();
             }
 
-            value = System.getProperty(msgDumpSystemPropertyBase + ".before");
-            if (value != null) {
-                // if value is not null => property is set, we will override the base property settings
-                logBefore = Boolean.valueOf(value);
-                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase + ".before", logBefore));
+            value = getBooleanValue(msgDumpSystemPropertyBase + ".before");
+            logBefore = (value != null) ? value.booleanValue() : logBefore;
+
+            value = getBooleanValue(msgDumpSystemPropertyBase + ".after");
+            logAfter = (value != null) ? value.booleanValue() : logAfter;
+
+            Level levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
+            if (levelValue != null) {
+                logLevel = levelValue;
             }
 
-            value = System.getProperty(msgDumpSystemPropertyBase + ".after");
+            // narrowing to proper communication side
+            msgDumpSystemPropertyBase += "." + side.toString();
+
+            value = getBooleanValue(msgDumpSystemPropertyBase);
             if (value != null) {
-                // if value is not null => property is set, we will override the base property settings
-                logAfter = Boolean.valueOf(value);
-                LOGGER.fine(String.format("%s system property detected to be set to value %b", msgDumpSystemPropertyBase + ".after", logAfter));
+                logBefore = value.booleanValue();
+                logAfter = value.booleanValue();
             }
 
-            value = System.getProperty(msgDumpSystemPropertyBase + ".level");
-            if (value != null) {
-                // if value is not null => property is set, we will try to override the default logging level
-                LOGGER.fine(String.format("%s system property detected to be set to value %s", msgDumpSystemPropertyBase + ".level", value));
-                try {
-                    logLevel = Level.parse(value);
-                } catch (IllegalArgumentException ex) {
-                    // TODO L10N
-                    LOGGER.warning(
-                            String.format("Illegal logging level value stored in %s system property: '%s'. Using default logging level.", msgDumpSystemPropertyBase + ".level", value),
-                            ex);
-                }
+            value = getBooleanValue(msgDumpSystemPropertyBase + ".before");
+            logBefore = (value != null) ? value.booleanValue() : logBefore;
+
+            value = getBooleanValue(msgDumpSystemPropertyBase + ".after");
+            logAfter = (value != null) ? value.booleanValue() : logAfter;
+
+            levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
+            if (levelValue != null) {
+                logLevel = levelValue;
             }
 
             if (logBefore || logAfter) {
@@ -152,6 +171,39 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             return newTube;
+        }
+
+        private Boolean getBooleanValue(String propertyName) {
+            Boolean retVal = null;
+
+            String stringValue = System.getProperty(propertyName);
+            if (stringValue != null) {
+                retVal = Boolean.valueOf(stringValue);
+                // TODO L10N
+                LOGGER.fine(String.format("%s system property detected to be set to value %b", propertyName, retVal));
+            }
+
+            return retVal;
+        }
+
+        private Level getLevelValue(String propertyName) {
+            Level retVal = null;
+
+            String stringValue = System.getProperty(propertyName);
+            if (stringValue != null) {
+                // if value is not null => property is set, we will try to override the default logging level
+                LOGGER.fine(String.format("%s system property detected to be set to value %s", propertyName, stringValue));
+                try {
+                    retVal = Level.parse(stringValue);
+                } catch (IllegalArgumentException ex) {
+                    // TODO L10N
+                    LOGGER.warning(
+                            String.format("Illegal logging level value stored in %s system property: '%s'. Using default logging level.", propertyName, stringValue),
+                            ex);
+                }
+            }
+
+            return retVal;
         }
     }
 

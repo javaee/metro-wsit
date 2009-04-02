@@ -108,13 +108,13 @@ public class WrapperDumpTube implements Tube {
     }
 
     public NextAction processResponse(Packet response) {
-        if (logBefore && messageDumper.isLoggable()) {
+        if (logAfter && messageDumper.isLoggable()) {
             messageDumper.dump(MessageDumper.MessageType.Request, ProcessingState.Received, messageDumper.convertToString(response), tubeId, Fiber.current().owner.id);
         }
 
         NextAction next = wrappedTube.processResponse(response);
 
-        if (logAfter && messageDumper.isLoggable()) {
+        if (logBefore && messageDumper.isLoggable()) {
             messageDumper.dump(MessageDumper.MessageType.Request, ProcessingState.Processed, messageDumper.convertToString(next.getPacket()), tubeId, Fiber.current().owner.id);
             if (next.getThrowable() != null) {
                 messageDumper.dump(MessageDumper.MessageType.Request, ProcessingState.Processed, messageDumper.convertToString(next.getThrowable()), tubeId, Fiber.current().owner.id);
@@ -125,12 +125,12 @@ public class WrapperDumpTube implements Tube {
     }
 
     public NextAction processException(Throwable t) {
-        if (logBefore && messageDumper.isLoggable()) {
+        if (logAfter && messageDumper.isLoggable()) {
             messageDumper.dump(MessageDumper.MessageType.Request, ProcessingState.Received, messageDumper.convertToString(t), tubeId, Fiber.current().owner.id);
         }
 
         NextAction next = wrappedTube.processException(t);
-        if (logAfter && messageDumper.isLoggable()) {
+        if (logBefore && messageDumper.isLoggable()) {
             if (next.getPacket() != null) {
                 messageDumper.dump(MessageDumper.MessageType.Request, ProcessingState.Processed, messageDumper.convertToString(next.getPacket()), tubeId, Fiber.current().owner.id);
             }
