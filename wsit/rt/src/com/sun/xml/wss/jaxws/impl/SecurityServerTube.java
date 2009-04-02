@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
@@ -77,8 +78,10 @@ import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
@@ -116,6 +119,11 @@ import java.security.PrivilegedAction;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.net.URL;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**
@@ -123,7 +131,10 @@ import javax.xml.ws.soap.SOAPFaultException;
  * @author Vbkumar.Jayanti@Sun.COM
  */
 public class SecurityServerTube extends SecurityTubeBase {
-    
+
+    private static final String WSCONTEXT_DELEGATE="META-INF/services/com.sun.xml.ws.api.server.WebServiceContextDelegate";
+    private Class contextDelegate = null;
+
     private SessionManager sessionManager =
             SessionManager.getSessionManager();
     //private WSDLBoundOperation cachedOperation = null;
@@ -149,6 +160,10 @@ public class SecurityServerTube extends SecurityTubeBase {
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
+            String cntxtClass = getMetaINFServiceClass(WSCONTEXT_DELEGATE);
+            if (cntxtClass != null) {
+                 contextDelegate = this.loadClass(cntxtClass);
+            }
         } catch (Exception e) {            
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
@@ -164,6 +179,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         trustConfig = that.trustConfig;
         wsscConfig = that.wsscConfig;
         handler = that.handler;
+        contextDelegate = that.contextDelegate;
     }
     
     public AbstractTubeImpl copy(TubeCloner cloner){
@@ -174,6 +190,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     //Note: There is an Assumption that the STS is distinct from the WebService in case of
     // WS-Trust and the STS and WebService are the same entity for SecureConversation
     @Override
+    @SuppressWarnings("unchecked")
     public NextAction processRequest(Packet packet) {
 
 // Not required, Commenting
@@ -190,6 +207,27 @@ public class SecurityServerTube extends SecurityTubeBase {
         //String reqAction= null;
         
         boolean thereWasAFault = false;
+
+
+        if (this.contextDelegate != null) {
+            try {
+                WebServiceContextDelegate current = packet.webServiceContextDelegate;
+                Constructor ctor = contextDelegate.getConstructor(new Class[]{WebServiceContextDelegate.class});
+                packet.webServiceContextDelegate = (WebServiceContextDelegate) ctor.newInstance(new Object[]{current});
+            } catch (InstantiationException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
@@ -813,5 +851,43 @@ public class SecurityServerTube extends SecurityTubeBase {
                 return null; // nothing to return
             }
         });
+    }
+
+     private static String getMetaINFServiceClass(String metaInfService) {
+        URL url = loadFromClasspath(metaInfService);
+        if (url != null) {
+            InputStream is = null;
+            try {
+                is = url.openStream();
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                int val = is.read();
+                while (val != -1) {
+                    os.write(val);
+                    val = is.read();
+                }
+                String classname = os.toString();
+                return classname;
+
+            } catch (IOException ex) {
+                log.log(Level.SEVERE, null, ex);
+                throw new WebServiceException(ex);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    log.log(Level.WARNING, null, ex);
+                }
+            }
+        }
+        return null;
+    }
+    public static URL loadFromClasspath(final String configFileName) {
+
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl == null) {
+            return ClassLoader.getSystemResource(configFileName);
+        } else {
+            return cl.getResource(configFileName);
+        }
     }
 }

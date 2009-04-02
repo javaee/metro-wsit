@@ -1598,7 +1598,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 ret = loader.loadClass(classname);
                 return ret;
             } catch (ClassNotFoundException e) {
-                // ignore
+                
             }
         }
         // if context classloader didnt work, try this
