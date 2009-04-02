@@ -35,6 +35,10 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -43,16 +47,49 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 public enum SequenceManagerFactory {
     INSTANCE;
+
+//    private final ReadWriteLock clientCacheLock = new ReentrantReadWriteLock();
+//    private final Map<Object, SequenceManager> clientSequenceManagerCache = new WeakHashMap<Object, SequenceManager>();
+    private final SequenceManager clientSequenceManager = new DefaultInMemorySequenceManager(SequenceManager.Type.CLIENT, null);
+
+    private final ReadWriteLock serviceCacheLock = new ReentrantReadWriteLock();
+    private final Map<Object, SequenceManager> serviceSequenceManagerCache = new WeakHashMap<Object, SequenceManager>();
         
     private SequenceManagerFactory() {
         // TODO: load from external configuration and revert to default if not present
     }
 
     public SequenceManager getClientSequenceManager(ManagedObjectManager managedObjectManager) {
-        return new DefaultInMemorySequenceManager(SequenceManager.Type.CLIENT, managedObjectManager);
+        // TODO change this once it is clear how to obtain endpoint on the client side
+        return clientSequenceManager;
     }
 
-    public SequenceManager getServerSequenceManager(ManagedObjectManager managedObjectManager) {
-        return new DefaultInMemorySequenceManager(SequenceManager.Type.SERVICE, managedObjectManager);
+    public SequenceManager getServerSequenceManager(Object correlationId, ManagedObjectManager managedObjectManager) {
+        return getInMemorySequenceManager(correlationId, SequenceManager.Type.SERVICE, managedObjectManager, serviceSequenceManagerCache, serviceCacheLock);
+    }
+
+    private SequenceManager getInMemorySequenceManager(Object correlationId, SequenceManager.Type type, ManagedObjectManager mom, Map<Object, SequenceManager> cache, ReadWriteLock cacheLock) {
+        try {
+            cacheLock.readLock().lock();
+            SequenceManager sequenceManager = cache.get(correlationId);
+            if (sequenceManager == null) {
+                cacheLock.readLock().unlock();
+                try {
+                    cacheLock.writeLock().lock();
+                    sequenceManager = cache.get(correlationId);
+                    if (sequenceManager == null) {
+                        sequenceManager = new DefaultInMemorySequenceManager(type, mom);
+                        cache.put(correlationId, sequenceManager);
+                    }
+                } finally {
+                    cacheLock.readLock().lock();
+                    cacheLock.writeLock().unlock();
+                }
+            }
+
+            return sequenceManager;
+        } finally {
+            cacheLock.readLock().unlock();
+        }
     }
 }
