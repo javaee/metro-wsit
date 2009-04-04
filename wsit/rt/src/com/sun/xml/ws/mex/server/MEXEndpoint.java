@@ -147,7 +147,7 @@ public class MEXEndpoint implements Provider<Message> {
                 final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
                 final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
 
-                address = address.substring(0 , address.length() - 4);
+                address = this.getAddressFromMexAddress(address, soapVersion);
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
                 wsdlRetriever.addDocuments(writer, null, address);
@@ -210,7 +210,7 @@ public class MEXEndpoint implements Provider<Message> {
             }
         }
         if (ownerEndpointAddress != null) {
-            ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
+            ownerEndpointAddress = getAddressFromMexAddress(ownerEndpointAddress, wsEndpoint.getBinding().getSOAPVersion());
 
             boundEndpoints = module.getBoundEndpoints();
             for (BoundEndpoint endpoint : boundEndpoints) {
@@ -277,5 +277,18 @@ public class MEXEndpoint implements Provider<Message> {
         return faultMessage;
     }
 
+    private String getAddressFromMexAddress(String mexAddress, SOAPVersion soapVersion){
+        if (mexAddress.endsWith("mex")){
+            return mexAddress.substring(0, mexAddress.length()-"/mex".length());
+        }
+
+        if (soapVersion.equals(SOAPVersion.SOAP_11)){
+            return mexAddress.substring(0, mexAddress.length()-"/mex/soap11".length());
+        } else if (soapVersion.equals(SOAPVersion.SOAP_12)){
+            return mexAddress.substring(0, mexAddress.length()-"/mex/soap12".length());
+        }
+
+        return null;
+    }
 }
 
