@@ -126,7 +126,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.xml.transform.Result;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Node;
 
 /**
  *
@@ -608,7 +610,7 @@ public class TrustPluginImpl implements TrustPlugin {
 
                 //if the stsAddress what we have matches the address of this port, return
                 //this port information
-                if(uri.equals(stsURI)){
+                 if(URI.create(uri).getPath().equals(URI.create(stsURI).getPath())){
                     serviceInfo[0]= port.getServiceName();
                     serviceInfo[1]= port.getPortName();
                     break;
@@ -664,18 +666,18 @@ public class TrustPluginImpl implements TrustPlugin {
     }
     
     private BaseSTSResponse parseRSTR(Source source, WSTrustVersion wstVer) throws WSTrustException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();  
-        Element ele;
+        Element ele = null;
         try{                                
-            Result result = new StreamResult(baos);
+            DOMResult result = new DOMResult();
             Transformer tf = TransformerFactory.newInstance().newTransformer();
             tf.transform(source, result);
-            baos.close();
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();            
-            Document doc = db.parse(new ByteArrayInputStream(baos.toByteArray()));
-            ele = doc.getDocumentElement();
+
+            Node node = result.getNode();
+            if (node instanceof Document){
+                ele = ((Document)node).getDocumentElement();
+            } else if (node instanceof Element){
+                ele = (Element)node;
+            }
         }catch(Exception xe){
             throw new WSTrustException("Error occurred while trying to parse RSTP stream", xe);
         }

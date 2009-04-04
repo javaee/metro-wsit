@@ -86,7 +86,7 @@ public class MEXEndpoint implements Provider<Message> {
 
     @Resource
     protected WebServiceContext wsContext;
-    
+
     private static final Logger logger =
         Logger.getLogger(MEXEndpoint.class.getName());
 
@@ -125,7 +125,7 @@ public class MEXEndpoint implements Provider<Message> {
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
         }
-        // If here, either action is unsupported 
+        // If here, either action is unsupported
         // TODO: Better error message
         throw new UnsupportedOperationException(action);
     }
@@ -137,30 +137,30 @@ public class MEXEndpoint implements Provider<Message> {
     private Message processGetRequest(final Message request,
         String address, final AddressingVersion wsaVersion,
         final SOAPVersion soapVersion) {
-        
+
         try {
             WSEndpoint ownerEndpoint = findEndpoint();
-            
+
             // If the owner endpoint has been found, then
             // get its metadata and write it to the response message
             if (ownerEndpoint != null) {
                 final MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
                 final XMLStreamWriter writer = buffer.createFromXMLStreamWriter();
 
-                address = address.substring(0 , address.length() - 4);
+                address = this.getAddressFromMexAddress(address, soapVersion);
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
                 wsdlRetriever.addDocuments(writer, null, address);
                 writer.writeEndDocument();
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
-                
+
                 HeaderList headers = responseMessage.getHeaders();
                 //headers.add(Headers.create(new QName(wsaVersion.nsUri, "To"), "http://www.w3.org/2005/08/addressing/anonymous"));
                 headers.add(Headers.create(new QName(wsaVersion.nsUri, "Action"), GET_RESPONSE));
                 //headers.add(Headers.create(new QName(wsaVersion.nsUri, "MessageID"), "uuid:" + UUID.randomUUID().toString()));
                 //headers.add(Headers.create(new QName(wsaVersion.nsUri, "RelatedTo"), request.getHeaders().getMessageID(wsaVersion, soapVersion)));
-                 
+
                 //wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, GET_RESPONSE);
                 return responseMessage;
             }
@@ -171,7 +171,7 @@ public class MEXEndpoint implements Provider<Message> {
             wsContext.getMessageContext().put(BindingProvider.SOAPACTION_URI_PROPERTY, wsaVersion.getDefaultFaultAction());
             return faultMessage;
         } catch (XMLStreamException streamE) {
-            final String exceptionMessage = 
+            final String exceptionMessage =
                MessagesMessages.MEX_0001_RESPONSE_WRITING_FAILURE(address);
             logger.log(Level.SEVERE, exceptionMessage, streamE);
             throw new WebServiceException(exceptionMessage, streamE);
@@ -180,11 +180,11 @@ public class MEXEndpoint implements Provider<Message> {
 
     /**
      * Find the endpoint that this MEX endpoint is serving.
-     * 
+     *
      * This method is searching for an endpoint that has the same address as the MEX endpoint
      * with the suffix "/mex" removed. If the MEX endpoint has an HTTPS address,
      * it will first look for an endpoint on HTTP and then HTTPS.
-     * 
+     *
      * @return The endpoint that owns the actual service or null.
      */
     private WSEndpoint findEndpoint() {
@@ -210,7 +210,7 @@ public class MEXEndpoint implements Provider<Message> {
             }
         }
         if (ownerEndpointAddress != null) {
-            ownerEndpointAddress = ownerEndpointAddress.substring(0, ownerEndpointAddress.length() - "/mex".length());
+            ownerEndpointAddress = getAddressFromMexAddress(ownerEndpointAddress, wsEndpoint.getBinding().getSOAPVersion());
 
             boundEndpoints = module.getBoundEndpoints();
             for (BoundEndpoint endpoint : boundEndpoints) {
@@ -245,7 +245,7 @@ public class MEXEndpoint implements Provider<Message> {
         writer.writeStartElement(soapPrefix, "Body", soapVersion.nsUri);
         writer.writeStartElement(MetadataConstants.MEX_PREFIX, "Metadata", MetadataConstants.MEX_NAMESPACE);
     }
-    
+
     private Message createFaultMessage(@NotNull final String faultText, @NotNull final String unsupportedAction,
             @NotNull final AddressingVersion av, @NotNull final SOAPVersion sv) {
         final QName subcode = av.actionNotSupportedTag;
@@ -277,5 +277,17 @@ public class MEXEndpoint implements Provider<Message> {
         return faultMessage;
     }
 
-}
+    private String getAddressFromMexAddress(String mexAddress, SOAPVersion soapVersion){
+        if (mexAddress.endsWith("mex")){
+            return mexAddress.substring(0, mexAddress.length()-"/mex".length());
+        }
 
+        if (soapVersion.equals(SOAPVersion.SOAP_11)){
+            return mexAddress.substring(0, mexAddress.length()-"/mex/soap11".length());
+        } else if (soapVersion.equals(SOAPVersion.SOAP_12)){
+            return mexAddress.substring(0, mexAddress.length()-"/mex/soap12".length());
+        }
+
+        return null;
+    }
+}
