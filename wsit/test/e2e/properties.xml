@@ -37,7 +37,7 @@
 -->
 
 <project name="wsit.dev.java.net test properties">
-    <property name="testcases" value="testcases"/> <!-- /wspolicy/dispatch/base -->
+    <property name="testcases" value="testcases"/>
     <property name="test.lib.dir" value="${basedir}/lib"/>
     <property name="test.docs.dir" value="${basedir}/docs"/>
     <property name="test.src.dir" value="${basedir}/src"/>
@@ -53,7 +53,7 @@
         For more information on the different command line options
         refer to docs/index.html
         -->
-    <property name="args" value="-legacy-local"/>
+    <!--property name="args" value="-legacy-local"/--> <!-- commented out => in-vm transport used instead of legacy local transport-->
     
     <!-- BEGIN: Emma code coverage specific stuff -->    
         
