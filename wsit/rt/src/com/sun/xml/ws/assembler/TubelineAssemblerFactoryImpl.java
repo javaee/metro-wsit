@@ -94,7 +94,10 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context), Side.Client));
+                context.setTubelineHead(setupMessageDumping(
+                        tubeCreator.getMessageDumpPropertyBase(),
+                        tubeCreator.createTube(context),
+                        Side.Client));
             }
 
             return context.getTubelineHead();
@@ -115,15 +118,16 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(tubeCreator.createTube(context), Side.Endpoint));
+                context.setTubelineHead(setupMessageDumping(
+                        tubeCreator.getMessageDumpPropertyBase(),
+                        tubeCreator.createTube(context),
+                        Side.Endpoint));
             }
 
             return context.getTubelineHead();
         }
 
-        private Tube setupMessageDumping(Tube newTube, Side side) {
-            String msgDumpSystemPropertyBase = newTube.getClass().getName();
-
+        private Tube setupMessageDumping(String msgDumpSystemPropertyBase, Tube newTube, Side side) {
             boolean logBefore = false;
             boolean logAfter = false;
             Level logLevel = Level.INFO;

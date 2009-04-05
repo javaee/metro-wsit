@@ -50,10 +50,6 @@ final class TubeCreator {
 
     private TubeFactory factory;
 
-    TubeCreator(TubeFactory factory) { // TODO remove this constructor
-        this.factory = factory;
-    }
-
     TubeCreator(TubeFactoryConfig config) {
         try {
             Class<?> factoryClass = Class.forName(config.getClassName());
@@ -104,5 +100,9 @@ final class TubeCreator {
         if (factory instanceof TubelineAssemblyContextUpdater) {
             ((TubelineAssemblyContextUpdater) factory).prepareContext(context);
         }
+    }
+
+    String getMessageDumpPropertyBase() {
+        return factory.getClass().getName();
     }
 }
