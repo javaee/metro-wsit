@@ -92,10 +92,10 @@
 
             <java jar="${test.lib.dir}/harness.jar" fork="true">
                 <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
-                <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
-                <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/>
-                <sysproperty key="com.sun.xml.ws.runtime.client" value="true"/>
+                <!--sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+                <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/-->
 
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.client.after" value="true"/-->
 
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
