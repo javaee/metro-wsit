@@ -679,7 +679,7 @@ public class TrustPluginImpl implements TrustPlugin {
                 ele = (Element)node;
             }
         }catch(Exception xe){
-            throw new WSTrustException("Error occurred while trying to parse RSTP stream", xe);
+            throw new WSTrustException("Error occurred while trying to parse RSTR stream", xe);
         }
         
         RequestedSecurityToken rdst = null;
