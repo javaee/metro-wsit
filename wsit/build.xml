@@ -452,7 +452,7 @@
         PYTHONPATH=$PKG_TOOLKIT_DIR/pkg/vendor-packages:$PKG_TOOLKIT_DIR/pkg/bin:`pwd`
         export PYTHONPATH
     3. cd to <wsit-sandbox> directory (if not already there)
-    4. update version in uc2.py file / update module.revision property value in this build.xml
+    4. update module.revision property value in this build.xml
     4. run the uc2 ant target
     ===============
 
