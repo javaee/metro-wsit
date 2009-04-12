@@ -70,8 +70,6 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollec
 import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
@@ -85,7 +83,6 @@ import javax.xml.ws.RespectBindingFeature;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
-import javax.xml.bind.JAXBElement;
 import javax.xml.ws.BindingProvider;
 
 import java.util.logging.Level;
@@ -115,7 +112,6 @@ import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
@@ -125,9 +121,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Node;
 
 /**
@@ -511,7 +505,16 @@ public class TrustPluginImpl implements TrustPlugin {
             throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
         }
        //final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
-        final Dispatch<Message> dispatch = service.createDispatch(portName, Message.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+        WebServiceFeature[] wsFeatures = null;
+        STSIssuedTokenConfiguration rtConfig = (STSIssuedTokenConfiguration)stsConfig.getOtherOptions().get("RunTimeConfig");
+        if (rtConfig != null){
+            wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(),
+                                                 new AddressingFeature(false),
+                                                 new STSIssuedTokenFeature(rtConfig)};
+        }else{
+            wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)};
+        }
+        final Dispatch<Message> dispatch = service.createDispatch(portName, Message.class, Service.Mode.MESSAGE, wsFeatures);
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();

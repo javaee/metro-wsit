@@ -561,6 +561,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.APPLIES_TO, packet.endpointAddress.toString());
                         ((DefaultSTSIssuedTokenConfiguration)config).copy(rtConfig);
+
+                        config.getOtherOptions().put("RunTimeConfig", rtConfig);
                     }
 
                     // Obtain issued token from STS
