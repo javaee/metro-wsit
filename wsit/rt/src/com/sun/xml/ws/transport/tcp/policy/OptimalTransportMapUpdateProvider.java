@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,16 +43,17 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.transport.SelectOptimalTransportFeature;
 import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
@@ -65,23 +66,23 @@ public class OptimalTransportMapUpdateProvider implements PolicyMapUpdateProvide
 
     private static final Logger LOGGER = Logger.getLogger(OptimalTransportMapUpdateProvider.class);
 
-    public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+    public Collection<PolicySubject> update(PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+        final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
+
         try {
-            LOGGER.entering(policyMapMutator, policyMap, model, wsBinding);
+            LOGGER.entering(policyMap, model, wsBinding);
 
-            if (policyMapMutator == null) {
-                return;
-            }
+            updateOptimalTransportSettings(subjects, wsBinding, model, policyMap);
 
-            updateOptimalTransportSettings(wsBinding, model, policyMap, policyMapMutator);
+            return subjects;
             // TODO : update map with RM policy based on RM feature
 
         } finally {
-            LOGGER.exiting();
+            LOGGER.exiting(subjects);
         }
     }
 
-    private void updateOptimalTransportSettings(WSBinding wsBinding, SEIModel model, PolicyMap policyMap, PolicyMapExtender policyMapMutator) throws PolicyException, IllegalArgumentException {
+    private void updateOptimalTransportSettings(Collection<PolicySubject> subjects, WSBinding wsBinding, SEIModel model, PolicyMap policyMap) throws PolicyException, IllegalArgumentException {
         final SelectOptimalTransportFeature optimalTransportFeature = wsBinding.getFeature(SelectOptimalTransportFeature.class);
         if (optimalTransportFeature == null || !optimalTransportFeature.isEnabled()) {
             return;
@@ -95,11 +96,13 @@ public class OptimalTransportMapUpdateProvider implements PolicyMapUpdateProvide
         final PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
         final Policy existingPolicy = (policyMap != null) ? policyMap.getEndpointEffectivePolicy(endpointKey) : null;
         if ((existingPolicy == null) || !existingPolicy.contains(TCPConstants.SELECT_OPTIMAL_TRANSPORT_ASSERTION)) {
-            final Policy mcPolicy = createOptimalTransportPolicy(model.getBoundPortTypeName());
-            policyMapMutator.putEndpointSubject(endpointKey, new PolicySubject(model.getBoundPortTypeName(), mcPolicy));
+            final Policy otPolicy = createOptimalTransportPolicy(model.getBoundPortTypeName());
+            final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingSubject(model.getBoundPortTypeName());
+            final PolicySubject subject = new PolicySubject(wsdlSubject, otPolicy);
+            subjects.add(subject);
             if (LOGGER.isLoggable(Level.FINE)) {
                 // TODO L10N
-                LOGGER.fine(String.format("Added Optimal transport policy with ID '%s' to binding element '%s'", mcPolicy.getIdOrName(), model.getBoundPortTypeName()));
+                LOGGER.fine(String.format("Added Optimal transport policy with ID '%s' to binding element '%s'", otPolicy.getIdOrName(), model.getBoundPortTypeName()));
             }
         } else if (LOGGER.isLoggable(Level.FINE)) {
             // TODO L10N

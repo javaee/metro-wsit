@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,13 +43,15 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
@@ -61,20 +63,20 @@ public class RxMapUpdateProvider implements PolicyMapUpdateProvider {
 
     private static final Logger LOGGER = Logger.getLogger(RxMapUpdateProvider.class);
 
-    public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+    public Collection<PolicySubject> update(PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+        final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
+
         try {
-            LOGGER.entering(policyMapMutator, policyMap, model, wsBinding);
+            LOGGER.entering(policyMap, model, wsBinding);
 
-            if (policyMapMutator == null) {
-                return;
-            }
+            updateMakeConnectionSettings(subjects, wsBinding, model, policyMap);
 
-            updateMakeConnectionSettings(wsBinding, model, policyMap, policyMapMutator);
+            return subjects;
 
             // TODO : update map with RM policy based on RM feature
 
         } finally {
-            LOGGER.exiting();
+            LOGGER.exiting(subjects);
         }
     }
 
@@ -90,7 +92,7 @@ public class RxMapUpdateProvider implements PolicyMapUpdateProvider {
                 }));
     }
 
-    private void updateMakeConnectionSettings(WSBinding wsBinding, SEIModel model, PolicyMap policyMap, PolicyMapExtender policyMapMutator) throws PolicyException, IllegalArgumentException {
+    private void updateMakeConnectionSettings(Collection<PolicySubject> subjects, WSBinding wsBinding, SEIModel model, PolicyMap policyMap) throws PolicyException, IllegalArgumentException {
         final MakeConnectionSupportedFeature mcFeature = wsBinding.getFeature(MakeConnectionSupportedFeature.class);
         if (mcFeature == null || !mcFeature.isEnabled()) {
             return;
@@ -105,7 +107,9 @@ public class RxMapUpdateProvider implements PolicyMapUpdateProvider {
         final Policy existingPolicy = (policyMap != null) ? policyMap.getEndpointEffectivePolicy(endpointKey) : null;
         if ((existingPolicy == null) || !existingPolicy.contains(MakeConnectionSupportedAssertion.NAME)) {
             final Policy mcPolicy = createMakeConnectionPolicy(model.getBoundPortTypeName());
-            policyMapMutator.putEndpointSubject(endpointKey, new PolicySubject(model.getBoundPortTypeName(), mcPolicy));
+            final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingSubject(model.getBoundPortTypeName());
+            final PolicySubject subject = new PolicySubject(wsdlSubject, mcPolicy);
+            subjects.add(subject);
             if (LOGGER.isLoggable(Level.FINE)) {
                 // TODO L10N
                 LOGGER.fine(String.format("Added make connection policy with ID '%s' to binding element '%s'", mcPolicy.getIdOrName(), model.getBoundPortTypeName()));

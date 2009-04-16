@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,12 +44,11 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapExtender;
-import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import static com.sun.xml.ws.tx.common.Constants.AT_ALWAYS_CAPABILITY;
 import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
 import static com.sun.xml.ws.tx.common.Constants.WSP2002_OPTIONAL;
@@ -81,12 +80,13 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
      * @param model
      * @param wsBinding
      */
-    public void update(final PolicyMapExtender policyMapMutator, final PolicyMap policyMap,
-                       final SEIModel model, final WSBinding wsBinding) throws PolicyException {
+    public Collection<PolicySubject> update(final PolicyMap policyMap, final SEIModel model, final WSBinding wsBinding) throws PolicyException {
         final String METHOD_NAME = "update";
 
+        final Collection<PolicySubject> subjects = new ArrayList<PolicySubject>();
+
         if (nonJavaEEContainer) {
-            return;
+            return subjects;
         }
 
         // For each method of a CMT EJB, map its effective javax.ejb.TransactionAttribute to semantically equivalent 
@@ -108,7 +108,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         logger.fine(METHOD_NAME, 
                                 LocalizationMessages.NON_EE_CONTAINER_2005("NoClassDefFoundError: " + 
                                                                            e.getLocalizedMessage()));
-                        return;
+                        return subjects;
                     }
                     if (isCMTEJB) {
                         // perform class level caching of info
@@ -116,7 +116,7 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                         classDefaultTxnAttr = TransactionAnnotationProcessor.getTransactionAttributeDefault(theClass);
                     } else {
                         // not a CMT EJB, no transaction attributes to look for; just return
-                        return;
+                        return subjects;
                     }
                 }
 
@@ -127,11 +127,10 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                 final String policyId = model.getBoundPortTypeName().getLocalPart() + "_" + method.getOperationName() + "_WSAT_Policy";
                 final Policy policy = mapTransactionAttribute2WSATPolicy(policyId, txnAttr);
                 if (policy != null) {
-                    // insert ws-at policy assertion in operation scope into policyMapMutator
-                    final PolicyMapKey operationKey =
-                            PolicyMap.createWsdlOperationScopeKey(model.getServiceQName(),
-                            model.getPortName(), new QName(model.getTargetNamespace(), method.getOperationName()));
-                    final PolicySubject generatedWsatPolicySubject = new PolicySubject(method, policy);
+                    // attach ws-at policy assertion to binding/operation
+                    final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingOperationSubject(model.getBoundPortTypeName(),
+                                                                                                            new QName(model.getTargetNamespace(), method.getOperationName()));
+                    final PolicySubject generatedWsatPolicySubject = new PolicySubject(wsdlSubject, policy);
                     if (logger.isLogging(Level.FINE)) {
                         logger.fine(METHOD_NAME,
                                 LocalizationMessages.ADD_AT_POLICY_ASSERTION_2007(
@@ -151,10 +150,11 @@ public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
                                 CMTEJB.getName(),
                                 method.getMethod().getName()));
                     }
-                    policyMapMutator.putOperationSubject(operationKey, generatedWsatPolicySubject);
+                    subjects.add(generatedWsatPolicySubject);
                 }
             } // for each method in CMT EJB
         }
+        return subjects;
     }
     
     static class WsatPolicyAssertion extends SimpleAssertion {

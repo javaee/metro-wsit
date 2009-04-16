@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,16 +43,17 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapExtender;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.transport.TcpTransportFeature;
 import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 
@@ -65,23 +66,23 @@ public class TCPTransportMapUpdateProvider implements PolicyMapUpdateProvider {
 
     private static final Logger LOGGER = Logger.getLogger(TCPTransportMapUpdateProvider.class);
 
-    public void update(PolicyMapExtender policyMapMutator, PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+    public Collection<PolicySubject> update(PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
+        final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
+
         try {
-            LOGGER.entering(policyMapMutator, policyMap, model, wsBinding);
+            LOGGER.entering(policyMap, model, wsBinding);
 
-            if (policyMapMutator == null) {
-                return;
-            }
+            updateTCPTransportSettings(subjects, wsBinding, model, policyMap);
 
-            updateTCPTransportSettings(wsBinding, model, policyMap, policyMapMutator);
+            return subjects;
             // TODO : update map with RM policy based on RM feature
 
         } finally {
-            LOGGER.exiting();
+            LOGGER.exiting(subjects);
         }
     }
 
-    private void updateTCPTransportSettings(WSBinding wsBinding, SEIModel model, PolicyMap policyMap, PolicyMapExtender policyMapMutator) throws PolicyException, IllegalArgumentException {
+    private void updateTCPTransportSettings(Collection<PolicySubject> subjects, WSBinding wsBinding, SEIModel model, PolicyMap policyMap) throws PolicyException, IllegalArgumentException {
         final TcpTransportFeature tcpTransportFeature = wsBinding.getFeature(TcpTransportFeature.class);
         if (tcpTransportFeature == null || !tcpTransportFeature.isEnabled()) {
             return;
@@ -96,7 +97,9 @@ public class TCPTransportMapUpdateProvider implements PolicyMapUpdateProvider {
         final Policy existingPolicy = (policyMap != null) ? policyMap.getEndpointEffectivePolicy(endpointKey) : null;
         if ((existingPolicy == null) || !existingPolicy.contains(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
             final Policy tcpTransportPolicy = createTCPTransportPolicy(model.getBoundPortTypeName());
-            policyMapMutator.putEndpointSubject(endpointKey, new PolicySubject(model.getBoundPortTypeName(), tcpTransportPolicy));
+            final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingSubject(model.getBoundPortTypeName());
+            final PolicySubject subject = new PolicySubject(wsdlSubject, tcpTransportPolicy);
+            subjects.add(subject);
             if (LOGGER.isLoggable(Level.FINE)) {
                 // TODO L10N
                 LOGGER.fine(String.format("Added TCP transport policy with ID '%s' to binding element '%s'", tcpTransportPolicy.getIdOrName(), model.getBoundPortTypeName()));
