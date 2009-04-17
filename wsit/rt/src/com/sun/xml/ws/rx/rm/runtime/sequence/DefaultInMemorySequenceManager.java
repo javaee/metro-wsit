@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedObject;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -51,12 +52,13 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 @ManagedObject
 @Description("In Memory RM Sequence Manager")
+@AMXMetadata(type="RMSequenceManager", pathPart="RMSequenceManager")
 final class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
     private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();
     private final Map<String, String> boundSequences = new HashMap<String, String>();
-    private ManagedObjectManager managedObjectManager;
+    private final ManagedObjectManager managedObjectManager;
 
     public DefaultInMemorySequenceManager(SequenceManager.Type type, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
