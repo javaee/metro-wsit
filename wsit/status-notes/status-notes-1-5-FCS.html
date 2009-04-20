@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 1.5 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-04-20 13:24:14 $ by $Author: m_potociar $</pre>
+        <pre>Last Modified : $Date: 2009-04-20 15:54:07 $ by $Author: jdg6688 $</pre>
 
         <h5>Updated: April 20, 2008</h5>
 
@@ -635,7 +635,7 @@
         <br>
         <hr>
         <h2><a name="sc"></a>Secure Conversation Status</h2>
-        <p><code>Updated: October 29, 2008</code></p>
+        <p><code>Updated: April 20, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -644,7 +644,8 @@
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1051">Issue 1051</a>: Wrong KeyWrap algorithm for the secure conversation RSTR message</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1056">Issue 1056</a>: Infinite loop when processing a DerivedKeyToken with Generation elenment</li>
         </ul>
 
         <p><b>Known issues</b></p>
@@ -661,24 +662,19 @@
         <br>
         <hr>
         <h2><a name="trust"></a>Trust Status</h2>
-        <p><code> Updated:  October 29, 2008</code></p>
+        <p><code> Updated:  April 20, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>Allow MEX to work for STS with only common path</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=983">Issue 983</a>: SAML 2.0 Token Signature Validation Issue</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1008">Issue 1008</a>: Signature Verification Issue for custom SAML Tokens</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1024">Issue 1024</a>: Classcast excepton if to print out plain RSTR</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1030">Issue 1030</a>: NPE when validating the signature of a response SOAP message that was to a request with 2 SAML assertions </li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1034">Issue 1034</a>: Extra STR created in the request message in the case of TransportBinding with IssuedToken as SingnedSupportingToken</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1036">Issue 1036</a>: Wrong value type in the STR for use to sign the STS issued SAML 2.0 assertion as a SignedSupportingToken</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1043">Issue 1043</a>: Using NetBeans to create and use an STS does not work</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1073">Issue 1073</a>: STS does not support TruststoreCBH</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1076">Issue 1076</a>: StackOverFlowError if secure conversation is enabled for both STS and the service</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1083">Issue 1083</a>: With Metro STS, STSAttributeProvider values is not taked in the issued token</li>
         </ul>
-
         <p><b>Known issues</b></p>
         <ul>
             <li>None</li>
