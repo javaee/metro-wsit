@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 1.5 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-04-20 08:39:31 $ by $Author: kumarjayanti $</pre>
+        <pre>Last Modified : $Date: 2009-04-20 09:48:41 $ by $Author: ritzmann $</pre>
 
         <h5>Updated: October 29, 2008</h5>
 
@@ -58,7 +58,7 @@
         <br>
         <hr>
         <h2><a name="ha"></a>High Availability, JDK support, GF version, etc.</h2>
-        <p><code> Updated: September 19, 2008</code></p>
+        <p><code> Updated: April 20, 2009</code></p>
 
         <ul>
             <li>High availability: this release has <em>not</em> implemented nor
@@ -81,13 +81,18 @@
                 source code has a minor issue. See the bug description for details
                 how to resolve the issue: <a href="https://metro.dev.java.net/issues/show_bug.cgi?id=3">
             nbproject for rt build depends on missing xmldsig.jar</a></li>
+
+            <li>Maven: The artifact ID of the parent POM for webservices-rt and
+                webservices-tools was changed to ensure that it does not clash with
+                the POM used for the Metro GlassFish V3 OSGi bundles. See
+                <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1108">this issue</a>.</li>
         </ul>
 
         <!-- ========================================================================================== -->
         <br>
         <hr>
         <h2><a name="mex"></a>Metadata Exchange Status</h2>
-        <p><code> Updated:  Feb 26, 2009</code></p>
+        <p><code> Updated:  Apr 20, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -869,7 +874,7 @@
         <hr>
         <h2><a name="policy">
         </a>Policy Status</h2>
-        <p><code> Updated: Feb 26, 2009</code></p>
+        <p><code> Updated: Apr 20, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -887,6 +892,8 @@
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=884">First element check when unmarshalling policy expression too strict</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1049">Policy error check should produce line number and system ID</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1075">Policy core does n't allow to write policy assertions in compact form</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1092">validate policy assertions on client</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1113">WSIT .xml file parsing is intolerably fussy with valid white space</a></li>
         </ul>
 
         <p><b>Feature requests not implemented in this release</b></p>
