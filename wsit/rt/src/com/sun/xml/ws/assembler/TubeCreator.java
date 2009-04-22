@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  */
 final class TubeCreator {
 
-    private TubeFactory factory;
+    private final TubeFactory factory;
+    private final String msgDumpPropertyBase;
 
     TubeCreator(TubeFactoryConfig config) {
         try {
@@ -58,6 +59,7 @@ final class TubeCreator {
                 // We can suppress "unchecked" warning here as we are checking for the correct type in the if statement above
                 Class<TubeFactory> typedClass = (Class<TubeFactory>) factoryClass;
                 this.factory = typedClass.newInstance();
+                this.msgDumpPropertyBase = this.factory.getClass().getName() + ".dump";
             } else {
                 // TODO L10N
                 throw new RuntimeException(String.format("Class '%s' does not implement '%s' interface", factoryClass.getName(), TubeFactory.class.getName()));
@@ -103,6 +105,6 @@ final class TubeCreator {
     }
 
     String getMessageDumpPropertyBase() {
-        return factory.getClass().getName();
+        return msgDumpPropertyBase;
     }
 }

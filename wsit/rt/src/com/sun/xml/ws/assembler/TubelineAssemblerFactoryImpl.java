@@ -57,6 +57,8 @@ import java.util.logging.Level;
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
     private static class MetroTubelineAssembler implements TubelineAssembler {
+        private static final String COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE = "com.sun.metro.soap.dump";
+
         private static enum Side {
             Client("client"),
             Endpoint("endpoint");
@@ -132,8 +134,45 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             boolean logAfter = false;
             Level logLevel = Level.INFO;
 
-            // checking general properties
+            // checking common properties
             Boolean value = getBooleanValue(msgDumpSystemPropertyBase);
+            if (value != null) {
+                logBefore = value.booleanValue();
+                logAfter = value.booleanValue();
+            }
+
+            value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".before");
+            logBefore = (value != null) ? value.booleanValue() : logBefore;
+
+            value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".after");
+            logAfter = (value != null) ? value.booleanValue() : logAfter;
+
+            Level levelValue = getLevelValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".level");
+            if (levelValue != null) {
+                logLevel = levelValue;
+            }
+
+            // narrowing to proper communication side on common properties
+            value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString());
+            if (value != null) {
+                logBefore = value.booleanValue();
+                logAfter = value.booleanValue();
+            }
+
+            value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".before");
+            logBefore = (value != null) ? value.booleanValue() : logBefore;
+
+            value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".after");
+            logAfter = (value != null) ? value.booleanValue() : logAfter;
+
+            levelValue = getLevelValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".level");
+            if (levelValue != null) {
+                logLevel = levelValue;
+            }
+
+
+            // checking general tube-specific properties
+            value = getBooleanValue(msgDumpSystemPropertyBase);
             if (value != null) {
                 logBefore = value.booleanValue();
                 logAfter = value.booleanValue();
@@ -145,12 +184,12 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             value = getBooleanValue(msgDumpSystemPropertyBase + ".after");
             logAfter = (value != null) ? value.booleanValue() : logAfter;
 
-            Level levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
+            levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
             if (levelValue != null) {
                 logLevel = levelValue;
             }
 
-            // narrowing to proper communication side
+            // narrowing to proper communication side on tube-specific properties
             msgDumpSystemPropertyBase += "." + side.toString();
 
             value = getBooleanValue(msgDumpSystemPropertyBase);
