@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
@@ -33,22 +35,14 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-<property name="domain" value="domain1"/>
-<path id="jaxws.classpath">
-    <pathelement location="${glassfish.home}/lib/webservices-rt.jar"/>
-    <pathelement location="${glassfish.home}/lib/webservices-tools.jar"/>
-    <pathelement location="${glassfish.home}/lib/endorsed/webservices-api.jar"/>
-    <pathelement location="${glassfish.home}/lib/activation.jar"/>
-    <pathelement location="${glassfish.home}/lib/javaee.jar"/>
-    <pathelement location="${basedir}/../../etc"/>
-    <pathelement location="etc/client-config"/>
-</path>
-<taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
-    <classpath refid="jaxws.classpath"/>
-</taskdef>
-<taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen">
-    <classpath refid="jaxws.classpath"/>
-</taskdef>
-<taskdef name="apt" classname="com.sun.tools.ws.ant.Apt">
-    <classpath refid="jaxws.classpath"/>
-</taskdef>
+
+<xs:schema elementFormDefault="qualified" targetNamespace="http://xmlsoap.org/DAB" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://xmlsoap.org/DAB">
+    <xs:element name="Department" type="tns:department"/>
+    <xs:complexType name="department">
+        <xs:sequence>
+            <xs:element minOccurs="1" maxOccurs="1" name="companyName" nillable="true" type="xs:string"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="departmentName" nillable="true" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="AccountBalance" type="xs:string"/>
+</xs:schema>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
@@ -36,27 +36,14 @@
  holder.
 -->
 
-<!DOCTYPE project [
-	<!ENTITY tomcat SYSTEM "../../etc/common-targets-tomcat.xml">
-        <!ENTITY glassfish SYSTEM "../../etc/common-targets-glassfish.xml">
-        <!ENTITY targets SYSTEM "../../etc/targets.xml">
-]>
+<bindings 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"    
+    wsdlLocation="http://localhost:8080/jaxws-fs/simple?wsdl" 
+    xmlns="http://java.sun.com/xml/ns/jaxws">    
+    <bindings node="wsdl:definitions">
+        <package name="simple.client"/>
+    </bindings>
+</bindings>
 
-<project basedir="." default="help" name="fs">
-
-    <property file="build.properties" />
-	
-    &targets; 
-    
-    <target name="run-sample" depends="" >
-    	<echo>RUN SAMPLE</echo>
-        <antcall target="server" />
-        <sleep seconds="10"/>
-        <antcall target="sts" />
-        <sleep seconds="10"/>
-    	<antcall target="client" />
-    	<antcall target="run" />
-    </target>
-    
-    
-</project>

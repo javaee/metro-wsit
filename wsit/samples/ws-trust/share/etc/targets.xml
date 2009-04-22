@@ -41,18 +41,6 @@
 <property name="build.classes.home" value="${build.home}/classes"/>
 <property name="build.war.home" value="${build.home}/war"/>
 <property name="build.lib.home" value="${build.home}/lib"/>
-<!--target name="copy-am-files">   
-        <echo message="Copying AM Files"/>
-        <copy file="${basedir}/../../am/AMConfig.properties"
-                tofile="${build.classes.home}/AMConfig.properties" />
-        <mkdir dir="${build.lib.home}"/>
-        <copy file="${basedir}/../../am/amclientsdk.jar"
-            tofile="${build.lib.home}/amclientsdk.jar" />
-        <copy file="${basedir}/../../am/jaas.jar"
-            tofile="${build.lib.home}/jaas.jar" />
-        <copy file="${basedir}/../../am/jdk_logging.jar"
-            tofile="${build.lib.home}/jdk_logging.jar" />
-</target-->
 
 <target name="setup-tc" if="tomcat.home">
     <echo message="In setup-TC in targets.xml"/>
@@ -237,17 +225,6 @@
 </target>
 
 <target name="create-sts-war">
-    <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war" webxml="../../etc/sts/web.xml">
-	<webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
-	<zipfileset
-            dir="etc/sts"
-            includes="sts.wsdl, *.xsd"
-            prefix="WEB-INF/wsdl"/>
-	<classes dir="${build.classes.home}" includes="**/sts/**, **/com/**, **/common/**"/>
-    </war>
-</target>
-
-<!--target name="create-sts-war">
         <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
                 webxml="../../etc/sts/web.xml">
                 <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
@@ -266,30 +243,7 @@
                 <classes dir="${build.classes.home}" includes="**/sts/**,
                         **/com/**, **/common/**"/>
         </war>
-   </target-->
-
-<!--target name="create-sts-war">
-        <antcall target="copy-am-files" />
-        <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
-                webxml="../../etc/sts/web.xml">
-                <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
-                <zipfileset
-                           dir="etc/sts"
-                           includes="sts.wsdl, *.xsd"
-                           prefix="WEB-INF/wsdl"/>
-                <zipfileset
-                           dir="../../etc/sts"
-                           includes="wsit-server.xml"
-                           prefix="WEB-INF/classes"/>
-                <zipfileset
-                            dir="../../etc/sts/services"
-                            includes="com.sun.*"
-                            prefix="WEB-INF/classes/META-INF/services"/>
-                <classes dir="${build.classes.home}" includes="**/sts/**,
-                        **/com/**, **/common/**, AMConfig.properties"/>
-                <lib dir="${build.lib.home}" />
-        </war>
-</target-->
+   </target>
 
 <target name="deploy-sts-tc" depends="check-if-sts-deployed-tom, undeploy-sts-tomcat" if="tomcat.home">
 
@@ -337,17 +291,6 @@
             <classpath refid="jaxws.classpath"/>
         </javac>
     </target>
-
- <!--target name="compile-callbacks" depends="setup-tc, setup-glassfish" >
-        <javac
-            fork="true"
-            debug="${debug}"
-            srcdir="${basedir}/.."
-            destdir="${build.classes.home}" 
-            includes="common/SampleUsernamePasswordCallbackHandler.java, common/SampleAMSTSAuthorizationProvider.java, common/SampleAMUsernamePasswordValidator.java">
-            <classpath refid="jaxws.classpath"/>
-        </javac>
-</target-->
 
 <target name="generate-client" depends="setup-tc, setup-glassfish" >
     <wsimport
