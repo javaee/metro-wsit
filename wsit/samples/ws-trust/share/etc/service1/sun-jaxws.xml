@@ -11,8 +11,8 @@
 
     <endpoint
         name="simple"
-        interface="simple.server.IPingService"
-        implementation="simple.server.PingImpl"
+        interface="simple.server1.IPingService"
+        implementation="simple.server1.PingImpl"
         wsdl="WEB-INF/wsdl/PingService.wsdl"    
         service="{http://tempuri.org/}PingService"
         port="{http://tempuri.org/}CustomBinding_IPingService"

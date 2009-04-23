@@ -45,7 +45,7 @@
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/">
     
     <!-- begin :Keystore Info : latest method : referred from wsdl:service element -->
-    <wsp:Policy wsu:Id="ClientKeystorePolicy" 
+    <wsp:Policy wsu:Id="FSClientPolicy"
       xmlns:sc="http://schemas.sun.com/2006/03/wss/client" 
       xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" 
       xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
@@ -61,6 +61,29 @@
                 </scc:SCClientConfiguration>
                 
                 <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" 
+                    shareToken="true">
+                </tc:PreconfiguredSTS>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="PingClientPolicy"
+      xmlns:sc="http://schemas.sun.com/2006/03/wss/client"
+      xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+      xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
+                <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"></sc:TrustStore>
+
+                <!--sc:ValidatorConfiguration wspp:visibility="private" sc:maxClockSkew="1200000" sc:timestampFreshnessLimit="1200000"/-->
+                <scc:SCClientConfiguration wspp:visibility="private">
+                    <scc:LifeTime>36000</scc:LifeTime>
+                </scc:SCClientConfiguration>
+
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client"
+                    shareToken="true"
                     endpoint="http://localhost:8080/jaxws-fs-sts/sts"
                     wsdlLocation="http://localhost:8080/jaxws-fs-sts/sts?wsdl"
                     serviceName="SecurityTokenService"
@@ -95,6 +118,13 @@
             <xsd:import schemaLocation="Service_schema.xsd" namespace="http://xmlsoap.org/DAB"/>
         </xsd:schema>
    </wsdl:types>
+
+   <wsdl:message name="PingRequest">
+       <wsdl:part name="Ping" element="q:Ping" xmlns:q="http://xmlsoap.org/Ping"/>
+   </wsdl:message>
+   <wsdl:message name="PingResponse">
+       <wsdl:part name="PingResponse" element="q:PingResponse" xmlns:q="http://xmlsoap.org/Ping"/>
+   </wsdl:message>
         
   <wsdl:message name="DABRequest">
             <wsdl:part name="Department" element="q:Department" xmlns:q="http://xmlsoap.org/DAB"/>
@@ -109,6 +139,13 @@
 	<wsdl:message name="ISecurityTokenService_IssueToken_OutputMessage">
 		<wsdl:part name="IssueTokenResult" element="q2:MessageBody" xmlns:q2="http://schemas.message.com/Message"/>
 	</wsdl:message>
+
+    <wsdl:portType name="IPingService">
+            <wsdl:operation name="Ping">
+                <wsdl:input wsap:Action="http://xmlsoap.org/Ping" name="PingRequest" message="tns:PingRequest"/>
+                <wsdl:output wsap:Action="http://xmlsoap.org/Ping" name="PingResponse" message="tns:PingResponse"/>
+            </wsdl:operation>
+    </wsdl:portType>
     
    <wsdl:portType name="IFinancialService">
             <wsdl:operation name="getAccountBalance">
@@ -123,9 +160,23 @@
 			<wsdl:output wsap:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue" message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
 		</wsdl:operation>
 	</wsdl:portType>
+
+    <wsdl:binding name="PingBinding" type="tns:IPingService">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsp:PolicyReference URI="#PingClientPolicy"></wsp:PolicyReference>
+        <wsdl:operation name="Ping">
+            <soap:operation soapAction="http://xmlsoap.org/Ping" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>     
     
     <wsdl:binding name="IFinancialService_Binding" type="tns:IFinancialService">
-		<wsp:PolicyReference URI="#ClientKeystorePolicy"/>
+		<wsp:PolicyReference URI="#FSClientPolicy"/>
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="getAccountBalance">
 			<soap:operation soapAction="http://xmlsoap.org/DAB" style="document"/>
@@ -157,6 +208,12 @@
 			<soap:address location="http://localhost:8080/jaxws-sts/sts"/>
 		</wsdl:port>
 	</wsdl:service>
+
+    <wsdl:service name="PingService">
+        <wsdl:port name="CustomBinding_IPingService" binding="tns:PingBinding">
+            <soap:address location="REPLACE_WITH_ACTUAL_URL"/>
+        </wsdl:port>
+    </wsdl:service> 
 
     <!-- **** NOTE : SERVICE HAS POLICYREFERENCE TO CLIENTKEYSTOREPOLICY DEFINED ABOVE **** -->
    <wsdl:service name="FinancialService">

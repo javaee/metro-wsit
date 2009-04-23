@@ -41,17 +41,18 @@ import javax.xml.ws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
 import java.io.FileInputStream;
 import simple.schema.client.Department;
+import javax.xml.ws.Holder;
+import org.xmlsoap.ping.Ping;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import java.net.URL;
 
-public class FinancialServiceClient {
+public class ServiceClient {
     public static void main (String[] args) {
         try {
             FinancialService service = new FinancialService();
             IFinancialService stub = service.getIFinancialServicePort(); 
-
-                    
+      
             // use static stubs to override endpoint property of WSDL       
             String serviceHost = System.getProperty("endpoint.host");
             String servicePort = System.getProperty("endpoint.port");
@@ -79,6 +80,23 @@ public class FinancialServiceClient {
             String balance = stub.getAccountBalance(dept);
             
             System.out.println("balance=" + balance);
+
+            PingService service1 = new PingService();
+            IPingService stub1 = service1.getCustomBindingIPingService();
+
+            // use static stubs to override endpoint property of WSDL
+            String service1Host = System.getProperty("endpoint1.host");
+            String service1Port = System.getProperty("endpoint1.port");
+            String service1URLFragment = System.getProperty("service1.url");
+            String service1URL =
+                "http://" + service1Host + ":" + service1Port + service1URLFragment;
+
+            System.out.println("Service URL=" + service1URL);
+
+            ((BindingProvider)stub1).getRequestContext().
+                put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, service1URL);
+
+             stub1.ping(new Holder("1"), new Holder("sun"), new Holder("Passed!"));
             
         } catch (Exception ex) {
             System.out.println ("Caught Exception: " + ex.getMessage() );

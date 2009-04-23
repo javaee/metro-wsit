@@ -12,7 +12,7 @@
     wsdlLocation="PingService.wsdl"
     xmlns="http://java.sun.com/xml/ns/jaxws">    
     <bindings node="wsdl:definitions">
-        <package name="simple.server"/>
+        <package name="simple.server1"/>
 	<enableWrapperStyle>false</enableWrapperStyle>
     </bindings>
     

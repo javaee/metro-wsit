@@ -52,6 +52,8 @@
     	<echo>RUN SAMPLE</echo>
         <antcall target="server" />
         <sleep seconds="10"/>
+        <antcall target="server1" />
+        <sleep seconds="10"/>
         <antcall target="sts" />
         <sleep seconds="10"/>
     	<antcall target="client" />
