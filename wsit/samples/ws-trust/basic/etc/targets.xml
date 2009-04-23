@@ -389,8 +389,6 @@
 
 <target name="run-tc-s1" if="tomcat.home">
    <mkdir dir="${build.classes.home}/META-INF/services"/>
-   <copy file="${basedir}/../../etc/com.sun.xml.ws.policy.PlugfestPolicyMap" todir="${build.classes.home}/META-INF/services"/>
-   <copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/>
    <java fork="true" classname="${client}">
         <sysproperty key="tomcat.home" value="${tomcat.home}"/>
         <sysproperty key="endpoint.host" value="${endpoint.host}"/>
@@ -408,6 +406,7 @@
             <pathelement location="${build.classes.home}"/>
             <pathelement location="${build.classes.home}/../"/>
         </classpath>
+        <jvmarg value="-DWSIT_HOME=${tomcat.home}"/>
         <!--
         <jvmarg value="-Xdebug"/>
         <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009"/>
@@ -467,7 +466,6 @@
 
 <target name="rundebug-tc">
    <mkdir dir="${build.classes.home}/META-INF/services"/>
-   <copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/>
    <java fork="true" classname="${client}">
         <sysproperty key="tomcat.home" value="${tomcat.home}"/>
         <sysproperty key="endpoint.host" value="${endpoint.host}"/>
