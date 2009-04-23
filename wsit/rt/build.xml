@@ -265,7 +265,7 @@
         <expand-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${rtjar-tmpdir-v3}">
             <metainf>
                 <!-- Replace JAX-WS services files with ours -->
-                <copy todir="${rtjar-tmpdir}/META-INF/services" overwrite="true">
+                <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
                     <fileset dir="../etc/META-INF/services"/>
                 </copy>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
