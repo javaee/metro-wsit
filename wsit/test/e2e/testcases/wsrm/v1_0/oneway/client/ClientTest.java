@@ -53,7 +53,7 @@ public class ClientTest extends TestCase {
             PingService service = new PingService();
             port = service.getPingPort();
             
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < 5; i++) {
                 port.ping("Hello " + i);
                 LOGGER.info(String.format("Hello %d. message successfully sent.", i));
             }
