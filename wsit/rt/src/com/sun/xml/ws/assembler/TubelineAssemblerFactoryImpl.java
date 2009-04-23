@@ -44,7 +44,7 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.dump.WrapperDumpTube;
+import com.sun.xml.ws.dump.LoggingDumpTube;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -57,12 +57,13 @@ import java.util.logging.Level;
 public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory {
 
     private static class MetroTubelineAssembler implements TubelineAssembler {
+
         private static final String COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE = "com.sun.metro.soap.dump";
 
         private static enum Side {
+
             Client("client"),
             Endpoint("endpoint");
-
             private final String name;
 
             private Side(String name) {
@@ -75,8 +76,19 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
         }
 
-        private static final Logger LOGGER = Logger.getLogger(MetroTubelineAssembler.class);
+        private static class MessageDumpingInfo {
 
+            final boolean dumpBefore;
+            final boolean dumpAfter;
+            final Level logLevel;
+
+            MessageDumpingInfo(boolean dumpBefore, boolean dumpAfter, Level logLevel) {
+                this.dumpBefore = dumpBefore;
+                this.dumpAfter = dumpAfter;
+                this.logLevel = logLevel;
+            }
+        }
+        private static final Logger LOGGER = Logger.getLogger(MetroTubelineAssembler.class);
         private final BindingID bindingId;
         private final TubelineAssemblyController tubelineAssemblyController;
 
@@ -96,10 +108,31 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(
-                        tubeCreator.getMessageDumpPropertyBase(),
-                        tubeCreator.createTube(context),
-                        Side.Client));
+                final MessageDumpingInfo msgDumpInfo = setupMessageDumping(tubeCreator.getMessageDumpPropertyBase(), Side.Client);
+
+                final Tube oldTubelineHead = context.getTubelineHead();
+                LoggingDumpTube afterDumpTube = null;
+                if (msgDumpInfo.dumpAfter) {
+                    afterDumpTube = new LoggingDumpTube(msgDumpInfo.logLevel, LoggingDumpTube.Position.After, context.getTubelineHead());
+                    context.setTubelineHead(afterDumpTube);
+                }
+
+                if (!context.setTubelineHead(tubeCreator.createTube(context))) { // no new tube has been created
+                    if (afterDumpTube != null) {
+                        context.setTubelineHead(oldTubelineHead); // removing possible "after" message dumping tube
+                    }
+                } else {
+                    final String loggedTubeName = context.getTubelineHead().getClass().getName();
+                    if (afterDumpTube != null) {
+                        afterDumpTube.setLoggedTubeName(loggedTubeName);
+                    }
+
+                    if (msgDumpInfo.dumpBefore) {
+                        final LoggingDumpTube beforeDumpTube = new LoggingDumpTube(msgDumpInfo.logLevel, LoggingDumpTube.Position.Before, context.getTubelineHead());
+                        beforeDumpTube.setLoggedTubeName(loggedTubeName);
+                        context.setTubelineHead(beforeDumpTube);
+                    }
+                }
             }
 
             return context.getTubelineHead();
@@ -120,32 +153,53 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             }
 
             for (TubeCreator tubeCreator : tubeCreators) {
-                context.setTubelineHead(setupMessageDumping(
-                        tubeCreator.getMessageDumpPropertyBase(),
-                        tubeCreator.createTube(context),
-                        Side.Endpoint));
+                final MessageDumpingInfo msgDumpInfo = setupMessageDumping(tubeCreator.getMessageDumpPropertyBase(), Side.Endpoint);
+
+                final Tube oldTubelineHead = context.getTubelineHead();
+                LoggingDumpTube afterDumpTube = null;
+                if (msgDumpInfo.dumpAfter) {
+                    afterDumpTube = new LoggingDumpTube(msgDumpInfo.logLevel, LoggingDumpTube.Position.After, context.getTubelineHead());
+                    context.setTubelineHead(afterDumpTube);
+                }
+
+                if (!context.setTubelineHead(tubeCreator.createTube(context))) { // no new tube has been created
+                    if (afterDumpTube != null) {
+                        context.setTubelineHead(oldTubelineHead); // removing possible "after" message dumping tube
+                    }
+                } else {
+                    final String loggedTubeName = context.getTubelineHead().getClass().getName();
+                    if (afterDumpTube != null) {
+                        afterDumpTube.setLoggedTubeName(loggedTubeName);
+                    }
+
+                    if (msgDumpInfo.dumpBefore) {
+                        final LoggingDumpTube beforeDumpTube = new LoggingDumpTube(msgDumpInfo.logLevel, LoggingDumpTube.Position.Before, context.getTubelineHead());
+                        beforeDumpTube.setLoggedTubeName(loggedTubeName);
+                        context.setTubelineHead(beforeDumpTube);
+                    }
+                }
             }
 
             return context.getTubelineHead();
         }
 
-        private Tube setupMessageDumping(String msgDumpSystemPropertyBase, Tube newTube, Side side) {
-            boolean logBefore = false;
-            boolean logAfter = false;
+        private MessageDumpingInfo setupMessageDumping(String msgDumpSystemPropertyBase, Side side) {
+            boolean dumpBefore = false;
+            boolean dumpAfter = false;
             Level logLevel = Level.INFO;
 
             // checking common properties
-            Boolean value = getBooleanValue(msgDumpSystemPropertyBase);
+            Boolean value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE);
             if (value != null) {
-                logBefore = value.booleanValue();
-                logAfter = value.booleanValue();
+                dumpBefore = value.booleanValue();
+                dumpAfter = value.booleanValue();
             }
 
             value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".before");
-            logBefore = (value != null) ? value.booleanValue() : logBefore;
+            dumpBefore = (value != null) ? value.booleanValue() : dumpBefore;
 
             value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".after");
-            logAfter = (value != null) ? value.booleanValue() : logAfter;
+            dumpAfter = (value != null) ? value.booleanValue() : dumpAfter;
 
             Level levelValue = getLevelValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + ".level");
             if (levelValue != null) {
@@ -155,15 +209,15 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             // narrowing to proper communication side on common properties
             value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString());
             if (value != null) {
-                logBefore = value.booleanValue();
-                logAfter = value.booleanValue();
+                dumpBefore = value.booleanValue();
+                dumpAfter = value.booleanValue();
             }
 
             value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".before");
-            logBefore = (value != null) ? value.booleanValue() : logBefore;
+            dumpBefore = (value != null) ? value.booleanValue() : dumpBefore;
 
             value = getBooleanValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".after");
-            logAfter = (value != null) ? value.booleanValue() : logAfter;
+            dumpAfter = (value != null) ? value.booleanValue() : dumpAfter;
 
             levelValue = getLevelValue(COMMON_MESSAGE_DUMP_SYSTEM_PROPERTY_BASE + "." + side.toString() + ".level");
             if (levelValue != null) {
@@ -174,15 +228,15 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             // checking general tube-specific properties
             value = getBooleanValue(msgDumpSystemPropertyBase);
             if (value != null) {
-                logBefore = value.booleanValue();
-                logAfter = value.booleanValue();
+                dumpBefore = value.booleanValue();
+                dumpAfter = value.booleanValue();
             }
 
             value = getBooleanValue(msgDumpSystemPropertyBase + ".before");
-            logBefore = (value != null) ? value.booleanValue() : logBefore;
+            dumpBefore = (value != null) ? value.booleanValue() : dumpBefore;
 
             value = getBooleanValue(msgDumpSystemPropertyBase + ".after");
-            logAfter = (value != null) ? value.booleanValue() : logAfter;
+            dumpAfter = (value != null) ? value.booleanValue() : dumpAfter;
 
             levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
             if (levelValue != null) {
@@ -194,26 +248,22 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
 
             value = getBooleanValue(msgDumpSystemPropertyBase);
             if (value != null) {
-                logBefore = value.booleanValue();
-                logAfter = value.booleanValue();
+                dumpBefore = value.booleanValue();
+                dumpAfter = value.booleanValue();
             }
 
             value = getBooleanValue(msgDumpSystemPropertyBase + ".before");
-            logBefore = (value != null) ? value.booleanValue() : logBefore;
+            dumpBefore = (value != null) ? value.booleanValue() : dumpBefore;
 
             value = getBooleanValue(msgDumpSystemPropertyBase + ".after");
-            logAfter = (value != null) ? value.booleanValue() : logAfter;
+            dumpAfter = (value != null) ? value.booleanValue() : dumpAfter;
 
             levelValue = getLevelValue(msgDumpSystemPropertyBase + ".level");
             if (levelValue != null) {
                 logLevel = levelValue;
             }
 
-            if (logBefore || logAfter) {
-                return new WrapperDumpTube(logBefore, logAfter, logLevel, newTube);
-            }
-
-            return newTube;
+            return new MessageDumpingInfo(dumpBefore, dumpAfter, logLevel);
         }
 
         private Boolean getBooleanValue(String propertyName) {

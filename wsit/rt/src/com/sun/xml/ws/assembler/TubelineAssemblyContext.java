@@ -64,11 +64,15 @@ public class TubelineAssemblyContext {
         return adaptedHead;
     }
 
-    void setTubelineHead(Tube newHead) {
+    boolean setTubelineHead(Tube newHead) {
         if (newHead != head || newHead != adaptedHead) {
             head = newHead;
             tubes.add(head);
             adaptedHead = null;
+
+            return true;
+        } else {
+            return false;
         }
     }
 
