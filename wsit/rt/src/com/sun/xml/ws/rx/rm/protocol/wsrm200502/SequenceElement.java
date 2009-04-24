@@ -37,7 +37,6 @@ package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractSequence;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SequenceType")
 @XmlRootElement(name = "Sequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class SequenceElement extends AbstractSequence {
+public class SequenceElement {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
@@ -74,7 +73,6 @@ public class SequenceElement extends AbstractSequence {
     public SequenceElement() {
     }
 
-    @Override
     public String getLocalPart() {
         return "Sequence";
     }
@@ -168,7 +166,6 @@ public class SequenceElement extends AbstractSequence {
      * 
      * @return The Message number.
      */
-    @Override
     public long getNumber() {
         return getMessageNumber();
     }

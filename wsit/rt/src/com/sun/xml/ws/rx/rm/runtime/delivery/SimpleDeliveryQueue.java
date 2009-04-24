@@ -33,76 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm.protocol;
+package com.sun.xml.ws.rx.rm.runtime.delivery;
 
-import javax.xml.namespace.QName;
-import javax.xml.ws.EndpointReference;
-import java.util.List;
-import java.util.Map;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 
 /**
- * 
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public abstract class AbstractAcceptType {
+final class SimpleDeliveryQueue implements DeliveryQueue {
 
-    /**
-     * Gets the value of the acksTo property.
-     *
-     * @return
-     *     possible object is
-     *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
-     *
-     */
-    protected abstract EndpointReference getAcksTo();
+    public static interface Strategy {
+        public long getMaxCurrentlyDeliverableMessageNumber();
+        public boolean isDeliverable(long messageNumber);
+    }
 
-    /**
-     * Sets the value of the acksTo property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link com.sun.xml.ws.api.addressing.WSEndpointReference }
-     *
-     */
-    public abstract void setAcksTo(EndpointReference value);
+    private Postman postman;
+    private Postman.Callback deliveryCallback;
 
-    /**
-     * Gets the value of the any property.
-     *
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the any property.
-     *
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getAny().add(newItem);
-     * </pre>
-     *
-     *
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Object }
-     * {@link org.w3c.dom.Element }
-     *
-     *
-     */
-    public abstract List<Object> getAny();
+    SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback) {
+        this.postman = postman;
+        this.deliveryCallback = deliveryCallback;
+    }
 
-    /**
-     * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     *
-     * <p>
-     * the map is keyed by the name of the attribute and
-     * the value is the string value of the attribute.
-     *
-     * the map returned by this method is live, and you can add new attribute
-     * by updating the map directly. Because of this design, there's no setter.
-     *
-     *
-     * @return
-     *     always non-null
-     */
-    public abstract Map<QName, String> getOtherAttributes();
+    public void put(ApplicationMessage message) {
+        postman.deliver(message, deliveryCallback);
+    }
+
 }

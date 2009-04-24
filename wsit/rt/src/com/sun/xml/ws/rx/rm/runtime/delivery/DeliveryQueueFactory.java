@@ -33,22 +33,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm.protocol;
 
-/*
- * This is the abstract class for <code>AckRequestedElement</code> to support two implementations of WSRM
- * AbstractAckRequested.java
+package com.sun.xml.ws.rx.rm.runtime.delivery;
+
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
+
+/**
  *
- * @author Bhakti Mehta
- * @author Mike Grogan
- *
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public abstract class AbstractAckRequested {
+public enum DeliveryQueueFactory {
+    INSTANCE;
 
-    /**
-     *Introduce accessors using simple types rather than BigInteger and Identifier
-     */
-    public abstract void setId(String id);
+    public DeliveryQueue createDeliveryQueue(RuntimeContext rc, Postman postman, Postman.Callback deliveryCallback) {
+//        ReliableMessagingFeature.DeliveryAssurance da = rc.configuration.getDeliveryAssurance();
+//        boolean ordering = rc.configuration.isOrderedDeliveryEnabled();
 
-    protected abstract String getId();
+        // TODO P1 implement
+
+        DeliveryQueue queue = new SimpleDeliveryQueue(postman, deliveryCallback);
+
+        return queue;
+    }
 }

@@ -47,6 +47,9 @@ public class CreateSequenceRefusedFault extends AbstractRmSoapFault {
     private static final long serialVersionUID = 1533003947712389030L;
 
     public CreateSequenceRefusedFault(RxConfiguration configuration, Packet request, String reason) {
-        super(createCreateSequenceProcessingSoapFaultResponse(configuration, request, configuration.getRmVersion().createSequenceRefusedFaultCode, reason), reason);
+        super(configuration,
+                request,
+                configuration.getRmVersion().createSequenceRefusedFaultCode,
+                reason);
     }
 }

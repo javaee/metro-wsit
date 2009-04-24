@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import java.util.Calendar;
 import javax.xml.datatype.Duration;
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -73,6 +75,33 @@ public class Expires {
     protected Duration value;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+
+    public Expires() {
+    }
+
+    public Expires(Duration value) {
+        this.value = value;
+    }
+
+    public Expires(long duration) {
+        setDuration(duration);
+    }
+
+    public long getDuration() {
+        if (value == null || "PT0S".equals(value.toString())) {
+            return Sequence.NO_EXPIRATION;
+        }
+
+        return getValue().getTimeInMillis(Calendar.getInstance());
+    }
+
+    public void setDuration(long value) {
+        if (value == Sequence.NO_EXPIRATION) {
+            // TODO implement
+        } else {
+            // TODO implement
+        }
+    }
 
     /**
      * Gets the value of the value property.

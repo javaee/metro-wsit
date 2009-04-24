@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.protocol.AbstractSequenceAcknowledgement;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.namespace.QName;
@@ -62,7 +61,7 @@ import java.util.Map;
 "any"
 })
 @XmlRootElement(name = "SequenceAcknowledgement", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgement {
+public class SequenceAcknowledgementElement {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;

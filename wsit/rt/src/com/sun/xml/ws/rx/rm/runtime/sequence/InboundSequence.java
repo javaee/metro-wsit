@@ -37,10 +37,15 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 /**
  * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
@@ -54,21 +59,63 @@ final class InboundSequence extends AbstractSequence {
 
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     //
-    private final Set<Long> unackedMessageIdentifiers;
+    private final Set<Long> allUnackedMessageNumbers;
+    private final Set<Long> registeredUnackedMessageNumbers;
 
     InboundSequence(
             String sequenceId,
             String securityContextTokenId,
-            long expirationTime) {
+            long expirationTime,
+            DeliveryQueue deliveryQueue) {
 
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID);
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueue);
 
-        this.unackedMessageIdentifiers = new TreeSet<Long>();
+        this.allUnackedMessageNumbers = new TreeSet<Long>();
+        this.registeredUnackedMessageNumbers = new HashSet<Long>();
+    }
+
+    public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
+        if (getStatus() != Sequence.Status.CREATED) {
+            // TODO L10N
+            throw new IllegalStateException("Wrong sequence state: " + getStatus());
+        }
+
+        if (!this.getId().equals(message.getSequenceId())) {
+            throw new IllegalArgumentException(String.format(
+                    "Cannot register message: sequence identifier on the application message [ %s ] " +
+                    "is different from the identifier of this sequence [ %s ].",
+                    message.getSequenceId(),
+                    this.getId()));
+        }
+
+        try {
+            messageIdLock.writeLock().lock();
+
+            if (message.getMessageNumber() > getLastMessageId()) {
+                // new message - note that this will work even for the first message that arrives
+                // some message(s) got lost, add to all unacked message number set...
+                for (long lostIdentifier = getLastMessageId() + 1; lostIdentifier <= message.getMessageNumber(); lostIdentifier++) {
+                    allUnackedMessageNumbers.add(lostIdentifier);
+                }
+                updateLastMessageId(message.getMessageNumber());
+            } else if (registeredUnackedMessageNumbers.contains(message.getMessageNumber())) {
+                // duplicate message
+                throw LOGGER.logException(new DuplicateMessageRegistrationException(this.getId(), message.getMessageNumber()), Level.FINE);
+            }
+
+            registeredUnackedMessageNumbers.add(message.getMessageNumber());
+
+            if (storeMessageFlag) {
+                storeMessage(message);
+            }
+        } finally {
+            messageIdLock.writeLock().unlock();
+        }
     }
 
     @Override
     Collection<Long> getUnackedMessageIdStorage() {
-        return unackedMessageIdentifiers;
+        return allUnackedMessageNumbers;
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException {
@@ -89,24 +136,39 @@ final class InboundSequence extends AbstractSequence {
         try {
             messageIdLock.writeLock().lock();
 
-            if (messageId > getLastMessageId()) {
-                // new message - note that this will work even for the first message that arrives
-                if (getLastMessageId() + 1 != messageId) {
-                    // some message(s) got lost...
-                    for (long lostIdentifier = getLastMessageId() + 1; lostIdentifier < messageId; lostIdentifier++) {
-                        unackedMessageIdentifiers.add(lostIdentifier);
-                    }
-                }
-                updateLastMessageId(messageId);
-            } else {
-                if (!unackedMessageIdentifiers.remove(messageId)) {
-                    // duplicate message
-                    // FIXME change exception to DuplicateMessageException
-                    throw LOGGER.logSevereException(new IllegalMessageIdentifierException(messageId));
-                }
+            if (!registeredUnackedMessageNumbers.remove(messageId)) {
+                // TODO L10N
+                LOGGER.warning(String.format(
+                        "Message number [ %d ] not found among the %s unacknowledged message numbers on a sequence [ %s ].",
+                        messageId,
+                        "registered",
+                        this.getId()));
+            }
+
+            if (allUnackedMessageNumbers.remove(messageId)) {
+                // TODO L10N
+                LOGGER.warning(String.format(
+                        "Message number [ %d ] not found among the %s unacknowledged message numbers on a sequence [ %s ].",
+                        messageId,
+                        "all",
+                        this.getId()));
             }
         } finally {
             messageIdLock.writeLock().unlock();
         }
+    }
+
+    @Override
+    protected Long getUnackedMessageIdentifierKey(long messageNumber) {
+        Long msgNumberKey = null;
+        Iterator<Long> iterator = registeredUnackedMessageNumbers.iterator();
+        while (iterator.hasNext()) {
+            msgNumberKey = iterator.next();
+            if (msgNumberKey.longValue() == messageNumber) {
+                break;
+            }
+        }
+
+        return msgNumberKey;
     }
 }

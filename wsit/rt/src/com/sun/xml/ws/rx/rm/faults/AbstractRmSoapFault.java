@@ -61,7 +61,7 @@ public abstract class AbstractRmSoapFault extends RxException {
 
     public AbstractRmSoapFault(RxConfiguration configuration, Packet request, QName subcode, String reason) {
         super(reason);
-        this.soapFaultResponse = createRmProcessingSoapFaultResponse(configuration, request, subcode, reason);
+        this.soapFaultResponse = createRmProcessingSoapFaultResponse(configuration, request, subcode, reason, true);
     }
 
     public AbstractRmSoapFault(Packet soapFaultResponse, String reason) {
@@ -79,10 +79,12 @@ public abstract class AbstractRmSoapFault extends RxException {
      * @param requestPacket the request that caused the fault
      * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
      * @param reason English language reason element
+     *
      * @return response packet filled with a generated SOAP fault
+     * 
      * @throws RxRuntimeException in case of any errors while creating the SOAP fault response packet
      */
-    protected static Packet createRmProcessingSoapFaultResponse(RxConfiguration configuration, Packet request, QName subcode, String reason) throws RxRuntimeException {
+    protected static Packet createRmProcessingSoapFaultResponse(RxConfiguration configuration, Packet request, QName subcode, String reason, boolean attachSequenceFaultElement) throws RxRuntimeException {
         try {
             SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
 
@@ -104,59 +106,19 @@ public abstract class AbstractRmSoapFault extends RxException {
             }
 
             Message soapFaultMessage = Messages.create(soapFault);
-            if (configuration.getSoapVersion() == SOAPVersion.SOAP_11) {
-                Header faultHeader;
-                if (configuration.getRmVersion() == RmVersion.WSRM200502) {
-                    faultHeader = Headers.create(RmVersion.WSRM200502.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceFaultElement(subcode));
-                } else {
-                    faultHeader = Headers.create(RmVersion.WSRM200702.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode));
+
+            if (attachSequenceFaultElement) {
+                if (configuration.getSoapVersion() == SOAPVersion.SOAP_11) {
+                    Header faultHeader;
+                    if (configuration.getRmVersion() == RmVersion.WSRM200502) {
+                        faultHeader = Headers.create(RmVersion.WSRM200502.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceFaultElement(subcode));
+                    } else {
+                        faultHeader = Headers.create(RmVersion.WSRM200702.getJaxbContext(configuration.getAddressingVersion()), new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode));
+                    }
+                    soapFaultMessage.getHeaders().add(faultHeader);
                 }
-                soapFaultMessage.getHeaders().add(faultHeader);
             }
 
-            return request.createServerResponse(
-                    soapFaultMessage,
-                    configuration.getAddressingVersion(),
-                    configuration.getSoapVersion(),
-                    getProperFaultActionForAddressingVersion(configuration));
-        } catch (SOAPException ex) {
-            throw new RxRuntimeException("Error creating a SOAP fault", ex);
-        }
-    }
-
-    /**
-     * Creates a SOAP fault response that occured while processing the CreateSequence request message
-     * 
-     * @param requestPacket the request that caused the fault
-     * @param subcode WS-RM specific code FQN as defined in the WS-RM specification
-     * @param reason English language reason element
-     * @return response packet filled with a generated SOAP fault
-     * @throws RxRuntimeException in case of any errors while creating the SOAP fault response packet
-     */
-    protected static Packet createCreateSequenceProcessingSoapFaultResponse(RxConfiguration configuration, Packet request, QName subcode, String reason) throws RxRuntimeException {
-        try {
-            SOAPFault soapFault = configuration.getSoapVersion().saajSoapFactory.createFault();
-
-            // common SOAP1.1 and SOAP1.2 Fault settings 
-            if (reason != null) {
-                soapFault.setFaultString(reason, Locale.ENGLISH);
-            }
-
-            // SOAP version-specific SOAP Fault settings
-            // FIXME: check if the code we generate is allways a Sender.
-            switch (configuration.getSoapVersion()) {
-                case SOAP_11:
-                    soapFault.setFaultCode(subcode);
-                    break;
-                case SOAP_12:
-                    soapFault.setFaultCode(configuration.getSoapVersion().faultCodeServer);
-                    soapFault.appendFaultSubcode(subcode);
-                    break;
-                default:
-                    throw new RxRuntimeException("Unsupported SOAP version: '" + configuration.getSoapVersion().toString() + "'");
-            }
-
-            Message soapFaultMessage = Messages.create(soapFault);
             return request.createServerResponse(
                     soapFaultMessage,
                     configuration.getAddressingVersion(),

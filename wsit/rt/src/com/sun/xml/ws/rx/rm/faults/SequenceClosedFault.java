@@ -47,6 +47,6 @@ public class SequenceClosedFault extends AbstractRmSoapFault {
     private static final long serialVersionUID = -3121993473458842931L;
 
     public SequenceClosedFault(RxConfiguration configuration, Packet request, String reason) {
-        super(createRmProcessingSoapFaultResponse(configuration, request, configuration.getRmVersion().sequenceClosedFaultCode, reason), reason);
+        super(configuration, request, configuration.getRmVersion().sequenceClosedFaultCode, reason);
     }
 }

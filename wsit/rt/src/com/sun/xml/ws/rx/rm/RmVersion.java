@@ -72,6 +72,7 @@ public enum RmVersion {
     WSRM200502(
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
     AssertionNamespace.WSRMP_200502.toString(),
+    "/LastMessage",
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AckRequestedElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.CreateSequenceElement.class,
@@ -98,6 +99,7 @@ public enum RmVersion {
     WSRM200702(
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
     AssertionNamespace.WSRMP_200702.toString(),
+    "/CloseSequence",
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AckRequestedElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.Address.class,
@@ -139,9 +141,8 @@ public enum RmVersion {
     public final String ackRequestedAction;
     public final String createSequenceAction;
     public final String createSequenceResponseAction;
-    public final String closeSequenceAction;
+    public final String closeSequenceAction; // == lastAction
     public final String closeSequenceResponseAction;
-    public final String lastAction;
     public final String sequenceAcknowledgementAction;
     public final String wsrmFaultAction;
     public final String terminateSequenceAction;
@@ -162,16 +163,15 @@ public enum RmVersion {
      */
     private final JaxbContextRepository jaxbContextRepository;
 
-    private RmVersion(String nsUri, String policyNsUri, Class<?>... rmProtocolClasses) {
+    private RmVersion(String nsUri, String policyNsUri, String closeSequenceActionSuffix, Class<?>... rmProtocolClasses) {
         this.namespaceUri = nsUri;
         this.policyNamespaceUri = policyNsUri;
 
         this.ackRequestedAction = namespaceUri + "/AckRequested";
         this.createSequenceAction = namespaceUri + "/CreateSequence";
         this.createSequenceResponseAction = namespaceUri + "/CreateSequenceResponse";
-        this.closeSequenceAction = namespaceUri + "/CloseSequence";
+        this.closeSequenceAction = namespaceUri + closeSequenceActionSuffix;
         this.closeSequenceResponseAction = namespaceUri + "/CloseSequenceResponse";
-        this.lastAction = namespaceUri + "/LastMessage";
         this.sequenceAcknowledgementAction = namespaceUri + "/SequenceAcknowledgement";
         this.wsrmFaultAction = namespaceUri + "/fault";
         this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
@@ -211,7 +211,6 @@ public enum RmVersion {
                 (ackRequestedAction.equals(wsaAction) ||
                 createSequenceAction.equals(wsaAction) ||
                 closeSequenceAction.equals(wsaAction) ||
-                lastAction.equals(wsaAction) ||
                 terminateSequenceAction.equals(wsaAction));
     }
 

@@ -35,9 +35,6 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractAckRequested;
-
-
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +74,7 @@ import javax.xml.bind.annotation.XmlType;
 "any"
 })
 @XmlRootElement(name = "AckRequested", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class AckRequestedElement extends AbstractAckRequested {
+public class AckRequestedElement {
 
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;

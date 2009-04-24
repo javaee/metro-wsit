@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 
@@ -84,7 +84,7 @@ import javax.xml.bind.annotation.XmlType;
 "securityTokenReference"
 })
 @XmlRootElement(name = "CreateSequence", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class CreateSequenceElement extends AbstractCreateSequence {
+public class CreateSequenceElement {
 
     @XmlElement(name = "AcksTo", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected EndpointReference acksTo;
@@ -98,6 +98,46 @@ public class CreateSequenceElement extends AbstractCreateSequence {
     private SecurityTokenReferenceType securityTokenReference;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+
+    public CreateSequenceElement() {
+    }
+
+    public CreateSequenceElement(CreateSequenceData data) {
+        this();
+        
+        acksTo = data.getAcksToEpr();
+        expires = new Expires(data.getExpiry());
+
+        if (data.getOfferedSequenceId() != null) {
+            this.offer = new OfferType();
+            offer.setId(data.getOfferedSequenceId());
+            // Microsoft does not accept CreateSequence messages if AcksTo and Offer/Endpoint are not the same
+            offer.setEndpoint(data.getAcksToEpr());
+
+            offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+        }
+        if (data.getStrType() != null) {
+            securityTokenReference = data.getStrType();
+        }
+    }
+
+    public CreateSequenceData.Builder toDataBuilder() {
+        final CreateSequenceData.Builder dataBuilder = CreateSequenceData.getBuilder(this.getAcksTo());
+        dataBuilder.strType(securityTokenReference);
+
+        if (expires != null) {
+            dataBuilder.expiry(expires.getDuration());
+        }
+
+        if (offer != null) {
+            dataBuilder.offeredInboundSequenceId(offer.getId());
+            if (offer.getExpires() != null) {
+                dataBuilder.offeredSequenceExpiry(offer.getExpires().getDuration());
+            }
+        }
+
+        return dataBuilder;
+    }
 
     /**
      * Gets the value of the acksTo property.

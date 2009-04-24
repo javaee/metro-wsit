@@ -35,13 +35,16 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -64,7 +67,13 @@ public abstract class AbstractSequence implements Sequence {
     private final AtomicBoolean ackRequestedFlag;
     //
     private long lastMessageId;
-    private long lastActivityTime;
+    private volatile long lastActivityTime;
+    private volatile long lastAcknowledgementRequestTime;
+    //
+    private final Map<String, ApplicationMessage> weakMessageStorage;
+    private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
+    //
+    private final DeliveryQueue deliveryQueue;
 
     /**
      * Initializes instance fields.
@@ -79,7 +88,8 @@ public abstract class AbstractSequence implements Sequence {
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,
-            long initalLastMessageId) {
+            long initalLastMessageId,
+            DeliveryQueue deliveryQueue) {
 
         this.sequenceId = sequenceId;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
@@ -88,6 +98,12 @@ public abstract class AbstractSequence implements Sequence {
         this.ackRequestedFlag = new AtomicBoolean(false);
         this.lastActivityTime = System.currentTimeMillis();
         this.lastMessageId = initalLastMessageId;
+
+        this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
+        this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
+
+        // TODO initialize delivery queue
+        this.deliveryQueue = deliveryQueue;
     }
 
     public String getId() {
@@ -98,11 +114,6 @@ public abstract class AbstractSequence implements Sequence {
         return boundSecurityTokenReferenceId;
     }
 
-    public long generateNextMessageId() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
-    }
-
-
     public long getLastMessageId() {
         try {
             messageIdLock.readLock().lock();
@@ -112,14 +123,6 @@ public abstract class AbstractSequence implements Sequence {
         }
     }
     
-    public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
-    }
-
-    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_INTERFACE_OPERATION_IN_IMPLEMENTATION(Sequence.class.getName()));
-    }
-
     public List<AckRange> getAcknowledgedMessageIds() {
         messageIdLock.readLock().lock();
         try {
@@ -193,6 +196,15 @@ public abstract class AbstractSequence implements Sequence {
         return ackRequestedFlag.get();
     }
 
+    public void updateLastAcknowledgementRequestTime() {
+        lastAcknowledgementRequestTime = System.currentTimeMillis();
+    }
+
+    public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
+        return lastAcknowledgementRequestTime - System.currentTimeMillis() > delayPeriod && hasPendingAcknowledgements();
+    }
+
+    
     public void close() {
         status.set(Status.CLOSED);
     }
@@ -233,6 +245,47 @@ public abstract class AbstractSequence implements Sequence {
     
     final void setStatus(Status newStatus) {
         status.set(newStatus);
+    }
+
+    protected abstract Long getUnackedMessageIdentifierKey(long messageNumber);
+
+    public ApplicationMessage retrieveMessage(String correlationId) {
+        try {
+            messageIdLock.readLock().lock();
+            return weakMessageStorage.get(correlationId);
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+    }
+
+    public ApplicationMessage retrieveUnackedMessage(long messageNumber) {
+        try {
+            messageIdLock.readLock().lock();
+            String correlationKey = weakUnackedNumberToCorrelationIdMap.get(messageNumber);
+            return (correlationKey != null) ? weakMessageStorage.get(correlationKey) : null;
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+    }
+
+    public DeliveryQueue getDeliveryQueue() {
+        try {
+            messageIdLock.readLock().lock();
+            
+            return deliveryQueue; // TODO copy?
+        } finally {
+            messageIdLock.readLock().unlock();
+        }
+    }
+
+    protected final void storeMessage(ApplicationMessage message) throws UnsupportedOperationException {
+        // no need to synchronize, called from within a write lock
+        Long msgNumberKey = getUnackedMessageIdentifierKey(message.getMessageNumber());
+        assert msgNumberKey != null;
+        // NOTE this must be a new String object
+        String correlationKey = new String(message.getCorrelationId());
+        weakUnackedNumberToCorrelationIdMap.put(msgNumberKey, correlationKey);
+        weakMessageStorage.put(correlationKey, message);
     }
 
     @Override

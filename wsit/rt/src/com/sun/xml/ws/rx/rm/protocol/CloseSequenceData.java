@@ -33,89 +33,64 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rx.rm.protocol;
 
-import javax.xml.namespace.QName;
-import java.util.List;
-import java.util.Map;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 /**
- * This is the base class for the implementations of <code> SequenceElement </code> based on the
- * two versions of the RM specification
  *
- * @author Bhakti Mehta
- * @author Mike Grogan
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public abstract class AbstractSequence {
+public class CloseSequenceData {
 
-    public String getLocalPart() {
-        return "Sequence";
+    public static class Builder {
+        private @NotNull final String sequenceId;
+        private final long lastMessageId;
+        private @Nullable AcknowledgementData acknowledgementData;
+
+        private Builder(String outboundSequenceId, long lastMessageId) {
+            this.sequenceId = outboundSequenceId;
+            this.lastMessageId = lastMessageId;
+        }
+
+        public void acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
+            this.acknowledgementData = acknowledgementData;
+        }
+
+        public CloseSequenceData build() {
+            // TODO construct parent class object
+            return new CloseSequenceData(sequenceId, lastMessageId, acknowledgementData);
+        }
     }
 
-    /**
-     * Mutator for the Id property.  Maps to the Identifier property in the underlying
-     * JAXB class.
-     *
-     * @param id The new value.
-     */
-    public abstract void setId(String id);
-
-    /**
-     * Accessor for the Id property.  Maps to the Identifier property in the underlying
-     * JAXB class
-     * @return The sequence id
-     */
-    protected abstract String getId();
-
-    /**
-     * Mutator for the Number property which maps to the MessageNumber property in
-     * the underlying JAXB class.
-     *
-     * @param l The Message number.
-     */
-    public void setNumber(long l) {
-        setMessageNumber(l);
+    public static Builder getBuilder(@NotNull String outboundSequenceId, long lastMessageId) {
+        // TODO construct builder
+        return new Builder(outboundSequenceId, lastMessageId);
     }
 
-    /**
-     * Accessor for the Number property which maps to the MessageNumber property in
-     * the underlying JAXB class.
-     *
-     * @return The Message number.
-     */
-    protected long getNumber() {
-        return getMessageNumber();
+    private @NotNull final String sequenceId;
+    private final long lastMessageId;
+    private @Nullable final AcknowledgementData acknowledgementData;
+
+    private CloseSequenceData(@NotNull String sequenceId, long lastMessageId, @Nullable AcknowledgementData acknowledgementData) {
+        assert sequenceId != null;
+
+        this.sequenceId = sequenceId;
+        this.lastMessageId = lastMessageId;
+        this.acknowledgementData = acknowledgementData;
     }
 
-    /**
-     * Gets the value of the messageNumber property.
-     *
-     * @return The value of the property.
-     *
-     */
-    protected abstract Long getMessageNumber();
+    public @NotNull String getSequenceId() {
+        return sequenceId;
+    }
 
-    /**
-     * Sets the value of the messageNumber property.
-     *
-     * @param value The new value.
-     *
-     */
-    public abstract void setMessageNumber(Long value);
+    public long getLastMessageId() {
+        return lastMessageId;
+    }
 
-    /**
-     * Gets the value of the any property.
-     *
-     * @return The value of the property.
-     *
-     *
-     */
-    public abstract List<Object> getAny();
-
-    /**
-     * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     *
-     * @return The map of attributes.
-     */
-    public abstract Map<QName, String> getOtherAttributes();
+    public @Nullable AcknowledgementData getAcknowledgementData() {
+        return acknowledgementData;
+    }
 }

@@ -47,6 +47,6 @@ public class UnknownSequenceFault extends AbstractRmSoapFault {
     private static final long serialVersionUID = 8971100141866675662L;
 
     public UnknownSequenceFault(RxConfiguration configuration, Packet request, String reason) {
-        super(createRmProcessingSoapFaultResponse(configuration, request, configuration.getRmVersion().unknownSequenceFaultCode, reason), reason);
+        super(configuration, request, configuration.getRmVersion().unknownSequenceFaultCode, reason);
     }    
 }

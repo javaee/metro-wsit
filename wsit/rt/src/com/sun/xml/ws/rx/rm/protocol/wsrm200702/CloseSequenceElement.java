@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
+import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -94,6 +95,14 @@ public class CloseSequenceElement {
     public CloseSequenceElement(String sequenceId, long lastMessageNumber) {
         this.identifier = new Identifier(sequenceId);
         this.lastMsgNumber = lastMessageNumber;
+    }
+
+    public CloseSequenceElement(CloseSequenceData data) {
+        this(data.getSequenceId(), data.getLastMessageId());
+    }
+    
+    public CloseSequenceData.Builder toDataBuilder() {
+        return CloseSequenceData.getBuilder(identifier.getValue(), lastMsgNumber); 
     }
 
     /**

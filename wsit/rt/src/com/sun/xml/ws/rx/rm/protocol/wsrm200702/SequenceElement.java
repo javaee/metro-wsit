@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.protocol.AbstractSequence;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ import javax.xml.bind.annotation.XmlType;
 "any"
 })
 @XmlRootElement(name = "Sequence", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceElement extends AbstractSequence {
+public class SequenceElement {
 
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;
@@ -136,7 +135,6 @@ public class SequenceElement extends AbstractSequence {
      *
      * @return The Message number.
      */
-    @Override
     public long getNumber() {
         return getMessageNumber();
     }

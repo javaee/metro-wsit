@@ -37,7 +37,7 @@ package com.sun.xml.ws.rx.testing;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,13 +87,13 @@ public final class PacketFilteringFeature extends WebServiceFeature {
         return ID;
     }
 
-    List<PacketFilter> createFilters(RxConfiguration configuration) {
+    List<PacketFilter> createFilters(RuntimeContext context) {
         List<PacketFilter> filters = new ArrayList<PacketFilter>(filterClasses.size());
         
         for (Class<? extends PacketFilter> filterClass : filterClasses) {
             try {
                 final PacketFilter filter = filterClass.newInstance();
-                filter.configure(configuration.getRmVersion(), configuration.getSoapVersion(), configuration.getAddressingVersion());
+                filter.configure(context);
                 filters.add(filter);
             } catch (InstantiationException ex) {
                 LOGGER.warning("Error instantiating packet filter of class [" + filterClass.getName() + "]", ex);

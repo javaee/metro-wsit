@@ -36,7 +36,8 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +45,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * TODO javadoc
@@ -57,19 +56,15 @@ final class OutboundSequence extends AbstractSequence {
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
     private final List<Long> unackedMessageIdentifiers;
-    private final Map<Long, Object> weakMessageStorage;
-    private final Map<Long, Long> weakIdtoCorrelationIdMap;
-    
 
     OutboundSequence(
             String sequenceId,
             String securityContextTokenId,
-            long expirationTime) {
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1);
+            long expirationTime,
+            DeliveryQueue deliveryQueue) {
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, deliveryQueue);
 
         this.unackedMessageIdentifiers = new LinkedList<Long>();
-        this.weakMessageStorage = new WeakHashMap<Long, Object>();
-        this.weakIdtoCorrelationIdMap = new WeakHashMap<Long, Long>();
     }
 
     @Override
@@ -77,60 +72,55 @@ final class OutboundSequence extends AbstractSequence {
         return unackedMessageIdentifiers;
     }
 
-    @Override
-    public long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+    public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
         if (getStatus() != Sequence.Status.CREATED) {
-            throw new IllegalStateException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_NEXT_MESSAGE_ID_REJECTED(getId(), getStatus()));
+            // TODO L10N
+            throw new IllegalStateException("Wrong sequence state: " + getStatus());
+        }
+
+        if (message.getSequenceId() != null) {
+            throw new IllegalArgumentException(String.format(
+                    "Cannot register message: Application message has been already registered on a sequence [ %s ].",
+                    message.getSequenceId()));
         }
 
         try {
             messageIdLock.writeLock().lock();
 
-            long nextId = getLastMessageId() + 1;
-            if (nextId > Sequence.MAX_MESSAGE_ID) {
-                throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
+            message.setSequenceData(this.getId(), generateNextMessageId());
+            if (storeMessageFlag) {
+                storeMessage(message);
             }
-
-            updateLastMessageId(nextId);
-            
-            // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
-            // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-            unackedMessageIdentifiers.add(new Long(nextId)); 
-            return nextId;
         } finally {
             messageIdLock.writeLock().unlock();
         }
     }
 
-    @Override
-    public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
-        Long idKey;
-        try {
-            messageIdLock.readLock().lock();
-            int index = unackedMessageIdentifiers.indexOf(id);
-            if (index >= 0) { // the id is in the list
-                idKey = unackedMessageIdentifiers.get(index);
-            } else {
-                // Creating a new uncached long object that GC can dispose
-                // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-                idKey = new Long(id); 
-            }            
-        } finally {
-            messageIdLock.readLock().unlock();
+    private long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+        // no need to synchronize, called from within a write lock
+
+        long nextId = getLastMessageId() + 1;
+        if (nextId > Sequence.MAX_MESSAGE_ID) {
+            throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
         }
 
-        // we hold message while correlation id is still around in id-to-correlationId map
-        // we hold correlation id while id is still around in unacked ids list
-        
+        updateLastMessageId(nextId);
+
+        // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
         // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-        Long correlationIdKey = new Long(correlationId);
-        weakIdtoCorrelationIdMap.put(idKey, correlationIdKey);
-        weakMessageStorage.put(correlationIdKey, message); 
+        unackedMessageIdentifiers.add(new Long(nextId));
+        return nextId;
     }
 
     @Override
-    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException {
-        return weakMessageStorage.get(correlationId);
+    protected Long getUnackedMessageIdentifierKey(long messageNumber) {
+        Long msgNumberKey = null;
+        int index = unackedMessageIdentifiers.indexOf(messageNumber);
+        if (index >= 0) {
+            // the id is in the list
+            msgNumberKey = unackedMessageIdentifiers.get(index);
+        }
+        return msgNumberKey;
     }
 
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {

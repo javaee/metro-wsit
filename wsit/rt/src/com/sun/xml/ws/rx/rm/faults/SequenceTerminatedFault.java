@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.faults;
 
 import com.sun.xml.ws.api.message.Packet;
@@ -44,13 +43,13 @@ import com.sun.xml.ws.rx.RxConfiguration;
  * @author m_potociar
  */
 public class SequenceTerminatedFault extends AbstractRmSoapFault {
+
     private static final long serialVersionUID = -4689338956255310299L;
 
     public SequenceTerminatedFault(RxConfiguration configuration, Packet request, String reason) {
-        super(createRmProcessingSoapFaultResponse(
-                configuration, 
-                request, 
-                configuration.getRmVersion().sequenceTerminatedFaultCode, 
-                reason), reason);
-    }    
+        super(configuration,
+                request,
+                configuration.getRmVersion().sequenceTerminatedFaultCode,
+                reason);
+    }
 }

@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.Status;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,21 +98,22 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
         }
     }
 
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime));
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
+        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueue));
     }
 
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime));
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
+        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueue));
     }
 
     public String generateSequenceUID() {
         return "uuid:" + UUID.randomUUID();
     }
 
-    public void closeSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
         Sequence sequence = getSequence(sequenceId);
         sequence.close();
+        return sequence;
     }
 
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {

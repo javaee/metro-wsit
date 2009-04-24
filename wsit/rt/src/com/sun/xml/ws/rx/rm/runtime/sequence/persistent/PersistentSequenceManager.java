@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.UUID;
@@ -66,15 +67,15 @@ public final class PersistentSequenceManager implements SequenceManager {
     public Map<String, String> boundSequences() {
 	return null;
     }
-    public void closeSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

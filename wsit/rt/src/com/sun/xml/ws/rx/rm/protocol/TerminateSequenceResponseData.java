@@ -33,71 +33,52 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rx.rm.protocol;
 
-import javax.xml.namespace.QName;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 /**
- * This is the base class for the implementations of <code> SequenceAcknowledgementElement </code> based on the
- * two versions of the RM specification
  *
- * @author Bhakti Mehta
- * @author Mike Grogan
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public abstract class AbstractSequenceAcknowledgement {
+public class TerminateSequenceResponseData {
+    public static class Builder {
 
-    /**
-     *  Gets the value of the nack property.
-     *
-     * @return The value of the property, which is a list of BigIntegers
-     *
-     *
-     */
-    protected abstract List<BigInteger> getNack();
+        private @NotNull final String sequenceId;
+        private @Nullable AcknowledgementData acknowledgementData;
 
-    /**
-     * Gets the value of the any property representing extensibility elements
-     *
-     * @return The list of elements.
-     *
-     */
-    protected abstract List<Object> getAny();
+        public Builder(@NotNull String sequenceId) {
+            this.sequenceId = sequenceId;
+        }
 
-    /**
-     * Gets a map that contains attributes that aren't bound to any typed property on this class.
-     *
-     * @return The value of the property
-     */
-    protected abstract Map<QName, String> getOtherAttributes();
+        public void acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
+            this.acknowledgementData = acknowledgementData;
+        }
 
-    /**
-     * Sets the Identifier
-     * @param id
-     */
-    public abstract void setId(String id);
+        public TerminateSequenceResponseData build() {
+            return new TerminateSequenceResponseData(sequenceId, acknowledgementData);
+        }
+    }
 
-    /**
-     * Gets the identifier associated with the Sequence
-     * @return     String
-     */
-    protected abstract String getId();
+    public static Builder getBuilder(String sequenceId) {
+        return new Builder(sequenceId);
+    }
 
-    /**
-     * Gets the BufferRemaining value
-     * @return   int
-     */
-    protected abstract int getBufferRemaining();
+    private @NotNull final String sequenceId;
+    private @Nullable final AcknowledgementData acknowledgementData;
 
-    /**
-     * Sets the BufferRemaining value
-     * @return void
-     */
-    public abstract void setBufferRemaining(int value);
+    private TerminateSequenceResponseData(@NotNull String sequenceId, @Nullable AcknowledgementData acknowledgementData) {
+        this.sequenceId = sequenceId;
+        this.acknowledgementData = acknowledgementData;
+    }
 
-    public abstract void addAckRange(long lower, long upper);
+    public @NotNull String getSequenceId() {
+        return sequenceId;
+    }
 
-    public abstract void addNack(long index);
+    public @Nullable AcknowledgementData getAcknowledgementData() {
+        return acknowledgementData;
+    }
 }
