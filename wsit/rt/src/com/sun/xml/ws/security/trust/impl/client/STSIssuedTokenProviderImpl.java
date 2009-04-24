@@ -41,6 +41,10 @@ import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenProvider;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.wss.SubjectAccessor;
+import java.util.Set;
+import javax.security.auth.Subject;
 
 /**
  *
@@ -49,8 +53,29 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenProvider;
 public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
     
     public void issue(IssuedTokenContext ctx)throws WSTrustException{
+        STSIssuedTokenConfiguration config = (STSIssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
+        ctx.setTokenIssuer(config.getSTSEndpoint());
+        boolean shareToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.SHARE_TOKEN));
+        Subject subject = SubjectAccessor.getRequesterSubject();
+        if (shareToken && subject != null){
+            Set pcs = subject.getPrivateCredentials(IssuedTokenContext.class);
+            for (Object obj : pcs){
+                IssuedTokenContext cached = (IssuedTokenContext)obj;
+                if (cached.getTokenIssuer().equals(ctx.getTokenIssuer())){
+                    updateContext(cached, ctx);
+                    return;
+                }
+            }
+        }
         TrustPlugin tp = WSTrustFactory.newTrustPlugin();
         tp.process(ctx);
+        if (shareToken){
+            if (subject == null){
+                subject = new Subject();
+            }
+            subject.getPrivateCredentials().add(ctx);
+            SubjectAccessor.setRequesterSubject(subject);
+        }
     } 
     
     public void cancel(IssuedTokenContext ctx)throws WSTrustException{
@@ -64,5 +89,16 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
     public void validate(IssuedTokenContext ctx)throws WSTrustException{
         TrustPlugin tp = WSTrustFactory.newTrustPlugin();
         tp.processValidate(ctx);
+    }
+
+    private void updateContext(IssuedTokenContext cached, IssuedTokenContext ctx) {
+        ctx.setUnAttachedSecurityTokenReference(cached.getUnAttachedSecurityTokenReference());
+        ctx.setSecurityToken(cached.getSecurityToken());
+        ctx.setRequestorCertificate(cached.getRequestorCertificate());
+        ctx.setProofKeyPair(cached.getProofKeyPair());
+        ctx.setProofKey(cached.getProofKey());
+        ctx.setExpirationTime(cached.getExpirationTime());
+        ctx.setCreationTime(cached.getCreationTime());
+        ctx.setAttachedSecurityTokenReference(cached.getAttachedSecurityTokenReference());
     }
 }

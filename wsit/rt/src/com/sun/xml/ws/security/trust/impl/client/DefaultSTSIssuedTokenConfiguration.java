@@ -331,6 +331,10 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                         this.stsPortName = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
                     }
                 }
+                String shareToken = attrs.get(new QName(CONFIG_NAMESPACE, SHARE_TOKEN));
+                if (shareToken != null){
+                    this.getOtherOptions().put(SHARE_TOKEN, shareToken);
+                }
             }
         }
         if (stsProtocol == null){
