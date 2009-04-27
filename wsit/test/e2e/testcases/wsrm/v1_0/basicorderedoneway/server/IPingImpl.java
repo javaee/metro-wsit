@@ -62,7 +62,7 @@ public class IPingImpl {
         LOGGER.log(Level.ALL, String.format("==============  Message [ %d ]: On server side received %s  ===============", msgNumber, s));
         long value = CURRENT_PING_VALUE.getAndIncrement();
         if (msgNumber != value) {
-            String errorMessage = String.format("Expected message number: %d%, received message number: %d", value, msgNumber);
+            String errorMessage = String.format("Expected message number: %d, received message number: %d", value, msgNumber);
             LOGGER.severe(errorMessage);
             throw new RuntimeException(errorMessage);
         }
