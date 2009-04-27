@@ -109,7 +109,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
         }
         // outbound sequence ack requested flag
         final Sequence outboundSequence = sequenceManager.getSequence(outboundSequenceId);
-        if (outboundSequence.hasPendingAcknowledgements()) {
+        if (outboundSequence.hasUnacknowledgedMessages()) {
             ackDataBuilder.ackReqestedSequenceId(outboundSequenceId);
             outboundSequence.updateLastAcknowledgementRequestTime();
         }

@@ -145,7 +145,7 @@ final class InboundSequence extends AbstractSequence {
                         this.getId()));
             }
 
-            if (allUnackedMessageNumbers.remove(messageId)) {
+            if (!allUnackedMessageNumbers.remove(messageId)) {
                 // TODO L10N
                 LOGGER.warning(String.format(
                         "Message number [ %d ] not found among the %s unacknowledged message numbers on a sequence [ %s ].",

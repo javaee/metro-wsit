@@ -249,7 +249,7 @@ public interface Sequence {
      */
     @ManagedAttribute
     @Description("True if the sequence has unacknowledged message identifiers")
-    public boolean hasPendingAcknowledgements();
+    public boolean hasUnacknowledgedMessages();
 
     /**
      * Provides information on the status of the message sequence

@@ -76,8 +76,12 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
     public void registerMessage(@NotNull ApplicationMessage inMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException {
         assert inMessage != null;
 
+        final Sequence inboundSequence = sequenceManager.getSequence(inMessage.getSequenceId());
+
         // register and possibly store message in the unacked message sequence queue
-        sequenceManager.getSequence(inMessage.getSequenceId()).registerMessage(inMessage, true); // TODO this may not be always needed in case of AtMostOnce delivery
+        inboundSequence.registerMessage(inMessage, true); // TODO this may not be always needed in case of AtMostOnce delivery
+
+        inboundSequence.setAckRequestedFlag(); // simulate acknowledgement request for new each message
     }
 
     public void processAcknowledgements(@Nullable AcknowledgementData acknowledgementData) throws UnknownSequenceException {
@@ -116,7 +120,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
 
         // outbound sequence ack requested flag
         Sequence outboundSequence = sequenceManager.getBoundSequence(inboundSequenceId);
-        if (outboundSequence != null && outboundSequence.hasPendingAcknowledgements()) {
+        if (outboundSequence != null && outboundSequence.hasUnacknowledgedMessages()) {
             ackDataBuilder.ackReqestedSequenceId(outboundSequence.getId());
             outboundSequence.updateLastAcknowledgementRequestTime();
         }

@@ -171,7 +171,7 @@ public abstract class AbstractSequence implements Sequence {
         }
     }       
 
-    public boolean hasPendingAcknowledgements() {
+    public boolean hasUnacknowledgedMessages() {
         try {
             messageIdLock.readLock().lock();
             return !getUnackedMessageIdStorage().isEmpty();
@@ -201,7 +201,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
-        return lastAcknowledgementRequestTime - System.currentTimeMillis() > delayPeriod && hasPendingAcknowledgements();
+        return lastAcknowledgementRequestTime - System.currentTimeMillis() > delayPeriod && hasUnacknowledgedMessages();
     }
 
     

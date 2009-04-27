@@ -109,12 +109,12 @@ public class OutboundSequenceTest extends TestCase {
             sequence.registerMessage(new DummyAppMessage("" + i), true);
         }
 
-        assertTrue(sequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
 
         List<Sequence.AckRange> ackedRages;
 
         sequence.acknowledgeMessageId(1);
-        assertTrue(sequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
         ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
@@ -124,7 +124,7 @@ public class OutboundSequenceTest extends TestCase {
                     new Sequence.AckRange(1, 2),
                     new Sequence.AckRange(4, 4),
                 }));
-        assertTrue(sequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
         ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
@@ -135,7 +135,7 @@ public class OutboundSequenceTest extends TestCase {
         sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                     new Sequence.AckRange(1, 5)
                 }));
-        assertFalse(sequence.hasPendingAcknowledgements());
+        assertFalse(sequence.hasUnacknowledgedMessages());
         ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);

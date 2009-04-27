@@ -134,6 +134,17 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             loadSequenceHeaderData(lastAppMessage, message);
             loadAcknowledgementData(lastAppMessage, message);
 
+            // simulating last message delivery
+            Sequence inboundSequence = sequenceManager.getSequence(lastAppMessage.getSequenceId());
+            try {
+                inboundSequence.registerMessage(lastAppMessage, false);
+            } catch (Exception ex) {
+                // TODO L10N
+                throw LOGGER.logSevereException(new RxRuntimeException("Unexpected exception", ex));
+            }
+            inboundSequence.acknowledgeMessageId(lastAppMessage.getMessageNumber());
+            inboundSequence.setAckRequestedFlag();
+
             CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(lastAppMessage.getSequenceId(), lastAppMessage.getMessageNumber());
             dataBuilder.acknowledgementData(lastAppMessage.getAcknowledgementData());
             return dataBuilder.build();

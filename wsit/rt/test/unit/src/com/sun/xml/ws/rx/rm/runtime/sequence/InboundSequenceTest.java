@@ -90,14 +90,14 @@ public class InboundSequenceTest extends TestCase {
     }
 
     public void testPendingAcknowedgements() throws Exception {
-        assertFalse(sequence.hasPendingAcknowledgements());
+        assertFalse(sequence.hasUnacknowledgedMessages());
 
 
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
-        assertTrue(sequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
 
         sequence.acknowledgeMessageId(1);
-        assertFalse(sequence.hasPendingAcknowledgements());
+        assertFalse(sequence.hasUnacknowledgedMessages());
 
         List<Sequence.AckRange> ackedRages;
         ackedRages = sequence.getAcknowledgedMessageIds();
@@ -112,7 +112,7 @@ public class InboundSequenceTest extends TestCase {
                     new Sequence.AckRange(2, 2),
                     new Sequence.AckRange(4, 5)
                 }));
-        assertTrue(sequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
 
         ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(2, ackedRages.size());
@@ -122,7 +122,7 @@ public class InboundSequenceTest extends TestCase {
         assertEquals(5, ackedRages.get(1).upper);
 
         sequence.acknowledgeMessageId(3);
-        assertFalse(sequence.hasPendingAcknowledgements());
+        assertFalse(sequence.hasUnacknowledgedMessages());
         ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);

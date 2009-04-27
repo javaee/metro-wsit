@@ -166,6 +166,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
                 }
             } else { // application message
+                // prevent closing of TBc in case of one-way - we want to send acknowledgement back at least
+                request.keepTransportBackChannelOpen();
+
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                 rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
@@ -366,7 +369,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
         // TODO handle last message number - pass it to the sequence so that it can allocate new unacked messages if necessary
         // int lastMessageNumber = closeSeqElement.getLastMsgNumber();
 
-        inboundSequence.close();
+        String boundSequenceId = rc.getBoundSequenceId(inboundSequence.getId());
+        try {
+            rc.sequenceManager.closeSequence(inboundSequence.getId());
+        } finally {
+            if (boundSequenceId != null) {
+                rc.sequenceManager.closeSequence(boundSequenceId);
+            }
+        }
 
         final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
         responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
