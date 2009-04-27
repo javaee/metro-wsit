@@ -106,6 +106,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 } catch (DuplicateMessageRegistrationException ex) {
                     onCompletion(ex);
                 }
+            } else {
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
             }
         }
 

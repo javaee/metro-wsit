@@ -60,8 +60,7 @@ import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceResponseData;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueFactory;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
@@ -275,7 +274,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
         final CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(rc.communicator.send(request), "CreateSequence", Level.SEVERE));
 
 
-        DeliveryQueue inboundQueue = null;
         if (requestData.getOfferedSequenceId() != null) {
             // we offered an inbound sequence
             if (responseData.getAcceptedSequenceAcksTo() == null) {
@@ -283,12 +281,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
             } else if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(responseData.getAcceptedSequenceAcksTo().toString(), rc.communicator.getDestinationAddress()));
             }
-            inboundQueue = DeliveryQueueFactory.INSTANCE.createDeliveryQueue(
-                    rc,
-                    PostmanPool.INSTANCE.getPostman(),
-                    new ClientDestinationDeliveryCallback(rc));
         }
-        DeliveryQueue outboundQueue = DeliveryQueueFactory.INSTANCE.createDeliveryQueue(
+        DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc,
                 PostmanPool.INSTANCE.getPostman(),
                 new ClientSourceDeliveryCallback(rc));
@@ -297,15 +291,19 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 responseData.getSequenceId(),
                 (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
                 responseData.getExpirationTime(),
-                outboundQueue).getId();
+                outboundQueueBuilder).getId();
 
         if (requestData.getOfferedSequenceId() != null) {
+            DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
+                    rc,
+                    PostmanPool.INSTANCE.getPostman(),
+                    new ClientDestinationDeliveryCallback(rc));
 
             Sequence inboundSequence = rc.sequenceManager.createInboundSequence(
                     requestData.getOfferedSequenceId(),
                     (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
                     responseData.getExpirationTime(),
-                    inboundQueue);
+                    inboundQueueBuilder);
 
             rc.sequenceManager.bindSequences(outboundSequenceId, inboundSequence.getId());
         }

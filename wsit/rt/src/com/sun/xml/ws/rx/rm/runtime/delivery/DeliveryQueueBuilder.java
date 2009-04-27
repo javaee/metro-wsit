@@ -36,23 +36,46 @@
 
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
+import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum DeliveryQueueFactory {
-    INSTANCE;
+public final class DeliveryQueueBuilder {
+    
+    private final @NotNull RuntimeContext rc;
+    private final @NotNull Postman postman;
+    private final @NotNull Postman.Callback deliveryCallback;
 
-    public DeliveryQueue createDeliveryQueue(RuntimeContext rc, Postman postman, Postman.Callback deliveryCallback) {
-//        ReliableMessagingFeature.DeliveryAssurance da = rc.configuration.getDeliveryAssurance();
-//        boolean ordering = rc.configuration.isOrderedDeliveryEnabled();
+    private Sequence sequence;
+
+    public static DeliveryQueueBuilder getBuilder(@NotNull RuntimeContext rc, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+        return new DeliveryQueueBuilder(rc, postman, deliveryCallback);
+    }
+
+    private DeliveryQueueBuilder(@NotNull RuntimeContext rc, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+        assert rc != null;
+        assert postman != null;
+        assert deliveryCallback != null;
+
+        this.rc = rc;
+        this.postman = postman;
+        this.deliveryCallback = deliveryCallback;
+    }
+
+    public void sequence(Sequence sequence) {
+        this.sequence = sequence;
+    }
+
+    public DeliveryQueue build() {
+        //        ReliableMessagingFeature.DeliveryAssurance da = rc.configuration.getDeliveryAssurance();
+        //        boolean ordering = rc.configuration.isOrderedDeliveryEnabled();
 
         // TODO P1 implement
-
-        DeliveryQueue queue = new SimpleDeliveryQueue(postman, deliveryCallback);
-
-        return queue;
+        return new SimpleDeliveryQueue(postman, deliveryCallback, sequence);
     }
 }

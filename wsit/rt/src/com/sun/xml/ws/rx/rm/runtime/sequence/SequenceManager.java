@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Map;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -89,14 +89,14 @@ public interface SequenceManager {
      * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
-     * @param deliveryQueue delivery queue for the newly created sequence
+     * @param deliveryQueueBuilder delivery queue builder that creates delivery queue for the newly created sequence
      * 
      * @return newly created inbound sequence
      * 
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException;
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException;
 
     /**
      * Creates a new inbound sequence object
@@ -105,14 +105,14 @@ public interface SequenceManager {
      * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
-     * @param deliveryQueue delivery queue for the newly created sequence
+     * @param deliveryQueueBuilder delivery queue builder that creates delivery queue for the newly created sequence
      * 
      * @return newly created inbound sequence
      * 
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException;
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException;
     
     /**
      * Generates a unique identifier of a sequence

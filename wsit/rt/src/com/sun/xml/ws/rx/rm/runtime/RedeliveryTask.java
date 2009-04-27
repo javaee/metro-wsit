@@ -46,7 +46,7 @@ import java.util.logging.Level;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class RedeliveryTask implements Runnable {
+final class RedeliveryTask implements Runnable {
     public static interface DeliveryHandler {
         public void putToDeliveryQueue(ApplicationMessage message);
     }

@@ -37,7 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,8 +61,8 @@ final class OutboundSequence extends AbstractSequence {
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,
-            DeliveryQueue deliveryQueue) {
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, deliveryQueue);
+            DeliveryQueueBuilder deliveryQueueBuilder) {
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, deliveryQueueBuilder);
 
         this.unackedMessageIdentifiers = new LinkedList<Long>();
     }

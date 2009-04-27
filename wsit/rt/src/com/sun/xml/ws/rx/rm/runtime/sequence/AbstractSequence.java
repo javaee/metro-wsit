@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,7 +90,7 @@ public abstract class AbstractSequence implements Sequence {
             String securityContextTokenId,
             long expirationTime,
             long initalLastMessageId,
-            DeliveryQueue deliveryQueue) {
+            DeliveryQueueBuilder deliveryQueueBuilder) {
 
         this.sequenceId = sequenceId;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
@@ -103,7 +104,8 @@ public abstract class AbstractSequence implements Sequence {
         this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
 
         // TODO initialize delivery queue
-        this.deliveryQueue = deliveryQueue;
+        deliveryQueueBuilder.sequence(this);
+        this.deliveryQueue = deliveryQueueBuilder.build();
     }
 
     public String getId() {

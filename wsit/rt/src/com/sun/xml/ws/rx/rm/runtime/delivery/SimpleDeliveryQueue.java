@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 
 /**
  *
@@ -43,21 +44,21 @@ import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
  */
 final class SimpleDeliveryQueue implements DeliveryQueue {
 
-    public static interface Strategy {
-        public long getMaxCurrentlyDeliverableMessageNumber();
-        public boolean isDeliverable(long messageNumber);
-    }
+    private final Postman postman;
+    private final Postman.Callback deliveryCallback;
+    private final Sequence sequence;
 
-    private Postman postman;
-    private Postman.Callback deliveryCallback;
-
-    SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback) {
+    SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback, Sequence sequence) {
         this.postman = postman;
         this.deliveryCallback = deliveryCallback;
+        this.sequence = sequence;
     }
 
     public void put(ApplicationMessage message) {
         postman.deliver(message, deliveryCallback);
     }
 
+    public long getRemainingMessageBufferSize() {
+        return DeliveryQueue.UNLIMITED_BUFFER_SIZE;
+    }
 }

@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.Status;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,12 +98,12 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
         }
     }
 
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
-        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueue));
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
     }
 
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueue deliveryQueue) throws DuplicateSequenceException {
-        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueue));
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
     }
 
     public String generateSequenceUID() {

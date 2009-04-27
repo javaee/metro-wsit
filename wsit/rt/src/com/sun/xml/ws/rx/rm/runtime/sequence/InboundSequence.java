@@ -38,7 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,9 +66,9 @@ final class InboundSequence extends AbstractSequence {
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,
-            DeliveryQueue deliveryQueue) {
+            DeliveryQueueBuilder deliveryQueueBuilder) {
 
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueue);
+        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
 
         this.allUnackedMessageNumbers = new TreeSet<Long>();
         this.registeredUnackedMessageNumbers = new HashSet<Long>();

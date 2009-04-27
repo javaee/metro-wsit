@@ -65,7 +65,7 @@ public final class RuntimeContext {
         private final @NotNull Communicator communicator;
         private final @NotNull SourceMessageHandler sourceMessageHandler;
         private final @NotNull DestinationMessageHandler destinationMessageHandler;
-        public RedeliveryTask redeliveryTask;
+        private final @NotNull RedeliveryTask redeliveryTask;
 
 
         public Builder(@NotNull RxConfiguration configuration, @NotNull SequenceManager sequenceManager, @NotNull Communicator communicator) {
@@ -105,9 +105,9 @@ public final class RuntimeContext {
     public final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     public final WsrmProtocolHandler protocolHandler;
     public final ScheduledTaskManager scheduledTaskManager;
-    public final RedeliveryTask redeliveryTask;
-    public final SourceMessageHandler sourceMessageHandler;
-    public final DestinationMessageHandler destinationMessageHandler;
+    final RedeliveryTask redeliveryTask;
+    final SourceMessageHandler sourceMessageHandler;
+    final DestinationMessageHandler destinationMessageHandler;
 
     private RuntimeContext(
             RxConfiguration configuration,

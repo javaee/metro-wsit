@@ -37,15 +37,39 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import java.util.Queue;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public interface DeliveryQueue {
-    public static long UNLIMITED_BUFFER_SIZE = -1;
+public class InOrderDeliveryQueue implements DeliveryQueue {
 
-    public void put(ApplicationMessage message);
+    private final Postman postman;
+    private final Postman.Callback deliveryCallback;
+    private final Sequence sequence;
 
-    public long getRemainingMessageBufferSize();
+    private final long maxMessageBufferSize;
+    private final Queue<ApplicationMessage> postponedMessageQueue;
+
+    public InOrderDeliveryQueue(Postman postman, Callback deliveryCallback, Sequence sequence, long maxMessageBufferSize) {
+        this.postman = postman;
+        this.deliveryCallback = deliveryCallback;
+        this.sequence = sequence;
+
+        this.maxMessageBufferSize = maxMessageBufferSize;
+        this.postponedMessageQueue = null; // TODO
+    }
+
+    public void put(ApplicationMessage message) {
+        // TODO implement inorder
+        postman.deliver(message, deliveryCallback);
+    }
+
+    public long getRemainingMessageBufferSize() {
+        return (maxMessageBufferSize == DeliveryQueue.UNLIMITED_BUFFER_SIZE) ? maxMessageBufferSize : maxMessageBufferSize - postponedMessageQueue.size();
+    }
+
 }

@@ -60,8 +60,7 @@ import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceResponseData;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
-import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueFactory;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
@@ -92,7 +91,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
      * concept of distinguishing between system and application errors in JAXWS RI.
      * The workaround should be removed once the missing concept is introduced.
      */
-    private static final String RM_ACK_PROPERTY_KEY = "RM_ACK";
+    private static final String RM_ACK_PROPERTY_KEY = "RM_ACK"; // TODO P1 use in implementation
     /**
      * TODO javadoc
      */
@@ -321,7 +320,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
         }
 
-        DeliveryQueue inboundQueue = DeliveryQueueFactory.INSTANCE.createDeliveryQueue(
+        DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc,
                 PostmanPool.INSTANCE.getPostman(),
                 destinationDeliveryCallback);
@@ -330,10 +329,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 rc.sequenceManager.generateSequenceUID(),
                 receivedSctId,
                 calculateSequenceExpirationTime(requestData.getExpiry()),
-                inboundQueue);
+                inboundQueueBuilder);
 
         if (requestData.getOfferedSequenceId() != null) {
-            DeliveryQueue outboundQueue = DeliveryQueueFactory.INSTANCE.createDeliveryQueue(
+            DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                     rc,
                     PostmanPool.INSTANCE.getPostman(),
                     sourceDeliveryCallback);
@@ -342,7 +341,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     requestData.getOfferedSequenceId(),
                     receivedSctId,
                     calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()),
-                    outboundQueue);
+                    outboundQueueBuilder);
             rc.sequenceManager.bindSequences(inboundSequence.getId(), outboundSequence.getId());
         }
 
