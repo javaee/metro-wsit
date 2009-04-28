@@ -64,7 +64,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
          * concept of distinguishing between system and application errors in JAXWS RI.
          * The workaround should be removed once the missing concept is introduced.
          */
-        private static final String RM_ACK_PROPERTY_KEY = "RM_ACK"; // TODO P1 use in implementation
+        private static final String RM_ACK_PROPERTY_KEY = "RM_ACK";
         //
         private final JaxwsApplicationMessage request;
         private final RuntimeContext rc;
@@ -94,7 +94,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
             try {
                 if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message
                     response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.sequenceAcknowledgementAction);
-                    rc.protocolHandler.appendAcknowledgementHeaders(response.getMessage(), rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId()));
+                    rc.protocolHandler.appendAcknowledgementHeaders(response, rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId()));
                     resumeParentFiber(response);
                 } else {
                     JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());

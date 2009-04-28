@@ -78,7 +78,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 SequenceManagerFactory.INSTANCE.getClientSequenceManager(configuration.getManagedObjectManager()),
                 new Communicator(
                 "PacketFilteringTubeCommunicator",
-                null, // TODO P3 can we get the endpoint address?
+                context.getAddress(),
                 super.next,
                 null,
                 configuration.getAddressingVersion(),
@@ -176,7 +176,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 }
             }
         }
-        return super.processResponse(response); // TODO: is this ok?
+        return super.processResponse(response);
     }
 
     private List<PacketFilter> getConfiguredFilters(WSBinding binding, RuntimeContext context) {

@@ -147,7 +147,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         Packet packet = communicator.createRequestPacket(requestPacket, new CloseSequenceElement(data), rmVersion.closeSequenceAction, true);
 
         if (data.getAcknowledgementData() != null) {
-            appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+            appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
         }
 
         return packet;
@@ -171,7 +171,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         Packet packet = communicator.createResponsePacket(requestPacket, new CloseSequenceResponseElement(data), rmVersion.closeSequenceResponseAction);
 
         if (data.getAcknowledgementData() != null) {
-            appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+            appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
         }
 
         return packet;
@@ -195,7 +195,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         Packet packet = communicator.createRequestPacket(requestPacket, new TerminateSequenceElement(data), rmVersion.terminateSequenceAction, true);
 
         if (data.getAcknowledgementData() != null) {
-            appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+            appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
         }
 
         return packet;
@@ -221,7 +221,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.terminateSequenceResponseAction);
 
         if (data.getAcknowledgementData() != null) {
-            appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+            appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
         }
 
         return packet;
@@ -240,10 +240,13 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         jaxwsMessage.getHeaders().add(createHeader(sequenceHeaderElement));
     }
 
-    public void appendAcknowledgementHeaders(@NotNull Message jaxwsMessage, @NotNull AcknowledgementData ackData) {
-        assert jaxwsMessage != null;
+    public void appendAcknowledgementHeaders(@NotNull Packet packet, @NotNull AcknowledgementData ackData) {
+        assert packet != null;
+        assert packet.getMessage() != null;
         assert ackData != null;
 
+
+        Message jaxwsMessage = packet.getMessage();
         // ack requested header
         if (ackData.getAckReqestedSequenceId() != null) {
             AckRequestedElement ackRequestedElement = new AckRequestedElement();
@@ -251,6 +254,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
             ackRequestedElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
             jaxwsMessage.getHeaders().add(createHeader(ackRequestedElement));
+
+            packet.invocationProperties.put(RxConfiguration.ACK_REQUESTED_HEADER_SET, Boolean.TRUE);
         }
 
         // sequence acknowledgement header

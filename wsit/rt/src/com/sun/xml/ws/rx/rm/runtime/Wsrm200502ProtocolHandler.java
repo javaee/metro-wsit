@@ -70,8 +70,6 @@ import java.util.List;
 
 /**
  *
- *  TODO consume unprocessed messages
- *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
@@ -179,7 +177,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
 
         message.getHeaders().add(createHeader(sequenceElement));
 
-        appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+        appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
 
         return packet;
     }
@@ -206,7 +204,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     public Packet toPacket(CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
         Packet packet = communicator.createEmptyResponsePacket(requestPacket, rmVersion.closeSequenceAction);
 
-        appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+        appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
 
         return packet;
     }
@@ -229,7 +227,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         Packet packet = communicator.createRequestPacket(requestPacket, new TerminateSequenceElement(data), rmVersion.terminateSequenceAction, true);
 
         if (data.getAcknowledgementData() != null) {
-            appendAcknowledgementHeaders(packet.getMessage(), data.getAcknowledgementData());
+            appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
         }
 
         return packet;
@@ -267,10 +265,13 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         jaxwsMessage.getHeaders().add(createHeader(sequenceHeaderElement));
     }
 
-    public void appendAcknowledgementHeaders(@NotNull Message jaxwsMessage, @NotNull AcknowledgementData ackData) {
-        assert jaxwsMessage != null;
+    public void appendAcknowledgementHeaders(@NotNull Packet packet, @NotNull AcknowledgementData ackData) {
+        assert packet != null;
+        assert packet.getMessage() != null;
         assert ackData != null;
 
+
+        Message jaxwsMessage = packet.getMessage();
         // ack requested header
         if (ackData.getAckReqestedSequenceId() != null) {
             AckRequestedElement ackRequestedElement = new AckRequestedElement();

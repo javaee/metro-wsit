@@ -189,7 +189,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         Packet outboundPacketCopy = message.getPacket().copy(true);
         
         rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
-        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy.getMessage(), message.getAcknowledgementData());
+        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
         Fiber.CompletionCallback responseCallback;
         if (outboundPacketCopy.expectReply == null) {

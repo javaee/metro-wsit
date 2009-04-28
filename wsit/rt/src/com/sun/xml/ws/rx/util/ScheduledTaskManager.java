@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.util;
 
+import com.sun.xml.ws.commons.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -56,6 +57,7 @@ import java.util.concurrent.TimeUnit;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class ScheduledTaskManager {
+    private static final Logger LOGGER = Logger.getLogger(ScheduledTaskManager.class);
 
     private static final long DELAY = 2000;
     private static final long PERIOD = 100;
@@ -101,7 +103,8 @@ public final class ScheduledTaskManager {
     public ScheduledFuture<?> startTask(Runnable task, long delay, long period) {
         final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
-            // TODO: handle error condition
+            // TODO L10N
+            LOGGER.warning(String.format("Unable to store handle for task of class [ %s ]", task.getClass().getName()));
         }
         return taskHandle;
     }

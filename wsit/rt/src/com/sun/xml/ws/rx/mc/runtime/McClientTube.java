@@ -54,6 +54,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.util.UUID;
 import javax.xml.bind.Unmarshaller;
@@ -215,7 +216,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
             }
         }
 
-        // this request seems to be one-way, need to check if there are any RM-Acks set on it.
+        // this request seems to be one-way, need to check if there are is an RM AckRequest set on it.
         // FIXME: this should be made in a RM-agnostic way
         return isBooleanFlagSet(request, RxConfiguration.ACK_REQUESTED_HEADER_SET);
     }

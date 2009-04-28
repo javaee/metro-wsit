@@ -73,7 +73,7 @@ class ServerSourceDeliveryCallback implements Postman.Callback {
         Packet outboundPacketCopy = message.getPacket().copy(true);
 
         rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
-        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy.getMessage(), message.getAcknowledgementData());
+        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
         Fiber parentFiber = rc.suspendedFiberStorage.remove(message.getCorrelationId());
         parentFiber.resume(outboundPacketCopy);

@@ -386,7 +386,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
                 return rc.protocolHandler.toPacket(responseBuilder.build(), request);
             } else {
-                final TerminateSequenceResponseData.Builder responseBuilder = TerminateSequenceResponseData.getBuilder(inboundSequence.getId()); // TODO
+                final TerminateSequenceResponseData.Builder responseBuilder = TerminateSequenceResponseData.getBuilder(inboundSequence.getId());
                 responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
                 return rc.protocolHandler.toPacket(responseBuilder.build(), request);
             }
@@ -421,7 +421,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
     private Packet createEmptyAcknowledgementResponse(Packet request, String sequenceId) throws RxRuntimeException {
         Packet response = rc.communicator.createEmptyResponsePacket(request, rc.rmVersion.sequenceAcknowledgementAction);
-        rc.protocolHandler.appendAcknowledgementHeaders(response.getMessage(), rc.destinationMessageHandler.getAcknowledgementData(sequenceId));
+        rc.protocolHandler.appendAcknowledgementHeaders(response, rc.destinationMessageHandler.getAcknowledgementData(sequenceId));
         return response;
     }
 

@@ -449,7 +449,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 JaxwsApplicationMessage requestMessage = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
 
                 rc.sourceMessageHandler.attachAcknowledgementInfo(requestMessage);
-                rc.protocolHandler.appendAcknowledgementHeaders(requestMessage.getJaxwsMessage(), requestMessage.getAcknowledgementData());
+                rc.protocolHandler.appendAcknowledgementHeaders(requestMessage.getPacket(), requestMessage.getAcknowledgementData());
 
                 rc.communicator.sendAsync(request, new Fiber.CompletionCallback() {
 

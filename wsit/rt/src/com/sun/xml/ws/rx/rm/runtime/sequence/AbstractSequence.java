@@ -274,7 +274,7 @@ public abstract class AbstractSequence implements Sequence {
         try {
             messageIdLock.readLock().lock();
             
-            return deliveryQueue; // TODO copy?
+            return deliveryQueue;
         } finally {
             messageIdLock.readLock().unlock();
         }

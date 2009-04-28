@@ -89,7 +89,7 @@ public abstract class WsrmProtocolHandler {
 
     public abstract void appendSequenceHeader(@NotNull Message jaxwsMessage, @NotNull ApplicationMessage message) throws RxRuntimeException;
 
-    public abstract void appendAcknowledgementHeaders(@NotNull Message jaxwsMessage, @NotNull AcknowledgementData ackData) throws RxRuntimeException;
+    public abstract void appendAcknowledgementHeaders(@NotNull Packet packet, @NotNull AcknowledgementData ackData) throws RxRuntimeException;
 
     public abstract AcknowledgementData getAcknowledgementData(Message jaxwsMessage) throws RxRuntimeException;
 
