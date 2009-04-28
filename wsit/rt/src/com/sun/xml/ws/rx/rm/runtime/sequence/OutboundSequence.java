@@ -129,6 +129,8 @@ final class OutboundSequence extends AbstractSequence {
         if (!unackedMessageIdentifiers.remove(messageId)) {
             throw new IllegalMessageIdentifierException(messageId);
         }
+
+        this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 
     public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
@@ -180,5 +182,7 @@ final class OutboundSequence extends AbstractSequence {
         } finally {
             messageIdLock.writeLock().unlock();
         }
+        
+        this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 }

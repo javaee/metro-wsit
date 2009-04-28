@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
@@ -68,11 +69,14 @@ class ServerSourceDeliveryCallback implements Postman.Callback {
 
     public void deliver(JaxwsApplicationMessage message) {
         rc.sourceMessageHandler.attachAcknowledgementInfo(message);
-        rc.protocolHandler.appendSequenceHeader(message.getJaxwsMessage(), message);
-        rc.protocolHandler.appendAcknowledgementHeaders(message.getJaxwsMessage(), message.getAcknowledgementData());
+
+        Packet outboundPacketCopy = message.getPacket().copy(true);
+
+        rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
+        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy.getMessage(), message.getAcknowledgementData());
 
         Fiber parentFiber = rc.suspendedFiberStorage.remove(message.getCorrelationId());
-        parentFiber.resume(message.getPacket());
+        parentFiber.resume(outboundPacketCopy);
     }
 
 }

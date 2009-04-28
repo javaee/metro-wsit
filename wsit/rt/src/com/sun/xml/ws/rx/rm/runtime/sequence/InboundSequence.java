@@ -156,6 +156,8 @@ final class InboundSequence extends AbstractSequence {
         } finally {
             messageIdLock.writeLock().unlock();
         }
+
+        this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 
     @Override

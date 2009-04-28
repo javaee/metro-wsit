@@ -81,18 +81,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private static final Logger LOGGER = Logger.getLogger(ServerTube.class);
     private static final Level PROTOCOL_FAULT_LOGGING_LEVEL = Level.WARNING;
     /**
-     * The property wih this key may be set by JCaps in the message context to indicate
-     * whether the message that was delivered to the application endpoint should be
-     * acknowledged or not.
-     *
-     * The property value may be "true" or "false", "true" s default.
-     *
-     * Introduction of this property is required as a temporary workaround for missing
-     * concept of distinguishing between system and application errors in JAXWS RI.
-     * The workaround should be removed once the missing concept is introduced.
-     */
-    private static final String RM_ACK_PROPERTY_KEY = "RM_ACK"; // TODO P1 use in implementation
-    /**
      * TODO javadoc
      */
     private static final String SEQUENCE_PROPERTY = "com.sun.xml.ws.sequence";

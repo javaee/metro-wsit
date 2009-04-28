@@ -53,6 +53,19 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
     private static class ResponseCallbackHandler extends AbstractResponseHandler implements Fiber.CompletionCallback {
 
+        /**
+         * The property wih this key may be set by JCaps in the message context to indicate
+         * whether the message that was delivered to the application endpoint should be
+         * acknowledged or not.
+         *
+         * The property value may be "true" or "false", "true" s default.
+         *
+         * Introduction of this property is required as a temporary workaround for missing
+         * concept of distinguishing between system and application errors in JAXWS RI.
+         * The workaround should be removed once the missing concept is introduced.
+         */
+        private static final String RM_ACK_PROPERTY_KEY = "RM_ACK"; // TODO P1 use in implementation
+        //
         private final JaxwsApplicationMessage request;
         private final RuntimeContext rc;
 
@@ -63,7 +76,20 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Packet response) {
-            rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
+            /**
+             * This if clause is a part of the RM-JCaps private contract. JCaps may decide
+             * that the request it received should be resent and thus it should not be acknowledged.
+             *
+             * For more information, see documentation of RM_ACK_PROPERTY_KEY constant field.
+             */
+            String rmAckPropertyValue = String.class.cast(response.invocationProperties.get(RM_ACK_PROPERTY_KEY));
+            if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
+                rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
+            } else {
+                LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
+                return;
+            }
 
             try {
                 if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message
@@ -75,8 +101,8 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
                     rc.sourceMessageHandler.putToDeliveryQueue(message);
                 }
-                
-                // TODO handle RM faults
+
+            // TODO handle RM faults
             } catch (DuplicateMessageRegistrationException ex) {
                 onCompletion(ex);
             }
@@ -112,7 +138,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
 
-        rc.communicator.sendAsync(message.getPacket(), responseCallback);
+        rc.communicator.sendAsync(message.getPacket(), responseCallback); // TODO packet copy
     }
 
     private static boolean isResendPossible(Throwable throwable) {

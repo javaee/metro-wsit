@@ -53,7 +53,10 @@ public abstract class ApplicationMessageBase implements ApplicationMessage {
     private AtomicInteger resendCount = new AtomicInteger();
 
     protected ApplicationMessageBase(@NotNull String correlationId) {
-        assert correlationId != null;
+        if (correlationId == null) {
+            throw new NullPointerException("correlationId initialization parameter must not be 'null'");
+        }
+
         this.correlationId = correlationId;
     }
 

@@ -60,13 +60,25 @@ public final class RuntimeContext {
     }
 
     public static final class Builder {
-        private final @NotNull RxConfiguration configuration;
-        private final @NotNull SequenceManager sequenceManager;
-        private final @NotNull Communicator communicator;
-        private final @NotNull SourceMessageHandler sourceMessageHandler;
-        private final @NotNull DestinationMessageHandler destinationMessageHandler;
-        private final @NotNull RedeliveryTask redeliveryTask;
 
+        private final
+        @NotNull
+        RxConfiguration configuration;
+        private final
+        @NotNull
+        SequenceManager sequenceManager;
+        private final
+        @NotNull
+        Communicator communicator;
+        private final
+        @NotNull
+        SourceMessageHandler sourceMessageHandler;
+        private final
+        @NotNull
+        DestinationMessageHandler destinationMessageHandler;
+        private final
+        @NotNull
+        RedeliveryTask redeliveryTask;
 
         public Builder(@NotNull RxConfiguration configuration, @NotNull SequenceManager sequenceManager, @NotNull Communicator communicator) {
             assert configuration != null;
@@ -85,21 +97,19 @@ public final class RuntimeContext {
             return new RuntimeContext(
                     configuration,
                     sequenceManager,
-                    communicator, 
+                    communicator,
                     new TimestampedCollection<String, Fiber>(),
                     WsrmProtocolHandler.getInstance(configuration, communicator, sequenceManager),
                     new ScheduledTaskManager(),
                     sourceMessageHandler,
                     destinationMessageHandler,
                     redeliveryTask);
-        }        
+        }
     }
-
     public final RxConfiguration configuration;
     public final AddressingVersion addressingVersion;
     public final SOAPVersion soapVersion;
     public final RmVersion rmVersion;
-
     public final SequenceManager sequenceManager;
     public final Communicator communicator;
     public final TimestampedCollection<String, Fiber> suspendedFiberStorage;
@@ -145,11 +155,17 @@ public final class RuntimeContext {
     }
 
     public ScheduledFuture<?> startRedeliveryTask() {
-        return scheduledTaskManager.startTask(redeliveryTask, configuration.getMessageRetransmissionInterval(), configuration.getMessageRetransmissionInterval());
+        return scheduledTaskManager.startTask(
+                redeliveryTask,
+                configuration.getMessageRetransmissionInterval(),
+                configuration.getMessageRetransmissionInterval());
     }
 
     public ScheduledFuture<?> startAckRequesterTask(Runnable ackRequesterTask) {
-        return scheduledTaskManager.startTask(redeliveryTask, configuration.getAcknowledgementRequestInterval(), configuration.getAcknowledgementRequestInterval());
+        return scheduledTaskManager.startTask(
+                ackRequesterTask,
+                configuration.getAcknowledgementRequestInterval(),
+                configuration.getAcknowledgementRequestInterval());
     }
 
     public void stopAllTasks() {

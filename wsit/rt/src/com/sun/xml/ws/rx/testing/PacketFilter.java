@@ -89,11 +89,11 @@ public abstract class PacketFilter {
      */
     protected final String getSequenceId(Packet packet) {
         try {
-            if (notInitialized(packet)) {
+            if (notInitialized(packet) || isRmProtocolMessage(packet)) {
                 return null;
             }
 
-            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, null);
+            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, packet.getMessage().getID(rc.addressingVersion, rc.soapVersion));
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
             return message.getSequenceId();
         } catch (Exception ex) {
@@ -112,11 +112,11 @@ public abstract class PacketFilter {
      */
     protected final long getMessageId(Packet packet) {
         try {
-            if (notInitialized(packet)) {
+            if (notInitialized(packet) || isRmProtocolMessage(packet)) {
                 return UNSPECIFIED;
             }
             
-            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, null);
+            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, packet.getMessage().getID(rc.addressingVersion, rc.soapVersion));
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
             return message.getMessageNumber();
         } catch (Exception ex) {
@@ -133,6 +133,10 @@ public abstract class PacketFilter {
      */
     protected final RmVersion getRmVersion() {
         return rc.rmVersion;
+    }
+
+    protected final boolean isRmProtocolMessage(Packet packet) {
+        return rc.rmVersion.isRmAction(rc.communicator.getWsaAction(packet));
     }
 
     final void configure(RuntimeContext context) {

@@ -119,6 +119,51 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             }
         }
     }
+
+    private static class AmbiguousMepCallbackHandler extends AbstractResponseHandler implements Fiber.CompletionCallback {
+
+        private final ApplicationMessage request;
+        private final RuntimeContext rc;
+
+        public AmbiguousMepCallbackHandler(ApplicationMessage request, RuntimeContext rc) {
+            super(rc.suspendedFiberStorage, request.getCorrelationId());
+            this.request = request;
+            this.rc = rc;
+        }
+
+        public void onCompletion(Packet response) {
+            if (response.getMessage() != null) {
+                // TODO handle RM faults
+                JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
+                rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+                rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
+                
+                rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+                
+                if (message.getSequenceId() != null) {
+                    try {
+                        rc.destinationMessageHandler.registerMessage(message);
+                        rc.destinationMessageHandler.putToDeliveryQueue(message);                        
+                        return;
+                    } catch (DuplicateMessageRegistrationException ex) {
+                        onCompletion(ex);
+                        return;
+                    }
+                }
+            }
+
+            getParentFiber().resume(response);
+        }
+
+        public void onCompletion(Throwable error) {
+            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
+            } else {
+                getParentFiber().resume(error);
+            }
+        }
+    }
+
     //
     private final RuntimeContext rc;
 
@@ -140,17 +185,22 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
     private void deliver(JaxwsApplicationMessage message) {
         rc.sourceMessageHandler.attachAcknowledgementInfo(message);
-        rc.protocolHandler.appendSequenceHeader(message.getJaxwsMessage(), message);
-        rc.protocolHandler.appendAcknowledgementHeaders(message.getJaxwsMessage(), message.getAcknowledgementData());
+
+        Packet outboundPacketCopy = message.getPacket().copy(true);
+        
+        rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
+        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy.getMessage(), message.getAcknowledgementData());
 
         Fiber.CompletionCallback responseCallback;
-        if (message.getPacket().expectReply != null && message.getPacket().expectReply.booleanValue()) {
+        if (outboundPacketCopy.expectReply == null) {
+            responseCallback = new AmbiguousMepCallbackHandler(message, rc);
+        } else if (outboundPacketCopy.expectReply.booleanValue()) {
             responseCallback = new ReqRespMepCallbackHandler(message, rc);
         } else {
             responseCallback = new OneWayMepCallbackHandler(message, rc);
         }
 
-        rc.communicator.sendAsync(message.getPacket(), responseCallback);
+        rc.communicator.sendAsync(outboundPacketCopy, responseCallback);
     }
 
     private static boolean isResendPossible(Throwable throwable) {

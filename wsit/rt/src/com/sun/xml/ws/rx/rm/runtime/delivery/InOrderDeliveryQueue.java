@@ -62,13 +62,22 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     private static final Logger LOGGER = Logger.getLogger(InOrderDeliveryQueue.class);
     private static final MessageIdComparator MSG_ID_COMPARATOR = new MessageIdComparator();
     //
-    private final @NotNull Postman postman;
-    private final @NotNull Postman.Callback deliveryCallback;
-    private final @NotNull Sequence sequence;
+    private final 
+    @NotNull
+    Postman postman;
+    private final 
+    @NotNull
+    Postman.Callback deliveryCallback;
+    private final 
+    @NotNull
+    Sequence sequence;
     //
     private final long maxMessageBufferSize;
-    private final @NotNull BlockingQueue<ApplicationMessage> postponedMessageQueue;
+    private final 
+    @NotNull
+    BlockingQueue<ApplicationMessage> postponedMessageQueue;
     //
+
     public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize) {
         assert postman != null;
         assert deliveryCallback != null;
@@ -84,6 +93,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     }
 
     public void put(ApplicationMessage message) {
+//        LOGGER.info(Thread.currentThread().getName() + " put: mesageNumber = " + message.getMessageNumber());
         assert message.getSequenceId().equals(sequence.getId());
 
         try {
@@ -92,21 +102,37 @@ class InOrderDeliveryQueue implements DeliveryQueue {
             // TODO L10N
             throw LOGGER.logSevereException(new RxRuntimeException("Adding message to an internal message queue was interrupted.", ex));
         }
-        // TODO implement inorder
-        for (;;) {
-            ApplicationMessage deliverableMessage = null;
 
-            synchronized (postponedMessageQueue) {
-                if (isDeliverable(postponedMessageQueue.peek())) {
-                    deliverableMessage = postponedMessageQueue.poll();
-                    assert isDeliverable(deliverableMessage);
+        tryDelivery();
+    }
+    public void onSequenceAcknowledgement() {
+//        LOGGER.info(Thread.currentThread().getName() + " onSequenceAcknowledgement");
+        tryDelivery();
+    }
+    
+    private void tryDelivery() {
+//        LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue.size() = " + postponedMessageQueue.size());
+        if (!postponedMessageQueue.isEmpty()) {
+            for (;;) {
+                ApplicationMessage deliverableMessage = null;
+
+                synchronized (postponedMessageQueue) {
+                    ApplicationMessage queueHead = postponedMessageQueue.peek();
+
+//                    LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue head message number = " + ((queueHead != null) ? queueHead.getMessageNumber() + " is deliverable: " + isDeliverable(queueHead) : "n/a"));
+
+                    if (queueHead != null && isDeliverable(queueHead)) {
+                        deliverableMessage = postponedMessageQueue.poll();
+                        assert isDeliverable(deliverableMessage);
+                    }
                 }
-            }
 
-            if (deliverableMessage != null) {
-                postman.deliver(deliverableMessage, deliveryCallback);
-            } else {
-                break;
+                if (deliverableMessage != null) {
+//                    LOGGER.info(Thread.currentThread().getName() + " delivering message number = " + deliverableMessage.getMessageNumber());
+                    postman.deliver(deliverableMessage, deliveryCallback);
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -118,10 +144,10 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     private boolean isDeliverable(ApplicationMessage message) {
         List<Sequence.AckRange> ackedIds = sequence.getAcknowledgedMessageIds();
         if (ackedIds.isEmpty()) {
-            return message.getMessageNumber() == 1; // this is a first message
+            return message.getMessageNumber() == 1L; // this is a first message
         } else {
             AckRange firstRange = ackedIds.get(0);
-            return (firstRange.lower != 0) ? message.getMessageNumber() == 1 : message.getMessageNumber() == firstRange.upper + 1;
+            return (firstRange.lower != 1L) ? message.getMessageNumber() == 1L : message.getMessageNumber() == firstRange.upper + 1;
         }
     }
 }

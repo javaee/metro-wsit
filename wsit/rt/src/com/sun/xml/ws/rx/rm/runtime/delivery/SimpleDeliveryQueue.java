@@ -61,4 +61,8 @@ final class SimpleDeliveryQueue implements DeliveryQueue {
     public long getRemainingMessageBufferSize() {
         return DeliveryQueue.UNLIMITED_BUFFER_SIZE;
     }
+
+    public void onSequenceAcknowledgement() {
+        // do nothing
+    }
 }

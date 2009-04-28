@@ -73,6 +73,9 @@ final class RedeliveryTask implements Runnable {
         }
 
         for (ApplicationMessage message : readyForResendQueue) {
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.info(String.format("Pputting to sequence [ %s ] delivery queue message with number [ %d ] ", message.getSequenceId(), message.getMessageNumber()));
+            }
             deliveryHandler.putToDeliveryQueue(message);
         }
     }
@@ -92,7 +95,7 @@ final class RedeliveryTask implements Runnable {
      */
     final boolean register(@NotNull ApplicationMessage message, long executionTime) {
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("A packet has been scheduled for a resend:%n%s", message));
+            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a resend on a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
         }
         return scheduledMessages.register(executionTime, message);
     }

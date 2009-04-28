@@ -67,7 +67,7 @@ public abstract class AbstractSequence implements Sequence {
     private final AtomicReference<Status> status;
     private final AtomicBoolean ackRequestedFlag;
     //
-    private long lastMessageId;
+    private volatile long lastMessageId;
     private volatile long lastActivityTime;
     private volatile long lastAcknowledgementRequestTime;
     //
@@ -203,7 +203,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
-        return lastAcknowledgementRequestTime - System.currentTimeMillis() > delayPeriod && hasUnacknowledgedMessages();
+        return System.currentTimeMillis() - lastAcknowledgementRequestTime > delayPeriod && hasUnacknowledgedMessages();
     }
 
     

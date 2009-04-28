@@ -48,4 +48,6 @@ public interface DeliveryQueue {
     public void put(ApplicationMessage message);
 
     public long getRemainingMessageBufferSize();
+
+    public void onSequenceAcknowledgement();
 }
