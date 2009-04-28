@@ -33,43 +33,95 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
-import java.util.Queue;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class InOrderDeliveryQueue implements DeliveryQueue {
+class InOrderDeliveryQueue implements DeliveryQueue {
 
-    private final Postman postman;
-    private final Postman.Callback deliveryCallback;
-    private final Sequence sequence;
+    private static final class MessageIdComparator implements Comparator<ApplicationMessage> {
 
+        public int compare(ApplicationMessage o1, ApplicationMessage o2) {
+            return (o1.getMessageNumber() < o2.getMessageNumber()) ? -1 : (o1.getMessageNumber() > o2.getMessageNumber()) ? 1 : 0;
+        }
+    }
+    private static final Logger LOGGER = Logger.getLogger(InOrderDeliveryQueue.class);
+    private static final MessageIdComparator MSG_ID_COMPARATOR = new MessageIdComparator();
+    //
+    private final @NotNull Postman postman;
+    private final @NotNull Postman.Callback deliveryCallback;
+    private final @NotNull Sequence sequence;
+    //
     private final long maxMessageBufferSize;
-    private final Queue<ApplicationMessage> postponedMessageQueue;
+    private final @NotNull BlockingQueue<ApplicationMessage> postponedMessageQueue;
+    //
+    public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize) {
+        assert postman != null;
+        assert deliveryCallback != null;
+        assert sequence != null;
+        assert maxMessageBufferSize >= DeliveryQueue.UNLIMITED_BUFFER_SIZE;
 
-    public InOrderDeliveryQueue(Postman postman, Callback deliveryCallback, Sequence sequence, long maxMessageBufferSize) {
         this.postman = postman;
         this.deliveryCallback = deliveryCallback;
         this.sequence = sequence;
 
         this.maxMessageBufferSize = maxMessageBufferSize;
-        this.postponedMessageQueue = null; // TODO
+        this.postponedMessageQueue = new PriorityBlockingQueue<ApplicationMessage>(32, MSG_ID_COMPARATOR);
     }
 
     public void put(ApplicationMessage message) {
+        assert message.getSequenceId().equals(sequence.getId());
+
+        try {
+            postponedMessageQueue.put(message);
+        } catch (InterruptedException ex) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new RxRuntimeException("Adding message to an internal message queue was interrupted.", ex));
+        }
         // TODO implement inorder
-        postman.deliver(message, deliveryCallback);
+        for (;;) {
+            ApplicationMessage deliverableMessage = null;
+
+            synchronized (postponedMessageQueue) {
+                if (isDeliverable(postponedMessageQueue.peek())) {
+                    deliverableMessage = postponedMessageQueue.poll();
+                    assert isDeliverable(deliverableMessage);
+                }
+            }
+
+            if (deliverableMessage != null) {
+                postman.deliver(deliverableMessage, deliveryCallback);
+            } else {
+                break;
+            }
+        }
     }
 
     public long getRemainingMessageBufferSize() {
         return (maxMessageBufferSize == DeliveryQueue.UNLIMITED_BUFFER_SIZE) ? maxMessageBufferSize : maxMessageBufferSize - postponedMessageQueue.size();
     }
 
+    private boolean isDeliverable(ApplicationMessage message) {
+        List<Sequence.AckRange> ackedIds = sequence.getAcknowledgedMessageIds();
+        if (ackedIds.isEmpty()) {
+            return message.getMessageNumber() == 1; // this is a first message
+        } else {
+            AckRange firstRange = ackedIds.get(0);
+            return (firstRange.lower != 0) ? message.getMessageNumber() == 1 : message.getMessageNumber() == firstRange.upper + 1;
+        }
+    }
 }

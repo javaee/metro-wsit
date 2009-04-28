@@ -76,6 +76,11 @@ public final class DeliveryQueueBuilder {
         //        boolean ordering = rc.configuration.isOrderedDeliveryEnabled();
 
         // TODO P1 implement
-        return new SimpleDeliveryQueue(postman, deliveryCallback, sequence);
+
+        if (rc.configuration.isOrderedDeliveryEnabled()) {
+            return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, rc.configuration.getDestinationBufferQuota());
+        } else {
+            return new SimpleDeliveryQueue(postman, deliveryCallback, sequence);
+        }
     }
 }
