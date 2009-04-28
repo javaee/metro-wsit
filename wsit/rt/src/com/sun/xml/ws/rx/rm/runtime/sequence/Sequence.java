@@ -129,9 +129,9 @@ public interface Sequence {
     public String getId();
 
     /**
-     * Provides information on the last message id sent on this sequence
+     * Provides information on the message number of the last message registered on this sequence
      *
-     * @return last message identifier registered on this sequence
+     * @return message number of the last message registered on this sequence
      */
     @ManagedAttribute
     @Description("Last message identifier register on this sequence")
