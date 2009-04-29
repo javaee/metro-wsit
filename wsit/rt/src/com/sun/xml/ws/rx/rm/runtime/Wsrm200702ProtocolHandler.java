@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -342,5 +344,12 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
             ackDataBuilder.acknowledgements(ackElement.getId(), ranges);
         }
         return ackDataBuilder.build();
+    }
+
+    @Override
+    public Header createSequenceFaultElementHeader(QName subcode, Object detail) {
+        return Headers.create(rmVersion.getJaxbContext( // TODO P2 include detail
+                addressingVersion),
+                Headers.create(RmVersion.WSRM200702.getJaxbContext(addressingVersion), new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode)));
     }
 }

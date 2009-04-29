@@ -50,8 +50,8 @@ import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.faults.AbstractRmSoapFault;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
-import com.sun.xml.ws.rx.rm.faults.UnknownSequenceFault;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -65,7 +65,6 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
-import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -184,14 +183,12 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
                 return doSuspend();
             }
-        } catch (UnknownSequenceException ex) {
+        } catch (AbstractRmSoapFault ex) { // TODO P1 REMOVE
             LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);
-            UnknownSequenceFault fault = new UnknownSequenceFault(rc.configuration, request, ex.getMessage()); // TODO better SOAP fault creation
-            return doReturnWith(fault.getSoapFaultResponse());
-
-        } catch (AbstractRmSoapFault ex) {
             return doReturnWith(ex.getSoapFaultResponse());
 
+        } catch (AbstractSoapFaultException ex) {
+            return doReturnWith(ex.toResponse(rc, request));
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);

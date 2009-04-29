@@ -61,6 +61,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.util.Communicator;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 
 /**
  *
@@ -120,6 +121,8 @@ public abstract class WsrmProtocolHandler {
     public abstract TerminateSequenceResponseData toTerminateSequenceResponseData(@NotNull Packet packet) throws RxRuntimeException;
 
     public abstract Packet toPacket(@NotNull TerminateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException;
+
+    public abstract Header createSequenceFaultElementHeader(QName subcode, Object detail);
 
     public final boolean containsProtocolMessage(@NotNull Packet packet) {
         assert packet != null;

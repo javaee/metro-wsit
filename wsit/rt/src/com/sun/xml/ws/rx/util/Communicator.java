@@ -103,6 +103,11 @@ public final class Communicator {
 
     public final Packet createRequestPacket(Object jaxbElement, String wsaAction, boolean expectReply) {
         Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
+
+        return createRequestPacket(message, wsaAction, expectReply);
+    }
+
+    public final Packet createRequestPacket(Message message, String wsaAction, boolean expectReply) {
         Packet packet = new Packet(message);
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
@@ -110,7 +115,7 @@ public final class Communicator {
                 packet,
                 addressingVersion,
                 soapVersion,
-                false,
+                !expectReply,
                 wsaAction);
 
         return packet;
@@ -119,20 +124,10 @@ public final class Communicator {
     public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
         if (originalRequestPacket != null) { // this is actually a request carried in a response packet
             return createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
+        } else {
+            Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
+            return createRequestPacket(message, wsaAction, expectReply);
         }
-
-        Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
-        Packet packet = new Packet(message);
-        packet.endpointAddress = destinationAddress;
-        packet.expectReply = expectReply;
-        message.getHeaders().fillRequestAddressingHeaders(
-                packet,
-                addressingVersion,
-                soapVersion,
-                false,
-                wsaAction);
-
-        return packet;
     }
 
     /**
@@ -154,18 +149,7 @@ public final class Communicator {
      * @return a new empty request packet
      */
     public Packet createEmptyRequestPacket(String requestWsaAction, boolean expectReply) {
-        Packet packet = createEmptyRequestPacket(expectReply);
-
-        Message message = Messages.createEmpty(soapVersion);
-        packet.setMessage(message);
-        message.getHeaders().fillRequestAddressingHeaders(
-                packet,
-                addressingVersion,
-                soapVersion,
-                false,
-                requestWsaAction);
-        
-        return packet;
+        return createRequestPacket(Messages.createEmpty(soapVersion), requestWsaAction, expectReply);
     }
 
     /**
@@ -184,6 +168,25 @@ public final class Communicator {
                     responseWsaAction);
         } else { // this is actually a response carried on a request
             return createRequestPacket(jaxbElement, responseWsaAction, false);
+        }
+    }
+
+    /**
+     * TODO javadoc
+     *
+     * @param requestPacket
+     * @param responseWsaAction
+     * @return
+     */
+    public Packet createResponsePacket(Packet requestPacket, Message message, String responseWsaAction) {
+        if (requestPacket != null) { // normal response
+            return requestPacket.createServerResponse(
+                    message,
+                    addressingVersion,
+                    soapVersion,
+                    responseWsaAction);
+        } else { // this is actually a response carried on a request
+            return createRequestPacket(message, responseWsaAction, false);
         }
     }
 
