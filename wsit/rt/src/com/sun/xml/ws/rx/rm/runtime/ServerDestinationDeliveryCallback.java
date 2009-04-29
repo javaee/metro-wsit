@@ -82,7 +82,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
              *
              * For more information, see documentation of RM_ACK_PROPERTY_KEY constant field.
              */
-            String rmAckPropertyValue = String.class.cast(response.invocationProperties.get(RM_ACK_PROPERTY_KEY));
+            String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
             if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
                 rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
             } else {
@@ -138,7 +138,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
 
-        rc.communicator.sendAsync(message.getPacket(), responseCallback); // TODO packet copy
+        rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback); // TODO packet copy
     }
 
     private static boolean isResendPossible(Throwable throwable) {
