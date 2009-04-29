@@ -36,6 +36,8 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
@@ -72,11 +74,8 @@ final class OutboundSequence extends AbstractSequence {
         return unackedMessageIdentifiers;
     }
 
-    public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
-        if (getStatus() != Sequence.Status.CREATED) {
-            // TODO L10N
-            throw new IllegalStateException("Wrong sequence state: " + getStatus());
-        }
+    public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException {
+        checkSequenceCreatedStatus("", Code.Sender); // TODO
 
         if (message.getSequenceId() != null) {
             throw new IllegalArgumentException(String.format(
@@ -123,17 +122,14 @@ final class OutboundSequence extends AbstractSequence {
         return msgNumberKey;
     }
 
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
-        // NOTE: This method will most likely not be used in our implementation as we expect range-based 
-        //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
-        if (!unackedMessageIdentifiers.remove(messageId)) {
-            throw new IllegalMessageIdentifierException(messageId);
-        }
-
-        this.getDeliveryQueue().onSequenceAcknowledgement();
+    public void acknowledgeMessageId(long messageId) {
+        // TODO L10N
+        throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
+        checkSequenceCreatedStatus("", Code.Sender); // TODO
+
         try {
             messageIdLock.writeLock().lock();
 
@@ -157,7 +153,7 @@ final class OutboundSequence extends AbstractSequence {
             // check proper bounds of acked ranges
             AckRange lastAckRange = ranges.get(ranges.size() - 1);
             if (getLastMessageId() < lastAckRange.upper) {
-                throw new IllegalMessageIdentifierException(lastAckRange.upper);
+                throw new InvalidAcknowledgementException(this.getId(), lastAckRange.upper, ranges);
             }
 
             if (unackedMessageIdentifiers.isEmpty()) {

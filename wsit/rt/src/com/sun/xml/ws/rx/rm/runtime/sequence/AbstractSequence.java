@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -288,6 +289,16 @@ public abstract class AbstractSequence implements Sequence {
         String correlationKey = new String(message.getCorrelationId());
         weakUnackedNumberToCorrelationIdMap.put(msgNumberKey, correlationKey);
         weakMessageStorage.put(correlationKey, message);
+    }
+
+    protected final void checkSequenceCreatedStatus(String message, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+        switch (getStatus()) {
+            case CLOSING :
+            case CLOSED :
+                throw new SequenceClosedException(message);
+            case TERMINATING :
+                throw new SequenceTerminatedException(message, code);
+        }
     }
 
     @Override

@@ -40,7 +40,6 @@ import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Detail;
 
 /**
  * If the condition listed below is reached, the RM Destination MUST generate this fault.
@@ -96,10 +95,5 @@ public final class MessageNumberRolloverException extends AbstractSoapFaultExcep
     @Override
     public String getDetailValue() {
         return ""; // TODO P2 implement
-    }
-
-    @Override
-    public void setupDetailElement(Detail detail) {
-        // TODO P2 implement
     }
 }

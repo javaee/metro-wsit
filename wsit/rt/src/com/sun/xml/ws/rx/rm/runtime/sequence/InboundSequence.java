@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -75,10 +76,7 @@ final class InboundSequence extends AbstractSequence {
     }
 
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
-        if (getStatus() != Sequence.Status.CREATED) {
-            // TODO L10N
-            throw new IllegalStateException("Wrong sequence state: " + getStatus());
-        }
+        checkSequenceCreatedStatus("", Code.Receiver); // TODO P2 message
 
         if (!this.getId().equals(message.getSequenceId())) {
             throw new IllegalArgumentException(String.format(
@@ -118,40 +116,23 @@ final class InboundSequence extends AbstractSequence {
         return allUnackedMessageNumbers;
     }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException {
-        // NOTE: This method is not meant to be used on inbound sequence in our implementation right now as we recieve 
-        //       only one message at a time. Thus we don't bother optimizing it.
-        for (AckRange range : ranges) {
-            for (long index = range.lower; index <= range.upper; index++) {
-                acknowledgeMessageId(index);
-            }
-        }
+    public void acknowledgeMessageIds(List<AckRange> ranges) {
+        // TODO L10N
+        throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
-        if (getStatus() != Sequence.Status.CREATED) {
-            throw new IllegalStateException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getStatus()));
-        }
+        checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getStatus()), Code.Receiver);
 
         try {
             messageIdLock.writeLock().lock();
 
             if (!registeredUnackedMessageNumbers.remove(messageId)) {
-                // TODO L10N
-                LOGGER.warning(String.format(
-                        "Message number [ %d ] not found among the %s unacknowledged message numbers on a sequence [ %s ].",
-                        messageId,
-                        "registered",
-                        this.getId()));
+                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
             }
 
             if (!allUnackedMessageNumbers.remove(messageId)) {
-                // TODO L10N
-                LOGGER.warning(String.format(
-                        "Message number [ %d ] not found among the %s unacknowledged message numbers on a sequence [ %s ].",
-                        messageId,
-                        "all",
-                        this.getId()));
+                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
             }
         } finally {
             messageIdLock.writeLock().unlock();

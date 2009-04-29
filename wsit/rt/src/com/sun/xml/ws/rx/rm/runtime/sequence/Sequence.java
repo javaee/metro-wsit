@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.List;
@@ -148,9 +149,9 @@ public interface Sequence {
      * @exception DuplicateMessageNumberException in case a message with such message number
      * has already been registered with the sequence
      *
-     * @exception IllegalStateException in a case the sequence is closed
+     * @exception AbstractSoapFaultException in a case the sequence is closed or terminated
      */
-    public void registerMessage(@NotNull ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException;
+    public void registerMessage(@NotNull ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException;
 
     /**
      * Retrieves a message stored within the sequence under the provided {@code correlationId}
@@ -206,12 +207,12 @@ public interface Sequence {
      *
      * @param ranges message identifier ranges to be acknowledged
      *
-     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a messages
-     * with the given identifiers have been already registered
-     *
-     * @exception IllegalStateException in case the sequence is closed
+     * @exception InvalidAcknowledgementException is generated when acked ranges contain
+     * a SequenceAcknowledgement covering messages that have not been sent.
+     * 
+     * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException;
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException;
 
     /**
      * Marks given message identifier with the sequence as aknowledged
@@ -221,9 +222,9 @@ public interface Sequence {
      * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message
      * with the given identifier has been already acknowledged
      *
-     * @exception IllegalStateException in case the sequence is closed
+     * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException;
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, AbstractSoapFaultException;
 
     /**
      * Determines whether such message number has been already acknowledged on the sequence

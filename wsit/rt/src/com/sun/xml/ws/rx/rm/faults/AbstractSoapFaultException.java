@@ -44,7 +44,6 @@ import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Detail;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 
@@ -72,8 +71,8 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
     private final boolean mustTryTodeliver;
     private final String faultReasonText;
 
-    protected AbstractSoapFaultException(String exceptionMessage, String faultReasonText, boolean mustTryToDeliver, Throwable originalReason) {
-        super(exceptionMessage, originalReason);
+    protected AbstractSoapFaultException(String exceptionMessage, String faultReasonText, boolean mustTryToDeliver, Throwable cause) {
+        super(exceptionMessage, cause);
         
         this.faultReasonText = faultReasonText;
         this.mustTryTodeliver = mustTryToDeliver;
@@ -93,8 +92,6 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
     public final String getReason() {
         return faultReasonText;
     }
-
-    public abstract void setupDetailElement(Detail detail);
 
     public abstract String getDetailValue();
 
@@ -134,7 +131,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
                     break;
                 case SOAP_12:
                     soapFault.appendFaultSubcode(getSubcode(rc.rmVersion));
-                    setupDetailElement(soapFault.addDetail());
+                    soapFault.addDetail().setValue(getDetailValue());
                     break;
                 default:
                     throw new RxRuntimeException("Unsupported SOAP version: '" + rc.soapVersion.toString() + "'");
@@ -158,7 +155,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
      *
      * @return
      */
-    private static String getProperFaultActionForAddressingVersion(RmVersion rmVersion, AddressingVersion addressingVersion) {
+    protected static String getProperFaultActionForAddressingVersion(RmVersion rmVersion, AddressingVersion addressingVersion) {
         return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.wsrmFaultAction;
     }
 }

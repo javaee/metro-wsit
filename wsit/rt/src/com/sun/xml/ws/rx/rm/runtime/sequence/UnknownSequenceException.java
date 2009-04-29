@@ -40,7 +40,6 @@ import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Detail;
 
 /**
  * Inicates that the sequence with given sequence identifier is not available.
@@ -98,11 +97,6 @@ public final class UnknownSequenceException extends AbstractSoapFaultException {
     @Override
     public QName getSubcode(RmVersion rv) {
         return rv.unknownSequenceFaultCode;
-    }
-
-    @Override
-    public void setupDetailElement(Detail detail) {
-        // TODO P2 implement
     }
 
     @Override

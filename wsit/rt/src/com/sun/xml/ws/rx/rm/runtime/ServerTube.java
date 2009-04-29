@@ -49,8 +49,8 @@ import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.rm.faults.AbstractRmSoapFault;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -183,11 +183,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
                 return doSuspend();
             }
-        } catch (AbstractRmSoapFault ex) { // TODO P1 REMOVE
-            LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);
-            return doReturnWith(ex.getSoapFaultResponse());
-
         } catch (AbstractSoapFaultException ex) {
+            LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);
             return doReturnWith(ex.toResponse(rc, request));
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
@@ -229,7 +226,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             LOGGER.exiting();
         }
     }
-    private Packet processProtocolRequest(Packet request) throws AbstractRmSoapFault {
+    private Packet processProtocolRequest(Packet request) throws AbstractSoapFaultException {
         String wsaAction = rc.communicator.getWsaAction(request);
         if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
@@ -253,25 +250,24 @@ public class ServerTube extends AbstractFilterTubeImpl {
         if (requestData.getOfferedSequenceId() != null) {
             if (rc.sequenceManager.isValid(requestData.getOfferedSequenceId())) {
                 // we already have such sequence
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        LocalizationMessages.WSRM_1137_OFFERED_ID_ALREADY_IN_USE(requestData.getOfferedSequenceId())));
+                throw new CreateSequenceRefusedFault(
+                        LocalizationMessages.WSRM_1137_OFFERED_ID_ALREADY_IN_USE(requestData.getOfferedSequenceId()),
+                        Code.Sender);
             }
 
             final String wsaTo = rc.communicator.getWsaTo(request);
             try {
                 requestDestination = new WSEndpointReference(new URI(wsaTo), rc.addressingVersion).toSpec();
             } catch (URISyntaxException e) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        LocalizationMessages.WSRM_1129_INVALID_VALUE_OF_MESSAGE_HEADER("To", "CreateSequence", wsaTo)), e);
+                throw new CreateSequenceRefusedFault(
+                        LocalizationMessages.WSRM_1129_INVALID_VALUE_OF_MESSAGE_HEADER("To", "CreateSequence", wsaTo),
+                        Code.Sender,
+                        e);
             } catch (NullPointerException e) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        LocalizationMessages.WSRM_1130_MISSING_MESSAGE_HEADER("To", "CreateSequence", wsaTo)), e);
+                throw new CreateSequenceRefusedFault(
+                        LocalizationMessages.WSRM_1130_MISSING_MESSAGE_HEADER("To", "CreateSequence", wsaTo),
+                        Code.Sender,
+                        e);
             }
         }
 
@@ -283,25 +279,22 @@ public class ServerTube extends AbstractFilterTubeImpl {
             // and if the STR id equals to the one in this session...
             String activeSctId = getSecurityContextTokenId(request);
             if (activeSctId == null) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        LocalizationMessages.WSRM_1133_NO_SECURITY_TOKEN_IN_REQUEST_PACKET()));
+                throw new CreateSequenceRefusedFault(
+                        LocalizationMessages.WSRM_1133_NO_SECURITY_TOKEN_IN_REQUEST_PACKET(),
+                        Code.Sender);
             }
             try {
                 receivedSctId = Utilities.extractSecurityContextTokenId(requestData.getStrType());
             } catch (RxException ex) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        ex.getMessage()));
+                throw new CreateSequenceRefusedFault(
+                        ex.getMessage(),
+                        Code.Sender);
             }
 
             if (!activeSctId.equals(receivedSctId)) {
-                throw LOGGER.logSevereException(new CreateSequenceRefusedFault(
-                        rc.configuration,
-                        request,
-                        LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(receivedSctId, activeSctId)));
+                throw new CreateSequenceRefusedFault(
+                        LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(receivedSctId, activeSctId),
+                        Code.Sender);
             }
         }
 
