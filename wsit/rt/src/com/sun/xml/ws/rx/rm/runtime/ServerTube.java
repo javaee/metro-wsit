@@ -178,10 +178,15 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
                     }
                 }
-                rc.destinationMessageHandler.putToDeliveryQueue(message);
 
-                rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
-                return doSuspend();
+                synchronized(message.getCorrelationId()) {
+                    // this synchronization is needed so that all 3 operations occur before
+                    // AbstractResponseHandler.getParentFiber() is invoked on the response thread
+                    rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
+                    rc.destinationMessageHandler.putToDeliveryQueue(message);
+
+                    return doSuspend();
+                }
             }
         } catch (AbstractSoapFaultException ex) {
             LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);

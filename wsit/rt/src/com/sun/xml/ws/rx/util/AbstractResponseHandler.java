@@ -56,7 +56,14 @@ public class AbstractResponseHandler {
     }
 
     protected final Fiber getParentFiber() {
-        return suspendedFiberStorage.remove(correlationId);
+        synchronized(correlationId) {
+            // this synchronization is needed to make sure that following set of operations on the request side
+            // 1. adding fiber to suspended storage,
+            // 2. sending message on a new fiber
+            // 3. suspending original parent fiber
+            // finishes before this one
+            return suspendedFiberStorage.remove(correlationId);
+        }
     }
 
     protected final void resumeParentFiber(Packet response) throws RxRuntimeException {

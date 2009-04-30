@@ -138,7 +138,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
     private void deliver(JaxwsApplicationMessage message) {
         Fiber.CompletionCallback responseCallback = new ResponseCallbackHandler(message, rc);
 
-        rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback); // TODO packet copy
+        rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback);
     }
 
     private static boolean isResendPossible(Throwable throwable) {
