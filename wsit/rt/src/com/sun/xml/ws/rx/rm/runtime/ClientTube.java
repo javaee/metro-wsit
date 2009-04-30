@@ -177,11 +177,16 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     request,
                     request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
 
-            rc.sourceMessageHandler.registerMessage(message, outboundSequenceId.value);
-            rc.sourceMessageHandler.putToDeliveryQueue(message);
-            rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
 
-            return super.doSuspend();
+            rc.sourceMessageHandler.registerMessage(message, outboundSequenceId.value);
+
+            synchronized(message.getCorrelationId()) {
+                // this synchronization is needed so that all 3 operations occur before
+                // AbstractResponseHandler.getParentFiber() is invoked on the response thread
+                rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
+                rc.sourceMessageHandler.putToDeliveryQueue(message);
+                return super.doSuspend();
+            }
         } catch (DuplicateMessageRegistrationException ex) {
             // TODO P2 duplicate message exception handling
             LOGGER.logSevereException(ex);
