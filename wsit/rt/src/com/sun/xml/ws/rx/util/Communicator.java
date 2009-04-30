@@ -209,7 +209,7 @@ public final class Communicator {
         requestPacket.transportBackChannel.close();
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(requestPacket.invocationProperties);
-        return requestPacket;
+        return emptyReturnPacket;
     }
 
     /**
