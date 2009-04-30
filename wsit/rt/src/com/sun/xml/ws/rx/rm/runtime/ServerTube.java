@@ -147,7 +147,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             String wsaAction = rc.communicator.getWsaAction(request);
             if (rc.rmVersion.isRmAction(wsaAction)) { // protocol message
                 if (rc.rmVersion.isRmProtocolRequest(wsaAction)) { // protocol request
-                    return doReturnWith(processProtocolRequest(request));
+                    return doReturnWith(processProtocolRequest(request, wsaAction));
                 } else { // protocol response
                     return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
                 }
@@ -226,8 +226,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             LOGGER.exiting();
         }
     }
-    private Packet processProtocolRequest(Packet request) throws AbstractSoapFaultException {
-        String wsaAction = rc.communicator.getWsaAction(request);
+    private Packet processProtocolRequest(Packet request, String wsaAction) throws AbstractSoapFaultException {
         if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
         } else if (rc.rmVersion.closeSequenceAction.equals(wsaAction)) {
