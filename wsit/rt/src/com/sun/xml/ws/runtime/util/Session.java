@@ -36,6 +36,7 @@
 package com.sun.xml.ws.runtime.util;
 
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 
 /**
  * The <code> Session </Session> object is used to manage state between multiple requests
@@ -58,24 +59,37 @@ public class Session {
      * Session manager that can handle Sessions of this exact type.
      * (Different SessionManagers might use different subclasses of this Class)
      */
-    private final SessionManager manager;
+    private SessionManager manager;
     /*
      * These fields might be persisted
      */
     /**
      * Unique key based either on the SCT or RM sequence id for the session
      */
-    private final String key;
+    private String key;
     /**
      * A container for user-defined data that will be exposed in WebServiceContext.
      */
-    private final Object userData;
+    private Object userData;
     private SecurityContextTokenInfo securityInfo;
     /*
      * These fields are for internal use
      */
-    private final long creationTime;
+    private long creationTime;
     private long lastAccessedTime;
+
+    protected Session(){
+        creationTime = lastAccessedTime =
+                System.currentTimeMillis();
+    }
+
+    public void init(SessionManager manager, String key, Object userData){
+        this.manager = manager;
+        this.userData = userData;
+        this.key = key;
+        creationTime = lastAccessedTime =
+                System.currentTimeMillis();
+    }
 
     /**
      * Public constructor
@@ -118,6 +132,10 @@ public class Session {
      */
     public SecurityContextTokenInfo getSecurityInfo() {
         return securityInfo;
+    }
+
+    public SecurityContextTokenInfo createSecurityContextInfo(){
+        return new SecurityContextTokenInfoImpl();
     }
 
     /**
