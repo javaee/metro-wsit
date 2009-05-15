@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.24 2009-03-30 18:45:46 jdg6688 Exp $
+ * $Id: WSTrustElementFactory.java,v 1.25 2009-05-15 03:47:45 jdg6688 Exp $
  */
 
 /*
@@ -76,6 +76,7 @@ import com.sun.xml.ws.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import java.util.List;
@@ -146,6 +147,18 @@ public abstract class WSTrustElementFactory {
     }
 
     public static WSTrustElementFactory newInstance() {
+        return trustElemFactory;
+    }
+
+    public static WSTrustElementFactory newInstance(String nsUri){
+        if (WSTrustVersion.WS_TRUST_13_NS_URI.equals(nsUri)){
+            return trustElemFactory13;
+        } else if (WSSCVersion.WSSC_13_NS_URI.equals(nsUri)){
+            return com.sun.xml.ws.security.secconv.WSSCElementFactory13.newInstance();
+        } else if (WSSCVersion.WSSC_10_NS_URI.equals(nsUri)){
+            return com.sun.xml.ws.security.secconv.WSSCElementFactory.newInstance();
+        }
+
         return trustElemFactory;
     }
     
@@ -239,6 +252,8 @@ public abstract class WSTrustElementFactory {
    public abstract KeyIdentifier createKeyIdentifier(String valueType, String encodingType);
    
    public abstract SecurityTokenReference createSecurityTokenReference(Reference ref);
+
+   public abstract SecurityContextToken createSecurityContextToken(final URI identifier, final String instance, final String wsuId);
 
    /**
      * Create a RequestedAttachedReference.

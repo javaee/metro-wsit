@@ -1,5 +1,5 @@
 /*
- * $Id: WSTrustElementFactoryImpl.java,v 1.20 2009-03-30 18:45:47 jdg6688 Exp $
+ * $Id: WSTrustElementFactoryImpl.java,v 1.21 2009-05-15 03:47:45 jdg6688 Exp $
  */
 
 /*
@@ -103,6 +103,7 @@ import com.sun.xml.ws.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 
 import java.net.URI;
@@ -554,6 +555,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         } catch (Exception e) {
             throw new RuntimeException("There was a problem while creating STR from JAXBElement", e);
         }
+     }
+
+     public SecurityContextToken createSecurityContextToken(final URI identifier, final String instance, final String wsuId){
+        throw new UnsupportedOperationException("this operation is not supported");
      }
 
      public JAXBElement toJAXBElement(final BaseSTSRequest request) {
