@@ -41,6 +41,7 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.Token;
@@ -57,11 +58,12 @@ import static com.sun.xml.ws.security.impl.policy.Constants.logger;
  */
 public class AsymmetricBindingProcessor extends BindingProcessor {
     private final AsymmetricBinding binding;
+    private SecurityPolicyVersion spVersion = null;
     
     /** Creates a new instance of AsymmetricBindingProcessor */
     public AsymmetricBindingProcessor(AsymmetricBinding asBinding,XWSSPolicyContainer container,
             boolean isServer,boolean isIncoming,Vector<SignedParts> signedParts,Vector<EncryptedParts> encryptedParts,
-            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements) {
+            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements,SecurityPolicyVersion spVersion) {
         this.binding = asBinding;
         this.container = container;
         this.isServer = isServer;
@@ -74,6 +76,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         this.signedElements = signedElements;
         this.encryptedElements = encryptedElements;
         this.encryptedParts = encryptedParts;
+        this.spVersion = spVersion;
     }
     
     
@@ -129,7 +132,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"Token reference by primary signature with ID "+primarySP.getUUID()+" will be Integrity protected");
             }
-            protectToken((WSSPolicy) primarySP.getKeyBinding());
+            protectToken((WSSPolicy) primarySP.getKeyBinding(),spVersion);
         }
         
     }
