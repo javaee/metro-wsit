@@ -105,12 +105,13 @@ import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImp
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import java.security.cert.X509Certificate;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+//import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.util.Iterator;
 import org.w3c.dom.Text;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
+import com.sun.xml.wss.impl.misc.Base64;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;

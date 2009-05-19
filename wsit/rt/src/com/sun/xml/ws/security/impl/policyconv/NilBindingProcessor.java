@@ -42,6 +42,7 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.MessageLayout;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
@@ -78,12 +79,12 @@ public class NilBindingProcessor extends BindingProcessor{
     }
     
     @Override
-    protected void protectToken(WSSPolicy token){
+    protected void protectToken(WSSPolicy token,SecurityPolicyVersion spVersion){
         
     }
     
     @Override
-    protected void protectToken(WSSPolicy token,boolean ignoreSTR){
+    protected void protectToken(WSSPolicy token,boolean ignoreSTR,SecurityPolicyVersion spVersion){
         
     }
     

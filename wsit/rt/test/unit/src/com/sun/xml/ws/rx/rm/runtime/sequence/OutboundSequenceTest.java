@@ -146,7 +146,7 @@ public class OutboundSequenceTest extends TestCase {
             sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                         new Sequence.AckRange(1, 6)
                     }));
-        } catch (IllegalMessageIdentifierException e) {
+        } catch (InvalidAcknowledgementException e) {
             passed = true;
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);
@@ -154,7 +154,7 @@ public class OutboundSequenceTest extends TestCase {
         passed = false;
         try {
             sequence.acknowledgeMessageId(6);
-        } catch (IllegalMessageIdentifierException e) {
+        } catch (InvalidAcknowledgementException e) {
             passed = true;
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);

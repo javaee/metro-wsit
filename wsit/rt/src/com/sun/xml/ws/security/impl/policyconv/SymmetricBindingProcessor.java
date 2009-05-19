@@ -71,10 +71,11 @@ import com.sun.xml.ws.security.policy.IssuedToken;
  */
 public class SymmetricBindingProcessor extends BindingProcessor{
     private SymmetricBinding binding = null;
+    private  SecurityPolicyVersion spVersion;
     /** Creates a new instance of SymmetricBindingProcessor */
     public SymmetricBindingProcessor(SymmetricBinding binding,XWSSPolicyContainer container,
             boolean isServer,boolean isIncoming,Vector<SignedParts> signedParts,Vector<EncryptedParts> encryptedParts,
-            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements) {
+            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements,SecurityPolicyVersion spVersion) {
         this.binding = binding;
         this.container = container;
         this.isServer = isServer;
@@ -87,6 +88,7 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         this.signedElements = signedElements;
         this.encryptedElements = encryptedElements;
         this.encryptedParts = encryptedParts;
+        this.spVersion = spVersion;
     }
     
     
@@ -166,9 +168,9 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(binding.getTokenProtection()){
             WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
             if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
-                protectToken(policy,true);
+                protectToken(policy,true,spVersion);
             }else{
-                protectToken((WSSPolicy) policy.getKeyBinding(),true);
+                protectToken((WSSPolicy) policy.getKeyBinding(),true,spVersion);
             }
         }
         

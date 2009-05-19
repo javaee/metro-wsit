@@ -349,7 +349,7 @@ public class TokenProcessor {
         SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
         if(this.isServer && !isIncoming){
             if(!spVersion.includeTokenAlways.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
+                xwssToken.setIncludeToken(spVersion.includeTokenNever);
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
                 }
@@ -358,7 +358,7 @@ public class TokenProcessor {
         }else if(!this.isServer && isIncoming){
             if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken()) ||
                     spVersion.includeTokenOnce.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
+                xwssToken.setIncludeToken(spVersion.includeTokenNever);
                 
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
@@ -375,13 +375,13 @@ public class TokenProcessor {
         } else{
             // SecurityPolicy 1.2
             if(spVersion.includeTokenAlways.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlways);
+                xwssToken.setIncludeToken(spVersion.includeTokenAlways);
             } else if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenAlwaysToRecipient);
+                xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
             } else if(spVersion.includeTokenNever.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
+                xwssToken.setIncludeToken(spVersion.includeTokenNever);
             } else if(spVersion.includeTokenOnce.equals(token.getIncludeToken())){
-                xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenOnce);
+                xwssToken.setIncludeToken(spVersion.includeTokenOnce);
             }
         }
     }

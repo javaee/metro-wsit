@@ -49,6 +49,7 @@ import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.RmSecurityException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
@@ -156,7 +157,15 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 request.keepTransportBackChannelOpen();
 
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+
+                if (!isSecurityContextTokenIdValid(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
+                    // TODO L10N + maybe throw SOAP fault exception?
+                    throw new RmSecurityException("Security context token on the message does not match the token bound to the sequence");
+                }
+
+
                 rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
                 rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
@@ -459,6 +468,19 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private final String getSecurityContextTokenId(Packet packet) {
         Session session = getSession(packet);
         return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
+    }
+
+    /**
+     * Determines whether the security context token identifier used to secure the message
+     * wrapped in the packet is the expected one
+     *
+     * @param expectedStrId expected security context token identifier
+     * @param packet packet wrapping the checked message
+     * @returns {code true} if the actual security context token identifier equals to the expected one
+     */
+    public final boolean isSecurityContextTokenIdValid(String expectedSctId, Packet packet) {
+        String actualSctId = getSecurityContextTokenId(packet);
+        return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
     }
 
     private final long calculateSequenceExpirationTime(long expiryDuration) {

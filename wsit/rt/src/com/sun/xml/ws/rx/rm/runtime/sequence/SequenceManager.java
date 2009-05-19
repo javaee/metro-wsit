@@ -66,7 +66,7 @@ public interface SequenceManager {
     
     @ManagedAttribute
     @Description("All RM sequences")
-    public Map<String, AbstractSequence> sequences();
+    public Map<String, ? extends Sequence> sequences();
 
     @ManagedAttribute
     @Description("Collection of sequence ID pairs that form an RM session")

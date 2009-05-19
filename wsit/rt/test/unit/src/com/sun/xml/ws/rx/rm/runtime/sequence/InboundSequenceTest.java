@@ -136,17 +136,16 @@ public class InboundSequenceTest extends TestCase {
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);
 
-        passed = false;
         try {
             // duplicate message acknowledgement
             sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                         new Sequence.AckRange(2, 2),
                         new Sequence.AckRange(4, 5)
                     }));
-        } catch (IllegalMessageIdentifierException e) {
-            passed = true;
+        } catch (UnsupportedOperationException e) {
+            return;
         }
-        assertTrue("IllegalMessageIdentifierException expected", passed);
+        fail("UnsupportedOperationException expected");
     }
 
     public void testIsAcknowledged() throws Exception {

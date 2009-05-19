@@ -53,7 +53,7 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 @ManagedObject
 @Description("In Memory RM Sequence Manager")
-@AMXMetadata(type="RMSequenceManager", pathPart="RMSequenceManager")
+@AMXMetadata(type = "RMSequenceManager", pathPart = "RMSequenceManager")
 final class DefaultInMemorySequenceManager implements SequenceManager {
 
     private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
@@ -68,12 +68,30 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
         }
     }
 
-    public Map<String, AbstractSequence> sequences() {
+    public Map<String, ? extends Sequence> sequences() {
         return sequences;
     }
 
     public Map<String, String> boundSequences() {
         return boundSequences;
+    }
+
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
+    }
+
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
+    }
+
+    public String generateSequenceUID() {
+        return "uuid:" + UUID.randomUUID();
+    }
+
+    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = getSequence(sequenceId);
+        sequence.close();
+        return sequence;
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
@@ -96,24 +114,6 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
         } finally {
             internalDataAccessLock.readLock().unlock();
         }
-    }
-
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
-    }
-
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
-    }
-
-    public String generateSequenceUID() {
-        return "uuid:" + UUID.randomUUID();
-    }
-
-    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
-        Sequence sequence = getSequence(sequenceId);
-        sequence.close();
-        return sequence;
     }
 
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
@@ -189,11 +189,7 @@ final class DefaultInMemorySequenceManager implements SequenceManager {
                 throw new UnknownSequenceException(referenceSequenceId);
             }
 
-            if (boundSequences.containsKey(referenceSequenceId)) {
-                return sequences.get(boundSequences.get(referenceSequenceId));
-            } else {
-                return null;
-            }
+            return (boundSequences.containsKey(referenceSequenceId)) ? sequences.get(boundSequences.get(referenceSequenceId)) : null;
         } finally {
             internalDataAccessLock.readLock().unlock();
         }

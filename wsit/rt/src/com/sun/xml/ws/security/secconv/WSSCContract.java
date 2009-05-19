@@ -395,7 +395,7 @@ public class WSSCContract {
         context.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));
         
         final SecurityContextTokenInfo sctinfo =
-                new SecurityContextTokenInfoImpl();
+                session.createSecurityContextInfo();
         sctinfo.setIdentifier(token.getIdentifier().toString());
         sctinfo.setExternalId(token.getWsuId());
         sctinfo.addInstance(null, secret);

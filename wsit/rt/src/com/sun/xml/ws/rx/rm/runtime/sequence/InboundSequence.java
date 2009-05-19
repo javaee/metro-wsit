@@ -56,14 +56,14 @@ import java.util.logging.Level;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class InboundSequence extends AbstractSequence {
+public final class InboundSequence extends AbstractSequence {
 
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     //
     private final Set<Long> allUnackedMessageNumbers;
     private final Set<Long> registeredUnackedMessageNumbers;
 
-    InboundSequence(
+    public InboundSequence(
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,

@@ -53,13 +53,13 @@ import java.util.List;
  * TODO make class thread-safe
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class OutboundSequence extends AbstractSequence {
+public final class OutboundSequence extends AbstractSequence {
 
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
     private final List<Long> unackedMessageIdentifiers;
 
-    OutboundSequence(
+    public OutboundSequence(
             String sequenceId,
             String securityContextTokenId,
             long expirationTime,
