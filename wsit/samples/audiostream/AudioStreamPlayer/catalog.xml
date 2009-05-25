@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
-    <system systemId="http://localhost:8080/WebServiceMediaStreamer/WavStreamerService?wsdl" uri="xml-resources/web-service-references/WavStreamerService/wsdl/localhost_8080/WebServiceMediaStreamer/WavStreamerService.wsdl"/>
-    <system systemId="http://localhost:8080/WebServiceMediaStreamer/WavStreamerService?xsd=1" uri="xml-resources/web-service-references/WavStreamerService/wsdl/localhost_8080/WebServiceMediaStreamer/WavStreamerService.xsd_1.xsd"/>
-    <system systemId="http://localhost:8080/AudioStreamProviderApp/AudioStreamerService?wsdl" uri="xml-resources/web-service-references/AudioStreamerService/wsdl/localhost_8080/AudioStreamProviderApp/AudioStreamerService.wsdl"/>
-    <system systemId="http://localhost:8080/AudioStreamProviderApp/AudioStreamerService?xsd=1" uri="xml-resources/web-service-references/AudioStreamerService/wsdl/localhost_8080/AudioStreamProviderApp/AudioStreamerService.xsd_1.xsd"/>
-</catalog>
