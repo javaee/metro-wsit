@@ -58,7 +58,7 @@ public interface Sequence {
     public static final long MAX_MESSAGE_ID = 9223372036854775807L;
     public static final long NO_EXPIRATION = -1;
     
-    public static enum Status {
+    public static enum State {
         // CREATING(10) not needed
         CREATED(15),
         CLOSING(20),
@@ -67,7 +67,7 @@ public interface Sequence {
 
         private int value;
         
-        private Status(int value) {
+        private State(int value) {
             this.value = value;
         }
         
@@ -75,8 +75,8 @@ public interface Sequence {
             return value;
         }
         
-        public static Status valueToStatus(int value) {
-            for (Status status : Status.values()) {
+        public static State valueToStatus(int value) {
+            for (State status : State.values()) {
                 if (status.value == value) {
                     return status;
                 }
@@ -175,6 +175,8 @@ public interface Sequence {
     public @Nullable ApplicationMessage retrieveMessage(@NotNull String correlationId);
 
     /**
+     * TODO consider removing as not used anywhere
+     *
      * Retrieves an unacknowledged message with the provided {@code messageNumber} stored
      * within the sequence if avalable. May return {@code null} if no unacknowledged message
      * with a given {@code messageNumber} is available.
@@ -253,11 +255,13 @@ public interface Sequence {
     public boolean hasUnacknowledgedMessages();
 
     /**
-     * Provides information on the status of the message sequence
+     * Provides information on the state of the message sequence
      * 
-     * @return current status of the message sequence
+     * @return current state of the message sequence
      */
-    public Status getStatus();
+    @ManagedAttribute
+    @Description("Runtime state of the sequence")
+    public State getState();
 
     /**
      * This method should be called to set the AckRequested flag, which indicates 

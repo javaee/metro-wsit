@@ -54,17 +54,14 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class OutboundSequence extends AbstractSequence {
+    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.MIN_MESSAGE_ID - 1;
 
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
     private final List<Long> unackedMessageIdentifiers;
 
-    public OutboundSequence(
-            String sequenceId,
-            String securityContextTokenId,
-            long expirationTime,
-            DeliveryQueueBuilder deliveryQueueBuilder) {
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1, deliveryQueueBuilder);
+    public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+        super(data, deliveryQueueBuilder);
 
         this.unackedMessageIdentifiers = new LinkedList<Long>();
     }
@@ -84,14 +81,14 @@ public final class OutboundSequence extends AbstractSequence {
         }
 
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
             message.setSequenceData(this.getId(), generateNextMessageId());
             if (storeMessageFlag) {
-                storeMessage(message);
+                storeMessage(message, getUnackedMessageIdentifierKey(message.getMessageNumber()));
             }
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
     }
 
@@ -103,7 +100,7 @@ public final class OutboundSequence extends AbstractSequence {
             throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
         }
 
-        updateLastMessageId(nextId);
+        data.setLastMessageId(nextId);
 
         // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
         // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
@@ -111,8 +108,7 @@ public final class OutboundSequence extends AbstractSequence {
         return nextId;
     }
 
-    @Override
-    protected Long getUnackedMessageIdentifierKey(long messageNumber) {
+    private Long getUnackedMessageIdentifierKey(long messageNumber) {
         Long msgNumberKey = null;
         int index = unackedMessageIdentifiers.indexOf(messageNumber);
         if (index >= 0) {
@@ -131,7 +127,7 @@ public final class OutboundSequence extends AbstractSequence {
         checkSequenceCreatedStatus("", Code.Sender); // TODO
 
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
             if (ranges == null || ranges.isEmpty()) {
                 return;
@@ -176,7 +172,7 @@ public final class OutboundSequence extends AbstractSequence {
                 }
             }
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
         
         this.getDeliveryQueue().onSequenceAcknowledgement();

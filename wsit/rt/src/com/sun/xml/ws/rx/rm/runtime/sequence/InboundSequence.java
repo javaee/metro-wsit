@@ -57,19 +57,16 @@ import java.util.logging.Level;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class InboundSequence extends AbstractSequence {
+    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.UNSPECIFIED_MESSAGE_ID;
 
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     //
     private final Set<Long> allUnackedMessageNumbers;
     private final Set<Long> registeredUnackedMessageNumbers;
 
-    public InboundSequence(
-            String sequenceId,
-            String securityContextTokenId,
-            long expirationTime,
-            DeliveryQueueBuilder deliveryQueueBuilder) {
-
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
+    public InboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+        // super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
+        super(data, deliveryQueueBuilder);
 
         this.allUnackedMessageNumbers = new TreeSet<Long>();
         this.registeredUnackedMessageNumbers = new HashSet<Long>();
@@ -87,7 +84,7 @@ public final class InboundSequence extends AbstractSequence {
         }
 
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
             if (message.getMessageNumber() > getLastMessageId()) {
                 // new message - note that this will work even for the first message that arrives
@@ -95,7 +92,7 @@ public final class InboundSequence extends AbstractSequence {
                 for (long lostIdentifier = getLastMessageId() + 1; lostIdentifier <= message.getMessageNumber(); lostIdentifier++) {
                     allUnackedMessageNumbers.add(lostIdentifier);
                 }
-                updateLastMessageId(message.getMessageNumber());
+                data.setLastMessageId(message.getMessageNumber());
             } else if (registeredUnackedMessageNumbers.contains(message.getMessageNumber())) {
                 // duplicate message
                 throw LOGGER.logException(new DuplicateMessageRegistrationException(this.getId(), message.getMessageNumber()), Level.FINE);
@@ -104,10 +101,10 @@ public final class InboundSequence extends AbstractSequence {
             registeredUnackedMessageNumbers.add(message.getMessageNumber());
 
             if (storeMessageFlag) {
-                storeMessage(message);
+                storeMessage(message, getUnackedMessageIdentifierKey(message.getMessageNumber()));
             }
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
     }
 
@@ -122,10 +119,10 @@ public final class InboundSequence extends AbstractSequence {
     }
 
     public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
-        checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getStatus()), Code.Receiver);
+        checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getState()), Code.Receiver);
 
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
             if (!registeredUnackedMessageNumbers.remove(messageId)) {
                 throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
@@ -135,14 +132,13 @@ public final class InboundSequence extends AbstractSequence {
                 throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
             }
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
 
         this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 
-    @Override
-    protected Long getUnackedMessageIdentifierKey(long messageNumber) {
+    private Long getUnackedMessageIdentifierKey(long messageNumber) {
         Long msgNumberKey = null;
         Iterator<Long> iterator = registeredUnackedMessageNumbers.iterator();
         while (iterator.hasNext()) {

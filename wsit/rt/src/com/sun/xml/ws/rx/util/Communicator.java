@@ -51,7 +51,6 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
 /**
@@ -80,7 +79,6 @@ public final class Communicator {
     private final AddressingVersion addressingVersion;
     private final SOAPVersion soapVersion;
     private final JAXBRIContext jaxbContext;
-    private final Unmarshaller jaxbUnmarshaller;
 
     public Communicator(
             String name,
@@ -89,8 +87,7 @@ public final class Communicator {
             SecureConversationInitiator scInitiator,
             AddressingVersion addressingVersion,
             SOAPVersion soapVersion,
-            JAXBRIContext jaxbContext,
-            Unmarshaller jaxbUnmarshaller) {
+            JAXBRIContext jaxbContext) {
         this.destinationAddress = destinationAddress;
         this.fiberExecutor = new FiberExecutor(name, tubeline);
         this.scInitiator = scInitiator;
@@ -98,7 +95,6 @@ public final class Communicator {
         this.soapVersion = soapVersion;
         this.soapMustUnderstandAttributeName = new QName(soapVersion.nsUri, "mustUnderstand");
         this.jaxbContext = jaxbContext;
-        this.jaxbUnmarshaller = jaxbUnmarshaller;
     }
 
     public final Packet createRequestPacket(Object jaxbElement, String wsaAction, boolean expectReply) {
@@ -317,13 +313,5 @@ public final class Communicator {
     }
     public SOAPVersion getSoapVersion() {
         return soapVersion;
-    }
-
-    public JAXBRIContext getJaxbContext() {
-        return jaxbContext;
-    }
-
-    public Unmarshaller getJaxbUnmarshaller() {
-        return jaxbUnmarshaller;
     }
 }

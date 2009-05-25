@@ -130,8 +130,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 scInitiator,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion()),
-                configuration.getRmVersion().createUnmarshaller(configuration.getAddressingVersion()))).build();
+                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
 
 
         // TODO P3 we should also take into account addressable clients

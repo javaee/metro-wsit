@@ -120,8 +120,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion()),
-                configuration.getRmVersion().createUnmarshaller(configuration.getAddressingVersion())));
+                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
 
         this.rc = rcBuilder.build();
 

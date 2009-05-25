@@ -45,12 +45,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * TODO javadoc
@@ -59,22 +53,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public abstract class AbstractSequence implements Sequence {
 
-    protected final ReadWriteLock messageIdLock = new ReentrantReadWriteLock(); // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables     
-    //
-    private final String sequenceId;
-    private final String boundSecurityTokenReferenceId;
-    private final long expirationTime;
-    //
-    private final AtomicReference<Status> status;
-    private final AtomicBoolean ackRequestedFlag;
-    //
-    private volatile long lastMessageId;
-    private volatile long lastActivityTime;
-    private volatile long lastAcknowledgementRequestTime;
-    //
-    private final Map<String, ApplicationMessage> weakMessageStorage;
-    private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
-    //
+    protected final SequenceData data;
     private final DeliveryQueue deliveryQueue;
 
     /**
@@ -86,23 +65,8 @@ public abstract class AbstractSequence implements Sequence {
      * 
      * @param expirationTime sequence expiration time
      */
-    AbstractSequence(
-            String sequenceId,
-            String securityContextTokenId,
-            long expirationTime,
-            long initalLastMessageId,
-            DeliveryQueueBuilder deliveryQueueBuilder) {
-
-        this.sequenceId = sequenceId;
-        this.boundSecurityTokenReferenceId = securityContextTokenId;
-        this.expirationTime = expirationTime;
-        this.status = new AtomicReference<Status>(Status.CREATED);
-        this.ackRequestedFlag = new AtomicBoolean(false);
-        this.lastActivityTime = System.currentTimeMillis();
-        this.lastMessageId = initalLastMessageId;
-
-        this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
-        this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
+    AbstractSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+        this.data = data;
 
         // TODO initialize delivery queue
         deliveryQueueBuilder.sequence(this);
@@ -110,24 +74,19 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public String getId() {
-        return sequenceId; // no need to synchronize
+        return data.getSequenceId();
     }
 
     public String getBoundSecurityTokenReferenceId() {
-        return boundSecurityTokenReferenceId;
+        return data.getBoundSecurityTokenReferenceId();
     }
 
     public long getLastMessageId() {
-        try {
-            messageIdLock.readLock().lock();
-            return lastMessageId;
-        } finally {
-            messageIdLock.readLock().unlock();
-        }
+        return data.getLastMessageId();
     }
-    
+
     public List<AckRange> getAcknowledgedMessageIds() {
-        messageIdLock.readLock().lock();
+        data.lockRead();
         try {
             if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
                 // no message associated with the sequence yet
@@ -151,82 +110,85 @@ public abstract class AbstractSequence implements Sequence {
                 if (lastBottomAckRange <= getLastMessageId()) {
                     result.add(new AckRange(lastBottomAckRange, getLastMessageId()));
                 }
-                
-                
-                
+
+
+
                 return result;
             }
         } finally {
-            messageIdLock.readLock().unlock();
+            data.unlockRead();
         }
     }
 
     public boolean isAcknowledged(long messageId) {
-        try{
-            messageIdLock.readLock().lock();
+        try {
+            data.lockRead();
             if (messageId > getLastMessageId()) {
                 return false;
             }
 
             return !getUnackedMessageIdStorage().contains(messageId);
         } finally {
-            messageIdLock.readLock().unlock();
+            data.unlockRead();
         }
-    }       
+    }
 
     public boolean hasUnacknowledgedMessages() {
         try {
-            messageIdLock.readLock().lock();
+            data.lockRead();
             return !getUnackedMessageIdStorage().isEmpty();
         } finally {
-            messageIdLock.readLock().unlock();
+            data.unlockRead();
         }
     }
 
-    public Status getStatus() {
-        return status.get();
+    public State getState() {
+        return data.getState();
+    }
+
+    public void setState(State newState) {
+        this.data.setState(newState);
     }
 
     public void setAckRequestedFlag() {
-        ackRequestedFlag.set(true);
+        data.setAckRequestedFlag(true);
     }
 
     public void clearAckRequestedFlag() {
-        ackRequestedFlag.set(false);
+        data.setAckRequestedFlag(false);
     }
 
     public boolean isAckRequested() {
-        return ackRequestedFlag.get();
+        return data.getAckRequestedFlag();
     }
 
     public void updateLastAcknowledgementRequestTime() {
-        lastAcknowledgementRequestTime = System.currentTimeMillis();
-    }
-
-    public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
-        return System.currentTimeMillis() - lastAcknowledgementRequestTime > delayPeriod && hasUnacknowledgedMessages();
-    }
-
-    
-    public void close() {
-        status.set(Status.CLOSED);
-    }
-
-    public boolean isClosed() {
-        Status currentStatus = status.get();
-        return currentStatus == Status.CLOSING || currentStatus == Status.CLOSED || currentStatus == Status.TERMINATING;
-    }
-
-    public boolean isExpired() {
-        return (expirationTime == Sequence.NO_EXPIRATION) ? false : System.currentTimeMillis() < expirationTime;
+        data.setLastAcknowledgementRequestTime(System.currentTimeMillis());
     }
 
     public long getLastActivityTime() {
-        return lastActivityTime;
+        return data.getLastActivityTime();
     }
 
     public void updateLastActivityTime() {
-        lastActivityTime = System.currentTimeMillis();
+        data.setLastActivityTime(System.currentTimeMillis());
+    }
+
+    public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
+        return System.currentTimeMillis() - data.getLastAcknowledgementRequestTime() > delayPeriod && hasUnacknowledgedMessages();
+    }
+
+    public void close() {
+        data.setState(State.CLOSED);
+    }
+
+    public boolean isClosed() {
+        State currentStatus = data.getState();
+        return currentStatus == State.CLOSING || currentStatus == State.CLOSED || currentStatus == State.TERMINATING;
+    }
+
+    public boolean isExpired() {
+        return (data.getExpirationTime() == Sequence.NO_EXPIRATION) ? false : System.currentTimeMillis() < data.getExpirationTime();
     }
 
     public void preDestroy() {
@@ -235,68 +197,34 @@ public abstract class AbstractSequence implements Sequence {
 
     abstract Collection<Long> getUnackedMessageIdStorage();
 
-    final long updateLastMessageId(long newValue) {
-        try {
-            messageIdLock.writeLock().lock();
-            long oldValue = lastMessageId;
-            lastMessageId = newValue;
-            return oldValue;
-        } finally {
-            messageIdLock.writeLock().unlock();
-        }        
+    public final void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException {
+        data.storeMessage(message, msgNumberKey);
     }
-    
-    final void setStatus(Status newStatus) {
-        status.set(newStatus);
-    }
-
-    protected abstract Long getUnackedMessageIdentifierKey(long messageNumber);
 
     public ApplicationMessage retrieveMessage(String correlationId) {
-        try {
-            messageIdLock.readLock().lock();
-            return weakMessageStorage.get(correlationId);
-        } finally {
-            messageIdLock.readLock().unlock();
-        }
+        return data.retrieveMessage(correlationId);
     }
 
     public ApplicationMessage retrieveUnackedMessage(long messageNumber) {
-        try {
-            messageIdLock.readLock().lock();
-            String correlationKey = weakUnackedNumberToCorrelationIdMap.get(messageNumber);
-            return (correlationKey != null) ? weakMessageStorage.get(correlationKey) : null;
-        } finally {
-            messageIdLock.readLock().unlock();
-        }
+        return data.retrieveUnackedMessage(messageNumber);
     }
 
     public DeliveryQueue getDeliveryQueue() {
         try {
-            messageIdLock.readLock().lock();
-            
+            data.lockRead();
+
             return deliveryQueue;
         } finally {
-            messageIdLock.readLock().unlock();
+            data.unlockRead();
         }
     }
 
-    protected final void storeMessage(ApplicationMessage message) throws UnsupportedOperationException {
-        // no need to synchronize, called from within a write lock
-        Long msgNumberKey = getUnackedMessageIdentifierKey(message.getMessageNumber());
-        assert msgNumberKey != null;
-        // NOTE this must be a new String object
-        String correlationKey = new String(message.getCorrelationId());
-        weakUnackedNumberToCorrelationIdMap.put(msgNumberKey, correlationKey);
-        weakMessageStorage.put(correlationKey, message);
-    }
-
     protected final void checkSequenceCreatedStatus(String message, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-        switch (getStatus()) {
-            case CLOSING :
-            case CLOSED :
+        switch (getState()) {
+            case CLOSING:
+            case CLOSED:
                 throw new SequenceClosedException(message);
-            case TERMINATING :
+            case TERMINATING:
                 throw new SequenceTerminatedException(message, code);
         }
     }
@@ -313,7 +241,7 @@ public abstract class AbstractSequence implements Sequence {
             return false;
         }
         final AbstractSequence other = (AbstractSequence) obj;
-        if ((this.sequenceId == null) ? (other.sequenceId != null) : !this.sequenceId.equals(other.sequenceId)) {
+        if ((this.data.getSequenceId() == null) ? (other.data.getSequenceId() != null) : !this.data.getSequenceId().equals(other.data.getSequenceId())) {
             return false;
         }
         return true;
@@ -322,7 +250,7 @@ public abstract class AbstractSequence implements Sequence {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 41 * hash + (this.sequenceId != null ? this.sequenceId.hashCode() : 0);
+        hash = 41 * hash + (this.data.getSequenceId() != null ? this.data.getSequenceId().hashCode() : 0);
         return hash;
     }
 }

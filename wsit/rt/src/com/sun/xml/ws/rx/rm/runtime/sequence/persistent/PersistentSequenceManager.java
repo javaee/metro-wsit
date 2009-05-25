@@ -46,70 +46,53 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedObject;
 import org.glassfish.gmbal.ManagedObjectManager;
 
-
-/*
-DROP TABLE RM_UNACKED_MESSAGES;
-DROP TABLE RM_SEQUENCES;
-
-CREATE TABLE RM_SEQUENCES (
-ID VARCHAR(256) NOT NULL,
-TYPE CHARACTER NOT NULL,
-
-EXP_TIME TIMESTAMP NOT NULL,
-BOUND_ID VARCHAR(256),
-STR_ID VARCHAR(256),
-
-STATUS CHARACTER NOT NULL,
-ACK_REQUESTED_FLAG CHARACTER,
-LAST_MESSAGE_ID BIGINT NOT NULL,
-LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
-LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
-
-PRIMARY KEY (ID, TYPE)
-);
-
-CREATE INDEX IDX_RM_SEQUENCES_BOUND_ID ON RM_SEQUENCES (BOUND_ID);
-
-CREATE TABLE RM_UNACKED_MESSAGES (
-SEQ_ID VARCHAR(256) NOT NULL,
-SEQ_TYPE CHARACTER NOT NULL,
-MSG_NUMBER BIGINT NOT NULL,
-IS_REGISTERED CHARACTER NOT NULL,
-
-CORRELATION_ID VARCHAR(256),
-NEXT_RESEND_COUNT INT,
-MSG_DATA BLOB,
-
-PRIMARY KEY (SEQ_ID, SEQ_TYPE, MSG_NUMBER)
-);
-
-ALTER TABLE RM_UNACKED_MESSAGES
-ADD CONSTRAINT FK_SEQUENCE
-FOREIGN KEY (SEQ_ID, SEQ_TYPE) REFERENCES RM_SEQUENCES(ID, TYPE);
-
-CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORRELATION_ID);
- */
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 @ManagedObject
 @Description("Persistent RM Sequence Manager")
+@AMXMetadata(type = "RMSequenceManager", pathPart = "RMSequenceManager")
 public final class PersistentSequenceManager implements SequenceManager {
-
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceManager.class);
+    /**
+     * JNDI name of the JDBC pool to be used for persisting RM data
+     */
     private static final String RM_JDBC_POOL_NAME = "jdbc/ReliableMessagingPool";
-    private Connection sqlConnection = null; // TODO initialize properly
-    private ManagedObjectManager managedObjectManager;
+    /**
+     * JDBC connection
+     */
+    private Connection sqlConnection = null;
+    /**
+     * Internal in-memory data access lock
+     */
+    private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
+    /**
+     * Internal in-memory cache of sequence data
+     */
+    private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();
+    /**
+     * Internal in-memory map of bound sequences
+     */
+    private final Map<String, String> boundSequences = new HashMap<String, String>();
+    /**
+     * Monitoring manager
+     */
+    private final ManagedObjectManager managedObjectManager;
 
     public PersistentSequenceManager(SequenceManager.Type type, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
@@ -120,32 +103,55 @@ public final class PersistentSequenceManager implements SequenceManager {
         // TODO recover();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Map<String, ? extends Sequence> sequences() {
-        return null;
+        return null; // TODO
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Map<String, String> boundSequences() {
-        return null;
+        return null; // TODO
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        return registerSequence(new OutboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
+        SequenceData data = new PersistentSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID);
+        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        return registerSequence(new InboundSequence(sequenceId, strId, expirationTime, deliveryQueueBuilder));
+        SequenceData data = new PersistentSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID);
+        return registerSequence(new InboundSequence(data, deliveryQueueBuilder));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String generateSequenceUID() {
         return "uuid:" + UUID.randomUUID();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
         Sequence sequence = getSequence(sequenceId);
         sequence.close();
         return sequence;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
 //        try {
 //            internalDataAccessLock.readLock().lock();
@@ -160,6 +166,9 @@ public final class PersistentSequenceManager implements SequenceManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean isValid(String sequenceId) {
 //        try {
 //            internalDataAccessLock.readLock().lock();
@@ -170,6 +179,9 @@ public final class PersistentSequenceManager implements SequenceManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
 //        try {
 //            internalDataAccessLock.writeLock().lock();
@@ -198,29 +210,8 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     /**
-     * Registers a new sequence in the internal sequence storage
-     *
-     * @param sequence sequence object to be registered within the internal sequence storage
+     * {@inheritDoc}
      */
-    private Sequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
-//        try {
-//            internalDataAccessLock.writeLock().lock();
-//            if (sequences.containsKey(sequence.getId())) {
-//                throw new DuplicateSequenceException(sequence.getId());
-//            } else {
-//                sequences.put(sequence.getId(), sequence);
-//                if (managedObjectManager != null) {
-//                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
-//                }
-//            }
-//
-//            return sequence;
-//        } finally {
-//            internalDataAccessLock.writeLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
-    }
-
     public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
 //        try {
 //            internalDataAccessLock.writeLock().lock();
@@ -239,6 +230,9 @@ public final class PersistentSequenceManager implements SequenceManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
 //        try {
 //            internalDataAccessLock.readLock().lock();
@@ -271,6 +265,30 @@ public final class PersistentSequenceManager implements SequenceManager {
                     String.format("Error closing a sequence with id '%s'", sequenceId), ex));
         }
      */
+
+    /**
+     * Registers a new sequence in the internal sequence storage
+     *
+     * @param sequence sequence object to be registered within the internal sequence storage
+     */
+    private Sequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
+//        try {
+//            internalDataAccessLock.writeLock().lock();
+//            if (sequences.containsKey(sequence.getId())) {
+//                throw new DuplicateSequenceException(sequence.getId());
+//            } else {
+//                sequences.put(sequence.getId(), sequence);
+//                if (managedObjectManager != null) {
+//                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+//                }
+//            }
+//
+//            return sequence;
+//        } finally {
+//            internalDataAccessLock.writeLock().unlock();
+//        }
+        throw new UnsupportedOperationException();
+    }
 
     protected void abort() {
         try {

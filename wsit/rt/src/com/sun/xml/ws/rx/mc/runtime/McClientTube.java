@@ -54,7 +54,6 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.util.UUID;
 import javax.xml.bind.Unmarshaller;
@@ -92,8 +91,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()),
-                configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
+                configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
 
         final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
@@ -231,7 +229,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     }
 
-    private Boolean isBooleanFlagSet(Packet packet, Object flag) {
+    private Boolean isBooleanFlagSet(Packet packet, String flag) {
         Boolean value = Boolean.class.cast(packet.invocationProperties.get(flag));
         return value != null && value.booleanValue();
     }

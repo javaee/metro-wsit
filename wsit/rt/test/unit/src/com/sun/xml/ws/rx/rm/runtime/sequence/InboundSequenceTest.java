@@ -47,17 +47,20 @@ import junit.framework.TestCase;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InboundSequenceTest extends TestCase {
-
-    private SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
+    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
     private Sequence sequence;
-
+    
     public InboundSequenceTest(String testName) {
         super(testName);
     }
 
     @Override
     protected void setUp() throws Exception {
-        sequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION, null);
+        sequence = sequenceManager.createInboundSequence(
+                sequenceManager.generateSequenceUID(),
+                null,
+                Sequence.NO_EXPIRATION,
+                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
         super.setUp();
     }
 
@@ -72,7 +75,7 @@ public class InboundSequenceTest extends TestCase {
             DummyAppMessage message = new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i);
             sequence.registerMessage(message, true);
             assertEquals(sequence.getId(), message.getSequenceId());
-            assertEquals(1, message.getMessageNumber());
+            assertEquals(i, message.getMessageNumber());
 
         }
     }
@@ -108,10 +111,9 @@ public class InboundSequenceTest extends TestCase {
         for (int i = 2; i <= 5; i++) {
             sequence.registerMessage(new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i), true);
         }
-        sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
-                    new Sequence.AckRange(2, 2),
-                    new Sequence.AckRange(4, 5)
-                }));
+        sequence.acknowledgeMessageId(2);
+        sequence.acknowledgeMessageId(4);
+        sequence.acknowledgeMessageId(5);
         assertTrue(sequence.hasUnacknowledgedMessages());
 
         ackedRages = sequence.getAcknowledgedMessageIds();
@@ -152,14 +154,22 @@ public class InboundSequenceTest extends TestCase {
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 2, null, null, false, "B"), true);
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 4, null, null, false, "D"), true);
-        
+
+        for (int i = 1; i < 6; i++) {
+            assertFalse(sequence.isAcknowledged(i));
+        }
+
+        sequence.acknowledgeMessageId(1);
+        sequence.acknowledgeMessageId(2);
+        sequence.acknowledgeMessageId(4);
+
         assertTrue(sequence.isAcknowledged(1));
         assertTrue(sequence.isAcknowledged(2));
         assertFalse(sequence.isAcknowledged(3));
         assertTrue(sequence.isAcknowledged(4));
         assertFalse(sequence.isAcknowledged(5));
     }
-    
+
     public void testBehaviorAfterCloseOperation() throws Exception {
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 2, null, null, false, "B"), true);
@@ -171,7 +181,7 @@ public class InboundSequenceTest extends TestCase {
         boolean passed = false;
         try {
             sequence.registerMessage(new DummyAppMessage(sequence.getId(), 3, null, null, false, "C"), true); // error
-        } catch (IllegalStateException e) {
+        } catch (SequenceClosedException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
@@ -179,28 +189,32 @@ public class InboundSequenceTest extends TestCase {
         passed = false;
         try {
             sequence.acknowledgeMessageId(1); // error
-        } catch (IllegalStateException e) {
+        } catch (SequenceClosedException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
     }
 
-    public void testStatus() throws Exception {
-        Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION, null);
-        assertEquals(Sequence.Status.CREATED, inbound.getStatus());
+    public void testSequenceState() throws Exception {
+        Sequence inbound = sequenceManager.createInboundSequence(
+                sequenceManager.generateSequenceUID(),
+                null,
+                Sequence.NO_EXPIRATION,
+                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+        assertEquals(Sequence.State.CREATED, inbound.getState());
 
         // TODO test closing
 
         inbound.close();
-        assertEquals(Sequence.Status.CLOSED, inbound.getStatus());
+        assertEquals(Sequence.State.CLOSED, inbound.getState());
 
         sequenceManager.terminateSequence(inbound.getId());
-        assertEquals(Sequence.Status.TERMINATING, inbound.getStatus());
+        assertEquals(Sequence.State.TERMINATING, inbound.getState());
     }
 
     public void testStoreAndRetrieveMessage() throws Exception {
         Map<String, ApplicationMessage> correlatedMessageMap = new HashMap<String, ApplicationMessage>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             ApplicationMessage message = new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i);
             sequence.registerMessage(message, true);
             correlatedMessageMap.put(message.getCorrelationId(), message);

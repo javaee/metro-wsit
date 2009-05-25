@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -50,7 +51,7 @@ public enum SequenceManagerFactory {
 
 //    private final ReadWriteLock clientCacheLock = new ReentrantReadWriteLock();
 //    private final Map<Object, SequenceManager> clientSequenceManagerCache = new WeakHashMap<Object, SequenceManager>();
-    private final SequenceManager clientSequenceManager = new DefaultInMemorySequenceManager(SequenceManager.Type.CLIENT, null);
+    private final SequenceManager clientSequenceManager = new InVmSequenceManager(SequenceManager.Type.CLIENT, null);
 
     private final ReadWriteLock serviceCacheLock = new ReentrantReadWriteLock();
     private final Map<Object, SequenceManager> serviceSequenceManagerCache = new WeakHashMap<Object, SequenceManager>();
@@ -78,7 +79,7 @@ public enum SequenceManagerFactory {
                     cacheLock.writeLock().lock();
                     sequenceManager = cache.get(correlationId);
                     if (sequenceManager == null) {
-                        sequenceManager = new DefaultInMemorySequenceManager(type, mom);
+                        sequenceManager = new InVmSequenceManager(type, mom);
                         cache.put(correlationId, sequenceManager);
                     }
                 } finally {
