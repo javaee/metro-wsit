@@ -1,8 +1,4 @@
 /*
- * $Id: WSTrustElementFactory.java,v 1.25 2009-05-15 03:47:45 jdg6688 Exp $
- */
-
-/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
