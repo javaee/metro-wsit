@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractCreateSequence;
+import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import javax.xml.namespace.QName;
@@ -83,7 +83,7 @@ import javax.xml.bind.annotation.XmlType;
 "securityTokenReference"
 })
 @XmlRootElement(name = "CreateSequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class CreateSequenceElement extends AbstractCreateSequence {
+public class CreateSequenceElement {
 
     @XmlElement(name = "AcksTo", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected EndpointReference acksTo;
@@ -97,6 +97,43 @@ public class CreateSequenceElement extends AbstractCreateSequence {
     private SecurityTokenReferenceType securityTokenReference;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+
+    public CreateSequenceElement() {
+    }
+
+    public CreateSequenceElement(CreateSequenceData data) {
+        this();
+
+        acksTo = data.getAcksToEpr();
+        expires = new Expires(data.getExpiry());
+
+        if (data.getOfferedSequenceId() != null) {
+            this.offer = new OfferType();
+            offer.setId(data.getOfferedSequenceId());
+            offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+        }
+        if (data.getStrType() != null) {
+            securityTokenReference = data.getStrType();
+        }
+    }
+
+    public CreateSequenceData.Builder toDataBuilder() {
+        final CreateSequenceData.Builder dataBuilder = CreateSequenceData.getBuilder(this.getAcksTo());
+        dataBuilder.strType(securityTokenReference);
+
+        if (expires != null) {
+            dataBuilder.expiry(expires.getDuration());
+        }
+
+        if (offer != null) {
+            dataBuilder.offeredInboundSequenceId(offer.getId());
+            if (offer.getExpires() != null) {
+                dataBuilder.offeredSequenceExpiry(offer.getExpires().getDuration());
+            }
+        }
+
+        return dataBuilder;
+    }
 
     /**
      * Gets the value of the acksTo property.

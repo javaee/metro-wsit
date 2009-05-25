@@ -35,9 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rx.rm.protocol.AbstractCreateSequenceResponse;
-
+import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +82,7 @@ import javax.xml.namespace.QName;
 "any"
 })
 @XmlRootElement(name = "CreateSequenceResponse", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class CreateSequenceResponseElement extends AbstractCreateSequenceResponse {
+public class CreateSequenceResponseElement {
 
     @XmlElement(name = "Identifier", required = true)
     protected Identifier identifier;
@@ -100,6 +99,35 @@ public class CreateSequenceResponseElement extends AbstractCreateSequenceRespons
 
     public CreateSequenceResponseElement() {
         incompleteSequenceBehavior = IncompleteSequenceBehaviorType.DISCARD_FOLLOWING_FIRST_GAP;
+    }
+
+    public CreateSequenceResponseElement(CreateSequenceResponseData data) {
+        this();
+
+        identifier = new Identifier(data.getSequenceId());
+        expires = new Expires(data.getExpirationTime());
+        if (data.getAcceptedSequenceAcksTo() != null) {
+            accept = new AcceptType();
+            accept.setAcksTo(data.getAcceptedSequenceAcksTo());
+        }
+    }
+
+    public CreateSequenceResponseData.Builder toDataBuilder() {
+        CreateSequenceResponseData.Builder dataBuilder = CreateSequenceResponseData.getBuilder(identifier.getValue());
+
+        if (expires != null && expires.getDuration() != Sequence.NO_EXPIRATION) {
+            dataBuilder.expirationTime(expires.getDuration() + System.currentTimeMillis());
+        }
+
+        if (accept != null) {
+            dataBuilder.acceptedSequenceAcksTo(accept.getAcksTo());
+        }
+
+        if (incompleteSequenceBehavior != null) {
+            dataBuilder.incompleteSequenceBehavior(incompleteSequenceBehavior.translate());
+        }
+
+        return dataBuilder;        
     }
 
     /**
@@ -194,8 +222,8 @@ public class CreateSequenceResponseElement extends AbstractCreateSequenceRespons
      *     {@link AcceptType }
      *     
      */
-    public void setAccept(AbstractAcceptType value) {
-        this.accept = (AcceptType) value;
+    public void setAccept(AcceptType value) {
+        this.accept = value;
     }
 
     /**

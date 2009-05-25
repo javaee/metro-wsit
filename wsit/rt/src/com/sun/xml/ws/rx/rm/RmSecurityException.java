@@ -43,13 +43,13 @@
  */
 package com.sun.xml.ws.rx.rm;
 
-import com.sun.xml.ws.rx.RxException;
+import com.sun.xml.ws.rx.RxRuntimeException;
 
 /**
  * Subclass of RMException thrown when an incorrect STR is
  * used to secure an inbound message.
  */
-public class RmSecurityException extends RxException {
+public class RmSecurityException extends RxRuntimeException {
     private static final long serialVersionUID = -8808571889805267275L;
 
     public RmSecurityException(String message) {

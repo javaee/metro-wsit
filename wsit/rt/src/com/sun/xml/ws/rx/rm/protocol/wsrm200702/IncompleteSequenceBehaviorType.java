@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
@@ -60,17 +61,20 @@ import javax.xml.bind.annotation.XmlType;
 public enum IncompleteSequenceBehaviorType {
 
     @XmlEnumValue("DiscardEntireSequence")
-    DISCARD_ENTIRE_SEQUENCE("DiscardEntireSequence"),
+    DISCARD_ENTIRE_SEQUENCE("DiscardEntireSequence", Sequence.IncompleteSequenceBehavior.DISCARD_ENTIRE_SEQUENCE),
     
     @XmlEnumValue("DiscardFollowingFirstGap")
-    DISCARD_FOLLOWING_FIRST_GAP("DiscardFollowingFirstGap"),
+    DISCARD_FOLLOWING_FIRST_GAP("DiscardFollowingFirstGap", Sequence.IncompleteSequenceBehavior.DISCARD_FOLLOWING_FIRST_GAP),
     
     @XmlEnumValue("NoDiscard")
-    NO_DISCARD("NoDiscard");
+    NO_DISCARD("NoDiscard", Sequence.IncompleteSequenceBehavior.NO_DISCARD);
+    //
     private final String value;
+    private final Sequence.IncompleteSequenceBehavior translation;
 
-    IncompleteSequenceBehaviorType(String v) {
-        value = v;
+    IncompleteSequenceBehaviorType(String v, Sequence.IncompleteSequenceBehavior translation) {
+        this.value = v;
+        this.translation = translation;
     }
 
     public String value() {
@@ -84,5 +88,9 @@ public enum IncompleteSequenceBehaviorType {
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public Sequence.IncompleteSequenceBehavior translate() {
+        return translation;
     }
 }

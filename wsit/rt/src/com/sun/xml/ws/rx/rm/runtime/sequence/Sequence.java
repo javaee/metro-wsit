@@ -35,6 +35,11 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.List;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -53,7 +58,7 @@ public interface Sequence {
     public static final long MAX_MESSAGE_ID = 9223372036854775807L;
     public static final long NO_EXPIRATION = -1;
     
-    public enum Status {
+    public static enum State {
         // CREATING(10) not needed
         CREATED(15),
         CLOSING(20),
@@ -62,7 +67,7 @@ public interface Sequence {
 
         private int value;
         
-        private Status(int value) {
+        private State(int value) {
             this.value = value;
         }
         
@@ -70,8 +75,8 @@ public interface Sequence {
             return value;
         }
         
-        public static Status valueToStatus(int value) {
-            for (Status status : Status.values()) {
+        public static State valueToStatus(int value) {
+            for (State status : State.values()) {
                 if (status.value == value) {
                     return status;
                 }
@@ -81,7 +86,30 @@ public interface Sequence {
         }
     }
 
-    public class AckRange {
+    public static enum IncompleteSequenceBehavior {
+        /**
+         * The default value which indicates that no acknowledged messages in the Sequence
+         * will be discarded.
+         */
+        NO_DISCARD,
+        /**
+         * Value indicates that the entire Sequence MUST be discarded if the
+         * Sequence is closed, or terminated,  when there are one or more gaps
+         * in the final SequenceAcknowledgement.
+         */
+        DISCARD_ENTIRE_SEQUENCE,
+        /**
+         * Value indicates that messages in the Sequence beyond the first gap
+         * MUST be discarded when there are one or more gaps in the final SequenceAcknowledgement.
+         */
+        DISCARD_FOLLOWING_FIRST_GAP;
+
+        public static IncompleteSequenceBehavior getDefault() {
+            return NO_DISCARD;
+        }
+    }
+
+    public static class AckRange {
 
         public final long lower;
         public final long upper;
@@ -102,108 +130,113 @@ public interface Sequence {
     public String getId();
 
     /**
-     * This operation is supported by outbound sequences only. 
-     * <p/>
-     * Generates a new message identifier and registers it within the sequence
-     * 
-     * @return the next message identifier that should be used for the next message sent on the sequence.
-     * 
-     * @exception MessageNumberRolloverException in case the message identifier counter overflows
-     * 
-     * @exception IllegalStateException in case the sequence is closed
-     * 
-     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
+     * Provides information on the message number of the last message registered on this sequence
+     *
+     * @return message number of the last message registered on this sequence
      */
-    public long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException, UnsupportedOperationException;
+    @ManagedAttribute
+    @Description("Last message identifier register on this sequence")
+    public long getLastMessageId();
 
     /**
-     * This operation is supported by outbound sequences only. 
-     * <p/>
-     * Stores a message within the sequence. The message is guaranteed to remain stored
-     * in the sequence until the message id associated with the message is acknowledged
-     * 
-     * @param correlationId identifier of a message that correlates with the stored message
-     * 
-     * @param id message identifier attached to the message
-     * 
-     * @param message the message that is supposed to be stored in the sequence 
-     *        until the message is not acknowledged as received
-     * 
-     * @exception IllegalStateException in case the sequence is closed
-     * 
-     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
+     * Registers given message with the sequence
+     *
+     * @param message application message to be registered
+     * @param storeMessageFlag boolean flag indicating whether message should be stored until acknowledged or not
+     *
+     * TODO should throw duplicate message exception instead of the IMIE
+     *
+     * @exception DuplicateMessageNumberException in case a message with such message number
+     * has already been registered with the sequence
+     *
+     * @exception AbstractSoapFaultException in a case the sequence is closed or terminated
      */
-    public void storeMessage(long correlationId, long id, Object message) throws IllegalStateException, UnsupportedOperationException;
+    public void registerMessage(@NotNull ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException;
 
     /**
-     * This operation is supported by outbound sequences only. 
+     * Retrieves a message stored within the sequence under the provided {@code correlationId}
+     * if avalable. May return {@code null} if no stored message under given {@code correlationId}
+     * is available.
      * <p/>
-     * Retrieves a message stored within the sequence if avalable. May return {@code null}
-     * if no stored message under given message id is available.
-     * <p/>
-     * Availability of the message depends on the message identifier acknowledgement. 
-     * Message, if stored (see {@link #storeMessage(long, java.lang.Object)} remains 
-     * available for retrieval until it is acknowledged. Once the message identifier 
-     * associated with the stored message has been acknowledged, availability of the 
-     * stored message is no longer guaranteed and stored message becomes eligible for 
-     * garbage collection.
+     * Availability of the message depends on the message identifier acknowledgement.
+     * Message, if stored (see {@link #registerMessage(com.sun.xml.ws.rx.rm.runtime.ApplicationMessage, boolean)}
+     * remains available for retrieval until it is acknowledged. Once the message identifier
+     * associated with the stored message has been acknowledged, availability of the
+     * stored message is no longer guaranteed and stored message becomes eligible for
+     * garbage collection (if stored in memory) or removal.
      * <p/>
      * Note however, that message MAY still be available even after it has been acknowledged.
      * Thus it is NOT safe to use this method as a test of a message acknowledgement.
-     * 
-     * @param correlationId identifier of a message that correlates with the stored message
-     * 
+     *
+     * @param correlationId correlation identifier of the stored {@link ApplicationMessage}
+     *
      * @return the message that is stored in the sequence if available, {@code null} otherwise.
-     * 
-     * @exception IllegalMessageIdentifierException in case the message number is not 
-     *            registered with the sequence.
-     * 
-     * @exception UnsupportedOperationException in case the sequence is inbound and does not support generating message identifiers
      */
-    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException, IllegalMessageIdentifierException;
-    
+    public @Nullable ApplicationMessage retrieveMessage(@NotNull String correlationId);
+
     /**
-     * Registers given message identifiers with the sequence as aknowledged
-     * 
+     * TODO consider removing as not used anywhere
+     *
+     * Retrieves an unacknowledged message with the provided {@code messageNumber} stored
+     * within the sequence if avalable. May return {@code null} if no unacknowledged message
+     * with a given {@code messageNumber} is available.
+     * <p/>
+     * Availability of the message depends on the message identifier acknowledgement.
+     * Message, if stored (see {@link #registerMessage(com.sun.xml.ws.rx.rm.runtime.ApplicationMessage, boolean)}
+     * remains available for retrieval until it is acknowledged. Once the message identifier
+     * associated with the stored message has been acknowledged, message will not be available.
+     * <p/>
+     * Note that this behavior is different from the behavior of {@link #retrieveMessage(java.lang.String)}
+     * method, where Message may remain available for a while even after it has been acknowledged.
+     *
+     * @param correlationId correlation identifier of the stored {@link ApplicationMessage}
+     *
+     * @return the message that is stored in the sequence if available, {@code null} otherwise.
+     */
+    public @Nullable ApplicationMessage retrieveUnackedMessage(long messageNumber);
+
+    /**
+     * Updates a delivery queue for this sequence with any unacknowledged messages that 
+     * should be sent and returns the delivery queue instance. Messages in the queue are
+     * the ones currently waiting for a delivery.
+     *
+     * @return delivery queue with a messages waiting for a delivery on this particular sequence
+     */
+    public DeliveryQueue getDeliveryQueue();
+
+    /**
+     * Marks given message identifiers with the sequence as aknowledged
+     *
      * @param ranges message identifier ranges to be acknowledged
+     *
+     * @exception InvalidAcknowledgementException is generated when acked ranges contain
+     * a SequenceAcknowledgement covering messages that have not been sent.
      * 
-     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a messages 
-     * with the given identifiers have been already registered
-     * 
-     * @exception IllegalStateException in case the sequence is closed
+     * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException, IllegalStateException;
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException;
 
     /**
-     * Registers given message identifier with the sequence as aknowledged
-     * 
+     * Marks given message identifier with the sequence as aknowledged
+     *
      * @param messageId message identifier to be acknowledged
-     * 
-     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message 
-     * with the given identifier has been already registered
-     * 
-     * @exception IllegalStateException in case the sequence is closed
+     *
+     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message
+     * with the given identifier has been already acknowledged
+     *
+     * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException;
+    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, AbstractSoapFaultException;
 
     /**
-     * Determines whether such message number has been already acknowledged on the sequence 
+     * Determines whether such message number has been already acknowledged on the sequence
      * or not.
-     * 
+     *
      * @param messageId message identifier to test
      * @return {@code true } or {@code false} depending on whether a message with such message
      *         identifer has been already acknowledged or not
      */
     public boolean isAcknowledged(long messageId);
-    
-    /**
-     * Provides information on the last message id sent on this sequence
-     * 
-     * @return last message identifier registered on this sequence
-     */
-    @ManagedAttribute
-    @Description("Last message identifier register on this sequence")
-    public long getLastMessageId();
 
     /**
      * Provides a collection of ranges of messages identifier acknowledged with the sequence
@@ -219,14 +252,16 @@ public interface Sequence {
      */
     @ManagedAttribute
     @Description("True if the sequence has unacknowledged message identifiers")
-    public boolean hasPendingAcknowledgements();
+    public boolean hasUnacknowledgedMessages();
 
     /**
-     * Provides information on the status of the message sequence
+     * Provides information on the state of the message sequence
      * 
-     * @return current status of the message sequence
+     * @return current state of the message sequence
      */
-    public Status getStatus();
+    @ManagedAttribute
+    @Description("Runtime state of the sequence")
+    public State getState();
 
     /**
      * This method should be called to set the AckRequested flag, which indicates 
@@ -250,7 +285,29 @@ public interface Sequence {
     @ManagedAttribute
     @Description("True if AckRequested flag set")
     public boolean isAckRequested();
-    
+
+    /**
+     * Updates information on when was the last acknowledgement request for this sequence
+     * sent to current time.
+     */
+    public void updateLastAcknowledgementRequestTime();
+
+    /**
+     * Determines whether a standalone acnowledgement request can be scheduled or not
+     * based on the {@link #hasPendingAcknowledgements()} value, last acknowledgement request time
+     * (see {@link #updateLastAcknowledgementRequestTime()}) and {@code delayPeriod}
+     * parameter.
+     * 
+     * Returns {@code true} if the sequence has any pending acknowledgements is set and last
+     * acknowledgement request time is older than delay period substracted from the current time.
+     * Returns {@code false} otherwise.
+     *
+     * @param delayPeriod delay period that should pass since the last acknowledgement request
+     * before an autonomous acnowledgement request is sent.
+     *
+     * @return {@code true} or {@code false} depending on whether
+     */
+    public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod);
     /**
      * Provides information on a security session to which this sequence is bound to.
      * 
@@ -289,17 +346,14 @@ public interface Sequence {
     
     /**
      * Provides information on the last activity time of this sequence
-     * 
+     *
+     * TODO: implement automatic updating of sequence last activity time
+     *
      * @return last activity time on the sequence in milliseconds
      */
     @ManagedAttribute
     @Description("Last activity time on the sequence in milliseconds")
     public long getLastActivityTime();
-    
-    /**
-     * Manually updates the last activit time of the sequence to present time
-     */
-    public void updateLastActivityTime();
     
     /**
      * The method is called during the sequence termination to allow sequence object to release its allocated resources

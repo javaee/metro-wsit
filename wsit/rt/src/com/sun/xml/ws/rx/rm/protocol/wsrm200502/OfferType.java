@@ -169,4 +169,25 @@ public class OfferType {
     public Map<QName, String> getOtherAttributes() {
         return otherAttributes;
     }
+
+    /**
+     * Mutator for the Id property.  Maps to the Identifier property in the underlying
+     * JAXB class.
+     *
+     * @param id The new value.
+     */
+    public void setId(String idString) {
+        Identifier newId = new Identifier();
+        newId.setValue(idString);
+        setIdentifier(newId);
+    }
+
+    /**
+     * Accessor for the Id property.  Maps to the Identifier property in the underlying
+     * JAXB class
+     * @return The sequence id
+     */
+    public String getId() {
+        return getIdentifier().getValue();
+    }
 }

@@ -35,220 +35,210 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
-import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.Status;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/*
+DROP TABLE RM_UNACKED_MESSAGES;
+DROP TABLE RM_SEQUENCES;
+
+CREATE TABLE RM_SEQUENCES (
+ID VARCHAR(256) NOT NULL,
+TYPE CHARACTER NOT NULL,
+
+EXP_TIME TIMESTAMP NOT NULL,
+BOUND_ID VARCHAR(256),
+STR_ID VARCHAR(256),
+
+STATUS CHARACTER NOT NULL,
+ACK_REQUESTED_FLAG CHARACTER,
+LAST_MESSAGE_ID BIGINT NOT NULL,
+LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
+LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
+
+PRIMARY KEY (ID, TYPE)
+);
+
+CREATE INDEX IDX_RM_SEQUENCES_BOUND_ID ON RM_SEQUENCES (BOUND_ID);
+
+CREATE TABLE RM_UNACKED_MESSAGES (
+SEQ_ID VARCHAR(256) NOT NULL,
+SEQ_TYPE CHARACTER NOT NULL,
+MSG_NUMBER BIGINT NOT NULL,
+IS_REGISTERED CHARACTER NOT NULL,
+
+CORRELATION_ID VARCHAR(256),
+NEXT_RESEND_COUNT INT,
+MSG_DATA BLOB,
+
+PRIMARY KEY (SEQ_ID, SEQ_TYPE, MSG_NUMBER)
+);
+
+ALTER TABLE RM_UNACKED_MESSAGES
+ADD CONSTRAINT FK_SEQUENCE
+FOREIGN KEY (SEQ_ID, SEQ_TYPE) REFERENCES RM_SEQUENCES(ID, TYPE);
+
+CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORRELATION_ID);
+ */
 
 /**
+ * Persistent implementation of sequence data
  *
+ * TODO implement - currently only works as a copy of in-vm sequence data
+ * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class PersistentSequenceData {
+final class PersistentSequenceData implements SequenceData {
 
-    /**
-    DROP TABLE RM_UNACKED_MESSAGES;
-    
-    DROP TABLE RM_SEQUENCES;
-    
-    CREATE TABLE RM_SEQUENCES (
-    id VARCHAR(50) NOT NULL,
-    expiration INTEGER NOT NULL,
-    status SMALLINT NOT NULL,
-    ack_requested_flag CHAR(1) NOT NULL,
-    last_message_id BIGINT NOT NULL,
-    PRIMARY KEY (id)
-    );
-    
-    CREATE TABLE RM_UNACKED_MESSAGES (
-    sequence_id VARCHAR(50) NOT NULL,
-    message_id BIGINT NOT NULL,
-    PRIMARY KEY (sequence_id, message_id)
-    );
-    
-    ALTER TABLE RM_UNACKED_MESSAGES ADD CONSTRAINT FK_RM_SEQUENCE_ID FOREIGN KEY (SEQUENCE_ID) REFERENCES RM_SEQUENCES (ID);
-     */
+    private final ReadWriteLock messageIdLock = new ReentrantReadWriteLock();
+    // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables
+    //
     private final String sequenceId;
     private final String boundSecurityTokenReferenceId;
     private final long expirationTime;
-    private final Connection sqlConnection;
-    private final ResultSet sequenceData;
-    
-    
+    //
+    private volatile State state;
+    private volatile boolean ackRequestedFlag;
+    private volatile long lastMessageId;
+    private volatile long lastActivityTime;
+    private volatile long lastAcknowledgementRequestTime;
+    //
+    private final Map<String, ApplicationMessage> weakMessageStorage;
+    private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
 
-    public PersistentSequenceData(
-            Connection connection,
-            String sequenceId,
-            String boundSecurityTokenReferenceId,
-            long expirationTime,
-            long lastMessageId,
-            Status status,
-            boolean ackRequestedFlag) throws PersistenceException {
+    public PersistentSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId) {
+        this(sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, System.currentTimeMillis(), 0L);
+    }
+
+    public PersistentSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
+        super();
         this.sequenceId = sequenceId;
-        this.boundSecurityTokenReferenceId = boundSecurityTokenReferenceId;
+        this.boundSecurityTokenReferenceId = securityContextTokenId;
         this.expirationTime = expirationTime;
-        this.sqlConnection = connection;
-
-        try {
-            PreparedStatement insertPS = sqlConnection.prepareStatement("INSERT INTO RM_SEQUENCES VALUES (?, ?, ?, ?, ?)");
-            insertPS.setString(1, sequenceId);
-            insertPS.setLong(2, expirationTime);
-            insertPS.setInt(3, status.getValue());
-            insertPS.setBoolean(4, ackRequestedFlag);
-            insertPS.setLong(5, lastMessageId);
-
-            if (insertPS.executeUpdate() != 1) {
-                throw new PersistenceException("Sequence data not inserted into database.");
-            }
-
-            // TODO commit
-            PreparedStatement queryPS = sqlConnection.prepareStatement("SELECT * FROM RM_SEQUENCES WHERE sequence_id = ?");
-            queryPS.setString(1, sequenceId);
-            sequenceData = queryPS.executeQuery();
-            if (!sequenceData.first()) {
-                // TODO L10N
-                throw new PersistenceException("Unable to get the sequence data");
-            }
-        } catch (SQLException ex) {
-            // TODO L10N
-            throw new PersistenceException("Error creating the new sequence data record.", ex);
-        } finally {
-            // resource cleanup
-        }
+        this.state = state;
+        // new AtomicReference<State>(State.CREATED);
+        this.ackRequestedFlag = ackRequestedFlag;
+        // new AtomicBoolean(false);
+        this.lastMessageId = lastMessageId;
+        this.lastActivityTime = lastActivityTime;
+        // System.currentTimeMillis();
+        this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
+        this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
+        this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
     }
 
-    public boolean isAckRequestedFlag() {
-        try {
-            return sequenceData.getBoolean("ack_requested_flag");
-        } catch (SQLException ex) {
-            // TODO handle
-            return false;
-        }
+    public void lockRead() {
+        messageIdLock.readLock().lock();
     }
 
-    public void setAckRequestedFlag(boolean ackRequestedFlag) {
-        try {
-            sequenceData.updateBoolean("ack_requested_flag", ackRequestedFlag);
-        } catch (SQLException ex) {
-            // TODO handle
-        }
+    public void unlockRead() {
+        messageIdLock.readLock().unlock();
     }
 
-    public Status getStatus() {
-        try {
-            return Status.valueToStatus(sequenceData.getInt("status"));
-        } catch (SQLException ex) {
-            // TODO handle
-            return null;
-        }
+    public void lockWrite() {
+        messageIdLock.writeLock().lock();
     }
 
-    public void setStatus(Status status) {
-        try {
-            sequenceData.updateInt("status", status.getValue());
-        } catch (SQLException ex) {
-            // TODO handle
-        }
-    }
-
-    public long getExpirationTime() {
-        return expirationTime; // no need to synchronize
-
+    public void unlockWrite() {
+        messageIdLock.writeLock().unlock();
     }
 
     public String getSequenceId() {
-        return sequenceId; // no need to synchronize
+        return sequenceId;
+    }
 
+    public String getBoundSecurityTokenReferenceId() {
+        return boundSecurityTokenReferenceId;
     }
 
     public long getLastMessageId() {
         try {
-            return sequenceData.getLong("last_message_id");
-        } catch (SQLException ex) {
-            // TODO handle
-            return -1;
+            lockRead();
+            return lastMessageId;
+        } finally {
+            unlockRead();
         }
     }
 
-    public long updateLastMessageId(long newId) {
+    public void setLastMessageId(long newLastMessageId) {
         try {
-            // TODO handle transaction
-            long retVal = getLastMessageId();
-            sequenceData.updateLong("last_message_id", newId);
-            return retVal;
-        } catch (SQLException ex) {
-            // TODO handle
-            return -1;
+            lockWrite();
+            this.lastMessageId = newLastMessageId;
+        } finally {
+            unlockWrite();
         }
     }
 
-    public long incrementAndGetLastMessageId() {
-        try {
-            // TODO handle transaction
-            long retVal = getLastMessageId() + 1;
-            sequenceData.updateLong("last_message_id", retVal);
-            return retVal;
-        } catch (SQLException ex) {
-            // TODO handle
-            return -1;
-        }
+    public State getState() {
+        return state;
     }
 
-    public Collection<Long> getAllUnackedIndexes() {
-        // TODO
-        return null;
+    public void setState(State newState) {
+        state = newState;
     }
 
-    public boolean noUnackedMessageIds() {
-        // TODO
-        return false;
+    public boolean getAckRequestedFlag() {
+        return ackRequestedFlag;
     }
 
-    public void addUnackedMessageId(long messageId) {
-        // TODO
+    public void setAckRequestedFlag(boolean newValue) {
+        ackRequestedFlag = newValue;
     }
 
-    public boolean removeUnackedMessageId(long messageId) {
-        // TODO
-        return false;
+    public long getLastAcknowledgementRequestTime() {
+        return lastAcknowledgementRequestTime;
     }
 
-    public void acquireMessageIdDataReadOnlyLock() {
-        // TODO
-    }
-
-    public void releaseMessageIdDataReadOnlyLock() {
-        // TODO
-    }
-
-    public void acquireMessageIdDataReadWriteLock() {
-        // TODO
-    }
-
-    public void releaseMessageIdDataReadWriteLock() {
-        // TODO
-    }
-
-    public String getBoundSecurityTokenReferenceId() {
-        // TODO
-        return boundSecurityTokenReferenceId;
+    public void setLastAcknowledgementRequestTime(long newTime) {
+        lastAcknowledgementRequestTime = newTime;
     }
 
     public long getLastActivityTime() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return lastActivityTime;
     }
 
-    public void updateLastActivityTime() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setLastActivityTime(long newTime) {
+        lastActivityTime = newTime;
     }
 
-    public void storeMessage(long id, Object message) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public long getExpirationTime() {
+        return expirationTime;
     }
 
-    public Object retrieveMessage(long id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public final void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException {
+        assert msgNumberKey != null;
+        try {
+            lockWrite();
+            // NOTE this must be a new String object
+            String correlationKey = new String(message.getCorrelationId());
+            weakUnackedNumberToCorrelationIdMap.put(msgNumberKey, correlationKey);
+            weakMessageStorage.put(correlationKey, message);
+        } finally {
+            unlockWrite();
+        }
+    }
+
+    public ApplicationMessage retrieveMessage(String correlationId) {
+        try {
+            lockRead();
+            return weakMessageStorage.get(correlationId);
+        } finally {
+            unlockRead();
+        }
+    }
+
+    public ApplicationMessage retrieveUnackedMessage(long messageNumber) {
+        try {
+            lockRead();
+            String correlationKey = weakUnackedNumberToCorrelationIdMap.get(messageNumber);
+            return (correlationKey != null) ? weakMessageStorage.get(correlationKey) : null;
+        } finally {
+            unlockRead();
+        }
     }
 }

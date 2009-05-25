@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.protocol.AbstractSequenceAcknowledgement;
 
 import javax.xml.namespace.QName;
 import java.math.BigInteger;
@@ -124,7 +123,7 @@ import javax.xml.bind.annotation.XmlType;
 "any"
 })
 @XmlRootElement(name = "SequenceAcknowledgement", namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
-public class SequenceAcknowledgementElement extends AbstractSequenceAcknowledgement {
+public class SequenceAcknowledgementElement {
 
     @XmlElement(name = "Identifier", required = true, namespace = "http://docs.oasis-open.org/ws-rx/wsrm/200702")
     protected Identifier identifier;

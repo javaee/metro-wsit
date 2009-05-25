@@ -35,12 +35,11 @@
  */
 package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.RmVersion;
-import com.sun.xml.ws.rx.rm.runtime.PacketAdapter;
+import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 
 /**
  *
@@ -51,9 +50,7 @@ public abstract class PacketFilter {
     protected static final long UNSPECIFIED = -1;
     private static final Logger LOGGER = Logger.getLogger(PacketFilter.class);
     
-    private RmVersion rmVersion;
-    private SOAPVersion soapVersion;
-    private AddressingVersion addressingVersion;
+    private RuntimeContext rc;
 
     protected PacketFilter() {
     }
@@ -92,12 +89,13 @@ public abstract class PacketFilter {
      */
     protected final String getSequenceId(Packet packet) {
         try {
-            if (notInitialized(packet)) {
+            if (notInitialized(packet) || isRmProtocolMessage(packet)) {
                 return null;
             }
 
-            PacketAdapter pa = PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet);
-            return pa.getSequenceId(); 
+            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, packet.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+            rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+            return message.getSequenceId();
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return null;
@@ -114,12 +112,13 @@ public abstract class PacketFilter {
      */
     protected final long getMessageId(Packet packet) {
         try {
-            if (notInitialized(packet)) {
+            if (notInitialized(packet) || isRmProtocolMessage(packet)) {
                 return UNSPECIFIED;
             }
             
-            PacketAdapter pa = PacketAdapter.getInstance(rmVersion, soapVersion, addressingVersion, packet);
-            return pa.getMessageNumber(); 
+            JaxwsApplicationMessage message = new JaxwsApplicationMessage(packet, packet.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+            rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+            return message.getMessageNumber();
         } catch (Exception ex) {
             LOGGER.warning("Unexpected exception occured", ex);
             return UNSPECIFIED;
@@ -133,16 +132,18 @@ public abstract class PacketFilter {
      * @return RM version configured on the current WS port or {@code null} if RM is not enabled.
      */
     protected final RmVersion getRmVersion() {
-        return rmVersion;
+        return rc.rmVersion;
     }
 
-    final void configure(RmVersion rmVersion, SOAPVersion soapVersion, AddressingVersion addressingVersion) {
-        this.rmVersion = rmVersion;
-        this.soapVersion = soapVersion;
-        this.addressingVersion = addressingVersion;
+    protected final boolean isRmProtocolMessage(Packet packet) {
+        return rc.rmVersion.isRmAction(rc.communicator.getWsaAction(packet));
+    }
+
+    final void configure(RuntimeContext context) {
+        this.rc = context;
     }
 
     private boolean notInitialized(Packet packet) {
-        return rmVersion == null || packet == null || packet.getMessage() == null;
+        return rc == null || packet == null || packet.getMessage() == null;
     }
 }

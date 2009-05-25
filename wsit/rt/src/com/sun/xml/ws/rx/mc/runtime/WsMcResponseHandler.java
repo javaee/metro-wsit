@@ -52,7 +52,7 @@ import javax.xml.soap.SOAPFault;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class WsMcResponseHandler extends AbstractResponseHandler {
+class WsMcResponseHandler extends McResponseHandlerBase {
 
     private static final Logger LOGGER = Logger.getLogger(WsMcResponseHandler.class);
     //

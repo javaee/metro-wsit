@@ -35,8 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractTerminateSequence;
-
+import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ import javax.xml.bind.annotation.XmlType;
 "any"
 })
 @XmlRootElement(name = "TerminateSequence", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class TerminateSequenceElement extends AbstractTerminateSequence {
+public class TerminateSequenceElement {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
@@ -94,6 +93,15 @@ public class TerminateSequenceElement extends AbstractTerminateSequence {
         this.identifier = new Identifier(sequenceId);
     }
     
+    public TerminateSequenceElement(TerminateSequenceData data) {
+        this(data.getSequenceId());
+    }
+
+    public TerminateSequenceData.Builder toDataBuilder() {
+        // TODO get last message number?
+        return TerminateSequenceData.getBuilder(identifier.getValue(), 0);
+    }
+
     /**
      * Gets the value of the identifier property.
      * 

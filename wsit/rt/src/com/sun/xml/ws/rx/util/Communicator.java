@@ -67,15 +67,18 @@ import javax.xml.namespace.QName;
  */
 public final class Communicator {
 
+    // TODO P2 introduce an inner builder class
+
     private static final Logger LOGGER = Logger.getLogger(Communicator.class);
     public final QName soapMustUnderstandAttributeName;
     //
     private final SecureConversationInitiator scInitiator;
+    private final FiberExecutor fiberExecutor;
+    private final EndpointAddress destinationAddress;
+    //
     private final AddressingVersion addressingVersion;
     private final SOAPVersion soapVersion;
-    private final FiberExecutor fiberExecutor;
     private final JAXBRIContext jaxbContext;
-    private final EndpointAddress destinationAddress;
 
     public Communicator(
             String name,
@@ -96,6 +99,11 @@ public final class Communicator {
 
     public final Packet createRequestPacket(Object jaxbElement, String wsaAction, boolean expectReply) {
         Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
+
+        return createRequestPacket(message, wsaAction, expectReply);
+    }
+
+    public final Packet createRequestPacket(Message message, String wsaAction, boolean expectReply) {
         Packet packet = new Packet(message);
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
@@ -103,10 +111,153 @@ public final class Communicator {
                 packet,
                 addressingVersion,
                 soapVersion,
-                false,
+                !expectReply,
                 wsaAction);
 
         return packet;
+    }
+
+    public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
+        if (originalRequestPacket != null) { // this is actually a request carried in a response packet
+            return createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
+        } else {
+            Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
+            return createRequestPacket(message, wsaAction, expectReply);
+        }
+    }
+
+    /**
+     * Creates a new empty request packet
+     *
+     * @return a new empty request packet
+     */
+    public Packet createEmptyRequestPacket(boolean expectReply) {
+        Packet packet = new Packet();
+        packet.endpointAddress = destinationAddress;
+        packet.expectReply = expectReply;
+
+        return packet;
+    }
+
+    /**
+     * Creates a new empty request packet with an empty message thatt has WS-A action set
+     *
+     * @return a new empty request packet
+     */
+    public Packet createEmptyRequestPacket(String requestWsaAction, boolean expectReply) {
+        return createRequestPacket(Messages.createEmpty(soapVersion), requestWsaAction, expectReply);
+    }
+
+    /**
+     * TODO javadoc
+     *
+     * @param requestPacket
+     * @param responseWsaAction
+     * @return
+     */
+    public Packet createResponsePacket(Packet requestPacket, Object jaxbElement, String responseWsaAction) {
+        if (requestPacket != null) { // normal response
+            return requestPacket.createServerResponse(
+                    Messages.create(jaxbContext, jaxbElement, soapVersion),
+                    addressingVersion,
+                    soapVersion,
+                    responseWsaAction);
+        } else { // this is actually a response carried on a request
+            return createRequestPacket(jaxbElement, responseWsaAction, false);
+        }
+    }
+
+    /**
+     * TODO javadoc
+     *
+     * @param requestPacket
+     * @param responseWsaAction
+     * @return
+     */
+    public Packet createResponsePacket(Packet requestPacket, Message message, String responseWsaAction) {
+        if (requestPacket != null) { // normal response
+            return requestPacket.createServerResponse(
+                    message,
+                    addressingVersion,
+                    soapVersion,
+                    responseWsaAction);
+        } else { // this is actually a response carried on a request
+            return createRequestPacket(message, responseWsaAction, false);
+        }
+    }
+
+    /**
+     * TODO javadoc
+     *
+     * @param requestPacket
+     * @param responseWsaAction
+     * @return
+     */
+    public Packet createEmptyResponsePacket(Packet requestPacket, String responseWsaAction) {
+        return requestPacket.createServerResponse(
+                Messages.createEmpty(soapVersion),
+                addressingVersion,
+                soapVersion,
+                responseWsaAction);
+    }
+
+    public Packet createNullResponsePacket(Packet requestPacket) {
+        requestPacket.transportBackChannel.close();
+        Packet emptyReturnPacket = new Packet();
+        emptyReturnPacket.invocationProperties.putAll(requestPacket.invocationProperties);
+        return emptyReturnPacket;
+    }
+
+    /**
+     * Creates a new JAX-WS {@link Message} object that doesn't have any payload
+     * and sets it as the current packet content as a request message.
+     *
+     * @param wsaAction WS-Addressing action header to set
+     *
+     * @return the updated {@link PacketAdapter} instance
+     */
+    public final Packet setEmptyRequestMessage(Packet request, String wsaAction) {
+        Message message = Messages.createEmpty(soapVersion);
+        request.setMessage(message);
+        message.getHeaders().fillRequestAddressingHeaders(
+                request,
+                addressingVersion,
+                soapVersion,
+                false,
+                wsaAction);
+
+
+        return request;
+    }
+
+    /**
+     * TODO javadoc
+     *
+     * @param requestAdapter
+     * @param wsaAction
+     * @return
+     */
+    public final Packet setEmptyResponseMessage(Packet response, Packet request, String wsaAction) {
+
+        Message message = Messages.createEmpty(soapVersion);
+        response.setResponseMessage(request, message, addressingVersion, soapVersion, wsaAction);
+        return response;
+    }
+
+    public String getWsaAction(Packet packet) {
+        if (packet == null || packet.getMessage() == null) {
+            return null;
+        }
+        
+        return packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
+    }
+
+    public String getWsaTo(Packet packet) {
+        if (packet == null || packet.getMessage() == null) {
+            return null;
+        }
+
+        return packet.getMessage().getHeaders().getTo(addressingVersion, soapVersion);
     }
 
     /**
@@ -157,17 +308,10 @@ public final class Communicator {
         return destinationAddress;
     }
 
-    /**
-     * Creates a new empty request packet based on the muster packet registered 
-     * with this {@link ProtocolCommunicator} instance.
-     * 
-     * @return a new empty request packet
-     */
-    public Packet createEmptyRequestPacket(boolean expectReply) {
-        Packet packet = new Packet();
-        packet.endpointAddress = destinationAddress;
-        packet.expectReply = expectReply;
-
-        return packet;
+    public AddressingVersion getAddressingVersion() {
+        return addressingVersion;
+    }
+    public SOAPVersion getSoapVersion() {
+        return soapVersion;
     }
 }

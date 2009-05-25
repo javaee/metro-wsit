@@ -35,8 +35,11 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import junit.framework.TestCase;
 
 /**
@@ -44,158 +47,185 @@ import junit.framework.TestCase;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InboundSequenceTest extends TestCase {
-
-    private SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
-    private Sequence inboundSequence;
-
+    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
+    private Sequence sequence;
+    
     public InboundSequenceTest(String testName) {
         super(testName);
     }
 
     @Override
     protected void setUp() throws Exception {
-        inboundSequence = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION);
+        sequence = sequenceManager.createInboundSequence(
+                sequenceManager.generateSequenceUID(),
+                null,
+                Sequence.NO_EXPIRATION,
+                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
         super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        sequenceManager.terminateSequence(inboundSequence.getId());
+        sequenceManager.terminateSequence(sequence.getId());
         super.tearDown();
     }
 
-    public void testGenerateNextMessageId() throws Exception {
-        boolean passed = false;
-        try {
-            inboundSequence.generateNextMessageId();
-        } catch (UnsupportedOperationException e) {
-            passed = true;
+    public void testRegisterMessage() throws Exception {
+        for (int i = 1; i <= 5; i++) {
+            DummyAppMessage message = new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i);
+            sequence.registerMessage(message, true);
+            assertEquals(sequence.getId(), message.getSequenceId());
+            assertEquals(i, message.getMessageNumber());
+
         }
-        assertTrue("Inbound sequence should throw exception when getNextMessageId() is invoked", passed);
     }
 
     public void testGetLastMessageId() throws Exception {
-        inboundSequence.acknowledgeMessageId(1);
-        inboundSequence.acknowledgeMessageId(2);
-        inboundSequence.acknowledgeMessageId(3);
-        inboundSequence.acknowledgeMessageId(4);
+        for (int i = 1; i <= 5; i++) {
+            sequence.registerMessage(new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i), true);
+        }
+        assertEquals(5, sequence.getLastMessageId());
 
-        assertEquals(4, inboundSequence.getLastMessageId());
+        DummyAppMessage message = new DummyAppMessage(sequence.getId(), 10, null, null, false, "" + 10);
+        sequence.registerMessage(message, true);
+        assertEquals(10, sequence.getLastMessageId());
+
     }
 
     public void testPendingAcknowedgements() throws Exception {
-        assertFalse(inboundSequence.hasPendingAcknowledgements());
+        assertFalse(sequence.hasUnacknowledgedMessages());
+
+
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
+        assertTrue(sequence.hasUnacknowledgedMessages());
+
+        sequence.acknowledgeMessageId(1);
+        assertFalse(sequence.hasUnacknowledgedMessages());
 
         List<Sequence.AckRange> ackedRages;
-
-
-        inboundSequence.acknowledgeMessageId(1);
-        assertFalse(inboundSequence.hasPendingAcknowledgements());
-        ackedRages = inboundSequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(1, ackedRages.get(0).upper);
 
-        inboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
-                    new Sequence.AckRange(2, 2),
-                    new Sequence.AckRange(4, 5)
-                }));
-        assertTrue(inboundSequence.hasPendingAcknowledgements());
-        ackedRages = inboundSequence.getAcknowledgedMessageIds();
+        for (int i = 2; i <= 5; i++) {
+            sequence.registerMessage(new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i), true);
+        }
+        sequence.acknowledgeMessageId(2);
+        sequence.acknowledgeMessageId(4);
+        sequence.acknowledgeMessageId(5);
+        assertTrue(sequence.hasUnacknowledgedMessages());
+
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(2, ackedRages.get(0).upper);
         assertEquals(4, ackedRages.get(1).lower);
         assertEquals(5, ackedRages.get(1).upper);
 
-        inboundSequence.acknowledgeMessageId(3);
-        assertFalse(inboundSequence.hasPendingAcknowledgements());
-        ackedRages = inboundSequence.getAcknowledgedMessageIds();
+        sequence.acknowledgeMessageId(3);
+        assertFalse(sequence.hasUnacknowledgedMessages());
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
         boolean passed = false;
         try {
-            inboundSequence.acknowledgeMessageId(4); // duplicate message acknowledgement
+            sequence.acknowledgeMessageId(4); // duplicate message acknowledgement
         } catch (IllegalMessageIdentifierException e) {
             passed = true;
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);
 
-        passed = false;
         try {
             // duplicate message acknowledgement
-            inboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
+            sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
                         new Sequence.AckRange(2, 2),
                         new Sequence.AckRange(4, 5)
                     }));
-        } catch (IllegalMessageIdentifierException e) {
-            passed = true;
+        } catch (UnsupportedOperationException e) {
+            return;
         }
-        assertTrue("IllegalMessageIdentifierException expected", passed);
+        fail("UnsupportedOperationException expected");
     }
 
-    public void testIsAcknowledged() {
-        inboundSequence.acknowledgeMessageId(1);
-        inboundSequence.acknowledgeMessageId(2);
-        inboundSequence.acknowledgeMessageId(4);
-        
-        assertTrue(inboundSequence.isAcknowledged(1));
-        assertTrue(inboundSequence.isAcknowledged(2));
-        assertFalse(inboundSequence.isAcknowledged(3));
-        assertTrue(inboundSequence.isAcknowledged(4));
-        assertFalse(inboundSequence.isAcknowledged(5));
+    public void testIsAcknowledged() throws Exception {
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 2, null, null, false, "B"), true);
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 4, null, null, false, "D"), true);
+
+        for (int i = 1; i < 6; i++) {
+            assertFalse(sequence.isAcknowledged(i));
+        }
+
+        sequence.acknowledgeMessageId(1);
+        sequence.acknowledgeMessageId(2);
+        sequence.acknowledgeMessageId(4);
+
+        assertTrue(sequence.isAcknowledged(1));
+        assertTrue(sequence.isAcknowledged(2));
+        assertFalse(sequence.isAcknowledged(3));
+        assertTrue(sequence.isAcknowledged(4));
+        assertFalse(sequence.isAcknowledged(5));
     }
-    
+
     public void testBehaviorAfterCloseOperation() throws Exception {
-        inboundSequence.acknowledgeMessageId(1);
-        inboundSequence.acknowledgeMessageId(2);
-        inboundSequence.acknowledgeMessageId(4);
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 2, null, null, false, "B"), true);
+        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 4, null, null, false, "D"), true);
 
-        inboundSequence.close();
+        sequence.close();
 
         // sequence acknowledgement behavior
         boolean passed = false;
         try {
-            inboundSequence.acknowledgeMessageId(3); // error        
-        } catch (IllegalStateException e) {
+            sequence.registerMessage(new DummyAppMessage(sequence.getId(), 3, null, null, false, "C"), true); // error
+        } catch (SequenceClosedException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
 
         passed = false;
         try {
-            inboundSequence.acknowledgeMessageId(5); // error        
-        } catch (IllegalStateException e) {
+            sequence.acknowledgeMessageId(1); // error
+        } catch (SequenceClosedException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
     }
 
-    public void testStatus() throws Exception {
-        Sequence inbound = sequenceManager.createInboundSequence(sequenceManager.generateSequenceUID(), null, Sequence.NO_EXPIRATION);
-        assertEquals(Sequence.Status.CREATED, inbound.getStatus());
+    public void testSequenceState() throws Exception {
+        Sequence inbound = sequenceManager.createInboundSequence(
+                sequenceManager.generateSequenceUID(),
+                null,
+                Sequence.NO_EXPIRATION,
+                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+        assertEquals(Sequence.State.CREATED, inbound.getState());
 
         // TODO test closing
 
         inbound.close();
-        assertEquals(Sequence.Status.CLOSED, inbound.getStatus());
+        assertEquals(Sequence.State.CLOSED, inbound.getState());
 
         sequenceManager.terminateSequence(inbound.getId());
-        assertEquals(Sequence.Status.TERMINATING, inbound.getStatus());
+        assertEquals(Sequence.State.TERMINATING, inbound.getState());
     }
 
-    public void testStoreAndRetrieveMessage() {
-        try {
-            inboundSequence.storeMessage(1, 1, new Object());
-            fail("UnsupportedOperationException was expected to be thrown");
-        } catch (UnsupportedOperationException e) {
+    public void testStoreAndRetrieveMessage() throws Exception {
+        Map<String, ApplicationMessage> correlatedMessageMap = new HashMap<String, ApplicationMessage>();
+        for (int i = 1; i <= 3; i++) {
+            ApplicationMessage message = new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i);
+            sequence.registerMessage(message, true);
+            correlatedMessageMap.put(message.getCorrelationId(), message);
         }
-        try {
-            inboundSequence.retrieveMessage(1);
-            fail("UnsupportedOperationException was expected to be thrown");
-        } catch (UnsupportedOperationException e) {
+
+        System.gc();
+
+        for (Map.Entry<String, ApplicationMessage> entry : correlatedMessageMap.entrySet()) {
+            Object actual = sequence.retrieveMessage(entry.getKey());
+            assertEquals("Retrieved message is not the same as stored message", entry.getValue(), actual);
+            sequence.acknowledgeMessageId(entry.getValue().getMessageNumber());
         }
     }
 }

@@ -35,9 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractAcceptType;
-import com.sun.xml.ws.rx.rm.protocol.AbstractCreateSequenceResponse;
-
+import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +80,7 @@ import javax.xml.bind.annotation.XmlType;
 "any"
 })
 @XmlRootElement(name = "CreateSequenceResponse", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
-public class CreateSequenceResponseElement extends AbstractCreateSequenceResponse {
+public class CreateSequenceResponseElement {
 
     @XmlElement(name = "Identifier", namespace = "http://schemas.xmlsoap.org/ws/2005/02/rm")
     protected Identifier identifier;
@@ -93,6 +92,34 @@ public class CreateSequenceResponseElement extends AbstractCreateSequenceRespons
     protected List<Object> any;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+
+    public CreateSequenceResponseElement() {
+    }
+
+    public CreateSequenceResponseElement(CreateSequenceResponseData data) {
+        this();
+
+        identifier = new Identifier(data.getSequenceId());
+        expires = new Expires(data.getExpirationTime());
+        if (data.getAcceptedSequenceAcksTo() != null) {
+            accept = new AcceptType();
+            accept.setAcksTo(data.getAcceptedSequenceAcksTo());
+        }
+    }
+
+    public CreateSequenceResponseData.Builder toDataBuilder() {
+        CreateSequenceResponseData.Builder dataBuilder = CreateSequenceResponseData.getBuilder(identifier.getValue());
+
+        if (expires != null && expires.getDuration() != Sequence.NO_EXPIRATION) {
+            dataBuilder.expirationTime(expires.getDuration() + System.currentTimeMillis());
+        }
+
+        if (accept != null) {
+            dataBuilder.acceptedSequenceAcksTo(accept.getAcksTo());
+        }
+
+        return dataBuilder;
+    }
 
     /**
      * Gets the value of the identifier property.
@@ -162,8 +189,8 @@ public class CreateSequenceResponseElement extends AbstractCreateSequenceRespons
      *     {@link AcceptType }
      *     
      */
-    public void setAccept(AbstractAcceptType value) {
-        this.accept = (AcceptType) value;
+    public void setAccept(AcceptType value) {
+        this.accept = value;
     }
 
     /**

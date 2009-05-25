@@ -195,7 +195,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         return wsmcAnonymousEndpointReference;
     }
 
-    public final void registerProtocolResponseHandler(ProtocolMessageHandler handler) {
+    public final void registerProtocolMessageHandler(ProtocolMessageHandler handler) {
         mcSenderTask.register(handler);
     }
 
@@ -214,7 +214,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
             }
         }
 
-        // this request seems to be one-way, need to check if there are any RM-Acks set on it.
+        // this request seems to be one-way, need to check if there are is an RM AckRequest set on it.
         // FIXME: this should be made in a RM-agnostic way
         return isBooleanFlagSet(request, RxConfiguration.ACK_REQUESTED_HEADER_SET);
     }
@@ -229,7 +229,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     }
 
-    private Boolean isBooleanFlagSet(Packet packet, Object flag) {
+    private Boolean isBooleanFlagSet(Packet packet, String flag) {
         Boolean value = Boolean.class.cast(packet.invocationProperties.get(flag));
         return value != null && value.booleanValue();
     }

@@ -107,7 +107,8 @@ public class LoggingDumpTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processRequest(Packet request) {
         if (messageDumper.isLoggable()) {
-            messageDumper.dump(MessageDumper.MessageType.Request, position.requestState, messageDumper.convertToString(request), tubeId, Fiber.current().owner.id);
+            Packet dumpPacket = (request != null) ? request.copy(true) : null;
+            messageDumper.dump(MessageDumper.MessageType.Request, position.requestState, messageDumper.convertToString(dumpPacket), tubeId, Fiber.current().owner.id);
         }
 
         return super.processRequest(request);
@@ -116,7 +117,8 @@ public class LoggingDumpTube extends AbstractFilterTubeImpl {
     @Override
     public NextAction processResponse(Packet response) {
         if (messageDumper.isLoggable()) {
-            messageDumper.dump(MessageDumper.MessageType.Response, position.responseState, messageDumper.convertToString(response), tubeId, Fiber.current().owner.id);
+            Packet dumpPacket = (response != null) ? response.copy(true) : null;
+            messageDumper.dump(MessageDumper.MessageType.Response, position.responseState, messageDumper.convertToString(dumpPacket), tubeId, Fiber.current().owner.id);
         }
 
         return super.processResponse(response);

@@ -35,8 +35,10 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import java.util.Arrays;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import junit.framework.TestCase;
 
 /**
@@ -44,9 +46,8 @@ import junit.framework.TestCase;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OutboundSequenceTest extends TestCase {
-
-    private SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
-    private Sequence outboundSequence;
+    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
+    private Sequence sequence;
 
     public OutboundSequenceTest(String testName) {
         super(testName);
@@ -54,162 +55,164 @@ public class OutboundSequenceTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        outboundSequence = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1);
+        sequence = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1, SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
         super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        sequenceManager.terminateSequence(outboundSequence.getId());
+        sequenceManager.terminateSequence(sequence.getId());
         super.tearDown();
     }
 
-    public void testGenerateNextMessageId() throws Exception {
-        assertEquals(1, outboundSequence.generateNextMessageId());
-        assertEquals(2, outboundSequence.generateNextMessageId());
-        assertEquals(3, outboundSequence.generateNextMessageId());
-        assertEquals(4, outboundSequence.generateNextMessageId());
-        assertEquals(5, outboundSequence.generateNextMessageId());
+    public void testRegisterMessage() throws Exception {
+        DummyAppMessage message;
+
+        message = new DummyAppMessage("A");
+        sequence.registerMessage(message, true);
+        assertEquals(sequence.getId(), message.getSequenceId());
+        assertEquals(1, message.getMessageNumber());
+
+        message = new DummyAppMessage("B");
+        sequence.registerMessage(message, true);
+        assertEquals(sequence.getId(), message.getSequenceId());
+        assertEquals(2, message.getMessageNumber());
+
+        message = new DummyAppMessage("C");
+        sequence.registerMessage(message, true);
+        assertEquals(sequence.getId(), message.getSequenceId());
+        assertEquals(3, message.getMessageNumber());
+
+        message = new DummyAppMessage("D");
+        sequence.registerMessage(message, true);
+        assertEquals(sequence.getId(), message.getSequenceId());
+        assertEquals(4, message.getMessageNumber());
+
+        message = new DummyAppMessage("E");
+        sequence.registerMessage(message, true);
+        assertEquals(sequence.getId(), message.getSequenceId());
+        assertEquals(5, message.getMessageNumber());
     }
 
     public void testGetLastMessageId() throws Exception {
-        outboundSequence.generateNextMessageId(); // 1
-        outboundSequence.generateNextMessageId(); // 2
-        outboundSequence.generateNextMessageId(); // 3
-        outboundSequence.generateNextMessageId(); // 4
+        for (int i = 0; i < 4; i++) {
+            sequence.registerMessage(new DummyAppMessage("" + i), true);
+        }
 
-        assertEquals(4, outboundSequence.getLastMessageId());
+        assertEquals(4, sequence.getLastMessageId());
     }
 
     public void testPendingAcknowedgements() throws Exception {
-        outboundSequence.generateNextMessageId(); // 1 
-        outboundSequence.generateNextMessageId(); // 2 
-        outboundSequence.generateNextMessageId(); // 3 
-        outboundSequence.generateNextMessageId(); // 4 
-        outboundSequence.generateNextMessageId(); // 5 
+        for (int i = 0; i < 5; i++) {
+            sequence.registerMessage(new DummyAppMessage("" + i), true);
+        }
 
-        assertTrue(outboundSequence.hasPendingAcknowledgements());
+        assertTrue(sequence.hasUnacknowledgedMessages());
 
         List<Sequence.AckRange> ackedRages;
 
-        outboundSequence.acknowledgeMessageId(1);
-        assertTrue(outboundSequence.hasPendingAcknowledgements());
-        ackedRages = outboundSequence.getAcknowledgedMessageIds();
+        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1));
+        assertTrue(sequence.hasUnacknowledgedMessages());
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(1, ackedRages.get(0).upper);
 
-        outboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
-                    new Sequence.AckRange(1, 2),
-                    new Sequence.AckRange(4, 4),
-                }));
-        assertTrue(outboundSequence.hasPendingAcknowledgements());
-        ackedRages = outboundSequence.getAcknowledgedMessageIds();
+        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 4));
+        assertTrue(sequence.hasUnacknowledgedMessages());
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(2, ackedRages.get(0).upper);
         assertEquals(4, ackedRages.get(1).lower);
         assertEquals(4, ackedRages.get(1).upper);
 
-        outboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
-                    new Sequence.AckRange(1, 5)
-                }));
-        assertFalse(outboundSequence.hasPendingAcknowledgements());
-        ackedRages = outboundSequence.getAcknowledgedMessageIds();
+        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5));
+        assertFalse(sequence.hasUnacknowledgedMessages());
+        ackedRages = sequence.getAcknowledgedMessageIds();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
         boolean passed = false;
         try {
-            outboundSequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
-                        new Sequence.AckRange(1, 6)
-                    }));
-        } catch (IllegalMessageIdentifierException e) {
-            passed = true;
-        }
-        assertTrue("IllegalMessageIdentifierException expected", passed);
-
-        passed = false;
-        try {
-            outboundSequence.acknowledgeMessageId(6);
-        } catch (IllegalMessageIdentifierException e) {
+            sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5, 6));
+        } catch (InvalidAcknowledgementException e) {
             passed = true;
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);
     }
 
-    public void testIsAcknowledged() {
-        outboundSequence.generateNextMessageId(); // 1
-        outboundSequence.generateNextMessageId(); // 2
-        outboundSequence.generateNextMessageId(); // 3
-        outboundSequence.generateNextMessageId(); // 4
-        outboundSequence.generateNextMessageId(); // 5
+    public void testIsAcknowledged() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            sequence.registerMessage(new DummyAppMessage("" + i), true);
+        }
         
-        outboundSequence.acknowledgeMessageId(1);
-        outboundSequence.acknowledgeMessageId(2);
-        outboundSequence.acknowledgeMessageId(4);
+        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 4));
         
-        assertTrue(outboundSequence.isAcknowledged(1));
-        assertTrue(outboundSequence.isAcknowledged(2));
-        assertFalse(outboundSequence.isAcknowledged(3));
-        assertTrue(outboundSequence.isAcknowledged(4));
-        assertFalse(outboundSequence.isAcknowledged(5));
-        assertFalse(outboundSequence.isAcknowledged(6));
+        assertTrue(sequence.isAcknowledged(1));
+        assertTrue(sequence.isAcknowledged(2));
+        assertFalse(sequence.isAcknowledged(3));
+        assertTrue(sequence.isAcknowledged(4));
+        assertFalse(sequence.isAcknowledged(5));
+        assertFalse(sequence.isAcknowledged(6));
     }
     
     public void testSequenceStatusAfterCloseOperation() throws Exception {
-        outboundSequence.close();
-        assertEquals(Sequence.Status.CLOSED, outboundSequence.getStatus());
+        sequence.close();
+        assertEquals(Sequence.State.CLOSED, sequence.getState());
     }
 
     public void testBehaviorAfterCloseOperation() throws Exception {
-        outboundSequence.generateNextMessageId(); // 1
-        outboundSequence.close();
-        assertEquals(Sequence.Status.CLOSED, outboundSequence.getStatus());
+        sequence.registerMessage(new DummyAppMessage("A"), true); // 1
+        sequence.close();
+        assertEquals(Sequence.State.CLOSED, sequence.getState());
 
         // sequence acknowledgement behavior
-        outboundSequence.acknowledgeMessageId(1); // ok
-
-        // sequence generateNextMessageId behavior
         boolean passed = false;
         try {
-            outboundSequence.generateNextMessageId(); // error        
-        } catch (IllegalStateException e) {
+            sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1)); // ok
+            sequence.registerMessage(new DummyAppMessage("B"), true); // error - closed sequence
+        } catch (SequenceClosedException e) {
+            passed = true;
+        }
+
+        // sequence generateNextMessageId behavior
+        passed = false;
+        try {
+            sequence.registerMessage(new DummyAppMessage("B"), true); // error - closed sequence
+        } catch (SequenceClosedException e) {
             passed = true;
         }
         assertTrue("Expected exception was not thrown", passed);
     }
 
-    public void testStatus() throws Exception {
-        Sequence outbound = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1);
-        assertEquals(Sequence.Status.CREATED, outbound.getStatus());
+    public void testSequenceState() throws Exception {
+        Sequence outbound = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1, SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+        assertEquals(Sequence.State.CREATED, outbound.getState());
 
         outbound.close();
-        assertEquals(Sequence.Status.CLOSED, outbound.getStatus());
+        assertEquals(Sequence.State.CLOSED, outbound.getState());
 
         sequenceManager.terminateSequence(outbound.getId());
-        assertEquals(Sequence.Status.TERMINATING, outbound.getStatus());
+        assertEquals(Sequence.State.TERMINATING, outbound.getState());
     }
 
-    public void testStoreAndRetrieveMessage() throws InterruptedException {
-        Object[] messages = new Object[3];
-        for (int i = 0; i < messages.length; i++) {
-            Object message = new Object();
-            long msgId = outboundSequence.generateNextMessageId();
-            outboundSequence.storeMessage(i + 5, msgId, message);
-            messages[i] = message;
+    public void testStoreAndRetrieveMessage() throws Exception {
+        Map<String, ApplicationMessage> correlatedMessageMap = new HashMap<String, ApplicationMessage>();
+        for (int i = 0; i < 3; i++) {
+            ApplicationMessage message = new DummyAppMessage("" + i);
+            sequence.registerMessage(message, true);
+            correlatedMessageMap.put(message.getCorrelationId(), message);
         }
 
         System.gc();
 
-        int i = 0;
-        for (Object expected : messages) {
-            Object actual = outboundSequence.retrieveMessage(i + 5);
-            assertEquals("Retrieved message is not the same as stored message", expected, actual);
-            outboundSequence.acknowledgeMessageId(++i);
+        for (Map.Entry<String, ApplicationMessage> entry : correlatedMessageMap.entrySet()) {
+            Object actual = sequence.retrieveMessage(entry.getKey());
+            assertEquals("Retrieved message is not the same as stored message", entry.getValue(), actual);
         }
-        /*        
+        /*
         System.gc();
         Thread.sleep(2000);
         System.gc();

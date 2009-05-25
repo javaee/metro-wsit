@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Map;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -65,7 +66,7 @@ public interface SequenceManager {
     
     @ManagedAttribute
     @Description("All RM sequences")
-    public Map<String, AbstractSequence> sequences();
+    public Map<String, ? extends Sequence> sequences();
 
     @ManagedAttribute
     @Description("Collection of sequence ID pairs that form an RM session")
@@ -75,8 +76,10 @@ public interface SequenceManager {
      * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
      * 
      * @param sequenceId the unique sequence identifier
+     *
+     * @return closed sequence object
      */
-    public void closeSequence(String sequenceId) throws UnknownSequenceException;
+    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
      * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
@@ -86,13 +89,14 @@ public interface SequenceManager {
      * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
+     * @param deliveryQueueBuilder delivery queue builder that creates delivery queue for the newly created sequence
      * 
      * @return newly created inbound sequence
      * 
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException;
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException;
 
     /**
      * Creates a new inbound sequence object
@@ -101,13 +105,14 @@ public interface SequenceManager {
      * @param strId security reference token identifier which this session is bound to
      * @param expirationTime expiration time of the sequence in milliseconds; value of {@link com.sun.xml.ws.rm.policy.Configuration#UNSPECIFIED}
      * means that this sequence never expires.
+     * @param deliveryQueueBuilder delivery queue builder that creates delivery queue for the newly created sequence
      * 
      * @return newly created inbound sequence
      * 
      * @exception DuplicateSequenceExcepton in case a sequence instance with this 
      * identifier is already registered with this sequence manager
      */
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException;
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException;
     
     /**
      * Generates a unique identifier of a sequence

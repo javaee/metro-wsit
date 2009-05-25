@@ -40,6 +40,8 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.RxConfigurationFactory;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -50,7 +52,12 @@ public final class PacketFilteringTubeFactory implements TubeFactory {
 
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isPacketFilteringEnabled(context.getBinding())) {
-            return new PacketFilteringTube(context);
+        RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(
+                context.getWsdlPort(),
+                context.getBinding(),
+                null);
+
+            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
         } else {
             return context.getTubelineHead();
         }
@@ -58,7 +65,12 @@ public final class PacketFilteringTubeFactory implements TubeFactory {
 
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
         if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            return new PacketFilteringTube(context);
+            RxConfiguration configuration = RxConfigurationFactory.INSTANCE.createConfiguration(
+                context.getWsdlPort(),
+                context.getEndpoint().getBinding(),
+                context.getWrappedContext().getEndpoint().getManagedObjectManager());
+
+            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
         } else {
             return context.getTubelineHead();
         }

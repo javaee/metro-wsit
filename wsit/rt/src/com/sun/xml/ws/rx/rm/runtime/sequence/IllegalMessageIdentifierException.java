@@ -46,14 +46,21 @@ import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 public final class IllegalMessageIdentifierException extends RxRuntimeException {
     private static final long serialVersionUID = 647447570493203088L;
     //
-    private final long messageId;
+    private final long messageNumber;
+    private final String sequenceId;
     
-    public IllegalMessageIdentifierException(long messageIdentifier) {
-        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(messageIdentifier));
-        this.messageId = messageIdentifier;
+    public IllegalMessageIdentifierException(String sequenceId, long messageNumber) {
+        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(sequenceId, messageNumber));
+
+        this.sequenceId = sequenceId;
+        this.messageNumber = messageNumber;
     }
 
-    public long getMessageId() {
-        return messageId;
+    public long getMessageNumber() {
+        return messageNumber;
+    }
+
+    public String getSequenceId() {
+        return sequenceId;
     }
 }

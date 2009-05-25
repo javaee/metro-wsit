@@ -45,7 +45,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class RequestResponseMepHandler extends AbstractResponseHandler {
+class RequestResponseMepHandler extends McResponseHandlerBase {
 
     public RequestResponseMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);

@@ -47,7 +47,7 @@ import java.io.IOException;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class OneWayMepHandler extends AbstractResponseHandler {
+class OneWayMepHandler extends McResponseHandlerBase {
 
     public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);

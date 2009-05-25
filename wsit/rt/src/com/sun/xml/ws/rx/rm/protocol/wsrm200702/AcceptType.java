@@ -35,8 +35,6 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
-import com.sun.xml.ws.rx.rm.protocol.AbstractAcceptType;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.EndpointReference;
 import java.util.ArrayList;
@@ -75,7 +73,7 @@ import javax.xml.bind.annotation.XmlType;
 "acksTo",
 "any"
 })
-public class AcceptType extends AbstractAcceptType {
+public class AcceptType {
 
     @XmlElement(name = "AcksTo", required = true)
     protected EndpointReference acksTo;

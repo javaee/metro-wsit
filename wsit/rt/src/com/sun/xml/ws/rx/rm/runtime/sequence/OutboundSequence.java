@@ -36,7 +36,10 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,32 +47,23 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * TODO javadoc
  * TODO make class thread-safe
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class OutboundSequence extends AbstractSequence {
+public final class OutboundSequence extends AbstractSequence {
+    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.MIN_MESSAGE_ID - 1;
 
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
     private final List<Long> unackedMessageIdentifiers;
-    private final Map<Long, Object> weakMessageStorage;
-    private final Map<Long, Long> weakIdtoCorrelationIdMap;
-    
 
-    OutboundSequence(
-            String sequenceId,
-            String securityContextTokenId,
-            long expirationTime) {
-        super(sequenceId, securityContextTokenId, expirationTime, Sequence.MIN_MESSAGE_ID - 1);
+    public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+        super(data, deliveryQueueBuilder);
 
         this.unackedMessageIdentifiers = new LinkedList<Long>();
-        this.weakMessageStorage = new WeakHashMap<Long, Object>();
-        this.weakIdtoCorrelationIdMap = new WeakHashMap<Long, Long>();
     }
 
     @Override
@@ -77,73 +71,63 @@ final class OutboundSequence extends AbstractSequence {
         return unackedMessageIdentifiers;
     }
 
-    @Override
-    public long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
-        if (getStatus() != Sequence.Status.CREATED) {
-            throw new IllegalStateException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_NEXT_MESSAGE_ID_REJECTED(getId(), getStatus()));
+    public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException {
+        checkSequenceCreatedStatus("", Code.Sender); // TODO
+
+        if (message.getSequenceId() != null) {
+            throw new IllegalArgumentException(String.format(
+                    "Cannot register message: Application message has been already registered on a sequence [ %s ].",
+                    message.getSequenceId()));
         }
 
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
-            long nextId = getLastMessageId() + 1;
-            if (nextId > Sequence.MAX_MESSAGE_ID) {
-                throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
+            message.setSequenceData(this.getId(), generateNextMessageId());
+            if (storeMessageFlag) {
+                storeMessage(message, getUnackedMessageIdentifierKey(message.getMessageNumber()));
             }
-
-            updateLastMessageId(nextId);
-            
-            // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
-            // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-            unackedMessageIdentifiers.add(new Long(nextId)); 
-            return nextId;
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
     }
 
-    @Override
-    public void storeMessage(long correlationId, long id, Object message) throws UnsupportedOperationException {
-        Long idKey;
-        try {
-            messageIdLock.readLock().lock();
-            int index = unackedMessageIdentifiers.indexOf(id);
-            if (index >= 0) { // the id is in the list
-                idKey = unackedMessageIdentifiers.get(index);
-            } else {
-                // Creating a new uncached long object that GC can dispose
-                // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-                idKey = new Long(id); 
-            }            
-        } finally {
-            messageIdLock.readLock().unlock();
+    private long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+        // no need to synchronize, called from within a write lock
+
+        long nextId = getLastMessageId() + 1;
+        if (nextId > Sequence.MAX_MESSAGE_ID) {
+            throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
         }
 
-        // we hold message while correlation id is still around in id-to-correlationId map
-        // we hold correlation id while id is still around in unacked ids list
-        
+        data.setLastMessageId(nextId);
+
+        // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
         // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-        Long correlationIdKey = new Long(correlationId);
-        weakIdtoCorrelationIdMap.put(idKey, correlationIdKey);
-        weakMessageStorage.put(correlationIdKey, message); 
+        unackedMessageIdentifiers.add(new Long(nextId));
+        return nextId;
     }
 
-    @Override
-    public Object retrieveMessage(long correlationId) throws UnsupportedOperationException {
-        return weakMessageStorage.get(correlationId);
-    }
-
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException {
-        // NOTE: This method will most likely not be used in our implementation as we expect range-based 
-        //       acknowledgements on outbound sequence. Thus we are not trying to optimize the implementation
-        if (!unackedMessageIdentifiers.remove(messageId)) {
-            throw new IllegalMessageIdentifierException(messageId);
+    private Long getUnackedMessageIdentifierKey(long messageNumber) {
+        Long msgNumberKey = null;
+        int index = unackedMessageIdentifiers.indexOf(messageNumber);
+        if (index >= 0) {
+            // the id is in the list
+            msgNumberKey = unackedMessageIdentifiers.get(index);
         }
+        return msgNumberKey;
     }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws IllegalMessageIdentifierException {
+    public void acknowledgeMessageId(long messageId) {
+        // TODO L10N
+        throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
+    }
+
+    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
+        checkSequenceCreatedStatus("", Code.Sender); // TODO
+
         try {
-            messageIdLock.writeLock().lock();
+            data.lockWrite();
 
             if (ranges == null || ranges.isEmpty()) {
                 return;
@@ -165,7 +149,7 @@ final class OutboundSequence extends AbstractSequence {
             // check proper bounds of acked ranges
             AckRange lastAckRange = ranges.get(ranges.size() - 1);
             if (getLastMessageId() < lastAckRange.upper) {
-                throw new IllegalMessageIdentifierException(lastAckRange.upper);
+                throw new InvalidAcknowledgementException(this.getId(), lastAckRange.upper, ranges);
             }
 
             if (unackedMessageIdentifiers.isEmpty()) {
@@ -188,7 +172,9 @@ final class OutboundSequence extends AbstractSequence {
                 }
             }
         } finally {
-            messageIdLock.writeLock().unlock();
+            data.unlockWrite();
         }
+        
+        this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 }

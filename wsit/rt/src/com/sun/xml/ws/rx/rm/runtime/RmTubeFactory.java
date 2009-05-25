@@ -66,7 +66,7 @@ public final class RmTubeFactory implements TubeFactory {
                 null);
 
         if (configuration.isReliableMessagingEnabled()) {
-             return new RmClientTube(configuration, context.getTubelineHead(), context);
+             return new ClientTube(configuration, context.getTubelineHead(), context);
         }
 
         return context.getTubelineHead();
@@ -85,7 +85,7 @@ public final class RmTubeFactory implements TubeFactory {
                 context.getWrappedContext().getEndpoint().getManagedObjectManager());
 
         if (configuration.isReliableMessagingEnabled()) {
-             return AbstractRmServerTube.getInstance(configuration, context.getTubelineHead(), context);
+             return new ServerTube(configuration, context.getTubelineHead(), context);
         }
 
         return context.getTubelineHead();

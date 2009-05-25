@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
+import com.sun.xml.ws.rx.rm.protocol.CloseSequenceResponseData;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,6 +83,19 @@ public class CloseSequenceResponseElement {
     protected List<Object> any;
     @XmlAnyAttribute
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
+
+    public CloseSequenceResponseElement() {
+    }
+
+    public CloseSequenceResponseElement(CloseSequenceResponseData data) {
+        this();
+
+        identifier = new Identifier(data.getSequenceId());
+    }
+
+    public CloseSequenceResponseData.Builder toDataBuilder() {
+        return CloseSequenceResponseData.getBuilder(identifier.getValue());
+    }
 
     /**
      * Gets the value of the identifier property.
