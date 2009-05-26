@@ -82,7 +82,7 @@ public class ClientTest extends TestCase {
                     public void run() {
                         try {
                             LOGGER.info(String.format("Calling web service in runnable [ %d ]", id));
-                            portCopy.ping("ping");
+                            portCopy.ping("ping-" + id);
                             LOGGER.info(String.format("Web service call finished in runnable [ %d ]", id));
                         } finally {
                             latch.countDown();
@@ -103,7 +103,7 @@ public class ClientTest extends TestCase {
             if (port != null) {
                 try {
                     LOGGER.info(String.format("Still need to wait for %d threads", latch.getCount()));
-                    latch.await(30, TimeUnit.SECONDS);
+                    latch.await(600, TimeUnit.SECONDS);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ex);                    
                     try {
@@ -111,7 +111,7 @@ public class ClientTest extends TestCase {
                     } catch (IOException ioex) {
                         Logger.getLogger(ClientTest.class.getName()).log(Level.SEVERE, null, ioex);
                     }
-                    fail("The test did not finished in 30 seconds. Most likely it is stuck in a deadlock or on sending poisoned messages");
+                    fail("The test did not finished in 60 seconds. Most likely it is stuck in a deadlock or on sending poisoned messages");
                 }
                 try {
                     ((java.io.Closeable) port).close();
