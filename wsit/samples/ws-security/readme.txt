@@ -2,7 +2,7 @@ To Install WSIT and run the sample:
 
 1. Follow the steps in [1] to download, build and install WSIT in Glassfish or Tomcat.
 
-2. Copy the directory /wsit/wsit/samples/ws-trust/certs/xws-security to 
+2. Copy the directory /wsit/wsit/samples/ws-security/certs/xws-security to 
 <GLASSFISH_HOME> or <TOMCAT_HOME>.
 
 3. Set up WSIT_HOME system property:
