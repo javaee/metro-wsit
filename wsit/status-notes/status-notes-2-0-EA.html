@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 EA Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-05-26 19:13:15 $ by $Author: jdg6688 $</pre>
+        <pre>Last Modified : $Date: 2009-05-27 11:24:14 $ by $Author: kumarjayanti $</pre>
 
         <h5>Updated: May 26, 2008</h5>
 
@@ -185,16 +185,16 @@
         <br>
         <hr>
         <h2><a name="security"></a>Security Status</h2>
-        <p><code> Updated:  ??, 2009</code></p>
+        <p><code> Updated:  27th May, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>Support for Password Derived Keys</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1021">Issue 1021 </a>: validation of server side policy failed.</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue 206 </a>: validation of server side policy failed.</li>
         </ul>
 
         <p><b>Known Issues</b></p>
@@ -336,24 +336,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: top;">SamlToken as InitiatorToken in
-                        AsymmetricBinding, with ProtectTokens fails with :: Could not find
-                        Reference #5 under Signature with ID1<br>
-                    </td>
-                    <td style="vertical-align: top;"> WSDL has AsymmetricBinding
-                        (X509Token as Initiator and RecipientToken),SamlToken as
-                        SignedSupportingToken.Request/Response messages are signed and
-                        encrypted. The client side has a SamlCallbackHandler meant to populate
-                        an SenderVouches saml assertion into the request message. The test
-                        fails on the server side with the following exception trace :
-                        <pre>Could not find Reference<br>#ff63e9e3-248d-4f77-8802-5326d58da1a9 under Signature with ID1</pre>
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue#206</a><br>
-                    </td>
-                    <td style="vertical-align: top;">Will be fixed in a future
-                        release. <br>
-                    </td>
-                </tr>
-                <tr>
                     <td style="vertical-align: top;">Security with List data type
                         dropping xs namespace declaration&nbsp; <br>
                     </td>
@@ -466,8 +448,7 @@
                             </td>
                             <td>
                                 <p>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
-                                    release, &lt;sp:UsernameToken11&gt;&nbsp; and Password Derived Keys
-                                will be supported in a future release</p>
+                                    release, &lt;sp:UsernameToken11&gt;</p>
                             </td>
                         </tr>
                         <tr>
@@ -557,7 +538,7 @@
                                     in cases where the Token is not in the Message, is not handled
                                     correctly yet (refer known <a
                                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue# 76,
-                                    206</a>). Note that WCF RTM does not support sp:ProtectTokens assertion<br>
+                                    206</a>).
                                 </p>
                             </td>
                         </tr>
@@ -892,7 +873,7 @@
         <br>
         <hr>
         <h2><a name="securitypolicy"></a>Security Policy Status</h2>
-        <p><code> Updated: ??, 2009</code></p>
+        <p><code> Updated: May 27th, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
