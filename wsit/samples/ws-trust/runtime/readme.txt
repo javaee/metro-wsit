@@ -4,7 +4,7 @@ Run the sample:
 1. Copy the directory /wsit/wsit/samples/ws-trust/certs/xws-security to 
 <GLASSFISH_HOME> or <TOMCAT_HOME>.
 
-2. Edit /wsit/wsit/samples/ws-trust/src/fs/build.properties to set java.home and 
+2. Edit /wsit/wsit/samples/ws-trust/runtime/src/fs/build.properties to set java.home and
    tomcat.home/glassfish.home.
 
 3. Start tomcat or glassfish.
