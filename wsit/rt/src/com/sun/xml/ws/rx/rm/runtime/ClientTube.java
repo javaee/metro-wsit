@@ -91,7 +91,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
             this.value = value;
         }
     }
-
     //
     private static final Logger LOGGER = Logger.getLogger(ClientTube.class);
     private static final Lock INIT_LOCK = new ReentrantLock();
@@ -179,7 +178,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
             rc.sourceMessageHandler.registerMessage(message, outboundSequenceId.value);
 
-            synchronized(message.getCorrelationId()) {
+            synchronized (message.getCorrelationId()) {
                 // this synchronization is needed so that all 3 operations occur before
                 // AbstractResponseHandler.getParentFiber() is invoked on the response thread
                 rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
@@ -287,7 +286,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         csBuilder.strType(rc.communicator.tryStartSecureConversation());
         if (rc.configuration.requestResponseOperationsDetected()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager.generateSequenceUID());
-        // TODO P2 add offered sequence expiration configuration
+            // TODO P2 add offered sequence expiration configuration
         }
         final CreateSequenceData requestData = csBuilder.build();
         final Packet request = rc.protocolHandler.toPacket(requestData, null);

@@ -55,9 +55,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class TimestampedCollection<K, V> {
+public class TimestampedCollection<K, V> {
 
-    public TimestampedCollection() {
+    public static <K, V> TimestampedCollection<K, V> newInstance() {
+        return new TimestampedCollection<K, V>();
     }
 
     //
@@ -89,6 +90,10 @@ public final class TimestampedCollection<K, V> {
      * Data access lock
      */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+    TimestampedCollection() { 
+        // package private constructor - only classes in this package can extend this class
+    }
 
     /**
      * Registers a {@code subject} and maps it to a given {@code correlationId}.

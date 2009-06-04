@@ -38,7 +38,6 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
@@ -46,7 +45,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.ScheduledTaskManager;
-import com.sun.xml.ws.rx.util.TimestampedCollection;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.concurrent.ScheduledFuture;
 
 /**
@@ -98,7 +97,7 @@ public final class RuntimeContext {
                     configuration,
                     sequenceManager,
                     communicator,
-                    new TimestampedCollection<String, Fiber>(),
+                    new SuspendedFiberStorage(),
                     WsrmProtocolHandler.getInstance(configuration, communicator, sequenceManager),
                     new ScheduledTaskManager(),
                     sourceMessageHandler,
@@ -112,7 +111,7 @@ public final class RuntimeContext {
     public final RmVersion rmVersion;
     public final SequenceManager sequenceManager;
     public final Communicator communicator;
-    public final TimestampedCollection<String, Fiber> suspendedFiberStorage;
+    public final SuspendedFiberStorage suspendedFiberStorage;
     public final WsrmProtocolHandler protocolHandler;
     public final ScheduledTaskManager scheduledTaskManager;
     final RedeliveryTask redeliveryTask;
@@ -123,7 +122,7 @@ public final class RuntimeContext {
             RxConfiguration configuration,
             SequenceManager sequenceManager,
             Communicator communicator,
-            TimestampedCollection<String, Fiber> suspendedFiberStorage,
+            SuspendedFiberStorage suspendedFiberStorage,
             WsrmProtocolHandler protocolHandler,
             ScheduledTaskManager scheduledTaskManager,
             SourceMessageHandler srcMsgHandler,

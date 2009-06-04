@@ -102,7 +102,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     rc.sourceMessageHandler.putToDeliveryQueue(message);
                 }
 
-            // TODO handle RM faults
+                // TODO handle RM faults
             } catch (DuplicateMessageRegistrationException ex) {
                 onCompletion(ex);
             }
@@ -112,7 +112,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
             if (ServerDestinationDeliveryCallback.isResendPossible(error)) {
                 rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
             } else {
-                getParentFiber().resume(error);
+                resumeParentFiber(error);
             }
         }
     }

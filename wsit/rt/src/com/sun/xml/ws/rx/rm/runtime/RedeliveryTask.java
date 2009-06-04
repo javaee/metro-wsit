@@ -53,7 +53,7 @@ final class RedeliveryTask implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(RedeliveryTask.class);
     //
-    private final TimestampedCollection<Object, ApplicationMessage> scheduledMessages = new TimestampedCollection<Object, ApplicationMessage>();
+    private final TimestampedCollection<Object, ApplicationMessage> scheduledMessages = TimestampedCollection.newInstance();
     private final @NotNull DeliveryHandler deliveryHandler;
 
     RedeliveryTask(@NotNull DeliveryHandler deliveryHandler) {

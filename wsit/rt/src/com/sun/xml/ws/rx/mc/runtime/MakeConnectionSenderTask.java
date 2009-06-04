@@ -37,13 +37,12 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
-import com.sun.xml.ws.rx.util.TimestampedCollection;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,12 +64,12 @@ final class MakeConnectionSenderTask implements Runnable {
     private int scheduledMcRequestCounter;
     private final RxConfiguration configuration;
     private final Communicator communicator;
-    private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
+    private final SuspendedFiberStorage suspendedFiberStorage;
     private final Map<String, ProtocolMessageHandler> mapOfRegisteredProtocolMessageHandlers;
 
     MakeConnectionSenderTask(
             final Communicator communicator,
-            final TimestampedCollection<String, Fiber> suspendedFiberStorage,
+            final SuspendedFiberStorage suspendedFiberStorage,
             final String wsmcAnonymousAddress,
             final Header wsmcAnnonymousReplyToHeader,
             final Header wsmcAnnonymousFaultToHeader,

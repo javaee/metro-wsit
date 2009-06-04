@@ -33,37 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
+package com.sun.xml.ws.rx.util;
+
+import com.sun.xml.ws.rx.RxRuntimeException;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class RequestResponseMepHandler extends McResponseHandlerBase {
+public class ResumeFiberException extends RxRuntimeException {
 
-    public RequestResponseMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
-        super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
+    public ResumeFiberException(String message) {
+        super(message);
     }
 
-    public void onCompletion(Packet response) {
-        Message responseMessage = response.getMessage();
-        if (responseMessage != null) {
-            processMakeConnectionHeaders(responseMessage);
-
-            if (responseMessage.hasPayload()) {
-                resumeParentFiber(response);
-            }
-        }
-        // otherwise do nothing; we'll keep the fiber suspended until a non-empty response
-        // arrives as a response to WS-MakeConnection request
-    }
-
-    public void onCompletion(Throwable error) {
-        resumeParentFiber(error);
+    public ResumeFiberException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

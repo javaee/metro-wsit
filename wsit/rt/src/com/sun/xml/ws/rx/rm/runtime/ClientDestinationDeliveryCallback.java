@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
@@ -43,7 +42,6 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 class ClientDestinationDeliveryCallback implements Postman.Callback {
 
     private static final Logger LOGGER = Logger.getLogger(ClientDestinationDeliveryCallback.class);
-
     private final RuntimeContext rc;
 
     public ClientDestinationDeliveryCallback(RuntimeContext rc) {
@@ -63,8 +61,7 @@ class ClientDestinationDeliveryCallback implements Postman.Callback {
     }
 
     private void deliver(JaxwsApplicationMessage message) {
-        Fiber parentFiber = rc.suspendedFiberStorage.remove(message.getCorrelationId());
-        parentFiber.resume(message.getPacket());
+        rc.suspendedFiberStorage.resumeFiber(message.getCorrelationId(), message.getPacket());
         rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(message);
     }
 }

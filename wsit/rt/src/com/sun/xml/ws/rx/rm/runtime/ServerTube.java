@@ -180,6 +180,13 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     Sequence outboundSequence = rc.getBoundSequence(message.getSequenceId());
                     if (outboundSequence != null) {
                         final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
+                        if (_responseMessage == null) {
+                            return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+                        }
+
+                        // retrieved response is not null
+
+                        // FIXME: fiber is suspended, but not regstered!
                         rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
                         return doSuspend();
                     } else {
@@ -187,7 +194,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     }
                 }
 
-                synchronized(message.getCorrelationId()) {
+                synchronized (message.getCorrelationId()) {
                     // this synchronization is needed so that all 3 operations occur before
                     // AbstractResponseHandler.getParentFiber() is invoked on the response thread
                     rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
@@ -239,6 +246,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             LOGGER.exiting();
         }
     }
+
     private Packet processProtocolRequest(Packet request, String wsaAction) throws AbstractSoapFaultException {
         if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
@@ -403,7 +411,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 }
             }
         }
-   }
+    }
 
     private Packet handleSequenceAcknowledgementAction(Packet request) { // TODO move packet creation processing to protocol handler
         AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(request.getMessage());
@@ -419,7 +427,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         return createEmptyAcknowledgementResponse(request, ackData.getAckReqestedSequenceId());
     }
-
 
     private Packet createEmptyAcknowledgementResponse(Packet request, String sequenceId) throws RxRuntimeException {
         Packet response = rc.communicator.createEmptyResponsePacket(request, rc.rmVersion.sequenceAcknowledgementAction);

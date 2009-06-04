@@ -33,11 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
@@ -47,8 +45,8 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 class ServerSourceDeliveryCallback implements Postman.Callback {
-    private static final Logger LOGGER = Logger.getLogger(ServerSourceDeliveryCallback.class);
 
+    private static final Logger LOGGER = Logger.getLogger(ServerSourceDeliveryCallback.class);
     private final RuntimeContext rc;
 
     public ServerSourceDeliveryCallback(RuntimeContext rc) {
@@ -75,8 +73,6 @@ class ServerSourceDeliveryCallback implements Postman.Callback {
         rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
         rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
-        Fiber parentFiber = rc.suspendedFiberStorage.remove(message.getCorrelationId());
-        parentFiber.resume(outboundPacketCopy);
+        rc.suspendedFiberStorage.resumeFiber(message.getCorrelationId(), outboundPacketCopy);
     }
-
 }

@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.util.ScheduledTaskManager;
 import com.sun.xml.ws.api.EndpointAddress;
@@ -55,6 +54,7 @@ import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.UUID;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
@@ -74,7 +74,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
     private final Header wsmcAnnonymousFaultToHeader;
     private final Communicator communicator;
     private final ScheduledTaskManager scheduler;
-    private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
+    private final SuspendedFiberStorage suspendedFiberStorage;
     private final MakeConnectionSenderTask mcSenderTask;
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
@@ -98,7 +98,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
         this.wsmcAnnonymousFaultToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().faultToTag);
 
-        this.suspendedFiberStorage = new TimestampedCollection<String, Fiber>();
+        this.suspendedFiberStorage = new SuspendedFiberStorage();
         this.mcSenderTask = new MakeConnectionSenderTask(
                 communicator,
                 suspendedFiberStorage,

@@ -36,11 +36,10 @@
 
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.io.IOException;
 
 /**
@@ -49,7 +48,7 @@ import java.io.IOException;
  */
 class OneWayMepHandler extends McResponseHandlerBase {
 
-    public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
+    public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
     }
 
@@ -66,7 +65,7 @@ class OneWayMepHandler extends McResponseHandlerBase {
             super.mcSenderTask.scheduleMcRequest();
         }
 
-        super.resumeParentFiber(response);
+        resumeParentFiber(response);
     }
 
     public void onCompletion(Throwable error) {
@@ -81,7 +80,7 @@ class OneWayMepHandler extends McResponseHandlerBase {
             super.mcSenderTask.scheduleMcRequest();
         }
 
-        super.resumeParentFiber(error);
+        resumeParentFiber(error);
     }
 
     private boolean isIOError(Throwable error) {

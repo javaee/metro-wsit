@@ -37,51 +37,18 @@
 package com.sun.xml.ws.rx.util;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.commons.Logger;
-import com.sun.xml.ws.rx.RxRuntimeException;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class AbstractResponseHandler {
-    private static final Logger LOGGER = Logger.getLogger(AbstractResponseHandler.class);
-    private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
+    protected final SuspendedFiberStorage suspendedFiberStorage;
     private String correlationId;
 
-    public AbstractResponseHandler(TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
+    public AbstractResponseHandler(SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         this.suspendedFiberStorage = suspendedFiberStorage;
         this.correlationId = correlationId;
-    }
-
-    protected final Fiber getParentFiber() {
-        synchronized(correlationId) {
-            // this synchronization is needed to make sure that following set of operations on the request side
-            // 1. adding fiber to suspended storage,
-            // 2. sending message on a new fiber
-            // 3. suspending original parent fiber
-            // finishes before this one
-            return suspendedFiberStorage.remove(correlationId);
-        }
-    }
-
-    protected final void resumeParentFiber(Packet response) throws RxRuntimeException {
-        Fiber parent = getParentFiber();
-        if (parent == null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException(String.format("No parent fiber found for correlationId [ %s ]. " + "Unable to resume parent fiber with a response packet.", correlationId)));
-        }
-        parent.resume(response);
-    }
-
-    protected final void resumeParentFiber(Throwable error) throws RxRuntimeException {
-        Fiber parent = getParentFiber();
-        if (parent == null) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException(String.format("No parent fiber found for correlationId [ %s ]. " + "Unable to resume parent fiber with a fiber-processing error. " + "(Original fiber-processing error attached as a nested exception)", correlationId), error));
-        }
-        parent.resume(error);
     }
 
     protected final String getCorrelationId() {
@@ -92,4 +59,11 @@ public class AbstractResponseHandler {
         this.correlationId = newCorrelationId;
     }
 
+    protected final void resumeParentFiber(Packet response) throws ResumeFiberException {
+        suspendedFiberStorage.resumeFiber(correlationId, response);
+    }
+
+    protected final void resumeParentFiber(Throwable error) throws ResumeFiberException {
+        suspendedFiberStorage.resumeFiber(correlationId, error);
+    }
 }

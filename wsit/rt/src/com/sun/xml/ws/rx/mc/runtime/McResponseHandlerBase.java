@@ -37,7 +37,6 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Fiber;
@@ -45,6 +44,7 @@ import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
 import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
@@ -59,14 +59,14 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
     protected final RxConfiguration configuration;
     protected final MakeConnectionSenderTask mcSenderTask;
 
-    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
+    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         super(suspendedFiberStorage, correlationId);
         
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
     }
 
-    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
+    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage) {
         super(suspendedFiberStorage, null);
 
         this.configuration = configuration;

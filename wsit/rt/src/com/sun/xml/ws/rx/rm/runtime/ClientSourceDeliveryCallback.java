@@ -70,14 +70,14 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
             }
 
-            getParentFiber().resume(response);
+            resumeParentFiber(response);
         }
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
                 rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
             } else {
-                getParentFiber().resume(error);
+                resumeParentFiber(error);
             }
         }
     }
@@ -102,7 +102,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 try {
                     rc.destinationMessageHandler.registerMessage(message);
                     rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-                    rc.destinationMessageHandler.putToDeliveryQueue(message);
+                    rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
                 } catch (DuplicateMessageRegistrationException ex) {
                     onCompletion(ex);
                 }
@@ -115,7 +115,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
                 rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
             } else {
-                getParentFiber().resume(error);
+                resumeParentFiber(error);
             }
         }
     }
@@ -137,13 +137,13 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                 rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-                
+
                 rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-                
+
                 if (message.getSequenceId() != null) {
                     try {
                         rc.destinationMessageHandler.registerMessage(message);
-                        rc.destinationMessageHandler.putToDeliveryQueue(message);                        
+                        rc.destinationMessageHandler.putToDeliveryQueue(message);
                         return;
                     } catch (DuplicateMessageRegistrationException ex) {
                         onCompletion(ex);
@@ -152,18 +152,17 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 }
             }
 
-            getParentFiber().resume(response);
+            resumeParentFiber(response);
         }
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
                 rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
             } else {
-                getParentFiber().resume(error);
+                resumeParentFiber(error);
             }
         }
     }
-
     //
     private final RuntimeContext rc;
 
@@ -187,7 +186,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         rc.sourceMessageHandler.attachAcknowledgementInfo(message);
 
         Packet outboundPacketCopy = message.getPacket().copy(true);
-        
+
         rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
         rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 

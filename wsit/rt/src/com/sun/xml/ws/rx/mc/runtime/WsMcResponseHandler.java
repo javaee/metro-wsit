@@ -35,15 +35,15 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.util.TimestampedCollection;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.util.ResumeFiberException;
+import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.Map;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
@@ -61,7 +61,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
     public WsMcResponseHandler(
             final RxConfiguration configuration,
             final MakeConnectionSenderTask mcSenderTask,
-            final TimestampedCollection<String, Fiber> suspendedFiberStorage,
+            final SuspendedFiberStorage suspendedFiberStorage,
             final Map<String, ProtocolMessageHandler> protocolHandlerMap) {
 
         super(configuration, mcSenderTask, suspendedFiberStorage);
@@ -107,13 +107,11 @@ class WsMcResponseHandler extends McResponseHandlerBase {
             if (wsaRelatesToHeader != null) {
                 // find original request fiber
                 setCorrelationId(wsaRelatesToHeader.getStringContent()); // initializing correlation id for getParentFiber()
-                Fiber originalFiber = getParentFiber();
-                if (originalFiber != null) {
-                    originalFiber.resume(response);
-                    return;
-                } else {
+                try {
+                    resumeParentFiber(response);
+                } catch (ResumeFiberException ex) {
                     // TODO L10N
-                    LOGGER.warning("No suspended fiber found for a response to a WS-MakeConnection request");
+                    LOGGER.warning("Unable to resume parent fiber for a response to a WS-MakeConnection request", ex);
                 }
             }
 
