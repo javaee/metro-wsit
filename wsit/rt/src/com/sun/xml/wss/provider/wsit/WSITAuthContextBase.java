@@ -258,7 +258,7 @@ public abstract class WSITAuthContextBase  {
     WSDLPort port = null;
     
     // Security Policy version 
-    protected SecurityPolicyVersion spVersion = null;
+    protected SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     
     //milliseconds
     protected long timestampTimeOut = 0;
