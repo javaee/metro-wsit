@@ -16,7 +16,7 @@ line 38, to set the keyStoreURL to your actual sts trust store location.
 4. Edit /wsit/wsit/samples/ws-trust/runtime/common/KeyStoreCallbackHandler.java,
 line 50, to set the keyStoreURL to your actual sts key store location.
 
-Similiarly, Edit /wsit/wsit/samples/ws-trust/runtime/src/fs/ect/service/PingService.wsdl,
+Similiarly, Edit /wsit/wsit/samples/ws-trust/runtime/src/fs/etc/service/PingService.wsdl,
 line 133-134 to replace $WSIT_HOME with your Glassfish/Tomcat location.
 
 5. Start tomcat or glassfish.
