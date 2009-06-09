@@ -73,6 +73,10 @@ public abstract class AbstractSequence implements Sequence {
         this.deliveryQueue = deliveryQueueBuilder.build();
     }
 
+    public SequenceData getData() {
+        return data;
+    }
+
     public String getId() {
         return data.getSequenceId();
     }
@@ -188,7 +192,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isExpired() {
-        return (data.getExpirationTime() == Sequence.NO_EXPIRATION) ? false : System.currentTimeMillis() < data.getExpirationTime();
+        return (data.getExpirationTime() == Sequence.NO_EXPIRY) ? false : System.currentTimeMillis() < data.getExpirationTime();
     }
 
     public void preDestroy() {
