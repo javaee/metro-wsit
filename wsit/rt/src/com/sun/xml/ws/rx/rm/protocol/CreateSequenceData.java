@@ -55,8 +55,8 @@ public class CreateSequenceData {
 
         private Builder(EndpointReference acksToEpr) {
             this.acksToEpr = acksToEpr;
-            this.expiry = Sequence.NO_EXPIRATION;
-            this.offeredSequenceExpiry = Sequence.NO_EXPIRATION;
+            this.expiry = Sequence.NO_EXPIRY;
+            this.offeredSequenceExpiry = Sequence.NO_EXPIRY;
         }
 
         public void expiry(long expiry) {
@@ -114,6 +114,10 @@ public class CreateSequenceData {
 
     public long getExpiry() {
         return expiry;
+    }
+
+    public boolean isNoExpiry() {
+        return expiry == Sequence.NO_EXPIRY;
     }
 
     public @Nullable String getOfferedSequenceId() {

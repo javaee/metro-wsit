@@ -54,7 +54,7 @@ public class CreateSequenceResponseData {
 
         private Builder(String sequenceId) {
             this.sequenceId = sequenceId;
-            this.expirationTime = Sequence.NO_EXPIRATION;
+            this.expirationTime = Sequence.NO_EXPIRY;
             this.incompleteSequenceBehavior = Sequence.IncompleteSequenceBehavior.getDefault();
         }
 

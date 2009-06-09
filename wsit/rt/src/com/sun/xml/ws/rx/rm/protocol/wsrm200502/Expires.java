@@ -73,14 +73,14 @@ public class Expires {
 
     public long getDuration() {
         if (value == null || "PT0S".equals(value.toString())) {
-            return Sequence.NO_EXPIRATION;
+            return Sequence.NO_EXPIRY;
         }
         
         return getValue().getTimeInMillis(Calendar.getInstance());
     }
 
     public void setDuration(long value) {
-        if (value == Sequence.NO_EXPIRATION) {
+        if (value == Sequence.NO_EXPIRY) {
             // TODO implement
         } else {
             // TODO implement

@@ -56,7 +56,7 @@ public interface Sequence {
     public static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly
     public static final long MIN_MESSAGE_ID = 1;
     public static final long MAX_MESSAGE_ID = 9223372036854775807L;
-    public static final long NO_EXPIRATION = -1;
+    public static final long NO_EXPIRY = -1;
     
     public static enum State {
         // CREATING(10) not needed

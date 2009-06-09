@@ -110,7 +110,7 @@ public class CreateSequenceResponseElement {
     public CreateSequenceResponseData.Builder toDataBuilder() {
         CreateSequenceResponseData.Builder dataBuilder = CreateSequenceResponseData.getBuilder(identifier.getValue());
 
-        if (expires != null && expires.getDuration() != Sequence.NO_EXPIRATION) {
+        if (expires != null && expires.getDuration() != Sequence.NO_EXPIRY) {
             dataBuilder.expirationTime(expires.getDuration() + System.currentTimeMillis());
         }
 

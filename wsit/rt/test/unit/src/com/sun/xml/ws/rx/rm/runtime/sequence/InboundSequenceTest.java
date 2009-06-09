@@ -59,7 +59,7 @@ public class InboundSequenceTest extends TestCase {
         sequence = sequenceManager.createInboundSequence(
                 sequenceManager.generateSequenceUID(),
                 null,
-                Sequence.NO_EXPIRATION,
+                Sequence.NO_EXPIRY,
                 SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
         super.setUp();
     }
@@ -199,7 +199,7 @@ public class InboundSequenceTest extends TestCase {
         Sequence inbound = sequenceManager.createInboundSequence(
                 sequenceManager.generateSequenceUID(),
                 null,
-                Sequence.NO_EXPIRATION,
+                Sequence.NO_EXPIRY,
                 SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
         assertEquals(Sequence.State.CREATED, inbound.getState());
 

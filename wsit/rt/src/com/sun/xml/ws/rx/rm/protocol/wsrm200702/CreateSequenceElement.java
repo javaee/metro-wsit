@@ -106,7 +106,9 @@ public class CreateSequenceElement {
         this();
         
         acksTo = data.getAcksToEpr();
-        expires = new Expires(data.getExpiry());
+        if (!data.isNoExpiry()) {
+            expires = new Expires(data.getExpiry());
+        }
 
         if (data.getOfferedSequenceId() != null) {
             this.offer = new OfferType();

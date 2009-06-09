@@ -152,7 +152,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
                 }
             } else { // application message
-                // prevent closing of TBc in case of one-way - we want to send acknowledgement back at least
+                // prevent closing of TBC in case of one-way - we want to send acknowledgement back at least
                 request.keepTransportBackChannelOpen();
 
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
@@ -187,6 +187,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         // retrieved response is not null
 
                         // FIXME: fiber is suspended, but not regstered!
+                        Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
+                        if (oldRegisteredFiber != null) {
+                            oldRegisteredFiber.resume(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+                        }
                         rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
                         return doSuspend();
                     } else {
@@ -490,8 +494,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private final long calculateSequenceExpirationTime(long expiryDuration) {
-        if (expiryDuration == Sequence.NO_EXPIRATION) {
-            return Sequence.NO_EXPIRATION;
+        if (expiryDuration == Sequence.NO_EXPIRY) {
+            return Sequence.NO_EXPIRY;
         } else {
             return expiryDuration + System.currentTimeMillis();
         }
