@@ -53,7 +53,7 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteringTest {
+public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteringTestCase {
     private String[] testResources = new String[] {
         "import_element_01"
     };

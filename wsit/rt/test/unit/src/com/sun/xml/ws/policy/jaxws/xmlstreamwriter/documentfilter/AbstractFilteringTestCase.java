@@ -57,11 +57,11 @@ import junit.framework.TestCase;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class AbstractFilteringTest extends TestCase { // must not be abstract to avoid JUnit warnings
+public class AbstractFilteringTestCase extends TestCase { // must not be abstract to avoid JUnit warnings
     private static final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);    
     
-    /** Creates a new instance of AbstractFilteringTest */
-    public AbstractFilteringTest(String testName) {super(testName);}
+    /** Creates a new instance of AbstractFilteringTestCase */
+    public AbstractFilteringTestCase(String testName) {super(testName);}
     
     protected final XMLStreamWriter openFilteredWriter(Writer outputStream, InvocationProcessorFactory factory) throws XMLStreamException {
         XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
@@ -110,7 +110,4 @@ public class AbstractFilteringTest extends TestCase { // must not be abstract to
         return marshaller;
     }
     
-    public void testDummy() {
-        // dummy test method to avoid JUnit warnings
-    }
 }

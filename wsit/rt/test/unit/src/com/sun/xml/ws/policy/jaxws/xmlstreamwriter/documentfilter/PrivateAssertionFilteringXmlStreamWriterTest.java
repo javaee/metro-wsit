@@ -53,7 +53,7 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PrivateAssertionFilteringXmlStreamWriterTest extends AbstractFilteringTest {
+public final class PrivateAssertionFilteringXmlStreamWriterTest extends AbstractFilteringTestCase {
     private static final String[] testResources = new String[] {
         "policy_0_visible",
     };

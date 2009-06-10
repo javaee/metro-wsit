@@ -58,7 +58,7 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsdlDocumentFilterTest extends AbstractFilteringTest {
+public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
     private static final String[] testPolicyResources = new String[] {
         "policy_0",
         "policy_1",

@@ -54,7 +54,7 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateElementFilteringInvocationProcessorTest  extends AbstractFilteringTest {
+public class PrivateElementFilteringInvocationProcessorTest  extends AbstractFilteringTestCase {
     private static final String[] testResources = new String[] {
         "element_01",
         "element_02"
