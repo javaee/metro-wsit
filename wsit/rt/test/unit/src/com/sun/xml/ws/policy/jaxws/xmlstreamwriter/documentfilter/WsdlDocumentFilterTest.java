@@ -99,7 +99,6 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTest {
             readAndWriteWsdl(wsdlResource, filteredBuffer, true);
             readAndWriteWsdl(wsdlResource + "_expected", unfilteredBuffer, false);
             
-            System.out.println(filteredBuffer.toString());
             assertEquals(unfilteredBuffer.toString(), filteredBuffer.toString());
         }
     }
