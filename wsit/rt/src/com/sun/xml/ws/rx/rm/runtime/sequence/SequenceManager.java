@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Map;
+import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedObject;
@@ -46,7 +47,8 @@ import org.glassfish.gmbal.ManagedObject;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 @ManagedObject
-@Description("RM Sequence Manager")
+@Description("Reliable Messaging Sequence Manager")
+@AMXMetadata(type = "RMSequenceManager")
 public interface SequenceManager {
     public static enum Type {
         CLIENT("client"),
