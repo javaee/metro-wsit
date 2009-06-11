@@ -55,18 +55,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import org.glassfish.gmbal.AMXMetadata;
-import org.glassfish.gmbal.Description;
-import org.glassfish.gmbal.ManagedObject;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-@ManagedObject
-@Description("Persistent RM Sequence Manager")
-@AMXMetadata(type = "RMSequenceManager", pathPart = "RMSequenceManager")
 public final class PersistentSequenceManager implements SequenceManager {
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceManager.class);
     /**
@@ -99,7 +93,6 @@ public final class PersistentSequenceManager implements SequenceManager {
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, type.toString());
         }
-
         // TODO recover();
     }
 
@@ -197,6 +190,7 @@ public final class PersistentSequenceManager implements SequenceManager {
 //                if (managedObjectManager != null) {
 //                    managedObjectManager.unregister(sequence);
 //                }
+//
 //                sequence.preDestroy();
 //
 //                return sequence;
@@ -278,8 +272,9 @@ public final class PersistentSequenceManager implements SequenceManager {
 //                throw new DuplicateSequenceException(sequence.getId());
 //            } else {
 //                sequences.put(sequence.getId(), sequence);
+//
 //                if (managedObjectManager != null) {
-//                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+//                    managedObjectManager.register(this, sequence, sequence.getId());
 //                }
 //            }
 //

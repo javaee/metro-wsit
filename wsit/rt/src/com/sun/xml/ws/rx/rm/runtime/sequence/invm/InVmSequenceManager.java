@@ -50,18 +50,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.glassfish.gmbal.AMXMetadata;
-import org.glassfish.gmbal.Description;
-import org.glassfish.gmbal.ManagedObject;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-@ManagedObject
-@Description("In Memory RM Sequence Manager")
-@AMXMetadata(type = "RMSequenceManager", pathPart = "RMSequenceManager")
 public final class InVmSequenceManager implements SequenceManager {
 
     /**
@@ -181,6 +175,7 @@ public final class InVmSequenceManager implements SequenceManager {
                 if (managedObjectManager != null) {
                     managedObjectManager.unregister(sequence);
                 }
+
                 sequence.preDestroy();
 
                 return sequence;
@@ -241,7 +236,7 @@ public final class InVmSequenceManager implements SequenceManager {
             } else {
                 sequences.put(sequence.getId(), sequence);
                 if (managedObjectManager != null) {
-                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+                    managedObjectManager.register(this, sequence, sequence.getId());
                 }
             }
 
