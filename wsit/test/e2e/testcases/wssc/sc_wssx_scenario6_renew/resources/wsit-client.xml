@@ -62,7 +62,7 @@
                 <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
                 <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"></sc:TrustStore>  
                 <scc:SCClientConfiguration wspp:visibility="private" renewExpiredSCT="true" requireCancelSCT="true">
-                    <scc:LifeTime>60000</scc:LifeTime>
+                    <scc:LifeTime>6000</scc:LifeTime>
                 </scc:SCClientConfiguration>
             </wsp:All>
         </wsp:ExactlyOne>

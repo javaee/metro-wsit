@@ -53,7 +53,7 @@
                 
                 <!--sc:ValidatorConfiguration wspp:visibility="private" sc:maxClockSkew="1200000" sc:timestampFreshnessLimit="1200000"/-->
                 <scc:SCClientConfiguration wspp:visibility="private" renewExpiredSCT="true" requireCancelSCT="true">
-                    <scc:LifeTime>60000</scc:LifeTime>
+                    <scc:LifeTime>6000</scc:LifeTime>
                 </scc:SCClientConfiguration>
                 
                 <sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
