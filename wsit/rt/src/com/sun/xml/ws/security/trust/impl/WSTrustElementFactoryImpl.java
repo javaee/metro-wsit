@@ -244,7 +244,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         return new ClaimsImpl(ClaimsImpl.fromElement(elem));
     }
 
-      public Claims createClaims(Claims claims) throws WSTrustException {
+    public Claims createClaims(Claims claims) throws WSTrustException {
         ClaimsImpl newClaims = new ClaimsImpl();
         newClaims.setDialect(claims.getDialect());
         newClaims.getAny().addAll(claims.getAny());

@@ -352,7 +352,9 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                     claims = getClaims(issuedToken, stsProtocol);
                 }                
             }
+
             if (!protocol.equals(stsProtocol)){
+                // Mixed versions of trust
                 copy(rstt, stsProtocol, protocol);
                 setClaims(claims);
                 protocol = stsProtocol;
@@ -371,14 +373,16 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
      private Claims getClaims(final IssuedToken issuedToken, String stsWstProtocol){
         Claims cs = null;        
          try {
-             Element claimsEle = null;         
+             //Element claimsEle = null;
              if (protocol.equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
-                claimsEle = issuedToken.getClaims().getClaimsAsElement();
+                Element claimsEle = issuedToken.getClaims().getClaimsAsElement();
+                cs = WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_13.getNamespaceURI()).createClaims(claimsEle);
              }else{
                  RequestSecurityTokenTemplate rstt = issuedToken.getRequestSecurityTokenTemplate();
-                 claimsEle = rstt.getClaims().getClaimsAsElement();
+                 Element claimsEle = rstt.getClaims().getClaimsAsElement();
+                 cs = WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_10.getNamespaceURI()).createClaims(claimsEle);
              }
-             cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(claimsEle);
+             cs = WSTrustElementFactory.newInstance(WSTrustVersion.getInstance(stsWstProtocol)).createClaims(cs);
          } catch (Exception e) {
              throw new WebServiceException(e);
          }        
