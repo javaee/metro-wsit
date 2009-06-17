@@ -249,7 +249,9 @@ public class SecurityServerTube extends SecurityTubeBase {
         } catch (XWSSecurityException xwse) {
             thereWasAFault = true;    
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            sfe.initCause(xwse);
+            if(sfe.getCause() != null){
+               sfe.initCause(xwse) ;
+            }
             msg = Messages.create(sfe, soapVersion);
           
         } catch (XWSSecurityRuntimeException xwse) {
