@@ -84,20 +84,19 @@ public class ReDelegate implements ConfigurationAPI {
 //            EndpointCreationAttributes creationAttributes,
 //            ClassLoader classLoader,
 //            Reader newConfig) {
-    @SuppressWarnings("unchecked")
     public <T> void recreate(InitParameters parameters) {
 //            SDDocumentSource newWsdl) {
         final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            final ClassLoader classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, ClassLoader.class);
+            final ClassLoader classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
             Thread.currentThread().setContextClassLoader(classLoader);
 //            final HashMap<String,SDDocumentSource> documents = new HashMap<String,SDDocumentSource>();
 //            documents.put(newWsdl.getSystemId().toExternalForm(), newWsdl);
-            final Reader newConfig = parameters.get(ManagementConstants.CONFIG_READER_PARAMETER_NAME, Reader.class);
+            final Reader newConfig = parameters.get(ManagementConstants.CONFIG_READER_PARAMETER_NAME);
             Map<URI, Policy> urnToPolicy = ExternalAttachmentsUnmarshaller.unmarshal(newConfig);
 
-            final ManagedEndpoint<T> managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, ManagedEndpoint.class);
-            final EndpointCreationAttributes creationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, EndpointCreationAttributes.class);
+            final ManagedEndpoint<T> managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+            final EndpointCreationAttributes creationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
             WSEndpoint<T> delegate = recreateEndpoint(managedEndpoint, creationAttributes, urnToPolicy);
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.fine(ManagementMessages.WSM_0002_NEW_ENDPOINT_DELEGATE(delegate));

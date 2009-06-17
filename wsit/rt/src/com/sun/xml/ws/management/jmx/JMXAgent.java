@@ -93,12 +93,11 @@ public class JMXAgent<T> implements CommunicationAPI {
 //        }
 //    }
 
-    @SuppressWarnings("unchecked")
     public void init(InitParameters parameters) {
 //        try {
-        this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, ManagedEndpoint.class);
-        this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, EndpointCreationAttributes.class);
-        this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, ClassLoader.class);
+        this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+        this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
+        this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
         this.server = ManagementFactory.getPlatformMBeanServer();
 //            server = MBeanServerFactory.createMBeanServer();
 //            JMXServiceURL jmxUrl = new JMXServiceURL("jmxmp", "localhost", 5555);
