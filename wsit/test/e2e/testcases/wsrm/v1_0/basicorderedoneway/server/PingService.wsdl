@@ -57,7 +57,7 @@
         <wsp:ExactlyOne>
             <wsp:All>
                 <wsrm:RMAssertion>
-                    <wsrm:InactivityTimeout Milliseconds="600000" />
+                    <wsrm:InactivityTimeout Milliseconds="20000" />
                     <wsrm:AcknowledgementInterval Milliseconds="200" />
                 </wsrm:RMAssertion>
                 <sunrm:Ordered />
