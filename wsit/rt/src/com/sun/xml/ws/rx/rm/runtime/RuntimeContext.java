@@ -89,7 +89,7 @@ public final class RuntimeContext {
             this.communicator = communicator;
             this.sourceMessageHandler = new SourceMessageHandler(sequenceManager);
             this.destinationMessageHandler = new DestinationMessageHandler(sequenceManager);
-            this.redeliveryTask = new RedeliveryTask(sourceMessageHandler);
+            this.redeliveryTask = new RedeliveryTask(sourceMessageHandler, sequenceManager);
         }
 
         public RuntimeContext build() {

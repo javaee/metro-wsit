@@ -497,7 +497,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         if (expiryDuration == Sequence.NO_EXPIRY) {
             return Sequence.NO_EXPIRY;
         } else {
-            return expiryDuration + System.currentTimeMillis();
+            return expiryDuration + rc.sequenceManager.currentTimeInMillis();
         }
     }
 }

@@ -99,9 +99,11 @@ public final class ScheduledTaskManager {
      * Adds a new task for scheduled execution.
      *
      * @param task new task to be executed regularly at a defined rate
+     * @param initialDelay the time to delay first execution (in milliseconds)
+     * @param period the period between successive executions (in milliseconds)
      */
-    public ScheduledFuture<?> startTask(Runnable task, long delay, long period) {
-        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, delay, period, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> startTask(Runnable task, long initialDelay, long period) {
+        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
             // TODO L10N
             LOGGER.warning(String.format("Unable to store handle for task of class [ %s ]", task.getClass().getName()));

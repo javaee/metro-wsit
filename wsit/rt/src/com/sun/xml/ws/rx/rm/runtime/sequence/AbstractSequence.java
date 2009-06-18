@@ -35,10 +35,12 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,6 +57,7 @@ public abstract class AbstractSequence implements Sequence {
 
     protected final SequenceData data;
     private final DeliveryQueue deliveryQueue;
+    private final TimeSynchronizer timeSynchronizer;
 
     /**
      * Initializes instance fields.
@@ -65,8 +68,14 @@ public abstract class AbstractSequence implements Sequence {
      * 
      * @param expirationTime sequence expiration time
      */
-    AbstractSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+    AbstractSequence(@NotNull SequenceData data, @NotNull DeliveryQueueBuilder deliveryQueueBuilder, @NotNull TimeSynchronizer timeSynchronizer) {
+        assert data != null;
+        assert deliveryQueueBuilder != null;
+        assert timeSynchronizer != null;
+
+
         this.data = data;
+        this.timeSynchronizer = timeSynchronizer;
 
         // TODO initialize delivery queue
         deliveryQueueBuilder.sequence(this);
@@ -167,7 +176,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public void updateLastAcknowledgementRequestTime() {
-        data.setLastAcknowledgementRequestTime(System.currentTimeMillis());
+        data.setLastAcknowledgementRequestTime(timeSynchronizer.currentTimeInMillis());
     }
 
     public long getLastActivityTime() {
@@ -175,11 +184,11 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public void updateLastActivityTime() {
-        data.setLastActivityTime(System.currentTimeMillis());
+        data.setLastActivityTime(timeSynchronizer.currentTimeInMillis());
     }
 
     public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
-        return System.currentTimeMillis() - data.getLastAcknowledgementRequestTime() > delayPeriod && hasUnacknowledgedMessages();
+        return timeSynchronizer.currentTimeInMillis() - data.getLastAcknowledgementRequestTime() > delayPeriod && hasUnacknowledgedMessages();
     }
 
     public void close() {
@@ -192,7 +201,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isExpired() {
-        return (data.getExpirationTime() == Sequence.NO_EXPIRY) ? false : System.currentTimeMillis() < data.getExpirationTime();
+        return (data.getExpirationTime() == Sequence.NO_EXPIRY) ? false : timeSynchronizer.currentTimeInMillis() < data.getExpirationTime();
     }
 
     public void preDestroy() {

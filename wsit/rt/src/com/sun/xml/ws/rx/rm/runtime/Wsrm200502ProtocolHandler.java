@@ -115,7 +115,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         Message message = packet.getMessage();
         CreateSequenceResponseElement csrElement = unmarshallMessage(message);
 
-        return csrElement.toDataBuilder().build();
+        return csrElement.toDataBuilder(sequenceManager).build();
     }
 
     public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {

@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Map;
 import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
@@ -49,7 +50,7 @@ import org.glassfish.gmbal.ManagedObject;
 @ManagedObject
 @Description("Reliable Messaging Sequence Manager")
 @AMXMetadata(type = "RMSequenceManager")
-public interface SequenceManager {
+public interface SequenceManager extends TimeSynchronizer {
     public static enum Type {
         CLIENT("client"),
         SERVICE("service");

@@ -46,7 +46,6 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.sql.SQLException;
@@ -62,6 +61,7 @@ import org.glassfish.gmbal.ManagedObjectManager;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PersistentSequenceManager implements SequenceManager {
+
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceManager.class);
     /**
      * JNDI name of the JDBC pool to be used for persisting RM data
@@ -114,16 +114,16 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID);
-        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder));
+        PersistentSequenceData data = new PersistentSequenceData(sequenceId, PersistentSequenceData.SequenceType.OUTBOUND, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder, this));
     }
 
     /**
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        SequenceData data = new PersistentSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID);
-        return registerSequence(new InboundSequence(data, deliveryQueueBuilder));
+        PersistentSequenceData data = new PersistentSequenceData(sequenceId, PersistentSequenceData.SequenceType.INBOUND, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        return registerSequence(new InboundSequence(data, deliveryQueueBuilder, this));
     }
 
     /**
@@ -242,47 +242,50 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     /*
-        beginTransaction();
-        try {
-            PreparedStatement ps = sqlConnection.prepareStatement("");
+    beginTransaction();
+    try {
+    PreparedStatement ps = sqlConnection.prepareStatement("");
 
-            final int rowsUpdated = ps.executeUpdate();
-            commit();
+    final int rowsUpdated = ps.executeUpdate();
+    commit();
 
-            if (rowsUpdated != 1) {
-                throw new UnknownSequenceException("");
-            }
-        } catch (SQLException ex) {
-            abort();
-            // TODO L10N
-            throw LOGGER.logSevereException(new PersistenceException(
-                    String.format("Error closing a sequence with id '%s'", sequenceId), ex));
-        }
+    if (rowsUpdated != 1) {
+    throw new UnknownSequenceException("");
+    }
+    } catch (SQLException ex) {
+    abort();
+    // TODO L10N
+    throw LOGGER.logSevereException(new PersistenceException(
+    String.format("Error closing a sequence with id '%s'", sequenceId), ex));
+    }
      */
-
+    
     /**
      * Registers a new sequence in the internal sequence storage
      *
      * @param sequence sequence object to be registered within the internal sequence storage
      */
-    private Sequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
-//        try {
-//            internalDataAccessLock.writeLock().lock();
-//            if (sequences.containsKey(sequence.getId())) {
-//                throw new DuplicateSequenceException(sequence.getId());
-//            } else {
-//                sequences.put(sequence.getId(), sequence);
-//
-//                if (managedObjectManager != null) {
-//                    managedObjectManager.register(this, sequence, sequence.getId());
-//                }
-//            }
-//
-//            return sequence;
-//        } finally {
-//            internalDataAccessLock.writeLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
+    private AbstractSequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
+
+        try {
+            internalDataAccessLock.writeLock().lock();
+            if (sequences.containsKey(sequence.getId())) {
+                throw new DuplicateSequenceException(sequence.getId());
+            } else {
+                @SuppressWarnings("unchecked") // this method is called only for sequences with PersistentSequenceData
+                PersistentSequenceData data = PersistentSequenceData.class.cast(sequence.getData());
+                data = PersistentSequenceData.insert(sqlConnection, data);
+
+                sequences.put(sequence.getId(), sequence);
+                if (managedObjectManager != null) {
+                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
+                }
+            }
+
+            return sequence;
+        } finally {
+            internalDataAccessLock.writeLock().unlock();
+        }
     }
 
     protected void abort() {
@@ -324,5 +327,13 @@ public final class PersistentSequenceManager implements SequenceManager {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException("Unable to lookup Metro reliable messaging JDBC connection pool", ex));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long currentTimeInMillis() {
+        // TODO sync date with database
+        return System.currentTimeMillis();
     }
 }

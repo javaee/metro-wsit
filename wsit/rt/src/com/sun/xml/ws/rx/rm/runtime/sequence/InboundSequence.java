@@ -40,6 +40,7 @@ import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,9 +65,9 @@ public final class InboundSequence extends AbstractSequence {
     private final Set<Long> allUnackedMessageNumbers;
     private final Set<Long> registeredUnackedMessageNumbers;
 
-    public InboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
+    public InboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
         // super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
-        super(data, deliveryQueueBuilder);
+        super(data, deliveryQueueBuilder, timeSynchronizer);
 
         this.allUnackedMessageNumbers = new TreeSet<Long>();
         this.registeredUnackedMessageNumbers = new HashSet<Long>();

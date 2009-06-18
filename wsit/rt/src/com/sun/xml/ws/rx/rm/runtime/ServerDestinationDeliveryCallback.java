@@ -87,7 +87,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                 rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
             } else {
                 LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval(), rc.sequenceManager));
                 return;
             }
 
@@ -110,7 +110,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ServerDestinationDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval(), rc.sequenceManager));
             } else {
                 resumeParentFiber(error);
             }

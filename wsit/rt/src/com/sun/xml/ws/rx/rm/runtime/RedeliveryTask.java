@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import com.sun.xml.ws.rx.util.TimestampedCollection;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -55,11 +56,14 @@ final class RedeliveryTask implements Runnable {
     //
     private final TimestampedCollection<Object, ApplicationMessage> scheduledMessages = TimestampedCollection.newInstance();
     private final @NotNull DeliveryHandler deliveryHandler;
+    private final @NotNull TimeSynchronizer timeSynchronizer;
 
-    RedeliveryTask(@NotNull DeliveryHandler deliveryHandler) {
+    RedeliveryTask(@NotNull DeliveryHandler deliveryHandler, @NotNull TimeSynchronizer timeSynchronizer) {
         assert deliveryHandler != null;
+        assert timeSynchronizer != null;
 
         this.deliveryHandler = deliveryHandler;
+        this.timeSynchronizer = timeSynchronizer;
     }
 
     public void run() {
@@ -81,7 +85,7 @@ final class RedeliveryTask implements Runnable {
     }
 
     private final boolean expired(long resumeTime) {
-        return System.currentTimeMillis() >= resumeTime;
+        return timeSynchronizer.currentTimeInMillis() >= resumeTime;
     }
 
     /**

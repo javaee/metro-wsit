@@ -35,9 +35,16 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
+import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -85,7 +92,6 @@ FOREIGN KEY (SEQ_ID, SEQ_TYPE) REFERENCES RM_SEQUENCES(ID, TYPE);
 
 CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORRELATION_ID);
  */
-
 /**
  * Persistent implementation of sequence data
  *
@@ -95,10 +101,32 @@ CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORR
  */
 final class PersistentSequenceData implements SequenceData {
 
-    private final ReadWriteLock messageIdLock = new ReentrantReadWriteLock();
-    // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables
+    static enum SequenceType {
+
+        INBOUND("IN"),
+        OUTBOUND("OUT");
+        private final String id;
+
+        private SequenceType(String id) {
+            this.id = id;
+        }
+
+        private static SequenceType toSequenceType(String id) {
+            for (SequenceType st : values()) {
+                if (st.id.equals(id)) {
+                    return st;
+                }
+            }
+
+            return null;
+        }
+    }
+    private static final Logger LOGGER = Logger.getLogger(PersistentSequenceData.class);
+    // lock used to synchronize the access to the mutable variables
+    private final ReadWriteLock dataLock = new ReentrantReadWriteLock();
     //
     private final String sequenceId;
+    private final SequenceType type;
     private final String boundSecurityTokenReferenceId;
     private final long expirationTime;
     //
@@ -111,41 +139,101 @@ final class PersistentSequenceData implements SequenceData {
     private final Map<String, ApplicationMessage> weakMessageStorage;
     private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
 
-    public PersistentSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId) {
-        this(sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, System.currentTimeMillis(), 0L);
+    PersistentSequenceData(String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, long lastMessageId, long lastActivityTime) {
+        this(sequenceId, type, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, lastActivityTime, 0L);
     }
 
-    public PersistentSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
+    PersistentSequenceData(String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         super();
+
         this.sequenceId = sequenceId;
+        this.type = type;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
         this.expirationTime = expirationTime;
         this.state = state;
-        // new AtomicReference<State>(State.CREATED);
         this.ackRequestedFlag = ackRequestedFlag;
-        // new AtomicBoolean(false);
         this.lastMessageId = lastMessageId;
         this.lastActivityTime = lastActivityTime;
-        // System.currentTimeMillis();
         this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
         this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
         this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
     }
 
+    static PersistentSequenceData insert(Connection sqlConnection, PersistentSequenceData data) throws DuplicateSequenceException {
+        try {
+            data.lockRead();
+
+            PreparedStatement ps = sqlConnection.prepareStatement("INSERT INTO RM_SEQUENCES VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            int i = 0;
+            ps.setString(++i, data.sequenceId); // ID VARCHAR(256) NOT NULL,
+            ps.setString(++i, data.type.id); // TYPE CHARACTER NOT NULL,
+
+            ps.setTimestamp(++i, new Timestamp(data.expirationTime)); // EXP_TIME TIMESTAMP NOT NULL,
+            ps.setNull(++i, Types.CHAR); // BOUND_ID VARCHAR(256),
+            ps.setString(++i, data.boundSecurityTokenReferenceId); // STR_ID VARCHAR(256),
+
+
+            ps.setString(++i, data.state.name()); // STATUS CHARACTER NOT NULL,
+            ps.setString(++i, Boolean.toString(data.ackRequestedFlag)); // ACK_REQUESTED_FLAG CHARACTER,
+            ps.setLong(++i, data.lastMessageId); // LAST_MESSAGE_ID BIGINT NOT NULL,
+            ps.setTimestamp(++i, new Timestamp(data.lastActivityTime)); // LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
+            ps.setTimestamp(++i, new Timestamp(data.lastAcknowledgementRequestTime)); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
+
+            if (ps.executeUpdate() != 1) {
+                // TODO P1 error inserting new row
+            }
+
+        } catch (SQLException ex) {
+            LOGGER.logSevereException(ex);
+            // TODO P1 error handling
+        } finally {
+            data.unlockRead();
+        }
+
+        return data;
+    }
+
+    static PersistentSequenceData save(Connection sqlConnection, PersistentSequenceData data) {
+        try {
+            data.lockRead();
+
+            // TODO implement
+
+            return data;
+        } finally {
+            data.unlockRead();
+        }
+    }
+
+    static PersistentSequenceData load(Connection sqlConnection, String sequenceId, SequenceType type) {
+        PersistentSequenceData data = null;
+
+        // TODO implement
+
+        return data;
+    }
+
+    static PersistentSequenceData remove(Connection sqlConnection, PersistentSequenceData data) {
+        // TODO implement        
+
+        return data;
+    }
+
     public void lockRead() {
-        messageIdLock.readLock().lock();
+        dataLock.readLock().lock();
     }
 
     public void unlockRead() {
-        messageIdLock.readLock().unlock();
+        dataLock.readLock().unlock();
     }
 
     public void lockWrite() {
-        messageIdLock.writeLock().lock();
+        dataLock.writeLock().lock();
     }
 
     public void unlockWrite() {
-        messageIdLock.writeLock().unlock();
+        dataLock.writeLock().unlock();
     }
 
     public String getSequenceId() {

@@ -26,8 +26,8 @@ final class InVmSequenceData implements SequenceData {
     private final Map<String, ApplicationMessage> weakMessageStorage;
     private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
 
-    public InVmSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId) {
-        this(sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, System.currentTimeMillis(), 0L);
+    public InVmSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId, long lastActivityTime) {
+        this(sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, lastActivityTime, 0L);
     }
 
     public InVmSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
@@ -36,12 +36,9 @@ final class InVmSequenceData implements SequenceData {
         this.boundSecurityTokenReferenceId = securityContextTokenId;
         this.expirationTime = expirationTime;
         this.state = state;
-        // new AtomicReference<State>(State.CREATED);
         this.ackRequestedFlag = ackRequestedFlag;
-        // new AtomicBoolean(false);
         this.lastMessageId = lastMessageId;
         this.lastActivityTime = lastActivityTime;
-        // System.currentTimeMillis();
         this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
         this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
         this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();

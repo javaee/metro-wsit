@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,11 +108,11 @@ public class CreateSequenceResponseElement {
         }
     }
 
-    public CreateSequenceResponseData.Builder toDataBuilder() {
+    public CreateSequenceResponseData.Builder toDataBuilder(TimeSynchronizer timeSynchronizer) {
         CreateSequenceResponseData.Builder dataBuilder = CreateSequenceResponseData.getBuilder(identifier.getValue());
 
         if (expires != null && expires.getDuration() != Sequence.NO_EXPIRY) {
-            dataBuilder.expirationTime(expires.getDuration() + System.currentTimeMillis());
+            dataBuilder.expirationTime(expires.getDuration() + timeSynchronizer.currentTimeInMillis());
         }
 
         if (accept != null) {

@@ -100,16 +100,16 @@ public final class InVmSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID);
-        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder));
+        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder, this));
     }
 
     /**
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID);
-        return registerSequence(new InboundSequence(data, deliveryQueueBuilder));
+        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        return registerSequence(new InboundSequence(data, deliveryQueueBuilder, this));
     }
 
     /**
@@ -244,5 +244,12 @@ public final class InVmSequenceManager implements SequenceManager {
         } finally {
             internalDataAccessLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long currentTimeInMillis() {
+        return System.currentTimeMillis();
     }
 }

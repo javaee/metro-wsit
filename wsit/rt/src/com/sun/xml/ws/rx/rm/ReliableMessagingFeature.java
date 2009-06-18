@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm;
 
 import com.sun.xml.ws.api.FeatureConstructor;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import javax.xml.ws.WebServiceFeature;
 
 /**
@@ -199,8 +200,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         LINEAR() {
-            public long nextResendTime(int resendAttemptNumber, long baseRate) {
-                return System.currentTimeMillis() + baseRate;
+            public long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer) {
+                return timeSynchronizer.currentTimeInMillis() + baseRate;
             }
         },
         /**
@@ -210,8 +211,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         EXPONENTIAL() {
-            public long nextResendTime(int resendAttemptNumber, long baseRate) {
-                return System.currentTimeMillis() + resendAttemptNumber * baseRate;
+            public long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer) {
+                return timeSynchronizer.currentTimeInMillis() + resendAttemptNumber * baseRate;
             }
         };
 
@@ -234,7 +235,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          *
          * @return next scheduled resume time
          */
-        public abstract long nextResendTime(int resendAttemptNumber, long baseRate);
+        public abstract long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer);
     }
 
     // General RM config values

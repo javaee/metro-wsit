@@ -418,7 +418,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     doneSignal.countDown();
                 }
             }
-        });
+        }, 10, 10);
 
         try {
             if (rc.configuration.getCloseSequenceOperationTimeout() > 0) {

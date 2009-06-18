@@ -41,6 +41,7 @@ import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,8 +61,8 @@ public final class OutboundSequence extends AbstractSequence {
     //
     private final List<Long> unackedMessageIdentifiers;
 
-    public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder) {
-        super(data, deliveryQueueBuilder);
+    public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
+        super(data, deliveryQueueBuilder, timeSynchronizer);
 
         this.unackedMessageIdentifiers = new LinkedList<Long>();
     }
