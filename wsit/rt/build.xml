@@ -286,6 +286,7 @@
                 </copy>
             </metainf>
             <expandfiles>
+                <exclude name="gmbal*.jar"/>
                 <exclude name="jaxb*.jar"/>
             </expandfiles>
         </expand-jars-macro>
