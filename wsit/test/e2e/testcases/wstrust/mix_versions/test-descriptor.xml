@@ -35,7 +35,7 @@
 -->
 
 <descriptor since="2.0">
-  <description>This trust test where the STS and the service use different versions of trust </description>
+  <description>This trust test where the STS and the service use different versions of trust; the RSTT contains Claims among the other entries </description>
   <client href ="test.bsh" since="2.0"/>
   <sts basedir="./sts">
     <wsdl href="sts.wsdl"/>

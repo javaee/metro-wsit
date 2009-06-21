@@ -35,7 +35,7 @@
 -->
 
 <descriptor since="2.0">
-  <description>This is a roundtrip RM test </description>
+  <description>In this test, there are two IssuedToken policy assertion in the service WSDL</description>
   <client href ="test.bsh" since="2.0"/>
   <sts basedir="./sts">
     <wsdl href="sts.wsdl"/>
