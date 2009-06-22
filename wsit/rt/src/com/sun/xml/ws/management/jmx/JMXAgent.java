@@ -38,7 +38,6 @@ package com.sun.xml.ws.management.jmx;
 
 //import java.io.IOException;
 import com.sun.xml.ws.api.management.CommunicationAPI;
-import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.InitParameters;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
@@ -66,11 +65,11 @@ import javax.xml.ws.WebServiceException;
 public class JMXAgent<T> implements CommunicationAPI {
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(JMXAgent.class);
-    private static final String RECONFIG_MBEAN_NAME = "com.sun.xml.ws.management:className=MetroReconfiguration";
 
     private MBeanServer server;
 //    private final JMXConnectorServer connector;
     
+    private String endpointId;
     private ManagedEndpoint<T> managedEndpoint;
     private EndpointCreationAttributes endpointCreationAttributes;
     private ClassLoader classLoader;
@@ -95,6 +94,7 @@ public class JMXAgent<T> implements CommunicationAPI {
 
     public void init(InitParameters parameters) {
 //        try {
+        this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
         this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
         this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
         this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
@@ -140,7 +140,7 @@ public class JMXAgent<T> implements CommunicationAPI {
                 attributeToListener.put(ReconfigMBeanAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
                                         new ReconfigMBeanAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
                 final ReconfigMBean openMBean = new ReconfigMBean(attributeToListener);
-                server.registerMBean(openMBean, getObjectName(this.managedEndpoint));
+                server.registerMBean(openMBean, getObjectName());
             } catch (InstanceAlreadyExistsException ex) {
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (MBeanRegistrationException ex) {
@@ -162,7 +162,7 @@ public class JMXAgent<T> implements CommunicationAPI {
 //        }
         if (this.server != null) {
             try {
-                this.server.unregisterMBean(getObjectName(this.managedEndpoint));
+                this.server.unregisterMBean(getObjectName());
             } catch (InstanceNotFoundException ex) {
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (MBeanRegistrationException ex) {
@@ -171,9 +171,9 @@ public class JMXAgent<T> implements CommunicationAPI {
         }
     }
 
-    private static final ObjectName getObjectName(WSEndpoint endpoint) {
+    private final ObjectName getObjectName() {
         try {
-            return new ObjectName(RECONFIG_MBEAN_NAME + "-" + endpoint.getPortName().getLocalPart());
+            return new ObjectName("com.sun.xml.ws.management:className=" + this.endpointId);
         } catch (MalformedObjectNameException ex) {
             throw LOGGER.logSevereException(new WebServiceException(ex));
         }

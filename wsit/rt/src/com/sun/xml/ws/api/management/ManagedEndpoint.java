@@ -36,7 +36,6 @@
 
 package com.sun.xml.ws.api.management;
 
-import com.sun.xml.ws.api.management.*;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -64,16 +63,19 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 public class ManagedEndpoint<T> extends WSEndpoint<T> {
 
+    public static final String ENDPOINT_ID_PARAMETER_NAME = "ENDPOINT_ID";
     public static final String ENDPOINT_INSTANCE_PARAMETER_NAME = "ENDPOINT_INSTANCE";
     public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
     public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
 
+    private final String id;
     private final EndpointCreationAttributes creationAttributes;
     private WSEndpoint<T> endpointDelegate;
 
     private final Collection<CommunicationAPI> commInterfaces;
 
-    public ManagedEndpoint(final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
+    public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
+        this.id = id;
         this.creationAttributes = attributes;
         this.endpointDelegate = endpoint;
 
@@ -83,6 +85,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
         }
 
         final InitParameters parameters = new InitParameters()
+                .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
                 .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
                 .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
                 .put(CLASS_LOADER_PARAMETER_NAME, classLoader);

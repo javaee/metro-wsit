@@ -39,13 +39,16 @@ package com.sun.xml.ws.management.server;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
-import com.sun.xml.ws.api.management.ManagementEndpointFactory;
+import com.sun.xml.ws.api.management.ManagedEndpointFactory;
+import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
+import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -53,7 +56,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Fabian Ritzmann
  */
-public class EndpointFactoryImpl implements ManagementEndpointFactory {
+public class EndpointFactoryImpl implements ManagedEndpointFactory {
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EndpointFactoryImpl.class);
     // TODO: Replace by reference to PolicyConstants
@@ -61,22 +64,34 @@ public class EndpointFactoryImpl implements ManagementEndpointFactory {
     private static final QName SERVICE_ASSERTION_QNAME = new QName(SUN_MANAGEMENT_NAMESPACE, "ManagedService");
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
-        if (isManaged(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap())) {
-            LOGGER.info("Created managed Metro endpoint. JMX connection URL = service:jmx:rmi:///jndi/rmi://localhost:8686/jmxrmi");
-            return new ManagedEndpoint<T>(endpoint, attributes);
+        final PolicyAssertion assertion = getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
+        if (assertion != null) {
+            final String id = assertion.getAttributeValue(new QName("", "id"));
+            LOGGER.info("Creating managed Metro endpoint with ID \"" + id + "\". JMX connection URL = service:jmx:rmi:///jndi/rmi://localhost:8686/jmxrmi");
+            return new ManagedEndpoint<T>(id, endpoint, attributes);
         }
         else {
             return endpoint;
         }
     }
 
-    private boolean isManaged(QName serviceName, QName portName, PolicyMap policyMap) {
+    private PolicyAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
         try {
             final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
             final Policy policy = policyMap.getEndpointEffectivePolicy(key);
-            return policy != null && policy.contains(SERVICE_ASSERTION_QNAME);
+            if (policy == null) {
+                return null;
+            }
+            else {
+                final Iterator<AssertionSet> assertionSets = policy.iterator();
+                final AssertionSet assertionSet = assertionSets.next();
+                final Iterator<PolicyAssertion> assertions = assertionSet.get(SERVICE_ASSERTION_QNAME).iterator();
+                return assertions.next();
+            }
         } catch (PolicyException ex) {
+            // TODO: add error message
             throw LOGGER.logSevereException(new WebServiceException(ex));
         }
     }
+
 }
