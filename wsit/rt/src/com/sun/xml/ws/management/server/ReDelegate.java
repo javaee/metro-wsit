@@ -145,7 +145,7 @@ public class ReDelegate implements ConfigurationAPI {
             final XMLStreamWriter xmlWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(writer);
             doc.writeTo(new MockPortAddressResolver(), new MockDocumentAddressResolver(), xmlWriter);
             xmlWriter.flush();
-            ManagementWSDLPatcher patcher = new ManagementWSDLPatcher(urnToPolicy);
+            final ManagementWSDLPatcher patcher = new ManagementWSDLPatcher(urnToPolicy);
             final StringReader reader = new StringReader(writer.getBuffer().toString());
             final XMLStreamReader xmlReader = XML_INPUT_FACTORY.createXMLStreamReader(reader);
             final StringWriter newWSDLWriter = new StringWriter();
