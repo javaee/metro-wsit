@@ -359,50 +359,17 @@ public abstract class WSITAuthContextBase  {
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
-            
-            if (endpointPolicy != null){
-                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri) ||endpointPolicy.contains("http://www.w3.org/2007/05/addressing/metadata")){
-                    addVer = AddressingVersion.W3C;
-                } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
-                    addVer = AddressingVersion.MEMBER;
-                }
-                if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
-                    optimized = false;
-                }
-                if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
-                    disableIncPrefix = true;
-                }
-                if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
-                    encHeaderContent = true;
-                }
-                if(endpointPolicy.contains(allowMissingTSClient) || endpointPolicy.contains(allowMissingTSServer)){
-                    allowMissingTimestamp = true;
-                }  
-                if(endpointPolicy.contains(unsetSecurityMUValueClient) || endpointPolicy.contains(unsetSecurityMUValueServer)){
-                    securityMUValue = false;
-                } 
-                if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-                    wsscVer = WSSCVersion.WSSC_10;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-                    wsscVer = WSSCVersion.WSSC_13;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_13;
-                } else if (endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri)) {
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
-                    wsscVer = WSSCVersion.WSSC_10;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                } 
-                if (endpointPolicy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200702;
-                } else if (endpointPolicy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200502;
-                }   
+
+            //This will be used for setting credentials like  spVersion.... etc for binding level policies
+            setPolicyCredentials(endpointPolicy);
+
+           //This will be used for setting credentials like  spVersion.... etc for operation level policies
+            for (WSDLBoundOperation operation : pipeConfig.getWSDLPort().getBinding().getBindingOperations()) {
+                QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(), operation.getName().getLocalPart());
+                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, operationName);
+                Policy operationPolicy = wsPolicyMap.getOperationEffectivePolicy(operationKey);
+                setPolicyCredentials(operationPolicy);
             }
-            
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
@@ -410,21 +377,10 @@ public abstract class WSITAuthContextBase  {
             }
             for( WSDLBoundOperation operation: pipeConfig.getWSDLPort().getBinding().getBindingOperations()){
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
-                        operation.getName().getLocalPart());
-                WSDLOperation wsdlOperation = operation.getOperation();
-                WSDLInput input = wsdlOperation.getInput();
-                WSDLOutput output = wsdlOperation.getOutput();
-                
-                QName inputMessageName = input.getMessage().getName();
-                QName outputMessageName = null;
-                if(output != null){
-                    outputMessageName = output.getMessage().getName();
-                }
-                
+                        operation.getName().getLocalPart());                 
+                                                
                 PolicyMapKey messageKey =  PolicyMap.createWsdlMessageScopeKey(
-                        serviceName,portName,operationName);
-                
-                
+                        serviceName,portName,operationName);                 
                 PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName,portName,operationName);
                 
                 //Review:Not sure if this is need and what is the
@@ -436,22 +392,23 @@ public abstract class WSITAuthContextBase  {
                     policyList.add(operationPolicy);
                 }else{
                     //log fine message
-                    
                     //System.out.println("Operation Level Security policy is null");
                 }
-                
-                
+
                 Policy imPolicy = null;
-                
                 imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
                 if(imPolicy != null ){
                     policyList.add(imPolicy);
                 }
                 //input message effective policy to be used. Policy elements at various
                 //scopes merged.
-                
+
                 Policy imEP = policyMerge.merge(policyList);
-                SecurityPolicyHolder outPH = addOutgoingMP(operation,imEP);
+                 SecurityPolicyHolder outPH = null;
+                if(imEP != null){
+                     outPH  = addOutgoingMP(operation,imEP);
+                }
+             
                 if(imPolicy != null){
                     policyList.remove(imPolicy);
                 }
@@ -466,13 +423,15 @@ public abstract class WSITAuthContextBase  {
                 }
                 //ouput message effective policy to be used. Policy elements at various
                 //scopes merged.
-                
+
                 Policy omEP =  policyMerge.merge(policyList);
                 if(omPolicy != null){
                     policyList.remove(omPolicy);
                 }
-                inPH = addIncomingMP(operation,omEP);
-                /*}*/
+                if(omEP != null){
+                     inPH = addIncomingMP(operation,omEP);
+                }               
+               
                 Iterator faults = operation.getOperation().getFaults().iterator();
                 ArrayList<Policy> faultPL = new ArrayList<Policy>();
                 faultPL.add(endpointPolicy);
@@ -480,8 +439,7 @@ public abstract class WSITAuthContextBase  {
                     faultPL.add(operationPolicy);
                 }
                 while(faults.hasNext()){
-                    WSDLFault fault = (WSDLFault) faults.next();
-                    
+                    WSDLFault fault = (WSDLFault) faults.next();                    
                     PolicyMapKey fKey = null;
                     fKey = PolicyMap.createWsdlFaultMessageScopeKey(
                             serviceName,portName,operationName,
@@ -507,7 +465,50 @@ public abstract class WSITAuthContextBase  {
             throw generateInternalError(pe);
         }
     }
-    
+    private void setPolicyCredentials(Policy policy){
+         if (policy != null){
+                if (policy.contains(AddressingVersion.W3C.policyNsUri) ||policy.contains("http://www.w3.org/2007/05/addressing/metadata")){
+                    addVer = AddressingVersion.W3C;
+                } else if (policy.contains(AddressingVersion.MEMBER.policyNsUri)){
+                    addVer = AddressingVersion.MEMBER;
+                }
+                if(policy.contains(optServerSecurity) || policy.contains(optClientSecurity)){
+                    optimized = false;
+                }
+                if(policy.contains(disableIncPrefixServer) || policy.contains(disableIncPrefixClient)){
+                    disableIncPrefix = true;
+                }
+                if(policy.contains(encHeaderContentServer) || policy.contains(encHeaderContentClient)){
+                    encHeaderContent = true;
+                }
+                if(policy.contains(allowMissingTSClient) || policy.contains(allowMissingTSServer)){
+                    allowMissingTimestamp = true;
+                }
+                if(policy.contains(unsetSecurityMUValueClient) || policy.contains(unsetSecurityMUValueServer)){
+                    securityMUValue = false;
+                }
+                if(policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                    wsscVer = WSSCVersion.WSSC_10;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
+                } else if(policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+                    wsscVer = WSSCVersion.WSSC_13;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_13;
+                } else if (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri)) {
+                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
+                    wsscVer = WSSCVersion.WSSC_10;
+                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
+                }
+                if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
+                        policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
+                    rmVer = RmVersion.WSRM200702;
+                } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
+                        policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
+                    rmVer = RmVersion.WSRM200502;
+                }
+            }
+    }
     protected RuntimeException generateInternalError(PolicyException ex){
         SOAPFault fault = null;
         try {
