@@ -36,6 +36,9 @@
 
 package com.sun.xml.ws.management.server;
 
+import com.sun.xml.txw2.TXW;
+import com.sun.xml.txw2.TypedXmlWriter;
+import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
@@ -96,6 +99,8 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             if (bindingPolicy != null) {
                 try {
                     final PolicySourceModel policyModel = POLICY_GENERATOR.translate(bindingPolicy);
+                    final StaxSerializer serializer = new StaxSerializer(this.out);
+                    final TypedXmlWriter policy = TXW.create(NamespaceVersion.v1_5.asQName(XmlToken.Policy), TypedXmlWriter.class, serializer);
                     POLICY_MARSHALLER.marshal(policyModel, this.out);
                 } catch (PolicyException ex) {
                     throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_0004_CANNOT_MARSHAL(this.out)), ex);
