@@ -51,12 +51,10 @@ public class ManagementPolicyValidator implements PolicyAssertionValidator {
     // TODO: Consolidate with other declarations of this QName
     private static final QName MANAGED_SERVICE_QNAME = new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService");
 
-    @Override
     public Fitness validateClientSide(PolicyAssertion assertion) {
         return Fitness.INVALID;
     }
 
-    @Override
     public Fitness validateServerSide(PolicyAssertion assertion) {
         final QName assertionName = assertion.getName();
         if (MANAGED_SERVICE_QNAME.equals(assertionName)) {
@@ -66,7 +64,6 @@ public class ManagementPolicyValidator implements PolicyAssertionValidator {
         }
     }
 
-    @Override
     public String[] declareSupportedDomains() {
         // TODO: Use constant
         return new String[] { "http://java.sun.com/xml/ns/metro/management" };
