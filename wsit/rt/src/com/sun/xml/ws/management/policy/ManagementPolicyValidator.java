@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.management.policy;
 
-import com.sun.xml.ws.policy. PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
