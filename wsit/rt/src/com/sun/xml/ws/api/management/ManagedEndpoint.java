@@ -1,0 +1,192 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ *
+ * The contents of this file are subject to the terms of either the GNU
+ * General Public License Version 2 only ("GPL") or the Common Development
+ * and Distribution License("CDDL") (collectively, the "License").  You
+ * may not use this file except in compliance with the License. You can obtain
+ * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ * language governing permissions and limitations under the License.
+ *
+ * When distributing the software, include this License Header Notice in each
+ * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ * Sun designates this particular file as subject to the "Classpath" exception
+ * as provided by Sun in the GPL Version 2 section of the License file that
+ * accompanied this code.  If applicable, add the following below the License
+ * Header, with the fields enclosed by brackets [] replaced by your own
+ * identifying information: "Portions Copyrighted [year]
+ * [name of copyright owner]"
+ *
+ * Contributor(s):
+ *
+ * If you wish your version of this file to be governed by only the CDDL or
+ * only the GPL Version 2, indicate your decision by adding "[Contributor]
+ * elects to include this software in this distribution under the [CDDL or GPL
+ * Version 2] license."  If you don't indicate a single choice of license, a
+ * recipient has the option to distribute your version of this file under
+ * either the CDDL, the GPL Version 2 or to extend the choice of license to
+ * its licensees as provided above.  However, if you add GPL Version 2 code
+ * and therefore, elected the GPL Version 2 license, then the option applies
+ * only if the new code is made subject to such option by the copyright
+ * holder.
+ */
+
+package com.sun.xml.ws.api.management;
+
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.Codec;
+import com.sun.xml.ws.api.pipe.FiberContextSwitchInterceptor;
+import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
+import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.EndpointComponent;
+import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
+import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
+import com.sun.xml.ws.policy.PolicyMap;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import javax.xml.namespace.QName;
+import org.glassfish.gmbal.ManagedObjectManager;
+
+/**
+ *
+ * @author Fabian Ritzmann
+ */
+public class ManagedEndpoint<T> extends WSEndpoint<T> {
+
+    public static final String ENDPOINT_ID_PARAMETER_NAME = "ENDPOINT_ID";
+    public static final String ENDPOINT_INSTANCE_PARAMETER_NAME = "ENDPOINT_INSTANCE";
+    public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
+    public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
+
+    private final String id;
+    private final EndpointCreationAttributes creationAttributes;
+    private WSEndpoint<T> endpointDelegate;
+
+    private final Collection<CommunicationAPI> commInterfaces;
+
+    public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
+        this.id = id;
+        this.creationAttributes = attributes;
+        this.endpointDelegate = endpoint;
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = getClass().getClassLoader();
+        }
+
+        final InitParameters parameters = new InitParameters()
+                .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
+                .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
+                .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
+                .put(CLASS_LOADER_PARAMETER_NAME, classLoader);
+        this.commInterfaces = ManagementFactory.createCommunicationImpls(parameters);
+        for (CommunicationAPI commInterface: commInterfaces) {
+            commInterface.start();
+        }
+    }
+
+    synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
+        this.endpointDelegate = endpoint;
+    }
+
+    @Override
+    public Codec createCodec() {
+        return this.endpointDelegate.createCodec();
+    }
+
+    @Override
+    public QName getServiceName() {
+        return this.endpointDelegate.getServiceName();
+    }
+
+    @Override
+    public QName getPortName() {
+        return this.endpointDelegate.getPortName();
+    }
+
+    @Override
+    public Class<T> getImplementationClass() {
+        return this.endpointDelegate.getImplementationClass();
+    }
+
+    @Override
+    public WSBinding getBinding() {
+        return this.endpointDelegate.getBinding();
+    }
+
+    @Override
+    public Container getContainer() {
+        return this.endpointDelegate.getContainer();
+    }
+
+    @Override
+    public WSDLPort getPort() {
+        return this.endpointDelegate.getPort();
+    }
+
+    @Override
+    public void setExecutor(Executor exec) {
+        this.endpointDelegate.setExecutor(exec);
+    }
+
+    @Override
+    public void schedule(Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+        this.endpointDelegate.schedule(request, callback, interceptor);
+    }
+
+    @Override
+    public PipeHead createPipeHead() {
+        return this.endpointDelegate.createPipeHead();
+    }
+
+    @Override
+    public void dispose() {
+        for (CommunicationAPI commInterface: this.commInterfaces) {
+            commInterface.stop();
+        }
+        if (this.endpointDelegate != null) {
+            this.endpointDelegate.dispose();
+        }
+    }
+
+    @Override
+    public ServiceDefinition getServiceDefinition() {
+        return this.endpointDelegate.getServiceDefinition();
+    }
+
+    @Override
+    public Set<EndpointComponent> getComponentRegistry() {
+        return this.endpointDelegate.getComponentRegistry();
+    }
+
+    @Override
+    public SEIModel getSEIModel() {
+        return this.endpointDelegate.getSEIModel();
+    }
+
+    @Override
+    public PolicyMap getPolicyMap() {
+        return this.endpointDelegate.getPolicyMap();
+    }
+
+    @Override
+    public ManagedObjectManager getManagedObjectManager() {
+        return this.endpointDelegate.getManagedObjectManager();
+    }
+
+    @Override
+    public ServerTubeAssemblerContext getAssemblerContext() {
+        return this.endpointDelegate.getAssemblerContext();
+    }
+
+}
