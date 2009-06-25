@@ -112,34 +112,34 @@ public class ManagementWSDLPatcherTest extends TestCase {
         super.tearDown();
     }
 
-    public void testBridgeNoPolicy() throws XMLStreamException {
-        final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
-        final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
-        final StringReader reader = new StringReader(WSDL_NO_POLICY);
-        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
-        final StringWriter writer = new StringWriter();
-        final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-        final XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(writer);
-        instance.bridge(xmlReader, xmlWriter);
-        xmlWriter.flush();
-        assertFalse(writer.getBuffer().toString().isEmpty());
-    }
+//    public void testBridgeNoPolicy() throws XMLStreamException {
+//        final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
+//        final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
+//        final StringReader reader = new StringReader(WSDL_NO_POLICY);
+//        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+//        final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
+//        final StringWriter writer = new StringWriter();
+//        final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+//        final XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(writer);
+//        instance.bridge(xmlReader, xmlWriter);
+//        xmlWriter.flush();
+//        assertFalse(writer.getBuffer().toString().isEmpty());
+//    }
 
-    public void testBridgePolicy() throws XMLStreamException {
-        final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
-        final Policy policy = Policy.createEmptyPolicy(null, "test-policy");
-        urnToPolicy.put(ExternalAttachmentsUnmarshaller.BINDING_ID, policy);
-        final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
-        final StringReader reader = new StringReader(WSDL_NO_POLICY);
-        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
-        final StringWriter writer = new StringWriter();
-        final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-        final XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(writer);
-        instance.bridge(xmlReader, xmlWriter);
-        xmlWriter.flush();
-        System.out.println(writer.getBuffer());
-    }
+//    public void testBridgePolicy() throws XMLStreamException {
+//        final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
+//        final Policy policy = Policy.createEmptyPolicy(null, "test-policy");
+//        urnToPolicy.put(ExternalAttachmentsUnmarshaller.BINDING_ID, policy);
+//        final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
+//        final StringReader reader = new StringReader(WSDL_NO_POLICY);
+//        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+//        final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
+//        final StringWriter writer = new StringWriter();
+//        final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+//        final XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(writer);
+//        instance.bridge(xmlReader, xmlWriter);
+//        xmlWriter.flush();
+//        System.out.println(writer.getBuffer());
+//    }
 
 }
