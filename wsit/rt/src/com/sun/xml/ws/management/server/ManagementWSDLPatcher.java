@@ -99,9 +99,10 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             if (bindingPolicy != null) {
                 try {
                     final PolicySourceModel policyModel = POLICY_GENERATOR.translate(bindingPolicy);
-                    final StaxSerializer serializer = new StaxSerializer(this.out);
+                    final StaxSerializer serializer = new FragmentSerializer(this.out);
                     final TypedXmlWriter policy = TXW.create(NamespaceVersion.v1_5.asQName(XmlToken.Policy), TypedXmlWriter.class, serializer);
-                    POLICY_MARSHALLER.marshal(policyModel, this.out);
+                    POLICY_MARSHALLER.marshal(policyModel, policy);
+                    policy.commit();
                 } catch (PolicyException ex) {
                     throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_0004_CANNOT_MARSHAL(this.out)), ex);
                 }
