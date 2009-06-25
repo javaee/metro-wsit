@@ -97,15 +97,35 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             super.handleStartElement();
             final Policy bindingPolicy = urnToPolicy.get(ExternalAttachmentsUnmarshaller.BINDING_ID);
             if (bindingPolicy != null) {
-                try {
-                    final PolicySourceModel policyModel = POLICY_GENERATOR.translate(bindingPolicy);
-                    final StaxSerializer serializer = new FragmentSerializer(this.out);
-                    final TypedXmlWriter policy = TXW.create(NamespaceVersion.v1_5.asQName(XmlToken.Policy), TypedXmlWriter.class, serializer);
-                    POLICY_MARSHALLER.marshal(policyModel, policy);
-                    policy.commit();
-                } catch (PolicyException ex) {
-                    throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_0004_CANNOT_MARSHAL(this.out)), ex);
-                }
+                writePolicy(bindingPolicy);
+            }
+        }
+        else if (this.inBinding && elementName.equals(WSDLConstants.QNAME_OPERATION)) {
+            super.handleStartElement();
+            final Policy operationPolicy = urnToPolicy.get(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_ID);
+            if (operationPolicy != null) {
+                writePolicy(operationPolicy);
+            }
+        }
+        else if (this.inBinding && elementName.equals(WSDLConstants.QNAME_INPUT)) {
+            super.handleStartElement();
+            final Policy inputPolicy = urnToPolicy.get(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_INPUT_ID);
+            if (inputPolicy != null) {
+                writePolicy(inputPolicy);
+            }
+        }
+        else if (this.inBinding && elementName.equals(WSDLConstants.QNAME_OUTPUT)) {
+            super.handleStartElement();
+            final Policy outputPolicy = urnToPolicy.get(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_OUTPUT_ID);
+            if (outputPolicy != null) {
+                writePolicy(outputPolicy);
+            }
+        }
+        else if (this.inBinding && elementName.equals(WSDLConstants.QNAME_FAULT)) {
+            super.handleStartElement();
+            final Policy faultPolicy = urnToPolicy.get(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_FAULT_ID);
+            if (faultPolicy != null) {
+                writePolicy(faultPolicy);
             }
         }
         else {
@@ -156,4 +176,15 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     protected void handleCharacters() throws XMLStreamException {
         super.handleCharacters();
     }
+
+    private void writePolicy(final Policy policy) {
+        try {
+            final PolicySourceModel policyModel = POLICY_GENERATOR.translate(policy);
+            final StaxSerializer serializer = new FragmentSerializer(this.out);
+            POLICY_MARSHALLER.marshal(policyModel, serializer);
+        } catch (PolicyException ex) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_0004_CANNOT_MARSHAL(this.out)), ex);
+        }
+    }
+
 }
