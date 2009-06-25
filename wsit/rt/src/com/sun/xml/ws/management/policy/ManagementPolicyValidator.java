@@ -52,7 +52,7 @@ public class ManagementPolicyValidator implements PolicyAssertionValidator {
     private static final QName MANAGED_SERVICE_QNAME = new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService");
 
     public Fitness validateClientSide(PolicyAssertion assertion) {
-        return Fitness.INVALID;
+        return Fitness.UNKNOWN;
     }
 
     public Fitness validateServerSide(PolicyAssertion assertion) {
