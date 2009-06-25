@@ -36,8 +36,6 @@
 
 package com.sun.xml.ws.management.server;
 
-import com.sun.xml.txw2.TXW;
-import com.sun.xml.txw2.TypedXmlWriter;
 import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
@@ -141,7 +139,9 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     @Override
     protected void handleEndElement() throws XMLStreamException {
         final QName elementName = this.in.getName();
-        this.inBinding = !elementName.equals(WSDLConstants.QNAME_BINDING);
+        if (this.inBinding) {
+            this.inBinding = !elementName.equals(WSDLConstants.QNAME_BINDING);
+        }
         if (this.skipToken == null) {
             super.handleEndElement();
             return;
