@@ -53,6 +53,8 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Create a ManagedEndpoint if the policy of the endpoint requires it. Otherwise
+ * returns the given endpoint.
  *
  * @author Fabian Ritzmann
  */
@@ -67,6 +69,7 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
         final PolicyAssertion assertion = getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
         if (assertion != null) {
             final String id = assertion.getAttributeValue(new QName("", "id"));
+            // TODO Put log string into properties
             LOGGER.info("Creating managed Metro endpoint with ID \"" + id + "\". JMX connection URL = service:jmx:rmi:///jndi/rmi://localhost:8686/jmxrmi");
             return new ManagedEndpoint<T>(id, endpoint, attributes);
         }
@@ -75,19 +78,31 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
         }
     }
 
+    /**
+     * Return ManagedService assertion if there is one attached to the given port
+     * in the policy map
+     *
+     * @param serviceName The name of the service. Must not be null.
+     * @param portName The name of the port. Must not be null.
+     * @param policyMap The policy map. Must not be null.
+     * @return The policy assertion if found. Null otherwise.
+     */
     private PolicyAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
         try {
             final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
             final Policy policy = policyMap.getEndpointEffectivePolicy(key);
-            if (policy == null) {
-                return null;
-            }
-            else {
+            PolicyAssertion assertion = null;
+            if (policy != null) {
                 final Iterator<AssertionSet> assertionSets = policy.iterator();
-                final AssertionSet assertionSet = assertionSets.next();
-                final Iterator<PolicyAssertion> assertions = assertionSet.get(SERVICE_ASSERTION_QNAME).iterator();
-                return assertions.next();
+                if (assertionSets.hasNext()) {
+                    final AssertionSet assertionSet = assertionSets.next();
+                    final Iterator<PolicyAssertion> assertions = assertionSet.get(SERVICE_ASSERTION_QNAME).iterator();
+                    if (assertions.hasNext()) {
+                        assertion = assertions.next();
+                    }
+                }
             }
+            return assertion;
         } catch (PolicyException ex) {
             // TODO: add error message
             throw LOGGER.logSevereException(new WebServiceException(ex));
