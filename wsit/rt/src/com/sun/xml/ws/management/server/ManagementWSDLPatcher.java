@@ -65,7 +65,8 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     private static final PolicyModelMarshaller POLICY_MARSHALLER = PolicyModelMarshaller.getXmlMarshaller(true);
     private static final PolicyModelGenerator POLICY_GENERATOR = PolicyModelGenerator.getGenerator();
     private final Map<URI, Policy> urnToPolicy;
-    private XmlToken skipToken;
+    // Skip element if this value is 0 or positive
+    private long skipDepth = -1L;
     private boolean inBinding = false;
 
     public ManagementWSDLPatcher(Map<URI, Policy> urnToPolicy) {
@@ -81,13 +82,14 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      */
     @Override
     protected void handleStartElement() throws XMLStreamException {
-        if (this.skipToken != null) {
+        if (this.skipDepth >= 0L) {
+            this.skipDepth++;
             return;
         }
         final QName elementName = this.in.getName();
         final XmlToken policyToken = NamespaceVersion.resolveAsToken(elementName);
         if (policyToken != XmlToken.UNKNOWN) {
-            this.skipToken = policyToken;
+            this.skipDepth++;
             return;
         }
         else if (elementName.equals(WSDLConstants.QNAME_BINDING)) {
@@ -142,16 +144,13 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
         if (this.inBinding) {
             this.inBinding = !elementName.equals(WSDLConstants.QNAME_BINDING);
         }
-        if (this.skipToken == null) {
+        if (this.skipDepth < 0L) {
             super.handleEndElement();
             return;
         }
         else {
-            final XmlToken policyToken = NamespaceVersion.resolveAsToken(elementName);
-            if (this.skipToken.equals(policyToken)) {
-                this.skipToken = null;
-                return;
-            }
+            this.skipDepth--;
+            return;
         }
     }
 

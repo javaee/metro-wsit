@@ -150,6 +150,59 @@ public class ManagementWSDLPatcherTest extends TestCase {
   + "</wsp:Policy>"
   + "</definitions>";
 
+    private static final String WSDL_WITH_IMPORT = "<!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.2-hudson-475-rc1. --><definitions xmlns:wsp=\"http://www.w3.org/ns/ws-policy\" xmlns:wsam=\"http://www.w3.org/2007/05/addressing/metadata\" xmlns:sp=\"http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702\" xmlns:sc=\"http://schemas.sun.com/2006/03/wss/server\" xmlns:wspp=\"http://java.sun.com/xml/ns/wsit/policy\" xmlns:wsu=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd\" xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:tns=\"http://test.ws.xml.sun.com/\" xmlns=\"http://schemas.xmlsoap.org/wsdl/\" targetNamespace=\"http://test.ws.xml.sun.com/\" name=\"NewWebServiceService\">"
+  + "    <import namespace=\"http://test.ws.xml.sun.com/\" location=\"jndi:/server/WebApplicationSunJAXWSFromWSDL/WEB-INF/wsdl/Type.wsdl\" />"
+  + "    <binding name=\"NewWebServicePortBinding\" type=\"tns:NewWebService\">"
+  + "       <soap:binding transport=\"http://schemas.xmlsoap.org/soap/http\" style=\"document\" />"
+  + "        <wsp:PolicyReference URI=\"#NewWebServicePortBindingPolicy\" />"
+  + "        <operation name=\"echo\">"
+  + "            <soap:operation soapAction=\"\" />"
+  + "            <input>"
+  + "                <soap:body use=\"literal\" />"
+  + "            </input>"
+  + "           <output>"
+  + "                <soap:body use=\"literal\" />"
+  + "            </output>"
+  + "        </operation>"
+  + "    </binding>"
+  + "    <service name=\"NewWebServiceService\">"
+  + "        <port name=\"NewWebServicePort\" binding=\"tns:NewWebServicePortBinding\">"
+  + "            <wsp:Policy>"
+  + "                <sunman:ManagedService xmlns:sunman=\"http://java.sun.com/xml/ns/metro/management\" id=\"A unique ID\" />"
+  + "            </wsp:Policy>"
+  + "            <soap:address location=\"temporary address after web service reconfiguration\" />"
+  + "        </port>"
+  + "    </service>"
+  + "    <wsp:Policy wsu:Id=\"NewWebServicePortBindingPolicy\">"
+  + "        <wsp:ExactlyOne>"
+  + "            <wsp:All>"
+  + "                <wsam:Addressing wsp:Optional=\"false\" />"
+  + "                <sp:TransportBinding>"
+  + "                    <wsp:Policy>"
+  + "                        <sp:TransportToken>"
+  + "                            <wsp:Policy>"
+  + "                                <sp:HttpsToken RequireClientCertificate=\"false\" />"
+  + "                            </wsp:Policy>"
+  + "                        </sp:TransportToken>"
+  + "                        <sp:Layout>"
+  + "                            <wsp:Policy>"
+  + "                                <sp:Lax />"
+  + "                            </wsp:Policy>"
+  + "                        </sp:Layout>"
+  + "                        <sp:IncludeTimestamp />"
+  + "                        <sp:AlgorithmSuite>"
+  + "                            <wsp:Policy>"
+  + "                                <sp:Basic128 />"
+  + "                            </wsp:Policy>"
+  + "                        </sp:AlgorithmSuite>"
+  + "                    </wsp:Policy>"
+  + "                </sp:TransportBinding>"
+  + "                <sp:Wss10 />"
+  + "            </wsp:All>"
+  + "        </wsp:ExactlyOne>"
+  + "    </wsp:Policy>"
+  + "</definitions>";
+
     private DocumentBuilder builder;
 
 
@@ -217,6 +270,25 @@ public class ManagementWSDLPatcherTest extends TestCase {
         final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
         final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
         final StringReader reader = new StringReader(WSDL);
+        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
+        final StringWriter writer = new StringWriter();
+        final XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+        final XMLStreamWriter xmlWriter = outputFactory.createXMLStreamWriter(writer);
+        instance.bridge(xmlReader, xmlWriter);
+        xmlWriter.flush();
+
+        final Document result = builder.parse(new InputSource(new StringReader(writer.toString())));
+        final NodeList bindingElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "binding");
+        assertEquals(1, bindingElements.getLength());
+        final NodeList policyElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "Policy");
+        assertEquals(0, policyElements.getLength());
+    }
+
+    public void testBridgeWsdl2RemovePolicies() throws Exception {
+        final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
+        final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
+        final StringReader reader = new StringReader(WSDL_WITH_IMPORT);
         final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);
         final StringWriter writer = new StringWriter();
