@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.management.server;
 
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.ConfigurationAPI;
 import com.sun.xml.ws.api.management.InitParameters;
@@ -58,10 +59,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
-//import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.logging.Level;
-//import javax.xml.stream.XMLStreamReader;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -71,6 +71,8 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Create a new WSEndpoint instance and use it to replace the existing WSEndpoint
+ * instance in a ManagedEndpoint.
  *
  * @author Fabian Ritzmann
  */
@@ -80,18 +82,11 @@ public class ReDelegate implements ConfigurationAPI {
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
-//    public <T> void recreate(ManagedEndpoint<T> managedEndpoint,
-//            EndpointCreationAttributes creationAttributes,
-//            ClassLoader classLoader,
-//            Reader newConfig) {
     public <T> void recreate(InitParameters parameters) {
-//            SDDocumentSource newWsdl) {
         final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             final ClassLoader classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
             Thread.currentThread().setContextClassLoader(classLoader);
-//            final HashMap<String,SDDocumentSource> documents = new HashMap<String,SDDocumentSource>();
-//            documents.put(newWsdl.getSystemId().toExternalForm(), newWsdl);
             final Reader newConfig = parameters.get(ManagementConstants.CONFIG_READER_PARAMETER_NAME);
             Map<URI, Policy> urnToPolicy = ExternalAttachmentsUnmarshaller.unmarshal(newConfig);
 
@@ -118,13 +113,16 @@ public class ReDelegate implements ConfigurationAPI {
         if (serviceDefinition == null) {
             throw new WebServiceException(ManagementMessages.WSM_0003_NO_SERVICE_DEFINITION());
         }
+
+        final LinkedList<SDDocumentSource> documentSources = new LinkedList<SDDocumentSource>();
         for (SDDocument doc: serviceDefinition) {
             if (doc.isWSDL()) {
-                replacePolicies(doc, urnToPolicy);
+                documentSources.add(replacePolicies(doc, urnToPolicy));
+            }
+            else {
+                documentSources.add(convertDocument(doc));
             }
         }
-
-        final SDDocumentSource newWsdl = null;
 
         return EndpointFactory.createEndpoint(endpoint.getImplementationClass(),
                 creationAttributes.isProcessHandlerAnnotation(),
@@ -133,20 +131,21 @@ public class ReDelegate implements ConfigurationAPI {
                 endpoint.getPortName(),
                 endpoint.getContainer(),
                 endpoint.getBinding(),
-                newWsdl,
                 null,
+                documentSources,
                 creationAttributes.getEntityResolver(),
                 creationAttributes.isTransportSynchronous());
     }
 
-    private static void replacePolicies(SDDocument doc, Map<URI, Policy> urnToPolicy) {
+    private static SDDocumentSource replacePolicies(SDDocument doc, Map<URI, Policy> urnToPolicy) {
         try {
             final StringWriter writer = new StringWriter();
             final XMLStreamWriter xmlWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(writer);
             doc.writeTo(new MockPortAddressResolver(), new MockDocumentAddressResolver(), xmlWriter);
             xmlWriter.flush();
+
             final ManagementWSDLPatcher patcher = new ManagementWSDLPatcher(urnToPolicy);
-            final StringReader reader = new StringReader(writer.getBuffer().toString());
+            final StringReader reader = new StringReader(writer.toString());
             final XMLStreamReader xmlReader = XML_INPUT_FACTORY.createXMLStreamReader(reader);
             final StringWriter newWSDLWriter = new StringWriter();
             final XMLStreamWriter newWSDLXMLWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(newWSDLWriter);
@@ -154,11 +153,40 @@ public class ReDelegate implements ConfigurationAPI {
             patcher.bridge(xmlReader, newWSDLXMLWriter);
             newWSDLXMLWriter.writeEndDocument();
             newWSDLXMLWriter.flush();
-            System.out.println(newWSDLWriter.getBuffer());
-        } catch (IOException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(""), ex);
-        } catch (XMLStreamException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(""), ex);
+
+            final XMLStreamReader newWSDLXMLReader = XML_INPUT_FACTORY.createXMLStreamReader(new StringReader(newWSDLWriter.toString()));
+            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(newWSDLXMLReader);
+            return SDDocumentSource.create(doc.getURL(), buffer);
+        } catch (IOException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException("", e));
+        } catch (XMLStreamException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException("", e));
+        }
+    }
+
+    private static SDDocumentSource convertDocument(final SDDocument doc) {
+        try {
+            // The docs are usually of type SDDocumentImpl, which we can cast
+            // to a SDDocumentSource.
+            if (doc instanceof SDDocumentSource) {
+                return (SDDocumentSource) doc;
+            }
+            final StringWriter writer = new StringWriter();
+            final XMLStreamWriter xmlWriter = XML_OUTPUT_FACTORY.createXMLStreamWriter(writer);
+            doc.writeTo(new MockPortAddressResolver(), new MockDocumentAddressResolver(), xmlWriter);
+            writer.flush();
+            final StringReader reader = new StringReader(writer.toString());
+            final XMLStreamReader xmlReader = XML_INPUT_FACTORY.createXMLStreamReader(reader);
+            final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(xmlReader);
+            return SDDocumentSource.create(doc.getURL(), buffer);
+        } catch (IOException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException("", e), e);
+        } catch (XMLStreamException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException("", e), e);
         }
     }
 
