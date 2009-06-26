@@ -405,6 +405,7 @@ public class WSTrustUtil {
         }else{
             final X509Data x509data = new X509Data(doc);
             x509data.addCertificate(cert);
+            keyinfo.add(x509data);
         }
         encKey.setKeyInfo(keyinfo);
         
@@ -444,9 +445,7 @@ public class WSTrustUtil {
             if (as != null){
                 doc = as.getOwnerDocument();
             }else{
-                DocumentBuilderFactory docBuilderFac = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder = docBuilderFac.newDocumentBuilder();
-                doc = docBuilder.newDocument();
+                doc = newDocument();
                 as = doc.createElementNS(samlNS, samlPrefix+":AttributeStatement");
                 doc.appendChild(as);
             }
@@ -472,5 +471,19 @@ public class WSTrustUtil {
         }catch (Exception ex){
             throw new WSTrustException(ex.getMessage());
         }
+    }
+
+    public static Document newDocument(){
+        Document doc;
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            doc = db.newDocument();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+
+        return doc;
     }
 }

@@ -213,6 +213,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
             }else{
                 final X509Data x509data = new X509Data(doc);
                 x509data.addCertificate(cert);
+                keyinfo.add(x509data);
             }
             encKey.setKeyInfo(keyinfo);
         } catch (XWSSecurityException ex){
