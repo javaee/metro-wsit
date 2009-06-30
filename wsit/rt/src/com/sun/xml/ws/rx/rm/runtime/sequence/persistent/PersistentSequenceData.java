@@ -42,13 +42,14 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 
 /*
 DROP TABLE RM_UNACKED_MESSAGES;
@@ -58,15 +59,15 @@ CREATE TABLE RM_SEQUENCES (
 ID VARCHAR(256) NOT NULL,
 TYPE CHARACTER NOT NULL,
 
-EXP_TIME TIMESTAMP NOT NULL,
+EXP_TIME BIGINT NOT NULL,
 BOUND_ID VARCHAR(256),
 STR_ID VARCHAR(256),
 
-STATUS CHARACTER NOT NULL,
+STATUS SMALLINT NOT NULL,
 ACK_REQUESTED_FLAG CHARACTER,
 LAST_MESSAGE_ID BIGINT NOT NULL,
-LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
-LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
+LAST_ACTIVITY_TIME BIGINT NOT NULL,
+LAST_ACK_REQUEST_TIME BIGINT NOT NULL,
 
 PRIMARY KEY (ID, TYPE)
 );
@@ -95,25 +96,35 @@ CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORR
 /**
  * Persistent implementation of sequence data
  *
- * TODO implement - currently only works as a copy of in-vm sequence data
- * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 final class PersistentSequenceData implements SequenceData {
 
+    private static final class FieldInfo {
+
+        final String columnName;
+        final int sqlType;
+
+        public FieldInfo(String columnName, int sqlType) {
+            this.columnName = columnName;
+            this.sqlType = sqlType;
+        }
+    }
+
     static enum SequenceType {
 
-        INBOUND("IN"),
-        OUTBOUND("OUT");
-        private final String id;
+        Inbound('I'),
+        Outbound('O');
+        //
+        private final char id;
 
-        private SequenceType(String id) {
+        private SequenceType(char id) {
             this.id = id;
         }
 
-        private static SequenceType toSequenceType(String id) {
+        private static SequenceType toSequenceType(char id) {
             for (SequenceType st : values()) {
-                if (st.id.equals(id)) {
+                if (st.id == id) {
                     return st;
                 }
             }
@@ -129,59 +140,139 @@ final class PersistentSequenceData implements SequenceData {
     private final SequenceType type;
     private final String boundSecurityTokenReferenceId;
     private final long expirationTime;
-    //
+    /*
     private volatile State state;
     private volatile boolean ackRequestedFlag;
     private volatile long lastMessageId;
     private volatile long lastActivityTime;
     private volatile long lastAcknowledgementRequestTime;
+     */
+    private final FieldInfo fState = new FieldInfo("STATUS", Types.SMALLINT);
+    private final FieldInfo fAckRequestedFlag = new FieldInfo("ACK_REQUESTED_FLAG", Types.CHAR);
+    private final FieldInfo fLastMessageId = new FieldInfo("LAST_MESSAGE_ID", Types.BIGINT);
+    private final FieldInfo fLastActivityTime = new FieldInfo("LAST_ACTIVITY_TIME", Types.BIGINT);
+    private final FieldInfo fLastAcknowledgementRequestTime = new FieldInfo("LAST_ACK_REQUEST_TIME", Types.BIGINT);
+    //
+    private final ResultSet dataResultSet;
     //
     private final Map<String, ApplicationMessage> weakMessageStorage;
     private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
 
-    PersistentSequenceData(String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, long lastMessageId, long lastActivityTime) {
-        this(sequenceId, type, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, lastActivityTime, 0L);
-    }
-
-    PersistentSequenceData(String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
-        super();
-
+    PersistentSequenceData(String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, ResultSet dataResultSet) {
         this.sequenceId = sequenceId;
         this.type = type;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
         this.expirationTime = expirationTime;
-        this.state = state;
-        this.ackRequestedFlag = ackRequestedFlag;
-        this.lastMessageId = lastMessageId;
-        this.lastActivityTime = lastActivityTime;
-        this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
+        //
+        this.dataResultSet = dataResultSet;
+//        this.state = state;
+//        this.ackRequestedFlag = ackRequestedFlag;
+//        this.lastMessageId = lastMessageId;
+//        this.lastActivityTime = lastActivityTime;
+//        this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
         this.weakMessageStorage = new WeakHashMap<String, ApplicationMessage>();
         this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
     }
 
-    static PersistentSequenceData insert(Connection sqlConnection, PersistentSequenceData data) throws DuplicateSequenceException {
+    static PersistentSequenceData newInstance(
+            Connection sqlConnection,
+            String sequenceId,
+            SequenceType type,
+            String securityContextTokenId,
+            long expirationTime,
+            State state,
+            boolean ackRequestedFlag,
+            long lastMessageId,
+            long lastActivityTime,
+            long lastAcknowledgementRequestTime) throws DuplicateSequenceException {
+        try {
+            PreparedStatement ps = sqlConnection.prepareStatement(
+                    "INSERT INTO RM.RM_SEQUENCES " +
+                    "(ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
+                    "VALUES " +
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            int i = 0;
+            ps.setString(++i, sequenceId); // ID VARCHAR(256) NOT NULL,
+            ps.setInt(++i, type.id); // TYPE CHARACTER NOT NULL,
+
+            ps.setLong(++i, expirationTime); // EXP_TIME TIMESTAMP NOT NULL,
+            ps.setString(++i, securityContextTokenId); // STR_ID VARCHAR(256),
+
+
+            ps.setInt(++i, state.asInt()); // STATUS SMALLINT NOT NULL,
+            ps.setString(++i, Boolean.toString(ackRequestedFlag)); // ACK_REQUESTED_FLAG CHARACTER,
+            ps.setLong(++i, lastMessageId); // LAST_MESSAGE_ID BIGINT NOT NULL,
+            ps.setLong(++i, lastActivityTime); // LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
+            ps.setLong(++i, lastAcknowledgementRequestTime); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
+
+            if (ps.executeUpdate() != 1) {
+                throw LOGGER.logSevereException(
+                        new PersistenceException(String.format("Unable to insert sequence data for %s sequence with id = [ %s ]", type, sequenceId)));
+            }
+
+        } catch (SQLException ex) {
+            LOGGER.logSevereException(ex);
+            // TODO P1 error handling
+        }
+
+        return loadInstance(sqlConnection, sequenceId, type);
+    }
+
+    static PersistentSequenceData loadInstance(Connection sqlConnection, String sequenceId, SequenceType type) {
+        PersistentSequenceData data = null;
+
+        try {
+            PreparedStatement ps = sqlConnection.prepareStatement(
+                    "SELECT " +
+                    "EXP_TIME, BOUND_ID, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME " +
+                    "FROM RM_SEQUENCES " +
+                    "WHERE ID=? AND TYPE=?");
+
+            ps.setString(1, sequenceId);
+            ps.setInt(2, type.id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                // TODO P1 error selecting existing row
+            }
+
+            if (!rs.isFirst() && !rs.isLast()) {
+                // TODO P1 error - multiple rows selected
+            }
+
+
+            data = new PersistentSequenceData(
+                    sequenceId,
+                    type,
+                    rs.getString("STR_ID"),
+                    rs.getLong("EXP_TIME"),
+                    rs);
+
+            // TODO load unacked messages
+
+        } catch (SQLException ex) {
+            LOGGER.logSevereException(ex);
+            // TODO P1 error handling
+        }
+
+        return data;
+    }
+
+    static PersistentSequenceData remove(Connection sqlConnection, PersistentSequenceData data) {
         try {
             data.lockRead();
 
-            PreparedStatement ps = sqlConnection.prepareStatement("INSERT INTO RM_SEQUENCES VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement ps = sqlConnection.prepareStatement("DELETE FROM RM_SEQUENCES WHERE ID=? AND TYPE=?");
 
-            int i = 0;
-            ps.setString(++i, data.sequenceId); // ID VARCHAR(256) NOT NULL,
-            ps.setString(++i, data.type.id); // TYPE CHARACTER NOT NULL,
-
-            ps.setTimestamp(++i, new Timestamp(data.expirationTime)); // EXP_TIME TIMESTAMP NOT NULL,
-            ps.setNull(++i, Types.CHAR); // BOUND_ID VARCHAR(256),
-            ps.setString(++i, data.boundSecurityTokenReferenceId); // STR_ID VARCHAR(256),
-
-
-            ps.setString(++i, data.state.name()); // STATUS CHARACTER NOT NULL,
-            ps.setString(++i, Boolean.toString(data.ackRequestedFlag)); // ACK_REQUESTED_FLAG CHARACTER,
-            ps.setLong(++i, data.lastMessageId); // LAST_MESSAGE_ID BIGINT NOT NULL,
-            ps.setTimestamp(++i, new Timestamp(data.lastActivityTime)); // LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
-            ps.setTimestamp(++i, new Timestamp(data.lastAcknowledgementRequestTime)); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
+            ps.setString(1, data.sequenceId); // ID VARCHAR(256) NOT NULL,
+            ps.setInt(2, data.type.id); // TYPE CHARACTER NOT NULL,
 
             if (ps.executeUpdate() != 1) {
-                // TODO P1 error inserting new row
+                throw LOGGER.logException(
+                        new PersistenceException(String.format("Unable to delete sequence data for %s sequence with id = [ %s ]", data.type, data.sequenceId)),
+                        Level.WARNING);
             }
 
         } catch (SQLException ex) {
@@ -190,32 +281,6 @@ final class PersistentSequenceData implements SequenceData {
         } finally {
             data.unlockRead();
         }
-
-        return data;
-    }
-
-    static PersistentSequenceData save(Connection sqlConnection, PersistentSequenceData data) {
-        try {
-            data.lockRead();
-
-            // TODO implement
-
-            return data;
-        } finally {
-            data.unlockRead();
-        }
-    }
-
-    static PersistentSequenceData load(Connection sqlConnection, String sequenceId, SequenceType type) {
-        PersistentSequenceData data = null;
-
-        // TODO implement
-
-        return data;
-    }
-
-    static PersistentSequenceData remove(Connection sqlConnection, PersistentSequenceData data) {
-        // TODO implement        
 
         return data;
     }
@@ -244,58 +309,98 @@ final class PersistentSequenceData implements SequenceData {
         return boundSecurityTokenReferenceId;
     }
 
+    public long getExpirationTime() {
+        return expirationTime;
+    }
+
     public long getLastMessageId() {
         try {
-            lockRead();
-            return lastMessageId;
-        } finally {
-            unlockRead();
+            return dataResultSet.getLong(fLastMessageId.columnName);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve sequence data", ex));
         }
     }
 
-    public void setLastMessageId(long newLastMessageId) {
+    public void setLastMessageId(long newValue) {
         try {
-            lockWrite();
-            this.lastMessageId = newLastMessageId;
-        } finally {
-            unlockWrite();
+            dataResultSet.updateLong(fLastMessageId.columnName, newValue);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to update sequence data", ex));
         }
     }
 
     public State getState() {
-        return state;
+        try {
+            return State.asState(dataResultSet.getInt(fState.columnName));
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve sequence data", ex));
+        }
     }
 
-    public void setState(State newState) {
-        state = newState;
+    public void setState(State newValue) {
+        try {
+            dataResultSet.updateInt(fState.columnName, newValue.asInt());
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to update sequence data", ex));
+        }
     }
 
     public boolean getAckRequestedFlag() {
-        return ackRequestedFlag;
+        try {
+            return dataResultSet.getBoolean(fAckRequestedFlag.columnName);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve sequence data", ex));
+        }
     }
 
     public void setAckRequestedFlag(boolean newValue) {
-        ackRequestedFlag = newValue;
+        try {
+            dataResultSet.updateBoolean(fAckRequestedFlag.columnName, newValue);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to update sequence data", ex));
+        }
     }
 
     public long getLastAcknowledgementRequestTime() {
-        return lastAcknowledgementRequestTime;
+        try {
+            return dataResultSet.getLong(fLastAcknowledgementRequestTime.columnName);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve sequence data", ex));
+        }
     }
 
-    public void setLastAcknowledgementRequestTime(long newTime) {
-        lastAcknowledgementRequestTime = newTime;
+    public void setLastAcknowledgementRequestTime(long newValue) {
+        try {
+            dataResultSet.updateLong(fLastAcknowledgementRequestTime.columnName, newValue);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to update sequence data", ex));
+        }
     }
 
     public long getLastActivityTime() {
-        return lastActivityTime;
+        try {
+            return dataResultSet.getLong(fLastActivityTime.columnName);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve sequence data", ex));
+        }
     }
 
-    public void setLastActivityTime(long newTime) {
-        lastActivityTime = newTime;
-    }
-
-    public long getExpirationTime() {
-        return expirationTime;
+    public void setLastActivityTime(long newValue) {
+        try {
+            dataResultSet.updateLong(fLastActivityTime.columnName, newValue);
+        } catch (SQLException ex) {
+            // TODO P3 L10N
+            throw LOGGER.logSevereException(new PersistenceException("Unable to update sequence data", ex));
+        }
     }
 
     public final void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException {
@@ -309,15 +414,18 @@ final class PersistentSequenceData implements SequenceData {
         } finally {
             unlockWrite();
         }
+
     }
 
-    public ApplicationMessage retrieveMessage(String correlationId) {
+    public ApplicationMessage retrieveMessage(
+            String correlationId) {
         try {
             lockRead();
             return weakMessageStorage.get(correlationId);
         } finally {
             unlockRead();
         }
+
     }
 
     public ApplicationMessage retrieveUnackedMessage(long messageNumber) {

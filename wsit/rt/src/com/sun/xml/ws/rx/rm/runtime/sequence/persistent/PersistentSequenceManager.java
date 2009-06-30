@@ -114,7 +114,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        PersistentSequenceData data = new PersistentSequenceData(sequenceId, PersistentSequenceData.SequenceType.OUTBOUND, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new OutboundSequence(data, deliveryQueueBuilder, this));
     }
 
@@ -122,7 +122,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
-        PersistentSequenceData data = new PersistentSequenceData(sequenceId, PersistentSequenceData.SequenceType.INBOUND, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new InboundSequence(data, deliveryQueueBuilder, this));
     }
 
@@ -265,21 +265,15 @@ public final class PersistentSequenceManager implements SequenceManager {
      *
      * @param sequence sequence object to be registered within the internal sequence storage
      */
-    private AbstractSequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
-
+    private AbstractSequence registerSequence(AbstractSequence sequence) {
         try {
             internalDataAccessLock.writeLock().lock();
-            if (sequences.containsKey(sequence.getId())) {
-                throw new DuplicateSequenceException(sequence.getId());
-            } else {
-                @SuppressWarnings("unchecked") // this method is called only for sequences with PersistentSequenceData
-                PersistentSequenceData data = PersistentSequenceData.class.cast(sequence.getData());
-                data = PersistentSequenceData.insert(sqlConnection, data);
 
-                sequences.put(sequence.getId(), sequence);
-                if (managedObjectManager != null) {
-                    managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
-                }
+            // no need to check for a duplicate:
+            // if we were able to create PersistentSequenceData instance, it means that there is no duplicate
+            sequences.put(sequence.getId(), sequence);
+            if (managedObjectManager != null) {
+                managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
             }
 
             return sequence;

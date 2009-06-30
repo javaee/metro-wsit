@@ -73,11 +73,11 @@ public interface Sequence {
             this.value = value;
         }
         
-        public int getValue() {
+        public int asInt() {
             return value;
         }
         
-        public static State valueToStatus(int value) {
+        public static State asState(int value) {
             for (State status : State.values()) {
                 if (status.value == value) {
                     return status;
