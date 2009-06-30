@@ -40,6 +40,8 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
 import com.sun.xml.ws.api.management.ManagedEndpointFactory;
+import com.sun.xml.ws.management.ManagementConstants;
+import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -61,19 +63,16 @@ import javax.xml.ws.WebServiceException;
 public class EndpointFactoryImpl implements ManagedEndpointFactory {
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EndpointFactoryImpl.class);
-    // TODO: Replace by reference to PolicyConstants
-    private static final String SUN_MANAGEMENT_NAMESPACE = "http://java.sun.com/xml/ns/metro/management";
-    private static final QName SERVICE_ASSERTION_QNAME = new QName(SUN_MANAGEMENT_NAMESPACE, "ManagedService");
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
         final PolicyAssertion assertion = getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
         if (assertion != null) {
             final String id = assertion.getAttributeValue(new QName("", "id"));
-            // TODO Put log string into properties
-            LOGGER.info("Creating managed Metro endpoint with ID \"" + id + "\". JMX connection URL = service:jmx:rmi:///jndi/rmi://localhost:8686/jmxrmi");
+            LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(id));
             return new ManagedEndpoint<T>(id, endpoint, attributes);
         }
         else {
+            LOGGER.config(ManagementMessages.WSM_5002_ENDPOINT_NOT_CREATED());
             return endpoint;
         }
     }
@@ -84,28 +83,31 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
      *
      * @param serviceName The name of the service. Must not be null.
      * @param portName The name of the port. Must not be null.
-     * @param policyMap The policy map. Must not be null.
+     * @param policyMap The policy map. May be null.
      * @return The policy assertion if found. Null otherwise.
      */
     private PolicyAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
+        LOGGER.entering(serviceName, portName, policyMap);
         try {
-            final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
-            final Policy policy = policyMap.getEndpointEffectivePolicy(key);
             PolicyAssertion assertion = null;
-            if (policy != null) {
-                final Iterator<AssertionSet> assertionSets = policy.iterator();
-                if (assertionSets.hasNext()) {
-                    final AssertionSet assertionSet = assertionSets.next();
-                    final Iterator<PolicyAssertion> assertions = assertionSet.get(SERVICE_ASSERTION_QNAME).iterator();
-                    if (assertions.hasNext()) {
-                        assertion = assertions.next();
+            if (policyMap != null) {
+                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
+                final Policy policy = policyMap.getEndpointEffectivePolicy(key);
+                if (policy != null) {
+                    final Iterator<AssertionSet> assertionSets = policy.iterator();
+                    if (assertionSets.hasNext()) {
+                        final AssertionSet assertionSet = assertionSets.next();
+                        final Iterator<PolicyAssertion> assertions = assertionSet.get(ManagementConstants.SERVICE_ASSERTION_QNAME).iterator();
+                        if (assertions.hasNext()) {
+                            assertion = assertions.next();
+                        }
                     }
                 }
             }
+            LOGGER.exiting(assertion);
             return assertion;
         } catch (PolicyException ex) {
-            // TODO: add error message
-            throw LOGGER.logSevereException(new WebServiceException(ex));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
         }
     }
 

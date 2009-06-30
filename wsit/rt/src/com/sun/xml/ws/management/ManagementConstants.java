@@ -36,11 +36,26 @@
 
 package com.sun.xml.ws.management;
 
+import com.sun.xml.ws.policy.PolicyConstants;
+
+import javax.xml.namespace.QName;
+
 /**
+ * Constants used by several management classes.
  *
  * @author Fabian Ritzmann
  */
 public class ManagementConstants {
 
+    /**
+     * Named parameter ID for the policy attachment configuration passed into the
+     * managed endpoint.
+     */
     public static final String CONFIG_READER_PARAMETER_NAME = "CONFIG_READER";
+
+    /**
+     * Fully qualified name of the ManagedService policy assertion.
+     */
+    public static final QName SERVICE_ASSERTION_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
+
 }
