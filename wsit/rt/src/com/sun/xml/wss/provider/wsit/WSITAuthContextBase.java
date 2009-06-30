@@ -460,6 +460,9 @@ public abstract class WSITAuthContextBase  {
                     }
                     faultPL.remove(fPolicy);
                 }
+                if(operationPolicy != null){
+                    policyList.remove(operationPolicy);
+                }
             }
         }catch(PolicyException pe){
             throw generateInternalError(pe);
