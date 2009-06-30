@@ -75,14 +75,14 @@
 							</wsp:Policy>
 						</sp:Layout>
 						<sp:IncludeTimestamp/>
-						<!--sp:EncryptSignature/-->
+						<sp:EncryptSignature/>
 						<sp:OnlySignEntireHeadersAndBody/>
 					</wsp:Policy>
 				</sp:SymmetricBinding>
 				<sp:EndorsingSupportingTokens xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
 					<wsp:Policy>
 						<sp:IssuedToken sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
-                                                    <sp:Issuer>
+                                                    <!--sp:Issuer>
                                                         <Address xmlns="http://www.w3.org/2005/08/addressing">http://localhost:8080/jaxws-fs-wssx-sts/sts</Address>
                                                         <Metadata xmlns="http://www.w3.org/2005/08/addressing">
                                                             <wsx:Metadata xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -93,7 +93,7 @@
                                                                 </wsx:MetadataSection>
                                                             </wsx:Metadata>
                                                         </Metadata>
-                                                    </sp:Issuer>
+                                                    </sp:Issuer-->
                                                     <sp:RequestSecurityTokenTemplate>
                                                         <t:TokenType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
 							<t:KeyType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey</t:KeyType>

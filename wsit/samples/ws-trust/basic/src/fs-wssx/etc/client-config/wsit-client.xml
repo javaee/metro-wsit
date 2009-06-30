@@ -61,8 +61,8 @@
                 </scc:SCClientConfiguration>
                 
                 <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" 
-                    endpoint="http://localhost:8080/jaxws-sts/sts"
-                    wsdlLocation="http://localhost:8080/jaxws-sts/sts?wsdl"
+                    endpoint="http://localhost:8080/jaxws-fs-wssx-sts/sts"
+                    wsdlLocation="http://localhost:8080/jaxws-fs-wssx-sts/sts?wsdl"
                     serviceName="SecurityTokenService"
                     portName="ISecurityTokenService_Port"
                     namespace="http://tempuri.org/">

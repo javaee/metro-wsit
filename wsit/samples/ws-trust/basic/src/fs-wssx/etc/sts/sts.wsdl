@@ -45,7 +45,7 @@
                                               xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                                               xmlns:wsp="http://www.w3.org/ns/ws-policy" 
                                               xmlns:tns="http://tempuri.org/"
-                                              xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                                              xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" 
                                               xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" 
                                               xmlns:wsa10="http://www.w3.org/2005/08/addressing">
 	<wsp:Policy wsu:Id="ISecurityTokenService_policy">
@@ -114,7 +114,7 @@
                                 </sc:ValidatorConfiguration>
                                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
                                      <tc:LifeTime>36000</tc:LifeTime>
-                                     <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
+                                     <tc:Contract>com.sun.xml.ws.security.trust.impl.WSTrustContractImpl</tc:Contract>
                                      <tc:Issuer>SunSTS</tc:Issuer>
                                      <tc:ServiceProviders>
                                             <tc:ServiceProvider endPoint="http://localhost:8080/jaxws-fs/simple" >
