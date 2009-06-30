@@ -49,15 +49,23 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
+import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
+
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
+ * Wraps an existing WSEndpoint instance and provides a method to swap the
+ * WSEndpoint instance. This class also brings up the management communication
+ * interfaces when it is instantiated.
+ *
+ * This class forwards all method invocations to the wrapped WSEndpoint instance.
  *
  * @author Fabian Ritzmann
  */
@@ -68,12 +76,23 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
     public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
     public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
 
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagedEndpoint.class);
+
     private final String id;
     private final EndpointCreationAttributes creationAttributes;
     private WSEndpoint<T> endpointDelegate;
 
     private final Collection<CommunicationAPI> commInterfaces;
 
+    /**
+     * Initializes this endpoint.
+     *
+     * @param id A unique ID of the managed endpoint.
+     * @param endpoint The wrapped WSEndpoint instance.
+     * @param attributes Several attributes that were used to create the original WSEndpoint
+     *   instance and that cannot be queried from WSEndpoint itself. This is used by
+     *   the communication API to recreate WSEndpoint instances with the same parameters.
+     */
     public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
         this.id = id;
         this.creationAttributes = attributes;
@@ -95,8 +114,15 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
         }
     }
 
+    /**
+     * Sets a new WSEndpoint instance to which method calls will be forwarded from
+     * then on.
+     *
+     * @param endpoint The WSEndpoint instance. May not be null.
+     */
     synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
         this.endpointDelegate = endpoint;
+        LOGGER.info(ManagementMessages.WSM_5004_RECONFIGURED_ENDPOINT(this.id));
     }
 
     @Override
