@@ -146,6 +146,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     static final String PIPE_HELPER = "PIPE_HELPER";
     
     /** Creates a new instance of WSITServerAuthContext */
+    @SuppressWarnings("unchecked")
     public WSITServerAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
         this.operation = operation;
@@ -154,13 +155,25 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         endPoint = (WSEndpoint)map.get("ENDPOINT");
         
         Iterator it = inMessagePolicyMap.values().iterator();
-        SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
-        Set configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
-        trustConfig = holder.getConfigAssertions(
-                com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-        wsscConfig = holder.getConfigAssertions(
-                com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
-        
+        Set configAssertions = null;
+        while (it.hasNext()) {
+            SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+            if (configAssertions != null) {
+                configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
+            } else {
+                configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
+            }
+            if (trustConfig != null) {
+                trustConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
+            } else {
+                trustConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+            }
+            if (wsscConfig != null) {
+                wsscConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
+            } else {
+                wsscConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+            }
+        }
         String isGF = System.getProperty("com.sun.aas.installRoot");
         if (isGF != null) {            
             try {
