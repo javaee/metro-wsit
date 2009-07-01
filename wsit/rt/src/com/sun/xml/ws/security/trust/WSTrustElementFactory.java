@@ -42,6 +42,7 @@ import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
@@ -64,6 +65,7 @@ import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;
 import com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.URI;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
@@ -84,6 +86,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  * A Factory for creating the WS-Trust schema elements, and marshalling/un-marshalling them
@@ -221,6 +224,8 @@ public abstract class WSTrustElementFactory {
     public abstract UseKey createUseKey(Token token, String sig);
 
     public abstract OnBehalfOf createOnBehalfOf(Token oboToken);
+
+    public abstract ActAs createActAs(Token token);
     
     public abstract ValidateTarget createValidateTarget(Token token);
     
@@ -345,7 +350,9 @@ public abstract class WSTrustElementFactory {
     public abstract Claims createClaims(Element elem)throws WSTrustException;
 
     public abstract Claims createClaims(Claims claims) throws WSTrustException;
-    
+
+    public abstract Claims createClaims() throws WSTrustException;
+
     /**
      * create an RST from JAXBElement
      * <p>
@@ -494,4 +501,21 @@ public abstract class WSTrustElementFactory {
      * </p>
      */
      public abstract Element toElement(BinarySecret binarySecret, Document doc);
+
+     public Element toElement(Object jaxbEle){
+        if (jaxbEle instanceof Element){
+            return (Element)jaxbEle;
+        }
+        try{
+            Document doc = WSTrustUtil.newDocument();
+
+            getMarshaller().marshal((JAXBElement)jaxbEle, doc);
+            return doc.getDocumentElement();
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage(), ex);
+        }
+    }
+
+     public abstract Marshaller getMarshaller();
 }

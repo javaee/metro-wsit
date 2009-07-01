@@ -52,6 +52,7 @@ import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -278,6 +279,22 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         if (authnCtx != null){
              context.getOtherProperties().put(IssuedTokenContext.AUTHN_CONTEXT, authnCtx);
         }
+
+        // Get Claims from the RST
+        Claims claims = rst.getClaims();
+        if (claims == null && secParas != null){
+            claims = secParas.getClaims();
+        }
+        if (claims != null){
+            // Add supporting information
+            List<Object> si = rst.getExtensionElements();
+            claims.getSupportingProperties().addAll(si);
+            if (at != null){
+                claims.getSupportingProperties().addAll(at);
+            }
+        }else{
+            claims = eleFac.createClaims();
+        }
         
         // Get the OnBehalfOf token and put it in the Subject public credentails
         // ToDo: to identify the OBO token properly
@@ -285,7 +302,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         if (obo != null){
             Object oboToken = obo.getAny();
             if (oboToken != null){
-                subject.getPublicCredentials().add((Element)oboToken);
+                subject.getPublicCredentials().add(eleFac.toElement(oboToken));
                 String confirMethod = null;
                 if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
                     tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){
@@ -298,8 +315,23 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 }
             }
         }
-        
+        // Handle ActAs token
+        ActAs actAs = rst.getActAs();
+        if (actAs != null){
+            Object actAsToken = actAs.getAny();
+            if (actAsToken != null){
+                // set ActAs attribute
+                claims.getOtherAttributes().put(new QName("ActAs"), "true");
+
+                // Create a Subject with act as credential and put it in claims
+                Subject actAsSubj = new Subject();
+                actAsSubj.getPublicCredentials().add(eleFac.toElement(actAsToken));
+                claims.getSupportingProperties().add(actAsSubj);
+            }
+        }
+
         // Check if the client is authorized to be issued the token from the STSAuthorizationProvider
+        //ToDo: handling ActAs case
         final STSAuthorizationProvider authzProvider = WSTrustFactory.getSTSAuthorizationProvider();
         if (!authzProvider.isAuthorized(subject, appliesTo, tokenType, keyType)){
             String user = subject.getPrincipals().iterator().next().getName();
@@ -308,20 +340,6 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                     user, tokenType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0015_CLIENT_NOT_AUTHORIZED(
                     user, tokenType, appliesTo));
-        }
-        
-        // Get claimed attributes from the RST
-        Claims claims = rst.getClaims();
-        if (claims == null && secParas != null){
-            claims = secParas.getClaims();
-        }
-        if (claims != null){
-            // Add supporting information
-            List<Object> si = rst.getExtensionElements();
-            claims.getSupportingProperties().addAll(si);
-            if (at != null){
-                claims.getSupportingProperties().addAll(at);
-            }
         }
         
         // Get claimed attributes from the STSAttributeProvider

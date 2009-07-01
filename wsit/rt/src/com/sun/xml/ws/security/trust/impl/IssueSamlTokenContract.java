@@ -282,6 +282,9 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         if (claims == null && secParas != null){
             claims = secParas.getClaims();
         }
+        if (claims == null){
+            claims = eleFac.createClaims();
+        }
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         

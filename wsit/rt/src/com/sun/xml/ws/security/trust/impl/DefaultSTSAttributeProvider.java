@@ -49,9 +49,12 @@ import java.util.Set;
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import javax.xml.stream.XMLStreamReader;
+
+import com.sun.xml.wss.saml.Assertion;
+import com.sun.xml.wss.saml.AssertionUtil;
+import com.sun.xml.wss.saml.*;
 import com.sun.xml.wss.saml.util.SAMLUtil;
 
 /**
@@ -61,6 +64,7 @@ import com.sun.xml.wss.saml.util.SAMLUtil;
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
     private static final String SAML_1_0_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
     private static final String SAML_2_0_NS = "urn:oasis:names:tc:SAML:2.0:assertion";
+
     public Map<QName, List<String>> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
         final Set<Principal> principals = subject.getPrincipals();
         final Map<QName, List<String>> attrs = new HashMap<QName, List<String>>();
@@ -85,37 +89,120 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
                         XMLStreamReader reader = (XMLStreamReader) obj;
                         //To create a DOM Element representing the Assertion :
                         samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+                    } else if (obj instanceof Element){
+                        samlAssertion = (Element) obj;
                     }
+                    break;
                 }
-            } catch (Exception ex){
-                samlAssertion = null;
-            }
-            
-            if (samlAssertion != null){
-                String uri = samlAssertion.getNamespaceURI();
-                List<String> nameIds = new ArrayList<String>();  
-                NodeList nl = null;
-                if (SAML_1_0_NS.equals(uri)){
-                    nl = samlAssertion.getElementsByTagNameNS(SAML_1_0_NS, "NameIdentifier");
-                }else if (SAML_2_0_NS.equals(uri)){
-                    nl = samlAssertion.getElementsByTagNameNS(SAML_2_0_NS, "NameID");
+                if (samlAssertion != null){
+                    this.addAttributes(samlAssertion, attrs, false);
                 }
-                
-                if (nl != null && nl.getLength() > 0){
-                    Element nameId = (Element) nl.item(0);
-                    nameIds.add(nameId.getFirstChild().getNodeValue());
-                }
-                
-                attrs.put(new QName("http://sun.com", NAME_IDENTIFIER), nameIds);
+            }catch (Exception ex){
+                throw new RuntimeException(ex);
             }
         }
-       
-        // Set up a dumy attribute value
-        final QName key = new QName("http://sun.com", "token-requestor");
-        List<String> tokenRequestor = new ArrayList<String>();
-        tokenRequestor.add("authenticated");
-        attrs.put(key, tokenRequestor);
+
+        // Check if it is the ActAs case
+        if ("true".equals(claims.getOtherAttributes().get(new QName("ActAs")))){
+            //ToDo: have a general mechanism to handle ActAs tokens
+
+            // Get the ActAs token
+            Element token = null;
+            for (Object obj : claims.getSupportingProperties()){
+                if (obj instanceof Subject){
+                    token = (Element)((Subject)obj).getPublicCredentials().iterator().next();
+                        break;
+                }
+            }
+
+            try {
+                if (token != null){
+                    addAttributes(token, attrs, true);
+                }
+            }catch (Exception ex){
+                throw new RuntimeException(ex);
+            }
+        }
+
+        if (attrs.size() < 2){
+            // Set up a dumy attribute value
+            final QName key = new QName("http://sun.com", "token-requestor");
+            List<String> tokenRequestor = new ArrayList<String>();
+            tokenRequestor.add("authenticated");
+            attrs.put(key, tokenRequestor);
+        }
        
         return attrs;
-    }   
+    }
+
+    private void addAttributes(Element token, Map<QName, List<String>> attrs, boolean isActAs) throws SAMLException{
+        // only handle the case of UsernameToken and SAML assertion here
+        String name = null;
+        String nameNS = null;
+        String tokenName = token.getLocalName();
+        if ("UsernameToken".equals(tokenName)){
+            // an UsernameToken: get the user name
+            name = token.getElementsByTagName("Username").item(0).getFirstChild().getNodeValue();
+        } else if ("Assertion".equals(tokenName)){
+            // an SAML assertion
+            Assertion assertion = AssertionUtil.fromElement(token);
+
+            com.sun.xml.wss.saml.Subject subject = null;
+            NameID nameID = null;
+
+            // SAML 2.0
+            try {
+                subject = assertion.getSubject();
+            }catch (Exception ex){
+                subject = null;
+            }
+
+            if (subject != null){
+                nameID = subject.getNameId();
+            }
+
+            List<Object> statements = assertion.getStatements();
+            for (Object s : statements){
+                if (s instanceof AttributeStatement){
+                    List<Attribute> samlAttrs = ((AttributeStatement)s).getAttributes();
+                    for (Attribute samlAttr : samlAttrs){
+                        String attrName = samlAttr.getName();
+                        String attrNS = samlAttr.getNameFormat();
+                        List<Object> samlAttrValues = samlAttr.getAttributes();
+                        List<String> attrValues = new ArrayList<String>();
+                        for (Object samlAttrValue : samlAttrValues){
+                            attrValues.add(((Element)samlAttrValue).getFirstChild().getNodeValue());
+                        }
+                        attrs.put(new QName(attrNS, attrName), attrValues);
+                    }
+
+                    // for SAML 1.0, 1.1
+                    if (subject == null){
+                        subject = ((AttributeStatement)s).getSubject();
+                    }
+                } else if (s instanceof AuthenticationStatement){
+                    subject = ((AuthenticationStatement)s).getSubject();
+                }
+            }
+
+            // Get the user identifier in the Subject:
+            if (nameID != null){
+                //SAML 2.0 case
+                name = nameID.getValue();
+                nameNS = nameID.getNameQualifier();
+            }else{
+                // SAML 1.0, 1.1. case
+                NameIdentifier nameIdentifier = subject.getNameIdentifier();
+                if (nameIdentifier != null){
+                    name = nameIdentifier.getValue();
+                    nameNS = nameIdentifier.getNameQualifier();
+                }
+            }
+
+            String idName = isActAs ? "ActAs" : NAME_IDENTIFIER;
+            List<String> nameIds = new ArrayList<String>();
+            nameIds.add(name);
+            attrs.put(new QName(nameNS, idName), nameIds);
+        }
+    }
 }

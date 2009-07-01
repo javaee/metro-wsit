@@ -67,6 +67,7 @@ import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
+import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
@@ -456,6 +457,10 @@ public class WSTrustUtil {
                 Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
                 attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
                 attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
+                if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(samlNS)){
+                    attrEle.setAttribute("Name", attrKey.getLocalPart());
+                    attrEle.setAttribute("NameFormat", attrKey.getNamespaceURI());
+                }
   
                 Iterator valueIt = values.iterator();
                 while (valueIt.hasNext()){

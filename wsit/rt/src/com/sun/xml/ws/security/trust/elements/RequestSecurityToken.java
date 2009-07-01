@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityToken.java,v 1.11 2008-06-18 01:37:12 jdg6688 Exp $
+ * $Id: RequestSecurityToken.java,v 1.12 2009-07-01 00:27:54 jdg6688 Exp $
  */
 
 /*
@@ -150,6 +150,10 @@ public interface RequestSecurityToken extends WSTrustElementBase, BaseSTSRequest
      SecondaryParameters getSecondaryParameters(); 
      
      public List<Object> getExtensionElements();
+     
+     void setActAs(ActAs actAs);
+
+     ActAs getActAs();
 
 }
 

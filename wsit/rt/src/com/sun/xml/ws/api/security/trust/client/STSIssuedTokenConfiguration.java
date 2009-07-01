@@ -52,6 +52,7 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
 
     public static final String ISSUED_TOKEN = "IssuedToken";
     public static final String APPLIES_TO = "AppliesTo";
+    public static final String ACT_AS ="ActAs";
     public static final String SHARE_TOKEN = "shareToken";
     public static final String STS_ENDPOINT = "sts-endpoint";
     public static final String STS_MEX_ADDRESS = "sts-mex-address";

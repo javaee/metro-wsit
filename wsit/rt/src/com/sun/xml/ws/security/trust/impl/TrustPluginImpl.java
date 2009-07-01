@@ -59,6 +59,7 @@ import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.*;
+import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -222,9 +223,18 @@ public class TrustPluginImpl implements TrustPlugin {
         }
 
         final RequestSecurityToken rst= fact.createRSTForIssue(null,requestType, null,applTo,null,null,null);
+
+        // Handle OnBehalfOf token
         if (oboToken != null){
             OnBehalfOf obo = fact.createOnBehalfOf(oboToken);
             rst.setOnBehalfOf(obo);
+        }
+
+        // Handle ActAs token
+        Token actAsToken = (Token)stsConfig.getOtherOptions().get(STSIssuedTokenConfiguration.ACT_AS);
+       if (actAsToken != null){
+            ActAs actAs = fact.createActAs(actAsToken);
+            rst.setActAs(actAs);
         }
 
         String tokenType = null;

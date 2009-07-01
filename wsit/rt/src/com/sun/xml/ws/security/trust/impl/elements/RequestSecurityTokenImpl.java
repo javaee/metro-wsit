@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.22 2008-06-18 01:37:12 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.23 2009-07-01 00:27:53 jdg6688 Exp $
  */
 
 /*
@@ -336,6 +336,14 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public OnBehalfOf getOnBehalfOf() {
         return obo;
+    }
+
+    public void setActAs(ActAs actAs){
+        throw new UnsupportedOperationException("Unsupported operation: setActAs");
+    }
+    
+    public ActAs getActAs(){
+        return null;
     }
     
     public final void setIssuer(final Issuer issuer) {

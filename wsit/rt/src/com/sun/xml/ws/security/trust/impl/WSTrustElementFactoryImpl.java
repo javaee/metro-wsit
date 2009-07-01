@@ -40,6 +40,7 @@ import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
+import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
@@ -113,13 +114,12 @@ import javax.xml.transform.Source;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseCollectionType;
 import com.sun.xml.ws.security.trust.impl.elements.RenewTargetImpl;
@@ -210,6 +210,10 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public ValidateTarget createValidateTarget(Token token){
          throw new UnsupportedOperationException("Unsupported operation: ValidateTarget");
     }
+
+    public ActAs createActAs(Token token){
+        throw new UnsupportedOperationException("Unsupported operation: createActAs");
+    }
     
     /**
      * Create an Entropy with a BinarySecret
@@ -246,11 +250,17 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
 
     public Claims createClaims(Claims claims) throws WSTrustException {
         ClaimsImpl newClaims = new ClaimsImpl();
-        newClaims.setDialect(claims.getDialect());
-        newClaims.getAny().addAll(claims.getAny());
-        newClaims.getOtherAttributes().putAll(claims.getOtherAttributes());
+        if (claims != null){
+            newClaims.setDialect(claims.getDialect());
+            newClaims.getAny().addAll(claims.getAny());
+            newClaims.getOtherAttributes().putAll(claims.getOtherAttributes());
+        }
 
         return newClaims;
+    }
+
+    public Claims createClaims() throws WSTrustException {
+        return new ClaimsImpl();
     }
     
     public Status createStatus(String code, String reason){
@@ -737,20 +747,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public Element toElement(final RequestSecurityToken rst) {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            final DocumentBuilder builder = dbf.newDocumentBuilder();
-            final Document doc = builder.newDocument();
+            
+            final Document doc = WSTrustUtil.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             final JAXBElement<RequestSecurityTokenType> rstElement =  (new ObjectFactory()).createRequestSecurityToken((RequestSecurityTokenType)rst);
             getMarshaller().marshal(rstElement, doc);
             return doc.getDocumentElement();
-            
-        } catch (javax.xml.parsers.ParserConfigurationException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), ex);
-            throw new RuntimeException(LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), ex);
         } catch (JAXBException e) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), e);
@@ -766,10 +769,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public Element toElement(final RequestSecurityTokenResponse rstr) {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            final DocumentBuilder builder = dbf.newDocumentBuilder();
-            final Document doc = builder.newDocument();
+            final Document doc = WSTrustUtil.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             final JAXBElement<RequestSecurityTokenResponseType> rstrElement =  (new ObjectFactory()).createRequestSecurityTokenResponse((RequestSecurityTokenResponseType)rstr);
@@ -804,21 +804,14 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
      */
     public  Element toElement(final RequestSecurityTokenResponseCollection rstrCollection) {
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            final DocumentBuilder builder = dbf.newDocumentBuilder();
-            final Document doc = builder.newDocument();
+            final Document doc = WSTrustUtil.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             final JAXBElement<RequestSecurityTokenResponseCollectionType> rstElement =
                     (new ObjectFactory()).createRequestSecurityTokenResponseCollection((RequestSecurityTokenResponseCollectionType)rstrCollection);
             getMarshaller().marshal(rstElement, doc);
             return doc.getDocumentElement();
-        } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
-            throw new RuntimeException(LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
-        } catch (JAXBException ex) {
+        }  catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
             throw new RuntimeException(LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
@@ -827,20 +820,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     
     public Element toElement(final BinarySecret secret){
         try {
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            final DocumentBuilder builder = dbf.newDocumentBuilder();
-            final Document doc = builder.newDocument();
+            final Document doc = WSTrustUtil.newDocument();
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             final JAXBElement<BinarySecretType> bsElement =
                     (new ObjectFactory()).createBinarySecret((BinarySecretType)secret);
             getMarshaller().marshal(bsElement, doc);
             return doc.getDocumentElement();
-        } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
-            throw new RuntimeException(LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
@@ -857,20 +843,13 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public Element toElement(final SecurityTokenReference str, Document doc) {
         try {
             if(doc == null){
-                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                dbf.setNamespaceAware(true);
-                final DocumentBuilder builder = dbf.newDocumentBuilder();
-                doc = builder.newDocument();
+                doc = WSTrustUtil.newDocument();
             }
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
             final JAXBElement<SecurityTokenReferenceType> strElement =  (new com.sun.xml.ws.security.secext10.ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)str);
             getMarshaller().marshal(strElement, doc);
             return doc.getDocumentElement();
-        } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
-            throw new RuntimeException(LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
@@ -887,10 +866,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
     public Element toElement(final BinarySecret secret, Document doc) {
         try {
             if(doc == null){
-                final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                dbf.setNamespaceAware(true);
-                final DocumentBuilder builder = dbf.newDocumentBuilder();
-                doc = builder.newDocument();
+                doc = WSTrustUtil.newDocument();
             }
             
             //javax.xml.bind.Marshaller marshaller = getContext().createMarshaller();
@@ -899,10 +875,6 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
             getMarshaller().marshal(bsElement, doc);
             return doc.getDocumentElement();
             
-        } catch (javax.xml.parsers.ParserConfigurationException pe) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
-            throw new RuntimeException(LogStringsMessages.WST_0011_PARSERCONFIG_EX_TO_ELEMENT(), pe);
         } catch (JAXBException ex) {
             log.log(Level.SEVERE,
                     LogStringsMessages.WST_0012_JAXB_EX_TO_ELEMENT(), ex);
@@ -910,22 +882,7 @@ public class WSTrustElementFactoryImpl extends WSTrustElementFactory {
         }
     }
     
-    public Element toElement(JAXBElement jaxbEle){
-        try{
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.newDocument();
-        
-            getMarshaller().marshal(jaxbEle, doc);
-            return doc.getDocumentElement();
-            
-        } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage(), ex);
-        }
-    }
-    
-    private Marshaller getMarshaller(){
+    public Marshaller getMarshaller(){
          try {
             Marshaller marshaller = getContext().createMarshaller();
             marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new com.sun.xml.ws.security.trust.util.TrustNamespacePrefixMapper());

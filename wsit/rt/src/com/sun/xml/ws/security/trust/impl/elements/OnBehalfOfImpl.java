@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.8 2008-02-26 06:33:24 ofung Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.9 2009-07-01 00:27:53 jdg6688 Exp $
  */
 
 /*
@@ -67,7 +67,7 @@ public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
     public OnBehalfOfImpl(OnBehalfOfType oboType){
         Object ob = oboType.getAny();
         if (ob != null){
-            this.setAny((Element)ob);
+            this.setAny(ob);
         }
     }
     public EndpointReference getEndpointReference() {

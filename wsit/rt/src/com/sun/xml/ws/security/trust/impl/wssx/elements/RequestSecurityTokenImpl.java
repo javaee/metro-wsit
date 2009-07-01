@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.9 2008-07-31 20:17:41 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.10 2009-07-01 00:27:55 jdg6688 Exp $
  */
 
 /*
@@ -50,6 +50,8 @@ import com.sun.xml.ws.policy.impl.bindings.PolicyReference;
 import javax.xml.bind.JAXBElement;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.elements.*;
@@ -80,6 +82,8 @@ import com.sun.xml.ws.security.trust.impl.wssx.bindings.SignChallengeType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.UseKeyType;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.ValidateTargetType;
 import java.util.ArrayList;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Implementation of the RequestSecurityToken interface.
@@ -111,6 +115,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     private Entropy entropy = null;
     private AppliesTo appliesTo = null;
     private OnBehalfOf obo = null;
+    private ActAs actAs = null;
     private SignChallenge signChallenge = null;
     private Encryption encryption = null;
     private UseKey useKey = null;
@@ -339,6 +344,22 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
     
     public OnBehalfOf getOnBehalfOf() {
         return obo;
+    }
+
+    public void setActAs(ActAs actAs) {
+        this.actAs = actAs;
+
+        //Create ActAs element
+        Document doc = WSTrustUtil.newDocument();
+        Element actAsElement = doc.createElementNS(WSTrustVersion.WS_TRUST_13_NS_URI, "wst:ActAs");
+        actAsElement.setAttribute("xmlns:wst", WSTrustVersion.WS_TRUST_13_NS_URI);
+        doc.appendChild(actAsElement);
+        actAsElement.appendChild(doc.importNode((Element)actAs.getAny(), true));
+        getAny().add(actAsElement);
+    }
+
+    public ActAs getActAs() {
+        return this.actAs;
     }
     
     public void setIssuer(Issuer issuer) {
@@ -703,8 +724,13 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
                     extendedElements.add(list.get(i));
                 }
             }else{
-                getAny().add(list.get(i));
-                extendedElements.add(list.get(i));
+                Object obj = list.get(i);
+                if ((obj instanceof Element) && (((Element)obj).getLocalName().equals("ActAs"))){
+                    setActAs(new ActAsImpl((Element)obj));
+                }else{
+                    getAny().add(list.get(i));
+                    extendedElements.add(list.get(i));
+                }
             }
         }
     }
