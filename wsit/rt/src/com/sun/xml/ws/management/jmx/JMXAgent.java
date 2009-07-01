@@ -36,145 +36,152 @@
 
 package com.sun.xml.ws.management.jmx;
 
-//import java.io.IOException;
 import com.sun.xml.ws.api.management.CommunicationAPI;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.InitParameters;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
+import com.sun.xml.ws.management.ManagementMessages;
+import com.sun.xml.ws.management.ManagementUtil;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.lang.management.ManagementFactory;
-//import java.net.MalformedURLException;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
-//import javax.management.MBeanServerFactory;
+import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-//import javax.management.remote.JMXConnectorServer;
-//import javax.management.remote.JMXConnectorServerFactory;
-//import javax.management.remote.JMXServiceURL;
+import javax.management.remote.JMXConnectorServer;
+import javax.management.remote.JMXConnectorServerFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Implements the JMX server and connector for a managed endpoint.
  *
  * @author Fabian Ritzmann
  */
 public class JMXAgent<T> implements CommunicationAPI {
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(JMXAgent.class);
+    private static final QName JMX_SERVICE_URL_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXServiceURL");
+    private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/";
 
     private MBeanServer server;
-//    private final JMXConnectorServer connector;
-    
+    private JMXConnectorServer connector;
+
     private String endpointId;
     private ManagedEndpoint<T> managedEndpoint;
     private EndpointCreationAttributes endpointCreationAttributes;
     private ClassLoader classLoader;
 
-//    public JMXAgent(ManagedEndpoint endpoint, EndpointCreationAttributes creationAttributes, ClassLoader classLoader) {
-//        try {
-//        this.managedEndpoint = endpoint;
-//        this.endpointCreationAttributes = creationAttributes;
-//        this.classLoader = classLoader;
-//        this.server = ManagementFactory.getPlatformMBeanServer();
-//            server = MBeanServerFactory.createMBeanServer();
-//            JMXServiceURL jmxUrl = new JMXServiceURL("jmxmp", "localhost", 5555);
-//            connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, null, server);
-//        } catch (MalformedURLException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        }
-//    }
 
     public void init(InitParameters parameters) {
-//        try {
-        this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
-        this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-        this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
-        this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
-        this.server = ManagementFactory.getPlatformMBeanServer();
-//            server = MBeanServerFactory.createMBeanServer();
-//            JMXServiceURL jmxUrl = new JMXServiceURL("jmxmp", "localhost", 5555);
-//            connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, null, server);
-//        } catch (MalformedURLException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        }
+        try {
+            this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
+            this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+            this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
+            this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
+
+            // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
+            this.server = MBeanServerFactory.createMBeanServer();
+            final JMXServiceURL jmxUrl = getServiceURL();
+            final HashMap<String, String> env = new HashMap<String, String>();
+            this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, server);
+        } catch (MalformedURLException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(e));
+        } catch (IOException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(e));
+        }
     }
 
     public void start() {
-//        try {
-//            if (server != null && connector != null) {
-//                final ReconfigMBean openMBean = new ReconfigMBean();
-//                server.registerMBean(openMBean, new ObjectName("com.sun.xml.ws:className=ReconfigMBean"));
-//                connector.start();
-//            }
-//        } catch (MalformedObjectNameException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (InstanceAlreadyExistsException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (MBeanRegistrationException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (NotCompliantMBeanException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//            throw new WebServiceException(ex);
-//        }
-        if (server != null) {
+        if (server != null && connector != null) {
             try {
-                final HashMap<String, MBeanAttribute> attributeToListener = new HashMap<String, MBeanAttribute>();
-                attributeToListener.put(ReconfigMBeanAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
-                                        new ReconfigMBeanAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
-                final ReconfigMBean openMBean = new ReconfigMBean(attributeToListener);
-                server.registerMBean(openMBean, getObjectName());
+                server.registerMBean(createMBean(), getObjectName());
+                connector.start();
+                LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, connector.getAddress()));
             } catch (InstanceAlreadyExistsException ex) {
+                // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (MBeanRegistrationException ex) {
+                // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (NotCompliantMBeanException ex) {
+                // TODO add error message
+                throw LOGGER.logSevereException(new WebServiceException(ex));
+            } catch (IOException ex) {
+                // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             }
         }
     }
 
     public void stop() {
-//        if (connector != null) {
-//            try {
-//                connector.stop();
-//            } catch (IOException ex) {
-//                Logger.getLogger(WSServletAgent.class.getName()).log(Level.SEVERE, null, ex);
-//                throw new WebServiceException(ex);
-//            }
-//        }
+        if (this.connector != null) {
+            try {
+                connector.stop();
+            } catch (IOException ex) {
+                // TODO add error message
+                throw LOGGER.logSevereException(new WebServiceException(ex));
+            }
+        }
         if (this.server != null) {
             try {
                 this.server.unregisterMBean(getObjectName());
             } catch (InstanceNotFoundException ex) {
+                // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (MBeanRegistrationException ex) {
+                // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             }
         }
     }
 
-    private final ObjectName getObjectName() {
+    private ReconfigMBean createMBean() {
+        final HashMap<String, MBeanAttribute> attributeToListener = new HashMap<String, MBeanAttribute>();
+        attributeToListener.put(ReconfigMBeanAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
+                new ReconfigMBeanAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
+        return new ReconfigMBean(attributeToListener);
+    }
+
+    private ObjectName getObjectName() {
         try {
             return new ObjectName("com.sun.xml.ws.management:className=" + this.endpointId);
         } catch (MalformedObjectNameException ex) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(ex));
+        }
+    }
+
+    private JMXServiceURL getServiceURL() {
+        try {
+            final PolicyAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint.getServiceName(),
+                    this.managedEndpoint.getPortName(), this.managedEndpoint.getPolicyMap());
+            final Iterator<PolicyAssertion> parameters = managedService.getParametersIterator();
+            while (parameters.hasNext()) {
+                final PolicyAssertion parameter = parameters.next();
+                if (JMX_SERVICE_URL_PARAMETER_QNAME.equals(parameter.getName())) {
+                    return new JMXServiceURL(parameter.getValue().trim());
+                }
+            }
+            // No JMXServiceURL found, return default
+            final String jmxServiceURL = JMX_SERVICE_URL_DEFAULT_PREFIX + this.endpointId;
+            LOGGER.config(ManagementMessages.WSM_5005_DEFAULT_JMX_SERVICE_URL(jmxServiceURL));
+            return new JMXServiceURL(jmxServiceURL);
+        } catch (MalformedURLException ex) {
+            // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(ex));
         }
     }

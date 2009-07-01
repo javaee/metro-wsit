@@ -34,38 +34,60 @@
  * holder.
  */
 
-package com.sun.xml.ws.management.server;
+package com.sun.xml.ws.management;
 
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.management.ManagedEndpoint;
-import com.sun.xml.ws.api.management.ManagedEndpointFactory;
-import com.sun.xml.ws.management.ManagementMessages;
-import com.sun.xml.ws.management.ManagementUtil;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
+import java.util.Iterator;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
- * Create a ManagedEndpoint if the policy of the endpoint requires it. Otherwise
- * returns the given endpoint.
+ * Utility methods for the management code
  *
  * @author Fabian Ritzmann
  */
-public class EndpointFactoryImpl implements ManagedEndpointFactory {
+public class ManagementUtil {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EndpointFactoryImpl.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagementUtil.class);
 
-    public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
-        final PolicyAssertion assertion = ManagementUtil.getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
-        if (assertion != null) {
-            final String id = assertion.getAttributeValue(new QName("", "id"));
-            return new ManagedEndpoint<T>(id, endpoint, attributes);
-        }
-        else {
-            LOGGER.config(ManagementMessages.WSM_5002_ENDPOINT_NOT_CREATED());
-            return endpoint;
+    /**
+     * Return ManagedService assertion if there is one attached to the given port
+     * in the policy map
+     *
+     * @param serviceName The name of the service. Must not be null.
+     * @param portName The name of the port. Must not be null.
+     * @param policyMap The policy map. May be null.
+     * @return The policy assertion if found. Null otherwise.
+     */
+    public static PolicyAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
+        LOGGER.entering(serviceName, portName, policyMap);
+        try {
+            PolicyAssertion assertion = null;
+            if (policyMap != null) {
+                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
+                final Policy policy = policyMap.getEndpointEffectivePolicy(key);
+                if (policy != null) {
+                    final Iterator<AssertionSet> assertionSets = policy.iterator();
+                    if (assertionSets.hasNext()) {
+                        final AssertionSet assertionSet = assertionSets.next();
+                        final Iterator<PolicyAssertion> assertions = assertionSet.get(ManagementConstants.SERVICE_ASSERTION_QNAME).iterator();
+                        if (assertions.hasNext()) {
+                            assertion = assertions.next();
+                        }
+                    }
+                }
+            }
+            LOGGER.exiting(assertion);
+            return assertion;
+        } catch (PolicyException ex) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
         }
     }
 
