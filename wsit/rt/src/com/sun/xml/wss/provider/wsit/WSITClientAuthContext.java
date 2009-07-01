@@ -179,14 +179,28 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         itm = IssuedTokenManager.getInstance();
         //scPlugin = WSSCFactory.newNewSCPlugin(null, wsscVer);
         //scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
-        
+        Set configAssertions = null;
         Iterator it = outMessagePolicyMap.values().iterator();
-        SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-        Set configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS);
-        trustConfig = holder.getConfigAssertions(
-                com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
-        wsscConfig = holder.getConfigAssertions(
-                com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
+        while (it.hasNext()) {
+            SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+            if (configAssertions != null) {
+                configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS));
+            } else {
+                configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_CLIENT_POLICY_NS);
+            }
+            if (trustConfig != null) {
+                trustConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS));
+            } else {
+                trustConfig = holder.getConfigAssertions(
+                        com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
+            }
+            if (wsscConfig != null) {
+                wsscConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS));
+            } else {
+                wsscConfig = holder.getConfigAssertions(
+                        com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
+            }
+        }      
 
         Properties props = new Properties();
         if (callbackHandler != null) {

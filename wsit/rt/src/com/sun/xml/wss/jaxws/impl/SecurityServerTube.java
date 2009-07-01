@@ -153,10 +153,26 @@ public class SecurityServerTube extends SecurityTubeBase {
         
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
-            SecurityPolicyHolder holder = (SecurityPolicyHolder)it.next();
-            Set<PolicyAssertion> configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
-            trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-            wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+            Set<PolicyAssertion> configAssertions = null;
+            while (it.hasNext()) {
+                SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+                if (configAssertions != null) {
+                    configAssertions.addAll(holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS));
+                } else {
+                    configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
+                }
+                if (trustConfig != null) {
+                    trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
+                } else {
+                    trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                }
+                if (wsscConfig != null) {
+                    wsscConfig.addAll(holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
+                } else {
+                    wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+                }
+            }
+
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
