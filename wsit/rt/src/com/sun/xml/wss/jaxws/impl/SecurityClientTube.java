@@ -128,6 +128,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     private Set wsscConfig = null;
 
     // Creates a new instance of SecurityClientTube
+    @SuppressWarnings("unchecked")
     public SecurityClientTube(ClientTubelineAssemblyContext wsitContext, Tube nextTube) {
         super(new ClientTubeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
         //scPlugin = new WSSCPlugin(null, wsscVer);

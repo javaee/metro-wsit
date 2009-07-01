@@ -164,6 +164,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     protected Object tubeOrPipe;
     
     /** Creates a new instance of WSITClientAuthContext */
+    @SuppressWarnings("unchecked")
     public WSITClientAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
         this.authConfig= (WSITClientAuthConfig)map.get(PipeConstants.AUTH_CONFIG);

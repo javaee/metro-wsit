@@ -148,6 +148,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     private String reqAction = null;
     
     // Creates a new instance of SecurityServerTube
+    @SuppressWarnings("unchecked")
     public SecurityServerTube(ServerTubelineAssemblyContext context, Tube nextTube) {
         super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
         
