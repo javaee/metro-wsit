@@ -449,82 +449,99 @@ public class TrustPluginImpl implements TrustPlugin {
     private BaseSTSResponse invokeRST(final RequestSecurityToken request, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
         
         String stsURI = stsConfig.getSTSEndpoint();
-        URI wsdlLocation = null;
-        QName serviceName = null;
-        QName portName = null;
-        
-        final String metadataStr = stsConfig.getSTSMEXAddress();
-        if (metadataStr != null){
-            wsdlLocation = URI.create(metadataStr);
-        }else{
-            final String namespace = stsConfig.getSTSNamespace();
-            String wsdlLocationStr = stsConfig.getSTSWSDLLocation();
-            if (wsdlLocationStr == null){
-                wsdlLocationStr = stsURI;
-            }else{
-                final String serviceNameStr = stsConfig.getSTSServiceName();
-                if (serviceNameStr != null && namespace != null){
-                      serviceName = new QName(namespace,serviceNameStr);
-                }
-
-                final String portNameStr = stsConfig.getSTSPortName();
-                if (portNameStr != null && namespace != null){
-                      portName = new QName(namespace, portNameStr);
-                }
-            }
-            wsdlLocation = URI.create(wsdlLocationStr);
-        }
-        
+        STSIssuedTokenConfiguration rtConfig = (STSIssuedTokenConfiguration)stsConfig.getOtherOptions().get("RunTimeConfig");
+        Dispatch<Message> dispatch = null;
         WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
         WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
-        if(serviceName == null || portName==null){
-            //we have to get the serviceName and portName through MEX
-            if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WST_1012_SERVICE_PORTNAME_MEX(serviceName, portName));
-            }
-
-            final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
-            serviceName = names[0];
-            portName = names[1];
-        }
-
-        Service service = null;
-        try{
-            // Work around for issue 338
-            String url = wsdlLocation.toString();
-            // if (url.endsWith("/mex")){
-            //   int index = url.lastIndexOf("/mex");
-            //  url = url.substring(0, index);
-            //}
-
-            /* Fix of JCAPS Issue 866 (Fix is : use the container got from JCAPS 
-             * through JAX-WS and pass that into the client for the STS )
-             */
-            Container container = (Container) stsConfig.getOtherOptions().get("CONTAINER");
-            if(container != null){
-                InitParams initParams = new InitParams();
-                initParams.setContainer(container);
-                service = WSService.create(new URL(url), serviceName, initParams);
-            }else{
-                service = Service.create(new URL(url), serviceName);
-            }
-        }catch (MalformedURLException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
-            throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
-        }
-       //final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
-        WebServiceFeature[] wsFeatures = null;
-        STSIssuedTokenConfiguration rtConfig = (STSIssuedTokenConfiguration)stsConfig.getOtherOptions().get("RunTimeConfig");
         if (rtConfig != null){
-            wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(),
-                                                 new AddressingFeature(false),
-                                                 new STSIssuedTokenFeature(rtConfig)};
+            dispatch = (Dispatch<Message>)rtConfig.getOtherOptions().get(stsURI);
         }else{
-            wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)};
+            dispatch = (Dispatch<Message>)stsConfig.getOtherOptions().get(stsURI);
         }
-        final Dispatch<Message> dispatch = service.createDispatch(portName, Message.class, Service.Mode.MESSAGE, wsFeatures);
+
+        if (dispatch == null){
+            URI wsdlLocation = null;
+            QName serviceName = null;
+            QName portName = null;
+
+            final String metadataStr = stsConfig.getSTSMEXAddress();
+            if (metadataStr != null){
+                wsdlLocation = URI.create(metadataStr);
+            }else{
+                final String namespace = stsConfig.getSTSNamespace();
+                String wsdlLocationStr = stsConfig.getSTSWSDLLocation();
+                if (wsdlLocationStr == null){
+                    wsdlLocationStr = stsURI;
+                }else{
+                    final String serviceNameStr = stsConfig.getSTSServiceName();
+                    if (serviceNameStr != null && namespace != null){
+                          serviceName = new QName(namespace,serviceNameStr);
+                    }
+
+                    final String portNameStr = stsConfig.getSTSPortName();
+                    if (portNameStr != null && namespace != null){
+                          portName = new QName(namespace, portNameStr);
+                    }
+                }
+                wsdlLocation = URI.create(wsdlLocationStr);
+            }
+
+            //WSTrustVersion wstVer = WSTrustVersion.getInstance(stsConfig.getProtocol());
+            //WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
+            if(serviceName == null || portName==null){
+                //we have to get the serviceName and portName through MEX
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE,
+                            LogStringsMessages.WST_1012_SERVICE_PORTNAME_MEX(serviceName, portName));
+                }
+
+                final QName[] names = doMexRequest(wsdlLocation.toString(), stsURI);
+                serviceName = names[0];
+                portName = names[1];
+            }
+
+            Service service = null;
+            try{
+                // Work around for issue 338
+                String url = wsdlLocation.toString();
+                // if (url.endsWith("/mex")){
+                //   int index = url.lastIndexOf("/mex");
+                //  url = url.substring(0, index);
+                //}
+
+                /* Fix of JCAPS Issue 866 (Fix is : use the container got from JCAPS
+                 * through JAX-WS and pass that into the client for the STS )
+                 */
+                Container container = (Container) stsConfig.getOtherOptions().get("CONTAINER");
+                if(container != null){
+                    InitParams initParams = new InitParams();
+                    initParams.setContainer(container);
+                    service = WSService.create(new URL(url), serviceName, initParams);
+                }else{
+                    service = Service.create(new URL(url), serviceName);
+                }
+            }catch (MalformedURLException ex){
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
+                throw new WebServiceException(LogStringsMessages.WST_0041_SERVICE_NOT_CREATED(wsdlLocation.toString()), ex);
+            }
+           //final Dispatch<Object> dispatch = service.createDispatch(portName, WSTrustElementFactory.getContext(wstVer), Service.Mode.PAYLOAD, new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)});
+            WebServiceFeature[] wsFeatures = null;
+           //STSIssuedTokenConfiguration rtConfig = (STSIssuedTokenConfiguration)stsConfig.getOtherOptions().get("RunTimeConfig");
+            if (rtConfig != null){
+                wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(),
+                                                     new AddressingFeature(false),
+                                                     new STSIssuedTokenFeature(rtConfig)};
+            }else{
+                wsFeatures = new WebServiceFeature[]{new RespectBindingFeature(), new AddressingFeature(false)};
+            }
+            dispatch = service.createDispatch(portName, Message.class, Service.Mode.MESSAGE, wsFeatures);
+            if (rtConfig != null){
+                rtConfig.getOtherOptions().put(stsURI, dispatch);
+            }else{
+                stsConfig.getOtherOptions().put(stsURI, dispatch);
+            }
+        }
         //Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE, new WebServiceFeature[]{new AddressingFeature(false)});
         //WSBinding wsbinding = (WSBinding) dispatch.getBinding();
         //AddressingVersion addVer = wsbinding.getAddressingVersion();
