@@ -445,7 +445,8 @@ public class TrustPluginImpl implements TrustPlugin {
         
         return rst;
     }
-    
+
+    @SuppressWarnings("unchecked")
     private BaseSTSResponse invokeRST(final RequestSecurityToken request, STSIssuedTokenConfiguration stsConfig) throws RemoteException, WSTrustException {
         
         String stsURI = stsConfig.getSTSEndpoint();
