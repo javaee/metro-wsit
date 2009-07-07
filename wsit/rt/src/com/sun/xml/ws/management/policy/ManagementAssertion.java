@@ -47,7 +47,7 @@ import javax.xml.namespace.QName;
  *
  * @author Fabian Ritzmann
  */
-class ManagementAssertion extends PolicyAssertion {
+public class ManagementAssertion extends PolicyAssertion {
 
     // TODO: Consolidate with other declarations of this namespace
     private static final String MANAGEMENT_NAMESPACE = "http://java.sun.com/xml/ns/metro/management";

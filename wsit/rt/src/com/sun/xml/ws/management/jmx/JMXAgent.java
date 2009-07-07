@@ -43,9 +43,11 @@ import com.sun.xml.ws.api.management.ManagedEndpoint;
 import com.sun.xml.ws.management.ManagementLogger;
 import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.management.ManagementUtil;
+import com.sun.xml.ws.management.server.ConfigPoller;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 
+import com.sun.xml.ws.rx.util.ScheduledTaskManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -79,6 +81,8 @@ public class JMXAgent<T> implements CommunicationAPI {
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_KEY_ATTRIBUTE_QNAME = new QName("", "key");
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME = new QName("", "value");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
+
+    private final ScheduledTaskManager taskManager = new ScheduledTaskManager();
 
     private MBeanServer server;
     private JMXConnectorServer connector;
@@ -118,6 +122,13 @@ public class JMXAgent<T> implements CommunicationAPI {
                 server.registerMBean(createMBean(), getObjectName());
                 connector.start();
                 LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, connector.getAddress()));
+
+                // TODO create proper interfaces, make interval configurable
+                final ConfigPoller poller = new ConfigPoller(new InitParameters()
+                        .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
+                        .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
+                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader));
+                this.taskManager.startTask(poller, 0, 10000);
             } catch (InstanceAlreadyExistsException ex) {
                 // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
@@ -135,23 +146,26 @@ public class JMXAgent<T> implements CommunicationAPI {
     }
 
     public void stop() {
-        if (this.connector != null) {
-            try {
+        try {
+            if (this.connector != null) {
                 connector.stop();
-            } catch (IOException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
             }
-        }
-        if (this.server != null) {
+        } catch (IOException ex) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(ex));
+        } finally {
             try {
-                this.server.unregisterMBean(getObjectName());
+                if (this.server != null) {
+                    this.server.unregisterMBean(getObjectName());
+                }
             } catch (InstanceNotFoundException ex) {
                 // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } catch (MBeanRegistrationException ex) {
                 // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
+            } finally {
+                this.taskManager.stopAll();
             }
         }
     }

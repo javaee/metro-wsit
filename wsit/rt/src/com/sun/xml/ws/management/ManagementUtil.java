@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.management;
 
+import com.sun.xml.ws.management.policy.ManagementAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -44,6 +45,8 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -66,7 +69,7 @@ public class ManagementUtil {
      * @param policyMap The policy map. May be null.
      * @return The policy assertion if found. Null otherwise.
      */
-    public static PolicyAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
+    public static ManagementAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
         LOGGER.entering(serviceName, portName, policyMap);
         try {
             PolicyAssertion assertion = null;
@@ -85,10 +88,30 @@ public class ManagementUtil {
                 }
             }
             LOGGER.exiting(assertion);
-            return assertion;
+            return assertion == null ? null : assertion.getImplementation(ManagementAssertion.class);
         } catch (PolicyException ex) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
         }
     }
 
+    /**
+     * Read all data and return it as a String.
+     *
+     * @param reader The reader. Must not be null
+     * @return All data provided by the reader.
+     */
+    public static String convert(Reader reader) {
+        try {
+            final StringBuilder data = new StringBuilder();
+            final char[] buffer = new char[1024];
+            int count;
+            while ((count = reader.read(buffer)) >= 0) {
+                data.append(buffer, 0, count);
+            }
+            return data.toString();
+        } catch (IOException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(e));
+        }
+    }
 }
