@@ -39,7 +39,9 @@ import com.sun.xml.ws.api.BindingID;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.WSPortInfo;
+import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
@@ -48,15 +50,20 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.binding.BindingImpl;
 
+import com.sun.xml.ws.developer.WSBindingProvider;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import javax.xml.namespace.QName;
+import javax.xml.ws.Binding;
+import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.AddressingFeature;
 import junit.framework.TestCase;
@@ -115,8 +122,70 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         service.addPort(portName, bindingId.toString(), ADDRESS_URL.toString());
         final WSPortInfo portInfo = ((WSServiceDelegate) service).safeGetPort(portName);
         final Container container = Container.NONE;
+
+        WSBindingProvider wsbp = new WSBindingProvider() {
+
+            public void setOutboundHeaders(List<Header> headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setOutboundHeaders(Header... headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setOutboundHeaders(Object... headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public List<Header> getInboundHeaders() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setAddress(String address) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public WSEndpointReference getWSEndpointReference() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public WSPortInfo getPortInfo() {
+                return portInfo;
+            }
+
+            public Map<String, Object> getRequestContext() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public Map<String, Object> getResponseContext() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public Binding getBinding() {
+                return binding;
+            }
+
+            public EndpointReference getEndpointReference() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void close() throws IOException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        };
+
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
+                address,
+                port,
+                wsbp,
+                binding,
+                container,
+                ((BindingImpl)binding).createCodec(),
+                null);
         final Tube tubeline = getAssembler(bindingId).createClient(context);
         assertNotNull(tubeline);
     }
@@ -170,11 +239,72 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         final WSDLPort port = null;
         final WSDLModel clientModel = parseConfigFile(configFileName);
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
-        final PolicyMap map = portInfo.getPolicyMap();
         final WSBinding binding = bindingId.createBinding(new AddressingFeature(true));
         final Container container = Container.NONE;
+
+        WSBindingProvider wsbp = new WSBindingProvider() {
+
+            public void setOutboundHeaders(List<Header> headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setOutboundHeaders(Header... headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setOutboundHeaders(Object... headers) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public List<Header> getInboundHeaders() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setAddress(String address) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public WSEndpointReference getWSEndpointReference() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public WSPortInfo getPortInfo() {
+                return portInfo;
+            }
+
+            public Map<String, Object> getRequestContext() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public Map<String, Object> getResponseContext() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public Binding getBinding() {
+                return binding;
+            }
+
+            public EndpointReference getEndpointReference() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <T extends EndpointReference> T getEndpointReference(Class<T> clazz) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void close() throws IOException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        };
+
         final ClientTubeAssemblerContext context = new ClientTubeAssemblerContext(
-                address, port, portInfo, binding, container, ((BindingImpl)binding).createCodec(),null);
+                address, 
+                port,
+                wsbp,
+                binding,
+                container,
+                ((BindingImpl)binding).createCodec(),
+                null);
 
         return getAssembler(bindingId).createClient(context);
     }
