@@ -75,7 +75,7 @@ public class InitParameters {
         return initObject == null ? null : initObject.getObject();
     }
 
-    private class InitObject<T> {
+    private static class InitObject<T> {
 
         final T object;
 
