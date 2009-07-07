@@ -38,7 +38,7 @@ package com.sun.xml.ws.management.server;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.management.ManagedEndpoint;
+//import com.sun.xml.ws.api.management.ManagedEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -113,16 +113,16 @@ public class EndpointFactoryImplTest extends TestCase {
     /**
      * Test of createEndpoint method, of class EndpointFactoryImpl.
      */
-    public void testCreateEndpointManagedAssertion() throws Exception {
-        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/managed.wsdl");
-        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
-        final PolicyMap policyMap = wsdlModel.getPolicyMap();
-        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
-        EndpointCreationAttributes attributes = null;
-        EndpointFactoryImpl instance = new EndpointFactoryImpl();
-        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
-        assertTrue(result instanceof ManagedEndpoint);
-    }
+//    public void testCreateEndpointManagedAssertion() throws Exception {
+//        final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/managed.wsdl");
+//        final WSDLModel wsdlModel = PolicyResourceLoader.getWsdlModel(resourceUrl, true);
+//        final PolicyMap policyMap = wsdlModel.getPolicyMap();
+//        WSEndpoint<String> endpoint = new MockEndpoint(new QName("http://example.org/", "AddNumbersService"), new QName("http://example.org/", "AddNumbersPort"), policyMap);
+//        EndpointCreationAttributes attributes = null;
+//        EndpointFactoryImpl instance = new EndpointFactoryImpl();
+//        WSEndpoint<String> result = instance.createEndpoint(endpoint, attributes);
+//        assertTrue(result instanceof ManagedEndpoint);
+//    }
 
 
     private static class MockEndpoint extends WSEndpoint<String> {
