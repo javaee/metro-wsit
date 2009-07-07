@@ -51,7 +51,7 @@ import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.management.ManagementLogger;
 
 import java.util.Collection;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
     public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
     public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagedEndpoint.class);
+    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ManagedEndpoint.class);
 
     private final String id;
     private final EndpointCreationAttributes creationAttributes;
@@ -112,6 +112,15 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
         for (CommunicationAPI commInterface: commInterfaces) {
             commInterface.start();
         }
+    }
+
+    /**
+     * Return the ID of this managed endpoint.
+     *
+     * @return The ID of the managed endpoint.
+     */
+    public String getId() {
+        return this.id;
     }
 
     /**

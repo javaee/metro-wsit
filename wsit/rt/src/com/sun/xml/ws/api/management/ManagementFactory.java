@@ -36,55 +36,63 @@
 
 package com.sun.xml.ws.api.management;
 
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.management.ManagementLogger;
+import com.sun.xml.ws.management.ManagementMessages;
+import com.sun.xml.ws.util.ServiceFinder;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Provides methods to create implementations for the Management APIs.
  *
  * @author Fabian Ritzmann
  */
-public class ManagementFactory<T> {
+public class ManagementFactory {
 
-    private static final String COMM_DEFAULT_IMPL = "com.sun.xml.ws.management.jmx.JMXAgent";
-    private static final String CONF_DEFAULT_IMPL = "com.sun.xml.ws.management.server.ReDelegate";
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagementFactory.class);
+    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ManagementFactory.class);
 
     public static Collection<CommunicationAPI> createCommunicationImpls(InitParameters parameters) throws WebServiceException {
-        try {
-            // TBD: Return all available communication interfaces, not just one
-            Class<? extends CommunicationAPI> implClass = Class.forName(COMM_DEFAULT_IMPL).asSubclass(CommunicationAPI.class);
-            CommunicationAPI impl = implClass.newInstance();
-            impl.init(parameters);
-            ArrayList<CommunicationAPI> impls = new ArrayList<CommunicationAPI>();
-            impls.add(impl);
-            return impls;
-        } catch (InstantiationException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to created default management implementation", e));
-        } catch (IllegalAccessException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to created default management implementation", e));
-        } catch (ClassNotFoundException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to find default management implementation class " + COMM_DEFAULT_IMPL, e));
+        final ServiceFinder<CommunicationAPI> finder = ServiceFinder.find(CommunicationAPI.class);
+        final Collection<CommunicationAPI> commImpls = new ArrayList<CommunicationAPI>();
+        final Iterator<CommunicationAPI> commImplIterator = finder.iterator();
+        while (commImplIterator.hasNext()) {
+            final CommunicationAPI commImpl = commImplIterator.next();
+            commImpl.init(parameters);
+            commImpls.add(commImpl);
         }
+        if (commImpls.size() < 1) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(CommunicationAPI.class.getName())));
+        }
+        return commImpls;
     }
 
     public static ConfigurationAPI createConfigurationImpl() throws WebServiceException {
-        try {
-            Class<? extends ConfigurationAPI> implClass = Class.forName(CONF_DEFAULT_IMPL).asSubclass(ConfigurationAPI.class);
-            ConfigurationAPI impl = implClass.newInstance();
-            return impl;
-        } catch (InstantiationException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to created default management implementation", e));
-        } catch (IllegalAccessException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to created default management implementation", e));
-        } catch (ClassNotFoundException e) {
-            throw LOGGER.logSevereException(new WebServiceException("Failed to find default management implementation class " + CONF_DEFAULT_IMPL, e));
+        final ServiceFinder<ConfigurationAPI> finder = ServiceFinder.find(ConfigurationAPI.class);
+        final Iterator<ConfigurationAPI> configImpls = finder.iterator();
+        if (!configImpls.hasNext()) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(ConfigurationAPI.class.getName())));
         }
+        final ConfigurationAPI configImpl = configImpls.next();
+        if (configImpls.hasNext()) {
+            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigurationAPI.class, configImpl));
+        }
+        return configImpl;
     }
 
-    public static PersistenceAPI createPersistenceImpl(InitParameters parameters) throws WebServiceException {
-        throw new UnsupportedOperationException("Method not implemented yet");
+    public static PersistenceAPI createPersistenceImpl() throws WebServiceException {
+        final ServiceFinder<PersistenceAPI> finder = ServiceFinder.find(PersistenceAPI.class);
+        final Iterator<PersistenceAPI> persistenceImpls = finder.iterator();
+        if (!persistenceImpls.hasNext()) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(PersistenceAPI.class.getName())));
+        }
+        final PersistenceAPI persistenceImpl = persistenceImpls.next();
+        if (persistenceImpls.hasNext()) {
+            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigurationAPI.class, persistenceImpl));
+        }
+        return persistenceImpl;
     }
 
 }

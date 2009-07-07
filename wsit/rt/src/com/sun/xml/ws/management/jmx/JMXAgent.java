@@ -40,11 +40,11 @@ import com.sun.xml.ws.api.management.CommunicationAPI;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.InitParameters;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
+import com.sun.xml.ws.management.ManagementLogger;
 import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.management.ManagementUtil;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -72,7 +72,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class JMXAgent<T> implements CommunicationAPI {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(JMXAgent.class);
+    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(JMXAgent.class);
     private static final QName JMX_SERVICE_URL_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXServiceURL");
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXConnectorServerEnvironment");
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "Entry");

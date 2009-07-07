@@ -48,14 +48,13 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.management.ManagementConstants;
+import com.sun.xml.ws.management.ManagementLogger;
 import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
 import com.sun.xml.ws.resources.ManagementMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
@@ -78,7 +77,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ReDelegate implements ConfigurationAPI {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ReDelegate.class);
+    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ReDelegate.class);
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
@@ -87,8 +86,8 @@ public class ReDelegate implements ConfigurationAPI {
         try {
             final ClassLoader classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
             Thread.currentThread().setContextClassLoader(classLoader);
-            final Reader newConfig = parameters.get(ManagementConstants.CONFIG_READER_PARAMETER_NAME);
-            Map<URI, Policy> urnToPolicy = ExternalAttachmentsUnmarshaller.unmarshal(newConfig);
+            final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
+            Map<URI, Policy> urnToPolicy = ExternalAttachmentsUnmarshaller.unmarshal(new StringReader(newConfig));
 
             final ManagedEndpoint<T> managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
             final EndpointCreationAttributes creationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);

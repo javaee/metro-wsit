@@ -40,10 +40,10 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.management.ManagedEndpoint;
 import com.sun.xml.ws.api.management.ManagedEndpointFactory;
+import com.sun.xml.ws.management.ManagementLogger;
 import com.sun.xml.ws.management.ManagementMessages;
 import com.sun.xml.ws.management.ManagementUtil;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 import javax.xml.namespace.QName;
 
@@ -55,7 +55,7 @@ import javax.xml.namespace.QName;
  */
 public class EndpointFactoryImpl implements ManagedEndpointFactory {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EndpointFactoryImpl.class);
+    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(EndpointFactoryImpl.class);
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
         final PolicyAssertion assertion = ManagementUtil.getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());

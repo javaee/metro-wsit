@@ -51,7 +51,7 @@ public class ManagementConstants {
      * Named parameter ID for the policy attachment configuration passed into the
      * managed endpoint.
      */
-    public static final String CONFIG_READER_PARAMETER_NAME = "CONFIG_READER";
+    public static final String CONFIGURATION_DATA_PARAMETER_NAME = "CONFIGURATION_DATA";
 
     /**
      * Fully qualified name of the ManagedService policy assertion.

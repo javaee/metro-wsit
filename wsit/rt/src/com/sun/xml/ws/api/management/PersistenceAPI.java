@@ -37,9 +37,17 @@
 package com.sun.xml.ws.api.management;
 
 /**
+ * Persist configuration changes.
  *
  * @author Fabian Ritzmann
  */
 public interface PersistenceAPI {
+
+    /**
+     * Persist configuration changes.
+     *
+     * @param parameters Any parameter that needs to be passed into the implementation
+     */
+    public void persist(InitParameters parameters);
 
 }

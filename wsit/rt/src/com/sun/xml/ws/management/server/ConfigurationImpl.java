@@ -34,58 +34,22 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.management;
+package com.sun.xml.ws.management.server;
 
-import java.util.HashMap;
+import com.sun.xml.ws.api.management.ConfigurationAPI;
+import com.sun.xml.ws.api.management.InitParameters;
+import com.sun.xml.ws.api.management.ManagementFactory;
+import com.sun.xml.ws.api.management.PersistenceAPI;
 
 /**
- * Provides type-safe named parameters.
  *
  * @author Fabian Ritzmann
  */
-public class InitParameters {
+public class ConfigurationImpl implements ConfigurationAPI {
 
-    private final HashMap<String, InitObject> nameToInstance = new HashMap<String, InitObject>();
-
-    /**
-     * Add parameter with the given name.
-     *
-     * @param <T> The type of the parameter
-     * @param name The name of the parameter
-     * @param parameter The parameter
-     * @return This instance of InitParameters (so that you can chain multiple put calls)
-     */
-    public <T> InitParameters put(String name, T parameter) {
-        final InitObject<T> initObject = new InitObject<T>(parameter);
-        this.nameToInstance.put(name, initObject);
-        return this;
-    }
-
-    /**
-     * Get parameter with the given name and type. Returns null if a parameter
-     * with the name exists but has a different type.
-     *
-     * @param <T> The type of the parameter
-     * @param name The name of the parameter
-     * @return The parameter with the given name or null
-     */
-    public <T> T get(String name) {
-        @SuppressWarnings("unchecked")
-        final InitObject<T> initObject = this.nameToInstance.get(name);
-        return initObject == null ? null : initObject.getObject();
-    }
-
-    private class InitObject<T> {
-
-        final T object;
-
-        public InitObject(T object) {
-            this.object = object;
-        }
-
-        public T getObject() {
-            return this.object;
-        }
+    public <T> void recreate(InitParameters parameters) {
+        final PersistenceAPI persist = ManagementFactory.createPersistenceImpl();
+        persist.persist(parameters);
     }
 
 }
