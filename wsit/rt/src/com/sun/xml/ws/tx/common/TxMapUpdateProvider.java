@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.SimpleAssertion;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import static com.sun.xml.ws.tx.common.Constants.AT_ALWAYS_CAPABILITY;
@@ -64,7 +64,7 @@ import java.util.logging.Level;
  * <p/>
  * Known limitation: not accounting for ejb deployment descriptor, only working off of TransactionAttribute annotations.
  */
-public class TxMapUpdateProvider implements PolicyMapUpdateProvider {
+public class TxMapUpdateProvider implements PolicyMapConfigurator {
 
     final static private TxLogger logger = TxLogger.getATLogger(TxMapUpdateProvider.class);
 

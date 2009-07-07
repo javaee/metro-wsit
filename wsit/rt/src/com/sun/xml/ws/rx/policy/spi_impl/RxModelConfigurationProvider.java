@@ -42,14 +42,14 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
 import com.sun.xml.ws.rx.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rx.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rx.policy.assertion.RmAssertionTranslator;
-
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
@@ -59,8 +59,8 @@ import javax.xml.ws.WebServiceFeature;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class RxModelConfigurationProvider implements ModelConfiguratorProvider {
-    // TODO implement PolicyMapUpdateProvider as well
+public class RxModelConfigurationProvider implements PolicyFeatureConfigurator {
+    // TODO implement PolicyMapConfigurator as well
     private static final Logger LOGGER = Logger.getLogger(RxModelConfigurationProvider.class);
 
     /**

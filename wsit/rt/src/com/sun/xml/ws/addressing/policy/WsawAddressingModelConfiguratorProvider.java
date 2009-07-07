@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 import java.util.Collection;
@@ -63,7 +63,7 @@ import javax.xml.ws.soap.AddressingFeature;
  *
  * @author Rama Pulavarthi
  */
-public class WsawAddressingModelConfiguratorProvider implements ModelConfiguratorProvider{
+public class WsawAddressingModelConfiguratorProvider implements PolicyFeatureConfigurator{
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingModelConfiguratorProvider.class);
 
@@ -71,7 +71,7 @@ public class WsawAddressingModelConfiguratorProvider implements ModelConfigurato
         new QName(AddressingVersion.W3C.policyNsUri, "UsingAddressing");
 
     /**
-     * Creates a new instance of AddressingModelConfiguratorProvider
+     * Creates a new instance of AddressingPolicyFeatureConfigurator
      */
     public WsawAddressingModelConfiguratorProvider() {
     }

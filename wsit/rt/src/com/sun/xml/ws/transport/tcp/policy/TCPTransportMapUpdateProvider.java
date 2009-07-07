@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.SimpleAssertion;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.transport.TcpTransportFeature;
@@ -62,7 +62,7 @@ import javax.xml.namespace.QName;
  * @author Alexey Stashok
  * @author Marek Potociar
  */
-public class TCPTransportMapUpdateProvider implements PolicyMapUpdateProvider {
+public class TCPTransportMapUpdateProvider implements PolicyMapConfigurator {
 
     private static final Logger LOGGER = Logger.getLogger(TCPTransportMapUpdateProvider.class);
 

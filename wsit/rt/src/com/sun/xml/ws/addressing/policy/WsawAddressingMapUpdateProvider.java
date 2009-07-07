@@ -45,7 +45,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
@@ -64,7 +64,7 @@ import javax.xml.ws.soap.AddressingFeature;
  *
  * @author Rama Pulavarthi
  */
-public class WsawAddressingMapUpdateProvider implements PolicyMapUpdateProvider {
+public class WsawAddressingMapUpdateProvider implements PolicyMapConfigurator {
 
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingMapUpdateProvider.class);
 

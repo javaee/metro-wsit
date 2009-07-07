@@ -45,7 +45,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.jaxws.spi.PolicyMapUpdateProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
@@ -59,7 +59,7 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class RxMapUpdateProvider implements PolicyMapUpdateProvider {
+public class RxMapUpdateProvider implements PolicyMapConfigurator {
 
     private static final Logger LOGGER = Logger.getLogger(RxMapUpdateProvider.class);
 

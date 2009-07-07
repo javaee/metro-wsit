@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.jaxws.spi.ModelConfiguratorProvider;
+import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
 import com.sun.xml.ws.transport.TcpTransportFeature;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -51,12 +51,12 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 
 /**
- * {@link ModelConfiguratorProvider}, which will transform SOAP/TCP policy
+ * {@link PolicyFeatureConfigurator}, which will transform SOAP/TCP policy
  * assertions to features on corresponding ports.
  *
  * @author Alexey Stashok
  */
-public class TCPTransportConfigurationProvider implements ModelConfiguratorProvider {
+public class TCPTransportConfigurationProvider implements PolicyFeatureConfigurator {
 
     private static final QName ENABLED = new QName("enabled");
     private static final Logger LOGGER = Logger.getLogger(TCPTransportConfigurationProvider.class);
