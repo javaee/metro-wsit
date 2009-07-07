@@ -396,7 +396,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
         try {
             if (outboundSeqence != null) {
-                TerminateSequenceData.Builder responseBuilder = TerminateSequenceData.getBuilder(outboundSeqence.getId(), outboundSeqence.getLastMessageId());
+                TerminateSequenceData.Builder responseBuilder = TerminateSequenceData.getBuilder(outboundSeqence.getId(), outboundSeqence.getLastMessageNumber());
                 responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
                 return rc.protocolHandler.toPacket(responseBuilder.build(), request);
             } else {

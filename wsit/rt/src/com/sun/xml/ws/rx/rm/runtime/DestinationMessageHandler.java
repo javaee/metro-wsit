@@ -92,7 +92,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
         if (acknowledgementData.getAcknowledgedSequenceId() != null) { // process outbound sequence acknowledgements           
             final List<AckRange> acknowledgedRanges = acknowledgementData.getAcknowledgedRanges();
             if (!acknowledgedRanges.isEmpty()) {
-                sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId()).acknowledgeMessageIds(acknowledgedRanges);
+                sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId()).acknowledgeMessageNumbers(acknowledgedRanges);
             }
         }
 
@@ -114,7 +114,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
         if (inboundSequence.isAckRequested()) {
-            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageIds());
+            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
             inboundSequence.clearAckRequestedFlag();
         }
 
@@ -130,7 +130,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
 
 
     public void acknowledgeApplicationLayerDelivery(ApplicationMessage inMessage) throws UnknownSequenceException {
-        sequenceManager.getSequence(inMessage.getSequenceId()).acknowledgeMessageId(inMessage.getMessageNumber());
+        sequenceManager.getSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
     }
 
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException {

@@ -84,11 +84,11 @@ public class InboundSequenceTest extends TestCase {
         for (int i = 1; i <= 5; i++) {
             sequence.registerMessage(new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i), true);
         }
-        assertEquals(5, sequence.getLastMessageId());
+        assertEquals(5, sequence.getLastMessageNumber());
 
         DummyAppMessage message = new DummyAppMessage(sequence.getId(), 10, null, null, false, "" + 10);
         sequence.registerMessage(message, true);
-        assertEquals(10, sequence.getLastMessageId());
+        assertEquals(10, sequence.getLastMessageNumber());
 
     }
 
@@ -99,11 +99,11 @@ public class InboundSequenceTest extends TestCase {
         sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
         assertTrue(sequence.hasUnacknowledgedMessages());
 
-        sequence.acknowledgeMessageId(1);
+        sequence.acknowledgeMessageNumber(1);
         assertFalse(sequence.hasUnacknowledgedMessages());
 
         List<Sequence.AckRange> ackedRages;
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(1, ackedRages.get(0).upper);
@@ -111,28 +111,28 @@ public class InboundSequenceTest extends TestCase {
         for (int i = 2; i <= 5; i++) {
             sequence.registerMessage(new DummyAppMessage(sequence.getId(), i, null, null, false, "" + i), true);
         }
-        sequence.acknowledgeMessageId(2);
-        sequence.acknowledgeMessageId(4);
-        sequence.acknowledgeMessageId(5);
+        sequence.acknowledgeMessageNumber(2);
+        sequence.acknowledgeMessageNumber(4);
+        sequence.acknowledgeMessageNumber(5);
         assertTrue(sequence.hasUnacknowledgedMessages());
 
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(2, ackedRages.get(0).upper);
         assertEquals(4, ackedRages.get(1).lower);
         assertEquals(5, ackedRages.get(1).upper);
 
-        sequence.acknowledgeMessageId(3);
+        sequence.acknowledgeMessageNumber(3);
         assertFalse(sequence.hasUnacknowledgedMessages());
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
         boolean passed = false;
         try {
-            sequence.acknowledgeMessageId(4); // duplicate message acknowledgement
+            sequence.acknowledgeMessageNumber(4); // duplicate message acknowledgement
         } catch (IllegalMessageIdentifierException e) {
             passed = true;
         }
@@ -140,7 +140,7 @@ public class InboundSequenceTest extends TestCase {
 
         try {
             // duplicate message acknowledgement
-            sequence.acknowledgeMessageIds(Arrays.asList(new Sequence.AckRange[]{
+            sequence.acknowledgeMessageNumbers(Arrays.asList(new Sequence.AckRange[]{
                         new Sequence.AckRange(2, 2),
                         new Sequence.AckRange(4, 5)
                     }));
@@ -148,26 +148,6 @@ public class InboundSequenceTest extends TestCase {
             return;
         }
         fail("UnsupportedOperationException expected");
-    }
-
-    public void testIsAcknowledged() throws Exception {
-        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 1, null, null, false, "A"), true);
-        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 2, null, null, false, "B"), true);
-        sequence.registerMessage(new DummyAppMessage(sequence.getId(), 4, null, null, false, "D"), true);
-
-        for (int i = 1; i < 6; i++) {
-            assertFalse(sequence.isAcknowledged(i));
-        }
-
-        sequence.acknowledgeMessageId(1);
-        sequence.acknowledgeMessageId(2);
-        sequence.acknowledgeMessageId(4);
-
-        assertTrue(sequence.isAcknowledged(1));
-        assertTrue(sequence.isAcknowledged(2));
-        assertFalse(sequence.isAcknowledged(3));
-        assertTrue(sequence.isAcknowledged(4));
-        assertFalse(sequence.isAcknowledged(5));
     }
 
     public void testBehaviorAfterCloseOperation() throws Exception {
@@ -188,7 +168,7 @@ public class InboundSequenceTest extends TestCase {
 
         passed = false;
         try {
-            sequence.acknowledgeMessageId(1); // error
+            sequence.acknowledgeMessageNumber(1); // error
         } catch (SequenceClosedException e) {
             passed = true;
         }
@@ -225,7 +205,7 @@ public class InboundSequenceTest extends TestCase {
         for (Map.Entry<String, ApplicationMessage> entry : correlatedMessageMap.entrySet()) {
             Object actual = sequence.retrieveMessage(entry.getKey());
             assertEquals("Retrieved message is not the same as stored message", entry.getValue(), actual);
-            sequence.acknowledgeMessageId(entry.getValue().getMessageNumber());
+            sequence.acknowledgeMessageNumber(entry.getValue().getMessageNumber());
         }
     }
 }

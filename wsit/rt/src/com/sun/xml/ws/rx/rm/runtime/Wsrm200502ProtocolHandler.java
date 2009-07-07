@@ -143,7 +143,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
                 // TODO L10N
                 throw LOGGER.logSevereException(new RxRuntimeException("Unexpected exception", ex));
             }
-            inboundSequence.acknowledgeMessageId(lastAppMessage.getMessageNumber());
+            inboundSequence.acknowledgeMessageNumber(lastAppMessage.getMessageNumber());
             inboundSequence.setAckRequestedFlag();
 
             CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(lastAppMessage.getSequenceId(), lastAppMessage.getMessageNumber());
@@ -348,7 +348,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
                     }
                 }
 
-                long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageId();
+                long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageNumber();
                 if (lastLowerBound <= lastMessageId) {
                     ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                 }

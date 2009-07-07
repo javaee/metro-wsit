@@ -99,7 +99,7 @@ public class OutboundSequenceTest extends TestCase {
             sequence.registerMessage(new DummyAppMessage("" + i), true);
         }
 
-        assertEquals(4, sequence.getLastMessageId());
+        assertEquals(4, sequence.getLastMessageNumber());
     }
 
     public void testPendingAcknowedgements() throws Exception {
@@ -111,51 +111,36 @@ public class OutboundSequenceTest extends TestCase {
 
         List<Sequence.AckRange> ackedRages;
 
-        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1));
+        sequence.acknowledgeMessageNumbers(SequenceTestUtils.createAckRanges(1));
         assertTrue(sequence.hasUnacknowledgedMessages());
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(1, ackedRages.get(0).upper);
 
-        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 4));
+        sequence.acknowledgeMessageNumbers(SequenceTestUtils.createAckRanges(1, 2, 4));
         assertTrue(sequence.hasUnacknowledgedMessages());
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(2, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(2, ackedRages.get(0).upper);
         assertEquals(4, ackedRages.get(1).lower);
         assertEquals(4, ackedRages.get(1).upper);
 
-        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5));
+        sequence.acknowledgeMessageNumbers(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5));
         assertFalse(sequence.hasUnacknowledgedMessages());
-        ackedRages = sequence.getAcknowledgedMessageIds();
+        ackedRages = sequence.getAcknowledgedMessageNumbers();
         assertEquals(1, ackedRages.size());
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
         boolean passed = false;
         try {
-            sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5, 6));
+            sequence.acknowledgeMessageNumbers(SequenceTestUtils.createAckRanges(1, 2, 3, 4, 5, 6));
         } catch (InvalidAcknowledgementException e) {
             passed = true;
         }
         assertTrue("IllegalMessageIdentifierException expected", passed);
-    }
-
-    public void testIsAcknowledged() throws Exception {
-        for (int i = 0; i < 5; i++) {
-            sequence.registerMessage(new DummyAppMessage("" + i), true);
-        }
-        
-        sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1, 2, 4));
-        
-        assertTrue(sequence.isAcknowledged(1));
-        assertTrue(sequence.isAcknowledged(2));
-        assertFalse(sequence.isAcknowledged(3));
-        assertTrue(sequence.isAcknowledged(4));
-        assertFalse(sequence.isAcknowledged(5));
-        assertFalse(sequence.isAcknowledged(6));
     }
     
     public void testSequenceStatusAfterCloseOperation() throws Exception {
@@ -171,7 +156,7 @@ public class OutboundSequenceTest extends TestCase {
         // sequence acknowledgement behavior
         boolean passed = false;
         try {
-            sequence.acknowledgeMessageIds(SequenceTestUtils.createAckRanges(1)); // ok
+            sequence.acknowledgeMessageNumbers(SequenceTestUtils.createAckRanges(1)); // ok
             sequence.registerMessage(new DummyAppMessage("B"), true); // error - closed sequence
         } catch (SequenceClosedException e) {
             passed = true;

@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
@@ -45,6 +46,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -81,7 +83,7 @@ MSG_NUMBER BIGINT NOT NULL,
 IS_REGISTERED CHARACTER NOT NULL,
 
 CORRELATION_ID VARCHAR(256),
-NEXT_RESEND_COUNT INT,
+NEXT_RESEND_COUNT INT NOT NULL,
 MSG_DATA BLOB,
 
 PRIMARY KEY (SEQ_ID, SEQ_TYPE, MSG_NUMBER)
@@ -235,11 +237,12 @@ final class PersistentSequenceData implements SequenceData {
             ResultSet rs = ps.executeQuery();
 
             if (!rs.next()) {
-                // TODO P1 error selecting existing row
+                return null;
             }
 
             if (!rs.isFirst() && !rs.isLast()) {
-                // TODO P1 error - multiple rows selected
+                // TODO L10N
+                throw LOGGER.logSevereException(new PersistenceException(""));
             }
 
 
@@ -298,6 +301,12 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void unlockWrite() {
+        try {
+            dataResultSet.updateRow();
+        } catch (SQLException ex) {
+            // TODO L10N
+            LOGGER.logSevereException(new PersistenceException("Unable to update database with new data.", ex));
+        }
         dataLock.writeLock().unlock();
     }
 
@@ -313,7 +322,7 @@ final class PersistentSequenceData implements SequenceData {
         return expirationTime;
     }
 
-    public long getLastMessageId() {
+    public long getLastMessageNumber() {
         try {
             return dataResultSet.getLong(fLastMessageId.columnName);
         } catch (SQLException ex) {
@@ -322,7 +331,7 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    public void setLastMessageId(long newValue) {
+    public void setLastMessageNumber(long newValue) {
         try {
             dataResultSet.updateLong(fLastMessageId.columnName, newValue);
         } catch (SQLException ex) {
@@ -403,22 +412,11 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    public final void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException {
-        assert msgNumberKey != null;
-        try {
-            lockWrite();
-            // NOTE this must be a new String object
-            String correlationKey = new String(message.getCorrelationId());
-            weakUnackedNumberToCorrelationIdMap.put(msgNumberKey, correlationKey);
-            weakMessageStorage.put(correlationKey, message);
-        } finally {
-            unlockWrite();
-        }
-
+    public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public ApplicationMessage retrieveMessage(
-            String correlationId) {
+    public ApplicationMessage retrieveMessage(String correlationId) {
         try {
             lockRead();
             return weakMessageStorage.get(correlationId);
@@ -428,13 +426,15 @@ final class PersistentSequenceData implements SequenceData {
 
     }
 
-    public ApplicationMessage retrieveUnackedMessage(long messageNumber) {
-        try {
-            lockRead();
-            String correlationKey = weakUnackedNumberToCorrelationIdMap.get(messageNumber);
-            return (correlationKey != null) ? weakMessageStorage.get(correlationKey) : null;
-        } finally {
-            unlockRead();
-        }
+    public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public Collection<Long> getUnackedMessageNumbers() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void markAsAcknowledged(long messageNumber) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

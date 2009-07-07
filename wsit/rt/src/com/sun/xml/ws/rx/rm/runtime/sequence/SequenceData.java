@@ -2,6 +2,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
+import java.util.Collection;
 
 public interface SequenceData {
 
@@ -15,33 +16,44 @@ public interface SequenceData {
 
     String getSequenceId();
 
+    long getExpirationTime();
+
     String getBoundSecurityTokenReferenceId();
 
-    long getLastMessageId();
+    long getLastMessageNumber();
+
+    void setLastMessageNumber(long newLastMessageNumber);
 
     boolean getAckRequestedFlag();
 
-    long getLastAcknowledgementRequestTime();
-
-    long getLastActivityTime();
-
-    State getState();
-
     void setAckRequestedFlag(boolean newValue);
+
+    long getLastAcknowledgementRequestTime();
 
     void setLastAcknowledgementRequestTime(long newTime);
 
-    void setLastActivityTime(long newTime);
+    long getLastActivityTime();
 
-    void setLastMessageId(long newLastMessageId);
+    void setLastActivityTime(long newTime);
+    
+    State getState();
 
     void setState(State newState);
 
-    long getExpirationTime();
+    void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException;
+
+    /**
+     * Removes the provided {@code messageNumber} from the collevtion of unacked message
+     * numbers and and marks stored message with given {@code messageNumber} (if any)
+     * as eligible for removal from the underlying message storage.
+     *
+     * @param messageNumber
+     */
+    void markAsAcknowledged(long messageNumber);
+
+    void attachMessageToUnackedMessageNumber(ApplicationMessage message);
 
     ApplicationMessage retrieveMessage(String correlationId);
 
-    ApplicationMessage retrieveUnackedMessage(long messageNumber);
-
-    void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException;
+    public Collection<Long> getUnackedMessageNumbers();
 }

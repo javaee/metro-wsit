@@ -328,7 +328,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                             lastLowerBound = nackId.longValue() + 1;
                         }
                     }
-                    long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageId();
+                    long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageNumber();
                     if (lastLowerBound <= lastMessageId) {
                         ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                     }

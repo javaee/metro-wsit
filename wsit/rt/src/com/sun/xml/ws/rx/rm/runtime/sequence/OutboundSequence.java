@@ -46,7 +46,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -59,18 +58,18 @@ public final class OutboundSequence extends AbstractSequence {
 
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
-    private final List<Long> unackedMessageIdentifiers;
+//    private final List<Long> allUnackedMessageNumbers;
 
     public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
         super(data, deliveryQueueBuilder, timeSynchronizer);
-
-        this.unackedMessageIdentifiers = new LinkedList<Long>();
+//
+//        this.allUnackedMessageNumbers = new LinkedList<Long>();
     }
 
-    @Override
-    Collection<Long> getUnackedMessageIdStorage() {
-        return unackedMessageIdentifiers;
-    }
+//    @Override
+//    Collection<Long> getUnackedMessageNumbers() {
+//        return allUnackedMessageNumbers;
+//    }
 
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException {
         checkSequenceCreatedStatus("", Code.Sender); // TODO
@@ -86,45 +85,36 @@ public final class OutboundSequence extends AbstractSequence {
 
             message.setSequenceData(this.getId(), generateNextMessageId());
             if (storeMessageFlag) {
-                storeMessage(message, getUnackedMessageIdentifierKey(message.getMessageNumber()));
+                data.attachMessageToUnackedMessageNumber(message);
             }
         } finally {
             data.unlockWrite();
         }
     }
 
-    private long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException {
+    private long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException, DuplicateMessageRegistrationException {
         // no need to synchronize, called from within a write lock
 
-        long nextId = getLastMessageId() + 1;
+        long nextId = getLastMessageNumber() + 1;
         if (nextId > Sequence.MAX_MESSAGE_ID) {
             throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
         }
 
-        data.setLastMessageId(nextId);
+        data.setLastMessageNumber(nextId);
+        data.registerUnackedMessageNumber(nextId, true);
 
-        // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
-        // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-        unackedMessageIdentifiers.add(new Long(nextId));
+//        // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
+//        // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
+//        allUnackedMessageNumbers.add(new Long(nextId));
         return nextId;
     }
 
-    private Long getUnackedMessageIdentifierKey(long messageNumber) {
-        Long msgNumberKey = null;
-        int index = unackedMessageIdentifiers.indexOf(messageNumber);
-        if (index >= 0) {
-            // the id is in the list
-            msgNumberKey = unackedMessageIdentifiers.get(index);
-        }
-        return msgNumberKey;
-    }
-
-    public void acknowledgeMessageId(long messageId) {
+    public void acknowledgeMessageNumber(long messageId) {
         // TODO L10N
         throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
+    public void acknowledgeMessageNumbers(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
         checkSequenceCreatedStatus("", Code.Sender); // TODO
 
         try {
@@ -149,23 +139,23 @@ public final class OutboundSequence extends AbstractSequence {
 
             // check proper bounds of acked ranges
             AckRange lastAckRange = ranges.get(ranges.size() - 1);
-            if (getLastMessageId() < lastAckRange.upper) {
+            if (getLastMessageNumber() < lastAckRange.upper) {
                 throw new InvalidAcknowledgementException(this.getId(), lastAckRange.upper, ranges);
             }
 
-            if (unackedMessageIdentifiers.isEmpty()) {
+            final Collection<Long> unackedMessageNumbers = data.getUnackedMessageNumbers();
+            if (unackedMessageNumbers.isEmpty()) {
                 // we have checked the ranges are ok and there's nothing to acknowledge.
                 return;
             }
 
             // acknowledge messages
-            Iterator<Long> unackedIterator = unackedMessageIdentifiers.iterator();
             Iterator<AckRange> rangeIterator = ranges.iterator();
             AckRange currentRange = rangeIterator.next();
-            while (unackedIterator.hasNext()) {
-                long unackedIndex = unackedIterator.next();
-                if (unackedIndex >= currentRange.lower && unackedIndex <= currentRange.upper) {
-                    unackedIterator.remove();
+
+            for (long unackedMessageNumber : unackedMessageNumbers) {
+                if (unackedMessageNumber >= currentRange.lower && unackedMessageNumber <= currentRange.upper) {
+                    data.markAsAcknowledged(unackedMessageNumber);
                 } else if (rangeIterator.hasNext()) {
                     currentRange = rangeIterator.next();
                 } else {

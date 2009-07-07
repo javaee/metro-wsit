@@ -138,7 +138,7 @@ public interface Sequence {
      */
     @ManagedAttribute
     @Description("Last message identifier register on this sequence")
-    public long getLastMessageId();
+    public long getLastMessageNumber();
 
     /**
      * Registers given message with the sequence
@@ -177,27 +177,6 @@ public interface Sequence {
     public @Nullable ApplicationMessage retrieveMessage(@NotNull String correlationId);
 
     /**
-     * TODO consider removing as not used anywhere
-     *
-     * Retrieves an unacknowledged message with the provided {@code messageNumber} stored
-     * within the sequence if avalable. May return {@code null} if no unacknowledged message
-     * with a given {@code messageNumber} is available.
-     * <p/>
-     * Availability of the message depends on the message identifier acknowledgement.
-     * Message, if stored (see {@link #registerMessage(com.sun.xml.ws.rx.rm.runtime.ApplicationMessage, boolean)}
-     * remains available for retrieval until it is acknowledged. Once the message identifier
-     * associated with the stored message has been acknowledged, message will not be available.
-     * <p/>
-     * Note that this behavior is different from the behavior of {@link #retrieveMessage(java.lang.String)}
-     * method, where Message may remain available for a while even after it has been acknowledged.
-     *
-     * @param correlationId correlation identifier of the stored {@link ApplicationMessage}
-     *
-     * @return the message that is stored in the sequence if available, {@code null} otherwise.
-     */
-    public @Nullable ApplicationMessage retrieveUnackedMessage(long messageNumber);
-
-    /**
      * Updates a delivery queue for this sequence with any unacknowledged messages that 
      * should be sent and returns the delivery queue instance. Messages in the queue are
      * the ones currently waiting for a delivery.
@@ -207,45 +186,35 @@ public interface Sequence {
     public DeliveryQueue getDeliveryQueue();
 
     /**
-     * Marks given message identifiers with the sequence as aknowledged
+     * Marks given message numbers with the sequence as aknowledged
      *
-     * @param ranges message identifier ranges to be acknowledged
+     * @param ranges message number ranges to be acknowledged
      *
      * @exception InvalidAcknowledgementException is generated when acked ranges contain
      * a SequenceAcknowledgement covering messages that have not been sent.
      * 
      * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageIds(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException;
+    public void acknowledgeMessageNumbers(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException;
 
     /**
-     * Marks given message identifier with the sequence as aknowledged
+     * Marks given message number with the sequence as aknowledged
      *
-     * @param messageId message identifier to be acknowledged
+     * @param messageNumber message number to be acknowledged
      *
      * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message
-     * with the given identifier has been already acknowledged
+     * with the given number has been already acknowledged
      *
      * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, AbstractSoapFaultException;
+    public void acknowledgeMessageNumber(long messageNumber) throws IllegalMessageIdentifierException, AbstractSoapFaultException;
 
     /**
-     * Determines whether such message number has been already acknowledged on the sequence
-     * or not.
-     *
-     * @param messageId message identifier to test
-     * @return {@code true } or {@code false} depending on whether a message with such message
-     *         identifer has been already acknowledged or not
-     */
-    public boolean isAcknowledged(long messageId);
-
-    /**
-     * Provides a collection of ranges of messages identifier acknowledged with the sequence
+     * Provides a collection of ranges of message numbers acknowledged with the sequence
      * 
-     * @return collection of ranges of messages identifier registered with the sequence
+     * @return collection of ranges of message numbers registered with the sequence
      */
-    public List<AckRange> getAcknowledgedMessageIds();
+    public List<AckRange> getAcknowledgedMessageNumbers();
 
     /**
      * The method may be called to determine whether the sequence has some unacknowledged messages or not

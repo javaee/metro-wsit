@@ -142,7 +142,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     }
 
     private boolean isDeliverable(ApplicationMessage message) {
-        List<Sequence.AckRange> ackedIds = sequence.getAcknowledgedMessageIds();
+        List<Sequence.AckRange> ackedIds = sequence.getAcknowledgedMessageNumbers();
         if (ackedIds.isEmpty()) {
             return message.getMessageNumber() == 1L; // this is a first message
         } else {

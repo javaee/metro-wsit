@@ -44,7 +44,6 @@ import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -82,10 +81,6 @@ public abstract class AbstractSequence implements Sequence {
         this.deliveryQueue = deliveryQueueBuilder.build();
     }
 
-    public SequenceData getData() {
-        return data;
-    }
-
     public String getId() {
         return data.getSequenceId();
     }
@@ -94,65 +89,49 @@ public abstract class AbstractSequence implements Sequence {
         return data.getBoundSecurityTokenReferenceId();
     }
 
-    public long getLastMessageId() {
-        return data.getLastMessageId();
+    public long getLastMessageNumber() {
+        return data.getLastMessageNumber();
     }
 
-    public List<AckRange> getAcknowledgedMessageIds() {
+    public List<AckRange> getAcknowledgedMessageNumbers() {
+        final Collection<Long> unackedMessageNumbers;
+        final long lastMessageNumber;
+
         data.lockRead();
         try {
-            if (getLastMessageId() == Sequence.UNSPECIFIED_MESSAGE_ID) {
-                // no message associated with the sequence yet
-                return Collections.emptyList();
-            } else if (getUnackedMessageIdStorage().isEmpty()) {
-                // no unacked indexes - we have a single acked range
-                return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, getLastMessageId()));
-            } else {
-                // need to calculate ranges from the unacked indexes
-                List<AckRange> result = new LinkedList<Sequence.AckRange>();
-
-                Iterator<Long> unackedIndexIterator = getUnackedMessageIdStorage().iterator();
-                long lastBottomAckRange = Sequence.MIN_MESSAGE_ID;
-                while (unackedIndexIterator.hasNext()) {
-                    long lastUnacked = unackedIndexIterator.next();
-                    if (lastBottomAckRange < lastUnacked) {
-                        result.add(new AckRange(lastBottomAckRange, lastUnacked - 1));
-                    }
-                    lastBottomAckRange = lastUnacked + 1;
-                }
-                if (lastBottomAckRange <= getLastMessageId()) {
-                    result.add(new AckRange(lastBottomAckRange, getLastMessageId()));
-                }
-
-
-
-                return result;
-            }
+            unackedMessageNumbers = data.getUnackedMessageNumbers();
+            lastMessageNumber = data.getLastMessageNumber();
         } finally {
             data.unlockRead();
         }
-    }
 
-    public boolean isAcknowledged(long messageId) {
-        try {
-            data.lockRead();
-            if (messageId > getLastMessageId()) {
-                return false;
+        if (lastMessageNumber == Sequence.UNSPECIFIED_MESSAGE_ID) {
+            // no message associated with the sequence yet
+            return Collections.emptyList();
+        } else if (unackedMessageNumbers.isEmpty()) {
+            // no unacked indexes - we have a single acked range
+            return Arrays.asList(new AckRange(Sequence.MIN_MESSAGE_ID, lastMessageNumber));
+        } else {
+            // need to calculate ranges from the unacked indexes
+            List<AckRange> result = new LinkedList<Sequence.AckRange>();
+
+            long lastBottomAckRange = Sequence.MIN_MESSAGE_ID;
+            for (long lastUnacked : unackedMessageNumbers) {
+                if (lastBottomAckRange < lastUnacked) {
+                    result.add(new AckRange(lastBottomAckRange, lastUnacked - 1));
+                }
+                lastBottomAckRange = lastUnacked + 1;
+            }
+            if (lastBottomAckRange <= lastMessageNumber) {
+                result.add(new AckRange(lastBottomAckRange, lastMessageNumber));
             }
 
-            return !getUnackedMessageIdStorage().contains(messageId);
-        } finally {
-            data.unlockRead();
+            return result;
         }
     }
 
     public boolean hasUnacknowledgedMessages() {
-        try {
-            data.lockRead();
-            return !getUnackedMessageIdStorage().isEmpty();
-        } finally {
-            data.unlockRead();
-        }
+        return !data.getUnackedMessageNumbers().isEmpty();
     }
 
     public State getState() {
@@ -207,29 +186,13 @@ public abstract class AbstractSequence implements Sequence {
     public void preDestroy() {
         // nothing to do...
     }
-
-    abstract Collection<Long> getUnackedMessageIdStorage();
-
-    public final void storeMessage(ApplicationMessage message, Long msgNumberKey) throws UnsupportedOperationException {
-        data.storeMessage(message, msgNumberKey);
-    }
-
+    
     public ApplicationMessage retrieveMessage(String correlationId) {
         return data.retrieveMessage(correlationId);
     }
 
-    public ApplicationMessage retrieveUnackedMessage(long messageNumber) {
-        return data.retrieveUnackedMessage(messageNumber);
-    }
-
     public DeliveryQueue getDeliveryQueue() {
-        try {
-            data.lockRead();
-
-            return deliveryQueue;
-        } finally {
-            data.unlockRead();
-        }
+        return deliveryQueue;
     }
 
     protected final void checkSequenceCreatedStatus(String message, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {

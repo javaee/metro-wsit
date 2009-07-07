@@ -104,7 +104,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         Sequence inboundSequence = sequenceManager.getBoundSequence(outboundSequenceId);
         if (inboundSequence != null && inboundSequence.isAckRequested()) {
-            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageIds());
+            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
             inboundSequence.clearAckRequestedFlag();
         }
         // outbound sequence ack requested flag

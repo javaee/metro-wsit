@@ -41,13 +41,7 @@ import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Level;
 
 /**
  * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
@@ -62,93 +56,87 @@ public final class InboundSequence extends AbstractSequence {
 
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     //
-    private final Set<Long> allUnackedMessageNumbers;
-    private final Set<Long> registeredUnackedMessageNumbers;
+//    private final Set<Long> allUnackedMessageNumbers;
+//    private final Set<Long> receivedUnackedMessageNumbers;
 
     public InboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
         // super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
         super(data, deliveryQueueBuilder, timeSynchronizer);
-
-        this.allUnackedMessageNumbers = new TreeSet<Long>();
-        this.registeredUnackedMessageNumbers = new HashSet<Long>();
+//
+//        this.allUnackedMessageNumbers = new TreeSet<Long>();
+//        this.receivedUnackedMessageNumbers = new HashSet<Long>();
     }
 
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
-        checkSequenceCreatedStatus("", Code.Receiver); // TODO P2 message
+        checkSequenceCreatedStatus(
+                    "Cannot register message: This sequence is not in ready to accept messages.",
+                    Code.Receiver); // TODO P2 message
 
         if (!this.getId().equals(message.getSequenceId())) {
-            throw new IllegalArgumentException(String.format(
+            // TODO L10N
+            throw LOGGER.logSevereException(new IllegalArgumentException(String.format(
                     "Cannot register message: sequence identifier on the application message [ %s ] " +
                     "is different from the identifier of this sequence [ %s ].",
                     message.getSequenceId(),
-                    this.getId()));
+                    this.getId())));
         }
 
         try {
             data.lockWrite();
 
-            if (message.getMessageNumber() > getLastMessageId()) {
+            if (message.getMessageNumber() > data.getLastMessageNumber()) {
                 // new message - note that this will work even for the first message that arrives
                 // some message(s) got lost, add to all unacked message number set...
-                for (long lostIdentifier = getLastMessageId() + 1; lostIdentifier <= message.getMessageNumber(); lostIdentifier++) {
-                    allUnackedMessageNumbers.add(lostIdentifier);
+                for (long lostIdentifier = data.getLastMessageNumber() + 1; lostIdentifier <= message.getMessageNumber(); lostIdentifier++) {
+                    data.registerUnackedMessageNumber(lostIdentifier, false);
+//                    allUnackedMessageNumbers.add(lostIdentifier);
                 }
-                data.setLastMessageId(message.getMessageNumber());
-            } else if (registeredUnackedMessageNumbers.contains(message.getMessageNumber())) {
+                data.setLastMessageNumber(message.getMessageNumber());
+//            } else if (receivedUnackedMessageNumbers.contains(message.getMessageNumber())) {
                 // duplicate message
-                throw LOGGER.logException(new DuplicateMessageRegistrationException(this.getId(), message.getMessageNumber()), Level.FINE);
+//                throw LOGGER.logException(new DuplicateMessageRegistrationException(this.getId(), message.getMessageNumber()), Level.FINE);
             }
 
-            registeredUnackedMessageNumbers.add(message.getMessageNumber());
+            data.registerUnackedMessageNumber(message.getMessageNumber(), true);
+//            receivedUnackedMessageNumbers.add(message.getMessageNumber());
 
             if (storeMessageFlag) {
-                storeMessage(message, getUnackedMessageIdentifierKey(message.getMessageNumber()));
+                data.attachMessageToUnackedMessageNumber(message);
             }
         } finally {
             data.unlockWrite();
         }
     }
 
-    @Override
-    Collection<Long> getUnackedMessageIdStorage() {
-        return allUnackedMessageNumbers;
-    }
+//    @Override
+//    Collection<Long> getUnackedMessageNumbers() {
+//        return allUnackedMessageNumbers;
+//    }
 
-    public void acknowledgeMessageIds(List<AckRange> ranges) {
+    public void acknowledgeMessageNumbers(List<AckRange> ranges) {
         // TODO L10N
         throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
-    public void acknowledgeMessageId(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
+    public void acknowledgeMessageNumber(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
         checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getState()), Code.Receiver);
 
         try {
             data.lockWrite();
 
-            if (!registeredUnackedMessageNumbers.remove(messageId)) {
-                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
-            }
+            data.markAsAcknowledged(messageId);
 
-            if (!allUnackedMessageNumbers.remove(messageId)) {
-                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
-            }
+//            if (!registeredUnackedMessageNumbers.remove(messageId)) {
+//                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
+//            }
+//
+//            boolean removedFromAll = allUnackedMessageNumbers.remove(messageId);
+//            assert removedFromAll;
+
         } finally {
             data.unlockWrite();
         }
 
         this.getDeliveryQueue().onSequenceAcknowledgement();
-    }
-
-    private Long getUnackedMessageIdentifierKey(long messageNumber) {
-        Long msgNumberKey = null;
-        Iterator<Long> iterator = registeredUnackedMessageNumbers.iterator();
-        while (iterator.hasNext()) {
-            msgNumberKey = iterator.next();
-            if (msgNumberKey.longValue() == messageNumber) {
-                break;
-            }
-        }
-
-        return msgNumberKey;
     }
 }
