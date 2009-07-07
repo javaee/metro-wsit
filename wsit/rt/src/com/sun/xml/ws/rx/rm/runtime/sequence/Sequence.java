@@ -41,18 +41,16 @@ import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.List;
-import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
-import org.glassfish.gmbal.ManagedObject;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-@ManagedObject
+@ManagedData
 @Description("Reliable Messaging Sequence")
-@AMXMetadata(type = "RMSequence")
 public interface Sequence {
 
     public static final long UNSPECIFIED_MESSAGE_ID = 0; // this MUST be 0 in order for AbstractSequence.createAckRanges() method to work properly

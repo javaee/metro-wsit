@@ -172,10 +172,6 @@ public final class InVmSequenceManager implements SequenceManager {
 
                 }
 
-                if (managedObjectManager != null) {
-                    managedObjectManager.unregister(sequence);
-                }
-
                 sequence.preDestroy();
 
                 return sequence;
@@ -235,9 +231,6 @@ public final class InVmSequenceManager implements SequenceManager {
                 throw new DuplicateSequenceException(sequence.getId());
             } else {
                 sequences.put(sequence.getId(), sequence);
-                if (managedObjectManager != null) {
-                    managedObjectManager.register(this, sequence, sequence.getId());
-                }
             }
 
             return sequence;
