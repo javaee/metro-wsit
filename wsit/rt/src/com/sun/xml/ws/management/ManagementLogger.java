@@ -37,7 +37,7 @@
 package com.sun.xml.ws.management;
 
 import com.sun.istack.logging.Logger;
-import java.lang.reflect.Field;
+import com.sun.xml.ws.util.Constants;
 
 /**
  * Implements a logger for the management component.
@@ -88,18 +88,7 @@ public class ManagementLogger extends Logger {
     }
 
     private static String getLoggingSubsystemName() {
-        String loggingSubsystemName = "management";
-        try {
-            // Looking up JAX-WS class at run-time, so that we don't need to depend
-            // on it at compile-time.
-            Class jaxwsConstants = Class.forName("com.sun.xml.ws.util.Constants");
-            Field loggingDomainField = jaxwsConstants.getField("LoggingDomain");
-            Object loggingDomain = loggingDomainField.get(null);
-            loggingSubsystemName = loggingDomain.toString().concat(".management");
-        } catch (Exception e) {
-            // if we catch an exception, we stick with the default name
-        }
-        return loggingSubsystemName;
+        return Constants.LoggingDomain + ".management";
     }
 
 }
