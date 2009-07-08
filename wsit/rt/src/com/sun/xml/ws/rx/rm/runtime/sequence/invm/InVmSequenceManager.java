@@ -83,10 +83,10 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     private final DeliveryQueueBuilder outboundQueueBuilder;
 
-    public InVmSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public InVmSequenceManager(DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (this.managedObjectManager != null) {
-            this.managedObjectManager.registerAtRoot(this, "RMSequenceManager");
+            this.managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
 
         this.inboundQueueBuilder = inboundQueueBuilder;
@@ -133,7 +133,25 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence closeInboundSequence(String sequenceId) throws UnknownSequenceException {
+        return closeSequence(sequenceId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence closeOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        return closeSequence(sequenceId);
+    }
+
+    /**
+     * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
+     *
+     * @param sequenceId the unique sequence identifier
+     *
+     * @return closed sequence object
+     */
+    private Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
         Sequence sequence = getSequence(sequenceId);
         sequence.close();
         return sequence;
@@ -142,7 +160,27 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
+        return getSequence(sequenceId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        return getSequence(sequenceId);
+    }
+
+    /**
+     * Retrieves an existing sequence from the internal sequence storage
+     *
+     * @param sequenceId the unique sequence identifier
+     *
+     * @return sequence identified with the {@code sequenceId} identifier
+     *
+     * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
+     */
+    private Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
             internalDataAccessLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {

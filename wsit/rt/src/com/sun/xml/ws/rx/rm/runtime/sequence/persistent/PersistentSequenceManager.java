@@ -96,10 +96,10 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final DeliveryQueueBuilder outboundQueueBuilder;
 
-    public PersistentSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public PersistentSequenceManager(DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (managedObjectManager != null) {
-            managedObjectManager.registerAtRoot(this, type.toString());
+            managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
 
         this.inboundQueueBuilder = inboundQueueBuilder;
@@ -147,8 +147,8 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
-        Sequence sequence = getSequence(sequenceId);
+    public Sequence closeInboundSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = getSequence(sequenceId, PersistentSequenceData.SequenceType.Inbound);
         sequence.close();
         return sequence;
     }
@@ -156,7 +156,27 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence closeOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = getSequence(sequenceId, PersistentSequenceData.SequenceType.Outbound);
+        sequence.close();
+        return sequence;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
+        return getSequence(sequenceId, PersistentSequenceData.SequenceType.Inbound);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        return getSequence(sequenceId, PersistentSequenceData.SequenceType.Outbound);
+    }
+
+    private Sequence getSequence(String sequenceId, PersistentSequenceData.SequenceType sequenceType) throws UnknownSequenceException {
         try {
             dataLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
@@ -168,8 +188,6 @@ public final class PersistentSequenceManager implements SequenceManager {
                     if (sequences.containsKey(sequenceId)) { // re-checking
                         return sequences.get(sequenceId);
                     } else {
-                        PersistentSequenceData.SequenceType sequenceType = null; // TODO
-
                         PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(sqlConnection, sequenceId, sequenceType);
                         if (sequenceData != null) {
                             switch (sequenceType) {

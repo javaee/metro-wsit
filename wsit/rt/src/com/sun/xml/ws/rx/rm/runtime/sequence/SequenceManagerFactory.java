@@ -53,14 +53,13 @@ public enum SequenceManagerFactory {
     /**
      * Creates new {@link SequenceManager} instance. This operation should be called only once per endpoint and/or endpoint client.
      *
-     * @param type {@link SequenceManager} instance type that determines whether this instance will be used on the endpoint client or on the endpoint itself
      * @param inboundQueueBuilder delivery queue builder that will be used to create delivery queue for all newly created inbound sequences
      * @param outboundQueueBuilder delivery queue builder that will be used to create delivery queue for all newly created outbound sequences
      * @param managedObjectManager object manager managing the newly created {@link SequenceManager} instance
      * @return newly created {@link SequenceManager} instance
      */
-    public SequenceManager createSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public SequenceManager createSequenceManager(DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         // TODO change this once it is clear how to obtain endpoint on the client side
-        return new InVmSequenceManager(type, inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
+        return new InVmSequenceManager(inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
     }
 }

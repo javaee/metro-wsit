@@ -76,7 +76,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
         assert outMessage != null;
         assert outboundSequenceId != null;
 
-        final Sequence outboundSequence = sequenceManager.getSequence(outboundSequenceId);
+        final Sequence outboundSequence = sequenceManager.getOutboundSequence(outboundSequenceId);
         outboundSequence.registerMessage(outMessage, true); // TODO it may not be needed to store message if AtMostOnce delivery
     }
 
@@ -113,7 +113,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
             inboundSequence.clearAckRequestedFlag();
         }
         // outbound sequence ack requested flag
-        final Sequence outboundSequence = sequenceManager.getSequence(outboundSequenceId);
+        final Sequence outboundSequence = sequenceManager.getOutboundSequence(outboundSequenceId);
         if (outboundSequence.hasUnacknowledgedMessages()) {
             ackDataBuilder.ackReqestedSequenceId(outboundSequenceId);
             outboundSequence.updateLastAcknowledgementRequestTime();
@@ -125,6 +125,6 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException {
         assert sequenceManager != null;
         
-        sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
+        sequenceManager.getOutboundSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 }

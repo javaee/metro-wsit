@@ -135,7 +135,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             loadAcknowledgementData(lastAppMessage, message);
 
             // simulating last message delivery
-            Sequence inboundSequence = rc.getSequence(lastAppMessage.getSequenceId());
+            Sequence inboundSequence = rc.getInboundSequence(lastAppMessage.getSequenceId());
             try {
                 inboundSequence.registerMessage(lastAppMessage, false);
             } catch (Exception ex) {
@@ -165,7 +165,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         ApplicationMessage lastAppMessage = new ApplicationMessageBase("") {
         };
         try {
-            rc.getSequence(data.getSequenceId()).registerMessage(lastAppMessage, false);
+            rc.getOutboundSequence(data.getSequenceId()).registerMessage(lastAppMessage, false);
         } catch (DuplicateMessageRegistrationException ex) {
             LOGGER.logSevereException(ex);
         } catch (IllegalStateException ex) {
@@ -347,7 +347,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
                     }
                 }
 
-                long lastMessageId = rc.getSequence(ackElement.getId()).getLastMessageNumber();
+                long lastMessageId = rc.getInboundSequence(ackElement.getId()).getLastMessageNumber();
                 if (lastLowerBound <= lastMessageId) {
                     ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                 }

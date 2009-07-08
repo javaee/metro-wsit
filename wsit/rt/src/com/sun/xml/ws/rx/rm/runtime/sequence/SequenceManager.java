@@ -50,22 +50,8 @@ import org.glassfish.gmbal.ManagedObject;
 @Description("Reliable Messaging Sequence Manager")
 @AMXMetadata(type = "RMSequenceManager")
 public interface SequenceManager extends TimeSynchronizer {
-    public static enum Type {
-        CLIENT("client"),
-        ENDPOINT("endpoint");
+    public static final String MANAGED_BEAN_NAME = "RMSequenceManager";
 
-        private final String identifier;
-
-        private Type(String identifier) {
-            this.identifier = identifier;
-        }
-
-        @Override
-        public String toString() {
-            return identifier;
-        }        
-    }
-    
     @ManagedAttribute
     @Description("All RM sequences")
     public Map<String, ? extends Sequence> sequences();
@@ -75,13 +61,22 @@ public interface SequenceManager extends TimeSynchronizer {
     public Map<String, String> boundSequences();
 
     /**
-     * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
+     * Closes an existing inbound sequence. The closed inbound sequence is still kept in the internal sequence storage
      * 
-     * @param sequenceId the unique sequence identifier
+     * @param sequenceId the unique inbound sequence identifier
      *
-     * @return closed sequence object
+     * @return closed inbound sequence object
      */
-    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException;
+    public Sequence closeInboundSequence(String sequenceId) throws UnknownSequenceException;
+
+    /**
+     * Closes an existing outbound sequence. The closed outbound sequence is still kept in the internal sequence storage
+     *
+     * @param sequenceId the unique outbound sequence identifier
+     *
+     * @return closed oubtound sequence object
+     */
+    public Sequence closeOutboundSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
      * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
@@ -122,15 +117,26 @@ public interface SequenceManager extends TimeSynchronizer {
     public String generateSequenceUID();
 
     /**
-     * Retrieves an existing sequence from the internal sequence storage
-     * 
-     * @param sequenceId the unique sequence identifier
-     * 
-     * @return sequence identified with the {@code sequenceId} identifier
-     * 
+     * Retrieves an existing inbound sequence from the internal sequence storage
+     *
+     * @param sequenceId the unique inbound sequence identifier
+     *
+     * @return inbound sequence identified with the {@code sequenceId} identifier
+     *
+     * @exception UnknownSequenceExceptio in case no such inbound sequence is registered within the sequence manager
+     */
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException;
+
+    /**
+     * Retrieves an existing outbound sequence from the internal sequence storage
+     *
+     * @param sequenceId the unique outbound sequence identifier
+     *
+     * @return outbound sequence identified with the {@code sequenceId} identifier
+     *
      * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
      */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
      * Provides information on whether the sequence identifier is a valid identifier that belongs to an existing 

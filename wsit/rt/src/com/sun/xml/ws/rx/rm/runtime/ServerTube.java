@@ -136,7 +136,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
-                SequenceManager.Type.ENDPOINT,
                 inboundQueueBuilder,
                 outboundQueueBuilder,
                 configuration.getManagedObjectManager());
@@ -174,7 +173,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
 
-                if (!isSecurityContextTokenIdValid(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
+                if (!isSecurityContextTokenIdValid(rc.getInboundSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
                     // TODO L10N + maybe throw SOAP fault exception?
                     throw new RmSecurityException("Security context token on the message does not match the token bound to the sequence");
                 }
@@ -371,17 +370,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
-        Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
+        Sequence inboundSequence = rc.getInboundSequence(requestData.getSequenceId());
 
         // TODO handle last message number - pass it to the sequence so that it can allocate new unacked messages if necessary
         // int lastMessageNumber = closeSeqElement.getLastMsgNumber();
 
         String boundSequenceId = rc.getBoundSequenceId(inboundSequence.getId());
         try {
-            rc.sequenceManager().closeSequence(inboundSequence.getId());
+            rc.sequenceManager().closeInboundSequence(inboundSequence.getId());
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager().closeSequence(boundSequenceId);
+                rc.sequenceManager().closeOutboundSequence(boundSequenceId);
             }
         }
 
@@ -398,7 +397,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         // Formulating response:
         //   If there is an outbound sequence, client expects us to terminate it => sending TerminateSequence back.
         //   If not, we send TerminateSequenceResponse
-        Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
+        Sequence inboundSequence = rc.getInboundSequence(requestData.getSequenceId());
         Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
         try {
             if (outboundSeqence != null) {

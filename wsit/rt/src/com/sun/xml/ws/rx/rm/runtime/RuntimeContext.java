@@ -181,10 +181,16 @@ public final class RuntimeContext {
         scheduledTaskManager.stopAll();
     }
 
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
         assert sequenceManager != null;
 
-        return sequenceManager.getSequence(sequenceId);
+        return sequenceManager.getInboundSequence(sequenceId);
+    }
+
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
+        return sequenceManager.getOutboundSequence(sequenceId);
     }
 
     public Sequence getBoundSequence(String sequenceId) throws UnknownSequenceException {
