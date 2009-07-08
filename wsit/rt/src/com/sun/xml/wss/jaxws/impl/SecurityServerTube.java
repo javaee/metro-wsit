@@ -135,8 +135,7 @@ public class SecurityServerTube extends SecurityTubeBase {
     private static final String WSCONTEXT_DELEGATE="META-INF/services/com.sun.xml.ws.api.server.WebServiceContextDelegate";
     private Class contextDelegate = null;
 
-    private SessionManager sessionManager =
-            SessionManager.getSessionManager();
+    private SessionManager sessionManager = null;
     //private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
     private Set wsscConfig = null;
@@ -181,6 +180,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (cntxtClass != null) {
                  contextDelegate = this.loadClass(cntxtClass);
             }
+            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration)tubeConfig).getEndpoint());
         } catch (Exception e) {            
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
@@ -251,6 +251,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer));
+        ctx.setExtraneousProperty("SessionManager", sessionManager);
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
@@ -402,6 +403,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage /*, thereWasAFault*/);
+        ctx.setExtraneousProperty("SessionManager", sessionManager);
         Message msg = null;
         try{
             msg = retPacket.getMessage();
@@ -606,6 +608,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
+        ictx.getOtherProperties().put("SessionManager", sessionManager);
         
         Message msg = packet.getMessage();
         Message retMsg  ;

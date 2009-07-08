@@ -38,63 +38,27 @@ package com.sun.xml.ws.security.trust.impl.client;
 
 import com.sun.xml.ws.addressing.policy.Address;
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
-import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.trust.WSTrustVersion;
-import java.net.URI;
-import java.util.Iterator;
-import java.util.Map;
-import javax.xml.namespace.QName;
-
-import java.util.logging.Level;
-import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import java.io.ByteArrayOutputStream;
-
-import com.sun.xml.ws.addressing.policy.Address;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
-import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.policy.IssuedToken;
-import com.sun.xml.ws.security.policy.Issuer;
-import com.sun.xml.ws.security.policy.RequestSecurityTokenTemplate;
+import com.sun.xml.ws.security.secext10.*;
 import com.sun.xml.ws.security.trust.*;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.wss.impl.MessageConstants;
+
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
-
-import java.util.logging.Level;
-
-
-import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import org.w3c.dom.Document;
-
 import org.w3c.dom.Element;
-
-import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
-import java.security.cert.X509Certificate;
-
 
 /**
  *
@@ -230,11 +194,30 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     }
 
     public void setOBOToken(String username, String password){
-        //ToDo
+        ObjectFactory fact = new ObjectFactory();
+        UsernameTokenType ut = fact.createUsernameTokenType();
+        AttributedString un = fact.createAttributedString();
+        un.setValue(username);
+        AttributedString pwd = fact.createAttributedString();
+        pwd.setValue(password);
+        ut.setUsername(un);
+        ut.setPassword(pwd);
+
+        this.oboToken = new GenericToken(fact.createUsernameToken(ut));
     }
 
     public void setOBOToken(X509Certificate cert){
-        //ToDo
+        ObjectFactory fact = new ObjectFactory();
+        BinarySecurityTokenType bst = fact.createBinarySecurityTokenType();
+        bst.setValueType(MessageConstants.X509v3_NS);
+        bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+        try{
+            bst.setValue(cert.getEncoded());
+        }catch(CertificateEncodingException ex){
+            throw new RuntimeException(ex);
+        }
+
+        this.oboToken = new GenericToken(fact.createBinarySecurityToken(bst));
     }
     
     public String getTokenType(){

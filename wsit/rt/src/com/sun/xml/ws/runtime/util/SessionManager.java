@@ -40,6 +40,10 @@ package com.sun.xml.ws.runtime.util;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import java.util.Set;
 import com.sun.xml.ws.util.ServiceFinder;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.sun.xml.ws.api.server.WSEndpoint;
 
 /**
  *
@@ -60,8 +64,8 @@ import com.sun.xml.ws.util.ServiceFinder;
 
 public abstract class SessionManager {
 
-    
     private static SessionManager manager;
+    private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
      
     /**
      * Returns an existing session identified by the Key else null
@@ -152,10 +156,35 @@ public abstract class SessionManager {
      *
      * @return The value of the <code>manager</code> field.
      */ 
+    public static SessionManager getSessionManager(WSEndpoint endPoint) {
+         synchronized (SessionManager.class) {
+             SessionManager sm = sessionManagers.get(endPoint);
+             if (sm == null) {
+                 ServiceFinder<SessionManager> finder = 
+                         ServiceFinder.find(SessionManager.class);
+                 if (finder != null && finder.toArray().length > 0) {
+                    sm = finder.toArray()[0];
+                 } else {
+                    sm = new SessionManagerImpl();
+                 }
+                 sessionManagers.put(endPoint, sm);
+             }
+             return sm;
+         }
+     }
+
+    /**
+     * Returns the single instance of SessionManager
+     * Use the usual services mechanism to find implementing class.  If not
+     * found, use <code>com.sun.xml.ws.runtime.util.SessionManager</code>
+     * by default.
+     *
+     * @return The value of the <code>manager</code> field.
+     */
     public static SessionManager getSessionManager() {
          synchronized (SessionManager.class) {
              if (manager == null) {
-                 ServiceFinder<SessionManager> finder = 
+                 ServiceFinder<SessionManager> finder =
                          ServiceFinder.find(SessionManager.class);
                  if (finder != null && finder.toArray().length > 0) {
                     manager = finder.toArray()[0];
@@ -166,6 +195,5 @@ public abstract class SessionManager {
              return manager;
          }
      }
-
 }
 

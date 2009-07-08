@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.4 2009-07-01 00:27:55 jdg6688 Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.5 2009-07-08 02:34:31 jdg6688 Exp $
  */
 
 /*
@@ -58,8 +58,7 @@ public class OnBehalfOfImpl extends OnBehalfOfType implements OnBehalfOf {
     private SecurityTokenReference str = null;
     
     public OnBehalfOfImpl(Token oboToken){
-        final Element element = (Element)oboToken.getTokenValue();
-        setAny(element);
+        setAny(oboToken.getTokenValue());
     }
     
     public OnBehalfOfImpl(OnBehalfOfType oboType){

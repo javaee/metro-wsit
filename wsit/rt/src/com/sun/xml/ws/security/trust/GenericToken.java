@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import javax.xml.bind.JAXBElement;
 
 /**
  *
@@ -65,7 +66,7 @@ public class GenericToken implements Token{
             LogDomainConstants.TRUST_IMPL_DOMAIN,
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
-    private Element token;
+    private Object token;
     
     //private JAXBElement tokenEle;
     
@@ -87,6 +88,10 @@ public class GenericToken implements Token{
             id = UUID.randomUUID().toString();
         }
     }
+
+    public GenericToken(JAXBElement token){
+        this.token = token;
+    }
     
     public GenericToken(Element token, String tokenType){
         this(token);
@@ -97,6 +102,8 @@ public class GenericToken implements Token{
     public GenericToken(SecurityHeaderElement headerElement){
         this.she = headerElement;
     }
+
+
     
     public String getType(){
         if (tokenType != null) {

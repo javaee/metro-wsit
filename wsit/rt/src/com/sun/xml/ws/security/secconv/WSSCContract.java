@@ -333,57 +333,19 @@ public class WSSCContract {
                     LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
             throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
-        
+
+        final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
         final Session session =
-                SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
+                sm.createSession(token.getIdentifier().toString());
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
         populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
-        SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
+        sm.addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
     
-    /*
-    private BaseSTSResponse createResponseFor13NS(final Entropy serverEntropy, final URI con, final AppliesTo scopes, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
-
-        // Create Security Context and SecurityContextToken
-        final SecurityContextToken token = WSTrustUtil.createSecurityContextToken(wsscEleFac);
-        final RequestedSecurityToken rst = wsscEleFac.createRequestedSecurityToken(token);
-        
-        // Create references
-        final SecurityTokenReference attachedReference = createSecurityTokenReference(token.getWsuId(),false);
-        final RequestedAttachedReference rar = wsscEleFac.createRequestedAttachedReference(attachedReference);
-        final SecurityTokenReference unattachedRef = createSecurityTokenReference(token.getIdentifier().toString(), true);
-        final RequestedUnattachedReference rur = wsscEleFac.createRequestedUnattachedReference(unattachedRef);
-        
-        // Create Lifetime
-        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
-        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, TIMEOUT, wsTrustVer);
-        
-        BaseSTSResponse response = null;
-        try {
-            response =
-                    wsscEleFac.createRSTRCollectionForIssue(tokenType, con, rst, scopes, rar, rur, proofToken, serverEntropy, lifetime);
-        } catch (WSTrustException ex){
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
-        }
-        
-        final Session session =
-                SessionManager.getSessionManager().createSession(token.getIdentifier().toString());
-        if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE,
-                    LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
-        }
-        populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
-        SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), context);
-        return response;
-    }*/
-    
-
     private void populateITC(final long currentTime, final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
         
         // Populate the IssuedTokenContext
@@ -551,6 +513,7 @@ public class WSSCContract {
     private BaseSTSResponse createRenewResponse(final RenewTarget renewTgt, final Entropy serverEntropy, final URI con, final byte[] secret, final RequestedProofToken proofToken, final IssuedTokenContext context, final URI tokenType) throws WSSecureConversationException {
 
         final SecurityTokenReference str = renewTgt.getSecurityTokenReference();
+        final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
         String id = null;
         final Reference ref = str.getReference();
         if (ref.getType().equals("Reference")){
@@ -563,7 +526,7 @@ public class WSSCContract {
         final RequestedAttachedReference rar = wsscEleFac.createRequestedAttachedReference(attachedReference);
         
         
-        final IssuedTokenContext ctx = SessionManager.getSessionManager().getSecurityContext(id, false);
+        final IssuedTokenContext ctx = sm.getSecurityContext(id, false);
         
         if (ctx == null || ctx.getSecurityToken() == null){
             log.log(Level.SEVERE,
@@ -598,10 +561,9 @@ public class WSSCContract {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_0014_RSTR_RESPONSE(WSTrustUtil.elemToString(rstr, wsTrustVer)));
         }
-        final Session session =
-                SessionManager.getSessionManager().getSession(token.getIdentifier().toString());
+        final Session session = sm.getSession(token.getIdentifier().toString());
         populateRenewedITC(session, secret, token, ctx, attachedReference);
-        SessionManager.getSessionManager().addSecurityContext(token.getIdentifier().toString(), ctx);
+        sm.addSecurityContext(token.getIdentifier().toString(), ctx);
         return rstr;
     }
     
@@ -618,7 +580,7 @@ public class WSSCContract {
             id = ((DirectReference)ref).getURIAttr().toString();
         }
                 
-        final IssuedTokenContext cxt = SessionManager.getSessionManager().getSecurityContext(id, true);
+        final IssuedTokenContext cxt = ((SessionManager)context.getOtherProperties().get("SessionManager")).getSecurityContext(id, true);
         if (cxt == null || cxt.getSecurityToken() == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));

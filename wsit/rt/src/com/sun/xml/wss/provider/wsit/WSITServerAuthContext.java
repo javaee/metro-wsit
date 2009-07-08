@@ -125,8 +125,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     protected static final String TRUE="true";
     static final String SERVICE_ENDPOINT = "SERVICE_ENDPOINT";
     //****************Class Variables***************
-    private SessionManager sessionManager=
-            SessionManager.getSessionManager();
+    private SessionManager sessionManager= null;
     
     
     //******************Instance Variables*********
@@ -153,6 +152,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //this.subject = subject;
         //this.map = map;
         endPoint = (WSEndpoint)map.get("ENDPOINT");
+        sessionManager = SessionManager.getSessionManager(endPoint);
         
         Iterator it = inMessagePolicyMap.values().iterator();
         Set configAssertions = null;
@@ -322,6 +322,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         ctx.setExtraneousProperty(MessageConstants.AUTH_SUBJECT, clientSubject);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
                 new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false, rmVer));
+        ctx.setExtraneousProperty("SessionManager", sessionManager);
         try{
             if(!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
@@ -487,6 +488,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage);
+        ctx.setExtraneousProperty("SessionManager", sessionManager);
         Message msg = retPacket.getMessage();
         
         try{
@@ -718,6 +720,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     private Packet invokeSecureConversationContract(Packet packet, ProcessingContext ctx, boolean isSCTIssue) {
         
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
+        ictx.getOtherProperties().put("SessionManager", sessionManager);
         Message msg = packet.getMessage();
         Message retMsg = null;
         String retAction = null;
