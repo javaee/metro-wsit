@@ -86,7 +86,7 @@ public final class InVmSequenceManager implements SequenceManager {
     public InVmSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (this.managedObjectManager != null) {
-            this.managedObjectManager.registerAtRoot(this, type.toString());
+            this.managedObjectManager.registerAtRoot(this, "RMSequenceManager");
         }
 
         this.inboundQueueBuilder = inboundQueueBuilder;
