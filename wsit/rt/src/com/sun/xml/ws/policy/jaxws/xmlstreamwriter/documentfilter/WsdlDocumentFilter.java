@@ -83,7 +83,9 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
                     
                     new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
                     
-                    new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS")
+                    new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS"),
+
+                    new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService")
                     )
                     );
         }
