@@ -34,11 +34,11 @@
  * holder.
  */
 
-package com.sun.xml.ws.management.server;
+package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.management.EndpointCreationAttributes;
-//import com.sun.xml.ws.api.management.ManagedEndpoint;
+import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
+//import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;

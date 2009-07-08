@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.management.server;
+package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;

@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.management;
+package com.sun.xml.ws.config.management;
 
 //import com.sun.xml.ws.management.policy.ManagementAssertion;
 //import com.sun.xml.ws.policy.PolicyMap;
