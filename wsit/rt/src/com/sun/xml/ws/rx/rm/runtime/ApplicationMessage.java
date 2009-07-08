@@ -33,10 +33,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
+import java.io.InputStream;
 
 /**
  * A protocol independent abstraction of an application message that is used as part of RM processing.
@@ -44,6 +44,7 @@ import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public interface ApplicationMessage {
+
     /**
      * Returns identifier of a sequence this message is associated with
      *
@@ -92,4 +93,10 @@ public interface ApplicationMessage {
      * @return number of the next resend attempt
      */
     public int getNextResendCount();
+
+    /**
+     * Returns {@code byte[]} representation of the message instance
+     * @return {@code byte[]} representation of the message instance
+     */
+    public byte[] toBytes();
 }

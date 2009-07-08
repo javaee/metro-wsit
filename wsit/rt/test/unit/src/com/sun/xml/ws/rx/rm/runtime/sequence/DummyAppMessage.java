@@ -27,4 +27,8 @@ class DummyAppMessage extends ApplicationMessageBase {
     public DummyAppMessage(String correlationId) {
         super(correlationId);
     }
+
+    public byte[] toBytes() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

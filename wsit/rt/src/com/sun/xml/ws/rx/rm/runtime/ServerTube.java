@@ -42,6 +42,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.runtime.util.Session;
@@ -65,6 +66,7 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.net.URI;
@@ -90,29 +92,27 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private static final String MESSAGE_NUMBER_PROPERTY = "com.sun.xml.ws.messagenumber";
     //
     private final RuntimeContext rc;
-    private final ServerSourceDeliveryCallback sourceDeliveryCallback;
-    private final ServerDestinationDeliveryCallback destinationDeliveryCallback;
+    private final WSEndpoint endpoint;
 
     public ServerTube(ServerTube original, TubeCloner cloner) {
         super(original, cloner);
 
         this.rc = original.rc;
-        this.sourceDeliveryCallback = original.sourceDeliveryCallback;
-        this.destinationDeliveryCallback = original.destinationDeliveryCallback;
+        this.endpoint = original.endpoint;
     }
 
     public ServerTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
         super(tubelineHead);
 
-        // TODO P3 don't take the first config alternative automatically...
+        this.endpoint = context.getEndpoint();
 
+        // TODO P3 don't take the first config alternative automatically...
         if (configuration.getAddressingVersion() == null) {
             throw new RxRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
         }
 
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
-                SequenceManagerFactory.INSTANCE.getServerSequenceManager(context.getEndpoint(), configuration.getManagedObjectManager()),
                 new Communicator(
                 "RmServerTubeCommunicator",
                 null, // TODO P3 can we get the endpoint address?
@@ -121,12 +121,27 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
                 configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
-
         this.rc = rcBuilder.build();
 
-        this.sourceDeliveryCallback = new ServerSourceDeliveryCallback(rc);
-        this.destinationDeliveryCallback = new ServerDestinationDeliveryCallback(rc);
+        DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
+                configuration,
+                PostmanPool.INSTANCE.getPostman(),
+                new ServerDestinationDeliveryCallback(rc));
+        DeliveryQueueBuilder outboundQueueBuilder = null;
+        if (configuration.requestResponseOperationsDetected()) {
+            outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
+                    configuration,
+                    PostmanPool.INSTANCE.getPostman(),
+                    new ServerSourceDeliveryCallback(rc));
+        }
 
+        SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+                SequenceManager.Type.CLIENT,
+                inboundQueueBuilder,
+                outboundQueueBuilder,
+                configuration.getManagedObjectManager());
+
+        this.rc.setSequenceManager(sequenceManager);
         rc.startRedeliveryTask();
     }
 
@@ -244,6 +259,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             rc.stopAllTasks();
+
+            SessionManager.removeSessionManager(endpoint);
+
             // TODO
         } finally {
             super.preDestroy();
@@ -272,7 +290,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         EndpointReference requestDestination = null;
         if (requestData.getOfferedSequenceId() != null) {
-            if (rc.sequenceManager.isValid(requestData.getOfferedSequenceId())) {
+            if (rc.sequenceManager().isValid(requestData.getOfferedSequenceId())) {
                 // we already have such sequence
                 throw new CreateSequenceRefusedFault(
                         LocalizationMessages.WSRM_1137_OFFERED_ID_ALREADY_IN_USE(requestData.getOfferedSequenceId()),
@@ -322,29 +340,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
         }
 
-        DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
-                rc,
-                PostmanPool.INSTANCE.getPostman(),
-                destinationDeliveryCallback);
-
-        Sequence inboundSequence = rc.sequenceManager.createInboundSequence(
-                rc.sequenceManager.generateSequenceUID(),
+        Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
+                rc.sequenceManager().generateSequenceUID(),
                 receivedSctId,
-                calculateSequenceExpirationTime(requestData.getExpiry()),
-                inboundQueueBuilder);
+                calculateSequenceExpirationTime(requestData.getExpiry()));
 
         if (requestData.getOfferedSequenceId() != null) {
-            DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
-                    rc,
-                    PostmanPool.INSTANCE.getPostman(),
-                    sourceDeliveryCallback);
-
-            Sequence outboundSequence = rc.sequenceManager.createOutboundSequence(
+            Sequence outboundSequence = rc.sequenceManager().createOutboundSequence(
                     requestData.getOfferedSequenceId(),
                     receivedSctId,
-                    calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()),
-                    outboundQueueBuilder);
-            rc.sequenceManager.bindSequences(inboundSequence.getId(), outboundSequence.getId());
+                    calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()));
+            rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequence.getId());
         }
 
         if (!hasSession(request)) { // security did not start session - we must do it
@@ -372,10 +378,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         String boundSequenceId = rc.getBoundSequenceId(inboundSequence.getId());
         try {
-            rc.sequenceManager.closeSequence(inboundSequence.getId());
+            rc.sequenceManager().closeSequence(inboundSequence.getId());
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager.closeSequence(boundSequenceId);
+                rc.sequenceManager().closeSequence(boundSequenceId);
             }
         }
 
@@ -408,10 +414,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
         } finally {
             Utilities.endSessionIfExists(request.endpoint, inboundSequence.getId());
             try {
-                rc.sequenceManager.terminateSequence(inboundSequence.getId());
+                rc.sequenceManager().terminateSequence(inboundSequence.getId());
             } finally {
                 if (outboundSeqence != null) {
-                    rc.sequenceManager.terminateSequence(outboundSeqence.getId());
+                    rc.sequenceManager().terminateSequence(outboundSeqence.getId());
                 }
             }
         }
@@ -497,7 +503,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         if (expiryDuration == Sequence.NO_EXPIRY) {
             return Sequence.NO_EXPIRY;
         } else {
-            return expiryDuration + rc.sequenceManager.currentTimeInMillis();
+            return expiryDuration + rc.sequenceManager().currentTimeInMillis();
         }
     }
 }

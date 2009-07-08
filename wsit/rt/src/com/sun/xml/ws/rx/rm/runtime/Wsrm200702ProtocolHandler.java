@@ -63,7 +63,6 @@ import com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.TerminateSequenceElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.UsesSequenceSTR;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.math.BigInteger;
@@ -80,14 +79,14 @@ import javax.xml.namespace.QName;
 final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
     private static final Logger LOGGER = Logger.getLogger(Wsrm200702ProtocolHandler.class);
-    private final SequenceManager sequenceManager;
+    private final RuntimeContext rc;
 
-    Wsrm200702ProtocolHandler(RxConfiguration configuration, SequenceManager sequenceManager, Communicator communicator) {
+    Wsrm200702ProtocolHandler(RxConfiguration configuration, RuntimeContext rc, Communicator communicator) {
         super(RmVersion.WSRM200702, configuration, communicator);
 
-        assert sequenceManager != null;
+        assert rc != null;
 
-        this.sequenceManager = sequenceManager;
+        this.rc = rc;
     }
 
     public CreateSequenceData toCreateSequenceData(@NotNull Packet packet) throws RxRuntimeException {
@@ -124,7 +123,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
         CreateSequenceResponseElement csrElement = unmarshallMessage(message);
 
-        return csrElement.toDataBuilder(sequenceManager).build();
+        return csrElement.toDataBuilder(rc.sequenceManager()).build();
     }
 
     public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
@@ -273,7 +272,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                 ackElement.addAckRange(0, 0); // we don't have any ack ranges => we have not received any message yet
             }
 
-            if (sequenceManager.getSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
+            if (rc.getSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
                 ackElement.setFinal(new SequenceAcknowledgementElement.Final());
             }
 
@@ -328,7 +327,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                             lastLowerBound = nackId.longValue() + 1;
                         }
                     }
-                    long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageNumber();
+                    long lastMessageId = rc.getSequence(ackElement.getId()).getLastMessageNumber();
                     if (lastLowerBound <= lastMessageId) {
                         ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                     }

@@ -89,7 +89,7 @@ public final class AcknowledgementData {
     private List<AckRange> ackedRanges;
     private String ackRequestedSequenceId;
 
-    public AcknowledgementData(String ackedSequenceId, List<AckRange> ackedRanges, String ackRequestedSequenceId) {
+    private AcknowledgementData(String ackedSequenceId, List<AckRange> ackedRanges, String ackRequestedSequenceId) {
         this.ackedSequenceId = ackedSequenceId;
         this.ackedRanges = ackedRanges;
         this.ackRequestedSequenceId = ackRequestedSequenceId;

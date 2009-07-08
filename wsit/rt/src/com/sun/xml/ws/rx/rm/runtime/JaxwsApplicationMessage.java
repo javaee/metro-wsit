@@ -37,7 +37,18 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
+import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.commons.Logger;
+import com.sun.xml.ws.rx.RxRuntimeException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * JAX-WS specific application message
@@ -46,15 +57,23 @@ import com.sun.xml.ws.api.message.Packet;
  */
 public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
-    private 
-    @NotNull
-    final Packet packet;
-    private 
-    @NotNull
-    final Message message;
+    private static final Logger LOGGER = Logger.getLogger(JaxwsApplicationMessage.class);
+    //
+    private @NotNull final Packet packet;
+    private @NotNull final Message message;
 
     public JaxwsApplicationMessage(@NotNull Packet packet, @NotNull String correlationId) {
         super(correlationId);
+
+        assert packet != null;
+        assert packet.getMessage() != null;
+
+        this.packet = packet;
+        this.message = packet.getMessage();
+    }
+
+    private JaxwsApplicationMessage(int initialResendCounterValue, @NotNull String correlationId, @NotNull String sequenceId, long messageNumber, Packet packet) {
+        super(initialResendCounterValue, correlationId, sequenceId, messageNumber, null);
 
         assert packet != null;
         assert packet.getMessage() != null;
@@ -69,5 +88,58 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
     public @NotNull Packet getPacket() {
         return packet;
+    }
+
+    @Override
+    public byte[] toBytes() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try {
+            if (message != null) {
+                XMLStreamWriter xsw = XMLStreamWriterFactory.create(baos, "UTF-8");
+                try {
+                    packet.getMessage().writeTo(xsw);
+                } catch (XMLStreamException ex) {
+                    // TODO L10N
+                    throw LOGGER.logSevereException(new RxRuntimeException("Unable to serialize message to XML stream", ex));
+                } finally {
+                    try {
+                        xsw.close();
+                    } catch (XMLStreamException ex) {
+                        LOGGER.warning("Error closing XMLStreamWriter after message was serialized to XML stream", ex);
+                    }
+                }
+            }
+
+            return baos.toByteArray();
+        } finally {
+            try {
+                baos.close();
+            } catch (IOException ex) {
+                LOGGER.warning("Error closing ByteArrayOutputStream after message was serialized to bytes", ex);
+            }
+        }
+    }
+
+    public static JaxwsApplicationMessage newInstance(@NotNull InputStream dataStream, int initialResendCounterValue, @NotNull String correlationId, @NotNull String sequenceId, long messageNumber) {
+        try {
+            XMLStreamReader xsr = XMLStreamReaderFactory.create(null, dataStream, "UTF-8", true);
+            try {
+                Message m = Messages.create(xsr);
+                return new JaxwsApplicationMessage(new Packet(m), correlationId); // TODO P1 fill in packet data
+            } finally {
+                try {
+                    xsr.close();
+                } catch (XMLStreamException ex) {
+                    LOGGER.warning("Error closing XMLStreamReader after message was de-serialized from XML stream", ex);
+                }
+            }
+        } finally {
+            try {
+                dataStream.close();
+            } catch (IOException ex) {
+                LOGGER.warning("Error closing data input stream after message was de-serialized from bytes", ex);
+            }
+        }
     }
 }

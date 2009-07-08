@@ -37,6 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
@@ -46,20 +47,21 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 
 /**
  * Handles outgoing application messages. This class encapsulates 
- * RM Source logic that is independent on of tha actual delivery mechanism 
+ * RM Source logic that is independent on of the actual delivery mechanism
  * or framework (such as JAX-WS fibers).
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
-    private final SequenceManager sequenceManager;
+    private volatile SequenceManager sequenceManager;
 
-    SourceMessageHandler(@NotNull SequenceManager sequenceManager) {
-        assert sequenceManager != null;
-
+    SourceMessageHandler(@Nullable SequenceManager sequenceManager) {
         this.sequenceManager = sequenceManager;
     }
 
+    void setSequenceManager(SequenceManager sequenceManager) {
+        this.sequenceManager = sequenceManager;
+    }
     /**
      * Registers outgoing message with the provided outbound sequence and
      * sets sequenceId and messageNumber properties on the outgoing message.
@@ -70,6 +72,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
     public void registerMessage(@NotNull ApplicationMessage outMessage, @NotNull String outboundSequenceId) throws DuplicateMessageRegistrationException, UnknownSequenceException {
+        assert sequenceManager != null;
         assert outMessage != null;
         assert outboundSequenceId != null;
 
@@ -85,6 +88,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
     public void attachAcknowledgementInfo(@NotNull ApplicationMessage outMessage) throws UnknownSequenceException {
+        assert sequenceManager != null;
         assert outMessage != null;
         assert outMessage.getSequenceId() != null;
 
@@ -100,6 +104,7 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
     public AcknowledgementData getAcknowledgementData(String outboundSequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         Sequence inboundSequence = sequenceManager.getBoundSequence(outboundSequenceId);
@@ -118,6 +123,8 @@ class SourceMessageHandler implements RedeliveryTask.DeliveryHandler {
     }
 
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException {
+        assert sequenceManager != null;
+        
         sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 }

@@ -74,12 +74,23 @@ public final class InVmSequenceManager implements SequenceManager {
      * Monitoring manager
      */
     private final ManagedObjectManager managedObjectManager;
+    /**
+     * Inbound delivery queue bulder
+     */
+    private final DeliveryQueueBuilder inboundQueueBuilder;
+    /**
+     * Outbound delivery queue bulder
+     */
+    private final DeliveryQueueBuilder outboundQueueBuilder;
 
-    public InVmSequenceManager(SequenceManager.Type type, ManagedObjectManager managedObjectManager) {
+    public InVmSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
-        if (managedObjectManager != null) {
-            managedObjectManager.registerAtRoot(this, type.toString());
+        if (this.managedObjectManager != null) {
+            this.managedObjectManager.registerAtRoot(this, type.toString());
         }
+
+        this.inboundQueueBuilder = inboundQueueBuilder;
+        this.outboundQueueBuilder = outboundQueueBuilder;
     }
 
     /**
@@ -99,17 +110,17 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
         SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
-        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder, this));
+        return registerSequence(new OutboundSequence(data, this.outboundQueueBuilder, this));
     }
 
     /**
      * {@inheritDoc}
      */
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
         SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
-        return registerSequence(new InboundSequence(data, deliveryQueueBuilder, this));
+        return registerSequence(new InboundSequence(data, this.inboundQueueBuilder, this));
     }
 
     /**

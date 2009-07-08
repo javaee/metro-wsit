@@ -47,7 +47,11 @@ import junit.framework.TestCase;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class InboundSequenceTest extends TestCase {
-    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
+    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+            SequenceManager.Type.CLIENT,
+            SequenceTestUtils.getDeliveryQueueBuilder(),
+            SequenceTestUtils.getDeliveryQueueBuilder(),
+            null);
     private Sequence sequence;
     
     public InboundSequenceTest(String testName) {
@@ -59,8 +63,7 @@ public class InboundSequenceTest extends TestCase {
         sequence = sequenceManager.createInboundSequence(
                 sequenceManager.generateSequenceUID(),
                 null,
-                Sequence.NO_EXPIRY,
-                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+                Sequence.NO_EXPIRY);
         super.setUp();
     }
 
@@ -179,8 +182,7 @@ public class InboundSequenceTest extends TestCase {
         Sequence inbound = sequenceManager.createInboundSequence(
                 sequenceManager.generateSequenceUID(),
                 null,
-                Sequence.NO_EXPIRY,
-                SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+                Sequence.NO_EXPIRY);
         assertEquals(Sequence.State.CREATED, inbound.getState());
 
         // TODO test closing

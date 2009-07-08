@@ -48,11 +48,9 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
-import com.sun.xml.ws.rx.util.Communicator;
 import java.util.LinkedList;
 import java.util.List;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -64,7 +62,7 @@ import org.glassfish.gmbal.ManagedObjectManager;
 final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
-    static final DeliveryQueueBuilder getDeliveryQueueBuilder(SequenceManager sequenceManager) {
+    static final DeliveryQueueBuilder getDeliveryQueueBuilder() {
         Tube tubeline = new AbstractFilterTubeImpl(null) {
 
             @Override
@@ -72,7 +70,6 @@ final class SequenceTestUtils  {
                 return this;
             }
         };
-        Communicator communicator = new Communicator("Dummy", null, tubeline, null, AddressingVersion.W3C, SOAPVersion.SOAP_12, RmVersion.WSRM200702.getJaxbContext(AddressingVersion.W3C));
         RxConfiguration config = new RxConfiguration() {
 
             public boolean isReliableMessagingEnabled() {
@@ -144,8 +141,7 @@ final class SequenceTestUtils  {
             }
         };
 
-        RuntimeContext rc = RuntimeContext.getBuilder(config, sequenceManager, communicator).build();
-        return DeliveryQueueBuilder.getBuilder(rc, PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
+        return DeliveryQueueBuilder.getBuilder(config, PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
 
             public void deliver(ApplicationMessage message) {
             }

@@ -74,7 +74,7 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * Internal in-memory data access lock
      */
-    private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock dataLock = new ReentrantReadWriteLock();
     /**
      * Internal in-memory cache of sequence data
      */
@@ -87,12 +87,23 @@ public final class PersistentSequenceManager implements SequenceManager {
      * Monitoring manager
      */
     private final ManagedObjectManager managedObjectManager;
+    /**
+     * Inbound delivery queue bulder
+     */
+    private final DeliveryQueueBuilder inboundQueueBuilder;
+    /**
+     * Outbound delivery queue bulder
+     */
+    private final DeliveryQueueBuilder outboundQueueBuilder;
 
-    public PersistentSequenceManager(SequenceManager.Type type, ManagedObjectManager managedObjectManager) {
+    public PersistentSequenceManager(SequenceManager.Type type, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, type.toString());
         }
+
+        this.inboundQueueBuilder = inboundQueueBuilder;
+        this.outboundQueueBuilder = outboundQueueBuilder;
         // TODO recover();
     }
 
@@ -113,17 +124,17 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
         PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
-        return registerSequence(new OutboundSequence(data, deliveryQueueBuilder, this));
+        return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this));
     }
 
     /**
      * {@inheritDoc}
      */
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime, DeliveryQueueBuilder deliveryQueueBuilder) throws DuplicateSequenceException {
+    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
         PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
-        return registerSequence(new InboundSequence(data, deliveryQueueBuilder, this));
+        return registerSequence(new InboundSequence(data, inboundQueueBuilder, this));
     }
 
     /**
@@ -146,18 +157,40 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
-//        try {
-//            internalDataAccessLock.readLock().lock();
-//            if (sequences.containsKey(sequenceId)) {
-//                return sequences.get(sequenceId);
-//            } else {
-//                throw new UnknownSequenceException(sequenceId);
-//            }
-//        } finally {
-//            internalDataAccessLock.readLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
-    }
+        try {
+            dataLock.readLock().lock();
+            if (sequences.containsKey(sequenceId)) {
+                return sequences.get(sequenceId);
+            } else {
+                dataLock.readLock().unlock();
+                dataLock.writeLock().lock();
+                try {
+                    if (sequences.containsKey(sequenceId)) { // re-checking
+                        return sequences.get(sequenceId);
+                    } else {
+                        PersistentSequenceData.SequenceType sequenceType = null; // TODO
+
+                        PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(sqlConnection, sequenceId, sequenceType);
+                        if (sequenceData != null) {
+                            switch (sequenceType) {
+                                case Inbound:
+                                    return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this));
+                                case Outbound:
+                                    return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this));
+                            }
+                        }
+                    }
+                } finally {
+                    dataLock.readLock().lock();
+                    dataLock.writeLock().unlock();
+                }
+
+                throw new UnknownSequenceException(sequenceId); // sequence not found
+            }
+        } finally {
+            dataLock.readLock().unlock();
+        }
+   }
 
     /**
      * {@inheritDoc}
@@ -240,25 +273,6 @@ public final class PersistentSequenceManager implements SequenceManager {
 //        }
         throw new UnsupportedOperationException();
     }
-
-    /*
-    beginTransaction();
-    try {
-    PreparedStatement ps = sqlConnection.prepareStatement("");
-
-    final int rowsUpdated = ps.executeUpdate();
-    commit();
-
-    if (rowsUpdated != 1) {
-    throw new UnknownSequenceException("");
-    }
-    } catch (SQLException ex) {
-    abort();
-    // TODO L10N
-    throw LOGGER.logSevereException(new PersistenceException(
-    String.format("Error closing a sequence with id '%s'", sequenceId), ex));
-    }
-     */
     
     /**
      * Registers a new sequence in the internal sequence storage
@@ -267,7 +281,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private AbstractSequence registerSequence(AbstractSequence sequence) {
         try {
-            internalDataAccessLock.writeLock().lock();
+            dataLock.writeLock().lock();
 
             // no need to check for a duplicate:
             // if we were able to create PersistentSequenceData instance, it means that there is no duplicate
@@ -278,7 +292,7 @@ public final class PersistentSequenceManager implements SequenceManager {
 
             return sequence;
         } finally {
-            internalDataAccessLock.writeLock().unlock();
+            dataLock.writeLock().unlock();
         }
     }
 

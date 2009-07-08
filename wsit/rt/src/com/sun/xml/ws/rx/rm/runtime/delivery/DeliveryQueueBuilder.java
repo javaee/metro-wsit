@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
+import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 
@@ -47,22 +47,22 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
  */
 public final class DeliveryQueueBuilder {
     
-    private final @NotNull RuntimeContext rc;
+    private final @NotNull RxConfiguration configuration;
     private final @NotNull Postman postman;
     private final @NotNull Postman.Callback deliveryCallback;
 
     private Sequence sequence;
 
-    public static DeliveryQueueBuilder getBuilder(@NotNull RuntimeContext rc, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
-        return new DeliveryQueueBuilder(rc, postman, deliveryCallback);
+    public static DeliveryQueueBuilder getBuilder(@NotNull RxConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+        return new DeliveryQueueBuilder(configuration, postman, deliveryCallback);
     }
 
-    private DeliveryQueueBuilder(@NotNull RuntimeContext rc, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
-        assert rc != null;
+    private DeliveryQueueBuilder(@NotNull RxConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+        assert configuration != null;
         assert postman != null;
         assert deliveryCallback != null;
 
-        this.rc = rc;
+        this.configuration = configuration;
         this.postman = postman;
         this.deliveryCallback = deliveryCallback;
     }
@@ -77,8 +77,8 @@ public final class DeliveryQueueBuilder {
 
         // TODO P1 implement
 
-        if (rc.configuration.isOrderedDeliveryEnabled()) {
-            return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, rc.configuration.getDestinationBufferQuota());
+        if (configuration.isOrderedDeliveryEnabled()) {
+            return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, configuration.getDestinationBufferQuota());
         } else {
             return new SimpleDeliveryQueue(postman, deliveryCallback, sequence);
         }

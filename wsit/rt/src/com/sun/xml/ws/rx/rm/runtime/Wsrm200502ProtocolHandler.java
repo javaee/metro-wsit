@@ -61,7 +61,6 @@ import com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceAcknowledgementElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceElement.LastMessage;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200502.TerminateSequenceElement;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.math.BigInteger;
@@ -78,14 +77,14 @@ import javax.xml.namespace.QName;
 final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
 
     private static final Logger LOGGER = Logger.getLogger(Wsrm200502ProtocolHandler.class);
-    private final SequenceManager sequenceManager;
+    private final RuntimeContext rc;
 
-    Wsrm200502ProtocolHandler(RxConfiguration configuration, SequenceManager sequenceManager, Communicator communicator) {
+    Wsrm200502ProtocolHandler(RxConfiguration configuration, RuntimeContext rc, Communicator communicator) {
         super(RmVersion.WSRM200502, configuration, communicator);
 
-        assert sequenceManager != null;
+        assert rc != null;
 
-        this.sequenceManager = sequenceManager;
+        this.rc = rc;
     }
 
     public CreateSequenceData toCreateSequenceData(@NotNull Packet packet) throws RxRuntimeException {
@@ -115,7 +114,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         Message message = packet.getMessage();
         CreateSequenceResponseElement csrElement = unmarshallMessage(message);
 
-        return csrElement.toDataBuilder(sequenceManager).build();
+        return csrElement.toDataBuilder(rc.sequenceManager()).build();
     }
 
     public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
@@ -136,7 +135,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             loadAcknowledgementData(lastAppMessage, message);
 
             // simulating last message delivery
-            Sequence inboundSequence = sequenceManager.getSequence(lastAppMessage.getSequenceId());
+            Sequence inboundSequence = rc.getSequence(lastAppMessage.getSequenceId());
             try {
                 inboundSequence.registerMessage(lastAppMessage, false);
             } catch (Exception ex) {
@@ -166,7 +165,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         ApplicationMessage lastAppMessage = new ApplicationMessageBase("") {
         };
         try {
-            sequenceManager.getSequence(data.getSequenceId()).registerMessage(lastAppMessage, false);
+            rc.getSequence(data.getSequenceId()).registerMessage(lastAppMessage, false);
         } catch (DuplicateMessageRegistrationException ex) {
             LOGGER.logSevereException(ex);
         } catch (IllegalStateException ex) {
@@ -348,7 +347,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
                     }
                 }
 
-                long lastMessageId = sequenceManager.getSequence(ackElement.getId()).getLastMessageNumber();
+                long lastMessageId = rc.getSequence(ackElement.getId()).getLastMessageNumber();
                 if (lastLowerBound <= lastMessageId) {
                     ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                 }

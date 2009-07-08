@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.RxConfiguration;
@@ -54,8 +55,8 @@ import java.util.concurrent.ScheduledFuture;
  */
 public final class RuntimeContext {
 
-    public static Builder getBuilder(@NotNull RxConfiguration configuration, @NotNull SequenceManager sequenceManager, @NotNull Communicator communicator) {
-        return new Builder(configuration, sequenceManager, communicator);
+    public static Builder getBuilder(@NotNull RxConfiguration configuration, @NotNull Communicator communicator) {
+        return new Builder(configuration, communicator);
     }
 
     public static final class Builder {
@@ -65,31 +66,41 @@ public final class RuntimeContext {
         RxConfiguration configuration;
         private final
         @NotNull
-        SequenceManager sequenceManager;
-        private final
-        @NotNull
         Communicator communicator;
-        private final
-        @NotNull
-        SourceMessageHandler sourceMessageHandler;
-        private final
-        @NotNull
-        DestinationMessageHandler destinationMessageHandler;
         private final
         @NotNull
         RedeliveryTask redeliveryTask;
 
-        public Builder(@NotNull RxConfiguration configuration, @NotNull SequenceManager sequenceManager, @NotNull Communicator communicator) {
+        private
+        @Nullable
+        SequenceManager sequenceManager;
+        private
+        @Nullable
+        SourceMessageHandler sourceMessageHandler;
+        private
+        @Nullable
+        DestinationMessageHandler destinationMessageHandler;
+
+        public Builder(@NotNull RxConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
-            assert sequenceManager != null;
             assert communicator != null;
 
             this.configuration = configuration;
-            this.sequenceManager = sequenceManager;
             this.communicator = communicator;
-            this.sourceMessageHandler = new SourceMessageHandler(sequenceManager);
-            this.destinationMessageHandler = new DestinationMessageHandler(sequenceManager);
-            this.redeliveryTask = new RedeliveryTask(sourceMessageHandler, sequenceManager);
+
+            this.sourceMessageHandler = new SourceMessageHandler(null);
+            this.destinationMessageHandler = new DestinationMessageHandler(null);
+            this.redeliveryTask = new RedeliveryTask(sourceMessageHandler, null);
+        }
+
+        public Builder sequenceManager(SequenceManager sequenceManager) {
+            this.sequenceManager = sequenceManager;
+
+            this.sourceMessageHandler.setSequenceManager(sequenceManager);
+            this.destinationMessageHandler.setSequenceManager(sequenceManager);
+            this.redeliveryTask.setTimeSynchronizer(sequenceManager);
+
+            return this;
         }
 
         public RuntimeContext build() {
@@ -98,7 +109,6 @@ public final class RuntimeContext {
                     sequenceManager,
                     communicator,
                     new SuspendedFiberStorage(),
-                    WsrmProtocolHandler.getInstance(configuration, communicator, sequenceManager),
                     new ScheduledTaskManager(),
                     sourceMessageHandler,
                     destinationMessageHandler,
@@ -109,7 +119,7 @@ public final class RuntimeContext {
     public final AddressingVersion addressingVersion;
     public final SOAPVersion soapVersion;
     public final RmVersion rmVersion;
-    public final SequenceManager sequenceManager;
+    private volatile SequenceManager sequenceManager;
     public final Communicator communicator;
     public final SuspendedFiberStorage suspendedFiberStorage;
     public final WsrmProtocolHandler protocolHandler;
@@ -123,7 +133,6 @@ public final class RuntimeContext {
             SequenceManager sequenceManager,
             Communicator communicator,
             SuspendedFiberStorage suspendedFiberStorage,
-            WsrmProtocolHandler protocolHandler,
             ScheduledTaskManager scheduledTaskManager,
             SourceMessageHandler srcMsgHandler,
             DestinationMessageHandler dstMsgHandler,
@@ -133,7 +142,6 @@ public final class RuntimeContext {
         this.sequenceManager = sequenceManager;
         this.communicator = communicator;
         this.suspendedFiberStorage = suspendedFiberStorage;
-        this.protocolHandler = protocolHandler;
         this.scheduledTaskManager = scheduledTaskManager;
         this.sourceMessageHandler = srcMsgHandler;
         this.destinationMessageHandler = dstMsgHandler;
@@ -143,6 +151,8 @@ public final class RuntimeContext {
         this.rmVersion = configuration.getRmVersion();
 
         this.redeliveryTask = redeliveryTask;
+
+        this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
     }
 
     public ScheduledFuture<?> startTask(Runnable task) {
@@ -172,15 +182,37 @@ public final class RuntimeContext {
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
         return sequenceManager.getSequence(sequenceId);
     }
 
     public Sequence getBoundSequence(String sequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
         return sequenceManager.getBoundSequence(sequenceId);
     }
 
     public String getBoundSequenceId(String sequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
         Sequence boundSequence = sequenceManager.getBoundSequence(sequenceId);
         return boundSequence != null ? boundSequence.getId() : null;
+    }
+
+    public SequenceManager sequenceManager() {
+        assert sequenceManager != null;
+
+        return this.sequenceManager;
+    }
+
+    public void setSequenceManager(@NotNull SequenceManager newValue) {
+        assert newValue != null;
+
+        this.sequenceManager = newValue;
+
+        this.sourceMessageHandler.setSequenceManager(newValue);
+        this.destinationMessageHandler.setSequenceManager(newValue);
+        this.redeliveryTask.setTimeSynchronizer(newValue);
     }
 }

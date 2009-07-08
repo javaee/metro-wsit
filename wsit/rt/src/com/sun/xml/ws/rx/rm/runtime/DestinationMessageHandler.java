@@ -58,11 +58,13 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
 
     private static final Logger LOGGER = Logger.getLogger(DestinationMessageHandler.class);
     //
-    private final SequenceManager sequenceManager;
+    private volatile SequenceManager sequenceManager;
 
-    DestinationMessageHandler(@NotNull SequenceManager sequenceManager) {
-        assert sequenceManager != null;
+    DestinationMessageHandler(@Nullable SequenceManager sequenceManager) {
+        this.sequenceManager = sequenceManager;
+    }
 
+    void setSequenceManager(SequenceManager sequenceManager) {
         this.sequenceManager = sequenceManager;
     }
 
@@ -74,6 +76,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
      * is placed into a delivery queue and delivery callback is invoked
      */
     public void registerMessage(@NotNull ApplicationMessage inMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException {
+        assert sequenceManager != null;
         assert inMessage != null;
 
         final Sequence inboundSequence = sequenceManager.getSequence(inMessage.getSequenceId());
@@ -85,6 +88,8 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
     }
 
     public void processAcknowledgements(@Nullable AcknowledgementData acknowledgementData) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
         if (acknowledgementData == null) {
             return;
         }
@@ -110,6 +115,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
      * @throws UnknownSequenceException if no such sequence exits for a given sequence identifier
      */
     public AcknowledgementData getAcknowledgementData(String inboundSequenceId) throws UnknownSequenceException {
+        assert sequenceManager != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
@@ -130,10 +136,14 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
 
 
     public void acknowledgeApplicationLayerDelivery(ApplicationMessage inMessage) throws UnknownSequenceException {
+        assert sequenceManager != null;
+
         sequenceManager.getSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
     }
 
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException {
+        assert sequenceManager != null;
+
         sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 

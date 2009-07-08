@@ -71,12 +71,12 @@ public abstract class WsrmProtocolHandler {
 
     private static final Logger LOGGER = Logger.getLogger(WsrmProtocolHandler.class);
 
-    public static WsrmProtocolHandler getInstance(RxConfiguration configuration, Communicator communicator, SequenceManager sequenceManager) {
+    public static WsrmProtocolHandler getInstance(RxConfiguration configuration, Communicator communicator, RuntimeContext rc) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
-                return new Wsrm200502ProtocolHandler(configuration, sequenceManager, communicator);
+                return new Wsrm200502ProtocolHandler(configuration, rc, communicator);
             case WSRM200702:
-                return new Wsrm200702ProtocolHandler(configuration, sequenceManager, communicator);
+                return new Wsrm200702ProtocolHandler(configuration, rc, communicator);
             default:
                 return null;
         }

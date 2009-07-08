@@ -62,6 +62,7 @@ import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
@@ -121,7 +122,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         this.rc = RuntimeContext.getBuilder(
                 configuration,
-                SequenceManagerFactory.INSTANCE.getClientSequenceManager(configuration.getManagedObjectManager()),
                 new Communicator(
                 "RmClientTubeCommunicator",
                 context.getAddress(),
@@ -131,6 +131,25 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 configuration.getSoapVersion(),
                 configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
 
+        DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
+                rc.configuration,
+                PostmanPool.INSTANCE.getPostman(),
+                new ClientSourceDeliveryCallback(rc));
+
+        DeliveryQueueBuilder inboundQueueBuilder = null;
+        if (rc.configuration.requestResponseOperationsDetected()) {
+            inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
+                    rc.configuration,
+                    PostmanPool.INSTANCE.getPostman(),
+                    new ClientDestinationDeliveryCallback(rc));
+        }
+
+        SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+                SequenceManager.Type.CLIENT,
+                inboundQueueBuilder,
+                outboundQueueBuilder,
+                rc.configuration.getManagedObjectManager());
+        rc.setSequenceManager(sequenceManager);
 
         // TODO P3 we should also take into account addressable clients
         final McClientTube mcClientTube = context.getImplementation(McClientTube.class);
@@ -285,7 +304,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         final CreateSequenceData.Builder csBuilder = CreateSequenceData.getBuilder(this.rmSourceReference.toSpec());
         csBuilder.strType(rc.communicator.tryStartSecureConversation());
         if (rc.configuration.requestResponseOperationsDetected()) {
-            csBuilder.offeredInboundSequenceId(rc.sequenceManager.generateSequenceUID());
+            csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration
         }
         final CreateSequenceData requestData = csBuilder.build();
@@ -301,37 +320,26 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(responseData.getAcceptedSequenceAcksTo().toString(), rc.communicator.getDestinationAddress()));
             }
         }
-        DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
-                rc,
-                PostmanPool.INSTANCE.getPostman(),
-                new ClientSourceDeliveryCallback(rc));
 
-        this.outboundSequenceId.value = rc.sequenceManager.createOutboundSequence(
+        this.outboundSequenceId.value = rc.sequenceManager().createOutboundSequence(
                 responseData.getSequenceId(),
                 (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                responseData.getExpirationTime(),
-                outboundQueueBuilder).getId();
+                responseData.getExpirationTime()).getId();
 
         if (requestData.getOfferedSequenceId() != null) {
-            DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
-                    rc,
-                    PostmanPool.INSTANCE.getPostman(),
-                    new ClientDestinationDeliveryCallback(rc));
-
-            Sequence inboundSequence = rc.sequenceManager.createInboundSequence(
+            Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                     requestData.getOfferedSequenceId(),
                     (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                    responseData.getExpirationTime(),
-                    inboundQueueBuilder);
+                    responseData.getExpirationTime());
 
-            rc.sequenceManager.bindSequences(outboundSequenceId.value, inboundSequence.getId());
+            rc.sequenceManager().bindSequences(outboundSequenceId.value, inboundSequence.getId());
         }
     }
 
     private void closeSequence() {
         CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager.getSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
@@ -345,10 +353,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
         try {
-            rc.sequenceManager.closeSequence(outboundSequenceId.value);
+            rc.sequenceManager().closeSequence(outboundSequenceId.value);
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager.closeSequence(boundSequenceId);
+                rc.sequenceManager().closeSequence(boundSequenceId);
             }
         }
     }
@@ -357,7 +365,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         TerminateSequenceData.Builder dataBuilder = TerminateSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager.getSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
@@ -388,10 +396,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
         // TODO P2 pass last message id into terminateSequence method
         final String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
         try {
-            rc.sequenceManager.terminateSequence(outboundSequenceId.value);
+            rc.sequenceManager().terminateSequence(outboundSequenceId.value);
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager.terminateSequence(boundSequenceId);
+                rc.sequenceManager().terminateSequence(boundSequenceId);
             }
         }
     }
@@ -410,7 +418,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
             public void run() {
                 try {
-                    if (!rc.sequenceManager.getSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
+                    if (!rc.sequenceManager().getSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
                         doneSignal.countDown();
                     }
                 } catch (UnknownSequenceException ex) {

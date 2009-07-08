@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import com.sun.xml.ws.rx.util.TimestampedCollection;
@@ -56,17 +57,22 @@ final class RedeliveryTask implements Runnable {
     //
     private final TimestampedCollection<Object, ApplicationMessage> scheduledMessages = TimestampedCollection.newInstance();
     private final @NotNull DeliveryHandler deliveryHandler;
-    private final @NotNull TimeSynchronizer timeSynchronizer;
+    private volatile @NotNull TimeSynchronizer timeSynchronizer;
 
-    RedeliveryTask(@NotNull DeliveryHandler deliveryHandler, @NotNull TimeSynchronizer timeSynchronizer) {
+    RedeliveryTask(@NotNull DeliveryHandler deliveryHandler, @Nullable TimeSynchronizer timeSynchronizer) {
         assert deliveryHandler != null;
-        assert timeSynchronizer != null;
 
         this.deliveryHandler = deliveryHandler;
         this.timeSynchronizer = timeSynchronizer;
     }
 
+    void setTimeSynchronizer(TimeSynchronizer timeSynchronizer) {
+        this.timeSynchronizer = timeSynchronizer;
+    }
+
     public void run() {
+        assert timeSynchronizer != null;
+        
         if (LOGGER.isLoggable(Level.FINEST)) {
             LOGGER.finest(String.format("Periodic request resend task executed - registered message queue size: [ %d ]", scheduledMessages.size()));
         }

@@ -46,7 +46,6 @@ import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.io.IOException;
 import java.util.List;
@@ -75,7 +74,6 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
 
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
-                SequenceManagerFactory.INSTANCE.getClientSequenceManager(configuration.getManagedObjectManager()),
                 new Communicator(
                 "PacketFilteringTubeCommunicator",
                 context.getAddress(),
@@ -96,7 +94,6 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
 
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
-                SequenceManagerFactory.INSTANCE.getServerSequenceManager(context.getEndpoint(), configuration.getManagedObjectManager()),
                 new Communicator(
                 "PacketFilteringTubeCommunicator",
                 null, // TODO P3 can we get the endpoint address?

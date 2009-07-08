@@ -46,7 +46,11 @@ import junit.framework.TestCase;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class OutboundSequenceTest extends TestCase {
-    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.getClientSequenceManager(null);
+    private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+            SequenceManager.Type.CLIENT, 
+            SequenceTestUtils.getDeliveryQueueBuilder(),
+            SequenceTestUtils.getDeliveryQueueBuilder(),
+            null);
     private Sequence sequence;
 
     public OutboundSequenceTest(String testName) {
@@ -55,7 +59,7 @@ public class OutboundSequenceTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        sequence = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1, SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+        sequence = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1);
         super.setUp();
     }
 
@@ -173,7 +177,7 @@ public class OutboundSequenceTest extends TestCase {
     }
 
     public void testSequenceState() throws Exception {
-        Sequence outbound = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1, SequenceTestUtils.getDeliveryQueueBuilder(sequenceManager));
+        Sequence outbound = sequenceManager.createOutboundSequence(sequenceManager.generateSequenceUID(), null, -1);
         assertEquals(Sequence.State.CREATED, outbound.getState());
 
         outbound.close();
