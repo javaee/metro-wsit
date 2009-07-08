@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.commons.Logger;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
@@ -92,11 +93,12 @@ final class Utilities {
      * <code>InboundSequence</code> or returns one that has
      * already been created by the SC Pipe.
      *
-     * @param sequence The InboundSequence
+     * @param endpoint endpoint instance
+     * @param sessionId session identifier
      * @return The Session
      */
-    static Session startSession(String sessionId) {
-        SessionManager manager = SessionManager.getSessionManager();
+    static Session startSession(WSEndpoint endpoint, String sessionId) {
+        SessionManager manager = SessionManager.getSessionManager(endpoint);
         Session session = manager.getSession(sessionId);
         if (session == null) {
             session = manager.createSession(sessionId);
@@ -107,12 +109,13 @@ final class Utilities {
 
     /**
      * Terminates the session associated with the sequence if
-     * RM owns the lifetime of the session.. i.e. If SC is not present.
+     * RM owns the lifetime of the session, i.e. if SC is not present.
      *
-     * @param sequence The InboundSequence
+     * @param endpoint endpoint instance
+     * @param sessionId session identifier
      */
-    static void endSessionIfExists(String sessionId) {
-        SessionManager manager = SessionManager.getSessionManager();
+    static void endSessionIfExists(WSEndpoint endpoint, String sessionId) {
+        SessionManager manager = SessionManager.getSessionManager(endpoint);
         if (manager.getSession(sessionId) != null) {
             manager.terminateSession(sessionId);
         }

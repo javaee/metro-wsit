@@ -348,7 +348,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         if (!hasSession(request)) { // security did not start session - we must do it
-            Utilities.startSession(inboundSequence.getId());
+            Utilities.startSession(request.endpoint, inboundSequence.getId());
         }
 
         final CreateSequenceResponseData.Builder responseBuilder = CreateSequenceResponseData.getBuilder(inboundSequence.getId());
@@ -406,7 +406,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
 
         } finally {
-            Utilities.endSessionIfExists(inboundSequence.getId());
+            Utilities.endSessionIfExists(request.endpoint, inboundSequence.getId());
             try {
                 rc.sequenceManager.terminateSequence(inboundSequence.getId());
             } finally {
@@ -447,7 +447,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             return null;
         }
 
-        return SessionManager.getSessionManager().getSession(sessionId);
+        return SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
     }
 
     /**
@@ -463,7 +463,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private void setSession(String sessionId, Packet packet) {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
-        Session session = SessionManager.getSessionManager().getSession(sessionId);
+        Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
         packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
     }
 
