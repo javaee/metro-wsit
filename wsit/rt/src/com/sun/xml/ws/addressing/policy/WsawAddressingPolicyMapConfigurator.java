@@ -64,9 +64,9 @@ import javax.xml.ws.soap.AddressingFeature;
  *
  * @author Rama Pulavarthi
  */
-public class WsawAddressingMapUpdateProvider implements PolicyMapConfigurator {
+public class WsawAddressingPolicyMapConfigurator implements PolicyMapConfigurator {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingMapUpdateProvider.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingPolicyMapConfigurator.class);
 
     private static final class AddressingAssertion extends PolicyAssertion {
 

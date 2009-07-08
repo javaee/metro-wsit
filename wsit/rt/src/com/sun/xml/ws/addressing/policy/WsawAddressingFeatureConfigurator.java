@@ -63,17 +63,17 @@ import javax.xml.ws.soap.AddressingFeature;
  *
  * @author Rama Pulavarthi
  */
-public class WsawAddressingModelConfiguratorProvider implements PolicyFeatureConfigurator{
+public class WsawAddressingFeatureConfigurator implements PolicyFeatureConfigurator{
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingModelConfiguratorProvider.class);
+    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsawAddressingFeatureConfigurator.class);
 
     private static final QName WSAW_ADDRESSING_ASSERTION =
         new QName(AddressingVersion.W3C.policyNsUri, "UsingAddressing");
 
     /**
-     * Creates a new instance of AddressingPolicyFeatureConfigurator
+     * Creates a new instance of WsawAddressingFeatureConfigurator
      */
-    public WsawAddressingModelConfiguratorProvider() {
+    public WsawAddressingFeatureConfigurator() {
     }
 
     /**

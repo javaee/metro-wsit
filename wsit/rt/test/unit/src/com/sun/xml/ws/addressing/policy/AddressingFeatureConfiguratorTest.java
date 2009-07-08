@@ -49,11 +49,11 @@ import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
  *
  * @author japod
  */
-public class AddressingModelConfiguratorProviderTest extends TestCase {
+public class AddressingFeatureConfiguratorTest extends TestCase {
     
     
     /**
-     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingFeatureConfigurator.
      * policy assertion present
      */
     public void testConfigureW3CAddressingAssertionPresent() throws Exception {
@@ -63,7 +63,7 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
     }
     
     /**
-     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingFeatureConfigurator.
      * policy assertion present
      */
     public void testConfigureMEMBERAddressingAssertionPresent() throws Exception {
@@ -73,7 +73,7 @@ public class AddressingModelConfiguratorProviderTest extends TestCase {
     }
 
     /**
-     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingModelConfiguratorProvider.
+     * Test of configure method, of class com.sun.xml.ws.policy.jaxws.addressing.AddressingFeatureConfigurator.
      * policy assertion not present
      */
     public void testConfigureAddressingAssertionNotPresent() throws Exception {
