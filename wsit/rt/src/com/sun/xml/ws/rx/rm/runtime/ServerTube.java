@@ -136,7 +136,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
-                SequenceManager.Type.CLIENT,
+                SequenceManager.Type.ENDPOINT,
                 inboundQueueBuilder,
                 outboundQueueBuilder,
                 configuration.getManagedObjectManager());
