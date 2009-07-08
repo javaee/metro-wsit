@@ -458,6 +458,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             super.next.preDestroy();
         }
         issuedTokenContextMap.clear();
+        SessionManager.removeSessionManager(((ServerTubeConfiguration)tubeConfig).getEndpoint());
     }        
     
     public Packet processMessage(XMLStreamReaderMessage msg) {

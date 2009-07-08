@@ -49,7 +49,6 @@ import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -187,11 +186,10 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         // get str id -> get Session corresponding to id
         // from session get corresponding SCTInfo ->
         // return sctinfo's IssuedTokenContext.
-        final String id = reference.getId();
-        final Session session =
-                SessionManager.getSessionManager().getSession(id);
-        return session.getSecurityInfo().getIssuedTokenContext();
-    }
-    
-    
+        //final String id = reference.getId();
+       // final Session session =
+             //   SessionManager.getSessionManager().getSession(id);
+       // return session.getSecurityInfo().getIssuedTokenContext();
+        return null;
+    }    
 }

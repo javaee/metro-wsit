@@ -298,6 +298,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         issuedTokenContextMap.clear();
+        SessionManager.removeSessionManager(endPoint);
     }
     
     public Packet validateRequest(Packet packet, Subject clientSubject, Subject serviceSubject, Map<Object, Object> sharedState)

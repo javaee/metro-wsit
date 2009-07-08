@@ -63,8 +63,6 @@ import com.sun.xml.ws.api.server.WSEndpoint;
  */
 
 public abstract class SessionManager {
-
-    private static SessionManager manager;
     private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
      
     /**
@@ -148,6 +146,10 @@ public abstract class SessionManager {
      */
     public abstract void addSecurityContext(String key, IssuedTokenContext itctx);
     
+    public static void removeSessionManager(WSEndpoint endpoint){
+        sessionManagers.remove(endpoint);
+    }
+
     /**
      * Returns the single instance of SessionManager
      * Use the usual services mechanism to find implementing class.  If not
@@ -170,29 +172,6 @@ public abstract class SessionManager {
                  sessionManagers.put(endPoint, sm);
              }
              return sm;
-         }
-     }
-
-    /**
-     * Returns the single instance of SessionManager
-     * Use the usual services mechanism to find implementing class.  If not
-     * found, use <code>com.sun.xml.ws.runtime.util.SessionManager</code>
-     * by default.
-     *
-     * @return The value of the <code>manager</code> field.
-     */
-    public static SessionManager getSessionManager() {
-         synchronized (SessionManager.class) {
-             if (manager == null) {
-                 ServiceFinder<SessionManager> finder =
-                         ServiceFinder.find(SessionManager.class);
-                 if (finder != null && finder.toArray().length > 0) {
-                    manager = finder.toArray()[0];
-                 } else {
-                    manager = new SessionManagerImpl();
-                 }
-             }
-             return manager;
          }
      }
 }
