@@ -37,7 +37,7 @@
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.api.config.management.ConfigurationAPI;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.PersistenceAPI;
 
@@ -47,7 +47,7 @@ import com.sun.xml.ws.api.config.management.PersistenceAPI;
  */
 public class ConfigurationImpl implements ConfigurationAPI {
 
-    public <T> void recreate(InitParameters parameters) {
+    public <T> void recreate(NamedParameters parameters) {
         final PersistenceAPI persist = ManagementFactory.createPersistenceImpl();
         persist.persist(parameters);
     }

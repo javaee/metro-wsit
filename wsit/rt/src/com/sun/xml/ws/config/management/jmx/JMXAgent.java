@@ -39,7 +39,7 @@ package com.sun.xml.ws.config.management.jmx;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.CommunicationAPI;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
@@ -93,7 +93,7 @@ public class JMXAgent<T> implements CommunicationAPI {
     private ClassLoader classLoader;
 
 
-    public void init(InitParameters parameters) {
+    public void init(NamedParameters parameters) {
         try {
             this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
             this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
@@ -124,7 +124,7 @@ public class JMXAgent<T> implements CommunicationAPI {
                 LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, connector.getAddress()));
 
                 // TODO create proper interfaces, make interval configurable
-                final ConfigPoller poller = new ConfigPoller(new InitParameters()
+                final ConfigPoller poller = new ConfigPoller(new NamedParameters()
                         .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                         .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
                         .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader));

@@ -54,7 +54,7 @@ public class ManagementFactory {
 
     private static final Logger LOGGER = Logger.getLogger(ManagementFactory.class);
 
-    public static Collection<CommunicationAPI> createCommunicationImpls(InitParameters parameters) throws WebServiceException {
+    public static Collection<CommunicationAPI> createCommunicationImpls(NamedParameters parameters) throws WebServiceException {
         final ServiceFinder<CommunicationAPI> finder = ServiceFinder.find(CommunicationAPI.class);
         final Collection<CommunicationAPI> commImpls = new ArrayList<CommunicationAPI>();
         final Iterator<CommunicationAPI> commImplIterator = finder.iterator();

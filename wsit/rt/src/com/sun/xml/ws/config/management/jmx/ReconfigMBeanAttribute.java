@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.config.management.ConfigurationAPI;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
@@ -99,7 +99,7 @@ public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
         try {
             this.newPolicies = value;
             final ConfigurationAPI config = ManagementFactory.createConfigurationImpl();
-            final InitParameters parameters = new InitParameters()
+            final NamedParameters parameters = new NamedParameters()
                     .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                     .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
                     .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)

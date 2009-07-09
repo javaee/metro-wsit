@@ -40,7 +40,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.ConfigurationAPI;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
 import com.sun.xml.ws.api.server.PortAddressResolver;
@@ -81,7 +81,7 @@ public class ReDelegate implements ConfigurationAPI {
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
-    public <T> void recreate(InitParameters parameters) {
+    public <T> void recreate(NamedParameters parameters) {
         final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             final ClassLoader classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);

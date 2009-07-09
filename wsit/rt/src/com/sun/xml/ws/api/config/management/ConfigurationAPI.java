@@ -42,6 +42,6 @@ package com.sun.xml.ws.api.config.management;
  */
 public interface ConfigurationAPI {
 
-    public <T> void recreate(InitParameters parameters);
+    public <T> void recreate(NamedParameters parameters);
 
 }

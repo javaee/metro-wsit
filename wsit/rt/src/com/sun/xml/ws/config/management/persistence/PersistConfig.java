@@ -37,7 +37,7 @@
 package com.sun.xml.ws.config.management.persistence;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.PersistenceAPI;
 import com.sun.xml.ws.config.management.ManagementConstants;
@@ -61,7 +61,7 @@ public class PersistConfig implements PersistenceAPI {
 
     private static final Logger LOGGER = Logger.getLogger(PersistConfig.class);
 
-    public void persist(final InitParameters parameters) {
+    public void persist(final NamedParameters parameters) {
         final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
         final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
         writeData(endpoint.getId(), newConfig);

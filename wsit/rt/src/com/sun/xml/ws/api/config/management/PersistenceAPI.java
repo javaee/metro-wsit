@@ -48,6 +48,6 @@ public interface PersistenceAPI {
      *
      * @param parameters Any parameter that needs to be passed into the implementation
      */
-    public void persist(InitParameters parameters);
+    public void persist(NamedParameters parameters);
 
 }

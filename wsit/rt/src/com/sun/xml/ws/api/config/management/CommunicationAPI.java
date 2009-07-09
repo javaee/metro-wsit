@@ -42,7 +42,7 @@ package com.sun.xml.ws.api.config.management;
  */
 public interface CommunicationAPI {
 
-    public void init(InitParameters parameters);
+    public void init(NamedParameters parameters);
 
     public void start();
 

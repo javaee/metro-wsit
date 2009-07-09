@@ -43,7 +43,7 @@ import java.util.HashMap;
  *
  * @author Fabian Ritzmann
  */
-public class InitParameters {
+public class NamedParameters {
 
     private final HashMap<String, InitObject> nameToInstance = new HashMap<String, InitObject>();
 
@@ -53,9 +53,9 @@ public class InitParameters {
      * @param <T> The type of the parameter
      * @param name The name of the parameter
      * @param parameter The parameter
-     * @return This instance of InitParameters (so that you can chain multiple put calls)
+     * @return This instance of NamedParameters (so that you can chain multiple put calls)
      */
-    public <T> InitParameters put(String name, T parameter) {
+    public <T> NamedParameters put(String name, T parameter) {
         final InitObject<T> initObject = new InitObject<T>(parameter);
         this.nameToInstance.put(name, initObject);
         return this;

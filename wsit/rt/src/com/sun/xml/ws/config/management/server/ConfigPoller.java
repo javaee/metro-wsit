@@ -37,7 +37,7 @@
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.InitParameters;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementUtil;
@@ -61,11 +61,11 @@ public class ConfigPoller implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
 
     private final ManagedEndpoint endpoint;
-    private final InitParameters configParameters;
+    private final NamedParameters configParameters;
 
     private volatile long version = 0L;
 
-    public ConfigPoller(InitParameters parameters) {
+    public ConfigPoller(NamedParameters parameters) {
         this.endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
         this.configParameters = parameters;
     }

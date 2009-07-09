@@ -103,7 +103,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
             classLoader = getClass().getClassLoader();
         }
 
-        final InitParameters parameters = new InitParameters()
+        final NamedParameters parameters = new NamedParameters()
                 .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
                 .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
                 .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
@@ -130,9 +130,9 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
      * @param endpoint The WSEndpoint instance. May not be null.
      */
     synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
-//        // Plug in code that regenerates WSDL when the endpoint was reconfigured
-//        final Set<EndpointComponent> endpointComponents = endpoint.getComponentRegistry();
-//        endpointComponents.add(new ManagedHttpMetadataPublisher());
+        // Plug in code that regenerates WSDL when the endpoint was reconfigured
+        final Set<EndpointComponent> endpointComponents = endpoint.getComponentRegistry();
+        endpointComponents.add(new ManagedHttpMetadataPublisher());
 
         this.endpointDelegate = endpoint;
         LOGGER.info(ManagementMessages.WSM_5004_RECONFIGURED_ENDPOINT(this.id));
