@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- *
+ * 
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- *
+ * 
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- *
+ * 
  * Contributor(s):
- *
+ * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -33,9 +33,8 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.transport.tcp.policy;
+package com.sun.xml.ws.rx.policy.spi_impl;
 
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
@@ -44,26 +43,30 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
-import com.sun.xml.ws.transport.TcpTransportFeature;
+import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.Rm10Assertion;
+import com.sun.xml.ws.rx.policy.assertion.Rm11Assertion;
+import com.sun.xml.ws.rx.policy.assertion.RmAssertionTranslator;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
 
 /**
- * {@link PolicyFeatureConfigurator}, which will transform SOAP/TCP policy
- * assertions to features on corresponding ports.
  *
- * @author Alexey Stashok
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class TCPTransportConfigurationProvider implements PolicyFeatureConfigurator {
-
-    private static final QName ENABLED = new QName("enabled");
-    private static final Logger LOGGER = Logger.getLogger(TCPTransportConfigurationProvider.class);
+public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
+    // TODO implement PolicyMapConfigurator as well
+    private static final Logger LOGGER = Logger.getLogger(RxFeatureConfigurator.class);
 
     /**
-     * Process TCP transport policy assertions
+     * process WS-RM policy assertions and if found and is not optional then RM is enabled on the
      * {@link WSDLPort}
+     *
      * @param key Key that identifies the endpoint scope
      * @param policyMap must be non-null
      * @return The list of features
@@ -75,22 +78,43 @@ public class TCPTransportConfigurationProvider implements PolicyFeatureConfigura
             Policy policy = policyMap.getEndpointEffectivePolicy(key);
             if (policy != null) {
                 for (AssertionSet alternative : policy) {
-                    for (PolicyAssertion assertion : alternative) {
-                        if (assertion.getName().equals(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
-                            boolean isEnabled = true;
-                            String value = assertion.getAttributeValue(ENABLED);
-                            if (value != null) {
-                                value = value.trim();
-                                isEnabled = Boolean.valueOf(value) || value.equalsIgnoreCase("yes");
-
+                    if (isPresentAndMandatory(alternative, Rm10Assertion.NAME) || isPresentAndMandatory(alternative, Rm11Assertion.NAME)) {
+                        ReliableMessagingFeatureBuilder rmFeatureBuilder = new ReliableMessagingFeatureBuilder();
+                        for (PolicyAssertion assertion : alternative) {
+                            if (assertion instanceof RmAssertionTranslator) {
+                                rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
                             }
-                            features.add(new TcpTransportFeature(isEnabled));
-                        }
-                    }
-                }
+                        } // next assertion
+                        features.add(rmFeatureBuilder.build());
+                    } // end-if RM assertion is present and not optional
+                    if (isPresentAndMandatory(alternative, MakeConnectionSupportedAssertion.NAME)) {
+                        features.add(new MakeConnectionSupportedFeature());
+                    } // end-if MC assertion is present and not optional
+                } // next alternative
             } // end-if policy not null
         }
-
         return features;
+    }
+
+    private Collection<PolicyAssertion> getAssertionsWithName(AssertionSet alternative, QName name) throws PolicyException {
+        Collection<PolicyAssertion> assertions = alternative.get(name);
+        if (assertions.size() > 1) {
+            // TODO L10N
+            throw LOGGER.logSevereException(new PolicyException(String.format("%n duplicate [%s] policy assertions in a single policy alternative detected", assertions.size(), name)));
+        }
+        return assertions;
+    }
+
+    private boolean isPresentAndMandatory(AssertionSet alternative, QName assertionName) throws PolicyException {
+        Collection<PolicyAssertion> assertions;
+
+        assertions = getAssertionsWithName(alternative, assertionName);
+        for (PolicyAssertion assertion : assertions) {
+            if (!assertion.isOptional()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

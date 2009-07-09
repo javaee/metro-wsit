@@ -64,9 +64,9 @@ import java.util.logging.Level;
  * <p/>
  * Known limitation: not accounting for ejb deployment descriptor, only working off of TransactionAttribute annotations.
  */
-public class TxMapUpdateProvider implements PolicyMapConfigurator {
+public class TxPolicyMapConfigurator implements PolicyMapConfigurator {
 
-    final static private TxLogger logger = TxLogger.getATLogger(TxMapUpdateProvider.class);
+    final static private TxLogger logger = TxLogger.getATLogger(TxPolicyMapConfigurator.class);
 
     static private boolean nonJavaEEContainer = false;
 

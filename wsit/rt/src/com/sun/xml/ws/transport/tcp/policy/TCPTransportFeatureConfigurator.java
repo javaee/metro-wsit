@@ -44,7 +44,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
-import com.sun.xml.ws.transport.SelectOptimalTransportFeature;
+import com.sun.xml.ws.transport.TcpTransportFeature;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
@@ -56,15 +56,14 @@ import javax.xml.ws.WebServiceFeature;
  *
  * @author Alexey Stashok
  */
-public class OptimalTransportConfigurationProvider implements PolicyFeatureConfigurator {
+public class TCPTransportFeatureConfigurator implements PolicyFeatureConfigurator {
 
     private static final QName ENABLED = new QName("enabled");
-    private static final Logger LOGGER = Logger.getLogger(OptimalTransportConfigurationProvider.class);
+    private static final Logger LOGGER = Logger.getLogger(TCPTransportFeatureConfigurator.class);
 
     /**
-     * process optimized transport policy assertions
+     * Process TCP transport policy assertions
      * {@link WSDLPort}
-     *
      * @param key Key that identifies the endpoint scope
      * @param policyMap must be non-null
      * @return The list of features
@@ -77,15 +76,15 @@ public class OptimalTransportConfigurationProvider implements PolicyFeatureConfi
             if (policy != null) {
                 for (AssertionSet alternative : policy) {
                     for (PolicyAssertion assertion : alternative) {
-                        if (assertion.getName().equals(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.SELECT_OPTIMAL_TRANSPORT_ASSERTION)) {
+                        if (assertion.getName().equals(com.sun.xml.ws.transport.tcp.wsit.TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
                             boolean isEnabled = true;
                             String value = assertion.getAttributeValue(ENABLED);
                             if (value != null) {
                                 value = value.trim();
                                 isEnabled = Boolean.valueOf(value) || value.equalsIgnoreCase("yes");
-                            }
 
-                            features.add(new SelectOptimalTransportFeature(isEnabled));
+                            }
+                            features.add(new TcpTransportFeature(isEnabled));
                         }
                     }
                 }

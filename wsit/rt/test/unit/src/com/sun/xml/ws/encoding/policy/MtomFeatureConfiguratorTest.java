@@ -51,7 +51,7 @@ import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
  *
  * @author japod
  */
-public class MtomModelConfiguratorProviderTest extends TestCase {
+public class MtomFeatureConfiguratorTest extends TestCase {
     
     
     /**

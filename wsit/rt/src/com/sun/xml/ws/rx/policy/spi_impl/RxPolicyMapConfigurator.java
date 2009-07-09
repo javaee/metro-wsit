@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
+ * 
  * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
- *
+ * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- *
+ * 
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- *
+ * 
  * Contributor(s):
- *
+ * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.transport.tcp.policy;
+package com.sun.xml.ws.rx.policy.spi_impl;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -45,12 +45,10 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
-import com.sun.xml.ws.transport.TcpTransportFeature;
-import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
+import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -59,12 +57,11 @@ import javax.xml.namespace.QName;
 
 /**
  *
- * @author Alexey Stashok
- * @author Marek Potociar
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class TCPTransportMapUpdateProvider implements PolicyMapConfigurator {
+public class RxPolicyMapConfigurator implements PolicyMapConfigurator {
 
-    private static final Logger LOGGER = Logger.getLogger(TCPTransportMapUpdateProvider.class);
+    private static final Logger LOGGER = Logger.getLogger(RxPolicyMapConfigurator.class);
 
     public Collection<PolicySubject> update(PolicyMap policyMap, SEIModel model, WSBinding wsBinding) throws PolicyException {
         final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
@@ -72,9 +69,10 @@ public class TCPTransportMapUpdateProvider implements PolicyMapConfigurator {
         try {
             LOGGER.entering(policyMap, model, wsBinding);
 
-            updateTCPTransportSettings(subjects, wsBinding, model, policyMap);
+            updateMakeConnectionSettings(subjects, wsBinding, model, policyMap);
 
             return subjects;
+
             // TODO : update map with RM policy based on RM feature
 
         } finally {
@@ -82,56 +80,43 @@ public class TCPTransportMapUpdateProvider implements PolicyMapConfigurator {
         }
     }
 
-    private void updateTCPTransportSettings(Collection<PolicySubject> subjects, WSBinding wsBinding, SEIModel model, PolicyMap policyMap) throws PolicyException, IllegalArgumentException {
-        final TcpTransportFeature tcpTransportFeature = wsBinding.getFeature(TcpTransportFeature.class);
-        if (tcpTransportFeature == null || !tcpTransportFeature.isEnabled()) {
+    /**
+     * Create a policy with an MCSupported assertion.
+     *
+     * @param bindingName The wsdl:binding element name. Used to generate a (locally) unique ID for the policy.
+     * @return A policy that contains one policy assertion that corresponds to the given assertion name.
+     */
+    private Policy createMakeConnectionPolicy(final QName bindingName) {
+        return Policy.createPolicy(null, bindingName.getLocalPart() + "_MCSupported_Policy", Arrays.asList(new AssertionSet[]{
+                    AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[]{new MakeConnectionSupportedAssertion()}))
+                }));
+    }
+
+    private void updateMakeConnectionSettings(Collection<PolicySubject> subjects, WSBinding wsBinding, SEIModel model, PolicyMap policyMap) throws PolicyException, IllegalArgumentException {
+        final MakeConnectionSupportedFeature mcFeature = wsBinding.getFeature(MakeConnectionSupportedFeature.class);
+        if (mcFeature == null || !mcFeature.isEnabled()) {
             return;
         }
 
         if (LOGGER.isLoggable(Level.FINEST)) {
             // TODO L10N
-            LOGGER.finest(String.format("Make TCP transport feature enabled on service '%s', port '%s'", model.getServiceQName(), model.getPortName()));
+            LOGGER.finest(String.format("Make connection feature enabled on service '%s', port '%s'", model.getServiceQName(), model.getPortName()));
         }
 
         final PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(model.getServiceQName(), model.getPortName());
         final Policy existingPolicy = (policyMap != null) ? policyMap.getEndpointEffectivePolicy(endpointKey) : null;
-        if ((existingPolicy == null) || !existingPolicy.contains(TCPConstants.TCPTRANSPORT_POLICY_ASSERTION)) {
-            final Policy tcpTransportPolicy = createTCPTransportPolicy(model.getBoundPortTypeName());
+        if ((existingPolicy == null) || !existingPolicy.contains(MakeConnectionSupportedAssertion.NAME)) {
+            final Policy mcPolicy = createMakeConnectionPolicy(model.getBoundPortTypeName());
             final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingSubject(model.getBoundPortTypeName());
-            final PolicySubject subject = new PolicySubject(wsdlSubject, tcpTransportPolicy);
+            final PolicySubject subject = new PolicySubject(wsdlSubject, mcPolicy);
             subjects.add(subject);
             if (LOGGER.isLoggable(Level.FINE)) {
                 // TODO L10N
-                LOGGER.fine(String.format("Added TCP transport policy with ID '%s' to binding element '%s'", tcpTransportPolicy.getIdOrName(), model.getBoundPortTypeName()));
+                LOGGER.fine(String.format("Added make connection policy with ID '%s' to binding element '%s'", mcPolicy.getIdOrName(), model.getBoundPortTypeName()));
             }
         } else if (LOGGER.isLoggable(Level.FINE)) {
             // TODO L10N
-            LOGGER.fine("Make TCP transport assertion is already present in the endpoint policy");
-        }
-    }
-
-    /**
-     * Create a policy with an TCPTransport assertion.
-     *
-     * @param bindingName The wsdl:binding element name. Used to generate a (locally) unique ID for the policy.
-     * @return A policy that contains one policy assertion that corresponds to the given assertion name.
-     */
-    private Policy createTCPTransportPolicy(final QName bindingName) {
-        return Policy.createPolicy(null, bindingName.getLocalPart() + "_TCPTransport_Policy", Arrays.asList(new AssertionSet[]{
-                    AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[]{new TCPTransportAssertion()}))
-                }));
-    }
-
-    public static class TCPTransportAssertion extends SimpleAssertion {
-
-        public TCPTransportAssertion() {
-            this(AssertionData.createAssertionData(
-                    TCPConstants.TCPTRANSPORT_POLICY_ASSERTION), null);
-        }
-
-        public TCPTransportAssertion(AssertionData data,
-                Collection<? extends PolicyAssertion> assertionParameters) {
-            super(data, assertionParameters);
+            LOGGER.fine("Make connection assertion is already present in the endpoint policy");
         }
     }
 }

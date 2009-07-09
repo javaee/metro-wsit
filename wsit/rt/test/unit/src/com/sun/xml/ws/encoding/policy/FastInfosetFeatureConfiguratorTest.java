@@ -52,7 +52,7 @@ import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getWSDLModel;
  *
  * @author Paul.Sandoz@Sun.Com
  */
-public class FastInfosetModelConfiguratorProviderTest extends TestCase {
+public class FastInfosetFeatureConfiguratorTest extends TestCase {
     
     
     /**
