@@ -55,8 +55,10 @@ import com.sun.xml.ws.policy.PolicyMap;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 import org.glassfish.gmbal.ManagedObjectManager;
 
@@ -69,18 +71,21 @@ import org.glassfish.gmbal.ManagedObjectManager;
  *
  * @author Fabian Ritzmann
  */
-public class ManagedEndpoint<T> extends WSEndpoint<T> {
+public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter {
 
     public static final String ENDPOINT_ID_PARAMETER_NAME = "ENDPOINT_ID";
     public static final String ENDPOINT_INSTANCE_PARAMETER_NAME = "ENDPOINT_INSTANCE";
     public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
     public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
+    public static final String ENDPOINT_STARTER_PARAMETER_NAME = "ENDPOINT_STARTER";
 
     private static final Logger LOGGER = Logger.getLogger(ManagedEndpoint.class);
 
     private final String id;
     private final EndpointCreationAttributes creationAttributes;
     private WSEndpoint<T> endpointDelegate;
+
+    private final CountDownLatch startSignal = new CountDownLatch(1);
 
     private final Collection<CommunicationAPI> commInterfaces;
 
@@ -94,24 +99,38 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
      *   the communication API to recreate WSEndpoint instances with the same parameters.
      */
     public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
-        this.id = id;
-        this.creationAttributes = attributes;
-        this.endpointDelegate = endpoint;
+        try {
+            this.id = id;
+            this.creationAttributes = attributes;
+            this.endpointDelegate = endpoint;
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = getClass().getClassLoader();
-        }
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            if (classLoader == null) {
+                classLoader = getClass().getClassLoader();
+            }
 
-        final NamedParameters parameters = new NamedParameters()
-                .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
-                .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
-                .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
-                .put(CLASS_LOADER_PARAMETER_NAME, classLoader);
-        this.commInterfaces = ManagementFactory.createCommunicationImpls(parameters);
-        for (CommunicationAPI commInterface: commInterfaces) {
-            commInterface.start();
+            final NamedParameters parameters = new NamedParameters()
+                    .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
+                    .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
+                    .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
+                    .put(CLASS_LOADER_PARAMETER_NAME, classLoader)
+                    .put(ENDPOINT_STARTER_PARAMETER_NAME, this);
+            this.commInterfaces = ManagementFactory.createCommunicationImpls(parameters);
+            for (CommunicationAPI commInterface : commInterfaces) {
+                commInterface.start();
+            }
+
+            // TODO log that we are blocking
+            // block until we receive a start signal
+            startSignal.await();
+        } catch (InterruptedException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(e));
         }
+    }
+
+    public void startEndpoint() {
+        this.startSignal.countDown();
     }
 
     /**

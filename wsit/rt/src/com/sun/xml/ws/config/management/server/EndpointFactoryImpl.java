@@ -45,8 +45,6 @@ import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 
-import javax.xml.namespace.QName;
-
 /**
  * Create a ManagedEndpoint if the policy of the endpoint requires it. Otherwise
  * returns the given endpoint.

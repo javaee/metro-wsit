@@ -38,6 +38,7 @@ package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.ConfigReader;
+import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.config.management.ManagementConstants;
@@ -45,6 +46,7 @@ import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.persistence.JDBCConfigSaver;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
 
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,13 +85,23 @@ public class JDBCConfigReader implements ConfigReader {
     private static class ConfigPoller implements Runnable {
         
         private final ManagedEndpoint endpoint;
+        private final EndpointStarter endpointStarter;
         private final NamedParameters configParameters;
 
         private volatile long version = 0L;
 
         public ConfigPoller(NamedParameters parameters) {
             this.endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+            this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configParameters = parameters;
+
+            ManagedServiceAssertion assertion = ManagementUtil.getAssertion(
+                    this.endpoint.getServiceName(), this.endpoint.getPortName(), this.endpoint.getPolicyMap());
+            final String start = assertion.getStart();
+            // TODO log actions, put "notify" into constant
+            if (start == null || !start.equals("notify")) {
+                endpointStarter.startEndpoint();
+            }
         }
 
         public void run() {
@@ -164,6 +176,7 @@ public class JDBCConfigReader implements ConfigReader {
             this.configParameters.put(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME, ManagementUtil.convert(reader));
             final ReDelegate redelegate = new ReDelegate();
             redelegate.recreate(this.configParameters);
+            this.endpointStarter.startEndpoint();
         }
 
     }

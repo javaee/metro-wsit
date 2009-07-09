@@ -40,11 +40,13 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.CommunicationAPI;
 import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
+import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 
@@ -75,6 +77,7 @@ import javax.xml.ws.WebServiceException;
 public class JMXAgent<T> implements CommunicationAPI {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
+    // TODO Move some functionality into ManagedServiceAssertion
     private static final QName JMX_SERVICE_URL_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXServiceURL");
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXConnectorServerEnvironment");
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "Entry");
@@ -100,15 +103,17 @@ public class JMXAgent<T> implements CommunicationAPI {
             this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
             this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
 
+            final EndpointStarter endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configReader = ManagementFactory.createConfigReaderImpl();
             this.configReader.init(new NamedParameters()
                         .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                         .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
-                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader));
+                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
+                        .put(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME, endpointStarter));
             
             // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
             this.server = MBeanServerFactory.createMBeanServer();
-            final PolicyAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint.getServiceName(),
+            final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint.getServiceName(),
                     this.managedEndpoint.getPortName(), this.managedEndpoint.getPolicyMap());
             final JMXServiceURL jmxUrl = getServiceURL(managedService);
             final Map<String, Object> env = getEnvironment(managedService);
@@ -207,7 +212,7 @@ public class JMXAgent<T> implements CommunicationAPI {
         }
     }
 
-    private Map<String, Object> getEnvironment(PolicyAssertion managedService) {
+    private Map<String, Object> getEnvironment(ManagedServiceAssertion managedService) {
         final Map<String, Object> result = new HashMap<String, Object>();
         final Iterator<PolicyAssertion> parameters = managedService.getParametersIterator();
         while (parameters.hasNext()) {

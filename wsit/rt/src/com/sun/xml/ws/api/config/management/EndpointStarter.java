@@ -34,42 +34,14 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.policy;
-
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.spi.AssertionCreationException;
-import java.util.Collection;
-import javax.xml.namespace.QName;
+package com.sun.xml.ws.api.config.management;
 
 /**
  *
  * @author Fabian Ritzmann
  */
-public class ManagedServiceAssertion extends PolicyAssertion {
+public interface EndpointStarter {
 
-    // TODO: Consolidate with other declarations of this namespace
-    private static final String MANAGEMENT_NAMESPACE = "http://java.sun.com/xml/ns/metro/management";
-    private static final QName MANAGED_SERVICE_NAME = new QName(MANAGEMENT_NAMESPACE, "ManagedService");
-
-    public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
-            throws AssertionCreationException {
-        super(data, assertionParameters, nestedAlternative);
-        if (!MANAGED_SERVICE_NAME.equals(data.getName())) {
-            throw new AssertionCreationException(data, "Expected policy assertion ManagedService in this namespace");
-        }
-        if (!data.containsAttribute(new QName("", "id"))) {
-            throw new AssertionCreationException(data, "ManagedService policy assertion must have id attribute");
-        }
-    }
-
-    public String getID() {
-        return this.getAttributeValue((new QName("", "id")));
-    }
-
-    public String getStart() {
-        return this.getAttributeValue((new QName("", "start")));
-    }
+    public void startEndpoint();
     
 }
