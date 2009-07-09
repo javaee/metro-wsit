@@ -272,7 +272,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                 ackElement.addAckRange(0, 0); // we don't have any ack ranges => we have not received any message yet
             }
 
-            if (rc.getInboundSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
+            if (rc.getSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
                 ackElement.setFinal(new SequenceAcknowledgementElement.Final());
             }
 
@@ -327,7 +327,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                             lastLowerBound = nackId.longValue() + 1;
                         }
                     }
-                    long lastMessageId = rc.getInboundSequence(ackElement.getId()).getLastMessageNumber();
+                    long lastMessageId = rc.getSequence(ackElement.getId()).getLastMessageNumber();
                     if (lastLowerBound <= lastMessageId) {
                         ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                     }

@@ -79,7 +79,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
         assert sequenceManager != null;
         assert inMessage != null;
 
-        final Sequence inboundSequence = sequenceManager.getInboundSequence(inMessage.getSequenceId());
+        final Sequence inboundSequence = sequenceManager.getSequence(inMessage.getSequenceId());
 
         // register and possibly store message in the unacked message sequence queue
         inboundSequence.registerMessage(inMessage, true); // TODO this may not be always needed in case of AtMostOnce delivery
@@ -97,12 +97,12 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
         if (acknowledgementData.getAcknowledgedSequenceId() != null) { // process outbound sequence acknowledgements           
             final List<AckRange> acknowledgedRanges = acknowledgementData.getAcknowledgedRanges();
             if (!acknowledgedRanges.isEmpty()) {
-                sequenceManager.getOutboundSequence(acknowledgementData.getAcknowledgedSequenceId()).acknowledgeMessageNumbers(acknowledgedRanges);
+                sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId()).acknowledgeMessageNumbers(acknowledgedRanges);
             }
         }
 
         if (acknowledgementData.getAckReqestedSequenceId() != null) { // process inbound sequence ack requested flag
-            final Sequence inboundSequence = sequenceManager.getInboundSequence(acknowledgementData.getAckReqestedSequenceId());
+            final Sequence inboundSequence = sequenceManager.getSequence(acknowledgementData.getAckReqestedSequenceId());
             inboundSequence.setAckRequestedFlag();
         }
     }
@@ -118,7 +118,7 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
         assert sequenceManager != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
-        final Sequence inboundSequence = sequenceManager.getInboundSequence(inboundSequenceId);
+        final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
         if (inboundSequence.isAckRequested()) {
             ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
             inboundSequence.clearAckRequestedFlag();
@@ -138,13 +138,13 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
     public void acknowledgeApplicationLayerDelivery(ApplicationMessage inMessage) throws UnknownSequenceException {
         assert sequenceManager != null;
 
-        sequenceManager.getInboundSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
+        sequenceManager.getSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
     }
 
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException {
         assert sequenceManager != null;
 
-        sequenceManager.getInboundSequence(message.getSequenceId()).getDeliveryQueue().put(message);
+        sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 
     

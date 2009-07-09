@@ -95,16 +95,35 @@ public final class PersistentSequenceManager implements SequenceManager {
      * Outbound delivery queue bulder
      */
     private final DeliveryQueueBuilder outboundQueueBuilder;
+    /**
+     * Unique identifier of the WS endpoint for which this particular sequence manager will be used
+     */
+    private final String uniqueEndpointId;
 
-    public PersistentSequenceManager(DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public PersistentSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
 
+        this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
         // TODO recover();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isPersistent() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String uniqueEndpointId() {
+        return uniqueEndpointId;
     }
 
     /**
@@ -125,7 +144,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this));
     }
 
@@ -133,7 +152,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new InboundSequence(data, inboundQueueBuilder, this));
     }
 
@@ -147,8 +166,8 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence closeInboundSequence(String sequenceId) throws UnknownSequenceException {
-        Sequence sequence = getSequence(sequenceId, PersistentSequenceData.SequenceType.Inbound);
+    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = getSequence(sequenceId);
         sequence.close();
         return sequence;
     }
@@ -156,123 +175,122 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence closeOutboundSequence(String sequenceId) throws UnknownSequenceException {
-        Sequence sequence = getSequence(sequenceId, PersistentSequenceData.SequenceType.Outbound);
-        sequence.close();
-        return sequence;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
-        return getSequence(sequenceId, PersistentSequenceData.SequenceType.Inbound);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
-        return getSequence(sequenceId, PersistentSequenceData.SequenceType.Outbound);
-    }
-
-    private Sequence getSequence(String sequenceId, PersistentSequenceData.SequenceType sequenceType) throws UnknownSequenceException {
+    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
             dataLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 return sequences.get(sequenceId);
-            } else {
-                dataLock.readLock().unlock();
-                dataLock.writeLock().lock();
-                try {
-                    if (sequences.containsKey(sequenceId)) { // re-checking
-                        return sequences.get(sequenceId);
-                    } else {
-                        PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(sqlConnection, sequenceId, sequenceType);
-                        if (sequenceData != null) {
-                            switch (sequenceType) {
-                                case Inbound:
-                                    return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this));
-                                case Outbound:
-                                    return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this));
-                            }
-                        }
-                    }
-                } finally {
-                    dataLock.readLock().lock();
-                    dataLock.writeLock().unlock();
-                }
-
-                throw new UnknownSequenceException(sequenceId); // sequence not found
             }
         } finally {
             dataLock.readLock().unlock();
         }
-   }
+
+        Sequence sequence = fetch(sequenceId);
+        if (sequence == null) {
+            throw new UnknownSequenceException(sequenceId); // sequence not found
+        }
+        return sequence;
+    }
+
+    private Sequence fetch(String sequenceId) {
+        // TODO if missed cache hit detected, invalidate and reload whole in-memory cache instead?
+
+        dataLock.writeLock().lock();
+        try {
+            if (sequences.containsKey(sequenceId)) { // re-checking
+                return sequences.get(sequenceId);
+            }
+
+            PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(sqlConnection, uniqueEndpointId, sequenceId);
+            if (sequenceData != null) {
+                switch (sequenceData.getType()) {
+                    case Inbound:
+                        return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this));
+                    case Outbound:
+                        return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this));
+                }
+
+            }
+
+            return null;
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
 
     /**
      * {@inheritDoc}
      */
     public boolean isValid(String sequenceId) {
-//        try {
-//            internalDataAccessLock.readLock().lock();
-//            return sequences.containsKey(sequenceId);
-//        } finally {
-//            internalDataAccessLock.readLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
+        Sequence s;
+        try {
+            dataLock.readLock().lock();
+            s = sequences.get(sequenceId);
+        } finally {
+            dataLock.readLock().unlock();
+        }
+
+        if (s == null) {
+            s = fetch(sequenceId);
+        }
+
+        return s != null && s.getState() != Sequence.State.TERMINATING;
     }
 
     /**
      * {@inheritDoc}
      */
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
-//        try {
-//            internalDataAccessLock.writeLock().lock();
-//            if (sequences.containsKey(sequenceId)) {
-//                AbstractSequence sequence = sequences.remove(sequenceId);
-//                sequence.setStatus(Status.TERMINATING);
-//
-//                if (boundSequences.containsKey(sequenceId)) {
-//                    boundSequences.remove(sequenceId);
-//
-//                }
-//
-//                if (managedObjectManager != null) {
-//                    managedObjectManager.unregister(sequence);
-//                }
-//
-//                sequence.preDestroy();
-//
-//                return sequence;
-//            } else {
-//                throw new UnknownSequenceException(sequenceId);
-//            }
-//        } finally {
-//            internalDataAccessLock.writeLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
+        try {
+            fetch(sequenceId); // Prefetch sequence to a cache if not ready
+
+            dataLock.writeLock().lock();
+            if (sequences.containsKey(sequenceId)) {
+                AbstractSequence sequence = sequences.remove(sequenceId);
+                sequence.setState(Sequence.State.TERMINATING);
+
+                if (boundSequences.containsKey(sequenceId)) {
+                    boundSequences.remove(sequenceId);
+
+                }
+
+                if (managedObjectManager != null) {
+                    managedObjectManager.unregister(sequence);
+                }
+
+                PersistentSequenceData.remove(sqlConnection, uniqueEndpointId, sequenceId);
+
+                sequence.preDestroy();
+
+                return sequence;
+            } else {
+                throw new UnknownSequenceException(sequenceId);
+            }
+
+        } finally {
+            dataLock.writeLock().unlock();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
-//        try {
-//            internalDataAccessLock.writeLock().lock();
-//            if (!sequences.containsKey(referenceSequenceId)) {
-//                throw new UnknownSequenceException(referenceSequenceId);
-//            }
-//
-//            if (!sequences.containsKey(boundSequenceId)) {
-//                throw new UnknownSequenceException(boundSequenceId);
-//            }
-//
-//            boundSequences.put(referenceSequenceId, boundSequenceId);
-//        } finally {
-//            internalDataAccessLock.writeLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
+        try {
+            dataLock.writeLock().lock();
+            if (!sequences.containsKey(referenceSequenceId) && fetch(referenceSequenceId) == null) {
+                throw new UnknownSequenceException(referenceSequenceId);
+            }
+
+            if (!sequences.containsKey(boundSequenceId) && fetch(referenceSequenceId) == null) {
+                throw new UnknownSequenceException(boundSequenceId);
+            }
+
+            PersistentSequenceData.bind(sqlConnection, uniqueEndpointId, referenceSequenceId, boundSequenceId);
+            boundSequences.put(referenceSequenceId, boundSequenceId);
+        } finally {
+            dataLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -291,7 +309,7 @@ public final class PersistentSequenceManager implements SequenceManager {
 //        }
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Registers a new sequence in the internal sequence storage
      *
@@ -317,7 +335,6 @@ public final class PersistentSequenceManager implements SequenceManager {
     protected void abort() {
         try {
             sqlConnection.rollback();
-
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

@@ -135,7 +135,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             loadAcknowledgementData(lastAppMessage, message);
 
             // simulating last message delivery
-            Sequence inboundSequence = rc.getInboundSequence(lastAppMessage.getSequenceId());
+            Sequence inboundSequence = rc.getSequence(lastAppMessage.getSequenceId());
             try {
                 inboundSequence.registerMessage(lastAppMessage, false);
             } catch (Exception ex) {
@@ -347,7 +347,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
                     }
                 }
 
-                long lastMessageId = rc.getInboundSequence(ackElement.getId()).getLastMessageNumber();
+                long lastMessageId = rc.getSequence(ackElement.getId()).getLastMessageNumber();
                 if (lastLowerBound <= lastMessageId) {
                     ranges.add(new Sequence.AckRange(lastLowerBound, lastMessageId));
                 }

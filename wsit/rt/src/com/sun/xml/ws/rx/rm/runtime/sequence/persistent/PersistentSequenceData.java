@@ -59,6 +59,7 @@ DROP TABLE RM_UNACKED_MESSAGES;
 DROP TABLE RM_SEQUENCES;
 
 CREATE TABLE RM_SEQUENCES (
+ENDPOINT_UID VARCHAR(512) NOT NULL,
 ID VARCHAR(256) NOT NULL,
 TYPE CHARACTER NOT NULL,
 
@@ -72,14 +73,14 @@ LAST_MESSAGE_ID BIGINT NOT NULL,
 LAST_ACTIVITY_TIME BIGINT NOT NULL,
 LAST_ACK_REQUEST_TIME BIGINT NOT NULL,
 
-PRIMARY KEY (ID, TYPE)
+PRIMARY KEY (ENDPOINT_UID, ID)
 );
 
 CREATE INDEX IDX_RM_SEQUENCES_BOUND_ID ON RM_SEQUENCES (BOUND_ID);
 
 CREATE TABLE RM_UNACKED_MESSAGES (
+ENDPOINT_UID VARCHAR(512) NOT NULL,
 SEQ_ID VARCHAR(256) NOT NULL,
-SEQ_TYPE CHARACTER NOT NULL,
 MSG_NUMBER BIGINT NOT NULL,
 IS_RECEIVED CHARACTER NOT NULL,
 
@@ -87,12 +88,12 @@ CORRELATION_ID VARCHAR(256),
 NEXT_RESEND_COUNT INT,
 MSG_DATA BLOB,
 
-PRIMARY KEY (SEQ_ID, SEQ_TYPE, MSG_NUMBER)
+PRIMARY KEY (ENDPOINT_UID, SEQ_ID, MSG_NUMBER)
 );
 
 ALTER TABLE RM_UNACKED_MESSAGES
 ADD CONSTRAINT FK_SEQUENCE
-FOREIGN KEY (SEQ_ID, SEQ_TYPE) REFERENCES RM_SEQUENCES(ID, TYPE);
+FOREIGN KEY (ENDPOINT_UID, SEQ_ID) REFERENCES RM_SEQUENCES(ENDPOINT_UID, ID);
 
 CREATE INDEX IDX_RM_UNACKED_MESSAGES_CORRELATION_ID ON RM_UNACKED_MESSAGES (CORRELATION_ID);
  */
@@ -116,18 +117,29 @@ final class PersistentSequenceData implements SequenceData {
 
     static enum SequenceType {
 
-        Inbound('I'),
-        Outbound('O');
+        Inbound("I"),
+        Outbound("O");
         //
-        private final char id;
+        private final String  id;
 
-        private SequenceType(char id) {
+        private SequenceType(String id) {
             this.id = id;
+        }
+
+        private static SequenceType fromId(String id) {
+            for (SequenceType type : values()) {
+                if (type.id.equals(id)) {
+                    return type;
+                }
+            }
+
+            return null;
         }
     }
     //
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceData.class);
     //
+    private final String endpointUid;
     private final String sequenceId;
     private final SequenceType type;
     private final String boundSecurityTokenReferenceId;
@@ -142,9 +154,10 @@ final class PersistentSequenceData implements SequenceData {
     private final Connection sqlConnection;
     private final ResultSet sequenceDataResultSet;
 
-    PersistentSequenceData(Connection sqlConnection, String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, ResultSet dataResultSet) {
+    PersistentSequenceData(Connection sqlConnection, String endpointUid, String sequenceId, SequenceType type, String securityContextTokenId, long expirationTime, ResultSet dataResultSet) {
         this.sqlConnection = sqlConnection;
 
+        this.endpointUid = endpointUid;
         this.sequenceId = sequenceId;
         this.type = type;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
@@ -155,6 +168,7 @@ final class PersistentSequenceData implements SequenceData {
 
     static PersistentSequenceData newInstance(
             Connection sqlConnection,
+            String enpointUid,
             String sequenceId,
             SequenceType type,
             String securityContextTokenId,
@@ -164,16 +178,18 @@ final class PersistentSequenceData implements SequenceData {
             long lastMessageId,
             long lastActivityTime,
             long lastAcknowledgementRequestTime) throws DuplicateSequenceException {
+        
         try {
             PreparedStatement ps = sqlConnection.prepareStatement(
                     "INSERT INTO RM.RM_SEQUENCES " +
-                    "(ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
+                    "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
                     "VALUES " +
-                    "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             int i = 0;
+            ps.setString(++i, enpointUid); // ENDPOINT_UID VARCHAR(256) NOT NULL,
             ps.setString(++i, sequenceId); // ID VARCHAR(256) NOT NULL,
-            ps.setInt(++i, type.id); // TYPE CHARACTER NOT NULL,
+            ps.setString(++i, type.id); // TYPE CHARACTER NOT NULL,
 
             ps.setLong(++i, expirationTime); // EXP_TIME TIMESTAMP NOT NULL,
             ps.setString(++i, securityContextTokenId); // STR_ID VARCHAR(256),
@@ -186,8 +202,10 @@ final class PersistentSequenceData implements SequenceData {
             ps.setLong(++i, lastAcknowledgementRequestTime); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
 
             if (ps.executeUpdate() != 1) {
-                throw LOGGER.logSevereException(
-                        new PersistenceException(String.format("Unable to insert sequence data for %s sequence with id = [ %s ]", type, sequenceId)));
+                throw LOGGER.logSevereException(new PersistenceException(String.format(
+                        "Unable to insert sequence data for %s sequence with id = [ %s ]",
+                        type,
+                        sequenceId)));
             }
 
         } catch (SQLException ex) {
@@ -198,21 +216,21 @@ final class PersistentSequenceData implements SequenceData {
                     sequenceId), ex));
         }
 
-        return loadInstance(sqlConnection, sequenceId, type);
+        return loadInstance(sqlConnection, enpointUid, sequenceId);
     }
 
-    static PersistentSequenceData loadInstance(Connection sqlConnection, String sequenceId, SequenceType type) {
+    static PersistentSequenceData loadInstance(Connection sqlConnection, String endpointUid, String sequenceId) {
         PersistentSequenceData data = null;
 
         try {
             PreparedStatement ps = sqlConnection.prepareStatement(
                     "SELECT " +
-                    "EXP_TIME, BOUND_ID, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME " +
+                    "TYPE, EXP_TIME, BOUND_ID, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME " +
                     "FROM RM_SEQUENCES " +
-                    "WHERE ID=? AND TYPE=?");
+                    "WHERE ENDPOINT_UID=? AND ID=?");
 
-            ps.setString(1, sequenceId);
-            ps.setInt(2, type.id);
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
 
             ResultSet rs = ps.executeQuery();
 
@@ -223,14 +241,15 @@ final class PersistentSequenceData implements SequenceData {
             if (!rs.isFirst() && !rs.isLast()) {
                 // TODO L10N
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
-                        "Duplicate sequence records detected for %s sequence with id [ %s ]", type, sequenceId)));
+                        "Duplicate sequence records detected for a sequence with id [ %s ]", sequenceId)));
             }
 
 
             data = new PersistentSequenceData(
                     sqlConnection,
+                    endpointUid,
                     sequenceId,
-                    type,
+                    SequenceType.fromId(rs.getString("TYPE")),
                     rs.getString("STR_ID"),
                     rs.getLong("EXP_TIME"),
                     rs);
@@ -238,8 +257,7 @@ final class PersistentSequenceData implements SequenceData {
         } catch (SQLException ex) {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
-                    "An exception occured while loading sequence data for %s sequence with id = [ %s ]",
-                    type,
+                    "An exception occured while loading sequence data for a sequence with id = [ %s ]",
                     sequenceId), ex));
         }
 
@@ -250,28 +268,39 @@ final class PersistentSequenceData implements SequenceData {
         try {
             data.lockRead();
 
-            PreparedStatement ps = sqlConnection.prepareStatement("DELETE FROM RM_SEQUENCES WHERE ID=? AND TYPE=?");
+            remove(sqlConnection, data.endpointUid, data.sequenceId);
+        } finally {
+            data.unlockRead();
+        }
+        return data;
+    }
 
-            ps.setString(1, data.sequenceId); // ID VARCHAR(256) NOT NULL,
-            ps.setInt(2, data.type.id); // TYPE CHARACTER NOT NULL,
+    static void remove(Connection sqlConnection, String endpointUid, String sequenceId) {
+        try {
+            PreparedStatement ps = sqlConnection.prepareStatement("DELETE FROM RM_SEQUENCES WHERE ENDPOINT_UID=? AND ID=?");
 
-            if (ps.executeUpdate() != 1) {
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+
+            final int rowsAffected = ps.executeUpdate();
+            if (rowsAffected != 1) {
                 throw LOGGER.logException(
-                        new PersistenceException(String.format("Unable to delete sequence data for %s sequence with id = [ %s ]", data.type, data.sequenceId)),
+                        new PersistenceException(String.format("Removing sequence with id = [ %s ] failed: Expected deleted rows: 1, Actual: %d", sequenceId, rowsAffected)),
                         Level.WARNING);
             }
+            
+            // TODO clear bound column where needed, clear unacknowledged data
 
         } catch (SQLException ex) {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
-                    "An exception occured while deleting sequence data for %s sequence with id = [ %s ]",
-                    data.type,
-                    data.sequenceId), ex));
-        } finally {
-            data.unlockRead();
+                    "An exception occured while deleting sequence data for a sequence with id = [ %s ]",
+                    sequenceId), ex));
         }
+    }
 
-        return data;
+    static void bind(Connection sqlConnection, String endpointUid, String referenceSequenceId, String boundSequenceId) {
+        // TODO implment & handle mutliple bindings (unbind old binding first)
     }
 
     public void lockRead() {
@@ -298,6 +327,10 @@ final class PersistentSequenceData implements SequenceData {
 
     public String getSequenceId() {
         return sequenceId;
+    }
+
+    public SequenceType getType() {
+        return type;
     }
 
     public String getBoundSecurityTokenReferenceId() {
@@ -401,11 +434,11 @@ final class PersistentSequenceData implements SequenceData {
     public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
         try {
             PreparedStatement ps = sqlConnection.prepareStatement("INSERT INTO RM_UNACKED_MESSAGES " +
-                    "(SEQ_ID, SEQ_TYPE, MSG_NUMBER, IS_RECEIVED) " +
+                    "(ENDPOINT_UID, SEQ_ID, MSG_NUMBER, IS_RECEIVED) " +
                     "VALUES (?, ?, ?, ?)");
 
-            ps.setString(1, sequenceId);
-            ps.setInt(2, type.id);
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
             ps.setLong(3, messageNumber);
             ps.setString(4, Boolean.toString(received));
 
@@ -427,18 +460,20 @@ final class PersistentSequenceData implements SequenceData {
         try {
             PreparedStatement ps = sqlConnection.prepareStatement(
                     "DELETE FROM RM_UNACKED_MESSAGES " +
-                    "WHERE SEQ_ID=? AND SEQ_TYPE=? AND MSG_NUMBER=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
 
-            ps.setString(1, sequenceId);
-            ps.setInt(2, type.id);
-            ps.setLong(3, messageNumber);
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+            ps.setLong(4, messageNumber);
 
-            if (ps.executeUpdate() != 1) {
+            final int rowsAffected = ps.executeUpdate();
+            if (rowsAffected != 1) {
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
-                        "Message acknowledgement failed: Unable to delete an unacked message registration for %s sequence with id = [ %s ] and message number [ %d ]",
+                        "Message acknowledgement failed for %s sequence with id = [ %s ] and message number [ %d ]: Expected deleted rows: 1, Actual: %d",
                         type,
                         sequenceId,
-                        messageNumber)));
+                        messageNumber,
+                        rowsAffected)));
             }
 
         } catch (SQLException ex) {
@@ -450,10 +485,10 @@ final class PersistentSequenceData implements SequenceData {
     public Collection<Long> getUnackedMessageNumbers() {
         try {
             PreparedStatement ps = sqlConnection.prepareStatement("SELECT MSG_NUMBER FROM RM_UNACKED_MESSAGES " +
-                    "WHERE SEQ_ID=? AND SEQ_TYPE=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=?");
 
-            ps.setString(1, sequenceId);
-            ps.setInt(2, type.id);
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
 
             ResultSet rs = ps.executeQuery();
 
@@ -476,7 +511,7 @@ final class PersistentSequenceData implements SequenceData {
         try {
             PreparedStatement ps = sqlConnection.prepareStatement("UPDATE RM_UNACKED_MESSAGES SET " +
                     "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, MSG_DATA=? " +
-                    "WHERE SEQ_ID=? AND SEQ_TYPE=? AND MSG_NUMBER=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
 
             int i = 0;
 
@@ -489,16 +524,18 @@ final class PersistentSequenceData implements SequenceData {
             bais = new ByteArrayInputStream(msgData);
             ps.setBinaryStream(++i, bais, msgData.length);
 
+            ps.setString(++i, endpointUid);
             ps.setString(++i, sequenceId);
-            ps.setInt(++i, type.id);
             ps.setLong(++i, message.getMessageNumber());
 
-            if (ps.executeUpdate() != 1) {
+            final int rowsAffected = ps.executeUpdate();
+            if (rowsAffected != 1) {
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
-                        "Unable to store message data in an unacked message registration for %s sequence with id = [ %s ] and message number [ %d ]",
+                        "Storing message data in an unacked message registration for %s sequence with id = [ %s ] and message number [ %d ] has failed: Expected updated rows: 1, Actual: %d",
                         type,
                         sequenceId,
-                        message.getMessageNumber())));
+                        message.getMessageNumber(),
+                        rowsAffected)));
             }
 
         } catch (SQLException ex) {
@@ -523,10 +560,10 @@ final class PersistentSequenceData implements SequenceData {
         try {
             PreparedStatement ps = sqlConnection.prepareStatement(
                     "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, MSG_DATA FROM RM_UNACKED_MESSAGES " +
-                    "WHERE SEQ_ID=? AND SEQ_TYPE=? AND CORRELATION_ID=?");
+                    "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND CORRELATION_ID=?");
 
-            ps.setString(1, sequenceId);
-            ps.setInt(2, type.id);
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
             ps.setString(3, correlationId);
 
 

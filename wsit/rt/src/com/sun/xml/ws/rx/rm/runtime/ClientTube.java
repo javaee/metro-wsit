@@ -145,6 +145,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+                context.getAddress().getURI().toString(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
                 rc.configuration.getManagedObjectManager());
@@ -338,7 +339,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private void closeSequence() {
         CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager().getOutboundSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
@@ -352,10 +353,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
         try {
-            rc.sequenceManager().closeOutboundSequence(outboundSequenceId.value);
+            rc.sequenceManager().closeSequence(outboundSequenceId.value);
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager().closeInboundSequence(boundSequenceId);
+                rc.sequenceManager().closeSequence(boundSequenceId);
             }
         }
     }
@@ -364,7 +365,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
         TerminateSequenceData.Builder dataBuilder = TerminateSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager().getOutboundSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
@@ -417,7 +418,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
             public void run() {
                 try {
-                    if (!rc.sequenceManager().getOutboundSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
+                    if (!rc.sequenceManager().getSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
                         doneSignal.countDown();
                     }
                 } catch (UnknownSequenceException ex) {
