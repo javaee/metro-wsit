@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.config.management;
 
-import com.sun.xml.ws.config.management.policy.ManagementAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -69,7 +69,7 @@ public class ManagementUtil {
      * @param policyMap The policy map. May be null.
      * @return The policy assertion if found. Null otherwise.
      */
-    public static ManagementAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
+    public static ManagedServiceAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
         LOGGER.entering(serviceName, portName, policyMap);
         try {
             PolicyAssertion assertion = null;
@@ -88,7 +88,7 @@ public class ManagementUtil {
                 }
             }
             LOGGER.exiting(assertion);
-            return assertion == null ? null : assertion.getImplementation(ManagementAssertion.class);
+            return assertion == null ? null : assertion.getImplementation(ManagedServiceAssertion.class);
         } catch (PolicyException ex) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
         }

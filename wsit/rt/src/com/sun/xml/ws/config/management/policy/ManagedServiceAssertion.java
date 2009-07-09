@@ -47,13 +47,13 @@ import javax.xml.namespace.QName;
  *
  * @author Fabian Ritzmann
  */
-public class ManagementAssertion extends PolicyAssertion {
+public class ManagedServiceAssertion extends PolicyAssertion {
 
     // TODO: Consolidate with other declarations of this namespace
     private static final String MANAGEMENT_NAMESPACE = "http://java.sun.com/xml/ns/metro/management";
     private static final QName MANAGED_SERVICE_NAME = new QName(MANAGEMENT_NAMESPACE, "ManagedService");
 
-    public ManagementAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
+    public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
             throws AssertionCreationException {
         super(data, assertionParameters, nestedAlternative);
         if (!MANAGED_SERVICE_NAME.equals(data.getName())) {
@@ -64,4 +64,8 @@ public class ManagementAssertion extends PolicyAssertion {
         }
     }
 
+    public String getID() {
+        return this.getAttributeValue((new QName("", "id")));
+    }
+    
 }

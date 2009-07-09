@@ -43,7 +43,7 @@ import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagedEndpointFactory;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 
 import javax.xml.namespace.QName;
 
@@ -58,10 +58,9 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
     private static final Logger LOGGER = Logger.getLogger(EndpointFactoryImpl.class);
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
-        final PolicyAssertion assertion = ManagementUtil.getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
+        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
         if (assertion != null) {
-            final String id = assertion.getAttributeValue(new QName("", "id"));
-            return new ManagedEndpoint<T>(id, endpoint, attributes);
+            return new ManagedEndpoint<T>(assertion.getID(), endpoint, attributes);
         }
         else {
             LOGGER.config(ManagementMessages.WSM_5002_ENDPOINT_NOT_CREATED());

@@ -61,7 +61,7 @@ public class ManagementAssertionCreator implements PolicyAssertionCreator {
 
     public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
         if (MANAGED_SERVICE_QNAME.equals(data.getName())) {
-            return new ManagementAssertion(data, assertionParameters, nestedAlternative);
+            return new ManagedServiceAssertion(data, assertionParameters, nestedAlternative);
         }
         else {
             return defaultCreator.createAssertion(data, assertionParameters, nestedAlternative, null);
