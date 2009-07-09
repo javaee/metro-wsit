@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.rx.util.ScheduledTaskManager;
+import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;

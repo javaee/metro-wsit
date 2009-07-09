@@ -47,7 +47,7 @@ import com.sun.xml.ws.config.management.server.ConfigPoller;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 
-import com.sun.xml.ws.rx.util.ScheduledTaskManager;
+import com.sun.xml.ws.commons.ScheduledTaskManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;

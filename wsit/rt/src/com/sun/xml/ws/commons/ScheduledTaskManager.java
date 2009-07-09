@@ -33,9 +33,8 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.util;
+package com.sun.xml.ws.commons;
 
-import com.sun.xml.ws.commons.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -49,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * TODO javadoc
  *
  * <b>
- * WARNING: This class is a private utility class used by WS-RX implementation. Any usage outside
+ * WARNING: This class is a private utility class used by WSIT implementation. Any usage outside
  * the intedned scope is strongly discouraged. The API exposed by this class may be changed, replaced
  * or removed without any advance notice.
  * </b>

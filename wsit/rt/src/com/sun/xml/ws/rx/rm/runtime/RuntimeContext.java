@@ -45,7 +45,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
-import com.sun.xml.ws.rx.util.ScheduledTaskManager;
+import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.concurrent.ScheduledFuture;
 
