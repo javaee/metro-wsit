@@ -38,6 +38,10 @@ package com.sun.xml.ws.runtime.util;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
+
 /**
  * The <code> Session </Session> object is used to manage state between multiple requests
  * from the same client. It contains a session key field to uniquely identify the Session, 
@@ -48,6 +52,8 @@ import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
  * @author Bhakti Mehta
  * @author Mike Grogan
  */
+@ManagedData
+    @Description("RM and SC session information")
 public class Session {
 
     /**
@@ -112,6 +118,8 @@ public class Session {
      *
      * @returns The session key
      */
+    @ManagedAttribute
+    @Description("Session key")
     public String getSessionKey() {
         return key;
     }
@@ -130,6 +138,8 @@ public class Session {
      * 
      * @returns The value of the field.
      */
+    @ManagedAttribute
+    @Description("Security context token info")
     public SecurityContextTokenInfo getSecurityInfo() {
         return securityInfo;
     }
@@ -152,6 +162,8 @@ public class Session {
      *
      * @returns The creation time.
      */
+    @ManagedAttribute
+    @Description("Creation time")
     public long getCreationTime() {
         return creationTime;
     }
@@ -162,6 +174,8 @@ public class Session {
      *
      * @returns The lastAccessedTime
      */
+    @ManagedAttribute
+    @Description("Last accessed time")
     public long getLastAccessedTime() {
         return lastAccessedTime;
     }

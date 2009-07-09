@@ -34,16 +34,22 @@
  * holder.
  */
 
-
 package com.sun.xml.ws.runtime.util;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import java.util.Set;
 import com.sun.xml.ws.util.ServiceFinder;
+
+import org.glassfish.gmbal.AMXMetadata;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedObject;
+import org.glassfish.gmbal.ManagedObjectManager;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.sun.xml.ws.api.server.WSEndpoint;
+import java.util.Set;
 
 /**
  *
@@ -62,6 +68,9 @@ import com.sun.xml.ws.api.server.WSEndpoint;
  * @author Mike Grogan
  */
 
+@ManagedObject
+@Description("Session manager used by RM and SC")
+@AMXMetadata(type="RM_SC_SessionManager")
 public abstract class SessionManager {
     private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
      
@@ -78,7 +87,16 @@ public abstract class SessionManager {
      *
      * @returns The Set of keys.
      */
+    @ManagedAttribute
+    @Description("The set of valid Session keys")
     public abstract Set<String> getKeys();
+
+    /**
+     * @returns The Collection of valid Sessions.
+     */
+    @ManagedAttribute
+    @Description("The collection of valid Sessions")
+    protected abstract Collection<Session> getSessions();
 
     /**
      * Removed the Session with the given key.
@@ -147,7 +165,8 @@ public abstract class SessionManager {
     public abstract void addSecurityContext(String key, IssuedTokenContext itctx);
     
     public static void removeSessionManager(WSEndpoint endpoint){
-        sessionManagers.remove(endpoint);
+        Object o = sessionManagers.remove(endpoint);
+        endpoint.getManagedObjectManager().unregister(o);
     }
 
     /**
@@ -158,21 +177,23 @@ public abstract class SessionManager {
      *
      * @return The value of the <code>manager</code> field.
      */ 
-    public static SessionManager getSessionManager(WSEndpoint endPoint) {
-         synchronized (SessionManager.class) {
-             SessionManager sm = sessionManagers.get(endPoint);
-             if (sm == null) {
-                 ServiceFinder<SessionManager> finder = 
-                         ServiceFinder.find(SessionManager.class);
-                 if (finder != null && finder.toArray().length > 0) {
+    public static SessionManager getSessionManager(WSEndpoint endpoint) {
+        synchronized (SessionManager.class) {
+            SessionManager sm = sessionManagers.get(endpoint);
+            if (sm == null) {
+                ServiceFinder<SessionManager> finder = 
+                    ServiceFinder.find(SessionManager.class);
+                if (finder != null && finder.toArray().length > 0) {
                     sm = finder.toArray()[0];
-                 } else {
+                } else {
                     sm = new SessionManagerImpl();
-                 }
-                 sessionManagers.put(endPoint, sm);
-             }
-             return sm;
-         }
-     }
+                }
+                sessionManagers.put(endpoint, sm);
+                endpoint.getManagedObjectManager()
+                    .registerAtRoot(sm, "RM_SC_SessionManager");
+            }
+            return sm;
+        }
+    }
 }
 

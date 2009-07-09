@@ -44,11 +44,14 @@ package com.sun.xml.ws.runtime.util;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
+
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.GregorianCalendar;
 import java.util.Set;
-import java.util.Hashtable;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -96,6 +99,10 @@ public class SessionManagerImpl extends SessionManager {
      */
     public Set<String> getKeys() {
         return sessionMap.keySet();
+    }
+
+    protected Collection<Session> getSessions() {
+        return sessionMap.values();
     }
 
     /**
