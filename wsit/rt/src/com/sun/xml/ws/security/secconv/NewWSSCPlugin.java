@@ -64,7 +64,6 @@ import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
-import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
@@ -92,6 +91,7 @@ import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.io.StringWriter;
+import java.util.Iterator;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -311,6 +311,22 @@ public class NewWSSCPlugin {
         return ctx;
     }
     
+     private void copyStandardSecurityProperties(Packet packet, Packet requestPacket) {
+        /*String username = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY);
+        if (username != null) {
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.USERNAME_PROPERTY, username);
+        }
+        String password = (String) packet.invocationProperties.get(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY);
+        if (password != null) {
+            requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
+        }*/
+        Set<String> set = packet.invocationProperties.keySet();        
+        for (Iterator it = set.iterator(); it.hasNext();) {
+                String key = (String)it.next();
+                requestPacket.invocationProperties.put(key, packet.invocationProperties.get(key));
+        }
+    }
+    
     private Packet createSendRequestPacket(
             final PolicyAssertion issuedToken, final WSDLPort wsdlPort, final WSBinding binding, final JAXBContext jbCxt, final BaseSTSRequest rst, final String action, final String endPointAddress, final Packet packet) {
         Marshaller marshaller;
@@ -361,7 +377,7 @@ public class NewWSSCPlugin {
         if (packet != null){
             reqPacket.contentNegotiation = packet.contentNegotiation;
         }
-        
+        copyStandardSecurityProperties(packet,reqPacket);
         return reqPacket;
     }
     
