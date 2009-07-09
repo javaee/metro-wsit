@@ -36,10 +36,10 @@
 
 package com.sun.xml.ws.config.management.server;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.InitParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.config.management.ManagementConstants;
-import com.sun.xml.ws.config.management.ManagementLogger;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.persistence.PersistConfig;
 
@@ -58,7 +58,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ConfigPoller implements Runnable {
 
-    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ConfigPoller.class);
+    private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
 
     private final ManagedEndpoint endpoint;
     private final InitParameters configParameters;

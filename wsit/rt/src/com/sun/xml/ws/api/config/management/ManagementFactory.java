@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.api.config.management;
 
-import com.sun.xml.ws.config.management.ManagementLogger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.util.ServiceFinder;
 
@@ -52,7 +52,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ManagementFactory {
 
-    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ManagementFactory.class);
+    private static final Logger LOGGER = Logger.getLogger(ManagementFactory.class);
 
     public static Collection<CommunicationAPI> createCommunicationImpls(InitParameters parameters) throws WebServiceException {
         final ServiceFinder<CommunicationAPI> finder = ServiceFinder.find(CommunicationAPI.class);

@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
@@ -51,7 +52,6 @@ import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.config.management.ManagementLogger;
 
 import java.util.Collection;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
     public static final String CREATION_ATTRIBUTES_PARAMETER_NAME = "CREATION_ATTRIBUTES";
     public static final String CLASS_LOADER_PARAMETER_NAME = "CLASS_LOADER";
 
-    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ManagedEndpoint.class);
+    private static final Logger LOGGER = Logger.getLogger(ManagedEndpoint.class);
 
     private final String id;
     private final EndpointCreationAttributes creationAttributes;
@@ -130,6 +130,10 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> {
      * @param endpoint The WSEndpoint instance. May not be null.
      */
     synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
+//        // Plug in code that regenerates WSDL when the endpoint was reconfigured
+//        final Set<EndpointComponent> endpointComponents = endpoint.getComponentRegistry();
+//        endpointComponents.add(new ManagedHttpMetadataPublisher());
+
         this.endpointDelegate = endpoint;
         LOGGER.info(ManagementMessages.WSM_5004_RECONFIGURED_ENDPOINT(this.id));
     }

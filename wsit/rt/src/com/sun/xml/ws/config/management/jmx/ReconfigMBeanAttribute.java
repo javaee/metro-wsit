@@ -36,13 +36,13 @@
 
 package com.sun.xml.ws.config.management.jmx;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.ConfigurationAPI;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.InitParameters;
 import com.sun.xml.ws.config.management.ManagementConstants;
-import com.sun.xml.ws.config.management.ManagementLogger;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
 import javax.management.InvalidAttributeValueException;
@@ -57,7 +57,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
 
-    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ReconfigMBeanAttribute.class);
+    private static final Logger LOGGER = Logger.getLogger(ReconfigMBeanAttribute.class);
     public final static String SERVICE_WSDL_ATTRIBUTE_NAME = ManagementMessages.RECONFIG_ATTRIBUTE_NAME();
 
     private final ManagedEndpoint<T> managedEndpoint;

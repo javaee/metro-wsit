@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.config.management.server;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.ConfigurationAPI;
@@ -48,7 +49,6 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.config.management.ManagementConstants;
-import com.sun.xml.ws.config.management.ManagementLogger;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
 import com.sun.xml.ws.resources.ManagementMessages;
@@ -77,7 +77,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class ReDelegate implements ConfigurationAPI {
 
-    private static final ManagementLogger LOGGER = ManagementLogger.getLogger(ReDelegate.class);
+    private static final Logger LOGGER = Logger.getLogger(ReDelegate.class);
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
     private static final XMLInputFactory XML_INPUT_FACTORY = XMLInputFactory.newInstance();
 
