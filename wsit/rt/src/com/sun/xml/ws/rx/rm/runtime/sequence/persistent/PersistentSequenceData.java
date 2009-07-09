@@ -474,8 +474,8 @@ final class PersistentSequenceData implements SequenceData {
     public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
         ByteArrayInputStream bais = null;
         try {
-            PreparedStatement ps = sqlConnection.prepareStatement("UPDATE RM_UNACKED_MESSAGES SET" +
-                    "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, MSG_DATA=?" +
+            PreparedStatement ps = sqlConnection.prepareStatement("UPDATE RM_UNACKED_MESSAGES SET " +
+                    "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, MSG_DATA=? " +
                     "WHERE SEQ_ID=? AND SEQ_TYPE=? AND MSG_NUMBER=?");
 
             int i = 0;
