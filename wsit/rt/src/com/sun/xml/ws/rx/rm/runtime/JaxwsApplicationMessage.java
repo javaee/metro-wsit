@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

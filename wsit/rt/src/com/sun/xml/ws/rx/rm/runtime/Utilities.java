@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 //

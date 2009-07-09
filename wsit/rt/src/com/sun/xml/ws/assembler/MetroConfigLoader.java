@@ -38,7 +38,7 @@ package com.sun.xml.ws.assembler;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.runtime.config.MetroConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import com.sun.xml.ws.runtime.config.TubelineDefinition;

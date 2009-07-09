@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;

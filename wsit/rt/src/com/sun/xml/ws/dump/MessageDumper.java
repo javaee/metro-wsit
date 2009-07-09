@@ -53,7 +53,7 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 final class MessageDumper {
-    private static final com.sun.xml.ws.commons.Logger DUMPER_LOGGER = com.sun.xml.ws.commons.Logger.getLogger(MessageDumper.class);
+    private static final com.sun.istack.logging.Logger DUMPER_LOGGER = com.sun.istack.logging.Logger.getLogger(MessageDumper.class);
 
     static enum MessageType {
         Request("Request message"),

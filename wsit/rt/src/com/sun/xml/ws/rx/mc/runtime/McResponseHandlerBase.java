@@ -40,7 +40,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.pipe.Fiber;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
 import com.sun.xml.ws.rx.RxConfiguration;

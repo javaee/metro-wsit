@@ -38,7 +38,7 @@ package com.sun.xml.ws.rx.util;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;

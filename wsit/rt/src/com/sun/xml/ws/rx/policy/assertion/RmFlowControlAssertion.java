@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.policy.assertion;
 
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;

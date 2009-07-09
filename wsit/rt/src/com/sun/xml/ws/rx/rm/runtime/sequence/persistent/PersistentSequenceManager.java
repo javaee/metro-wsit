@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.sql.Connection;
 import java.util.Map;

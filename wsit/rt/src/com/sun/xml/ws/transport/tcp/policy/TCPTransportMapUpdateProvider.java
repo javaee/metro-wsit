@@ -37,7 +37,7 @@ package com.sun.xml.ws.transport.tcp.policy;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;

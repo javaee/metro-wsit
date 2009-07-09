@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rx.testing;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.commons.Logger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
