@@ -82,15 +82,28 @@ public class ManagementFactory {
         return configImpl;
     }
 
-    public static PersistenceAPI createPersistenceImpl() throws WebServiceException {
-        final ServiceFinder<PersistenceAPI> finder = ServiceFinder.find(PersistenceAPI.class);
-        final Iterator<PersistenceAPI> persistenceImpls = finder.iterator();
+    public static ConfigSaver createConfigSaverImpl() throws WebServiceException {
+        final ServiceFinder<ConfigSaver> finder = ServiceFinder.find(ConfigSaver.class);
+        final Iterator<ConfigSaver> persistenceImpls = finder.iterator();
         if (!persistenceImpls.hasNext()) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(PersistenceAPI.class.getName())));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(ConfigSaver.class.getName())));
         }
-        final PersistenceAPI persistenceImpl = persistenceImpls.next();
+        final ConfigSaver persistenceImpl = persistenceImpls.next();
         if (persistenceImpls.hasNext()) {
-            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigurationAPI.class, persistenceImpl));
+            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigSaver.class.getName(), persistenceImpl));
+        }
+        return persistenceImpl;
+    }
+
+    public static ConfigReader createConfigReaderImpl() throws WebServiceException {
+        final ServiceFinder<ConfigReader> finder = ServiceFinder.find(ConfigReader.class);
+        final Iterator<ConfigReader> persistenceImpls = finder.iterator();
+        if (!persistenceImpls.hasNext()) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(ConfigReader.class.getName())));
+        }
+        final ConfigReader persistenceImpl = persistenceImpls.next();
+        if (persistenceImpls.hasNext()) {
+            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigReader.class.getName(), persistenceImpl));
         }
         return persistenceImpl;
     }

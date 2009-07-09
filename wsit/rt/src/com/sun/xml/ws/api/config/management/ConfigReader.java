@@ -36,18 +36,19 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import javax.xml.ws.WebServiceException;
+
 /**
- * Persist configuration changes.
+ * Read configuration changes.
  *
  * @author Fabian Ritzmann
  */
-public interface PersistenceAPI {
+public interface ConfigReader {
 
-    /**
-     * Persist configuration changes.
-     *
-     * @param parameters Any parameter that needs to be passed into the implementation
-     */
-    public void persist(NamedParameters parameters);
+    public void init(NamedParameters parameters) throws WebServiceException;
 
+    public void start() throws WebServiceException;
+
+    public void stop() throws WebServiceException;
+    
 }

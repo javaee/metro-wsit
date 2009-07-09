@@ -34,22 +34,22 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.server;
+package com.sun.xml.ws.api.config.management;
 
-import com.sun.xml.ws.api.config.management.ConfigurationAPI;
-import com.sun.xml.ws.api.config.management.NamedParameters;
-import com.sun.xml.ws.api.config.management.ManagementFactory;
-import com.sun.xml.ws.api.config.management.ConfigSaver;
+import javax.xml.ws.WebServiceException;
 
 /**
+ * Persist configuration changes
  *
  * @author Fabian Ritzmann
  */
-public class ConfigurationImpl implements ConfigurationAPI {
+public interface ConfigSaver {
 
-    public <T> void recreate(NamedParameters parameters) {
-        final ConfigSaver persist = ManagementFactory.createConfigSaverImpl();
-        persist.persist(parameters);
-    }
+    /**
+     * Persist configuration changes.
+     *
+     * @param parameters Any parameter that needs to be passed into the implementation
+     */
+    void persist(NamedParameters parameters) throws WebServiceException;
 
 }

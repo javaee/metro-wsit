@@ -34,55 +34,60 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.server;
+package com.sun.xml.ws.config.management.persistence;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.config.management.ManagementConstants;
-import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.config.management.persistence.PersistConfig;
 
-import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Default implementation that persists the new configuration data with JDBC.
  *
  * @author Fabian Ritzmann
  */
-public class ConfigPoller implements Runnable {
+public class JDBCConfigSaver implements ConfigSaver {
 
-    private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
+    private static final Logger LOGGER = Logger.getLogger(JDBCConfigSaver.class);
 
-    private final ManagedEndpoint endpoint;
-    private final NamedParameters configParameters;
-
-    private volatile long version = 0L;
-
-    public ConfigPoller(NamedParameters parameters) {
-        this.endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-        this.configParameters = parameters;
+    public void persist(final NamedParameters parameters) {
+        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+        final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
+        writeData(endpoint.getId(), newConfig);
     }
 
-    public void run() {
+    public static DataSource getManagementDS() {
+        try {
+            InitialContext initCtx = new InitialContext();
+            // TODO make name configurable, default to jdbc/metro/management
+            return (DataSource) initCtx.lookup("jdbc/managementDS");
+        } catch (NamingException e) {
+            // TODO add error message
+            throw LOGGER.logSevereException(new WebServiceException(e));
+        }
+    }
+
+    private static void writeData(final String endpointId, final String data) {
         Connection connection = null;
         try {
-            final DataSource source = PersistConfig.getManagementDS();
+            final DataSource source = getManagementDS();
             connection = source.getConnection();
-            pollData(connection, endpoint.getId());
+            writeData(connection, endpointId, data);
             connection.close();
         } catch (SQLException e) {
             // TODO add error message
-            LOGGER.logSevereException(e);
-        } catch (WebServiceException e) {
-            // TODO add error message
-            LOGGER.logSevereException(e);
+            throw LOGGER.logSevereException(new WebServiceException(e));
         } finally {
             try {
                 if (connection != null) {
@@ -90,58 +95,57 @@ public class ConfigPoller implements Runnable {
                 }
             } catch (SQLException e) {
                 // TODO add error message
-                LOGGER.logSevereException(e);
+                throw LOGGER.logSevereException(new WebServiceException(e));
             }
         }
     }
 
-    private void pollData(Connection connection, String endpointId) {
-        PreparedStatement statement = null;
+    private static void writeData(final Connection connection, final String endpointId, final String config) {
+        PreparedStatement updateStatement = null;
+        PreparedStatement insertStatement = null;
         try {
-            final String query = "SELECT version, config FROM METRO_CONFIG WHERE id = ? AND version > ?";
-            if (LOGGER.isLoggable(Level.FINER)) {
+            final String update = "UPDATE METRO_CONFIG SET version = version + 1, config = ? WHERE id = ?";
+            updateStatement = connection.prepareStatement(update);
+            updateStatement.setCharacterStream(1, new StringReader(config), config.length());
+            updateStatement.setString(2, endpointId);
+            if (LOGGER.isLoggable(Level.FINE)) {
                 // TODO put log message into properties
-                LOGGER.finer("Executing SQL command: " + query);
+                LOGGER.fine("Executing SQL command: " + update);
             }
-            statement = connection.prepareStatement(query);
-            statement.setString(1, endpointId);
-            statement.setLong(2, this.version);
-            final ResultSet result = statement.executeQuery();
-            if (result.next()) {
+            final int rowCount = updateStatement.executeUpdate();
+            if (rowCount == 0) {
+                final String insert = "INSERT INTO METRO_CONFIG (id, version, config) VALUES (?, 1, ?)";
+                insertStatement = connection.prepareStatement(insert);
+                insertStatement.setString(1, endpointId);
+                insertStatement.setCharacterStream(2, new StringReader(config), config.length());
                 if (LOGGER.isLoggable(Level.FINE)) {
                     // TODO put log message into properties
-                    LOGGER.fine("SQL query found updated configuration data");
+                    LOGGER.fine("SQL UPDATE returned row count 0. Executing SQL command: " + insert);
                 }
-                // TODO put column names into constants and/or make them configurable
-                this.version = result.getLong("version");
-                final Reader data = result.getCharacterStream("config");
-                reconfigure(data);
-            }
-            else {
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    // TODO put log message into properties
-                    LOGGER.finer("SQL query did not find any updated configuration data");
-                }
+                insertStatement.executeUpdate();
             }
         } catch (SQLException e) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(e));
         } finally {
-            if (statement != null) {
+            try {
+                if (updateStatement != null) {
+                    updateStatement.close();
+                }
+            } catch (SQLException e) {
+                // TODO add error message
+                throw LOGGER.logSevereException(new WebServiceException(e));
+            } finally {
                 try {
-                    statement.close();
+                    if (insertStatement != null) {
+                        insertStatement.close();
+                    }
                 } catch (SQLException e) {
                     // TODO add error message
                     throw LOGGER.logSevereException(new WebServiceException(e));
                 }
             }
         }
-    }
-
-    private void reconfigure(Reader reader) {
-        this.configParameters.put(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME, ManagementUtil.convert(reader));
-        final ReDelegate redelegate = new ReDelegate();
-        redelegate.recreate(this.configParameters);
     }
 
 }

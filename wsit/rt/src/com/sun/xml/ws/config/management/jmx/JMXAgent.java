@@ -38,16 +38,16 @@ package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.CommunicationAPI;
+import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.api.config.management.ManagementFactory;
+import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.config.management.server.ConfigPoller;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 
-import com.sun.xml.ws.commons.ScheduledTaskManager;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class JMXAgent<T> implements CommunicationAPI {
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME = new QName("", "value");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
-    private final ScheduledTaskManager taskManager = new ScheduledTaskManager();
+    private ConfigReader configReader;
 
     private MBeanServer server;
     private JMXConnectorServer connector;
@@ -100,6 +100,12 @@ public class JMXAgent<T> implements CommunicationAPI {
             this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
             this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
 
+            this.configReader = ManagementFactory.createConfigReaderImpl();
+            this.configReader.init(new NamedParameters()
+                        .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
+                        .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
+                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader));
+            
             // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
             this.server = MBeanServerFactory.createMBeanServer();
             final PolicyAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint.getServiceName(),
@@ -123,12 +129,8 @@ public class JMXAgent<T> implements CommunicationAPI {
                 connector.start();
                 LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, connector.getAddress()));
 
-                // TODO create proper interfaces, make interval configurable
-                final ConfigPoller poller = new ConfigPoller(new NamedParameters()
-                        .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
-                        .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
-                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader));
-                this.taskManager.startTask(poller, 0, 10000);
+                // TODO make interval configurable
+                this.configReader.start();
             } catch (InstanceAlreadyExistsException ex) {
                 // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
@@ -165,7 +167,7 @@ public class JMXAgent<T> implements CommunicationAPI {
                 // TODO add error message
                 throw LOGGER.logSevereException(new WebServiceException(ex));
             } finally {
-                this.taskManager.stopAll();
+                this.configReader.stop();
             }
         }
     }
