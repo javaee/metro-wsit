@@ -185,10 +185,10 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
             sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
 
-            WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
+            /*WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
             PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
             IdentityComponent idComponent = new IdentityComponent(wse, pm, props);
-            boolean add = wse.getComponentRegistry().add(idComponent);
+            boolean add = wse.getComponentRegistry().add(idComponent);*/
             
         } catch (Exception e) {            
             log.log(Level.SEVERE, 

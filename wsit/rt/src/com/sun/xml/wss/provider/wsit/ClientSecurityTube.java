@@ -35,9 +35,11 @@
  */
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -56,6 +58,9 @@ import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -93,6 +98,19 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
                     wsdlModel.getOwner().getName());
         }
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
+        /*ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) props.get(PipeConstants.WRAPPED_CONTEXT);
+        WSEndpointReference wsepr = context.getBindingProvider().getWSEndpointReference();
+        WSEndpointReference.EPRExtension idExtn = null;
+        try {
+        idExtn = wsepr.getEPRExtension(new QName("http://example.com/addressingidentity", "Identity"));
+        } catch (XMLStreamException ex) {
+        Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+        XMLStreamReader xmlreader = idExtn.readAsXMLStreamReader();
+        }catch (XMLStreamException ex) {
+        Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
     }
      
     protected ClientSecurityTube(ClientSecurityTube that, TubeCloner cloner) {
@@ -181,7 +199,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
 	    cAC = helper.getClientAuthContext(info,clientSubject);
 	    if (cAC != null) {
 		// proceed to process message sescurity
-		status = cAC.secureRequest(info, clientSubject);
+		status = cAC.secureRequest(info, clientSubject);  
 	    }
 	} catch(Exception e) {
 	    log.log(Level.SEVERE,"ws.error_secure_request", e);
