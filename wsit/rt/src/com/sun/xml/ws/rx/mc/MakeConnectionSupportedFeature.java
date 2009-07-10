@@ -37,11 +37,14 @@ package com.sun.xml.ws.rx.mc;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import javax.xml.ws.WebServiceFeature;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
+@ManagedData
 public class MakeConnectionSupportedFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.MakeConnectionSupportedFeature";
@@ -64,6 +67,7 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }

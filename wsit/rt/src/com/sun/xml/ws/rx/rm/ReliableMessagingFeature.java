@@ -38,11 +38,14 @@ package com.sun.xml.ws.rx.rm;
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import javax.xml.ws.WebServiceFeature;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
+@ManagedData
 public class ReliableMessagingFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.ReliableMessagingFeature";
@@ -338,6 +341,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }
@@ -349,6 +353,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * @return version currently configured for the feature. If not set explicitly, 
      *         the default value is specified by a call to {@link RmVersion#getDefault()}.
      */
+    @ManagedAttribute
     public RmVersion getVersion() {
         return version;
     }
@@ -360,6 +365,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         the default value is specified by {@link #DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT}
      *         constant.
      */
+    @ManagedAttribute
     public long getSequenceInactivityTimeout() {
         return sequenceInactivityTimeout;
     }
@@ -373,6 +379,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * @see SecurityBinding
      */
+    @ManagedAttribute
     public SecurityBinding getSecurityBinding() {
         return securityBinding;
     }
@@ -393,6 +400,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * @see DeliveryAssurance
      */
+    @ManagedAttribute
     public DeliveryAssurance getDeliveryAssurance() {
         return deliveryAssurance;
     }
@@ -419,6 +427,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * @return {@code true} if the ordered delivery si required, {@code false} otherwise.
      *         If not set explicitly, the default value is {@code false}.
      */
+    @ManagedAttribute
     public boolean isOrderedDeliveryEnabled() {
         return orderedDelivery;
     }
@@ -433,6 +442,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         set explicitly, the default value is specified by {@link #DEFAULT_DESTINATION_BUFFER_QUOTA}
      *         constant.
      */
+    @ManagedAttribute
     public long getDestinationBufferQuota() {
         return destinationBufferQuota;
     }
@@ -445,6 +455,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         the default value is specified by {@link #DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL}
      *         constant.
      */
+    @ManagedAttribute
     public long getMessageRetransmissionInterval() {
         return messageRetransmissionInterval;
     }
@@ -459,6 +470,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * @see BackoffAlgorithm
      */
+    @ManagedAttribute
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
         return retransmissionBackoffAlgorithm;
     }
@@ -471,6 +483,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         the default value is specified by the {@link #DEFAULT_ACK_REQUESTED_INTERVAL}
      *         constant.
      */
+    @ManagedAttribute
     public long getAcknowledgementRequestInterval() {
         return ackRequestInterval;
     }
@@ -484,6 +497,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         the default value is specified by the {@link #DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT}
      *         constant.
      */
+    @ManagedAttribute
     public long getCloseSequenceOperationTimeout() {
         return closeSequenceOperationTimeout;
     }

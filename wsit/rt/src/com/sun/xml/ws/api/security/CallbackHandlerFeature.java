@@ -9,6 +9,9 @@ import javax.security.auth.callback.Callback;
 import java.security.cert.CertStore;
 import java.security.KeyStore;
 
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
+
 /**
  * {@link WebServiceFeature} that controls {@link CallbackHandler} used during security related processing
  * of Metro.
@@ -31,6 +34,7 @@ import java.security.KeyStore;
  * @author Kohsuke Kawaguchi
  * @since Metro 1.5
  */
+@ManagedData
 public final class CallbackHandlerFeature extends WebServiceFeature {
     private final CallbackHandler handler;
 
@@ -39,6 +43,7 @@ public final class CallbackHandlerFeature extends WebServiceFeature {
         this.handler = handler;
     }
 
+    @ManagedAttribute
     public String getID() {
         return CallbackHandlerFeature.class.getName();
     }
@@ -47,6 +52,7 @@ public final class CallbackHandlerFeature extends WebServiceFeature {
      * @return
      *      {@link CallbackHandler} set in the constructor. Never null. 
      */
+    @ManagedAttribute
     public @NotNull CallbackHandler getHandler() {
         return handler;
     }

@@ -38,6 +38,8 @@ package com.sun.xml.ws.rx.testing;
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +50,7 @@ import javax.xml.ws.WebServiceFeature;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
+@ManagedData
 public final class PacketFilteringFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.runtime.testing.PacketFilteringFeature";
@@ -83,6 +86,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }
@@ -105,6 +109,7 @@ public final class PacketFilteringFeature extends WebServiceFeature {
         return filters;
     }
 
+    @ManagedAttribute
     boolean hasFilters() {
         return !filterClasses.isEmpty();
     }
