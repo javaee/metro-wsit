@@ -41,6 +41,9 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -67,12 +70,18 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
     private AuthStatus status = AuthStatus.SEND_SUCCESS;
     private ServerAuthContext sAC = null;
     private PacketMessageInfo info = null;
-
+    @SuppressWarnings("unchecked")
     public ServerSecurityTube(Map<Object, Object> props, final Tube next, boolean isHttpBinding) {
         super(next);
         props.put(PipeConstants.SECURITY_PIPE, this);
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
         this.isHttpBinding = isHttpBinding;
+        //if( id policy enabled && other checks) {
+        /*WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
+        PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
+        IdentityComponent idComponent = new IdentityComponent(wse,pm,props);
+        boolean add = wse.getComponentRegistry().add(idComponent);*/
+    //}
     }
 
     protected ServerSecurityTube(ServerSecurityTube that, TubeCloner cloner) {

@@ -56,6 +56,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -119,6 +120,8 @@ import java.security.PrivilegedAction;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
+import com.sun.xml.wss.provider.wsit.IdentityComponent;
+import com.sun.xml.wss.provider.wsit.PipeConstants;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -178,9 +181,15 @@ public class SecurityServerTube extends SecurityTubeBase {
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
             String cntxtClass = getMetaINFServiceClass(WSCONTEXT_DELEGATE);
             if (cntxtClass != null) {
-                 contextDelegate = this.loadClass(cntxtClass);
+                contextDelegate = this.loadClass(cntxtClass);
             }
-            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration)tubeConfig).getEndpoint());
+            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
+
+            /*WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
+            PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
+            IdentityComponent idComponent = new IdentityComponent(wse, pm, props);
+            boolean add = wse.getComponentRegistry().add(idComponent);*/
+            
         } catch (Exception e) {            
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
