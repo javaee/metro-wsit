@@ -27,7 +27,6 @@ import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -37,7 +36,6 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.security.KeyStoreException;
@@ -55,25 +53,21 @@ import javax.xml.namespace.QName;
  */
 public class IdentityComponent implements EndpointComponent {
 
-    private String s = "<Identity xmlns=\"http://example.com/addressingidentity\">" +
-            "<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\">" + "<X509Data>" + "<X509Certificate>" +
-            "1234567890" + "</X509Certificate>" + "</X509Data>" + "</KeyInfo>" + "</Identity>";
-    private KeyStore keyStore = null;
     protected TubeConfiguration pipeConfig = null;
-    private String alias;
-    String password = null;
-    String location = null;
-    Certificate cs = null;
-    java.io.FileInputStream fis = null;
     PolicyMap pm = null;
     WSEndpoint e = null;
     Map props = null;
+    Certificate cs = null;
 
     public IdentityComponent(WSEndpoint e, PolicyMap pm, Map props) {
         this.pm = pm;
         this.e = e;
         this.props = props;
-        getServerKeyStore();
+        try {
+            getServerKeyStore();
+        } catch (IOException ex) {
+            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
 
     }
@@ -109,7 +103,7 @@ public class IdentityComponent implements EndpointComponent {
                         IdentityType identityElement = new IdentityType();
                         identityElement.getDnsOrSpnOrUpn().add(bstElem);
 
-                        reader = readHeader(identityElement);                       
+                        reader = readHeader(identityElement);
 
                     } catch (CertificateEncodingException ex) {
                         Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
@@ -128,7 +122,12 @@ public class IdentityComponent implements EndpointComponent {
         }
     }
 
-    public void getServerKeyStore() {
+    public void getServerKeyStore() throws IOException {
+        String alias = null;
+        String password = null;
+        String location = null;        
+        java.io.FileInputStream fis = null;
+        
         WSDLPort port = (WSDLPort) props.get("WSDL_MODEL");
         pipeConfig = new ServerTubeConfiguration(pm, port, e);
         QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
@@ -140,42 +139,39 @@ public class IdentityComponent implements EndpointComponent {
             for (AssertionSet assertionSet : ep) {
                 for (PolicyAssertion pa : assertionSet) {
                     if (PolicyUtil.isConfigPolicyAssertion(pa)) {
-                        try {
+                        HashMap atts = (HashMap) pa.getAttributes();
+                        Set ks = atts.keySet();
+                        Iterator itt = ks.iterator();
+                        while (itt.hasNext()) {
+                            QName name = (QName) itt.next();
+                            if (name.getLocalPart().equals("storepass")) {
+                                password = (String) atts.get(name);
+                            } else if (name.getLocalPart().equals("location")) {
+                                location = (String) atts.get(name);
+                            } else if (name.getLocalPart().equals("alias")) {
+                                alias = (String) atts.get(name);
+                            }
+                        }
+                        KeyStore keyStore = null;
+                        try {                            
                             keyStore = KeyStore.getInstance("JKS");
-                            HashMap atts = (HashMap) pa.getAttributes();
-                            Set ks = atts.keySet();
-                            Iterator itt = ks.iterator();
-                            while (itt.hasNext()) {
-                                QName name = (QName) itt.next();
-                                if (name.getLocalPart().equals("storepass")) {
-                                    password = (String) atts.get(name);
-                                } else if (name.getLocalPart().equals("location")) {
-                                    location = (String) atts.get(name);
-                                } else if (name.getLocalPart().equals("alias")) {
-                                    alias = (String) atts.get(name);
-                                }
-                            }
-                            try {
-
-                                try {
-                                    fis = new java.io.FileInputStream(location);
-                                } catch (FileNotFoundException ex) {
-                                    Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                keyStore.load(fis, password.toCharArray());
-                                cs = keyStore.getCertificate(alias);
-                                fis.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (NoSuchAlgorithmException ex) {
-                                Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (CertificateException ex) {
-                                Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-
+                            fis = new java.io.FileInputStream(location);
+                            keyStore.load(fis, password.toCharArray());
+                            cs = keyStore.getCertificate(alias);
+                        } catch (FileNotFoundException ex) {
+                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (IOException ex) {
+                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (NoSuchAlgorithmException ex) {
+                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (CertificateException ex) {
+                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
                         } catch (KeyStoreException ex) {
                             Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
                             ex.printStackTrace();
+                        } finally {
+                            keyStore = null;
+                            fis.close();
                         }
 
                     }
@@ -193,9 +189,9 @@ public class IdentityComponent implements EndpointComponent {
         XMLStreamBufferResult xbr = new XMLStreamBufferResult();
         JAXBElement<IdentityType> idElem =
                 (new com.sun.xml.security.core.ai.ObjectFactory()).createIdentity(identityElem);
-        try{
+        try {
             JAXBUtil.createMarshaller(SOAPVersion.SOAP_11).marshal(idElem, xbr);
-        }catch(JAXBException je){
+        } catch (JAXBException je) {
             //log here
             throw new XMLStreamException(je);
         }
