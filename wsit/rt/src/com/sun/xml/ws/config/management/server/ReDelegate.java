@@ -39,7 +39,7 @@ package com.sun.xml.ws.config.management.server;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.ConfigurationAPI;
+import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.server.DocumentAddressResolver;
@@ -75,7 +75,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Fabian Ritzmann
  */
-public class ReDelegate implements ConfigurationAPI {
+public class ReDelegate implements Configurator {
 
     private static final Logger LOGGER = Logger.getLogger(ReDelegate.class);
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();

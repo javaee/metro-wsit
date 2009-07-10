@@ -34,14 +34,22 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
+package com.sun.xml.ws.config.management.server;
+
+import com.sun.xml.ws.api.config.management.Configurator;
+import com.sun.xml.ws.api.config.management.NamedParameters;
+import com.sun.xml.ws.api.config.management.ManagementFactory;
+import com.sun.xml.ws.api.config.management.ConfigSaver;
 
 /**
  *
  * @author Fabian Ritzmann
  */
-public interface ConfigurationAPI {
+public class DefaultConfigurator implements Configurator {
 
-    public <T> void recreate(NamedParameters parameters);
+    public <T> void recreate(NamedParameters parameters) {
+        final ConfigSaver persist = ManagementFactory.createConfigSaverImpl();
+        persist.persist(parameters);
+    }
 
 }

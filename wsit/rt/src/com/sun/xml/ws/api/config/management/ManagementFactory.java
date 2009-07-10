@@ -54,30 +54,30 @@ public class ManagementFactory {
 
     private static final Logger LOGGER = Logger.getLogger(ManagementFactory.class);
 
-    public static Collection<CommunicationAPI> createCommunicationImpls(NamedParameters parameters) throws WebServiceException {
-        final ServiceFinder<CommunicationAPI> finder = ServiceFinder.find(CommunicationAPI.class);
-        final Collection<CommunicationAPI> commImpls = new ArrayList<CommunicationAPI>();
-        final Iterator<CommunicationAPI> commImplIterator = finder.iterator();
+    public static Collection<CommunicationServer> createCommunicationImpls(NamedParameters parameters) throws WebServiceException {
+        final ServiceFinder<CommunicationServer> finder = ServiceFinder.find(CommunicationServer.class);
+        final Collection<CommunicationServer> commImpls = new ArrayList<CommunicationServer>();
+        final Iterator<CommunicationServer> commImplIterator = finder.iterator();
         while (commImplIterator.hasNext()) {
-            final CommunicationAPI commImpl = commImplIterator.next();
+            final CommunicationServer commImpl = commImplIterator.next();
             commImpl.init(parameters);
             commImpls.add(commImpl);
         }
         if (commImpls.size() < 1) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(CommunicationAPI.class.getName())));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(CommunicationServer.class.getName())));
         }
         return commImpls;
     }
 
-    public static ConfigurationAPI createConfigurationImpl() throws WebServiceException {
-        final ServiceFinder<ConfigurationAPI> finder = ServiceFinder.find(ConfigurationAPI.class);
-        final Iterator<ConfigurationAPI> configImpls = finder.iterator();
+    public static Configurator createConfiguratorImpl() throws WebServiceException {
+        final ServiceFinder<Configurator> finder = ServiceFinder.find(Configurator.class);
+        final Iterator<Configurator> configImpls = finder.iterator();
         if (!configImpls.hasNext()) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(ConfigurationAPI.class.getName())));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5007_NO_INTERFACE_IMPL(Configurator.class.getName())));
         }
-        final ConfigurationAPI configImpl = configImpls.next();
+        final Configurator configImpl = configImpls.next();
         if (configImpls.hasNext()) {
-            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(ConfigurationAPI.class, configImpl));
+            LOGGER.warning(ManagementMessages.WSM_5008_MULTIPLE_INTERFACE_IMPLS(Configurator.class, configImpl));
         }
         return configImpl;
     }

@@ -40,7 +40,7 @@ package com.sun.xml.ws.api.config.management;
  *
  * @author Fabian Ritzmann
  */
-public interface CommunicationAPI {
+public interface CommunicationServer {
 
     public void init(NamedParameters parameters);
 

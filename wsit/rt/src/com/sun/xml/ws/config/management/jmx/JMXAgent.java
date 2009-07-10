@@ -37,7 +37,7 @@
 package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.CommunicationAPI;
+import com.sun.xml.ws.api.config.management.CommunicationServer;
 import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
@@ -74,7 +74,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Fabian Ritzmann
  */
-public class JMXAgent<T> implements CommunicationAPI {
+public class JMXAgent<T> implements CommunicationServer {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
     // TODO Move some functionality into ManagedServiceAssertion

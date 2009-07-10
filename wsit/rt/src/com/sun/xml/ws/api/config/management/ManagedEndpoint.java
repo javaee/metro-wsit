@@ -87,7 +87,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
 
     private final CountDownLatch startSignal = new CountDownLatch(1);
 
-    private final Collection<CommunicationAPI> commInterfaces;
+    private final Collection<CommunicationServer> commInterfaces;
 
     /**
      * Initializes this endpoint.
@@ -116,7 +116,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
                     .put(CLASS_LOADER_PARAMETER_NAME, classLoader)
                     .put(ENDPOINT_STARTER_PARAMETER_NAME, this);
             this.commInterfaces = ManagementFactory.createCommunicationImpls(parameters);
-            for (CommunicationAPI commInterface : commInterfaces) {
+            for (CommunicationServer commInterface : commInterfaces) {
                 commInterface.start();
             }
 
@@ -209,7 +209,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
 
     @Override
     public void dispose() {
-        for (CommunicationAPI commInterface: this.commInterfaces) {
+        for (CommunicationServer commInterface: this.commInterfaces) {
             commInterface.stop();
         }
         if (this.endpointDelegate != null) {

@@ -37,7 +37,7 @@
 package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.ConfigurationAPI;
+import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
@@ -98,7 +98,7 @@ public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
     private void update(String value) throws InvalidAttributeValueException {
         try {
             this.newPolicies = value;
-            final ConfigurationAPI config = ManagementFactory.createConfigurationImpl();
+            final Configurator config = ManagementFactory.createConfiguratorImpl();
             final NamedParameters parameters = new NamedParameters()
                     .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                     .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
