@@ -40,6 +40,8 @@ import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
+import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.config.management.ManagementUtil;
 
 /**
  *
@@ -48,7 +50,9 @@ import com.sun.xml.ws.api.config.management.ConfigSaver;
 public class DefaultConfigurator implements Configurator {
 
     public <T> void recreate(NamedParameters parameters) {
-        final ConfigSaver persist = ManagementFactory.createConfigSaverImpl();
+        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+        final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(endpoint));
+        final ConfigSaver persist = factory.createConfigSaverImpl();
         persist.persist(parameters);
     }
 

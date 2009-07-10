@@ -79,10 +79,6 @@ public class JMXAgent<T> implements CommunicationServer {
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
     // TODO Move some functionality into ManagedServiceAssertion
     private static final QName JMX_SERVICE_URL_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXServiceURL");
-    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXConnectorServerEnvironment");
-    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "Entry");
-    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_KEY_ATTRIBUTE_QNAME = new QName("", "key");
-    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME = new QName("", "value");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
     private ConfigReader configReader;
@@ -103,9 +99,11 @@ public class JMXAgent<T> implements CommunicationServer {
             this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
             this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
 
+            final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint);
+
+            final ManagementFactory factory = new ManagementFactory(managedService);
             final EndpointStarter endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
-            this.configReader = ManagementFactory.createConfigReaderImpl();
-            this.configReader.init(new NamedParameters()
+            this.configReader = factory.createConfigReaderImpl(new NamedParameters()
                         .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                         .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
                         .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
@@ -113,11 +111,9 @@ public class JMXAgent<T> implements CommunicationServer {
             
             // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
             this.server = MBeanServerFactory.createMBeanServer();
-            final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint.getServiceName(),
-                    this.managedEndpoint.getPortName(), this.managedEndpoint.getPolicyMap());
             final JMXServiceURL jmxUrl = getServiceURL(managedService);
-            final Map<String, Object> env = getEnvironment(managedService);
-            this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, server);
+            final Map<String, String> env = managedService.getJMXConnectorServerEnvironment();
+            this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, this.server);
         } catch (MalformedURLException e) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(e));
@@ -212,26 +208,4 @@ public class JMXAgent<T> implements CommunicationServer {
         }
     }
 
-    private Map<String, Object> getEnvironment(ManagedServiceAssertion managedService) {
-        final Map<String, Object> result = new HashMap<String, Object>();
-        final Iterator<PolicyAssertion> parameters = managedService.getParametersIterator();
-        while (parameters.hasNext()) {
-            final PolicyAssertion parameter = parameters.next();
-            if (JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME.equals(parameter.getName())) {
-                final Iterator<PolicyAssertion> entries = parameter.getParametersIterator();
-                while (entries.hasNext()) {
-                    final PolicyAssertion entry = entries.next();
-                    if (!JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME.equals(entry.getName())) {
-                        throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5006_UNEXPECTED_ENTRY(entry)));
-                    }
-                    else {
-                        final String key = entry.getAttributeValue(JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_KEY_ATTRIBUTE_QNAME);
-                        final String value = entry.getAttributeValue(JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME);
-                        result.put(key, value);
-                    }
-                }
-            }
-        }
-        return result;
-    }
 }

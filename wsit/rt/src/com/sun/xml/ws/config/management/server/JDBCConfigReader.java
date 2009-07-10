@@ -95,8 +95,7 @@ public class JDBCConfigReader implements ConfigReader {
             this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configParameters = parameters;
 
-            ManagedServiceAssertion assertion = ManagementUtil.getAssertion(
-                    this.endpoint.getServiceName(), this.endpoint.getPortName(), this.endpoint.getPolicyMap());
+            ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
             final String start = assertion.getStart();
             // TODO log actions, put "notify" into constant
             if (start == null || !start.equals("notify")) {

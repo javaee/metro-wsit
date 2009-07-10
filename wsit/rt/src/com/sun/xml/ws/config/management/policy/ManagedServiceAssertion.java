@@ -36,12 +36,21 @@
 
 package com.sun.xml.ws.config.management.policy;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
+
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
  *
@@ -49,27 +58,127 @@ import javax.xml.namespace.QName;
  */
 public class ManagedServiceAssertion extends PolicyAssertion {
 
-    // TODO: Consolidate with other declarations of this namespace
-    private static final String MANAGEMENT_NAMESPACE = "http://java.sun.com/xml/ns/metro/management";
-    private static final QName MANAGED_SERVICE_NAME = new QName(MANAGEMENT_NAMESPACE, "ManagedService");
+    private static final Logger LOGGER = Logger.getLogger(ManagedServiceAssertion.class);
+
+    private static final QName MANAGED_SERVICE_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
+    private static final QName ID_ATTRIBUTE_QNAME = new QName("", "id");
+    private static final QName START_ATTRIBUTE_QNAME = new QName("", "start");
+    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXConnectorServerEnvironment");
+    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "Entry");
+    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_KEY_ATTRIBUTE_QNAME = new QName("", "key");
+    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME = new QName("", "value");
+    private static final QName COMMUNICATION_SERVER_IMPLEMENTATIONS_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "CommunicationServerImplementations");
+    private static final QName COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "CommunicationServerImplementation");
+    private static final QName CONFIGURATOR_IMPLEMENTATION_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ConfiguratorImplementation");
+    private static final QName CONFIG_SAVER_IMPLEMENTATION_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ConfigSaverImplementation");
+    private static final QName CONFIG_READER_IMPLEMENTATION_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ConfigReaderImplementation");
 
     public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
             throws AssertionCreationException {
         super(data, assertionParameters, nestedAlternative);
-        if (!MANAGED_SERVICE_NAME.equals(data.getName())) {
-            throw new AssertionCreationException(data, "Expected policy assertion ManagedService in this namespace");
+        if (!MANAGED_SERVICE_QNAME.equals(data.getName())) {
+            throw new AssertionCreationException(data, ManagementMessages.WSM_5011_EXPECTED_MANAGED_SERVICE_ASSERTION());
         }
-        if (!data.containsAttribute(new QName("", "id"))) {
-            throw new AssertionCreationException(data, "ManagedService policy assertion must have id attribute");
+        if (!data.containsAttribute(ID_ATTRIBUTE_QNAME)) {
+            throw new AssertionCreationException(data, ManagementMessages.WSM_5012_MANAGED_SERVICE_MISSING_ID());
         }
     }
 
     public String getID() {
-        return this.getAttributeValue((new QName("", "id")));
+        return this.getAttributeValue((ID_ATTRIBUTE_QNAME));
     }
 
     public String getStart() {
-        return this.getAttributeValue((new QName("", "start")));
+        return this.getAttributeValue((START_ATTRIBUTE_QNAME));
     }
     
+    public Map<String, String> getJMXConnectorServerEnvironment() {
+        final Map<String, String> result = new HashMap<String, String>();
+        final Iterator<PolicyAssertion> parameters = getParametersIterator();
+        while (parameters.hasNext()) {
+            final PolicyAssertion parameter = parameters.next();
+            if (JMX_CONNECTOR_SERVER_ENVIRONMENT_PARAMETER_QNAME.equals(parameter.getName())) {
+                final Iterator<PolicyAssertion> entries = parameter.getParametersIterator();
+                while (entries.hasNext()) {
+                    final PolicyAssertion entry = entries.next();
+                    if (!JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_PARAMETER_QNAME.equals(entry.getName())) {
+                        throw LOGGER.logSevereException(new WebServiceException(
+                                ManagementMessages.WSM_5006_UNEXPECTED_ENTRY(entry)));
+                    }
+                    else {
+                        final String key = entry.getAttributeValue(JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_KEY_ATTRIBUTE_QNAME);
+                        final String value = entry.getAttributeValue(JMX_CONNECTOR_SERVER_ENVIRONMENT_ENTRY_VALUE_ATTRIBUTE_QNAME);
+                        result.put(key, value);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public Collection<String> getCommunicationServerImplementations() {
+        final Collection<String> result = new LinkedList<String>();
+        final Iterator<PolicyAssertion> parameters = getParametersIterator();
+        while (parameters.hasNext()) {
+            final PolicyAssertion parameter = parameters.next();
+            if (COMMUNICATION_SERVER_IMPLEMENTATIONS_PARAMETER_QNAME.equals(parameter.getName())) {
+                final Iterator<PolicyAssertion> implementations = parameter.getParametersIterator();
+                while (implementations.hasNext()) {
+                    final PolicyAssertion implementation = implementations.next();
+                    if (!COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME.equals(implementation.getName())) {
+                        throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5013_EXPECTED_XML_TAG(
+                                COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME, implementation.getName())));
+                    }
+                    else {
+                        String value = parameter.getValue();
+                        if (value != null) {
+                            result.add(value.trim());
+                        }
+                        else {
+                            throw LOGGER.logSevereException(new WebServiceException(
+                                    ManagementMessages.WSM_5014_XML_VALUE_EMPTY(COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME)));
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public String getConfiguratorImplementation() {
+        return getParameterValue(CONFIGURATOR_IMPLEMENTATION_PARAMETER_QNAME);
+    }
+
+    public String getConfigSaverImplementation() {
+        return getParameterValue(CONFIG_SAVER_IMPLEMENTATION_PARAMETER_QNAME);
+    }
+
+    public String getConfigReaderImplementation() {
+        return getParameterValue(CONFIG_READER_IMPLEMENTATION_PARAMETER_QNAME);
+    }
+    
+    private String getParameterValue(final QName name) {
+        final Iterator<PolicyAssertion> parameters = getParametersIterator();
+        while (parameters.hasNext()) {
+            final PolicyAssertion parameter = parameters.next();
+            if (name.equals(parameter.getName())) {
+                String value = parameter.getValue();
+                if (value != null) {
+                    return value.trim();
+                }
+                else {
+                    throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5014_XML_VALUE_EMPTY(name)));
+                }
+            }
+        }
+        return null;
+    }
+
 }

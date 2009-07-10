@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
+import com.sun.xml.ws.config.management.ManagementUtil;
 
 import javax.management.InvalidAttributeValueException;
 import javax.management.openmbean.OpenType;
@@ -98,7 +99,8 @@ public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
     private void update(String value) throws InvalidAttributeValueException {
         try {
             this.newPolicies = value;
-            final Configurator config = ManagementFactory.createConfiguratorImpl();
+            final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(this.managedEndpoint));
+            final Configurator config = factory.createConfiguratorImpl();
             final NamedParameters parameters = new NamedParameters()
                     .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                     .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
@@ -112,4 +114,5 @@ public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
             throw LOGGER.logSevereException(exception);
         }
     }
+
 }

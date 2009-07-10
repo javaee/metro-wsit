@@ -56,7 +56,7 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
     private static final Logger LOGGER = Logger.getLogger(EndpointFactoryImpl.class);
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
-        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint.getServiceName(), endpoint.getPortName(), endpoint.getPolicyMap());
+        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
         if (assertion != null) {
             return new ManagedEndpoint<T>(assertion.getID(), endpoint, attributes);
         }

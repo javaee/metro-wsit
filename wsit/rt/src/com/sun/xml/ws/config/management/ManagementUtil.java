@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.config.management;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
@@ -61,26 +62,25 @@ public class ManagementUtil {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagementUtil.class);
 
     /**
-     * Return ManagedService assertion if there is one attached to the given port
-     * in the policy map
+     * Return ManagedService assertion if there is one associated with the endpoint.
      *
-     * @param serviceName The name of the service. Must not be null.
-     * @param portName The name of the port. Must not be null.
-     * @param policyMap The policy map. May be null.
+     * @param endpoint The endpoint. Must not be null.
      * @return The policy assertion if found. Null otherwise.
      */
-    public static ManagedServiceAssertion getAssertion(QName serviceName, QName portName, PolicyMap policyMap) {
-        LOGGER.entering(serviceName, portName, policyMap);
+    public static ManagedServiceAssertion getAssertion(WSEndpoint endpoint) {
+        LOGGER.entering(endpoint);
         try {
             PolicyAssertion assertion = null;
+            final PolicyMap policyMap = endpoint.getPolicyMap();
             if (policyMap != null) {
-                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
+                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(endpoint.getServiceName(), endpoint.getPortName());
                 final Policy policy = policyMap.getEndpointEffectivePolicy(key);
                 if (policy != null) {
                     final Iterator<AssertionSet> assertionSets = policy.iterator();
                     if (assertionSets.hasNext()) {
                         final AssertionSet assertionSet = assertionSets.next();
-                        final Iterator<PolicyAssertion> assertions = assertionSet.get(ManagementConstants.SERVICE_ASSERTION_QNAME).iterator();
+                        final Iterator<PolicyAssertion> assertions = assertionSet.get(
+                                ManagementConstants.SERVICE_ASSERTION_QNAME).iterator();
                         if (assertions.hasNext()) {
                             assertion = assertions.next();
                         }
@@ -114,4 +114,5 @@ public class ManagementUtil {
             throw LOGGER.logSevereException(new WebServiceException(e));
         }
     }
+    
 }

@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.config.management.ManagementMessages;
+import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.policy.PolicyMap;
 
 import java.util.Collection;
@@ -109,13 +110,14 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
                 classLoader = getClass().getClassLoader();
             }
 
+            final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(endpoint));
             final NamedParameters parameters = new NamedParameters()
                     .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
                     .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
                     .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
                     .put(CLASS_LOADER_PARAMETER_NAME, classLoader)
                     .put(ENDPOINT_STARTER_PARAMETER_NAME, this);
-            this.commInterfaces = ManagementFactory.createCommunicationImpls(parameters);
+            this.commInterfaces = factory.createCommunicationImpls(parameters);
             for (CommunicationServer commInterface : commInterfaces) {
                 commInterface.start();
             }
