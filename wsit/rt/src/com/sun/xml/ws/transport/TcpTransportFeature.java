@@ -38,12 +38,15 @@ package com.sun.xml.ws.transport;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import javax.xml.ws.WebServiceFeature;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  * TCP transport {@link javax.xml.ws.WebServiceFeature}
  *
  * @author Alexey Stashok
  */
+@ManagedData
 public class TcpTransportFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.transport.TcpTransportFeature";
@@ -66,6 +69,7 @@ public class TcpTransportFeature extends WebServiceFeature {
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }

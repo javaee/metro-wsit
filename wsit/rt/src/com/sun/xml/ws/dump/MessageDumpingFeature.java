@@ -40,11 +40,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import javax.xml.ws.WebServiceFeature;
 import com.sun.xml.ws.api.FeatureConstructor;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
+@ManagedData
 public final class MessageDumpingFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.messagedump.MessageDumpingFeature";
@@ -84,6 +87,7 @@ public final class MessageDumpingFeature extends WebServiceFeature {
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }
@@ -100,14 +104,17 @@ public final class MessageDumpingFeature extends WebServiceFeature {
         messageLoggingStatus.set(false);
     }
 
+    @ManagedAttribute
     public boolean getMessageLoggingStatus() {
         return messageLoggingStatus.get();
     }
 
+    @ManagedAttribute
     public String getMessageLoggingRoot() {
         return messageLoggingRoot;
     }
 
+    @ManagedAttribute
     public Level getMessageLoggingLevel() {
         return messageLoggingLevel;
     }

@@ -39,11 +39,14 @@ package com.sun.xml.ws.security.trust;
 import com.sun.xml.ws.api.FeatureConstructor;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import javax.xml.ws.WebServiceFeature;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
  *
  * @author Jiandong Guo
  */
+@ManagedData
 public class STSIssuedTokenFeature extends WebServiceFeature{
     public static final String ID = "com.sun.xml.ws.security.trust.STSIssuedTokenFeature";
 
@@ -56,10 +59,12 @@ public class STSIssuedTokenFeature extends WebServiceFeature{
     }
 
     @Override
+    @ManagedAttribute
     public String getID() {
         return ID;
     }
 
+    @ManagedAttribute
     public STSIssuedTokenConfiguration getSTSIssuedTokenConfiguration() {
         return this.stsIssuedTokenConfig;
     }
