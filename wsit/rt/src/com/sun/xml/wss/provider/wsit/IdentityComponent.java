@@ -7,6 +7,8 @@ package com.sun.xml.wss.provider.wsit;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 //import com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
+import com.sun.xml.security.core.ai.IdentityType;
+import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -20,7 +22,9 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import com.sun.xml.ws.security.opt.impl.keyinfo.BinarySecurityToken;
+import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
+import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import java.io.ByteArrayInputStream;
@@ -41,6 +45,8 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
 /**
@@ -92,14 +98,18 @@ public class IdentityComponent implements EndpointComponent {
                 public XMLStreamReader readAsXMLStreamReader() throws XMLStreamException {
                     XMLStreamReader reader = null;
                     try {
-                        // reader = XMLInputFactory.newInstance().createXMLStreamReader(new ByteArrayInputStream(bst));
                         String id = PolicyUtil.randomUUID();
-                        BinarySecurityToken bst = new com.sun.xml.ws.security.opt.impl.util.WSSElementFactory(SOAPVersion.SOAP_11).createBinarySecurityToken(id, cs.getEncoded());
-                        reader = bst.readHeader();
-                        s = "<wsai:Identity xmlns:wsai=\"http://example.com/addressingidentity\">" +
-                                "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">" +
-                                bst.readHeader() + "</ds:KeyInfo>" + "</wsai:Identity>";
-                        reader = XMLInputFactory.newInstance().createXMLStreamReader(new ByteArrayInputStream(s.getBytes()));
+                        BinarySecurityTokenType bst = new BinarySecurityTokenType();
+                        bst.setValueType(MessageConstants.X509v3_NS);
+                        bst.setId(id);
+                        bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+                        bst.setValue(cs.getEncoded());
+
+                        JAXBElement<BinarySecurityTokenType> bstElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createBinarySecurityToken(bst);
+                        IdentityType identityElement = new IdentityType();
+                        identityElement.getDnsOrSpnOrUpn().add(bstElem);
+
+                        reader = readHeader(identityElement);                       
 
                     } catch (CertificateEncodingException ex) {
                         Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
@@ -177,5 +187,18 @@ public class IdentityComponent implements EndpointComponent {
             Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+    }
+
+    public XMLStreamReader readHeader(IdentityType identityElem) throws XMLStreamException {
+        XMLStreamBufferResult xbr = new XMLStreamBufferResult();
+        JAXBElement<IdentityType> idElem =
+                (new com.sun.xml.security.core.ai.ObjectFactory()).createIdentity(identityElem);
+        try{
+            JAXBUtil.createMarshaller(SOAPVersion.SOAP_11).marshal(idElem, xbr);
+        }catch(JAXBException je){
+            //log here
+            throw new XMLStreamException(je);
+        }
+        return xbr.getXMLStreamBuffer().readAsXMLStreamReader();
     }
 }
