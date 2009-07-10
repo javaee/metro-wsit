@@ -166,7 +166,9 @@ public abstract class SessionManager {
     
     public static void removeSessionManager(WSEndpoint endpoint){
         Object o = sessionManagers.remove(endpoint);
-        endpoint.getManagedObjectManager().unregister(o);
+        if (o != null) {
+            endpoint.getManagedObjectManager().unregister(o);
+        }
     }
 
     /**
