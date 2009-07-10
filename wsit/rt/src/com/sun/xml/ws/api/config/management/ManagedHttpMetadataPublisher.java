@@ -102,12 +102,12 @@ class ManagedHttpMetadataPublisher extends HttpMetadataPublisher implements Endp
      */
     private void publishWSDL(@NotNull WSHTTPConnection connection, final @NotNull HttpAdapter adapter)
             throws IOException {
-//        // If the service definition has changed in the meantime, reprocess it
-//        final ServiceDefinition currentServiceDefinition = adapter.getEndpoint().getServiceDefinition();
-//        if (adapter.getServiceDefinition() != currentServiceDefinition) {
-//            adapter.initWSDLMap(currentServiceDefinition);
-//        }
-//        adapter.publishWSDL(connection);
+        // If the service definition has changed in the meantime, reprocess it
+        final ServiceDefinition currentServiceDefinition = adapter.getEndpoint().getServiceDefinition();
+        if (adapter.getServiceDefinition() != currentServiceDefinition) {
+            adapter.initWSDLMap(currentServiceDefinition);
+        }
+        adapter.publishWSDL(connection);
     }
 
 }
