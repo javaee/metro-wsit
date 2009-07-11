@@ -85,6 +85,7 @@ public class ClientPipeCreator extends ClientPipelineHook {
 //        propBag.put(PipeConstants.NEXT_PIPE,context.getAdaptedTubelineHead());
         propBag.put(PipeConstants.NEXT_TUBE, context.getTubelineHead());
         propBag.put(PipeConstants.CONTAINER, context.getContainer());
+        propBag.put(PipeConstants.WRAPPED_CONTEXT, context.getWrappedContext());
         ClientSecurityTube ret = new ClientSecurityTube(propBag, context.getTubelineHead());
         return ret;
     }

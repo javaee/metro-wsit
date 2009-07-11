@@ -77,10 +77,10 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
         this.isHttpBinding = isHttpBinding;
         //if( id policy enabled && other checks) {
-       /*WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
+        WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
         PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
         IdentityComponent idComponent = new IdentityComponent(wse,pm,props);
-        boolean add = wse.getComponentRegistry().add(idComponent);*/
+        boolean add = wse.getComponentRegistry().add(idComponent);
         
     //}
     }

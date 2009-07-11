@@ -61,6 +61,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -98,9 +99,10 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
                     wsdlModel.getOwner().getName());
         }
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
-        /*ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) props.get(PipeConstants.WRAPPED_CONTEXT);
+        ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) props.get(PipeConstants.WRAPPED_CONTEXT);
         WSEndpointReference wsepr = context.getBindingProvider().getWSEndpointReference();
         WSEndpointReference.EPRExtension idExtn = null;
+        //wsepr.toSpec().writeTo(new StreamResult(System.out));
         try {
         idExtn = wsepr.getEPRExtension(new QName("http://example.com/addressingidentity", "Identity"));
         } catch (XMLStreamException ex) {
@@ -110,7 +112,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
         XMLStreamReader xmlreader = idExtn.readAsXMLStreamReader();
         }catch (XMLStreamException ex) {
         Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        }
     }
      
     protected ClientSecurityTube(ClientSecurityTube that, TubeCloner cloner) {

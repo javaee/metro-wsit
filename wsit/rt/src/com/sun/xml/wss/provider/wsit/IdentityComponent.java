@@ -58,11 +58,13 @@ public class IdentityComponent implements EndpointComponent {
     WSEndpoint e = null;
     Map props = null;
     Certificate cs = null;
+    SOAPVersion sp = null;
 
     public IdentityComponent(WSEndpoint e, PolicyMap pm, Map props) {
         this.pm = pm;
         this.e = e;
         this.props = props;
+        this.sp = e.getBinding().getSOAPVersion();
         try {
             getServerKeyStore();
         } catch (IOException ex) {
@@ -97,8 +99,9 @@ public class IdentityComponent implements EndpointComponent {
                         bst.setValueType(MessageConstants.X509v3_NS);
                         bst.setId(id);
                         bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+                        if(cs != null){
                         bst.setValue(cs.getEncoded());
-
+                        } 
                         JAXBElement<BinarySecurityTokenType> bstElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createBinarySecurityToken(bst);
                         IdentityType identityElement = new IdentityType();
                         identityElement.getDnsOrSpnOrUpn().add(bstElem);
@@ -125,7 +128,7 @@ public class IdentityComponent implements EndpointComponent {
     public void getServerKeyStore() throws IOException {
         String alias = null;
         String password = null;
-        String location = null;        
+        String location = null; 
         java.io.FileInputStream fis = null;
         
         WSDLPort port = (WSDLPort) props.get("WSDL_MODEL");
@@ -136,8 +139,8 @@ public class IdentityComponent implements EndpointComponent {
         PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
         try {
             Policy ep = pm.getEndpointEffectivePolicy(endpointKey);
-            for (AssertionSet assertionSet : ep) {
-                for (PolicyAssertion pa : assertionSet) {
+      for (AssertionSet assertionSet : ep) {
+         inner:  for (PolicyAssertion pa : assertionSet) {
                     if (PolicyUtil.isConfigPolicyAssertion(pa)) {
                         HashMap atts = (HashMap) pa.getAttributes();
                         Set ks = atts.keySet();
@@ -148,10 +151,17 @@ public class IdentityComponent implements EndpointComponent {
                                 password = (String) atts.get(name);
                             } else if (name.getLocalPart().equals("location")) {
                                 location = (String) atts.get(name);
+                                if(location.startsWith("$WSIT")){
+                                    String path = System.getProperty("WSIT_HOME");
+                                    StringBuffer sb = new StringBuffer(location);
+                                    sb.replace(0, 10, path);
+                                    location = sb.toString();
+                                }
                             } else if (name.getLocalPart().equals("alias")) {
                                 alias = (String) atts.get(name);
                             }
                         }
+
                         KeyStore keyStore = null;
                         try {                            
                             keyStore = KeyStore.getInstance("JKS");
@@ -172,12 +182,13 @@ public class IdentityComponent implements EndpointComponent {
                         } finally {
                             keyStore = null;
                             fis.close();
+                            break inner;
                         }
 
                     }
-                    break;
+                    
                 }
-                break;
+               
             }
         } catch (PolicyException ex) {
             Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
@@ -190,7 +201,7 @@ public class IdentityComponent implements EndpointComponent {
         JAXBElement<IdentityType> idElem =
                 (new com.sun.xml.security.core.ai.ObjectFactory()).createIdentity(identityElem);
         try {
-            JAXBUtil.createMarshaller(SOAPVersion.SOAP_11).marshal(idElem, xbr);
+            JAXBUtil.createMarshaller(sp).marshal(idElem, xbr);
         } catch (JAXBException je) {
             //log here
             throw new XMLStreamException(je);

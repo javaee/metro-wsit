@@ -184,13 +184,15 @@ public class SecurityServerTube extends SecurityTubeBase {
                 contextDelegate = this.loadClass(cntxtClass);
             }
             sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
-
-            /*WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
+            props.put(PipeConstants.ENDPOINT, context.getEndpoint());
+            props.put(PipeConstants.POLICY, context.getPolicyMap());
+            props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
+            WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
             PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
             IdentityComponent idComponent = new IdentityComponent(wse, pm, props);
-            boolean add = wse.getComponentRegistry().add(idComponent);*/
+            boolean add = wse.getComponentRegistry().add(idComponent);
             
-        } catch (Exception e) {            
+        } catch (Exception e) {
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
             throw new RuntimeException(
