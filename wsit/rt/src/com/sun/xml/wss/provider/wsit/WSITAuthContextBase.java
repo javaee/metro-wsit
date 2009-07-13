@@ -269,6 +269,7 @@ public abstract class WSITAuthContextBase  {
     
     protected static final String DEFAULT_JMAC_HANDLER = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
     protected static final String WSDLPORT="WSDLPort";
+    protected static final String WSENDPOINT="WSEndpoint";
     
     static {
         try {
@@ -1170,6 +1171,9 @@ public abstract class WSITAuthContextBase  {
         }
         if (pipeConfig.getWSDLPort() != null) {
             ctx.getExtraneousProperties().put(WSITAuthContextBase.WSDLPORT, pipeConfig.getWSDLPort());
+        }
+        if (pipeConfig instanceof ServerTubeConfiguration) {
+            ctx.getExtraneousProperties().put(WSITAuthContextBase.WSENDPOINT,((ServerTubeConfiguration)pipeConfig).getEndpoint());
         }
         return ctx;
     }

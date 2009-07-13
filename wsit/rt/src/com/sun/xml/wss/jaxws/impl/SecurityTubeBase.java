@@ -249,6 +249,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     // Security Policy version
     protected SecurityPolicyVersion spVersion = null;
     protected static final String WSDLPORT="WSDLPort";
+    protected static final String WSENDPOINT="WSEndpoint";
     //flag used as temporary variable for each run
     //boolean isTrustOrSCMessage = false;
     
@@ -547,6 +548,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         if (tubeConfig.getWSDLPort() != null) {
             ctx.getExtraneousProperties().put(SecurityTubeBase.WSDLPORT, tubeConfig.getWSDLPort());
+        }
+        if (tubeConfig instanceof ServerTubeConfiguration) {
+            ctx.getExtraneousProperties().put(SecurityTubeBase.WSENDPOINT,((ServerTubeConfiguration)tubeConfig).getEndpoint());
         }
         return ctx;
     }
