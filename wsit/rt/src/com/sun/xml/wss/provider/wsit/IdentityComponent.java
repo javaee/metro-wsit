@@ -6,7 +6,6 @@ package com.sun.xml.wss.provider.wsit;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-//import com.sun.xml.internal.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.security.core.ai.IdentityType;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -62,12 +61,12 @@ import javax.xml.namespace.QName;
 public class IdentityComponent implements EndpointComponent {
 
     protected TubeConfiguration pipeConfig = null;
-    PolicyMap pm = null;
-    WSEndpoint e = null;
-    Map props = null;
-    Certificate cs = null;
-    SOAPVersion sp = null;
-     protected static final Logger log =
+    protected PolicyMap pm = null;
+    protected WSEndpoint e = null;
+    protected Map props = null;
+    private Certificate cs = null;
+    protected SOAPVersion sp = null;
+    protected static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSIT_PVD_DOMAIN,
             LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
@@ -87,15 +86,15 @@ public class IdentityComponent implements EndpointComponent {
                 CertificateFactory certFact = CertificateFactory.getInstance("X.509");
                 InputStream is = url.openStream();
                 cs = certFact.generateCertificate(is);
+                is.close();
             }
         } catch (IOException ex) {
             log.log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
         } catch(CertificateException ex){
             log.log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-            
-        }
+            throw new RuntimeException(ex);            
+        } 
 
 
     }
@@ -135,7 +134,7 @@ public class IdentityComponent implements EndpointComponent {
                         reader = readHeader(identityElement);
 
                     } catch (CertificateEncodingException ex) {
-                        Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                        log.log(Level.SEVERE, null, ex);
                     }
                     return reader;
                 }
@@ -154,9 +153,9 @@ public class IdentityComponent implements EndpointComponent {
     public void getServerKeyStore() throws IOException {
         String alias = null;
         String password = null;
-        String location = null; 
+        String location = null;
         java.io.FileInputStream fis = null;
-        
+
         WSDLPort port = (WSDLPort) props.get("WSDL_MODEL");
         pipeConfig = new ServerTubeConfiguration(pm, port, e);
         QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
@@ -166,10 +165,11 @@ public class IdentityComponent implements EndpointComponent {
         PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
         try {
             Policy ep = pm.getEndpointEffectivePolicy(endpointKey);
-      for (AssertionSet assertionSet : ep) {
-         inner:  for (PolicyAssertion pa : assertionSet) {
+            for (AssertionSet assertionSet : ep) {
+                inner:
+                for (PolicyAssertion pa : assertionSet) {
                     if (PolicyUtil.isConfigPolicyAssertion(pa)) {
-                        if(!pa.getName().equals(keyStoreQName)){
+                        if (!pa.getName().equals(keyStoreQName)) {
                             continue;
                         }
                         HashMap atts = (HashMap) pa.getAttributes();
@@ -181,7 +181,7 @@ public class IdentityComponent implements EndpointComponent {
                                 password = (String) atts.get(name);
                             } else if (name.getLocalPart().equals("location")) {
                                 location = (String) atts.get(name);
-                                if(location.startsWith("$WSIT")){
+                                if (location.startsWith("$WSIT")) {
                                     String path = System.getProperty("WSIT_HOME");
                                     StringBuffer sb = new StringBuffer(location);
                                     sb.replace(0, 10, path);
@@ -191,26 +191,30 @@ public class IdentityComponent implements EndpointComponent {
                                 alias = (String) atts.get(name);
                             }
                         }
-                        if(password == null || location == null || alias == null){
+                        if (password == null || location == null || alias == null) {
                             return;
                         }
-                            KeyStore keyStore = null;
-                        try {                            
+                        KeyStore keyStore = null;
+                        try {
                             keyStore = KeyStore.getInstance("JKS");
                             fis = new java.io.FileInputStream(location);
                             keyStore.load(fis, password.toCharArray());
                             cs = keyStore.getCertificate(alias);
                         } catch (FileNotFoundException ex) {
-                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                            log.log(Level.SEVERE, null, ex);
+                            throw new XWSSecurityException(ex);
                         } catch (IOException ex) {
-                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                            log.log(Level.SEVERE, null, ex);
+                             throw new RuntimeException(ex);
                         } catch (NoSuchAlgorithmException ex) {
-                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                            log.log(Level.SEVERE, null, ex);
+                             throw new XWSSecurityException(ex);
                         } catch (CertificateException ex) {
-                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+                            log.log(Level.SEVERE, null, ex);
+                             throw new XWSSecurityException(ex);
                         } catch (KeyStoreException ex) {
-                            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
-                            ex.printStackTrace();
+                            log.log(Level.SEVERE, null, ex);
+                             throw new XWSSecurityException(ex);
                         } finally {
                             keyStore = null;
                             fis.close();
@@ -218,12 +222,13 @@ public class IdentityComponent implements EndpointComponent {
                         }
 
                     }
-                    
+
                 }
-               
+
             }
         } catch (PolicyException ex) {
-            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, null, ex);
+             
         }
 
     }
@@ -238,7 +243,7 @@ public class IdentityComponent implements EndpointComponent {
             m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
             m.marshal(idElem, xbr);
         } catch (JAXBException je) {
-            //log here
+           log.log(Level.SEVERE, null, je);
             throw new XMLStreamException(je);
         }
         return xbr.getXMLStreamBuffer().readAsXMLStreamReader();
