@@ -35,6 +35,7 @@
  */
 package com.sun.xml.wss.provider.wsit;
 
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
@@ -46,10 +47,19 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.developer.WSBindingProvider;
+import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
+import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -61,8 +71,9 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.WebServiceException;
+import org.jvnet.staxex.Base64Data;
+import org.jvnet.staxex.XMLStreamReaderEx;
 
 /**
  *
@@ -76,7 +87,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
     private ClientAuthContext cAC = null;
     private Subject clientSubject = null;
     private PacketMessageInfo pmInfo = null;
-    
+   
     protected static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSIT_PVD_DOMAIN,
@@ -100,19 +111,25 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
         }
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
         ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) props.get(PipeConstants.WRAPPED_CONTEXT);
-        WSEndpointReference wsepr = context.getBindingProvider().getWSEndpointReference();
-        WSEndpointReference.EPRExtension idExtn = null;
-        //wsepr.toSpec().writeTo(new StreamResult(System.out));
-        try {
-        idExtn = wsepr.getEPRExtension(new QName("http://example.com/addressingidentity", "Identity"));
-        } catch (XMLStreamException ex) {
-        Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+        WSBindingProvider bpr = context.getBindingProvider();
+        WSEndpointReference epr = bpr.getWSEndpointReference();
+        if (epr != null) {
+            WSEndpointReference.EPRExtension idExtn = null;
+            XMLStreamReader xmlReader = null;
+            try {
+                QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                idExtn = epr.getEPRExtension(ID_QNAME);
+                if (idExtn != null) {
+                    xmlReader = idExtn.readAsXMLStreamReader();
+                    byte[] bstValue = digestBST(xmlReader);
+                    X509Certificate certificate = constructCertificate(bstValue);
+                    props.put(PipeConstants.SERVER_CERT, certificate);
+                }
+            } catch (XMLStreamException ex) {
+                log.log(Level.SEVERE, null, ex);
+            }
         }
-        try {
-        XMLStreamReader xmlreader = idExtn.readAsXMLStreamReader();
-        }catch (XMLStreamException ex) {
-        Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
     }
      
     protected ClientSecurityTube(ClientSecurityTube that, TubeCloner cloner) {
@@ -182,6 +199,18 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
             t = new WebServiceException(t);
         }
         return doThrow(t);
+    }
+
+    private X509Certificate constructCertificate(byte[] bstValue) {
+        try {
+            X509Certificate cert = null;
+            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+            cert = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(bstValue));
+            return cert;
+        } catch (CertificateException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -321,5 +350,33 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
             }
 	}
 	return s;
+    }
+    private byte[] digestBST(XMLStreamReader reader) throws XMLStreamException{
+        byte[] bstValue = null;
+        
+         while(reader.getEventType() != XMLStreamReader.CHARACTERS && reader.getEventType() != reader.END_ELEMENT){
+             reader.next();
+         }
+        if(reader.getEventType() == XMLStreamReader.CHARACTERS){
+
+            if(reader instanceof XMLStreamReaderEx){
+                CharSequence data = ((XMLStreamReaderEx)reader).getPCDATA();
+                if(data instanceof Base64Data){
+                    Base64Data binaryData = (Base64Data)data;
+                    bstValue = binaryData.getExact();
+                   
+                }
+            }
+            try {
+                bstValue = Base64.decode(StreamUtil.getCV(reader));
+
+
+            } catch (Base64DecodingException ex) {
+               log.log(Level.SEVERE, null, ex);
+            } catch (XMLStreamException ex) {
+               log.log(Level.SEVERE, null, ex);
+            }
+        }
+         return bstValue;
     }
 }

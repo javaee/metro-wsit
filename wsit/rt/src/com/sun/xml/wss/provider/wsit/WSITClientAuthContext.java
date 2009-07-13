@@ -100,6 +100,7 @@ import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -162,6 +163,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
     protected WSITClientAuthConfig authConfig = null;
     protected Object tubeOrPipe;
+
+
     
     /** Creates a new instance of WSITClientAuthContext */
     @SuppressWarnings("unchecked")
@@ -169,7 +172,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         super(map);
         this.authConfig= (WSITClientAuthConfig)map.get(PipeConstants.AUTH_CONFIG);
         this.tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
-        WSService service = (WSService)map.get("SERVICE");
+        this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
+        WSService service = (WSService)map.get(PipeConstants.SERVICE);
         if(service != null){
             container = service.getContainer();
         }

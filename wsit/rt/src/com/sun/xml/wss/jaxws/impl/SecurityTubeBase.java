@@ -104,10 +104,12 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.wss.XWSSConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import com.sun.xml.wss.impl.MessageConstants;
+import java.security.cert.X509Certificate;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
@@ -252,7 +254,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected static final String WSENDPOINT="WSEndpoint";
     //flag used as temporary variable for each run
     //boolean isTrustOrSCMessage = false;
-    
+    protected X509Certificate serverCert = null;
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -570,7 +572,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected boolean hasKerberosTokenPolicy(){
         return hasKerberosToken;
     }
-    
+    @SuppressWarnings("unchecked") 
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage) {
         ProcessingContextImpl ctx  ;
@@ -589,6 +591,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        if (serverCert != null) {
+            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        }
         
         try {
             MessagePolicy policy  ;

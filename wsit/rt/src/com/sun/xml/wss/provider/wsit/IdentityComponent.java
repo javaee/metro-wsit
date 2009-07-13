@@ -43,8 +43,10 @@ import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 
 /**
@@ -59,6 +61,7 @@ public class IdentityComponent implements EndpointComponent {
     Map props = null;
     Certificate cs = null;
     SOAPVersion sp = null;
+
 
     public IdentityComponent(WSEndpoint e, PolicyMap pm, Map props) {
         this.pm = pm;
@@ -86,7 +89,7 @@ public class IdentityComponent implements EndpointComponent {
 
     class IdentityEPRExtnContributor extends EndpointReferenceExtensionContributor {
 
-        QName ID_QNAME = new QName("http://example.com/addressingidentity", "Identity");
+        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
 
         public WSEndpointReference.EPRExtension getEPRExtension(@Nullable WSEndpointReference.EPRExtension extension) {
             return new WSEndpointReference.EPRExtension() {
@@ -135,6 +138,7 @@ public class IdentityComponent implements EndpointComponent {
         pipeConfig = new ServerTubeConfiguration(pm, port, e);
         QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
         QName portName = pipeConfig.getWSDLPort().getName();
+        QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
 
         PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
         try {
@@ -142,6 +146,9 @@ public class IdentityComponent implements EndpointComponent {
       for (AssertionSet assertionSet : ep) {
          inner:  for (PolicyAssertion pa : assertionSet) {
                     if (PolicyUtil.isConfigPolicyAssertion(pa)) {
+                        if(!pa.getName().equals(keyStoreQName)){
+                            continue;
+                        }
                         HashMap atts = (HashMap) pa.getAttributes();
                         Set ks = atts.keySet();
                         Iterator itt = ks.iterator();
@@ -161,8 +168,10 @@ public class IdentityComponent implements EndpointComponent {
                                 alias = (String) atts.get(name);
                             }
                         }
-
-                        KeyStore keyStore = null;
+                        if(password == null || location == null || alias == null){
+                            return;
+                        }
+                            KeyStore keyStore = null;
                         try {                            
                             keyStore = KeyStore.getInstance("JKS");
                             fis = new java.io.FileInputStream(location);
@@ -201,7 +210,10 @@ public class IdentityComponent implements EndpointComponent {
         JAXBElement<IdentityType> idElem =
                 (new com.sun.xml.security.core.ai.ObjectFactory()).createIdentity(identityElem);
         try {
-            JAXBUtil.createMarshaller(sp).marshal(idElem, xbr);
+            JAXBContext context = JAXBUtil.getJAXBContext();
+            Marshaller m = context.createMarshaller();
+            m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
+            m.marshal(idElem, xbr);
         } catch (JAXBException je) {
             //log here
             throw new XMLStreamException(je);

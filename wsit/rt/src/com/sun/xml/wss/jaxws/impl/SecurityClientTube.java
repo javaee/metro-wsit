@@ -35,6 +35,8 @@
  */
 package com.sun.xml.wss.jaxws.impl;
 
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.policy.Constants;
@@ -53,8 +55,6 @@ import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.pipe.Engine;
-import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
@@ -67,6 +67,7 @@ import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import javax.xml.soap.SOAPException;
@@ -86,6 +87,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 
@@ -110,8 +112,20 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
+import com.sun.xml.wss.provider.wsit.ClientSecurityTube;
+import com.sun.xml.wss.provider.wsit.PipeConstants;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Hashtable;
 import java.util.ListIterator;
+import java.util.logging.Logger;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import org.jvnet.staxex.Base64Data;
+import org.jvnet.staxex.XMLStreamReaderEx;
 
 /**
  *
@@ -154,6 +168,23 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                 }
             }
 
+            WSBindingProvider bpr = wsitContext.getWrappedContext().getBindingProvider();
+            WSEndpointReference epr = bpr.getWSEndpointReference();
+            if (epr != null) {
+                WSEndpointReference.EPRExtension idExtn = null;
+                XMLStreamReader xmlReader = null;
+                try {
+                    QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                    idExtn = epr.getEPRExtension(ID_QNAME);
+                    if (idExtn != null) {
+                        xmlReader = idExtn.readAsXMLStreamReader();
+                        byte[] bstValue = digestBST(xmlReader);
+                        serverCert = constructCertificate(bstValue);
+                    }
+                } catch (XMLStreamException ex) {
+                    Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             Properties props = new Properties();
             CallbackHandler handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
@@ -730,5 +761,47 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     LogStringsMessages.WSSTUBE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0027_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
         }
+    }
+
+    //TODO: copy from ClientSecurityTube. Move to common class
+    private X509Certificate constructCertificate(byte[] bstValue) {
+        try {
+            X509Certificate cert = null;
+            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+            cert = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(bstValue));
+            return cert;
+        } catch (CertificateException ex) {
+            Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private byte[] digestBST(XMLStreamReader reader) throws XMLStreamException {
+        byte[] bstValue = null;
+
+        while (reader.getEventType() != XMLStreamReader.CHARACTERS && reader.getEventType() != reader.END_ELEMENT) {
+            reader.next();
+        }
+        if (reader.getEventType() == XMLStreamReader.CHARACTERS) {
+
+            if (reader instanceof XMLStreamReaderEx) {
+                CharSequence data = ((XMLStreamReaderEx) reader).getPCDATA();
+                if (data instanceof Base64Data) {
+                    Base64Data binaryData = (Base64Data) data;
+                    bstValue = binaryData.getExact();
+
+                }
+            }
+            try {
+                bstValue = Base64.decode(StreamUtil.getCV(reader));
+
+
+            } catch (Base64DecodingException ex) {
+                Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (XMLStreamException ex) {
+                Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return bstValue;
     }
 }

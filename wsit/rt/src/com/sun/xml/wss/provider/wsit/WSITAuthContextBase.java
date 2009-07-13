@@ -73,9 +73,7 @@ import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLInput;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLOutput;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
@@ -157,10 +155,12 @@ import javax.xml.soap.SOAPMessage;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 
+import com.sun.xml.wss.XWSSConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.security.cert.X509Certificate;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
@@ -270,6 +270,7 @@ public abstract class WSITAuthContextBase  {
     protected static final String DEFAULT_JMAC_HANDLER = "com.sun.enterprise.security.jmac.callback.ContainerCallbackHandler";
     protected static final String WSDLPORT="WSDLPort";
     protected static final String WSENDPOINT="WSEndpoint";
+    protected X509Certificate serverCert = null;
     
     static {
         try {
@@ -1445,7 +1446,7 @@ public abstract class WSITAuthContextBase  {
         }
         return op;
     }
-    
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage) {
         ProcessingContextImpl ctx = null;
@@ -1469,6 +1470,9 @@ public abstract class WSITAuthContextBase  {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+         if (serverCert != null) {
+            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        }
         try {
             MessagePolicy policy = null;
             if (isRMMessage(packet)) {

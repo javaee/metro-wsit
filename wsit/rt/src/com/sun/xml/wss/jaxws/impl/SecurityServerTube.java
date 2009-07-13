@@ -191,7 +191,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
             IdentityComponent idComponent = new IdentityComponent(wse, pm, props);
             boolean add = wse.getComponentRegistry().add(idComponent);
-            
+           
         } catch (Exception e) {
             log.log(Level.SEVERE, 
                     LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
