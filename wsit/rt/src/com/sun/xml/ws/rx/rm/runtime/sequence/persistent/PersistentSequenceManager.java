@@ -37,7 +37,6 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
-import java.sql.Connection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,12 +47,9 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -64,13 +60,9 @@ public final class PersistentSequenceManager implements SequenceManager {
 
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceManager.class);
     /**
-     * JNDI name of the JDBC pool to be used for persisting RM data
+     * JDBC connection manager
      */
-    private static final String RM_JDBC_POOL_NAME = "jdbc/ReliableMessagingPool";
-    /**
-     * JDBC connection
-     */
-    private Connection sqlConnection = null;
+    private ConnectionManager cm;
     /**
      * Internal in-memory data access lock
      */
@@ -100,7 +92,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final String uniqueEndpointId;
 
-    public PersistentSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final ManagedObjectManager managedObjectManager) {
         this.managedObjectManager = managedObjectManager;
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
@@ -109,6 +101,8 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
+
+        this.cm = ConnectionManager.getInstance();
         // TODO recover();
     }
 
@@ -129,31 +123,43 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Map<String, ? extends Sequence> sequences() {
-        return null; // TODO
+    public Map<String, Sequence> sequences() {
+        try {
+            dataLock.readLock().lock();
+
+            return new HashMap<String, Sequence>(sequences);
+        } finally {
+            dataLock.readLock().unlock();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public Map<String, String> boundSequences() {
-        return null; // TODO
+        try {
+            dataLock.readLock().lock();
+
+            return new HashMap<String, String>(boundSequences);
+        } finally {
+            dataLock.readLock().unlock();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
-        return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this));
+    public Sequence createOutboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
+        PersistentSequenceData data = PersistentSequenceData.newInstance(cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this), data.getBoundSequenceId());
     }
 
     /**
      * {@inheritDoc}
      */
-    public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(sqlConnection, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
-        return registerSequence(new InboundSequence(data, inboundQueueBuilder, this));
+    public Sequence createInboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
+        PersistentSequenceData data = PersistentSequenceData.newInstance(cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        return registerSequence(new InboundSequence(data, inboundQueueBuilder, this), data.getBoundSequenceId());
     }
 
     /**
@@ -166,7 +172,7 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence closeSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence closeSequence(final String sequenceId) throws UnknownSequenceException {
         Sequence sequence = getSequence(sequenceId);
         sequence.close();
         return sequence;
@@ -175,53 +181,21 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+    public Sequence getSequence(final String sequenceId) throws UnknownSequenceException {
+        checkIfExist(sequenceId);
+
         try {
             dataLock.readLock().lock();
-            if (sequences.containsKey(sequenceId)) {
-                return sequences.get(sequenceId);
-            }
+            return sequences.get(sequenceId);
         } finally {
             dataLock.readLock().unlock();
-        }
-
-        Sequence sequence = fetch(sequenceId);
-        if (sequence == null) {
-            throw new UnknownSequenceException(sequenceId); // sequence not found
-        }
-        return sequence;
-    }
-
-    private Sequence fetch(String sequenceId) {
-        // TODO if missed cache hit detected, invalidate and reload whole in-memory cache instead?
-
-        dataLock.writeLock().lock();
-        try {
-            if (sequences.containsKey(sequenceId)) { // re-checking
-                return sequences.get(sequenceId);
-            }
-
-            PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(sqlConnection, uniqueEndpointId, sequenceId);
-            if (sequenceData != null) {
-                switch (sequenceData.getType()) {
-                    case Inbound:
-                        return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this));
-                    case Outbound:
-                        return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this));
-                }
-
-            }
-
-            return null;
-        } finally {
-            dataLock.writeLock().unlock();
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean isValid(String sequenceId) {
+    public boolean isValid(final String sequenceId) {
         Sequence s;
         try {
             dataLock.readLock().lock();
@@ -238,34 +212,87 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     /**
-     * {@inheritDoc}
+     * Method checks if a sequence is valid and if yes it also loads sequence into
+     * an in-memory cache if necessary.
+     * <p/>
+     * This Method must be called from within a write data lock or outside of any data lock.
+     * It must not be called from within a read data lock.
+     *
+     * @param sequenceIds list of sequence identifiers to check.
+     * @throws UnknownSequenceException in case no such sequence is found
      */
-    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
-        try {
-            fetch(sequenceId); // Prefetch sequence to a cache if not ready
+    private void checkIfExist(final String... sequenceIds) throws UnknownSequenceException {
+        for (String sequenceId : sequenceIds) {
+            Sequence s;
+            try {
+                dataLock.readLock().lock();
+                s = sequences.get(sequenceId);
+            } finally {
+                dataLock.readLock().unlock();
+            }
 
-            dataLock.writeLock().lock();
-            if (sequences.containsKey(sequenceId)) {
-                AbstractSequence sequence = sequences.remove(sequenceId);
-                sequence.setState(Sequence.State.TERMINATING);
+            if (s == null) {
+                s = fetch(sequenceId);
+            }
 
-                if (boundSequences.containsKey(sequenceId)) {
-                    boundSequences.remove(sequenceId);
-
-                }
-
-                if (managedObjectManager != null) {
-                    managedObjectManager.unregister(sequence);
-                }
-
-                PersistentSequenceData.remove(sqlConnection, uniqueEndpointId, sequenceId);
-
-                sequence.preDestroy();
-
-                return sequence;
-            } else {
+            if (s == null) {
                 throw new UnknownSequenceException(sequenceId);
             }
+        }
+    }
+
+    private Sequence fetch(final String sequenceId) {
+        // TODO decide: if missed cache hit detected, invalidate and reload whole in-memory cache instead?
+
+        dataLock.writeLock().lock();
+        try {
+            if (sequences.containsKey(sequenceId)) { // re-checking
+                return sequences.get(sequenceId);
+            }
+
+            PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(cm, uniqueEndpointId, sequenceId);
+            if (sequenceData != null) {
+                switch (sequenceData.getType()) {
+                    case Inbound:
+                        return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this), sequenceData.getBoundSequenceId());
+                    case Outbound:
+                        return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this), sequenceData.getBoundSequenceId());
+                }
+
+            }
+
+            return null;
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence terminateSequence(final String sequenceId) throws UnknownSequenceException {
+        try {
+            dataLock.writeLock().lock();
+
+            checkIfExist(sequenceId); // Check if valid and prefetch sequence to a in-memory cache if not ready
+
+            AbstractSequence sequence = sequences.remove(sequenceId);
+            sequence.setState(Sequence.State.TERMINATING);
+
+            if (boundSequences.containsKey(sequenceId)) {
+                boundSequences.remove(sequenceId);
+
+            }
+
+            if (managedObjectManager != null) {
+                managedObjectManager.unregister(sequence);
+            }
+
+            PersistentSequenceData.remove(cm, uniqueEndpointId, sequenceId);
+
+            sequence.preDestroy();
+
+            return sequence;
 
         } finally {
             dataLock.writeLock().unlock();
@@ -275,18 +302,12 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
+    public void bindSequences(final String referenceSequenceId, final String boundSequenceId) throws UnknownSequenceException {
         try {
             dataLock.writeLock().lock();
-            if (!sequences.containsKey(referenceSequenceId) && fetch(referenceSequenceId) == null) {
-                throw new UnknownSequenceException(referenceSequenceId);
-            }
+            checkIfExist(referenceSequenceId, boundSequenceId);
 
-            if (!sequences.containsKey(boundSequenceId) && fetch(referenceSequenceId) == null) {
-                throw new UnknownSequenceException(boundSequenceId);
-            }
-
-            PersistentSequenceData.bind(sqlConnection, uniqueEndpointId, referenceSequenceId, boundSequenceId);
+            PersistentSequenceData.bind(cm, uniqueEndpointId, referenceSequenceId, boundSequenceId);
             boundSequences.put(referenceSequenceId, boundSequenceId);
         } finally {
             dataLock.writeLock().unlock();
@@ -296,18 +317,15 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
-//        try {
-//            internalDataAccessLock.readLock().lock();
-//            if (!isValid(referenceSequenceId)) {
-//                throw new UnknownSequenceException(referenceSequenceId);
-//            }
-//
-//            return (boundSequences.containsKey(referenceSequenceId)) ? sequences.get(boundSequences.get(referenceSequenceId)) : null;
-//        } finally {
-//            internalDataAccessLock.readLock().unlock();
-//        }
-        throw new UnsupportedOperationException();
+    public Sequence getBoundSequence(final String referenceSequenceId) throws UnknownSequenceException {
+        checkIfExist(referenceSequenceId);
+
+        try {
+            dataLock.readLock().lock();
+            return (boundSequences.containsKey(referenceSequenceId)) ? sequences.get(boundSequences.get(referenceSequenceId)) : null;
+        } finally {
+            dataLock.readLock().unlock();
+        }
     }
 
     /**
@@ -315,7 +333,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      *
      * @param sequence sequence object to be registered within the internal sequence storage
      */
-    private AbstractSequence registerSequence(AbstractSequence sequence) {
+    private AbstractSequence registerSequence(final AbstractSequence sequence, final String boundSequenceId) {
         try {
             dataLock.writeLock().lock();
 
@@ -326,49 +344,15 @@ public final class PersistentSequenceManager implements SequenceManager {
                 managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
             }
 
+            if (boundSequenceId != null) {
+                checkIfExist(boundSequenceId);
+
+                boundSequences.put(sequence.getId(), boundSequenceId);
+            }
+
             return sequence;
         } finally {
             dataLock.writeLock().unlock();
-        }
-    }
-
-    protected void abort() {
-        try {
-            sqlConnection.rollback();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    protected void commit() throws SQLException {
-        sqlConnection.commit();
-    }
-
-    protected void beginTransaction() {
-        //no-op
-    }
-
-    synchronized void connect() throws PersistenceException {
-        try {
-            javax.naming.InitialContext ic = new javax.naming.InitialContext();
-            Object __ds = ic.lookup(RM_JDBC_POOL_NAME); // TODO
-            DataSource ds;
-            if (__ds instanceof DataSource) {
-                ds = DataSource.class.cast(__ds);
-            } else {
-                // TODO L10N
-                throw new PersistenceException(String.format(
-                        "Object of class '%s' bound in the JNDI under '%s' is not an instance of '%s'.", __ds.getClass().getName(), RM_JDBC_POOL_NAME, DataSource.class.getName()));
-            }
-
-            sqlConnection = ds.getConnection("username", "password");
-            sqlConnection.setAutoCommit(false);
-        } catch (SQLException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve JDBC connection to Metro reliable messaging database", ex));
-        } catch (NamingException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new PersistenceException("Unable to lookup Metro reliable messaging JDBC connection pool", ex));
         }
     }
 
@@ -376,7 +360,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public long currentTimeInMillis() {
-        // TODO sync date with database
+        // TODO sync time with database
         return System.currentTimeMillis();
     }
 }

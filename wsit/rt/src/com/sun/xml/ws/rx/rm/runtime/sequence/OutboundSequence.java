@@ -43,8 +43,6 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,8 +52,8 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class OutboundSequence extends AbstractSequence {
-    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.MIN_MESSAGE_ID - 1;
 
+    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.MIN_MESSAGE_ID - 1;
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
     //
 //    private final List<Long> allUnackedMessageNumbers;
@@ -70,7 +68,6 @@ public final class OutboundSequence extends AbstractSequence {
 //    Collection<Long> getUnackedMessageNumbers() {
 //        return allUnackedMessageNumbers;
 //    }
-
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException {
         checkSequenceCreatedStatus("", Code.Sender); // TODO
 
@@ -80,32 +77,19 @@ public final class OutboundSequence extends AbstractSequence {
                     message.getSequenceId()));
         }
 
-        try {
-            data.lockWrite();
-
-            message.setSequenceData(this.getId(), generateNextMessageId());
-            if (storeMessageFlag) {
-                data.attachMessageToUnackedMessageNumber(message);
-            }
-        } finally {
-            data.unlockWrite();
+        message.setSequenceData(this.getId(), generateNextMessageId());
+        if (storeMessageFlag) {
+            data.attachMessageToUnackedMessageNumber(message);
         }
     }
 
     private long generateNextMessageId() throws MessageNumberRolloverException, IllegalStateException, DuplicateMessageRegistrationException {
-        // no need to synchronize, called from within a write lock
+        long nextId = data.incrementAndGetLastMessageNumber(true);
 
-        long nextId = getLastMessageNumber() + 1;
         if (nextId > Sequence.MAX_MESSAGE_ID) {
             throw LOGGER.logSevereException(new MessageNumberRolloverException(getId(), nextId));
         }
 
-        data.setLastMessageNumber(nextId);
-        data.registerUnackedMessageNumber(nextId, true);
-
-//        // Making sure we have a new, uncached long object which GC can dispose later - used in storeMessage()
-//        // WARNING: this call to new Long(...) CANNOT be replaced with Long.valueOf(...) !!!
-//        allUnackedMessageNumbers.add(new Long(nextId));
         return nextId;
     }
 
@@ -117,55 +101,38 @@ public final class OutboundSequence extends AbstractSequence {
     public void acknowledgeMessageNumbers(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
         checkSequenceCreatedStatus("", Code.Sender); // TODO
 
-        try {
-            data.lockWrite();
-
-            if (ranges == null || ranges.isEmpty()) {
-                return;
-            }
-
-            if (ranges.size() > 1) {
-                Collections.sort(ranges, new Comparator<AckRange>() {
-
-                    public int compare(AckRange range1, AckRange range2) {
-                        if (range1.lower <= range2.lower) {
-                            return -1;
-                        } else {
-                            return 1;
-                        }
-                    }
-                });
-            }
-
-            // check proper bounds of acked ranges
-            AckRange lastAckRange = ranges.get(ranges.size() - 1);
-            if (getLastMessageNumber() < lastAckRange.upper) {
-                throw new InvalidAcknowledgementException(this.getId(), lastAckRange.upper, ranges);
-            }
-
-            final Collection<Long> unackedMessageNumbers = data.getUnackedMessageNumbers();
-            if (unackedMessageNumbers.isEmpty()) {
-                // we have checked the ranges are ok and there's nothing to acknowledge.
-                return;
-            }
-
-            // acknowledge messages
-            Iterator<AckRange> rangeIterator = ranges.iterator();
-            AckRange currentRange = rangeIterator.next();
-
-            for (long unackedMessageNumber : unackedMessageNumbers) {
-                if (unackedMessageNumber >= currentRange.lower && unackedMessageNumber <= currentRange.upper) {
-                    data.markAsAcknowledged(unackedMessageNumber);
-                } else if (rangeIterator.hasNext()) {
-                    currentRange = rangeIterator.next();
-                } else {
-                    break; // no more acked ranges
-                }
-            }
-        } finally {
-            data.unlockWrite();
+        if (ranges == null || ranges.isEmpty()) {
+            return;
         }
-        
+
+        AckRange.sort(ranges);
+
+        // check proper bounds of acked ranges
+        AckRange lastAckRange = ranges.get(ranges.size() - 1);
+        if (data.getLastMessageNumber() < lastAckRange.upper) {
+            throw new InvalidAcknowledgementException(this.getId(), lastAckRange.upper, ranges);
+        }
+
+        final Collection<Long> unackedMessageNumbers = data.getUnackedMessageNumbers();
+        if (unackedMessageNumbers.isEmpty()) {
+            // we have checked the ranges are ok and there's nothing to acknowledge.
+            return;
+        }
+
+        // acknowledge messages
+        Iterator<AckRange> rangeIterator = ranges.iterator();
+        AckRange currentRange = rangeIterator.next();
+
+        for (long unackedMessageNumber : unackedMessageNumbers) {
+            if (unackedMessageNumber >= currentRange.lower && unackedMessageNumber <= currentRange.upper) {
+                data.markAsAcknowledged(unackedMessageNumber);
+            } else if (rangeIterator.hasNext()) {
+                currentRange = rangeIterator.next();
+            } else {
+                break; // no more acked ranges
+                }
+        }
+
         this.getDeliveryQueue().onSequenceAcknowledgement();
     }
 }

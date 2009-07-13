@@ -54,7 +54,7 @@ public interface SequenceManager extends TimeSynchronizer {
 
     @ManagedAttribute
     @Description("All RM sequences")
-    public Map<String, ? extends Sequence> sequences();
+    public Map<String, Sequence> sequences();
 
     @ManagedAttribute
     @Description("Collection of sequence ID pairs that form an RM session")

@@ -81,30 +81,9 @@ public final class InboundSequence extends AbstractSequence {
                     this.getId())));
         }
 
-        try {
-            data.lockWrite();
-
-            if (message.getMessageNumber() > data.getLastMessageNumber()) {
-                // new message - note that this will work even for the first message that arrives
-                // some message(s) got lost, add to all unacked message number set...
-                for (long lostIdentifier = data.getLastMessageNumber() + 1; lostIdentifier <= message.getMessageNumber(); lostIdentifier++) {
-                    data.registerUnackedMessageNumber(lostIdentifier, false);
-//                    allUnackedMessageNumbers.add(lostIdentifier);
-                }
-                data.setLastMessageNumber(message.getMessageNumber());
-//            } else if (receivedUnackedMessageNumbers.contains(message.getMessageNumber())) {
-                // duplicate message
-//                throw LOGGER.logException(new DuplicateMessageRegistrationException(this.getId(), message.getMessageNumber()), Level.FINE);
-            }
-
-            data.registerUnackedMessageNumber(message.getMessageNumber(), true);
-//            receivedUnackedMessageNumbers.add(message.getMessageNumber());
-
-            if (storeMessageFlag) {
-                data.attachMessageToUnackedMessageNumber(message);
-            }
-        } finally {
-            data.unlockWrite();
+        data.registerUnackedMessageNumber(message.getMessageNumber(), true);
+        if (storeMessageFlag) {
+            data.attachMessageToUnackedMessageNumber(message);
         }
     }
 
@@ -118,24 +97,10 @@ public final class InboundSequence extends AbstractSequence {
         throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
-    public void acknowledgeMessageNumber(long messageId) throws IllegalMessageIdentifierException, IllegalStateException {
+    public void acknowledgeMessageNumber(long messageId) throws IllegalStateException {
         checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getState()), Code.Receiver);
 
-        try {
-            data.lockWrite();
-
-            data.markAsAcknowledged(messageId);
-
-//            if (!registeredUnackedMessageNumbers.remove(messageId)) {
-//                throw LOGGER.logSevereException(new IllegalMessageIdentifierException(getId(), messageId));
-//            }
-//
-//            boolean removedFromAll = allUnackedMessageNumbers.remove(messageId);
-//            assert removedFromAll;
-
-        } finally {
-            data.unlockWrite();
-        }
+        data.markAsAcknowledged(messageId);
 
         this.getDeliveryQueue().onSequenceAcknowledgement();
     }

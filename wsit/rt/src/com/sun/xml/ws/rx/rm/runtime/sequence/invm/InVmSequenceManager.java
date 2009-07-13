@@ -61,7 +61,7 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * Internal in-memory data access lock
      */
-    private final ReadWriteLock internalDataAccessLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock dataLock = new ReentrantReadWriteLock();
     /**
      * Internal in-memory storage of sequence data
      */
@@ -115,15 +115,27 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public Map<String, ? extends Sequence> sequences() {
-        return sequences;
+    public Map<String, Sequence> sequences() {
+        try {
+            dataLock.readLock().lock();
+
+            return new HashMap<String, Sequence>(sequences);
+        } finally {
+            dataLock.readLock().unlock();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public Map<String, String> boundSequences() {
-        return boundSequences;
+        try {
+            dataLock.readLock().lock();
+
+            return new HashMap<String, String>(boundSequences);
+        } finally {
+            dataLock.readLock().unlock();
+        }
     }
 
     /**
@@ -163,14 +175,14 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
-            internalDataAccessLock.readLock().lock();
+            dataLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 return sequences.get(sequenceId);
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }
         } finally {
-            internalDataAccessLock.readLock().unlock();
+            dataLock.readLock().unlock();
         }
     }
 
@@ -179,11 +191,11 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public boolean isValid(String sequenceId) {
         try {
-            internalDataAccessLock.readLock().lock();
+            dataLock.readLock().lock();
             Sequence s = sequences.get(sequenceId);
             return s != null && s.getState() != Sequence.State.TERMINATING;
         } finally {
-            internalDataAccessLock.readLock().unlock();
+            dataLock.readLock().unlock();
         }
     }
 
@@ -192,7 +204,7 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
         try {
-            internalDataAccessLock.writeLock().lock();
+            dataLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 AbstractSequence sequence = sequences.remove(sequenceId);
                 sequence.setState(State.TERMINATING);
@@ -209,7 +221,7 @@ public final class InVmSequenceManager implements SequenceManager {
                 throw new UnknownSequenceException(sequenceId);
             }
         } finally {
-            internalDataAccessLock.writeLock().unlock();
+            dataLock.writeLock().unlock();
         }
     }
 
@@ -218,7 +230,7 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public void bindSequences(String referenceSequenceId, String boundSequenceId) throws UnknownSequenceException {
         try {
-            internalDataAccessLock.writeLock().lock();
+            dataLock.writeLock().lock();
             if (!sequences.containsKey(referenceSequenceId)) {
                 throw new UnknownSequenceException(referenceSequenceId);
             }
@@ -229,7 +241,7 @@ public final class InVmSequenceManager implements SequenceManager {
 
             boundSequences.put(referenceSequenceId, boundSequenceId);
         } finally {
-            internalDataAccessLock.writeLock().unlock();
+            dataLock.writeLock().unlock();
         }
     }
 
@@ -238,14 +250,14 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException {
         try {
-            internalDataAccessLock.readLock().lock();
+            dataLock.readLock().lock();
             if (!isValid(referenceSequenceId)) {
                 throw new UnknownSequenceException(referenceSequenceId);
             }
 
             return (boundSequences.containsKey(referenceSequenceId)) ? sequences.get(boundSequences.get(referenceSequenceId)) : null;
         } finally {
-            internalDataAccessLock.readLock().unlock();
+            dataLock.readLock().unlock();
         }
     }
 
@@ -256,7 +268,7 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     private Sequence registerSequence(AbstractSequence sequence) throws DuplicateSequenceException {
         try {
-            internalDataAccessLock.writeLock().lock();
+            dataLock.writeLock().lock();
             if (sequences.containsKey(sequence.getId())) {
                 throw new DuplicateSequenceException(sequence.getId());
             } else {
@@ -265,7 +277,7 @@ public final class InVmSequenceManager implements SequenceManager {
 
             return sequence;
         } finally {
-            internalDataAccessLock.writeLock().unlock();
+            dataLock.writeLock().unlock();
         }
     }
 

@@ -40,6 +40,8 @@ import com.sun.istack.Nullable;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -57,36 +59,37 @@ public interface Sequence {
     public static final long MIN_MESSAGE_ID = 1;
     public static final long MAX_MESSAGE_ID = 9223372036854775807L;
     public static final long NO_EXPIRY = -1;
-    
+
     public static enum State {
         // CREATING(10) not needed
+
         CREATED(15),
         CLOSING(20),
         CLOSED(25),
         TERMINATING(30);
-
         private int value;
-        
+
         private State(int value) {
             this.value = value;
         }
-        
+
         public int asInt() {
             return value;
         }
-        
+
         public static State asState(int value) {
             for (State status : State.values()) {
                 if (status.value == value) {
                     return status;
                 }
             }
-            
+
             return null;
         }
     }
 
     public static enum IncompleteSequenceBehavior {
+
         /**
          * The default value which indicates that no acknowledged messages in the Sequence
          * will be discarded.
@@ -111,8 +114,26 @@ public interface Sequence {
 
     public static class AckRange {
 
+        private static final Comparator<AckRange> COMPARATOR = new Comparator<AckRange>() {
+
+            public int compare(AckRange range1, AckRange range2) {
+                if (range1.lower <= range2.lower) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        };
+
+        public static void sort(@NotNull List<AckRange> ranges) {
+            if (ranges.size() > 1) {
+                Collections.sort(ranges, COMPARATOR);
+            }
+        }
+        //
         public final long lower;
         public final long upper;
+        //
 
         public AckRange(long lower, long upper) {
             this.lower = lower;
@@ -172,7 +193,9 @@ public interface Sequence {
      *
      * @return the message that is stored in the sequence if available, {@code null} otherwise.
      */
-    public @Nullable ApplicationMessage retrieveMessage(@NotNull String correlationId);
+    public
+    @Nullable
+    ApplicationMessage retrieveMessage(@NotNull String correlationId);
 
     /**
      * Updates a delivery queue for this sequence with any unacknowledged messages that 
@@ -200,12 +223,9 @@ public interface Sequence {
      *
      * @param messageNumber message number to be acknowledged
      *
-     * @exception IllegalMessageIdentifierException in case this is an {@link InboundSequence} instance and a message
-     * with the given number has been already acknowledged
-     *
      * @exception AbstractSoapFaultException in case the sequence is terminated
      */
-    public void acknowledgeMessageNumber(long messageNumber) throws IllegalMessageIdentifierException, AbstractSoapFaultException;
+    public void acknowledgeMessageNumber(long messageNumber) throws AbstractSoapFaultException;
 
     /**
      * Provides a collection of ranges of message numbers acknowledged with the sequence
@@ -238,7 +258,7 @@ public interface Sequence {
      * with this sequence.
      */
     public void setAckRequestedFlag();
-    
+
     /**
      * This method should be called to clear the AckRequested flag, which indicates 
      * that any pending requests for acknowledgement of all message identifiers registered 
@@ -277,6 +297,7 @@ public interface Sequence {
      * @return {@code true} or {@code false} depending on whether
      */
     public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod);
+
     /**
      * Provides information on a security session to which this sequence is bound to.
      * 
@@ -312,7 +333,7 @@ public interface Sequence {
     @ManagedAttribute
     @Description("True if the sequence has expired")
     public boolean isExpired();
-    
+
     /**
      * Provides information on the last activity time of this sequence
      *
@@ -323,7 +344,7 @@ public interface Sequence {
     @ManagedAttribute
     @Description("Last activity time on the sequence in milliseconds")
     public long getLastActivityTime();
-    
+
     /**
      * The method is called during the sequence termination to allow sequence object to release its allocated resources
      */

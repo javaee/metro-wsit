@@ -3,16 +3,9 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import java.util.Collection;
+import java.util.List;
 
 public interface SequenceData {
-
-    void lockRead();
-
-    void lockWrite();
-
-    void unlockRead();
-
-    void unlockWrite();
 
     String getSequenceId();
 
@@ -40,12 +33,40 @@ public interface SequenceData {
 
     void setState(State newState);
 
+    /**
+     * Increments last message number on the sequence and returns new last message number value.
+     * Method automatically marks the newly created message number as unacknowledged.
+     *
+     * @param received this flag specifies whether the message with such number should be marked
+     * as received on the sequence.
+     *
+     * @return new value of the last message number
+     */
+    long incrementAndGetLastMessageNumber(boolean received);
+
+    /**
+     * Registers the message number as unacknowledged.
+     * <p/>
+     * If the value of {@code messageNumber} parameter is greater that the actual 
+     * last mesasge number, the last message number value is increased to the value of
+     * {@code messageNumber} parameter. All message numbers lying between the original
+     * and new value of last message number are automatically marked as unacknowldeged
+     * and not received.
+     *
+     * @param messageNumber unacknowledged message number to register
+     * @param received this flag specifies whether the message with such {@code messageNumber} should
+     * be marked as received on the sequence.
+     *
+     * @return new value of the last message number
+     */
     void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException;
 
     /**
-     * Removes the provided {@code messageNumber} from the collevtion of unacked message
+     * Removes the provided {@code messageNumber} from the collection of unacked message
      * numbers and and marks stored message with given {@code messageNumber} (if any)
      * as eligible for removal from the underlying message storage.
+     *
+     * This method does nothing if there's no such unacknowledged message number found
      *
      * @param messageNumber
      */
@@ -55,5 +76,19 @@ public interface SequenceData {
 
     ApplicationMessage retrieveMessage(String correlationId);
 
-    public Collection<Long> getUnackedMessageNumbers();
+    public List<Long> getUnackedMessageNumbers();
+
+    /**
+     * In contrast to {@link #getUnackedMessageNumbers()}, this method returns allways a non-empty
+     * {@link List} in which first item represents a current last message number value (see also
+     * {@link #getLastMessageNumber()}. The items following the first item represent
+     * the collection of unacked message numbers (see also {@link #getUnackedMessageNumbers()}).
+     * <p/>
+     * This special method was introduced in order to allow for an atomic retrieval of both values.
+     *
+     * @return {@link List} where first item represents the last message number and all subsequent
+     * values represent unacknowledged message numbers.
+     *
+     */
+    public List<Long> getLastMessageNumberWithUnackedMessageNumbers();
 }

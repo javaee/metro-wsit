@@ -42,7 +42,6 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,16 +93,10 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public List<AckRange> getAcknowledgedMessageNumbers() {
-        final Collection<Long> unackedMessageNumbers;
-        final long lastMessageNumber;
+        List<Long> values = data.getLastMessageNumberWithUnackedMessageNumbers();
 
-        data.lockRead();
-        try {
-            unackedMessageNumbers = data.getUnackedMessageNumbers();
-            lastMessageNumber = data.getLastMessageNumber();
-        } finally {
-            data.unlockRead();
-        }
+        final long lastMessageNumber = values.remove(0);
+        final List<Long> unackedMessageNumbers = values;
 
         if (lastMessageNumber == Sequence.UNSPECIFIED_MESSAGE_ID) {
             // no message associated with the sequence yet

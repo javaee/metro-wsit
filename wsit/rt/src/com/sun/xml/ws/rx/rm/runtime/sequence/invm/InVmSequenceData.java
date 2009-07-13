@@ -5,9 +5,10 @@ import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
@@ -60,19 +61,19 @@ final class InVmSequenceData implements SequenceData {
         this.weakUnackedNumberToCorrelationIdMap = new WeakHashMap<Long, String>();
     }
 
-    public void lockRead() {
+    private void lockRead() {
         dataLock.readLock().lock();
     }
 
-    public void unlockRead() {
+    private void unlockRead() {
         dataLock.readLock().unlock();
     }
 
-    public void lockWrite() {
+    private void lockWrite() {
         dataLock.writeLock().lock();
     }
 
-    public void unlockWrite() {
+    private void unlockWrite() {
         dataLock.writeLock().unlock();
     }
 
@@ -153,34 +154,64 @@ final class InVmSequenceData implements SequenceData {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public long incrementAndGetLastMessageNumber(boolean received) {
+        try {
+            dataLock.writeLock().lock();
+
+            addUnackedMessageNumber(++lastMessageNumber, received);
+            return lastMessageNumber;
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
         try {
             lockWrite();
 
-            if (received && receivedUnackedMessageNumbers.contains(messageNumber) || !received && allUnackedMessageNumbers.contains(messageNumber)) {
-                throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
-            }
+            if (messageNumber > lastMessageNumber) {
+                while (messageNumber > lastMessageNumber + 1) {
+                    // new message - note that this will work even for the first message that arrives
+                    // some message(s) got lost, add to all unacked message number set...
+                    incrementAndGetLastMessageNumber(false);
+                }
 
-            final Long newUnackedInstance = new Long(messageNumber);
+                incrementAndGetLastMessageNumber(received);
+            } else {
+                if (received && receivedUnackedMessageNumbers.contains(messageNumber) || !received && allUnackedMessageNumbers.contains(messageNumber)) {
+                    throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
+                }
 
-            allUnackedMessageNumbers.add(newUnackedInstance);
-            if (received) {
-                receivedUnackedMessageNumbers.add(newUnackedInstance);
+                addUnackedMessageNumber(messageNumber, received);
             }
         } finally {
             unlockWrite();
         }
     }
 
+    /*
+     * This method must be called from within a data write lock only.
+     */
+    private void addUnackedMessageNumber(long messageNumber, boolean received) {
+        final Long newUnackedInstance = new Long(messageNumber);
+
+        allUnackedMessageNumbers.add(newUnackedInstance);
+        if (received) {
+            receivedUnackedMessageNumbers.add(newUnackedInstance);
+        }
+    }
+
     public void markAsAcknowledged(long messageNumber) {
         try {
             lockWrite();
-            if (!receivedUnackedMessageNumbers.remove(messageNumber)) {
-                throw new IllegalMessageIdentifierException(sequenceId, messageNumber);
-            }
-
-            boolean removedFromAll = allUnackedMessageNumbers.remove(messageNumber);
-            assert removedFromAll;
+            receivedUnackedMessageNumbers.remove(messageNumber);
+            allUnackedMessageNumbers.remove(messageNumber);
         } finally {
             unlockWrite();
         }
@@ -195,17 +226,29 @@ final class InVmSequenceData implements SequenceData {
         }
     }
 
-    public Collection<Long> getUnackedMessageNumbers() {
+    public List<Long> getUnackedMessageNumbers() {
         try {
             lockRead();
-            return Collections.unmodifiableCollection(new ArrayList<Long>(allUnackedMessageNumbers));
+            return new ArrayList<Long>(allUnackedMessageNumbers);
         } finally {
             unlockRead();
         }
 
     }
 
-// INBOUND
+    public List<Long> getLastMessageNumberWithUnackedMessageNumbers() {
+        try {
+            lockRead();
+
+            LinkedList<Long> data = new LinkedList<Long>(allUnackedMessageNumbers);
+            data.addFirst(lastMessageNumber);
+
+            return data;
+        } finally {
+            unlockRead();
+        }
+    }
+
     private Long getUnackedMessageIdentifierKey(long messageNumber) {
         try {
             lockRead();
@@ -223,14 +266,4 @@ final class InVmSequenceData implements SequenceData {
             unlockRead();
         }
     }
-// OUTBOUND
-//    private Long getUnackedMessageIdentifierKey(long messageNumber) {
-//        Long msgNumberKey = null;
-//        int index = allUnackedMessageNumbers.indexOf(messageNumber);
-//        if (index >= 0) {
-//            // the id is in the list
-//            msgNumberKey = allUnackedMessageNumbers.get(index);
-//        }
-//        return msgNumberKey;
-//    }
 }

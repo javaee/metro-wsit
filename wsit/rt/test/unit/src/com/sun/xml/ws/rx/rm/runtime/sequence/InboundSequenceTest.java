@@ -133,13 +133,13 @@ public class InboundSequenceTest extends TestCase {
         assertEquals(1, ackedRages.get(0).lower);
         assertEquals(5, ackedRages.get(0).upper);
 
-        boolean passed = false;
-        try {
-            sequence.acknowledgeMessageNumber(4); // duplicate message acknowledgement
-        } catch (IllegalMessageIdentifierException e) {
-            passed = true;
-        }
-        assertTrue("IllegalMessageIdentifierException expected", passed);
+//        boolean passed = false;
+//        try {
+//            sequence.acknowledgeMessageNumber(4); // duplicate message acknowledgement
+//        } catch (IllegalMessageIdentifierException e) {
+//            passed = true;
+//        }
+//        assertTrue("IllegalMessageIdentifierException expected", passed);
 
         try {
             // duplicate message acknowledgement
