@@ -24,11 +24,16 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
+import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -40,6 +45,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -61,6 +67,10 @@ public class IdentityComponent implements EndpointComponent {
     Map props = null;
     Certificate cs = null;
     SOAPVersion sp = null;
+     protected static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSIT_PVD_DOMAIN,
+            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
 
 
     public IdentityComponent(WSEndpoint e, PolicyMap pm, Map props) {
@@ -68,10 +78,23 @@ public class IdentityComponent implements EndpointComponent {
         this.e = e;
         this.props = props;
         this.sp = e.getBinding().getSOAPVersion();
+        URL url = null;
         try {
+            url = SecurityUtil.loadFromClasspath("META-INF/ServerCertificate.cert");
+            if(url == null){
             getServerKeyStore();
+            }else {
+                CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+                InputStream is = url.openStream();
+                cs = certFact.generateCertificate(is);
+            }
         } catch (IOException ex) {
-            Logger.getLogger(IdentityComponent.class.getName()).log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        } catch(CertificateException ex){
+            log.log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+            
         }
 
 
