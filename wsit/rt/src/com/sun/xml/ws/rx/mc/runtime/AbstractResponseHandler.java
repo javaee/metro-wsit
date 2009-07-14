@@ -44,7 +44,6 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
-import com.sun.xml.ws.rx.RxConfiguration;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
@@ -56,20 +55,20 @@ abstract class AbstractResponseHandler implements Fiber.CompletionCallback {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractResponseHandler.class);
     //
-    protected final RxConfiguration configuration;
+    protected final McConfiguration configuration;
     //
     protected final MakeConnectionSenderTask mcSenderTask;
     private final TimestampedCollection<String, Fiber> suspendedFiberStorage;
     private String correlationId;
 
-    protected AbstractResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
+    protected AbstractResponseHandler(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage, String correlationId) {
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
         this.suspendedFiberStorage = suspendedFiberStorage;
         this.correlationId = correlationId;
     }
 
-    protected AbstractResponseHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
+    protected AbstractResponseHandler(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, TimestampedCollection<String, Fiber> suspendedFiberStorage) {
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
         this.suspendedFiberStorage = suspendedFiberStorage;

@@ -44,7 +44,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.io.IOException;
@@ -68,7 +68,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         this.rc = original.rc;
         this.filters = original.filters;
     }
-    public PacketFilteringTube(RxConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) {
+    public PacketFilteringTube(RmConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) {
         super(tubelineHead);
         this.isClientSide = true;
 
@@ -88,7 +88,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         this.filters = getConfiguredFilters(context.getBinding(), rc);
     }
 
-    public PacketFilteringTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
+    public PacketFilteringTube(RmConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
         super(tubelineHead);
         this.isClientSide = false;
 

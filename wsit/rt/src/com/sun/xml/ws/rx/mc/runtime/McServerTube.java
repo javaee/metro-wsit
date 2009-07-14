@@ -40,7 +40,6 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
@@ -133,9 +132,9 @@ public class McServerTube extends AbstractFilterTubeImpl {
         private static final Logger LOGGER = Logger.getLogger(AppRequestProcessingCallback.class);
         private final ResponseStorage responseStorage;
         private final String clientUID;
-        private final RxConfiguration configuration;
+        private final McConfiguration configuration;
 
-        public AppRequestProcessingCallback(@NotNull ResponseStorage responseStorage, @NotNull String clientUID, @NotNull RxConfiguration configuration) {
+        public AppRequestProcessingCallback(@NotNull ResponseStorage responseStorage, @NotNull String clientUID, @NotNull McConfiguration configuration) {
             this.responseStorage = responseStorage;
             this.clientUID = clientUID;
             this.configuration = configuration;
@@ -164,11 +163,11 @@ public class McServerTube extends AbstractFilterTubeImpl {
     //
     private static final Logger LOGGER = Logger.getLogger(McServerTube.class);
     //
-    private final RxConfiguration configuration;
+    private final McConfiguration configuration;
     private final FiberExecutor fiberExecutor;
     private final ResponseStorage responseStorage;
 
-    McServerTube(RxConfiguration configuration, Tube tubelineHead) {
+    McServerTube(McConfiguration configuration, Tube tubelineHead) {
         super(tubelineHead);
 
         this.configuration = configuration;

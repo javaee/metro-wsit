@@ -42,7 +42,6 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -79,7 +78,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     private static final Logger LOGGER = Logger.getLogger(Wsrm200502ProtocolHandler.class);
     private final RuntimeContext rc;
 
-    Wsrm200502ProtocolHandler(RxConfiguration configuration, RuntimeContext rc, Communicator communicator) {
+    Wsrm200502ProtocolHandler(RmConfiguration configuration, RuntimeContext rc, Communicator communicator) {
         super(RmVersion.WSRM200502, configuration, communicator);
 
         assert rc != null;

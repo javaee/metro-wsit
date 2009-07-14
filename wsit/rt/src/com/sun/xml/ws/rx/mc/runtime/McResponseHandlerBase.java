@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
@@ -56,17 +55,17 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
     private static final Logger LOGGER = Logger.getLogger(McResponseHandlerBase.class);
     //
-    protected final RxConfiguration configuration;
+    protected final McConfiguration configuration;
     protected final MakeConnectionSenderTask mcSenderTask;
 
-    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
+    protected McResponseHandlerBase(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         super(suspendedFiberStorage, correlationId);
         
         this.configuration = configuration;
         this.mcSenderTask = mcSenderTask;
     }
 
-    protected McResponseHandlerBase(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage) {
+    protected McResponseHandlerBase(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage) {
         super(suspendedFiberStorage, null);
 
         this.configuration = configuration;

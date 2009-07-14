@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 
@@ -47,17 +47,17 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
  */
 public final class DeliveryQueueBuilder {
     
-    private final @NotNull RxConfiguration configuration;
+    private final @NotNull RmConfiguration configuration;
     private final @NotNull Postman postman;
     private final @NotNull Postman.Callback deliveryCallback;
 
     private Sequence sequence;
 
-    public static DeliveryQueueBuilder getBuilder(@NotNull RxConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+    public static DeliveryQueueBuilder getBuilder(@NotNull RmConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
         return new DeliveryQueueBuilder(configuration, postman, deliveryCallback);
     }
 
-    private DeliveryQueueBuilder(@NotNull RxConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
+    private DeliveryQueueBuilder(@NotNull RmConfiguration configuration, @NotNull Postman postman, @NotNull Callback deliveryCallback) {
         assert configuration != null;
         assert postman != null;
         assert deliveryCallback != null;

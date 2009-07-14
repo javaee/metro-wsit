@@ -33,51 +33,69 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.rx.rm.runtime;
+
+import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
+import com.sun.xml.ws.rx.rm.RmVersion;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public interface RmConfiguration extends RxConfiguration {
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getBinding(),
-                null);
+    /**
+     * @see ReliableMessagingFeature#getVersion()
+     */
+    public RmVersion getRmVersion();
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
+    /**
+     * @see ReliableMessagingFeature#getSequenceInactivityTimeout()
+     */
+    public long getSequenceInactivityTimeout();
 
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager());
+    /**
+     * @see ReliableMessagingFeature#getSecurityBinding()
+     */
+    public SecurityBinding getSecurityBinding();
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
+    /**
+     * @see ReliableMessagingFeature#getDeliveryAssurance()
+     */
+    public DeliveryAssurance getDeliveryAssurance();
 
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
-    }
+    /**
+     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
+     */
+    public boolean isOrderedDeliveryEnabled();
+
+    /**
+     * @see ReliableMessagingFeature#getDestinationBufferQuota()
+     */
+    public long getDestinationBufferQuota();
+
+    /**
+     * @see ReliableMessagingFeature#getMessageRetransmissionInterval()
+     */
+    public long getMessageRetransmissionInterval();
+
+    /**
+     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
+     */
+    public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
+
+    /**
+     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
+     */
+    public long getAcknowledgementRequestInterval();
+
+    /**
+     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout()
+     */
+    public long getCloseSequenceOperationTimeout();
 }

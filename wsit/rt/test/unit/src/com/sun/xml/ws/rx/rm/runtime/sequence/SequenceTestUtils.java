@@ -37,17 +37,13 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.delivery.PostmanPool;
@@ -63,14 +59,7 @@ final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
     static final DeliveryQueueBuilder getDeliveryQueueBuilder() {
-        Tube tubeline = new AbstractFilterTubeImpl(null) {
-
-            @Override
-            public AbstractTubeImpl copy(TubeCloner cloner) {
-                return this;
-            }
-        };
-        RxConfiguration config = new RxConfiguration() {
+        RmConfiguration config = new RmConfiguration() {
 
             public boolean isReliableMessagingEnabled() {
                 throw new UnsupportedOperationException("Not supported yet.");

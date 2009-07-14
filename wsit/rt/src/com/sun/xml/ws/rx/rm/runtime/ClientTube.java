@@ -48,7 +48,6 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
@@ -109,7 +108,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         this.outboundSequenceId = original.outboundSequenceId;
     }
 
-    ClientTube(RxConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
+    ClientTube(RmConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
         super(tubelineHead); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
 
         this.outboundSequenceId = new VolatileHolder<String>(null);
@@ -250,7 +249,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
 
     static final ProtocolMessageHandler createRmProtocolMessageHandler(
-            final RxConfiguration configuration,
+            final RmConfiguration configuration,
             final WsrmProtocolHandler protocolHandler,
             final DestinationMessageHandler dstMsgHandler) {
         return new ProtocolMessageHandler() {

@@ -47,7 +47,6 @@ import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmSecurityException;
@@ -101,7 +100,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         this.endpoint = original.endpoint;
     }
 
-    public ServerTube(RxConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
+    public ServerTube(RmConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
         super(tubelineHead);
 
         this.endpoint = context.getEndpoint();

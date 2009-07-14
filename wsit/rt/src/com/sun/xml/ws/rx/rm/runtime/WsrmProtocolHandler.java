@@ -46,7 +46,6 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
@@ -57,7 +56,6 @@ import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.TerminateSequenceResponseData;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.util.Communicator;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -71,7 +69,7 @@ public abstract class WsrmProtocolHandler {
 
     private static final Logger LOGGER = Logger.getLogger(WsrmProtocolHandler.class);
 
-    public static WsrmProtocolHandler getInstance(RxConfiguration configuration, Communicator communicator, RuntimeContext rc) {
+    public static WsrmProtocolHandler getInstance(RmConfiguration configuration, Communicator communicator, RuntimeContext rc) {
         switch (configuration.getRmVersion()) {
             case WSRM200502:
                 return new Wsrm200502ProtocolHandler(configuration, rc, communicator);
@@ -142,8 +140,9 @@ public abstract class WsrmProtocolHandler {
         return (packet.getMessage() == null) ? false : rmVersion.isRmProtocolResponse(getWsaAction(packet.getMessage()));
     }
 
-    protected WsrmProtocolHandler(@NotNull RmVersion rmVersion, @NotNull RxConfiguration configuration, @NotNull Communicator communicator) {
+    protected WsrmProtocolHandler(@NotNull RmVersion rmVersion, @NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
         assert rmVersion != null;
+        assert rmVersion == configuration.getRmVersion();
         assert configuration != null;
         assert communicator != null;
         assert configuration.getRmVersion() == rmVersion;

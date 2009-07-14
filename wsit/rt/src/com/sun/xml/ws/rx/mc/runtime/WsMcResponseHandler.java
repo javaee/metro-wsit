@@ -39,7 +39,6 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.ResumeFiberException;
@@ -59,7 +58,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
     private final Map<String, ProtocolMessageHandler> actionToProtocolHandlerMap;
 
     public WsMcResponseHandler(
-            final RxConfiguration configuration,
+            final McConfiguration configuration,
             final MakeConnectionSenderTask mcSenderTask,
             final SuspendedFiberStorage suspendedFiberStorage,
             final Map<String, ProtocolMessageHandler> protocolHandlerMap) {

@@ -34,12 +34,12 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx;
+package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
@@ -51,50 +51,23 @@ import org.glassfish.gmbal.ManagedObjectManager;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class RxConfigurationImpl implements RxConfiguration {
-
+class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration {
     private final ReliableMessagingFeature rmFeature;
-    private final boolean mcSupported;
-    private final SOAPVersion soapVersion;
-    private final AddressingVersion addressingVersion;
-    private final boolean requestResponseDetected;
-    private final ManagedObjectManager managedObjectManager;
 
-    RxConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
+    RmConfigurationImpl(
+            ReliableMessagingFeature rmFeature,
+            MakeConnectionSupportedFeature mcSupportedFeature,
+            SOAPVersion soapVersion,
+            AddressingVersion addressingVersion,
+            boolean requestResponseDetected,
+            ManagedObjectManager managedObjectManager) {
+        super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
+
         this.rmFeature = rmFeature;
-        this.mcSupported = mcFeature != null && mcFeature.isEnabled();
-        this.soapVersion = soapVersion;
-        this.addressingVersion = addressingVersion;
-        this.requestResponseDetected = requestResponseDetected;
-	this.managedObjectManager = managedObjectManager;
-    }
-
-    public boolean isReliableMessagingEnabled() {
-        return rmFeature != null && rmFeature.isEnabled();
-    }
-
-    public boolean isMakeConnectionSupportEnabled() {
-        return mcSupported;
     }
 
     public RmVersion getRmVersion() {
         return (rmFeature == null) ? null : rmFeature.getVersion();
-    }
-
-    public McVersion getMcVersion() {
-        return (mcSupported) ? McVersion.WSMC200702 : null;
-    }
-
-    public SOAPVersion getSoapVersion() {
-        return soapVersion;
-    }
-
-    public AddressingVersion getAddressingVersion() {
-        return addressingVersion;
-    }
-
-    public boolean requestResponseOperationsDetected() {
-        return requestResponseDetected;
     }
 
     public long getSequenceInactivityTimeout() {
@@ -131,9 +104,5 @@ class RxConfigurationImpl implements RxConfiguration {
 
     public long getCloseSequenceOperationTimeout() {
         return (rmFeature == null) ? null : rmFeature.getCloseSequenceOperationTimeout();
-    }
-
-    public ManagedObjectManager getManagedObjectManager() {
-	return managedObjectManager;
     }
 }

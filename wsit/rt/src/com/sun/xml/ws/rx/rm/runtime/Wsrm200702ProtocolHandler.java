@@ -42,7 +42,6 @@ import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -81,7 +80,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     private static final Logger LOGGER = Logger.getLogger(Wsrm200702ProtocolHandler.class);
     private final RuntimeContext rc;
 
-    Wsrm200702ProtocolHandler(RxConfiguration configuration, RuntimeContext rc, Communicator communicator) {
+    Wsrm200702ProtocolHandler(RmConfiguration configuration, RuntimeContext rc, Communicator communicator) {
         super(RmVersion.WSRM200702, configuration, communicator);
 
         assert rc != null;
@@ -256,7 +255,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
             ackRequestedElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
             jaxwsMessage.getHeaders().add(createHeader(ackRequestedElement));
 
-            packet.invocationProperties.put(RxConfiguration.ACK_REQUESTED_HEADER_SET, Boolean.TRUE);
+            packet.invocationProperties.put(RmConfiguration.ACK_REQUESTED_HEADER_SET, Boolean.TRUE);
         }
 
         // sequence acknowledgement header

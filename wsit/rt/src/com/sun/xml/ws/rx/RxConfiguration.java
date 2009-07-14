@@ -38,16 +38,14 @@ package com.sun.xml.ws.rx;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
- * TODO split into sperate configurations for WS-Mc and WS-RM
+ * TODO split into sperate configurations for WS-MC and WS-RM
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
@@ -58,25 +56,11 @@ public interface RxConfiguration {
      * @see ReliableMessagingFeature
      */
     public boolean isReliableMessagingEnabled();
-
+    
     /**
      * @see MakeConnectionSupportedFeature
      */
     public boolean isMakeConnectionSupportEnabled();
-
-    /**
-     * @see ReliableMessagingFeature#getVersion() 
-     */
-    public RmVersion getRmVersion();
-
-    /**
-     * Specifies which WS-MC version SOAP messages and SOAP message headers should
-     * be used for communication between MC initiator and MC receiver
-     *
-     * @return MC version currently configured. If not set explicitly,
-     *         the default value is specified by a call to {@link McVersion#getDefault()}.
-     */
-    public McVersion getMcVersion();
 
     /**
      * Provides information about the SOAP protocol version used on the endpoint.
@@ -100,51 +84,6 @@ public interface RxConfiguration {
      */
     public boolean requestResponseOperationsDetected();
     
-    /**
-     * @see ReliableMessagingFeature#getSequenceInactivityTimeout() 
-     */
-    public long getSequenceInactivityTimeout();
-
-    /**
-     * @see ReliableMessagingFeature#getSecurityBinding()
-     */
-    public SecurityBinding getSecurityBinding();
-
-    /**
-     * @see ReliableMessagingFeature#getDeliveryAssurance()
-     */
-    public DeliveryAssurance getDeliveryAssurance();
-
-    /**
-     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
-     */
-    public boolean isOrderedDeliveryEnabled();
-
-    /**
-     * @see ReliableMessagingFeature#getDestinationBufferQuota()
-     */
-    public long getDestinationBufferQuota();
-    
-    /**
-     * @see ReliableMessagingFeature#getMessageRetransmissionInterval()
-     */
-    public long getMessageRetransmissionInterval();
-        
-    /**
-     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
-     */
-    public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
-    
-    /**
-     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
-     */
-    public long getAcknowledgementRequestInterval();    
-    
-    /**
-     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout() 
-     */
-    public long getCloseSequenceOperationTimeout();
-
     /**
      * GMBAL/JMX manager
      */

@@ -33,51 +33,57 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.rx;
+
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public abstract class RxConfigurationBase implements RxConfiguration {
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getBinding(),
-                null);
+    private final boolean rmEnabled;
+    private final boolean mcSupportEnabled;
+    private final SOAPVersion soapVersion;
+    private final AddressingVersion addressingVersion;
+    private final boolean requestResponseDetected;
+    private final ManagedObjectManager managedObjectManager;
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
+    protected RxConfigurationBase(boolean isRmEnabled, boolean isMcEnabled, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
+        this.rmEnabled = isRmEnabled;
+        this.mcSupportEnabled = isMcEnabled;
+
+        this.soapVersion = soapVersion;
+        this.addressingVersion = addressingVersion;
+        this.requestResponseDetected = requestResponseDetected;
+	this.managedObjectManager = managedObjectManager;
     }
 
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager());
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
+    public boolean isReliableMessagingEnabled() {
+        return rmEnabled;
     }
 
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
+    public boolean isMakeConnectionSupportEnabled() {
+        return mcSupportEnabled;
+    }
+
+    public SOAPVersion getSoapVersion() {
+        return soapVersion;
+    }
+
+    public AddressingVersion getAddressingVersion() {
+        return addressingVersion;
+    }
+
+    public boolean requestResponseOperationsDetected() {
+        return requestResponseDetected;
+    }
+
+    public ManagedObjectManager getManagedObjectManager() {
+	return managedObjectManager;
     }
 }

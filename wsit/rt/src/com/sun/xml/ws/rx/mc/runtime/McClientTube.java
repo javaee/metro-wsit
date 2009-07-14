@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -68,7 +67,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
     //
-    private final RxConfiguration configuration;
+    private final McConfiguration configuration;
     private final Unmarshaller unmarshaller;
     private final Header wsmcAnnonymousReplyToHeader;
     private final Header wsmcAnnonymousFaultToHeader;
@@ -78,7 +77,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
     private final MakeConnectionSenderTask mcSenderTask;
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
-    McClientTube(RxConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
+    McClientTube(McConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
         super(tubelineHead);
 
         this.configuration = configuration;
@@ -216,7 +215,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         // this request seems to be one-way, need to check if there are is an RM AckRequest set on it.
         // FIXME: this should be made in a RM-agnostic way
-        return isBooleanFlagSet(request, RxConfiguration.ACK_REQUESTED_HEADER_SET);
+        return isBooleanFlagSet(request, McConfiguration.ACK_REQUESTED_HEADER_SET);
     }
 
     static void setMcAnnonymousHeaders(final HeaderList headers, AddressingVersion av, Header wsmcReplyToHeader, Header wsmcFaultToHeader) {

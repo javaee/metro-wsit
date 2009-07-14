@@ -36,7 +36,6 @@
 
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
@@ -48,7 +47,7 @@ import java.io.IOException;
  */
 class OneWayMepHandler extends McResponseHandlerBase {
 
-    public OneWayMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
+    public OneWayMepHandler(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
     }
 

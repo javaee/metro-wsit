@@ -38,7 +38,6 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
@@ -62,7 +61,7 @@ final class MakeConnectionSenderTask implements Runnable {
     private long lastMcMessageTimestamp;
     private final AtomicBoolean isMcRequestPending;
     private int scheduledMcRequestCounter;
-    private final RxConfiguration configuration;
+    private final McConfiguration configuration;
     private final Communicator communicator;
     private final SuspendedFiberStorage suspendedFiberStorage;
     private final Map<String, ProtocolMessageHandler> mapOfRegisteredProtocolMessageHandlers;
@@ -73,7 +72,7 @@ final class MakeConnectionSenderTask implements Runnable {
             final String wsmcAnonymousAddress,
             final Header wsmcAnnonymousReplyToHeader,
             final Header wsmcAnnonymousFaultToHeader,
-            final RxConfiguration configuration) {
+            final McConfiguration configuration) {
         this.communicator = communicator;
         this.suspendedFiberStorage = suspendedFiberStorage;
         this.wsmcAnonymousAddress = wsmcAnonymousAddress;

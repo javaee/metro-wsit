@@ -39,7 +39,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
@@ -55,7 +54,7 @@ import java.util.concurrent.ScheduledFuture;
  */
 public final class RuntimeContext {
 
-    public static Builder getBuilder(@NotNull RxConfiguration configuration, @NotNull Communicator communicator) {
+    public static Builder getBuilder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
         return new Builder(configuration, communicator);
     }
 
@@ -63,7 +62,7 @@ public final class RuntimeContext {
 
         private final
         @NotNull
-        RxConfiguration configuration;
+        RmConfiguration configuration;
         private final
         @NotNull
         Communicator communicator;
@@ -81,7 +80,7 @@ public final class RuntimeContext {
         @Nullable
         DestinationMessageHandler destinationMessageHandler;
 
-        public Builder(@NotNull RxConfiguration configuration, @NotNull Communicator communicator) {
+        public Builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
             assert communicator != null;
 
@@ -115,7 +114,7 @@ public final class RuntimeContext {
                     redeliveryTask);
         }
     }
-    public final RxConfiguration configuration;
+    public final RmConfiguration configuration;
     public final AddressingVersion addressingVersion;
     public final SOAPVersion soapVersion;
     public final RmVersion rmVersion;
@@ -129,7 +128,7 @@ public final class RuntimeContext {
     final DestinationMessageHandler destinationMessageHandler;
 
     private RuntimeContext(
-            RxConfiguration configuration,
+            RmConfiguration configuration,
             SequenceManager sequenceManager,
             Communicator communicator,
             SuspendedFiberStorage suspendedFiberStorage,

@@ -33,51 +33,33 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
+
+package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.util.PortUtilities;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
+ * Reliable messaging run-time configuration factory
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public enum RmConfigurationFactory {
+    INSTANCE;
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getBinding(),
-                null);
+    public RmConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
+        return new RmConfigurationImpl(
+                binding.getFeature(ReliableMessagingFeature.class),
+                binding.getFeature(MakeConnectionSupportedFeature.class),
+                binding.getSOAPVersion(),
+                binding.getAddressingVersion(),
+                PortUtilities.checkForRequestResponseOperations(wsdlPort),
+		managedObjectManager);
     }
 
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager());
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
-
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
-    }
 }

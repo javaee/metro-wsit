@@ -33,51 +33,25 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.rx.mc.runtime;
+
+import com.sun.xml.ws.rx.RxConfiguration;
+import com.sun.xml.ws.rx.mc.McVersion;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public interface McConfiguration extends RxConfiguration {
+    /**
+     * Specifies which WS-MC version SOAP messages and SOAP message headers should
+     * be used for communication between MC initiator and MC receiver
+     *
+     * @return MC version currently configured. If not set explicitly,
+     *         the default value is specified by a call to {@link McVersion#getDefault()}.
+     */
+    public McVersion getMcVersion();
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getBinding(),
-                null);
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
-
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager());
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
-
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
-    }
 }

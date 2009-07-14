@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
-import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
@@ -46,7 +45,7 @@ import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
  */
 class RequestResponseMepHandler extends McResponseHandlerBase {
 
-    public RequestResponseMepHandler(RxConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
+    public RequestResponseMepHandler(McConfiguration configuration, MakeConnectionSenderTask mcSenderTask, SuspendedFiberStorage suspendedFiberStorage, String correlationId) {
         super(configuration, mcSenderTask, suspendedFiberStorage, correlationId);
     }
 

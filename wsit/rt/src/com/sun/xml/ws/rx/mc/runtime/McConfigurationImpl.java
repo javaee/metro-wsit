@@ -33,52 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
-import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
-import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+package com.sun.xml.ws.rx.mc.runtime;
+
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum RxConfigurationFactory {
-    INSTANCE;
+class McConfigurationImpl extends RxConfigurationBase implements McConfiguration {
+    private final MakeConnectionSupportedFeature mcSupportedFeature;
 
-    public RxConfiguration createConfiguration(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
+    McConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcSupportedFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
+        super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
 
-        return new RxConfigurationImpl(
-                binding.getFeature(ReliableMessagingFeature.class),
-                binding.getFeature(MakeConnectionSupportedFeature.class),
-                binding.getSOAPVersion(),
-                binding.getAddressingVersion(),
-                checkForRequestResponseOperations(wsdlPort),
-		managedObjectManager);
+        this.mcSupportedFeature = mcSupportedFeature;
     }
 
-   /**
-     * Determine whether wsdl port contains any two-way operations.
-     * 
-     * @param port WSDL port to check
-     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
-     */
-    private static boolean checkForRequestResponseOperations(WSDLPort port) {
-        WSDLBoundPortType portType;
-        if (port == null || null == (portType = port.getBinding())) {
-            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
-            return false;
-        }
-
-        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
-            if (!boundOperation.getOperation().isOneWay()) {
-                return true;
-            }
-        }
-        return false;
+    public McVersion getMcVersion() {
+        return (mcSupportedFeature != null) ? McVersion.WSMC200702 : null;
     }
 }

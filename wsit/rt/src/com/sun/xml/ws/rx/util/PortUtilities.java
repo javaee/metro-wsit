@@ -33,51 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.rx.util;
+
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundPortType;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public final class PortUtilities {
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getBinding(),
-                null);
+    private PortUtilities() {
 
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
     }
-
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
-                context.getWsdlPort(),
-                context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager());
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
+    
+   /**
+     * Determine whether wsdl port contains any two-way operations.
+     *
+     * @param port WSDL port to check
+     * @return {@code true} if there are request/response present on the port; returns {@code false} otherwise
+     */
+    public static boolean checkForRequestResponseOperations(WSDLPort port) {
+        WSDLBoundPortType portType;
+        if (port == null || null == (portType = port.getBinding())) {
+            //no WSDL perhaps? Returning false here means that will be no reverse sequence. That is the correct behavior.
+            return false;
         }
-    }
 
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
+        for (WSDLBoundOperation boundOperation : portType.getBindingOperations()) {
+            if (!boundOperation.getOperation().isOneWay()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
