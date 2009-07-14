@@ -67,7 +67,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="Persitent">
+    <xs:element name="Persistent">
         <xs:complexType>
             <xs:sequence>
                 <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
