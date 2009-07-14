@@ -68,7 +68,7 @@ STR_ID VARCHAR(256),
 
 STATUS SMALLINT NOT NULL,
 ACK_REQUESTED_FLAG CHARACTER,
-LAST_MESSAGE_ID BIGINT NOT NULL,
+LAST_MESSAGE_NUMBER BIGINT NOT NULL,
 LAST_ACTIVITY_TIME BIGINT NOT NULL,
 LAST_ACK_REQUEST_TIME BIGINT NOT NULL,
 
@@ -139,6 +139,15 @@ final class PersistentSequenceData implements SequenceData {
     }
     //
     private static final Logger LOGGER = Logger.getLogger(PersistentSequenceData.class);
+
+    private static String b2s(boolean value) {
+        return (value) ? "T" : "F";
+    }
+
+    private static boolean s2b(String string) {
+        return "T".equals(string);
+    }
+
     //
     private final String endpointUid;
     private final String sequenceId;
@@ -149,7 +158,7 @@ final class PersistentSequenceData implements SequenceData {
     //
     private final FieldInfo<Integer> fState = new FieldInfo<Integer>("STATUS", Types.SMALLINT, Integer.class);
     private final FieldInfo<String> fAckRequestedFlag = new FieldInfo<String>("ACK_REQUESTED_FLAG", Types.CHAR, String.class);
-    private final FieldInfo<Long> fLastMessageId = new FieldInfo<Long>("LAST_MESSAGE_ID", Types.BIGINT, Long.class);
+    private final FieldInfo<Long> fLastMessageNumber = new FieldInfo<Long>("LAST_MESSAGE_NUMBER", Types.BIGINT, Long.class);
     private final FieldInfo<Long> fLastActivityTime = new FieldInfo<Long>("LAST_ACTIVITY_TIME", Types.BIGINT, Long.class);
     private final FieldInfo<Long> fLastAcknowledgementRequestTime = new FieldInfo<Long>("LAST_ACK_REQUEST_TIME", Types.BIGINT, Long.class);
     //
@@ -183,7 +192,7 @@ final class PersistentSequenceData implements SequenceData {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "INSERT INTO RM.RM_SEQUENCES " +
-                    "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_ID, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
+                    "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_NUMBER, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
                     "VALUES " +
                     "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
@@ -197,8 +206,8 @@ final class PersistentSequenceData implements SequenceData {
 
 
             ps.setInt(++i, state.asInt()); // STATUS SMALLINT NOT NULL,
-            ps.setString(++i, Boolean.toString(ackRequestedFlag)); // ACK_REQUESTED_FLAG CHARACTER,
-            ps.setLong(++i, lastMessageId); // LAST_MESSAGE_ID BIGINT NOT NULL,
+            ps.setString(++i, b2s(ackRequestedFlag)); // ACK_REQUESTED_FLAG CHARACTER,
+            ps.setLong(++i, lastMessageId); // LAST_MESSAGE_NUMBER BIGINT NOT NULL,
             ps.setLong(++i, lastActivityTime); // LAST_ACTIVITY_TIME TIMESTAMP NOT NULL,
             ps.setLong(++i, lastAcknowledgementRequestTime); // LAST_ACK_REQUEST_TIME TIMESTAMP NOT NULL,
 
@@ -287,12 +296,24 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
+            ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND ID=?");
+
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+
+            int rowsAffected = ps.executeUpdate();
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(String.format("%d unacknowledged message records removed for a sequence with id [ %s ]", rowsAffected, sequenceId));
+            }
+
+            cm.recycle(ps);
+
             ps = cm.prepareStatement(con, "DELETE FROM RM_SEQUENCES WHERE ENDPOINT_UID=? AND ID=?");
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
 
-            final int rowsAffected = ps.executeUpdate();
+            rowsAffected = ps.executeUpdate();
             if (rowsAffected != 1) {
                 cm.rollback(con);
                 throw LOGGER.logException(
@@ -303,9 +324,8 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)),
                         Level.WARNING);
             }
-            cm.commit(con);
 
-            // TODO clear bound column where needed, clear unacknowledged data
+            cm.commit(con);
 
         } catch (SQLException ex) {
             cm.rollback(con);
@@ -345,7 +365,7 @@ final class PersistentSequenceData implements SequenceData {
                         Level.WARNING);
             }
 
-            cm.commit(con);            
+            cm.commit(con);
         } catch (SQLException ex) {
             cm.rollback(con);
             // TODO L10N
@@ -380,8 +400,7 @@ final class PersistentSequenceData implements SequenceData {
         return expirationTime;
     }
 
-    private <T> T getFieldData(FieldInfo<T> fi) {
-        Connection con = cm.getConnection(true);
+    private <T> T getFieldData(Connection con, FieldInfo<T> fi) throws PersistenceException {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT " +
@@ -415,6 +434,14 @@ final class PersistentSequenceData implements SequenceData {
                     sequenceId), ex));
         } finally {
             cm.recycle(ps);
+        }
+    }
+
+    private <T> T getFieldData(FieldInfo<T> fi) {
+        Connection con = cm.getConnection(true);
+        try {
+            return getFieldData(con, fi);
+        } finally {
             cm.recycle(con);
         }
     }
@@ -460,11 +487,11 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public long getLastMessageNumber() {
-        return getFieldData(fLastMessageId);
+        return getFieldData(fLastMessageNumber);
     }
 
     public void setLastMessageNumber(long newValue) {
-        setFieldData(fLastMessageId, newValue);
+        setFieldData(fLastMessageNumber, newValue);
     }
 
     public State getState() {
@@ -476,11 +503,11 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public boolean getAckRequestedFlag() {
-        return Boolean.valueOf(getFieldData(fAckRequestedFlag));
+        return s2b(getFieldData(fAckRequestedFlag));
     }
 
     public void setAckRequestedFlag(boolean newValue) {
-        setFieldData(fAckRequestedFlag, Boolean.toString(newValue));
+        setFieldData(fAckRequestedFlag, b2s(newValue));
     }
 
     public long getLastAcknowledgementRequestTime() {
@@ -503,91 +530,151 @@ final class PersistentSequenceData implements SequenceData {
      * {@inheritDoc }
      */
     public long incrementAndGetLastMessageNumber(boolean received) {
-        throw new UnsupportedOperationException("Not implmented yet"); // TODO P1 implement
-//        PreparedStatement ps = null;
-//        try {
-//
-//            ps = cm.prepareStatement("UPDATE RM_SEQUENCES SET " +
-//                    "LAST_MESSAGE_ID=LAST_MESSAGE_ID+1 " +
-//                    "WHERE ENDPOINT_UID=? AND ID=?");
-//
-//            ps.setString(1, endpointUid);
-//            ps.setString(2, sequenceId);
-//
-//            int rowsAffected = ps.executeUpdate();
-//            if (rowsAffected != 1) {
-//                throw LOGGER.logException(
-//                        new PersistenceException(String.format(
-//                        "Incrementing last message number on a sequence with id = [ %s ] failed: " +
-//                        "Expected updated rows: 1, Actual: %d",
-//                        sequenceId,
-//                        rowsAffected)),
-//                        Level.WARNING);
-//            }
-//
-//        } catch (SQLException ex) {
-//            throw LOGGER.logSevereException(new PersistenceException(String.format(
-//                    "Incrementing last message number on a sequence with id = [ %s ] failed: " +
-//                    "An unexpected JDBC exception occured",
-//                    sequenceId), ex));
-//        } finally {
-//            cm.recycle(ps);
-//        }
+        Connection con = cm.getConnection(false);
+        PreparedStatement ps = null;
+        try {
+            ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
+                    "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1 " +
+                    "WHERE ENDPOINT_UID=? AND ID=?");
 
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
 
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected != 1) {
+                cm.rollback(con);
+                throw LOGGER.logException(
+                        new PersistenceException(String.format(
+                        "Incrementing last message number on a sequence with id = [ %s ] failed: " +
+                        "Expected updated rows: 1, Actual: %d",
+                        sequenceId,
+                        rowsAffected)),
+                        Level.WARNING);
+            }
+
+            long newLastMessageId = getFieldData(con, fLastMessageNumber);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer("New last message id: " + newLastMessageId);
+            }
+
+            try {
+                registerSingleUnackedMessageNumber(con, newLastMessageId, received);
+            } catch (DuplicateMessageRegistrationException ex) {
+                cm.rollback(con);
+                throw new PersistenceException("Registering newly created last message id ", ex);
+            } catch (PersistenceException ex) {
+                cm.rollback(con);
+                throw ex;
+            }
+
+            cm.commit(con);
+            return newLastMessageId;
+        } catch (SQLException ex) {
+            cm.rollback(con);
+            throw LOGGER.logSevereException(new PersistenceException(String.format(
+                    "Incrementing last message number on a sequence with id = [ %s ] failed: " +
+                    "An unexpected JDBC exception occured",
+                    sequenceId), ex));
+        } finally {
+            cm.recycle(ps);
+            cm.recycle(con);
+        }
+    }
+
+    private void registerSingleUnackedMessageNumber(Connection con, long messageNumber, boolean received) throws PersistenceException, DuplicateMessageRegistrationException {
+        PreparedStatement ps = null;
+        try {
+            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?");
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+
+            ResultSet rs = ps.executeQuery();
+
+            final boolean doInsert = !rs.next();
+            // check for duplicate registration
+            if (!doInsert && s2b(rs.getString("IS_RECEIVED")) == received) {
+                throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
+            }
+
+            cm.recycle(ps);
+
+            final int rowsAffected;
+            if (doInsert) {
+                // insert
+                ps = cm.prepareStatement(con, "INSERT INTO RM_UNACKED_MESSAGES " +
+                        "(ENDPOINT_UID, SEQ_ID, MSG_NUMBER, IS_RECEIVED) " +
+                        "VALUES (?, ?, ?, ?)");
+                ps.setString(1, endpointUid);
+                ps.setString(2, sequenceId);
+                ps.setLong(3, messageNumber);
+                ps.setString(4, b2s(received));
+
+                rowsAffected = ps.executeUpdate();
+                if (rowsAffected != 1) {
+                    throw LOGGER.logSevereException(
+                            new PersistenceException(String.format(
+                            "Inserting new unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
+                            "Expected updated rows: 1, Actual: %d",
+                            messageNumber,
+                            sequenceId,
+                            rowsAffected)));
+                }
+            } else {
+                ps = cm.prepareStatement(con, "UPDATE RM_UNACKED_MESSAGES SET " +
+                        "IS_RECEIVED=? " +
+                        "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=? AND IS_RECEIVED=?");
+                ps.setString(1, b2s(received));
+                ps.setString(2, endpointUid);
+                ps.setString(3, sequenceId);
+                ps.setLong(4, messageNumber);
+                ps.setString(5, b2s(!received));
+
+                rowsAffected = ps.executeUpdate();
+            }
+            if (rowsAffected != 1) {
+                throw LOGGER.logSevereException(
+                        new PersistenceException(String.format(
+                        "Registering an unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
+                        "Expected affected rows: 1, Actual: %d",
+                        messageNumber,
+                        sequenceId,
+                        rowsAffected)));
+            }
+
+        } catch (SQLException ex) {
+                throw LOGGER.logSevereException(
+                        new PersistenceException(String.format(
+                        "Registering an unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
+                        "An unexpected JDBC exception occured",
+                        messageNumber,
+                        sequenceId), ex));
+        } finally {
+            cm.recycle(ps);
+        }
     }
 
     /**
      * {@inheritDoc }
      */
     public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
-        throw new UnsupportedOperationException("Not implmented yet"); // TODO P1 implement
-//        PreparedStatement ps = null;
-//        ResultSet rs = null;
-//        try {
-//            ps = cm.prepareStatement("SELECT " +
-//                    "MSG_NUMBER, IS_RECEIVED " +
-//                    "FROM RM_UNACKED_MESSAGES " +
-//                    "WHERE ENDPOINT_UID=?, SEQ_ID=? " +
-//                    "ORDER BY MSG_NUMBER");
-//
-//            ps.setString(1, endpointUid);
-//            ps.setString(2, sequenceId);
-//
-//            rs = ps.executeQuery();
-//
-//            while (rs.next()) {
-//                final long currentRowMsgNumber = rs.getLong("MSG_NUMBER");
-//                if (currentRowMsgNumber == messageNumber) {
-//                    if (Boolean.valueOf(rs.getString("IS_RECEIVED")) == received) {
-//                        throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
-//                    }
-//
-//                    rs.updateString("IS_RECEIVED", Boolean.toString(received));
-//                    rs.updateRow();
-//                    return;
-//                } else if (currentRowMsgNumber > messageNumber) {
-//                    break;
-//                }
-//            }
-//
-//            rs.moveToInsertRow();
-//            rs.updateLong("MSG_NUMBER", messageNumber);
-//            rs.updateString("IS_RECEIVED", Boolean.toString(received));
-//            rs.insertRow();
-//
-//        } catch (SQLException ex) {
-//            // TODO L10N
-//            throw LOGGER.logSevereException(new PersistenceException(String.format(
-//                    "Unable to insert new unacked message registration for %s sequence with id = [ %s ] and message number [ %d ]: " +
-//                    "An unexpected JDBC exception occured",
-//                    type,
-//                    sequenceId,
-//                    messageNumber), ex));
-//        } finally {
-//            cm.recycle(rs);
-//            cm.recycle(ps);
-//        }
+        Connection con = cm.getConnection(false);
+        try {
+            long lastMessageNumber = getFieldData(con, fLastMessageNumber);
+            for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
+                registerSingleUnackedMessageNumber(con, i, false);
+            }
+            registerSingleUnackedMessageNumber(con, messageNumber, received);
+
+            cm.commit(con);
+        } catch (PersistenceException ex) {
+            cm.rollback(con);
+            throw ex;
+        } catch (DuplicateMessageRegistrationException ex) {
+            cm.rollback(con);
+            throw ex;
+        } finally {
+            cm.recycle(con);
+        }
     }
 
     public void markAsAcknowledged(long messageNumber) {
@@ -659,10 +746,44 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public List<Long> getLastMessageNumberWithUnackedMessageNumbers() {
-        throw new UnsupportedOperationException("Not supported yet."); // TODO P1 implement
+        Connection con = cm.getConnection(true);
+        PreparedStatement ps = null;
+        try {
+            ps = cm.prepareStatement(con, "SELECT RM_SEQUENCES.LAST_MESSAGE_NUMBER AS LAST_NUMBER, RM_UNACKED_MESSAGES.MSG_NUMBER AS MESSAGE_NUMBER " +
+                    "FROM RM_UNACKED_MESSAGES " +
+                    "INNER JOIN RM_SEQUENCES ON " +
+                    "RM_UNACKED_MESSAGES.ENDPOINT_UID=RM_SEQUENCES.ENDPOINT_UID AND RM_UNACKED_MESSAGES.SEQ_ID=RM_SEQUENCES.ID " +
+                    "WHERE RM_UNACKED_MESSAGES.ENDPOINT_UID=? AND SEQ_ID=?");
+
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+
+            ResultSet rs = ps.executeQuery();
+
+            List<Long> result = new LinkedList<Long>();
+            if (rs.next()) { // add last message id and first message number
+                result.add(rs.getLong("LAST_NUMBER"));
+                result.add(rs.getLong("MESSAGE_NUMBER"));
+            } else {
+                result.add(getFieldData(con, fLastMessageNumber)); // load last message number again
+            }
+
+            while (rs.next()) { // add only message numbers
+                result.add(rs.getLong("MESSAGE_NUMBER"));
+            }
+
+            return result;
+        } catch (SQLException ex) {
+            throw LOGGER.logSevereException(new PersistenceException(String.format(
+                    "Unable to load list of unacked message registration for %s sequence with id = [ %s ]: " +
+                    "An unexpected JDBC exception occured",
+                    type,
+                    sequenceId), ex));
+        } finally {
+            cm.recycle(ps);
+            cm.recycle(con);
+        }
     }
-
-
 
     public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
         ByteArrayInputStream bais = null;
@@ -675,7 +796,7 @@ final class PersistentSequenceData implements SequenceData {
 
             int i = 0;
 
-            ps.setString(++i, Boolean.TRUE.toString());
+            ps.setString(++i, b2s(true));
 
             ps.setString(++i, message.getCorrelationId());
             ps.setLong(++i, message.getNextResendCount());

@@ -58,6 +58,7 @@ public interface SequenceData {
      * be marked as received on the sequence.
      *
      * @return new value of the last message number
+     * @exception DuplicateMessageRegistrationException in case such registration already exists
      */
     void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException;
 
