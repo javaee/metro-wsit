@@ -47,6 +47,7 @@ import junit.framework.TestCase;
  */
 public class OutboundSequenceTest extends TestCase {
     private final SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+            false,
             "0987654321",
             SequenceTestUtils.getDeliveryQueueBuilder(),
             SequenceTestUtils.getDeliveryQueueBuilder(),

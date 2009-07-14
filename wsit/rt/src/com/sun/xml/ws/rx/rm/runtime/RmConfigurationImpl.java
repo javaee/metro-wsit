@@ -105,4 +105,8 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
     public long getCloseSequenceOperationTimeout() {
         return (rmFeature == null) ? null : rmFeature.getCloseSequenceOperationTimeout();
     }
+
+    public boolean isPersistenceEnabled() {
+        return (rmFeature == null) ? null : rmFeature.isPersistenceEnabled();
+    }
 }

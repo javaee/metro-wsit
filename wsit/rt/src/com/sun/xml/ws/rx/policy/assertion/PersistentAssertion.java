@@ -34,73 +34,38 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.rm.runtime;
+package com.sun.xml.ws.rx.policy.assertion;
 
-import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.SimpleAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public interface RmConfiguration extends RxConfiguration {
+public class PersistentAssertion extends SimpleAssertion implements RmAssertionTranslator {
+    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("Persistent");
 
-    /**
-     * @see ReliableMessagingFeature#getVersion()
-     */
-    public RmVersion getRmVersion();
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
+            return new PersistentAssertion(data, assertionParameters);
+        }
+    };
 
-    /**
-     * @see ReliableMessagingFeature#getSequenceInactivityTimeout()
-     */
-    public long getSequenceInactivityTimeout();
+    public static AssertionInstantiator getInstantiator() {
+        return instantiator;
+    }
 
-    /**
-     * @see ReliableMessagingFeature#getSecurityBinding()
-     */
-    public SecurityBinding getSecurityBinding();
+    public PersistentAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
+    }
 
-    /**
-     * @see ReliableMessagingFeature#getDeliveryAssurance()
-     */
-    public DeliveryAssurance getDeliveryAssurance();
-
-    /**
-     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
-     */
-    public boolean isOrderedDeliveryEnabled();
-
-    /**
-     * @see ReliableMessagingFeature#getDestinationBufferQuota()
-     */
-    public long getDestinationBufferQuota();
-
-    /**
-     * @see ReliableMessagingFeature#getMessageRetransmissionInterval()
-     */
-    public long getMessageRetransmissionInterval();
-
-    /**
-     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
-     */
-    public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
-
-    /**
-     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
-     */
-    public long getAcknowledgementRequestInterval();
-
-    /**
-     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout()
-     */
-    public long getCloseSequenceOperationTimeout();
-
-    /**
-     * @see ReliableMessagingFeature#isPersistenceEnabled()
-     */
-    public boolean isPersistenceEnabled();
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.enablePersistence();
+    }
 }

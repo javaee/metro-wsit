@@ -51,6 +51,7 @@ import com.sun.xml.ws.rx.policy.assertion.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.PersistentAssertion;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +72,7 @@ public class RxAssertionValidator implements PolicyAssertionValidator {
         SERVER_SIDE_ASSERTIONS.add(AllowDuplicatesAssertion.NAME);
         SERVER_SIDE_ASSERTIONS.add(RmFlowControlAssertion.NAME);
         SERVER_SIDE_ASSERTIONS.add(InactivityTimeoutAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(PersistentAssertion.NAME);
 
         CLIENT_SIDE_ASSERTIONS.add(AckRequestIntervalClientAssertion.NAME);
         CLIENT_SIDE_ASSERTIONS.add(ResendIntervalClientAssertion.NAME);

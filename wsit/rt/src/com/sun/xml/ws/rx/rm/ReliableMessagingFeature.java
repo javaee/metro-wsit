@@ -253,6 +253,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final BackoffAlgorithm retransmissionBackoffAlgorithm;
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
+    private final boolean persistenceEnabled;
+
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -276,7 +278,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
-                DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT // this.closeSequenceOperationTimeout
+                DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
+                false // this.persistenceEnabled
                 );
     }
 
@@ -288,7 +291,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         "orderedDeliveryEnabled",
         "makeConnectionEnabled",
         "deliveryAssurance",
-        "securityBinding"
+        "securityBinding",
+        "persistenceEnabled"
     })
     public ReliableMessagingFeature(
             boolean enabled,
@@ -297,7 +301,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long bufferQuota,
             boolean orderedDelivery,
             DeliveryAssurance deliveryAssurance,
-            SecurityBinding securityBinding) {
+            SecurityBinding securityBinding,
+            boolean persistenceEnabled) {
 
         this(
                 enabled, // this.enabled
@@ -310,7 +315,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
-                DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT // this.closeSequenceOperationTimeout
+                DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
+                persistenceEnabled // this.persistenceEnabled
                 );
     }
 
@@ -325,7 +331,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long messageRetransmissionInterval,
             BackoffAlgorithm retransmissionBackoffAlgorithm,
             long ackRequestInterval,
-            long closeSequenceOperationTimeout) {
+            long closeSequenceOperationTimeout,
+            boolean persistenceEnabled) {
 
         super.enabled = enabled;
         this.version = version;
@@ -338,6 +345,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
         this.ackRequestInterval = ackRequestInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
+        this.persistenceEnabled = persistenceEnabled;
     }
 
     @Override
@@ -500,5 +508,17 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public long getCloseSequenceOperationTimeout() {
         return closeSequenceOperationTimeout;
+    }
+
+    /**
+     * <p>
+     * Specifies whether the runtime should use persistent message storage or not.
+     * </p>
+     * 
+     * @return {@code true} if the runtime should use persistent message storage, {@code false} otherwise
+     */
+    @ManagedAttribute
+    public boolean isPersistenceEnabled() {
+        return persistenceEnabled;
     }
 }

@@ -53,6 +53,7 @@ import com.sun.xml.ws.rx.policy.assertion.OrderedDeliveryAssertion;
 import com.sun.xml.ws.rx.policy.assertion.ResendIntervalClientAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.PersistentAssertion;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,6 +80,7 @@ public final class RxAssertionCreator implements PolicyAssertionCreator {
         instantiationMap.put(OrderedDeliveryAssertion.NAME, OrderedDeliveryAssertion.getInstantiator());
         instantiationMap.put(ResendIntervalClientAssertion.NAME, ResendIntervalClientAssertion.getInstantiator());
         instantiationMap.put(InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.getInstantiator());
+        instantiationMap.put(PersistentAssertion.NAME, PersistentAssertion.getInstantiator());
     }    
     
     private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(AssertionNamespace.namespacesList());

@@ -39,6 +39,7 @@
 xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
 xmlns:wsp="http://www.w3.org/ns/ws-policy"
 xmlns:wsrm="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+xmlns:sunrm="http://sun.com/2006/03/rm"
 xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy"
 xmlns:net35="http://schemas.microsoft.com/ws-rx/wsrmp/200702" >
     <wsp:ExactlyOne>
@@ -55,6 +56,7 @@ xmlns:net35="http://schemas.microsoft.com/ws-rx/wsrmp/200702" >
                 </wsp:Policy>
             </wsrm:RMAssertion>
             <net35:InactivityTimeout Milliseconds="1000"/>
+            <sunrm:Persistent />
         </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>

@@ -144,6 +144,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+                false, // TODO right now we decided not to support client side presisitence, revisit later
                 context.getAddress().getURI().toString(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,

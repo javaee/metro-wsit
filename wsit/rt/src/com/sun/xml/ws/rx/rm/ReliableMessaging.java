@@ -62,4 +62,5 @@ public @interface ReliableMessaging {
     boolean orderedDeliveryEnabled() default false;
     DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
     SecurityBinding securityBinding() default SecurityBinding.NONE;
+    boolean persistenceEnabled() default false;
 }

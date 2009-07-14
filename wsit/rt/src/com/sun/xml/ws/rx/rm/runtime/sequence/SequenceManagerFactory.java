@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
+import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceManager;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -53,6 +54,7 @@ public enum SequenceManagerFactory {
     /**
      * Creates new {@link SequenceManager} instance. This operation should be called only once per endpoint and/or endpoint client.
      *
+     * @param persistent specifies whether returned {@link SequenceManager} instance should support persistent message storage
      * @param uniqueEndpointId unique identifier of the WS endpoint for which this particular sequence manager will be used. The endpoint
      * identifier must be different for the client and for the server side.
      * @param inboundQueueBuilder delivery queue builder that will be used to create delivery queue for all newly created inbound sequences
@@ -60,8 +62,11 @@ public enum SequenceManagerFactory {
      * @param managedObjectManager object manager managing the newly created {@link SequenceManager} instance
      * @return newly created {@link SequenceManager} instance
      */
-    public SequenceManager createSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
-        // TODO change this once it is clear how to obtain endpoint on the client side
+    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+        if (persistent) {
+            return new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
+        }
+        
         return new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
     }
 }

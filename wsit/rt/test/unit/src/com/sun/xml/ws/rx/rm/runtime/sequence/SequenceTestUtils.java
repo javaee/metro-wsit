@@ -128,6 +128,10 @@ final class SequenceTestUtils  {
             public ManagedObjectManager getManagedObjectManager() {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            public boolean isPersistenceEnabled() {
+                return false;
+            }
         };
 
         return DeliveryQueueBuilder.getBuilder(config, PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {

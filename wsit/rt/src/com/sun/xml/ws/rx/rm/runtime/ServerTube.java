@@ -135,6 +135,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
+                configuration.isPersistenceEnabled(),
                 context.getEndpoint().getServiceName() + "::" + context.getEndpoint().getPortName(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
