@@ -67,4 +67,13 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="Persitent">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute namespace="##other" processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
+
 </xs:schema>
