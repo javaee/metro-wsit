@@ -746,7 +746,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public List<Long> getLastMessageNumberWithUnackedMessageNumbers() {
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT RM_SEQUENCES.LAST_MESSAGE_NUMBER AS LAST_NUMBER, RM_UNACKED_MESSAGES.MSG_NUMBER AS MESSAGE_NUMBER " +
@@ -772,8 +772,11 @@ final class PersistentSequenceData implements SequenceData {
                 result.add(rs.getLong("MESSAGE_NUMBER"));
             }
 
+            cm.commit(con);
+
             return result;
         } catch (SQLException ex) {
+            cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to load list of unacked message registration for %s sequence with id = [ %s ]: " +
                     "An unexpected JDBC exception occured",
