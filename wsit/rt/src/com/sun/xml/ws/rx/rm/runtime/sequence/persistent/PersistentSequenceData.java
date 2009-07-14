@@ -164,7 +164,7 @@ final class PersistentSequenceData implements SequenceData {
     //
     private final ConnectionManager cm;
 
-    PersistentSequenceData(ConnectionManager cm, String endpointUid, String sequenceId, SequenceType type, String securityContextTokenId, String boundId, long expirationTime) {
+    private PersistentSequenceData(ConnectionManager cm, String endpointUid, String sequenceId, SequenceType type, String securityContextTokenId, String boundId, long expirationTime) {
         this.cm = cm;
 
         this.endpointUid = endpointUid;
@@ -488,10 +488,6 @@ final class PersistentSequenceData implements SequenceData {
 
     public long getLastMessageNumber() {
         return getFieldData(fLastMessageNumber);
-    }
-
-    public void setLastMessageNumber(long newValue) {
-        setFieldData(fLastMessageNumber, newValue);
     }
 
     public State getState() {

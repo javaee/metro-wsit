@@ -14,8 +14,6 @@ public interface SequenceData {
 
     long getLastMessageNumber();
 
-    void setLastMessageNumber(long newLastMessageNumber);
-
     boolean getAckRequestedFlag();
 
     void setAckRequestedFlag(boolean newValue);

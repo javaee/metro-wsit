@@ -94,15 +94,6 @@ final class InVmSequenceData implements SequenceData {
         }
     }
 
-    public void setLastMessageNumber(long newLastMessageNumber) {
-        try {
-            lockWrite();
-            this.lastMessageNumber = newLastMessageNumber;
-        } finally {
-            unlockWrite();
-        }
-    }
-
     public State getState() {
         return state;
     }
