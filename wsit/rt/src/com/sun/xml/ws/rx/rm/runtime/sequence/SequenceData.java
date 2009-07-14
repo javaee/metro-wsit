@@ -2,7 +2,6 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
-import java.util.Collection;
 import java.util.List;
 
 public interface SequenceData {
