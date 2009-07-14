@@ -102,7 +102,7 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
 
-        this.cm = ConnectionManager.getInstance();
+        this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
         // TODO recover();
     }
 

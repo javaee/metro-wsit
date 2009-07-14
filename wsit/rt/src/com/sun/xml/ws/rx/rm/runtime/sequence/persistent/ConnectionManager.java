@@ -41,8 +41,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 /**
  *
@@ -54,54 +52,26 @@ final class ConnectionManager {
      * Logger instance
      */
     private static final Logger LOGGER = Logger.getLogger(ConnectionManager.class);
-    /**
-     * JNDI name of the JDBC pool to be used for persisting RM data
-     */
-    private static final String RM_JDBC_POOL_NAME = "jdbc/ReliableMessagingPool";
 
-    public static ConnectionManager getInstance() {
-        return new ConnectionManager();
+    private final DataSourceProvider dataSourceProvider;
+
+    public static ConnectionManager getInstance(DataSourceProvider dataSourceProvider) {
+        return new ConnectionManager(dataSourceProvider);
     }
 
-    private static synchronized DataSource getDataSource(String jndiName) throws PersistenceException {
-        try {
-            javax.naming.InitialContext ic = new javax.naming.InitialContext();
-            Object __ds = ic.lookup(jndiName); // TODO
-            DataSource ds;
-            if (__ds instanceof DataSource) {
-                ds = DataSource.class.cast(__ds);
-            } else {
-                // TODO L10N
-                throw new PersistenceException(String.format(
-                        "Object of class '%s' bound in the JNDI under '%s' is not an instance of '%s'.",
-                        __ds.getClass().getName(),
-                        jndiName,
-                        DataSource.class.getName()));
-            }
-
-            return ds;
-        } catch (NamingException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new PersistenceException("Unable to lookup Metro reliable messaging JDBC connection pool", ex));
-        }
-    }
-    //
-    private final DataSource ds;
-
-    private ConnectionManager() {
-        this.ds = getDataSource(RM_JDBC_POOL_NAME);
+    private ConnectionManager(DataSourceProvider dataSourceProvider) {
+        this.dataSourceProvider = dataSourceProvider;
     }
 
     Connection getConnection(boolean autoCommit) throws PersistenceException {
         try {
-            Connection connection = ds.getConnection("username", "password");
+            Connection connection = dataSourceProvider.getDataSource().getConnection();
+            
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             connection.setAutoCommit(autoCommit);
-
             return connection;
         } catch (SQLException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new PersistenceException("Unable to retrieve JDBC connection to Metro reliable messaging database", ex));
+            throw LOGGER.logSevereException(new PersistenceException("Unable to setup required JDBC connection parameters", ex));
         }
 
     }
