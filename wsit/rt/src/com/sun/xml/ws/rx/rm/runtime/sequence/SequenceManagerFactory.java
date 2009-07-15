@@ -35,10 +35,10 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceManager;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -62,11 +62,11 @@ public enum SequenceManagerFactory {
      * @param managedObjectManager object manager managing the newly created {@link SequenceManager} instance
      * @return newly created {@link SequenceManager} instance
      */
-    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
+    public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
         if (persistent) {
-            return new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
+            return new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
         }
         
-        return new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, managedObjectManager);
+        return new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
     }
 }

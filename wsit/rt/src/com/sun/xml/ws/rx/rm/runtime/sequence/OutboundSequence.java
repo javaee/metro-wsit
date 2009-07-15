@@ -47,29 +47,21 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO javadoc
- * TODO make class thread-safe
+ * Outbound sequence implementation
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class OutboundSequence extends AbstractSequence {
 
     public static final long INITIAL_LAST_MESSAGE_ID = Sequence.MIN_MESSAGE_ID - 1;
     private static final Logger LOGGER = Logger.getLogger(OutboundSequence.class);
-    //
-//    private final List<Long> allUnackedMessageNumbers;
 
     public OutboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
         super(data, deliveryQueueBuilder, timeSynchronizer);
-//
-//        this.allUnackedMessageNumbers = new LinkedList<Long>();
     }
 
-//    @Override
-//    Collection<Long> getUnackedMessageNumbers() {
-//        return allUnackedMessageNumbers;
-//    }
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, AbstractSoapFaultException {
-        checkSequenceCreatedStatus("", Code.Sender); // TODO
+        this.getState().verifyAcceptingMessageRegistration(getId(), Code.Sender);
 
         if (message.getSequenceId() != null) {
             throw new IllegalArgumentException(String.format(
@@ -99,7 +91,7 @@ public final class OutboundSequence extends AbstractSequence {
     }
 
     public void acknowledgeMessageNumbers(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {
-        checkSequenceCreatedStatus("", Code.Sender); // TODO
+        this.getState().verifyAcceptingAcknowledgement(getId(), Code.Sender);
 
         if (ranges == null || ranges.isEmpty()) {
             return;

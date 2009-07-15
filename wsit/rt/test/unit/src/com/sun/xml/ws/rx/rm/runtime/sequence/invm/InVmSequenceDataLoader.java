@@ -33,20 +33,27 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceDataLoader;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class InVmSequenceDataLoader implements SequenceDataLoader {
+
     public SequenceData newInstance(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         return new InVmSequenceData(
+                new TimeSynchronizer() {
+
+                    public long currentTimeInMillis() {
+                        return System.currentTimeMillis();
+                    }
+                },
                 sequenceId,
                 securityContextTokenId,
                 expirationTime,

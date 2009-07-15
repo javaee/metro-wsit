@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -155,10 +154,6 @@ public abstract class AbstractSequence implements Sequence {
         return data.getLastActivityTime();
     }
 
-    public void updateLastActivityTime() {
-        data.setLastActivityTime(timeSynchronizer.currentTimeInMillis());
-    }
-
     public boolean isStandaloneAcknowledgementRequestSchedulable(long delayPeriod) {
         return timeSynchronizer.currentTimeInMillis() - data.getLastAcknowledgementRequestTime() > delayPeriod && hasUnacknowledgedMessages();
     }
@@ -186,16 +181,6 @@ public abstract class AbstractSequence implements Sequence {
 
     public DeliveryQueue getDeliveryQueue() {
         return deliveryQueue;
-    }
-
-    protected final void checkSequenceCreatedStatus(String message, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-        switch (getState()) {
-            case CLOSING:
-            case CLOSED:
-                throw new SequenceClosedException(message);
-            case TERMINATING:
-                throw new SequenceTerminatedException(message, code);
-        }
     }
 
     @Override

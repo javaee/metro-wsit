@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
@@ -86,16 +87,21 @@ public final class InVmSequenceManager implements SequenceManager {
      * Unique identifier of the WS endpoint for which this particular sequence manager will be used
      */
     private final String uniqueEndpointId;
+    /**
+     * Inactivity timeout for a sequence
+     */
+    private final long sequenceInactivityTimeout;
 
-    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, ManagedObjectManager managedObjectManager) {
-        this.managedObjectManager = managedObjectManager;
-        if (this.managedObjectManager != null) {
-            this.managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
-        }
-
+    public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
+
+        this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
+        this.managedObjectManager = configuration.getManagedObjectManager();
+        if (this.managedObjectManager != null) {
+            this.managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
+        }
     }
 
     /**
@@ -142,7 +148,7 @@ public final class InVmSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
         return registerSequence(new OutboundSequence(data, this.outboundQueueBuilder, this));
     }
 
@@ -150,7 +156,7 @@ public final class InVmSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InVmSequenceData(sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
         return registerSequence(new InboundSequence(data, this.inboundQueueBuilder, this));
     }
 
@@ -177,7 +183,16 @@ public final class InVmSequenceManager implements SequenceManager {
         try {
             dataLock.readLock().lock();
             if (sequences.containsKey(sequenceId)) {
-                return sequences.get(sequenceId);
+                Sequence sequence = sequences.get(sequenceId);
+
+                if (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis()) {
+                    // TODO this should be handled by a maintenace task running in a separate thread
+                    dataLock.readLock().unlock();
+                    terminateSequence(sequenceId);
+                    dataLock.readLock().lock();
+                }
+
+                return sequence;
             } else {
                 throw new UnknownSequenceException(sequenceId);
             }

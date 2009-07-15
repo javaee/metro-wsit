@@ -3,6 +3,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -36,12 +37,16 @@ final class InVmSequenceData implements SequenceData {
     private final Map<String, ApplicationMessage> weakMessageStorage;
     private final Map<Long, String> weakUnackedNumberToCorrelationIdMap;
 
-    public InVmSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId, long lastActivityTime) {
-        this(sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, lastActivityTime, 0L);
+    private final TimeSynchronizer timeSynchronizer;
+
+    public InVmSequenceData(TimeSynchronizer timeSynchronizer, String sequenceId, String securityContextTokenId, long expirationTime, long lastMessageId, long lastActivityTime) {
+        this(timeSynchronizer, sequenceId, securityContextTokenId, expirationTime, State.CREATED, false, lastMessageId, lastActivityTime, 0L);
     }
 
-    public InVmSequenceData(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
+    public InVmSequenceData(TimeSynchronizer timeSynchronizer, String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         super();
+
+        this.timeSynchronizer = timeSynchronizer;
 
         this.sequenceId = sequenceId;
         this.boundSecurityTokenReferenceId = securityContextTokenId;
@@ -99,6 +104,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public void setState(State newState) {
+        updateLastActivityTime();
+
         state = newState;
     }
 
@@ -107,6 +114,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public void setAckRequestedFlag(boolean newValue) {
+        updateLastActivityTime();
+
         ackRequestedFlag = newValue;
     }
 
@@ -115,6 +124,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public void setLastAcknowledgementRequestTime(long newTime) {
+        updateLastActivityTime();
+
         lastAcknowledgementRequestTime = newTime;
     }
 
@@ -122,8 +133,8 @@ final class InVmSequenceData implements SequenceData {
         return lastActivityTime;
     }
 
-    public void setLastActivityTime(long newTime) {
-        lastActivityTime = newTime;
+    private void updateLastActivityTime() {
+        lastActivityTime = timeSynchronizer.currentTimeInMillis();
     }
 
     public long getExpirationTime() {
@@ -131,6 +142,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public final void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
+         updateLastActivityTime();
+
         try {
             lockWrite();
             // NOTE this must be a new String object
@@ -149,6 +162,8 @@ final class InVmSequenceData implements SequenceData {
      * {@inheritDoc}
      */
     public long incrementAndGetLastMessageNumber(boolean received) {
+        updateLastActivityTime();
+
         try {
             dataLock.writeLock().lock();
 
@@ -163,6 +178,8 @@ final class InVmSequenceData implements SequenceData {
      * {@inheritDoc}
      */
     public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
+        updateLastActivityTime();
+
         try {
             lockWrite();
 
@@ -199,6 +216,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public void markAsAcknowledged(long messageNumber) {
+        updateLastActivityTime();
+
         try {
             lockWrite();
             receivedUnackedMessageNumbers.remove(messageNumber);
@@ -209,6 +228,8 @@ final class InVmSequenceData implements SequenceData {
     }
 
     public ApplicationMessage retrieveMessage(String correlationId) {
+        updateLastActivityTime();
+
         try {
             lockRead();
             return weakMessageStorage.get(correlationId);

@@ -37,40 +37,27 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.util.List;
 
 /**
- * Inbound sequence optimized for low memory footprint, fast message acknowledgement and ack range calculation optimized 
- * for standard scenario (no lost messages). This class is not reentrant.
- * 
- * TODO make class thread-safe
- * 
+ * Inbound sequence implementation
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class InboundSequence extends AbstractSequence {
-    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.UNSPECIFIED_MESSAGE_ID;
 
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
-    //
-//    private final Set<Long> allUnackedMessageNumbers;
-//    private final Set<Long> receivedUnackedMessageNumbers;
+    public static final long INITIAL_LAST_MESSAGE_ID = Sequence.UNSPECIFIED_MESSAGE_ID;
 
     public InboundSequence(SequenceData data, DeliveryQueueBuilder deliveryQueueBuilder, TimeSynchronizer timeSynchronizer) {
-        // super(sequenceId, securityContextTokenId, expirationTime, Sequence.UNSPECIFIED_MESSAGE_ID, deliveryQueueBuilder);
         super(data, deliveryQueueBuilder, timeSynchronizer);
-//
-//        this.allUnackedMessageNumbers = new TreeSet<Long>();
-//        this.receivedUnackedMessageNumbers = new HashSet<Long>();
     }
 
     public void registerMessage(ApplicationMessage message, boolean storeMessageFlag) throws DuplicateMessageRegistrationException, IllegalStateException {
-        checkSequenceCreatedStatus(
-                    "Cannot register message: This sequence is not in ready to accept messages.",
-                    Code.Receiver); // TODO P2 message
+        this.getState().verifyAcceptingMessageRegistration(getId(), Code.Receiver);
 
         if (!this.getId().equals(message.getSequenceId())) {
             // TODO L10N
@@ -87,18 +74,12 @@ public final class InboundSequence extends AbstractSequence {
         }
     }
 
-//    @Override
-//    Collection<Long> getUnackedMessageNumbers() {
-//        return allUnackedMessageNumbers;
-//    }
-
     public void acknowledgeMessageNumbers(List<AckRange> ranges) {
-        // TODO L10N
         throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
     }
 
     public void acknowledgeMessageNumber(long messageId) throws IllegalStateException {
-        checkSequenceCreatedStatus(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(getId(), getState()), Code.Receiver);
+        this.getState().verifyAcceptingAcknowledgement(getId(), Code.Receiver);
 
         data.markAsAcknowledged(messageId);
 

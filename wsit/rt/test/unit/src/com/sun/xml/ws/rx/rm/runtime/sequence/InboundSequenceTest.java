@@ -52,7 +52,7 @@ public class InboundSequenceTest extends TestCase {
             "1234567890",
             SequenceTestUtils.getDeliveryQueueBuilder(),
             SequenceTestUtils.getDeliveryQueueBuilder(),
-            null);
+            SequenceTestUtils.getConfiguration());
     private Sequence sequence;
     
     public InboundSequenceTest(String testName) {

@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Map;
 import java.util.UUID;
@@ -92,8 +93,8 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final String uniqueEndpointId;
 
-    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final ManagedObjectManager managedObjectManager) {
-        this.managedObjectManager = managedObjectManager;
+    public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration) {
+        this.managedObjectManager = configuration.getManagedObjectManager();
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }

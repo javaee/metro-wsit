@@ -119,9 +119,13 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        builder.version(RmVersion.WSRM200502)
-                .sequenceInactivityTimeout(inactivityTimeout)
-                .messageRetransmissionInterval(retransmittionInterval);
+        builder.version(RmVersion.WSRM200502);
+        if (inactivityTimeout != ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT) { // prevents overwriting values set by other assertions
+            builder.sequenceInactivityTimeout(inactivityTimeout);
+        }
+        if (inactivityTimeout != ReliableMessagingFeature.DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL) { // prevents overwriting values set by other assertions
+            builder.messageRetransmissionInterval(retransmittionInterval);
+        }
 
         if (useExponentialBackoffAlgorithm) {
             builder.retransmissionBackoffAlgorithm(BackoffAlgorithm.EXPONENTIAL);

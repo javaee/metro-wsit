@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
@@ -58,15 +59,15 @@ import org.glassfish.gmbal.ManagedObjectManager;
 final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
-    static final DeliveryQueueBuilder getDeliveryQueueBuilder() {
-        RmConfiguration config = new RmConfiguration() {
+    static final RmConfiguration getConfiguration() {
+        return new RmConfiguration() {
 
             public boolean isReliableMessagingEnabled() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return true;
             }
 
             public boolean isMakeConnectionSupportEnabled() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return false;
             }
 
             public RmVersion getRmVersion() {
@@ -74,7 +75,7 @@ final class SequenceTestUtils  {
             }
 
             public McVersion getMcVersion() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return null;
             }
 
             public SOAPVersion getSoapVersion() {
@@ -90,15 +91,15 @@ final class SequenceTestUtils  {
             }
 
             public long getSequenceInactivityTimeout() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
             }
 
             public SecurityBinding getSecurityBinding() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.SecurityBinding.getDefault();
             }
 
             public DeliveryAssurance getDeliveryAssurance() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DeliveryAssurance.getDefault();
             }
 
             public boolean isOrderedDeliveryEnabled() {
@@ -106,35 +107,39 @@ final class SequenceTestUtils  {
             }
 
             public long getDestinationBufferQuota() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DEFAULT_DESTINATION_BUFFER_QUOTA;
             }
 
             public long getMessageRetransmissionInterval() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL;
             }
 
             public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.BackoffAlgorithm.getDefault();
             }
 
             public long getAcknowledgementRequestInterval() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DEFAULT_ACK_REQUESTED_INTERVAL;
             }
 
             public long getCloseSequenceOperationTimeout() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return ReliableMessagingFeature.DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
             }
 
             public ManagedObjectManager getManagedObjectManager() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return null;
             }
 
             public boolean isPersistenceEnabled() {
                 return false;
             }
         };
+    }
 
-        return DeliveryQueueBuilder.getBuilder(config, PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
+    static final DeliveryQueueBuilder getDeliveryQueueBuilder() {
+
+
+        return DeliveryQueueBuilder.getBuilder(getConfiguration(), PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
 
             public void deliver(ApplicationMessage message) {
             }

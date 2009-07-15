@@ -22,10 +22,25 @@ public interface SequenceData {
 
     void setLastAcknowledgementRequestTime(long newTime);
 
+    /**
+     * Provides information on the last activity time of this sequence data instance. Following is the
+     * list of operations invocation of which causes an update of last activity time:
+     * 
+     * <ul>
+     *   <li>{@link #attachMessageToUnackedMessageNumber(ApplicationMessage) }</li>
+     *   <li>{@link #incrementAndGetLastMessageNumber(boolean) }</li>
+     *   <li>{@link #markAsAcknowledged(long) }</li>
+     *   <li>{@link #registerUnackedMessageNumber(long, boolean) }</li>
+     *   <li>{@link #retrieveMessage(java.lang.String) }</li>
+     *   <li>{@link #setAckRequestedFlag(boolean) }</li>
+     *   <li>{@link #setLastAcknowledgementRequestTime(long) }</li>
+     *   <li>{@link #setState(com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State) }</li>
+     * </ul>
+     *
+     * @return last activity time of the sequence
+     */
     long getLastActivityTime();
 
-    void setLastActivityTime(long newTime);
-    
     State getState();
 
     void setState(State newState);

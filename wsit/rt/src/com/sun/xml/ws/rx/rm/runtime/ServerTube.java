@@ -139,7 +139,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 context.getEndpoint().getServiceName() + "::" + context.getEndpoint().getPortName(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
-                configuration.getManagedObjectManager());
+                configuration);
 
         this.rc.setSequenceManager(sequenceManager);
         rc.startRedeliveryTask();

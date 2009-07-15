@@ -51,7 +51,7 @@ public class OutboundSequenceTest extends TestCase {
             "0987654321",
             SequenceTestUtils.getDeliveryQueueBuilder(),
             SequenceTestUtils.getDeliveryQueueBuilder(),
-            null);
+            SequenceTestUtils.getConfiguration());
     private Sequence sequence;
 
     public OutboundSequenceTest(String testName) {

@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueue;
 import java.util.Collections;
@@ -63,10 +64,54 @@ public interface Sequence {
     public static enum State {
         // CREATING(10) not needed
 
-        CREATED(15),
-        CLOSING(20),
-        CLOSED(25),
-        TERMINATING(30);
+        CREATED(15) {
+
+            @Override
+            void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                // do nothing
+            }
+
+            @Override
+            void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                // do nothing
+            }
+        },
+        CLOSING(20) {
+
+            @Override
+            void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceClosedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
+            }
+
+            @Override
+            void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceClosedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
+            }
+        },
+        CLOSED(25) {
+
+            @Override
+            void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceClosedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
+            }
+
+            @Override
+            void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceClosedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
+            }
+        },
+        TERMINATING(30) {
+
+            @Override
+            void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceTerminatedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this), code);
+            }
+
+            @Override
+            void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
+                throw new SequenceTerminatedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this), code);
+            }
+        };
         private int value;
 
         private State(int value) {
@@ -86,6 +131,9 @@ public interface Sequence {
 
             return null;
         }
+
+        abstract void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code);
+        abstract void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code);
     }
 
     public static enum IncompleteSequenceBehavior {
@@ -335,9 +383,18 @@ public interface Sequence {
     public boolean isExpired();
 
     /**
-     * Provides information on the last activity time of this sequence
-     *
-     * TODO: implement automatic updating of sequence last activity time
+     * Provides information on the last activity time of this sequence. Following is the
+     * list of operations invocation of which causes an update of last activity time:
+     * <ul>
+     *   <li>{@link #acknowledgeMessageNumber(long)  }</li>
+     *   <li>{@link #acknowledgeMessageNumbers(java.util.List)  }</li>
+     *   <li>{@link #clearAckRequestedFlag() }</li>
+     *   <li>{@link #close() }</li>
+     *   <li>{@link #registerMessage(ApplicationMessage, boolean) }</li>
+     *   <li>{@link #retrieveMessage(java.lang.String)  }</li>
+     *   <li>{@link #setAckRequestedFlag() }</li>
+     *   <li>{@link #updateLastAcknowledgementRequestTime() }</li>
+     * </ul>
      *
      * @return last activity time on the sequence in milliseconds
      */

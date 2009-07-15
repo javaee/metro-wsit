@@ -84,10 +84,10 @@ import java.util.logging.Level;
  */
 final class ClientTube extends AbstractFilterTubeImpl {
 
-    private static final class VolatileHolder<V> {
+    private static final class VolatileReference<V> {
         public volatile V value;
 
-        public VolatileHolder(V value) {
+        public VolatileReference(V value) {
             this.value = value;
         }
     }
@@ -98,7 +98,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private final RuntimeContext rc;
     private final WSEndpointReference rmSourceReference;
     //
-    private volatile VolatileHolder<String> outboundSequenceId;
+    private volatile VolatileReference<String> outboundSequenceId;
 
     ClientTube(ClientTube original, TubeCloner cloner) {
         super(original, cloner);
@@ -111,7 +111,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     ClientTube(RmConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
         super(tubelineHead); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
 
-        this.outboundSequenceId = new VolatileHolder<String>(null);
+        this.outboundSequenceId = new VolatileReference<String>(null);
 
         SecureConversationInitiator scInitiator = context.getImplementation(SecureConversationInitiator.class);
         if (scInitiator == null) {
@@ -148,7 +148,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 context.getAddress().getURI().toString(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
-                rc.configuration.getManagedObjectManager());
+                rc.configuration);
         rc.setSequenceManager(sequenceManager);
 
         // TODO P3 we should also take into account addressable clients
