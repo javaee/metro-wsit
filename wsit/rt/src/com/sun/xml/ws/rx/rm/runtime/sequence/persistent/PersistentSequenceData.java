@@ -191,7 +191,7 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "INSERT INTO RM.RM_SEQUENCES " +
+            ps = cm.prepareStatement(con, "INSERT INTO RM_SEQUENCES " +
                     "(ENDPOINT_UID, ID, TYPE, EXP_TIME, STR_ID, STATUS, ACK_REQUESTED_FLAG, LAST_MESSAGE_NUMBER, LAST_ACTIVITY_TIME, LAST_ACK_REQUEST_TIME) " +
                     "VALUES " +
                     "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

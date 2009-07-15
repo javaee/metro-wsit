@@ -46,6 +46,12 @@ import com.sun.xml.ws.rx.util.TimeSynchronizer;
  */
 public class InVmSequenceDataLoader implements SequenceDataLoader {
 
+    public void setUp() {
+    }
+
+    public void tearDown() {
+    }
+
     public SequenceData newInstance(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         return new InVmSequenceData(
                 new TimeSynchronizer() {

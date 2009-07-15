@@ -79,7 +79,7 @@ final class ConnectionManager {
     PreparedStatement prepareStatement(Connection sqlConnection, String sqlStatement) throws SQLException {
         LOGGER.finer(String.format("Preparing SQL statement:\n%s", sqlStatement));
 
-        return sqlConnection.prepareStatement(sqlStatement);
+        return sqlConnection.prepareStatement(sqlStatement, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
     }
 
     void recycle(ResultSet... resources) {
