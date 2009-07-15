@@ -52,8 +52,6 @@ import org.w3c.dom.Element;
 
 import javax.xml.stream.XMLStreamReader;
 
-import com.sun.xml.wss.saml.Assertion;
-import com.sun.xml.wss.saml.AssertionUtil;
 import com.sun.xml.wss.saml.*;
 import com.sun.xml.wss.saml.util.SAMLUtil;
 
@@ -142,7 +140,7 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
         String tokenName = token.getLocalName();
         if ("UsernameToken".equals(tokenName)){
             // an UsernameToken: get the user name
-            name = token.getElementsByTagName("Username").item(0).getFirstChild().getNodeValue();
+            name = token.getElementsByTagNameNS("*", "Username").item(0).getFirstChild().getNodeValue();
         } else if ("Assertion".equals(tokenName)){
             // an SAML assertion
             Assertion assertion = AssertionUtil.fromElement(token);
@@ -198,11 +196,11 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
                     nameNS = nameIdentifier.getNameQualifier();
                 }
             }
-
-            String idName = isActAs ? "ActAs" : NAME_IDENTIFIER;
-            List<String> nameIds = new ArrayList<String>();
-            nameIds.add(name);
-            attrs.put(new QName(nameNS, idName), nameIds);
         }
+
+        String idName = isActAs ? "ActAs" : NAME_IDENTIFIER;
+        List<String> nameIds = new ArrayList<String>();
+        nameIds.add(name);
+        attrs.put(new QName(nameNS, idName), nameIds);
     }
 }

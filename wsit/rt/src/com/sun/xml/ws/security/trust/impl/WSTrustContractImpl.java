@@ -73,18 +73,26 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+
+import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.callback.EncryptionKeyCallback;
 import com.sun.xml.wss.impl.callback.SignatureKeyCallback;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
+
+import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedData;
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
+import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
+
 import java.io.IOException;
 import java.net.URI;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivateKey;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -92,22 +100,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.security.auth.Subject;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.xml.namespace.QName;
-import org.w3c.dom.Element;
-
-import com.sun.xml.wss.SecurityEnvironment;
-import javax.crypto.spec.SecretKeySpec;
-import org.w3c.dom.Document;
-
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedData;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
-import java.util.ArrayList;
 import java.util.UUID;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.Subject;
+import javax.xml.namespace.QName;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -132,7 +134,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
     public void init(final STSConfiguration stsConfig) {
         this.stsConfig = stsConfig;
         this.wstVer = (WSTrustVersion)stsConfig.getOtherOptions().get(WSTrustConstants.WST_VERSION);
-        eleFac = WSTrustElementFactory.newInstance(wstVer);
+        this.eleFac = WSTrustElementFactory.newInstance(wstVer);
     }
 
     public BaseSTSResponse issue(BaseSTSRequest request, IssuedTokenContext context) throws WSTrustException {
@@ -207,7 +209,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         context.setTokenType(tokenType);
         
         // Get KeyType
-       String keyType = null;
+        String keyType = null;
         URI keyTypeURI = rst.getKeyType();
         if (keyTypeURI == null && secParas != null){
             keyTypeURI = secParas.getKeyType();
@@ -221,7 +223,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             keyType = wstVer.getSymmetricKeyTypeURI();
         }
         context.setKeyType(keyType);
-        
+
+        // Get crypto algorithms
         String encryptionAlgorithm = null;
         URI encryptionAlgorithmURI = rst.getEncryptionAlgorithm();
         if(encryptionAlgorithmURI == null && secParas != null){
@@ -296,8 +299,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             claims = eleFac.createClaims();
         }
         
-        // Get the OnBehalfOf token and put it in the Subject public credentails
-        // ToDo: to identify the OBO token properly
+        // Handle OnBehalfOf token
         OnBehalfOf obo = rst.getOnBehalfOf();
         if (obo != null){
             Object oboToken = obo.getAny();
@@ -315,6 +317,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 }
             }
         }
+        
         // Handle ActAs token
         ActAs actAs = rst.getActAs();
         if (actAs != null){
@@ -323,7 +326,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 // set ActAs attribute
                 claims.getOtherAttributes().put(new QName("ActAs"), "true");
 
-                // Create a Subject with act as credential and put it in claims
+                // Create a Subject with ActAs credential and put it in claims
                 Subject actAsSubj = new Subject();
                 actAsSubj.getPublicCredentials().add(eleFac.toElement(actAsToken));
                 claims.getSupportingProperties().add(actAsSubj);

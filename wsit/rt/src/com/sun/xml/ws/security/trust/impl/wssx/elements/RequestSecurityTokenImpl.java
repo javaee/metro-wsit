@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.10 2009-07-01 00:27:55 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.11 2009-07-15 18:19:10 jdg6688 Exp $
  */
 
 /*
@@ -56,6 +56,7 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.ws.security.trust.elements.*;
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -354,7 +355,7 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
         Element actAsElement = doc.createElementNS(WSTrustVersion.WS_TRUST_13_NS_URI, "wst:ActAs");
         actAsElement.setAttribute("xmlns:wst", WSTrustVersion.WS_TRUST_13_NS_URI);
         doc.appendChild(actAsElement);
-        actAsElement.appendChild(doc.importNode((Element)actAs.getAny(), true));
+        actAsElement.appendChild(doc.importNode(WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_13).toElement(actAs.getAny()), true));
         getAny().add(actAsElement);
     }
 

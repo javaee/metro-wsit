@@ -194,30 +194,19 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     }
 
     public void setOBOToken(String username, String password){
-        ObjectFactory fact = new ObjectFactory();
-        UsernameTokenType ut = fact.createUsernameTokenType();
-        AttributedString un = fact.createAttributedString();
-        un.setValue(username);
-        AttributedString pwd = fact.createAttributedString();
-        pwd.setValue(password);
-        ut.setUsername(un);
-        ut.setPassword(pwd);
-
-        this.oboToken = new GenericToken(fact.createUsernameToken(ut));
+        this.oboToken = createUsernameToken(username, password);
     }
 
     public void setOBOToken(X509Certificate cert){
-        ObjectFactory fact = new ObjectFactory();
-        BinarySecurityTokenType bst = fact.createBinarySecurityTokenType();
-        bst.setValueType(MessageConstants.X509v3_NS);
-        bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
-        try{
-            bst.setValue(cert.getEncoded());
-        }catch(CertificateEncodingException ex){
-            throw new RuntimeException(ex);
-        }
+        this.oboToken = this.createBinaryTokenForCertificate(cert);
+    }
 
-        this.oboToken = new GenericToken(fact.createBinarySecurityToken(bst));
+    public void setActAsToken(String username, String password){
+        this.getOtherOptions().put(STSIssuedTokenConfiguration.ACT_AS, this.createUsernameToken(username, password));
+    }
+
+    public void setActAsToken(X509Certificate cert){
+        this.getOtherOptions().put(STSIssuedTokenConfiguration.ACT_AS, this.createBinaryTokenForCertificate(cert));
     }
     
     public String getTokenType(){
@@ -480,6 +469,33 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         if (config.getOtherOptions().containsKey(ISSUED_TOKEN)){
             this.getOtherOptions().remove(ISSUED_TOKEN);
         }
+    }
+
+    private Token createUsernameToken(String username, String password){
+        ObjectFactory fact = new ObjectFactory();
+        UsernameTokenType ut = fact.createUsernameTokenType();
+        AttributedString un = fact.createAttributedString();
+        un.setValue(username);
+        AttributedString pwd = fact.createAttributedString();
+        pwd.setValue(password);
+        ut.setUsername(un);
+        ut.setPassword(pwd);
+
+        return new GenericToken(fact.createUsernameToken(ut));
+    }
+
+    private Token createBinaryTokenForCertificate(X509Certificate cert){
+        ObjectFactory fact = new ObjectFactory();
+        BinarySecurityTokenType bst = fact.createBinarySecurityTokenType();
+        bst.setValueType(MessageConstants.X509v3_NS);
+        bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+        try{
+            bst.setValue(cert.getEncoded());
+        }catch(CertificateEncodingException ex){
+            throw new RuntimeException(ex);
+        }
+
+        return new GenericToken(fact.createBinarySecurityToken(bst));
     }
 }
 
