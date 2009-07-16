@@ -87,6 +87,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -167,8 +168,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
                 }
             }
-
+            Properties props = new Properties();
             WSBindingProvider bpr = wsitContext.getWrappedContext().getBindingProvider();
+            props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
+            props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel());
             WSEndpointReference epr = bpr.getWSEndpointReference();
             if (epr != null) {
                 WSEndpointReference.EPRExtension idExtn = null;
@@ -178,14 +181,21 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     idExtn = epr.getEPRExtension(ID_QNAME);
                     if (idExtn != null) {
                         xmlReader = idExtn.readAsXMLStreamReader();
-                        byte[] bstValue = digestBST(xmlReader);
-                        serverCert = constructCertificate(bstValue);
+                        CertificateRetriever cr = new CertificateRetriever();
+                        byte[] bstValue = cr.digestBST(xmlReader);
+                        X509Certificate certificate = cr.constructCertificate(bstValue);
+                        boolean valid = cr.validateCertificate(certificate, props);
+                        if (!valid) {
+                            throw new RuntimeException("certificate is not valid");
+                        }
+                        props.put(PipeConstants.SERVER_CERT, certificate);
                     }
                 } catch (XMLStreamException ex) {
-                    Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+                    log.log(Level.SEVERE, null, ex);
+                    throw new RuntimeException(ex);
                 }
             }
-            Properties props = new Properties();
+            
             CallbackHandler handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         } catch (Exception e) {
@@ -763,45 +773,5 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
     }
 
-    //TODO: copy from ClientSecurityTube. Move to common class
-    private X509Certificate constructCertificate(byte[] bstValue) {
-        try {
-            X509Certificate cert = null;
-            CertificateFactory fact = CertificateFactory.getInstance("X.509");
-            cert = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(bstValue));
-            return cert;
-        } catch (CertificateException ex) {
-            Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private byte[] digestBST(XMLStreamReader reader) throws XMLStreamException {
-        byte[] bstValue = null;
-
-        while (reader.getEventType() != XMLStreamReader.CHARACTERS && reader.getEventType() != reader.END_ELEMENT) {
-            reader.next();
-        }
-        if (reader.getEventType() == XMLStreamReader.CHARACTERS) {
-
-            if (reader instanceof XMLStreamReaderEx) {
-                CharSequence data = ((XMLStreamReaderEx) reader).getPCDATA();
-                if (data instanceof Base64Data) {
-                    Base64Data binaryData = (Base64Data) data;
-                    bstValue = binaryData.getExact();
-
-                }
-            }
-            try {
-                bstValue = Base64.decode(StreamUtil.getCV(reader));
-
-
-            } catch (Base64DecodingException ex) {
-                Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (XMLStreamException ex) {
-                Logger.getLogger(ClientSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return bstValue;
-    }
+   
 }

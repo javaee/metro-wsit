@@ -66,32 +66,34 @@ public class ServerPipeCreator extends ServerPipelineHook {
     public Pipe createSecurityPipe(PolicyMap map, SEIModel sei,
             WSDLPort port, WSEndpoint owner, Pipe tail) {
 
-	HashMap<Object, Object> props = new HashMap<Object, Object>();
+        HashMap<Object, Object> props = new HashMap<Object, Object>();
 
         boolean httpBinding = BindingID.XML_HTTP.equals(owner.getBinding().getBindingId());
-	props.put(PipeConstants.POLICY,map);
-	props.put(PipeConstants.SEI_MODEL,sei);
-	props.put(PipeConstants.WSDL_MODEL,port);
-	props.put(PipeConstants.ENDPOINT,owner);
-	props.put(PipeConstants.NEXT_PIPE,tail);
+        props.put(PipeConstants.POLICY, map);
+        props.put(PipeConstants.SEI_MODEL, sei);
+        props.put(PipeConstants.WSDL_MODEL, port);
+        props.put(PipeConstants.ENDPOINT, owner);
+        props.put(PipeConstants.NEXT_PIPE, tail);
         props.put(PipeConstants.CONTAINER, owner.getContainer());
         return new ServerSecurityPipe(props, tail, httpBinding);
-    }    
+    }
    
     @Override
-    public @NotNull Tube createSecurityTube(ServerTubelineAssemblyContext context) {
+    public 
+    @NotNull
+    Tube createSecurityTube(ServerTubelineAssemblyContext context) {
 
         HashMap<Object, Object> props = new HashMap<Object, Object>();
         boolean httpBinding = BindingID.XML_HTTP.equals(context.getEndpoint().getBinding().getBindingId());
-	props.put(PipeConstants.POLICY, context.getPolicyMap());
-	props.put(PipeConstants.SEI_MODEL,context.getSEIModel());
-	props.put(PipeConstants.WSDL_MODEL,context.getWsdlPort());
-	props.put(PipeConstants.ENDPOINT,context.getEndpoint());
-//	props.put(PipeConstants.NEXT_PIPE,context.getAdaptedTubelineHead());
-        props.put(PipeConstants.NEXT_TUBE,context.getTubelineHead());
+        props.put(PipeConstants.POLICY, context.getPolicyMap());
+        props.put(PipeConstants.SEI_MODEL, context.getSEIModel());
+        props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
+        props.put(PipeConstants.ENDPOINT, context.getEndpoint());
+        //props.put(PipeConstants.NEXT_PIPE,context.getAdaptedTubelineHead());
+        props.put(PipeConstants.NEXT_TUBE, context.getTubelineHead());
         props.put(PipeConstants.CONTAINER, context.getEndpoint().getContainer());
         //TODO: Convert GF security pipes to TUBE(s).
-        ServerSecurityTube serverTube = new ServerSecurityTube(props, context.getTubelineHead(),httpBinding);
+        ServerSecurityTube serverTube = new ServerSecurityTube(props, context.getTubelineHead(), httpBinding);
         return serverTube;
-    } 
+    }
 }
