@@ -72,15 +72,10 @@ public final class DeliveryQueueBuilder {
     }
 
     public DeliveryQueue build() {
-        //        ReliableMessagingFeature.DeliveryAssurance da = rc.configuration.getDeliveryAssurance();
-        //        boolean ordering = rc.configuration.isOrderedDeliveryEnabled();
-
-        // TODO P1 implement
-
         if (configuration.isOrderedDeliveryEnabled()) {
             return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, configuration.getDestinationBufferQuota());
         } else {
-            return new SimpleDeliveryQueue(postman, deliveryCallback, sequence);
+            return new SimpleDeliveryQueue(postman, deliveryCallback);
         }
     }
 }

@@ -51,7 +51,7 @@ public class SequenceDataTest extends TestCase {
     //
     private static final Sequence.State INITIAL_STATE = Sequence.State.CREATED;
     private static final boolean INITIAL_ACK_REQUESTED_FLAG = false;
-    private static final long INITIAL_LAST_MESSAGE_ID = 10;
+    private static final long INITIAL_LAST_MESSAGE_NUMBER = 10;
     private static final long INITIAL_LAST_ACTIVITY_TIME = 0;
     private static final long INITIAL_LAST_ACKNOWLEDGEMENT_REQUEST_TIME = 0;
     //
@@ -83,7 +83,7 @@ public class SequenceDataTest extends TestCase {
                     EXPECTED_EXPIRY_TIME,
                     INITIAL_STATE,
                     INITIAL_ACK_REQUESTED_FLAG,
-                    INITIAL_LAST_MESSAGE_ID,
+                    INITIAL_LAST_MESSAGE_NUMBER,
                     INITIAL_LAST_ACTIVITY_TIME,
                     INITIAL_LAST_ACKNOWLEDGEMENT_REQUEST_TIME);
         }
@@ -123,97 +123,100 @@ public class SequenceDataTest extends TestCase {
         }
     }
 
-//
-//    /**
-//     * Test of getLastMessageNumber method, of class SequenceData.
-//     */
-//    public void testGetLastMessageNumber() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_LAST_MESSAGE_ID, instance.getLastMessageNumber());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getAckRequestedFlag method, of class SequenceData.
-//     */
-//    public void testGetAckRequestedFlag() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_ACK_REQUESTED_FLAG, instance.getAckRequestedFlag());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of setAckRequestedFlag method, of class SequenceData.
-//     */
-//    public void testSetAckRequestedFlag() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getLastAcknowledgementRequestTime method, of class SequenceData.
-//     */
-//    public void testGetLastAcknowledgementRequestTime() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_LAST_ACKNOWLEDGEMENT_REQUEST_TIME, instance.getLastAcknowledgementRequestTime());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of setLastAcknowledgementRequestTime method, of class SequenceData.
-//     */
-//    public void testSetLastAcknowledgementRequestTime() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getLastActivityTime method, of class SequenceData.
-//     */
-//    public void testGetLastActivityTime() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_LAST_ACTIVITY_TIME, instance.getLastActivityTime());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of setLastActivityTime method, of class SequenceData.
-//     */
-//    public void testSetLastActivityTime() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getState method, of class SequenceData.
-//     */
-//    public void testGetState() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_STATE, instance.getState());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of setState method, of class SequenceData.
-//     */
-//    public void testSetState() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of incrementAndGetLastMessageNumber method, of class SequenceData.
-//     */
-//    public void testIncrementAndGetLastMessageNumber() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
+
+    /**
+     * Test of get/setAckRequestedFlag method, of class SequenceData.
+     */
+    public void testGetAndSetAckRequestedFlag() {
+        for (SequenceData instance : instances) {
+            assertEquals(INITIAL_ACK_REQUESTED_FLAG, instance.getAckRequestedFlag());
+
+            instance.setAckRequestedFlag(!INITIAL_ACK_REQUESTED_FLAG);
+            assertEquals(!INITIAL_ACK_REQUESTED_FLAG, instance.getAckRequestedFlag());
+        }
+    }
+
+    /**
+     * Test of get/setLastAcknowledgementRequestTime method, of class SequenceData.
+     */
+    public void testGetAndSetLastAcknowledgementRequestTime() {
+        final long expectedNewValue = System.currentTimeMillis();
+
+        for (SequenceData instance : instances) {
+            assertEquals(INITIAL_LAST_ACKNOWLEDGEMENT_REQUEST_TIME, instance.getLastAcknowledgementRequestTime());
+
+            instance.setLastAcknowledgementRequestTime(expectedNewValue);
+            assertEquals(expectedNewValue, instance.getLastAcknowledgementRequestTime());
+        }
+    }
+
+    /**
+     * Test of getState method, of class SequenceData.
+     */
+    public void testGetAndSetState() {
+        for (SequenceData instance : instances) {
+            assertEquals(INITIAL_STATE, instance.getState());
+
+            Sequence.State state;
+
+            state = Sequence.State.CREATED;
+            instance.setState(state);
+            assertEquals(state, instance.getState());
+
+            state = Sequence.State.CLOSING;
+            instance.setState(state);
+            assertEquals(state, instance.getState());
+
+            state = Sequence.State.CLOSED;
+            instance.setState(state);
+            assertEquals(state, instance.getState());
+
+            state = Sequence.State.TERMINATING;
+            instance.setState(state);
+            assertEquals(state, instance.getState());
+        }
+    }
+
+    /**
+     * Test of getLastMessageNumber and incrementAndGetLastMessageNumber method, of class SequenceData.
+     */
+    public void testIncrementAndGetLastMessageNumber() throws DuplicateMessageRegistrationException {
+        for (SequenceData instance : instances) {
+            long expectedLastMessageNumber = INITIAL_LAST_MESSAGE_NUMBER;
+
+            assertEquals(INITIAL_LAST_MESSAGE_NUMBER, instance.getLastMessageNumber());
+
+            long newLastMessageNumber;
+
+            newLastMessageNumber = instance.incrementAndGetLastMessageNumber(false);
+            expectedLastMessageNumber++;
+            assertEquals(newLastMessageNumber, instance.getLastMessageNumber());
+            assertEquals(expectedLastMessageNumber, newLastMessageNumber);
+
+            newLastMessageNumber = instance.incrementAndGetLastMessageNumber(true);
+            expectedLastMessageNumber++;
+            assertEquals(newLastMessageNumber, instance.getLastMessageNumber());
+            assertEquals(expectedLastMessageNumber, newLastMessageNumber);
+
+            // TODO add registerUnackedMessageNumber to the test
+
+            instance.registerUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 1, true);
+
+            try {
+                instance.registerUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 2, true);
+                fail("DuplicateMessageRegistrationException expected here");
+            } catch (DuplicateMessageRegistrationException ex) {
+                // passed test
+            }
+
+            long oldLastMessageNumber = instance.getLastMessageNumber();
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
+            assertEquals(oldLastMessageNumber + 1, instance.getLastMessageNumber());
+
+            // TODO test filling in gaps
+        }
+    }
+    
 //    /**
 //     * Test of registerUnackedMessageNumber method, of class SequenceData.
 //     */
@@ -253,6 +256,17 @@ public class SequenceDataTest extends TestCase {
 //     * Test of getLastMessageNumberWithUnackedMessageNumbers method, of class SequenceData.
 //     */
 //    public void testGetLastMessageNumberWithUnackedMessageNumbers() {
+//        fail("The test case is not implemented yet.");
+//    }
+//
+//    /**
+//     * Test of getLastActivityTime method, of class SequenceData.
+//     */
+//    public void testGetLastActivityTime() {
+//        for (SequenceData instance : instances) {
+//            assertEquals(INITIAL_LAST_ACTIVITY_TIME, instance.getLastActivityTime());
+//        }
+//
 //        fail("The test case is not implemented yet.");
 //    }
 }

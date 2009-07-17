@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 
 /**
  *
@@ -46,12 +45,10 @@ final class SimpleDeliveryQueue implements DeliveryQueue {
 
     private final Postman postman;
     private final Postman.Callback deliveryCallback;
-    private final Sequence sequence;
 
-    SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback, Sequence sequence) {
+    SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback) {
         this.postman = postman;
         this.deliveryCallback = deliveryCallback;
-        this.sequence = sequence;
     }
 
     public void put(ApplicationMessage message) {

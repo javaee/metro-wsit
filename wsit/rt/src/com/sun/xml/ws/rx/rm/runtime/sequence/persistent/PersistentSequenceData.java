@@ -446,8 +446,7 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    private <T> void setFieldData(FieldInfo<T> fi, T value) {
-        Connection con = cm.getConnection(false);
+    private <T> void setFieldData(Connection con, FieldInfo<T> fi, T value) {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
@@ -460,7 +459,6 @@ final class PersistentSequenceData implements SequenceData {
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected != 1) {
-                cm.rollback(con);
                 throw LOGGER.logException(
                         new PersistenceException(String.format(
                         "Udating %s column data on a sequence with id = [ %s ]  failed: " +
@@ -470,10 +468,7 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)),
                         Level.WARNING);
             }
-
-            cm.commit(con);
         } catch (SQLException ex) {
-            cm.rollback(con);
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Udating %s column data on a sequence with id = [ %s ]  failed: " +
@@ -482,6 +477,14 @@ final class PersistentSequenceData implements SequenceData {
                     sequenceId), ex));
         } finally {
             cm.recycle(ps);
+        }
+    }
+
+    private <T> void setFieldData(FieldInfo<T> fi, T value) {
+        Connection con = cm.getConnection(true);
+        try {
+            setFieldData(con, fi, value);
+        } finally {
             cm.recycle(con);
         }
     }
@@ -495,6 +498,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setState(State newValue) {
+        // TODO bump last activity time
+
         setFieldData(fState, newValue.asInt());
     }
 
@@ -503,6 +508,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setAckRequestedFlag(boolean newValue) {
+        // TODO bump last activity time
+
         setFieldData(fAckRequestedFlag, b2s(newValue));
     }
 
@@ -511,6 +518,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setLastAcknowledgementRequestTime(long newValue) {
+        // TODO bump last activity time
+
         setFieldData(fLastAcknowledgementRequestTime, newValue);
     }
 
@@ -526,6 +535,8 @@ final class PersistentSequenceData implements SequenceData {
      * {@inheritDoc }
      */
     public long incrementAndGetLastMessageNumber(boolean received) {
+        // TODO bump last activity time
+
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
@@ -578,11 +589,14 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     private void registerSingleUnackedMessageNumber(Connection con, long messageNumber, boolean received) throws PersistenceException, DuplicateMessageRegistrationException {
+        // TODO bump last activity time
+
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?");
+            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
+            ps.setLong(3, messageNumber);
 
             ResultSet rs = ps.executeQuery();
 
@@ -656,8 +670,11 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection(false);
         try {
             long lastMessageNumber = getFieldData(con, fLastMessageNumber);
-            for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
-                registerSingleUnackedMessageNumber(con, i, false);
+            if (lastMessageNumber < messageNumber) {
+                setFieldData(con, fLastMessageNumber, messageNumber);
+                for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
+                    registerSingleUnackedMessageNumber(con, i, false);
+                }
             }
             registerSingleUnackedMessageNumber(con, messageNumber, received);
 
@@ -674,6 +691,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void markAsAcknowledged(long messageNumber) {
+        // TODO bump last activity time
+
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
@@ -785,6 +804,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
+        // TODO bump last activity time
+
         ByteArrayInputStream bais = null;
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
@@ -844,6 +865,8 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public ApplicationMessage retrieveMessage(String correlationId) {
+        // TODO bump last activity time
+
         ByteArrayInputStream bais = null;
 
         Connection con = cm.getConnection(true);

@@ -52,11 +52,13 @@ public class EmbeddedDerbyDbInstance {
     /**
      * Derby connection URL
      */
-    private final String connectionURL;
-    private final Connection connection;
+    private final String connectionUrl;
+    private final String databaseName;
+    private Connection connection;
 
     private EmbeddedDerbyDbInstance(String databaseName) throws PersistenceException {
-        this.connectionURL = String.format("jdbc:derby:%s;create=true", databaseName);
+        this.databaseName = databaseName;
+        this.connectionUrl = String.format("jdbc:derby:%s;create=true", databaseName);
         try {
             // Loading the Derby JDBC driver. When the embedded Driver is used, this action also start the Derby engine.
             Class.forName(EMBEDDED_DERBY_DRIVER_CLASS_NAME).newInstance();
@@ -69,12 +71,18 @@ public class EmbeddedDerbyDbInstance {
             LOGGER.severe(String.format("Unable to access the JDBC driver class '%s'. Please, check your security policy", EMBEDDED_DERBY_DRIVER_CLASS_NAME), ex);
         }
 
+        this.connection = createConnection(databaseName, connectionUrl);
+    }
+
+    private static Connection createConnection(String databaseName, String connectionUrl) {
         try {
-            this.connection = DriverManager.getConnection(connectionURL);
+            Connection connection = DriverManager.getConnection(connectionUrl);
             LOGGER.config(String.format("Connection to database [ %s ] established succesfully", databaseName));
+            return connection;
         } catch (SQLException ex) {
             throw LOGGER.logSevereException(new PersistenceException(String.format("Connection to database could not be [ %s ] established", databaseName), ex));
         }
+
     }
 
     public static EmbeddedDerbyDbInstance start(String databaseName) throws PersistenceException {
@@ -102,7 +110,15 @@ public class EmbeddedDerbyDbInstance {
     }
 
     public Connection getConnection() {
-        // TODO
+        try {
+            // TODO
+            if (connection == null || connection.isClosed()) {
+                connection = createConnection(databaseName, connectionUrl);
+            }
+        } catch (SQLException ex) {
+            throw LOGGER.logSevereException(new PersistenceException("Connection.isClosed() invocation failed", ex));
+        }
+
         return connection;
     }
 
