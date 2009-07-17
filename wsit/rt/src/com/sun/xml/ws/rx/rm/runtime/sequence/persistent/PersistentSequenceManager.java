@@ -151,7 +151,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        PersistentSequenceData data = PersistentSequenceData.newInstance(this, cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this), data.getBoundSequenceId());
     }
 
@@ -159,7 +159,7 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
-        PersistentSequenceData data = PersistentSequenceData.newInstance(cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
+        PersistentSequenceData data = PersistentSequenceData.newInstance(this, cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new InboundSequence(data, inboundQueueBuilder, this), data.getBoundSequenceId());
     }
 
@@ -251,7 +251,7 @@ public final class PersistentSequenceManager implements SequenceManager {
                 return sequences.get(sequenceId);
             }
 
-            PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(cm, uniqueEndpointId, sequenceId);
+            PersistentSequenceData sequenceData = PersistentSequenceData.loadInstance(this, cm, uniqueEndpointId, sequenceId);
             if (sequenceData != null) {
                 switch (sequenceData.getType()) {
                     case Inbound:

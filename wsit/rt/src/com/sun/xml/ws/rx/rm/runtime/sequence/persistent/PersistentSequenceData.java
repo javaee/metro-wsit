@@ -42,6 +42,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationExcepti
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -163,8 +164,10 @@ final class PersistentSequenceData implements SequenceData {
     private final FieldInfo<Long> fLastAcknowledgementRequestTime = new FieldInfo<Long>("LAST_ACK_REQUEST_TIME", Types.BIGINT, Long.class);
     //
     private final ConnectionManager cm;
+    private final TimeSynchronizer ts;
 
-    private PersistentSequenceData(ConnectionManager cm, String endpointUid, String sequenceId, SequenceType type, String securityContextTokenId, String boundId, long expirationTime) {
+    private PersistentSequenceData(TimeSynchronizer ts, ConnectionManager cm, String endpointUid, String sequenceId, SequenceType type, String securityContextTokenId, String boundId, long expirationTime) {
+        this.ts = ts;
         this.cm = cm;
 
         this.endpointUid = endpointUid;
@@ -176,6 +179,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     static PersistentSequenceData newInstance(
+            TimeSynchronizer ts,
             ConnectionManager cm,
             String enpointUid,
             String sequenceId,
@@ -221,7 +225,7 @@ final class PersistentSequenceData implements SequenceData {
                         sequenceId)));
             }
 
-            PersistentSequenceData data = loadInstance(con, cm, enpointUid, sequenceId);
+            PersistentSequenceData data = loadInstance(con, ts, cm, enpointUid, sequenceId);
             cm.commit(con);
 
             return data;
@@ -240,16 +244,16 @@ final class PersistentSequenceData implements SequenceData {
 
     }
 
-    static PersistentSequenceData loadInstance(ConnectionManager cm, String endpointUid, String sequenceId) {
+    static PersistentSequenceData loadInstance(TimeSynchronizer ts, ConnectionManager cm, String endpointUid, String sequenceId) {
         Connection con = cm.getConnection(true);
         try {
-            return loadInstance(con, cm, endpointUid, sequenceId);
+            return loadInstance(con, ts, cm, endpointUid, sequenceId);
         } finally {
             cm.recycle(con);
         }
     }
 
-    private static PersistentSequenceData loadInstance(Connection connection, ConnectionManager cm, String endpointUid, String sequenceId) {
+    private static PersistentSequenceData loadInstance(Connection connection, TimeSynchronizer ts, ConnectionManager cm, String endpointUid, String sequenceId) {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(connection, "SELECT " +
@@ -273,6 +277,7 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             return new PersistentSequenceData(
+                    ts,
                     cm,
                     endpointUid,
                     sequenceId,
@@ -446,16 +451,25 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    private <T> void setFieldData(Connection con, FieldInfo<T> fi, T value) {
+    private <T> void setFieldData(Connection con, FieldInfo<T> fi, T value, boolean updateLastActivityTime) {
         PreparedStatement ps = null;
         try {
+            String lastActivityTimeUpdateString = "";
+            if (updateLastActivityTime) {
+                lastActivityTimeUpdateString = ", " + fLastActivityTime.columnName + "=? ";
+            }
+
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
-                    fi.columnName + "=? " +
+                    fi.columnName + "=?" + lastActivityTimeUpdateString + " " +
                     "WHERE ENDPOINT_UID=? AND ID=?");
 
-            ps.setObject(1, value, fi.sqlType);
-            ps.setString(2, endpointUid);
-            ps.setString(3, sequenceId);
+            int i = 0;
+            ps.setObject(++i, value, fi.sqlType);
+            if (updateLastActivityTime) {
+                ps.setLong(++i, ts.currentTimeInMillis());
+            }
+            ps.setString(++i, endpointUid);
+            ps.setString(++i, sequenceId);
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected != 1) {
@@ -468,6 +482,7 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)),
                         Level.WARNING);
             }
+            // TODO bump last activity time if needed
         } catch (SQLException ex) {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
@@ -480,11 +495,16 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    private <T> void setFieldData(FieldInfo<T> fi, T value) {
-        Connection con = cm.getConnection(true);
+    private <T> void setFieldData(FieldInfo<T> fi, T value, boolean updateLastActivityTime) {
+        Connection con = cm.getConnection(false);
+        boolean commit = false;
         try {
-            setFieldData(con, fi, value);
+            setFieldData(con, fi, value, updateLastActivityTime);
+            commit = true;
         } finally {
+            if (commit) {
+                cm.commit(con);
+            }
             cm.recycle(con);
         }
     }
@@ -498,9 +518,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setState(State newValue) {
-        // TODO bump last activity time
-
-        setFieldData(fState, newValue.asInt());
+        setFieldData(fState, newValue.asInt(), true);
     }
 
     public boolean getAckRequestedFlag() {
@@ -508,9 +526,7 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setAckRequestedFlag(boolean newValue) {
-        // TODO bump last activity time
-
-        setFieldData(fAckRequestedFlag, b2s(newValue));
+        setFieldData(fAckRequestedFlag, b2s(newValue), true);
     }
 
     public long getLastAcknowledgementRequestTime() {
@@ -518,34 +534,27 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void setLastAcknowledgementRequestTime(long newValue) {
-        // TODO bump last activity time
-
-        setFieldData(fLastAcknowledgementRequestTime, newValue);
+        setFieldData(fLastAcknowledgementRequestTime, newValue, true);
     }
 
     public long getLastActivityTime() {
         return getFieldData(fLastActivityTime);
     }
 
-    public void setLastActivityTime(long newValue) {
-        setFieldData(fLastActivityTime, newValue);
-    }
-
     /**
      * {@inheritDoc }
      */
     public long incrementAndGetLastMessageNumber(boolean received) {
-        // TODO bump last activity time
-
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
-                    "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1 " +
+                    "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1, " + fLastActivityTime.columnName +"=? " +
                     "WHERE ENDPOINT_UID=? AND ID=?");
 
-            ps.setString(1, endpointUid);
-            ps.setString(2, sequenceId);
+            ps.setLong(1, ts.currentTimeInMillis());
+            ps.setString(2, endpointUid);
+            ps.setString(3, sequenceId);
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected != 1) {
@@ -589,8 +598,6 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     private void registerSingleUnackedMessageNumber(Connection con, long messageNumber, boolean received) throws PersistenceException, DuplicateMessageRegistrationException {
-        // TODO bump last activity time
-
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
@@ -671,12 +678,13 @@ final class PersistentSequenceData implements SequenceData {
         try {
             long lastMessageNumber = getFieldData(con, fLastMessageNumber);
             if (lastMessageNumber < messageNumber) {
-                setFieldData(con, fLastMessageNumber, messageNumber);
+                setFieldData(con, fLastMessageNumber, messageNumber, false); // TODO really should be false?
                 for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
                     registerSingleUnackedMessageNumber(con, i, false);
                 }
             }
             registerSingleUnackedMessageNumber(con, messageNumber, received);
+            setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
         } catch (PersistenceException ex) {
@@ -691,8 +699,6 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void markAsAcknowledged(long messageNumber) {
-        // TODO bump last activity time
-
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
@@ -714,6 +720,8 @@ final class PersistentSequenceData implements SequenceData {
                         messageNumber,
                         rowsAffected)));
             }
+
+             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
         } catch (SQLException ex) {
@@ -804,8 +812,6 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public void attachMessageToUnackedMessageNumber(ApplicationMessage message) {
-        // TODO bump last activity time
-
         ByteArrayInputStream bais = null;
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
@@ -841,6 +847,8 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)));
             }
 
+            setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
+
             cm.commit(con);
         } catch (SQLException ex) {
             cm.rollback(con);
@@ -865,11 +873,9 @@ final class PersistentSequenceData implements SequenceData {
     }
 
     public ApplicationMessage retrieveMessage(String correlationId) {
-        // TODO bump last activity time
-
         ByteArrayInputStream bais = null;
 
-        Connection con = cm.getConnection(true);
+        Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, MSG_DATA FROM RM_UNACKED_MESSAGES " +
@@ -886,6 +892,7 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             if (!rs.isFirst() && !rs.isLast()) {
+                cm.rollback(con);
                 // TODO L10N
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
                         "Duplicate records detected for unacked message registration on %s sequence with id = [ %s ] and correlation id [ %d ]",
@@ -895,14 +902,20 @@ final class PersistentSequenceData implements SequenceData {
             }
 
 
-            return JaxwsApplicationMessage.newInstance(
+            ApplicationMessage message = JaxwsApplicationMessage.newInstance(
                     rs.getBlob("MSG_DATA").getBinaryStream(),
                     rs.getInt("NEXT_RESEND_COUNT"),
                     correlationId,
                     sequenceId,
                     rs.getLong("MSG_NUMBER"));
 
+            setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
+
+            cm.commit(con);
+
+            return message;
         } catch (SQLException ex) {
+            cm.rollback(con);
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Unable to load message data from an unacked message registration for %s sequence with id = [ %s ] and correlation id [ %d ]: " +
                     "An unexpected JDBC exception occured",

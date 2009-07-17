@@ -35,8 +35,10 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceDataLoader;
 import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceDataLoader;
+import java.util.logging.Level;
 import junit.framework.TestCase;
 
 /**
@@ -44,6 +46,8 @@ import junit.framework.TestCase;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class SequenceDataTest extends TestCase {
+
+    private static final Logger LOGGER = Logger.getLogger(SequenceDataTest.class);
 
     private static final String EXPECTED_SEQUENCE_ID = "sid_01";
     private static final long EXPECTED_EXPIRY_TIME = -1L;
@@ -216,7 +220,7 @@ public class SequenceDataTest extends TestCase {
             // TODO test filling in gaps
         }
     }
-    
+
 //    /**
 //     * Test of registerUnackedMessageNumber method, of class SequenceData.
 //     */
@@ -258,15 +262,56 @@ public class SequenceDataTest extends TestCase {
 //    public void testGetLastMessageNumberWithUnackedMessageNumbers() {
 //        fail("The test case is not implemented yet.");
 //    }
-//
-//    /**
-//     * Test of getLastActivityTime method, of class SequenceData.
-//     */
-//    public void testGetLastActivityTime() {
-//        for (SequenceData instance : instances) {
-//            assertEquals(INITIAL_LAST_ACTIVITY_TIME, instance.getLastActivityTime());
-//        }
-//
-//        fail("The test case is not implemented yet.");
-//    }
+
+    /**
+     * Test of getLastActivityTime method, of class SequenceData.
+     */
+    public void testGetLastActivityTime() throws DuplicateMessageRegistrationException, InterruptedException {
+        for (SequenceData instance : instances) {
+            assertEquals(INITIAL_LAST_ACTIVITY_TIME, instance.getLastActivityTime());
+
+            long oldLastActivityTime;
+
+            // TODO instance.attachMessageToUnackedMessageNumber(null);
+            // TODO SequenceData.retrieveMessage(java.lang.String)
+
+            final int SLEEP_TIME = 10;
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            instance.incrementAndGetLastMessageNumber(true);
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            Thread.sleep(SLEEP_TIME);
+            instance.setAckRequestedFlag(true);
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            Thread.sleep(SLEEP_TIME);
+            instance.setLastAcknowledgementRequestTime(System.currentTimeMillis());
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            Thread.sleep(SLEEP_TIME);
+            instance.setState(Sequence.State.CLOSED);
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            Thread.sleep(SLEEP_TIME);
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+
+            oldLastActivityTime = instance.getLastActivityTime();
+            Thread.sleep(SLEEP_TIME);
+            instance.markAsAcknowledged(instance.getLastMessageNumber());
+            assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
+        }
+    }
+
+    private void assertLowerThan(long lower, long greater) {
+        LOGGER.log(Level.ALL, String.format("Lower number: %d Greater number: %d", lower, greater));
+//        System.out.println(String.format("Lower number: %d Greater number: %d", lower, greater));
+
+        assertTrue(lower < greater);
+    }
 }

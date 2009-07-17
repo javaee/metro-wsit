@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceDataLoader;
+import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -87,6 +88,12 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
     private static final PersistentSequenceData.SequenceType TEST_SEQUENCE_TYPE = PersistentSequenceData.SequenceType.Inbound;
     //
     private final ConnectionManager cm = ConnectionManager.getInstance(new UnitTestDerbyDataSourceProvider());
+    private final TimeSynchronizer ts = new TimeSynchronizer() {
+
+        public long currentTimeInMillis() {
+            return System.currentTimeMillis();
+        }
+    };
     private EmbeddedDerbyDbInstance dbInstance;
 
     public void setUp() {
@@ -148,6 +155,7 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
 
     public SequenceData newInstance(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         return PersistentSequenceData.newInstance(
+                ts,
                 cm,
                 TEST_ENDPOINT_UID,
                 sequenceId,
