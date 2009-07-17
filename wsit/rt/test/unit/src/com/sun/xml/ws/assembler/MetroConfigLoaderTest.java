@@ -51,7 +51,40 @@ import junit.framework.TestCase;
  */
 public class MetroConfigLoaderTest extends TestCase {
 
-    private final String UNIT_TEST_RESOURCE_ROOT = "metro-config/";
+    private static final class TestDataInfo {
+
+        final String appConfigFileName;
+        final int expectedTubes;
+
+        public TestDataInfo(String appConfigFileName, int expectedTubes) {
+            this.appConfigFileName = appConfigFileName;
+            this.expectedTubes = expectedTubes;
+        }
+    }
+
+    private static class TestDataLoader extends ResourceLoader {
+
+        private final String resourceName;
+
+        public TestDataLoader(String resourceName) {
+            this.resourceName = UNIT_TEST_RESOURCE_ROOT + resourceName;
+        }
+
+        @Override
+        public URL getResource(String resource) throws MalformedURLException {
+            if ("metro.xml".equals(resource)) {
+                return Thread.currentThread().getContextClassLoader().getResource(resourceName);
+            } else {
+                return Thread.currentThread().getContextClassLoader().getResource(resource);
+            }
+        }
+    }
+    private static final String UNIT_TEST_RESOURCE_ROOT = "metro-config/";
+    private static final TestDataInfo[] APP_METRO_CONFIGS = new TestDataInfo[]{
+        new TestDataInfo("metro.xml", 12),
+        new TestDataInfo("metro-no-default.xml", 13),
+        new TestDataInfo("metro-no-default-single-tube.xml", 1)
+    };
 
     public MetroConfigLoaderTest(String testName) {
         super(testName);
@@ -67,33 +100,6 @@ public class MetroConfigLoaderTest extends TestCase {
         super.tearDown();
     }
 
-    /**
-     * Test of getTubeline method, of class MetroConfigLoader.
-     */
-//    public void testGetTubeline() throws URISyntaxException {
-//        MetroConfigLoader configLoader = new MetroConfigLoader(new ResourceLoader() {
-//
-//            @Override
-//            public URL getResource(String resource) throws MalformedURLException {
-//                return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + resource);
-//            }
-//        });
-//
-//        TubelineDefinition result;
-//
-//        result = configLoader.getTubeline(new URI("#default-tubeline"));
-//        assertNotNull(result);
-//
-//        result = configLoader.getTubeline(new URI("#ss-transport-message-dump-tubeline"));
-//        assertNotNull(result);
-//
-//        result = configLoader.getTubeline(new URI("#cs-application-message-dump-tubeline"));
-//        assertNotNull(result);
-//
-//        result = configLoader.getTubeline(new URI("#non-existent-tubeline"));
-//        assertNull(result);
-//    }
-    
     private Container createMockupContainer(final ResourceLoader loader) {
         return new Container() {
 
@@ -112,104 +118,90 @@ public class MetroConfigLoaderTest extends TestCase {
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader.
      */
     public void testGetEndpointSideTubeFactoriesTest() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
-
-            @Override
-            public URL getResource(String resource) throws MalformedURLException {
-                return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + resource);
-            }
-        }));
+        TestDataInfo tdi = APP_METRO_CONFIGS[0];
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
 
         TubeFactoryList result;
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "server"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
 
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "default-server"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
 
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "default-server"));
-    }
-
-    /**
-     * Test of getTubelineForEndpoint method, of class MetroConfigLoader - loading from default Metro config
-     */
-    public void testGetEndpointSideTubeFactoriesLoadFromDefaultConfig() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
-
-            @Override
-            public URL getResource(String resource) throws MalformedURLException {
-                if ("metro.xml".equals(resource)) {
-                    return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + "metro-no-default.xml");
-                } else {
-                    return null;
-                }
-            }
-        }));
-
-        TubeFactoryList result;
-        result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
-        assertTrue(containsTubeFactoryConfig(result, "server"));
-
-        result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
-        assertFalse(result.getTubeFactoryConfigs().isEmpty());
-        assertFalse(containsTubeFactoryConfig(result, "server"));
-
-        result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
-        assertFalse(result.getTubeFactoryConfigs().isEmpty());
-        assertFalse(containsTubeFactoryConfig(result, "server"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
     }
 
     /**
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader.
      */
     public void testGetClientSideTubeFactoriesTest() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
-
-            @Override
-            public URL getResource(String resource) throws MalformedURLException {
-                return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + resource);
-            }
-        }));
+        TestDataInfo tdi = APP_METRO_CONFIGS[0];
+        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
 
         TubeFactoryList result;
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "default-client"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
 
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "client"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
 
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
         assertTrue(containsTubeFactoryConfig(result, "default-client"));
+        assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
+    }
+
+    /**
+     * Test of getTubelineForEndpoint method, of class MetroConfigLoader - loading from default Metro config
+     */
+    public void testGetEndpointSideTubeFactoriesLoadFromDefaultConfig() throws URISyntaxException {
+        for (int i = 1; i < APP_METRO_CONFIGS.length; i++) {
+            TestDataInfo tdi = APP_METRO_CONFIGS[i];
+
+            MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
+
+            TubeFactoryList result;
+            result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
+            assertTrue(containsTubeFactoryConfig(result, "server"));
+            assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
+
+            result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
+            assertFalse(result.getTubeFactoryConfigs().isEmpty());
+            assertFalse(containsTubeFactoryConfig(result, "server"));
+
+            result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
+            assertFalse(result.getTubeFactoryConfigs().isEmpty());
+            assertFalse(containsTubeFactoryConfig(result, "server"));
+        }
     }
 
     /**
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader - loading from default Metro config
      */
     public void testGetClientSideTubeFactoriesLoadFromDefaultConfig() throws URISyntaxException {
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new ResourceLoader() {
+        for (int i = 1; i < APP_METRO_CONFIGS.length; i++) {
+            TestDataInfo tdi = APP_METRO_CONFIGS[i];
 
-            @Override
-            public URL getResource(String resource) throws MalformedURLException {
-                if ("metro.xml".equals(resource)) {
-                    return Thread.currentThread().getContextClassLoader().getResource(UNIT_TEST_RESOURCE_ROOT + "metro-no-default.xml");
-                } else {
-                    return null;
-                }
-            }
-        }));
+            MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
 
-        TubeFactoryList result;
-        result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
-        assertFalse(result.getTubeFactoryConfigs().isEmpty());
-        assertFalse(containsTubeFactoryConfig(result, "client"));
+            TubeFactoryList result;
+            result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
+            assertFalse(result.getTubeFactoryConfigs().isEmpty());
+            assertFalse(containsTubeFactoryConfig(result, "client"));
 
-        result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
-        assertTrue(containsTubeFactoryConfig(result, "client"));
+            result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/JmsPingPort)"));
+            assertTrue(containsTubeFactoryConfig(result, "client"));
+            assertEquals(tdi.expectedTubes, result.getTubeFactoryConfigs().size());
 
-        result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
-        assertFalse(result.getTubeFactoryConfigs().isEmpty());
-        assertFalse(containsTubeFactoryConfig(result, "client"));
+            result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/OtherPingPort)"));
+            assertFalse(result.getTubeFactoryConfigs().isEmpty());
+            assertFalse(containsTubeFactoryConfig(result, "client"));
+        }
     }
 
     private boolean containsTubeFactoryConfig(TubeFactoryList tubeList, String tubeFactoryName) {
