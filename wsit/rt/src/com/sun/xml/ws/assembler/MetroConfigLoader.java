@@ -105,7 +105,7 @@ class MetroConfigLoader {
             throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not found.")); // TODO L10N
         }
 
-        LOGGER.info(String.format("Default metro-default.xml configuration file located at: '%s'", defaultConfigUrl)); // TODO L10N
+        LOGGER.config(String.format("Default metro-default.xml configuration file located at: '%s'", defaultConfigUrl)); // TODO L10N
         this.defaultConfig = MetroConfigLoader.loadMetroConfig(defaultConfigUrl);
         if (defaultConfig == null) {
             throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not loaded")); // TODO L10N
@@ -119,7 +119,7 @@ class MetroConfigLoader {
 
         this.appConfigUrl = locateResource(APP_METRO_CFG_NAME, loader);
         if (appConfigUrl != null) {
-            LOGGER.info(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
+            LOGGER.config(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
             this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
         } else {
             LOGGER.config("No application metro.xml configuration file found."); // TODO L10N
