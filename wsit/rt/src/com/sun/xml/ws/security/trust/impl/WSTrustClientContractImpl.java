@@ -50,7 +50,6 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.trust.Configuration;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -94,8 +93,6 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     //private static final int DEFAULT_KEY_SIZE = 256;
-    
-    //private final Configuration config;
     
     private static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());

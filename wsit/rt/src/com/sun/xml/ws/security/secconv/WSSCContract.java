@@ -115,8 +115,6 @@ public class WSSCContract {
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
     
-    //private Configuration config;
-   
     private long currentTime;    
     private SymmetricBinding symBinding = null;
     private boolean reqServerEntr = true;

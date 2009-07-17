@@ -36,11 +36,6 @@
 
 
 package com.sun.xml.ws.security.secconv;
-
-
-
-import com.sun.xml.ws.security.trust.Configuration;
-//import com.sun.xml.ws.security.trust.WSTrustDOMContract;
  
 /**
  * A Factory for creating WS-SecureConversation contract instances.
@@ -55,11 +50,6 @@ public class WSSCFactory {
     public static WSSCPlugin newSCPlugin() {
         return new WSSCPlugin();
     }
-
-     //public static NewWSSCPlugin newNewSCPlugin(final Configuration config, final WSSCVersion wsscVer) {
-     //   return new NewWSSCPlugin(config, wsscVer);
-    //}
-
 
     public static WSSCContract newWSSCContract(final WSSCVersion wsscVer) {
         final WSSCContract contract = new WSSCContract();
