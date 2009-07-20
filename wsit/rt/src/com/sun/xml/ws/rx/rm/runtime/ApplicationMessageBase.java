@@ -38,8 +38,6 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
