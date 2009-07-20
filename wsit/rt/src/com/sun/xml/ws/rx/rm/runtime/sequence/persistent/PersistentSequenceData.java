@@ -148,7 +148,6 @@ final class PersistentSequenceData implements SequenceData {
     private static boolean s2b(String string) {
         return "T".equals(string);
     }
-
     //
     private final String endpointUid;
     private final String sequenceId;
@@ -549,7 +548,7 @@ final class PersistentSequenceData implements SequenceData {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_SEQUENCES SET " +
-                    "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1, " + fLastActivityTime.columnName +"=? " +
+                    "LAST_MESSAGE_NUMBER=LAST_MESSAGE_NUMBER+1, " + fLastActivityTime.columnName + "=? " +
                     "WHERE ENDPOINT_UID=? AND ID=?");
 
             ps.setLong(1, ts.currentTimeInMillis());
@@ -659,12 +658,12 @@ final class PersistentSequenceData implements SequenceData {
             }
 
         } catch (SQLException ex) {
-                throw LOGGER.logSevereException(
-                        new PersistenceException(String.format(
-                        "Registering an unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
-                        "An unexpected JDBC exception occured",
-                        messageNumber,
-                        sequenceId), ex));
+            throw LOGGER.logSevereException(
+                    new PersistenceException(String.format(
+                    "Registering an unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
+                    "An unexpected JDBC exception occured",
+                    messageNumber,
+                    sequenceId), ex));
         } finally {
             cm.recycle(ps);
         }
@@ -711,17 +710,27 @@ final class PersistentSequenceData implements SequenceData {
 
             final int rowsAffected = ps.executeUpdate();
             if (rowsAffected != 1) {
-                cm.rollback(con);
-                throw LOGGER.logSevereException(new PersistenceException(String.format(
-                        "Message acknowledgement failed for %s sequence with id = [ %s ] and message number [ %d ]: " +
-                        "Expected deleted rows: 1, Actual: %d",
-                        type,
-                        sequenceId,
-                        messageNumber,
-                        rowsAffected)));
+                if (rowsAffected == 0) {
+                    if (LOGGER.isLoggable(Level.FINER)) {
+                        LOGGER.finer(String.format(
+                                "No unacknowledged message record found for %s sequence with id = [ %s ] and message number [ %d ]: " +
+                                "Message was probably already acknowledged earlier",
+                                type,
+                                sequenceId,
+                                messageNumber));
+                    }
+                } else {
+                    throw LOGGER.logSevereException(new PersistenceException(String.format(
+                            "Message acknowledgement failed for %s sequence with id = [ %s ] and message number [ %d ]: " +
+                            "Expected deleted rows: 1, Actual: %d",
+                            type,
+                            sequenceId,
+                            messageNumber,
+                            rowsAffected)));
+                }
             }
 
-             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
+            setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);
         } catch (SQLException ex) {
