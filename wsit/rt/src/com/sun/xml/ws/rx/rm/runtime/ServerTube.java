@@ -201,7 +201,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
                         // retrieved response is not null
 
-                        // FIXME: fiber is suspended, but not regstered!
                         Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
                         if (oldRegisteredFiber != null) {
                             oldRegisteredFiber.resume(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
