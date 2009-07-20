@@ -89,12 +89,14 @@ public interface ApplicationMessage {
 
     /**
      * Retrieves number of the next resend attempt
+     *
      * @return number of the next resend attempt
      */
     public int getNextResendCount();
 
     /**
      * Returns {@code byte[]} representation of the message instance
+     * 
      * @return {@code byte[]} representation of the message instance
      */
     public byte[] toBytes();

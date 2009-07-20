@@ -134,6 +134,7 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
                 "IS_RECEIVED CHARACTER NOT NULL, " +
                 "CORRELATION_ID VARCHAR(256), " +
                 "NEXT_RESEND_COUNT INT, " +
+                "WSA_ACTION VARCHAR(256), " +
                 "MSG_DATA BLOB, " +
                 "PRIMARY KEY (ENDPOINT_UID, SEQ_ID, MSG_NUMBER)" +
                 ")");

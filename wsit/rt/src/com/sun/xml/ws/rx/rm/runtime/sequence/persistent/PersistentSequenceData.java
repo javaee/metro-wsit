@@ -86,6 +86,7 @@ IS_RECEIVED CHARACTER NOT NULL,
 
 CORRELATION_ID VARCHAR(256),
 NEXT_RESEND_COUNT INT,
+WSA_ACTION VARCHAR(256),
 MSG_DATA BLOB,
 
 PRIMARY KEY (ENDPOINT_UID, SEQ_ID, MSG_NUMBER)
@@ -825,7 +826,7 @@ final class PersistentSequenceData implements SequenceData {
         PreparedStatement ps = null;
         try {
             ps = cm.prepareStatement(con, "UPDATE RM_UNACKED_MESSAGES SET " +
-                    "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, MSG_DATA=? " +
+                    "IS_RECEIVED=?, CORRELATION_ID=?, NEXT_RESEND_COUNT=?, WSA_ACTION=?, MSG_DATA=? " +
                     "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
 
             int i = 0;
@@ -835,6 +836,7 @@ final class PersistentSequenceData implements SequenceData {
             ps.setString(++i, message.getCorrelationId());
             ps.setLong(++i, message.getNextResendCount());
 
+            ps.setString(++i, ((JaxwsApplicationMessage) message).getWsaAction());
             final byte[] msgData = message.toBytes();
             bais = new ByteArrayInputStream(msgData);
             ps.setBinaryStream(++i, bais, msgData.length);
@@ -886,7 +888,7 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, MSG_DATA FROM RM_UNACKED_MESSAGES " +
+            ps = cm.prepareStatement(con, "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, WSA_ACTION, MSG_DATA FROM RM_UNACKED_MESSAGES " +
                     "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND CORRELATION_ID=?");
 
             ps.setString(1, endpointUid);
@@ -914,6 +916,7 @@ final class PersistentSequenceData implements SequenceData {
                     rs.getBlob("MSG_DATA").getBinaryStream(),
                     rs.getInt("NEXT_RESEND_COUNT"),
                     correlationId,
+                    rs.getString("WSA_ACTION"),
                     sequenceId,
                     rs.getLong("MSG_NUMBER"));
 

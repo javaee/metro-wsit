@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
@@ -59,8 +60,9 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
     private static final Logger LOGGER = Logger.getLogger(JaxwsApplicationMessage.class);
     //
-    private @NotNull final Packet packet;
+    private @Nullable Packet packet;
     private @NotNull final Message message;
+    private @Nullable final String wsaAction;
 
     public JaxwsApplicationMessage(@NotNull Packet packet, @NotNull String correlationId) {
         super(correlationId);
@@ -70,16 +72,17 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
         this.packet = packet;
         this.message = packet.getMessage();
+        this.wsaAction = null;
     }
 
-    private JaxwsApplicationMessage(int initialResendCounterValue, @NotNull String correlationId, @NotNull String sequenceId, long messageNumber, Packet packet) {
+    private JaxwsApplicationMessage(int initialResendCounterValue, @NotNull String correlationId, @NotNull String wsaAction, @NotNull String sequenceId, long messageNumber, Message message) {
         super(initialResendCounterValue, correlationId, sequenceId, messageNumber, null);
 
-        assert packet != null;
-        assert packet.getMessage() != null;
+        assert message != null;
 
-        this.packet = packet;
-        this.message = packet.getMessage();
+        this.packet = null;
+        this.message = message;
+        this.wsaAction = wsaAction;
     }
 
     public @NotNull Message getJaxwsMessage() {
@@ -88,6 +91,12 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
     public @NotNull Packet getPacket() {
         return packet;
+    }
+
+    void setPacket(Packet newPacket) {
+        // FIXME once this method is not needed, remove it and make packet attribute final
+        newPacket.setMessage(message);
+        this.packet = newPacket;
     }
 
     @Override
@@ -121,12 +130,23 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
         }
     }
 
-    public static JaxwsApplicationMessage newInstance(@NotNull InputStream dataStream, int initialResendCounterValue, @NotNull String correlationId, @NotNull String sequenceId, long messageNumber) {
+    /**
+     * Returns WS-Addressing action header value - used in ServerTube as a workaround
+     *
+     * FIXME remove when no longer needed
+     * 
+     * @return WS-Addressing action header value
+     */
+    public String getWsaAction() {
+        return wsaAction;
+    }
+
+    public static JaxwsApplicationMessage newInstance(@NotNull InputStream dataStream, int initialResendCounterValue, @NotNull String correlationId, @NotNull String wsaAction, @NotNull String sequenceId, long messageNumber) {
         try {
             XMLStreamReader xsr = XMLStreamReaderFactory.create(null, dataStream, "UTF-8", true);
             try {
                 Message m = Messages.create(xsr);
-                return new JaxwsApplicationMessage(new Packet(m), correlationId); // TODO P1 fill in packet data
+                return new JaxwsApplicationMessage(initialResendCounterValue, correlationId, wsaAction, sequenceId, messageNumber, m);
             } finally {
                 try {
                     xsr.close();

@@ -199,7 +199,18 @@ public class ServerTube extends AbstractFilterTubeImpl {
                             return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
                         }
 
+                        if (rc.configuration.isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
+                            JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
+                            if (jaxwsAppMsg.getPacket() == null) {
+
+                                // FIXME: loaded from DB without a valid packet - create one
+                                // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
+                                jaxwsAppMsg.setPacket(rc.communicator.createEmptyResponsePacket(request, jaxwsAppMsg.getWsaAction()));
+                            }
+                        }
+
                         // retrieved response is not null
+
 
                         Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
                         if (oldRegisteredFiber != null) {
