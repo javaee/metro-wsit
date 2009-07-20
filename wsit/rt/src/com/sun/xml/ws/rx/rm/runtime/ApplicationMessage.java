@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
-import java.io.InputStream;
 
 /**
  * A protocol independent abstraction of an application message that is used as part of RM processing.
