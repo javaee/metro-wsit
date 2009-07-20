@@ -481,7 +481,6 @@ final class PersistentSequenceData implements SequenceData {
                         rowsAffected)),
                         Level.WARNING);
             }
-            // TODO bump last activity time if needed
         } catch (SQLException ex) {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
@@ -677,7 +676,7 @@ final class PersistentSequenceData implements SequenceData {
         try {
             long lastMessageNumber = getFieldData(con, fLastMessageNumber);
             if (lastMessageNumber < messageNumber) {
-                setFieldData(con, fLastMessageNumber, messageNumber, false); // TODO really should be false?
+                setFieldData(con, fLastMessageNumber, messageNumber, false);
                 for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
                     registerSingleUnackedMessageNumber(con, i, false);
                 }

@@ -104,7 +104,6 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.outboundQueueBuilder = outboundQueueBuilder;
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
-        // TODO recover();
     }
 
     /**
@@ -243,8 +242,6 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     private Sequence fetch(final String sequenceId) {
-        // TODO decide: if missed cache hit detected, invalidate and reload whole in-memory cache instead?
-
         dataLock.writeLock().lock();
         try {
             if (sequences.containsKey(sequenceId)) { // re-checking
