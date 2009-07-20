@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceDataLoader;
 import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceDataLoader;
+import java.util.List;
 import java.util.logging.Level;
 import junit.framework.TestCase;
 
@@ -48,7 +49,6 @@ import junit.framework.TestCase;
 public class SequenceDataTest extends TestCase {
 
     private static final Logger LOGGER = Logger.getLogger(SequenceDataTest.class);
-
     private static final String EXPECTED_SEQUENCE_ID = "sid_01";
     private static final long EXPECTED_EXPIRY_TIME = -1L;
     private static final String EXPECTED_STR_ID = "str_01";
@@ -127,7 +127,6 @@ public class SequenceDataTest extends TestCase {
         }
     }
 
-
     /**
      * Test of get/setAckRequestedFlag method, of class SequenceData.
      */
@@ -202,8 +201,6 @@ public class SequenceDataTest extends TestCase {
             assertEquals(newLastMessageNumber, instance.getLastMessageNumber());
             assertEquals(expectedLastMessageNumber, newLastMessageNumber);
 
-            // TODO add registerUnackedMessageNumber to the test
-
             instance.registerUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 1, true);
 
             try {
@@ -213,27 +210,69 @@ public class SequenceDataTest extends TestCase {
                 // passed test
             }
 
-            long oldLastMessageNumber = instance.getLastMessageNumber();
-            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
-            assertEquals(oldLastMessageNumber + 1, instance.getLastMessageNumber());
 
             // TODO test filling in gaps
         }
     }
 
-//    /**
-//     * Test of registerUnackedMessageNumber method, of class SequenceData.
-//     */
-//    public void testRegisterUnackedMessageNumber() throws Exception {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of markAsAcknowledged method, of class SequenceData.
-//     */
-//    public void testMarkAsAcknowledged() {
-//        fail("The test case is not implemented yet.");
-//    }
+    /**
+     * Test of registerUnackedMessageNumber method, of class SequenceData.
+     */
+    public void testUnackedMessageNumberHandlingMethods() throws Exception {
+        for (SequenceData instance : instances) {
+            // Test bumping up last message number if the new number exceeds last message number
+            long oldLastMessageNumber = instance.getLastMessageNumber();
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
+            assertEquals(oldLastMessageNumber + 1, instance.getLastMessageNumber());
+            assertEquals(1, instance.getUnackedMessageNumbers().size());
+
+            // Test filling in gaps
+            oldLastMessageNumber = instance.getLastMessageNumber();
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 10, true);
+            assertEquals(oldLastMessageNumber + 10, instance.getLastMessageNumber());
+            assertEquals(11, instance.getUnackedMessageNumbers().size());
+
+            List<Long> unacked = instance.getUnackedMessageNumbers();
+            List<Long> unackedWithLastMsgNumber = instance.getLastMessageNumberWithUnackedMessageNumbers();
+
+            assertEquals(instance.getLastMessageNumber(), unackedWithLastMsgNumber.get(0).longValue());
+            assertEquals(unacked.size() + 1, unackedWithLastMsgNumber.size());
+            for (int i = 0; i < unacked.size(); i++) {
+                assertEquals(unacked.get(i), unackedWithLastMsgNumber.get(i+1));
+            }
+
+            try {
+                instance.registerUnackedMessageNumber(unacked.get(0), true);
+                fail("DuplicateMessageRegistrationException expected here");
+            } catch (DuplicateMessageRegistrationException ex) {
+                // passed test
+            }
+            try {
+                instance.registerUnackedMessageNumber(unacked.get(unacked.size() - 1), true);
+                fail("DuplicateMessageRegistrationException expected here");
+            } catch (DuplicateMessageRegistrationException ex) {
+                // passed test
+            }
+            for (int i = 1; i < unacked.size() - 1; i++) {
+                instance.registerUnackedMessageNumber(unacked.get(i), true); // marking the automatically filled in numbers as received should pass
+            }
+
+            int ackedCount = 0;
+            for (long acknowledged : unacked) {
+                instance.markAsAcknowledged(acknowledged);
+
+                assertEquals(unacked.size() - ++ackedCount, instance.getUnackedMessageNumbers().size());
+            }
+            assertEquals(0, instance.getUnackedMessageNumbers().size());
+
+            // second run should do nothing
+            for (long acknowledged : unacked) {
+                instance.markAsAcknowledged(acknowledged);
+
+                assertEquals(0, instance.getUnackedMessageNumbers().size());
+            }
+        }
+    }
 //
 //    /**
 //     * Test of attachMessageToUnackedMessageNumber method, of class SequenceData.
@@ -246,20 +285,6 @@ public class SequenceDataTest extends TestCase {
 //     * Test of retrieveMessage method, of class SequenceData.
 //     */
 //    public void testRetrieveMessage() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getUnackedMessageNumbers method, of class SequenceData.
-//     */
-//    public void testGetUnackedMessageNumbers() {
-//        fail("The test case is not implemented yet.");
-//    }
-//
-//    /**
-//     * Test of getLastMessageNumberWithUnackedMessageNumbers method, of class SequenceData.
-//     */
-//    public void testGetLastMessageNumberWithUnackedMessageNumbers() {
 //        fail("The test case is not implemented yet.");
 //    }
 
