@@ -56,7 +56,6 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.runtime.util.Session;
 import com.sun.xml.ws.runtime.util.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;

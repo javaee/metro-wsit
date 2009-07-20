@@ -35,7 +35,6 @@
  */
 package com.sun.xml.wss.jaxws.impl;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
@@ -88,7 +87,6 @@ import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
-import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 
@@ -113,20 +111,13 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
-import com.sun.xml.wss.provider.wsit.ClientSecurityTube;
 import com.sun.xml.wss.provider.wsit.PipeConstants;
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Hashtable;
 import java.util.ListIterator;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.jvnet.staxex.Base64Data;
-import org.jvnet.staxex.XMLStreamReaderEx;
 
 /**
  *
@@ -183,6 +174,9 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         xmlReader = idExtn.readAsXMLStreamReader();
                         CertificateRetriever cr = new CertificateRetriever();
                         byte[] bstValue = cr.digestBST(xmlReader);
+                        if(bstValue == null){
+                             throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
+                        }
                         X509Certificate certificate = cr.constructCertificate(bstValue);
                         boolean valid = cr.validateCertificate(certificate, props);
                         if (!valid) {

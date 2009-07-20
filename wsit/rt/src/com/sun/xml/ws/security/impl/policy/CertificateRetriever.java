@@ -99,7 +99,9 @@ public class CertificateRetriever {
 
     public byte[] digestBST(XMLStreamReader reader) throws XMLStreamException {
         byte[] bstValue = null;
-
+        if(reader == null){
+          throw new RuntimeException("XML stream reader is null");
+        }
         while (reader.getEventType() != XMLStreamReader.CHARACTERS && reader.getEventType() != reader.END_ELEMENT) {
             reader.next();
         }
@@ -146,11 +148,20 @@ public class CertificateRetriever {
         try {
             setLocationPasswordAndAlias(trustStoreQName, props);
             KeyStore trustStore = KeyStore.getInstance("JKS");
+            if ( location == null){
+              throw new KeyStoreException("trustStore location is null");
+            }
             fis = new java.io.FileInputStream(location);
+            if ( password == null){
+              throw new KeyStoreException("trustStore password is null");
+            }
             trustStore.load(fis, password.toCharArray());
             DefaultCallbackHandler dch = new DefaultCallbackHandler(null, null);
             DefaultCallbackHandler.X509CertificateValidatorImpl certValidator =
                        dch.new X509CertificateValidatorImpl(trustStore,null,false);
+            if(cert == null){
+                throw new RuntimeException("certificate is null");
+            }
             valid = certValidator.validate((X509Certificate) cert);
 
         } catch (IOException ex) {

@@ -50,12 +50,8 @@ import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.wss.impl.callback.CertificateValidationCallback.CertificateValidationException;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
-import java.io.ByteArrayInputStream;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -118,9 +114,12 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
                     xmlReader = idExtn.readAsXMLStreamReader();
                     CertificateRetriever cr = new CertificateRetriever();
                     byte[] bstValue = cr.digestBST(xmlReader);
+                    if (bstValue == null) {
+                        throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
+                    }
                     X509Certificate certificate = cr.constructCertificate(bstValue);
-                    boolean valid = cr.validateCertificate(certificate,props);
-                    if(!valid){
+                    boolean valid = cr.validateCertificate(certificate, props);
+                    if (!valid){
                       throw new RuntimeException("certificate is not valid");
                     }
                     props.put(PipeConstants.SERVER_CERT, certificate);
