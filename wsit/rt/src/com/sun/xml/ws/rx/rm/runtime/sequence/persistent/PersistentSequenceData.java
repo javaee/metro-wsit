@@ -301,7 +301,7 @@ final class PersistentSequenceData implements SequenceData {
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
         try {
-            ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND ID=?");
+            ps = cm.prepareStatement(con, "DELETE FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=?");
 
             ps.setString(1, endpointUid);
             ps.setString(2, sequenceId);
