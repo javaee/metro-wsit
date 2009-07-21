@@ -240,7 +240,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public void preDestroy() {
         LOGGER.entering();
         try {
-            closeRmSession();
+            if (outboundSequenceId.value != null) { // RM session has already started
+                closeRmSession();
+            }
         } catch (RuntimeException ex) {
             LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         } finally {
