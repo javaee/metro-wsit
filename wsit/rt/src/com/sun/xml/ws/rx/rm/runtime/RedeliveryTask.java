@@ -84,7 +84,7 @@ final class RedeliveryTask implements Runnable {
 
         for (ApplicationMessage message : readyForResendQueue) {
             if (LOGGER.isLoggable(Level.FINER)) {
-                LOGGER.info(String.format("Pputting to sequence [ %s ] delivery queue message with number [ %d ] ", message.getSequenceId(), message.getMessageNumber()));
+                LOGGER.info(String.format("Putting to sequence [ %s ] delivery queue message with number [ %d ] ", message.getSequenceId(), message.getMessageNumber()));
             }
             deliveryHandler.putToDeliveryQueue(message);
         }
