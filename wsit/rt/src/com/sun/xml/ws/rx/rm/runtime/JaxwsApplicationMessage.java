@@ -107,7 +107,7 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
             if (message != null) {
                 XMLStreamWriter xsw = XMLStreamWriterFactory.create(baos, "UTF-8");
                 try {
-                    packet.getMessage().writeTo(xsw);
+                    packet.getMessage().copy().writeTo(xsw);
                 } catch (XMLStreamException ex) {
                     // TODO L10N
                     throw LOGGER.logSevereException(new RxRuntimeException("Unable to serialize message to XML stream", ex));
