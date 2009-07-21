@@ -74,7 +74,7 @@ final class RedeliveryTask implements Runnable {
         assert timeSynchronizer != null;
         
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.finest(String.format("Periodic request resend task executed - registered message queue size: [ %d ]", scheduledMessages.size()));
+            LOGGER.finest(String.format("Periodic request redelivery task executed - registered message queue size: [ %d ]", scheduledMessages.size()));
         }
 
         Queue<ApplicationMessage> readyForResendQueue = new LinkedList<ApplicationMessage>();
@@ -105,7 +105,7 @@ final class RedeliveryTask implements Runnable {
      */
     final boolean register(@NotNull ApplicationMessage message, long executionTime) {
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a resend on a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
+            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
         }
         return scheduledMessages.register(executionTime, message);
     }
