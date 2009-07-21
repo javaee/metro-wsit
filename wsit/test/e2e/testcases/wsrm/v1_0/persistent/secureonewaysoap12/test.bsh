@@ -1,0 +1,6 @@
+pingPort.ping("Hello");
+pingPort.close();
+
+
+
+
