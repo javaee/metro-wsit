@@ -72,10 +72,6 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     private final Map<String, String> boundSequences = new HashMap<String, String>();
     /**
-     * Monitoring manager
-     */
-    private final ManagedObjectManager managedObjectManager;
-    /**
      * Inbound delivery queue builder
      */
     private final DeliveryQueueBuilder inboundQueueBuilder;
@@ -98,9 +94,10 @@ public final class InVmSequenceManager implements SequenceManager {
         this.outboundQueueBuilder = outboundQueueBuilder;
 
         this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
-        this.managedObjectManager = configuration.getManagedObjectManager();
-        if (this.managedObjectManager != null) {
-            this.managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
+        
+        ManagedObjectManager managedObjectManager = configuration.getManagedObjectManager();
+        if (managedObjectManager != null) {
+            managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
     }
 

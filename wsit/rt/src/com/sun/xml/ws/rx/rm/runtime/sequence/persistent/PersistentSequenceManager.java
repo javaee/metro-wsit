@@ -77,10 +77,6 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final Map<String, String> boundSequences = new HashMap<String, String>();
     /**
-     * Monitoring manager
-     */
-    private final ManagedObjectManager managedObjectManager;
-    /**
      * Inbound delivery queue bulder
      */
     private final DeliveryQueueBuilder inboundQueueBuilder;
@@ -94,16 +90,16 @@ public final class PersistentSequenceManager implements SequenceManager {
     private final String uniqueEndpointId;
 
     public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration) {
-        this.managedObjectManager = configuration.getManagedObjectManager();
-        if (managedObjectManager != null) {
-            managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
-        }
-
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
+        
+        ManagedObjectManager managedObjectManager = configuration.getManagedObjectManager();
+        if (managedObjectManager != null) {
+            managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
+        }
     }
 
     /**
@@ -282,10 +278,6 @@ public final class PersistentSequenceManager implements SequenceManager {
 
             }
 
-            if (managedObjectManager != null) {
-                managedObjectManager.unregister(sequence);
-            }
-
             PersistentSequenceData.remove(cm, uniqueEndpointId, sequenceId);
 
             sequence.preDestroy();
@@ -338,9 +330,6 @@ public final class PersistentSequenceManager implements SequenceManager {
             // no need to check for a duplicate:
             // if we were able to create PersistentSequenceData instance, it means that there is no duplicate
             sequences.put(sequence.getId(), sequence);
-            if (managedObjectManager != null) {
-                managedObjectManager.register(this, sequence, sequence.getId().replace(':', '-'));
-            }
 
             if (boundSequenceId != null) {
                 checkIfExist(boundSequenceId);
