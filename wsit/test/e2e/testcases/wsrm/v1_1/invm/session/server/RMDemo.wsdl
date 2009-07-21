@@ -1,0 +1,133 @@
+<?xml version="1.0" ?>
+
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+
+
+<definitions
+
+    xmlns:wsaw = "http://www.w3.org/2006/05/addressing/wsdl"
+    xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+    xmlns:soap = "http://schemas.xmlsoap.org/wsdl/soap12/"
+    xmlns:tns = "http://rm.demo/"
+    xmlns:xsd = "http://www.w3.org/2001/XMLSchema"
+    xmlns = "http://schemas.xmlsoap.org/wsdl/"
+    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+    xmlns:wsp="http://www.w3.org/ns/ws-policy"
+    xmlns:wsrm="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+    targetNamespace = "http://rm.demo/"
+    name = "RMDemoService">
+
+    
+
+     <wsp:Policy wsu:Id="RM_policy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <wsam:Addressing wsp:Optional="false" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"/>
+                <wsrm:RMAssertion>
+                </wsrm:RMAssertion>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+
+    <types>
+        <xsd:schema>
+            <xsd:import namespace = "http://rm.demo/" schemaLocation = "RMDemo.xsd"></xsd:import>
+        </xsd:schema>
+    </types>
+
+    <message name = "getResult">
+        <part name = "parameters" element = "tns:getResult"></part>
+    </message>
+
+    <message name = "getResultResponse">
+        <part name = "parameters" element = "tns:getResultResponse"></part>
+    </message>
+
+    <message name = "addString">
+        <part name = "parameters" element = "tns:addString"></part>
+    </message>
+
+    <message name = "addStringResponse">
+        <part name = "parameters" element = "tns:addStringResponse"></part>
+    </message>
+
+    <portType name = "RMDemo">
+        <operation name = "getResult">
+            <input message = "tns:getResult" wsaw:Action="urn:wsrm:getResult"></input>
+            <output message = "tns:getResultResponse" wsaw:Action="urn:wsrm:getResultResponse"></output>
+        </operation>
+        <operation name = "addString">
+            <input message = "tns:addString" wsaw:Action="urn:wsrm:addString"></input>
+            <output message = "tns:addStringResponse" wsaw:Action="urn:wsrm:addStringResponse"></output>
+        </operation>
+    </portType>
+
+    <binding name = "RMDemoPortBinding" type = "tns:RMDemo">
+        <wsp:PolicyReference URI="#RM_policy"/>
+        <wsaw:UsingAddressing></wsaw:UsingAddressing>
+        <soap:binding transport = "http://schemas.xmlsoap.org/soap/http" style = "document"></soap:binding>
+        <operation name = "getResult">
+            <soap:operation></soap:operation>
+            <input>
+                <soap:body use = "literal"></soap:body>
+            </input>
+            <output>
+                <soap:body use = "literal"></soap:body>
+            </output>
+        </operation>
+        <operation name = "addString">
+            <soap:operation></soap:operation>
+            <input>
+                <soap:body use = "literal"></soap:body>
+            </input>
+            <output>
+                <soap:body use = "literal"></soap:body>
+            </output>
+        </operation>
+    </binding>
+
+    <service name = "RMDemoService">
+        <port name = "RMDemoPort" binding = "tns:RMDemoPortBinding">
+            <soap:address location = "http://localhost:8080/rmdemo"></soap:address>
+        </port>
+    </service>
+
+</definitions>
+
+
+

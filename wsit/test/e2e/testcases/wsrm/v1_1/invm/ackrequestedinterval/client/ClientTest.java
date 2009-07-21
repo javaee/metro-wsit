@@ -33,34 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.v1_1.wsa_v1_0_support.client;
+package wsrm.v1_1.invm.ackrequestedinterval.client;
 
-import junit.framework.TestCase;
-import java.io.Closeable;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class ClientTest extends TestCase {
-
     private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
 
-    public void testW3CAddressingVersionSupport() throws Exception {
+    public void testAckRequestedInterval() {
         IPing port = null;
         try {
             PingService service = new PingService();
             port = service.getPingPort();
-            port.ping("Hello world!");
+            
+            for (int i = 0; i < 50; i++) {
+                port.ping("Hello " + i);
+                LOGGER.info(String.format("Hello %d. message successfully sent.", i));
+            }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "WS proxy invocation failed with an unexpected exception.", ex);
             fail(String.format("Test failed with the execption: %s", ex));
         } finally {
             if (port != null) {
-                ((Closeable) port).close();
+                try {
+                    ((java.io.Closeable) port).close();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error while closing WS proxy", ex);
+                }
             }
-        }
+        }    
     }
 }

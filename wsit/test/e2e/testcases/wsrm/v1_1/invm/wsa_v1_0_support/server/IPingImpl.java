@@ -33,34 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.v1_1.wsa_member_submission_support.client;
+package wsrm.v1_1.invm.wsa_v1_0_support.server;
 
-import junit.framework.TestCase;
-import java.io.Closeable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.xml.ws.BindingType;
 
-/**
- *
- * @author Marek Potociar (marek.potociar at sun.com)
- */
-public class ClientTest extends TestCase {
+@WebService(endpointInterface = "wsrm.v1_1.invm.wsa_v1_0_support.server.IPing")
+@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+public class IPingImpl {
 
-    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
 
-    public void testMemberSubmissionAddressingVersionSupport() throws Exception {
-        IPing port = null;
-        try {
-            PingService service = new PingService();
-            port = service.getPingPort();
-            port.ping("Hello world!");
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "WS proxy invocation failed with an unexpected exception.", ex);
-            fail(String.format("Test failed with the execption: %s", ex));
-        } finally {
-            if (port != null) {
-                ((Closeable) port).close();
-            }
-        }
+    @WebMethod()
+    public void ping(String message) {
+        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
     }
 }

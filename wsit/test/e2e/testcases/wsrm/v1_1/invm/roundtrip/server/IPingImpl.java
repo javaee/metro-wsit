@@ -33,22 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.v1_1.wsa_v1_0_support.server;
+package wsrm.v1_1.invm.roundtrip.server;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jws.WebMethod;
+
+
 import javax.jws.WebService;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import javax.xml.ws.BindingType;
+import javax.xml.ws.soap.SOAPBinding;
 
-@WebService(endpointInterface = "wsrm.v1_1.wsa_v1_0_support.server.IPing")
-@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+@WebService(endpointInterface = "wsrm.v1_1.invm.roundtrip.server.IPing")
+@BindingType(SOAPBinding.SOAP12HTTP_BINDING)
 public class IPingImpl {
 
-    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
+    /**
+     * @param String
+     */
+    public PingResponseBodyType echoString(PingRequestBodyType echoString) {
+        PingResponseBodyType pr = new ObjectFactory().createPingResponseBodyType();
+        JAXBElement<String> val = new JAXBElement<String>(new QName("http://tempuri.org/", "EchoStringReturn"), String.class, new String("Returning hello "));
+        JAXBElement<String> text = echoString.getText();
+        JAXBElement<String> seq = echoString.getSequence();
+        val.setValue("Returning " + text.getValue() + "Sequence" + seq.getValue());
+        pr.setEchoStringReturn(val);
 
-    @WebMethod()
-    public void ping(String message) {
-        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
+        return pr;
     }
 }

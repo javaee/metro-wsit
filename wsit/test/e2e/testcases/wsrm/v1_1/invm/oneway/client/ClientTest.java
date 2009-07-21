@@ -33,22 +33,41 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package wsrm.v1_1.wsa_member_submission_support.server;
+package wsrm.v1_1.invm.oneway.client;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-import javax.xml.ws.BindingType;
+import junit.framework.TestCase;
 
-@WebService(endpointInterface = "wsrm.v1_1.wsa_member_submission_support.server.IPing")
-@BindingType(javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
-public class IPingImpl {
-
-    private static final Logger LOGGER = Logger.getLogger(IPingImpl.class.getName());
-
-    @WebMethod()
-    public void ping(String message) {
-        LOGGER.log(Level.ALL, String.format("On the server side received '%s'", message));
+/**
+ *
+ * @author Marek Potociar <marek.potociar at sun.com>
+ */
+public class ClientTest extends TestCase {
+    private static final Logger LOGGER = Logger.getLogger(ClientTest.class.getName());
+    
+    public void testOneWay() {
+        IPing port = null;
+        try {
+            PingService service = new PingService();
+            port = service.getPingPort();
+            
+            for (int i = 0; i < 5; i++) {
+                port.ping("Hello " + i);
+                LOGGER.info(String.format("Hello %d. message successfully sent.", i));
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "WS proxy invocation failed with an unexpected exception.", ex);
+            fail(String.format("Test failed with the execption: %s", ex));
+        } finally {
+            if (port != null) {
+                try {
+                    ((java.io.Closeable) port).close();
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE, "Error while closing WS proxy", ex);
+                }
+            }
+        }    
     }
 }
