@@ -210,7 +210,9 @@ public class CertificateRetriever {
                     }
                 }
             }
-
+            if(ep == null){
+                return;
+            }
             for (AssertionSet assertionSet : ep) {
 
                 for (PolicyAssertion pa : assertionSet) {
