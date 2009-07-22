@@ -335,6 +335,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
         this.iterationsForPDK = that.iterationsForPDK;
+        this.serverCert = that.serverCert;
         try {            
             this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
             this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
@@ -711,57 +712,18 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
-            
-            if (endpointPolicy != null){
-                if (endpointPolicy.contains(AddressingVersion.W3C.policyNsUri) ||endpointPolicy.contains("http://www.w3.org/2007/05/addressing/metadata")){
-                    addVer = AddressingVersion.W3C;
-                } else if (endpointPolicy.contains(AddressingVersion.MEMBER.policyNsUri)){
-                    addVer = AddressingVersion.MEMBER;
-                }
-                if(endpointPolicy.contains(optServerSecurity) || endpointPolicy.contains(optClientSecurity)){
-                    optimized = false;
-                }
-                if(endpointPolicy.contains(disableCPBuffering) || endpointPolicy.contains(disableSPBuffering)){
-                    disablePayloadBuffer = true;
-                }
-                if(endpointPolicy.contains(disableIncPrefixServer) || endpointPolicy.contains(disableIncPrefixClient)){
-                    disableIncPrefix = true;
-                }
-                if(endpointPolicy.contains(encHeaderContentServer) || endpointPolicy.contains(encHeaderContentClient)){
-                    encHeaderContent = true;
-                }
-                if(endpointPolicy.contains(bsp10Client) || endpointPolicy.contains(bsp10Server)){
-                    bsp10 = true;
-                }
-                if(endpointPolicy.contains(allowMissingTSClient) || endpointPolicy.contains(allowMissingTSServer)){
-                    allowMissingTimestamp = true;
-                }
-                if(endpointPolicy.contains(unsetSecurityMUValueClient) || endpointPolicy.contains(unsetSecurityMUValueServer)){
-                    securityMUValue = false;
-                } 
-                if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)){
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-                    wsscVer = WSSCVersion.WSSC_10;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                } else if(endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
-                    wsscVer = WSSCVersion.WSSC_13;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_13;
-                } else if (endpointPolicy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri)) {
-                    spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
-                    wsscVer = WSSCVersion.WSSC_10;
-                    wsTrustVer = WSTrustVersion.WS_TRUST_10;
-                } 
-                if (endpointPolicy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200702;
-                } else if (endpointPolicy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200502;
-                }                
+
+            //This will be used for setting credentials like  spVersion.... etc for binding level policies
+            setPolicyCredentials(endpointPolicy);
+
+              //This will be used for setting credentials like  spVersion.... etc for operation level policies
+            for (WSDLBoundOperation operation : tubeConfig.getWSDLPort().getBinding().getBindingOperations()) {
+                QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(), operation.getName().getLocalPart());
+                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, operationName);
+                Policy operationPolicy = wsPolicyMap.getOperationEffectivePolicy(operationKey);
+                setPolicyCredentials(operationPolicy);
             }
-            
-            
+                                    
             buildProtocolPolicy(endpointPolicy);
             ArrayList<Policy> policyList = new ArrayList<Policy>();
             if(endpointPolicy != null){
@@ -849,6 +811,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                         addOutgoingFaultPolicy(ep,outPH,fault);
                     }
                     faultPL.remove(fPolicy);
+                }
+                 if(operationPolicy != null){
+                    policyList.remove(operationPolicy);
                 }
             }
         }catch(PolicyException pe){
@@ -1672,6 +1637,57 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
     protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
-    
-    
+
+    private void setPolicyCredentials(Policy policy) {
+
+        if (policy != null) {
+            if (policy.contains(AddressingVersion.W3C.policyNsUri) || policy.contains("http://www.w3.org/2007/05/addressing/metadata")) {
+                addVer = AddressingVersion.W3C;
+            } else if (policy.contains(AddressingVersion.MEMBER.policyNsUri)) {
+                addVer = AddressingVersion.MEMBER;
+            }
+            if (policy.contains(optServerSecurity) || policy.contains(optClientSecurity)) {
+                optimized = false;
+            }
+            if (policy.contains(disableCPBuffering) || policy.contains(disableSPBuffering)) {
+                disablePayloadBuffer = true;
+            }
+            if (policy.contains(disableIncPrefixServer) || policy.contains(disableIncPrefixClient)) {
+                disableIncPrefix = true;
+            }
+            if (policy.contains(encHeaderContentServer) || policy.contains(encHeaderContentClient)) {
+                encHeaderContent = true;
+            }
+            if (policy.contains(bsp10Client) || policy.contains(bsp10Server)) {
+                bsp10 = true;
+            }
+            if (policy.contains(allowMissingTSClient) || policy.contains(allowMissingTSServer)) {
+                allowMissingTimestamp = true;
+            }
+            if (policy.contains(unsetSecurityMUValueClient) || policy.contains(unsetSecurityMUValueServer)) {
+                securityMUValue = false;
+            }
+            if (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri)) {
+                spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
+                wsscVer = WSSCVersion.WSSC_10;
+                wsTrustVer = WSTrustVersion.WS_TRUST_10;
+            } else if (policy.contains(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
+                spVersion = SecurityPolicyVersion.SECURITYPOLICY12NS;
+                wsscVer = WSSCVersion.WSSC_13;
+                wsTrustVer = WSTrustVersion.WS_TRUST_13;
+            } else if (policy.contains(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri)) {
+                spVersion = SecurityPolicyVersion.SECURITYPOLICY200512;
+                wsscVer = WSSCVersion.WSSC_10;
+                wsTrustVer = WSTrustVersion.WS_TRUST_10;
+            }
+            if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
+                    policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
+                rmVer = RmVersion.WSRM200702;
+            } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
+                    policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
+                rmVer = RmVersion.WSRM200502;
+            }
+        }
+    }
+
 }

@@ -78,6 +78,7 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.SubjectAccessor;
+import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
@@ -153,7 +154,6 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //this.map = map;
         endPoint = (WSEndpoint)map.get("ENDPOINT");
         sessionManager = SessionManager.getSessionManager(endPoint);
-        
         Iterator it = inMessagePolicyMap.values().iterator();
         Set configAssertions = null;
         while (it.hasNext()) {
@@ -231,7 +231,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     @SuppressWarnings("unchecked")
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
-        
+
         Packet packet = getRequestPacket(messageInfo);
         Packet ret = null;
 
@@ -550,7 +550,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     }
 
     @Override
-    protected ProcessingContext initializeOutgoingProcessingContext(Packet packet, boolean isSCMessage) {        
+    protected ProcessingContext initializeOutgoingProcessingContext(Packet packet, boolean isSCMessage) {
         ProcessingContextImpl ctx = null;
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);

@@ -5,6 +5,7 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -197,7 +198,19 @@ public class CertificateRetriever {
         PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
         try {
             com.sun.xml.ws.policy.Policy ep = pm.getEndpointEffectivePolicy(endpointKey);
-            
+
+            if (ep == null) {
+                for (WSDLBoundOperation operation : port.getBinding().getBindingOperations()) {
+                    QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
+                            operation.getName().getLocalPart());
+                    PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, operationName);
+                    ep = pm.getOperationEffectivePolicy(operationKey);
+                    if(ep != null){
+                    break;
+                    }
+                }
+            }
+
             for (AssertionSet assertionSet : ep) {
 
                 for (PolicyAssertion pa : assertionSet) {

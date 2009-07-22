@@ -78,6 +78,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
     private ClientAuthContext cAC = null;
     private Subject clientSubject = null;
     private PacketMessageInfo pmInfo = null;
+    protected X509Certificate serverCert = null;
    
     protected static final Logger log =
             Logger.getLogger(
@@ -123,6 +124,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
                       throw new RuntimeException("certificate is not valid");
                     }
                     props.put(PipeConstants.SERVER_CERT, certificate);
+                    this.serverCert = certificate;
                 }
             } catch (XMLStreamException ex) {
                 log.log(Level.SEVERE, null, ex);
@@ -135,6 +137,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
     protected ClientSecurityTube(ClientSecurityTube that, TubeCloner cloner) {
         super(that, cloner);
         this.helper = that.helper;
+        this.serverCert = that.serverCert;
     }
 
     @Override
