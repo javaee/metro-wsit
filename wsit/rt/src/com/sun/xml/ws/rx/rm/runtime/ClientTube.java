@@ -295,11 +295,13 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
 
     private void closeRmSession() {
-        closeSequence();
-        waitUntilAllRequestsAckedOrCloseOperationTimeout();
-        terminateSequence();
-
-        rc.stopAllTasks();
+        try {
+            closeSequence();
+            waitUntilAllRequestsAckedOrCloseOperationTimeout();
+            terminateSequence();
+        } finally {
+            rc.stopAllTasks();
+        }
     }
 
     private void createSequences() throws RxRuntimeException, DuplicateSequenceException {

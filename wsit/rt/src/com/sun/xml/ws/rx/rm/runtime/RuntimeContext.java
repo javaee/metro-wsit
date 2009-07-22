@@ -108,7 +108,7 @@ public final class RuntimeContext {
                     sequenceManager,
                     communicator,
                     new SuspendedFiberStorage(),
-                    new ScheduledTaskManager(),
+                    new ScheduledTaskManager("RM Runtime Context"),
                     sourceMessageHandler,
                     destinationMessageHandler,
                     redeliveryTask);
@@ -177,7 +177,7 @@ public final class RuntimeContext {
     }
 
     public void stopAllTasks() {
-        scheduledTaskManager.stopAll();
+        scheduledTaskManager.shutdown();
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {

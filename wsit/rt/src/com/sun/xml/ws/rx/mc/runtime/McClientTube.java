@@ -105,7 +105,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 wsmcAnnonymousReplyToHeader,
                 wsmcAnnonymousFaultToHeader,
                 configuration);
-        this.scheduler = new ScheduledTaskManager();
+        this.scheduler = new ScheduledTaskManager("MC Client Tube");
         // TODO P2 make it configurable
         this.scheduler.startTask(mcSenderTask, 2000, 500);
     }
@@ -182,7 +182,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
     @Override
     public void preDestroy() {
-        scheduler.stopAll();
+        scheduler.shutdown();
 
         super.preDestroy();
     }

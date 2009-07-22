@@ -45,9 +45,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.sun.istack.logging.Logger;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * TODO javadoc
+ * Scheduled task manager provides a higher-level API for scheduling and controlling
+ * tasks that should run on a separate thread(s).
  *
  * <b>
  * WARNING: This class is a private utility class used by WSIT implementation. Any usage outside
@@ -59,18 +62,47 @@ import com.sun.istack.logging.Logger;
  */
 public final class ScheduledTaskManager {
     private static final Logger LOGGER = Logger.getLogger(ScheduledTaskManager.class);
+    private static final AtomicInteger instanceNumber = new AtomicInteger(1);
+
+    private static class NamedThreadFactory implements ThreadFactory {
+
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        NamedThreadFactory(String namePrefix) {
+            SecurityManager securityManager = System.getSecurityManager();
+            this.group = (securityManager != null)? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            this.namePrefix = "-thread-";
+        }
+
+        public Thread newThread(Runnable task) {
+            Thread newThread = new Thread(group, task, namePrefix + threadNumber.getAndIncrement());
+            if (newThread.getPriority() != Thread.NORM_PRIORITY) {
+                newThread.setPriority(Thread.NORM_PRIORITY);
+            }
+
+            return newThread;
+        }
+    }
 
     private static final long DELAY = 2000;
     private static final long PERIOD = 100;
-    private final ScheduledExecutorService scheduler;
+    //
+    private final String name;
+    private final ScheduledExecutorService executorService;
     private final Queue<ScheduledFuture<?>> scheduledTaskHandles;
-
     /**
      * TODO javadoc
      */
-    public ScheduledTaskManager() {
-        scheduler = Executors.newScheduledThreadPool(1);
-        scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
+    public ScheduledTaskManager(String name) {
+        this.name = name.trim();
+
+        // make all lowercase, replace all occurences of subsequent empty characters with a single dash and append some info
+        String threadNamePrefix = this.name.toLowerCase().replaceAll("\\s+", "-") + "-scheduler-" + instanceNumber.getAndIncrement() + "-thread-";
+
+        this.executorService = Executors.newScheduledThreadPool(1, new NamedThreadFactory(threadNamePrefix));
+        this.scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
     }
 
     /**
@@ -85,15 +117,30 @@ public final class ScheduledTaskManager {
         return handles;
     }
 
-    /**
-     * Stops the  scheduled task executor
-     */
-    public void stopAll() {
+    public void stopAllTasks() {
         ScheduledFuture<?> handle;
         while ((handle = scheduledTaskHandles.poll()) != null) {
             handle.cancel(false);
         }
-        scheduler.shutdown();
+    }
+
+    /**
+     * Stops all the tasks and shuts down the scheduled task executor
+     */
+    public void shutdown() {
+        stopAllTasks();
+
+        executorService.shutdown();
+        if (!executorService.isTerminated()) {
+            try {
+                Thread.sleep(DELAY);
+            } catch (InterruptedException ex) {
+                LOGGER.fine("Interrupted while waiting for a scheduler to shut down.", ex);
+            }
+            if (!executorService.isTerminated()) {
+                executorService.shutdownNow();
+            }
+        }
     }
 
     /**
@@ -104,7 +151,7 @@ public final class ScheduledTaskManager {
      * @param period the period between successive executions (in milliseconds)
      */
     public ScheduledFuture<?> startTask(Runnable task, long initialDelay, long period) {
-        final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+        final ScheduledFuture<?> taskHandle = executorService.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
         if (!scheduledTaskHandles.offer(taskHandle)) {
             // TODO L10N
             LOGGER.warning(String.format("Unable to store handle for task of class [ %s ]", task.getClass().getName()));

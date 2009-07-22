@@ -145,7 +145,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
 
             if (request == null) {
                 // simulate IO error
-                return doThrow(new WebServiceException(new IOException("Simulated IO error while sending request")));
+                return doThrow(new WebServiceException(new IOException("Simulated IO error while sending a request")));
             }
         }
         return super.processRequest(request);

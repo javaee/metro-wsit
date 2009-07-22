@@ -63,7 +63,7 @@ import javax.xml.ws.WebServiceException;
 public class JDBCConfigReader implements ConfigReader {
 
     private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
-    private final ScheduledTaskManager taskManager = new ScheduledTaskManager();
+    private final ScheduledTaskManager taskManager = new ScheduledTaskManager("JDBC config reader");
 
     private ConfigPoller poller = null;
 
@@ -78,7 +78,7 @@ public class JDBCConfigReader implements ConfigReader {
     }
 
     public void stop() {
-        this.taskManager.stopAll();
+        this.taskManager.shutdown();
     }
 
     
