@@ -130,10 +130,6 @@ public abstract class AbstractSequence implements Sequence {
         return data.getState();
     }
 
-    public void setState(State newState) {
-        this.data.setState(newState);
-    }
-
     public void setAckRequestedFlag() {
         data.setAckRequestedFlag(true);
     }
@@ -172,7 +168,9 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public void preDestroy() {
-        // nothing to do...
+        data.setState(State.TERMINATING);
+
+        // nothing else to do...
     }
     
     public ApplicationMessage retrieveMessage(String correlationId) {

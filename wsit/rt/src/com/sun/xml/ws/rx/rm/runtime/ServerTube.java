@@ -271,8 +271,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
             rc.stopAllTasks();
 
             SessionManager.removeSessionManager(endpoint);
-
-            // TODO
         } finally {
             super.preDestroy();
             LOGGER.exiting();
@@ -480,6 +478,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
         packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
 
         Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
+
+        if (session == null && rc.configuration.isPersistenceEnabled()) {
+            // inbound sequence id (session id) is valid, but there's no session 
+            // in the session manager => there must have been a crash or redeploy
+            // starting a new session
+            session = Utilities.startSession(packet.endpoint, sessionId);
+        }
+
         packet.invocationProperties.put(Session.SESSION_KEY, session.getUserData());
     }
 

@@ -271,8 +271,6 @@ public final class PersistentSequenceManager implements SequenceManager {
             checkIfExist(sequenceId); // Check if valid and prefetch sequence to a in-memory cache if not ready
 
             AbstractSequence sequence = sequences.remove(sequenceId);
-            sequence.setState(Sequence.State.TERMINATING);
-
             if (boundSequences.containsKey(sequenceId)) {
                 boundSequences.remove(sequenceId);
 
@@ -283,7 +281,6 @@ public final class PersistentSequenceManager implements SequenceManager {
             sequence.preDestroy();
 
             return sequence;
-
         } finally {
             dataLock.writeLock().unlock();
         }

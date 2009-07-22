@@ -44,6 +44,7 @@ import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import javax.xml.ws.WebServiceException;
 
 class ClientSourceDeliveryCallback implements Postman.Callback {
@@ -76,10 +77,9 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
                         request.getNextResendCount(),
-                        rc.configuration.getMessageRetransmissionInterval(),
-                        rc.sequenceManager()));
+                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
             } else {
                 resumeParentFiber(error);
             }
@@ -111,13 +111,17 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                     onCompletion(ex);
                 }
             } else {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval(), rc.sequenceManager()));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
+                        request.getNextResendCount(),
+                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
             }
         }
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval(), rc.sequenceManager()));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
+                        request.getNextResendCount(),
+                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
             } else {
                 resumeParentFiber(error);
             }
@@ -161,7 +165,9 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().nextResendTime(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval(), rc.sequenceManager()));
+                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
+                        request.getNextResendCount(),
+                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
             } else {
                 resumeParentFiber(error);
             }

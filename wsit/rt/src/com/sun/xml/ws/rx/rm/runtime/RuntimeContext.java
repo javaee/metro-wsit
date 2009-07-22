@@ -89,7 +89,8 @@ public final class RuntimeContext {
 
             this.sourceMessageHandler = new SourceMessageHandler(null);
             this.destinationMessageHandler = new DestinationMessageHandler(null);
-            this.redeliveryTask = new RedeliveryTask(sourceMessageHandler, null);
+
+            this.redeliveryTask = RedeliveryTask.getInstance(sourceMessageHandler);
         }
 
         public Builder sequenceManager(SequenceManager sequenceManager) {
@@ -97,7 +98,6 @@ public final class RuntimeContext {
 
             this.sourceMessageHandler.setSequenceManager(sequenceManager);
             this.destinationMessageHandler.setSequenceManager(sequenceManager);
-            this.redeliveryTask.setTimeSynchronizer(sequenceManager);
 
             return this;
         }
@@ -154,19 +154,12 @@ public final class RuntimeContext {
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
     }
 
-    public ScheduledFuture<?> startTask(Runnable task) {
-        return scheduledTaskManager.startTask(task);
-    }
-
     public ScheduledFuture<?> startTask(Runnable task, long delay, long period) {
         return scheduledTaskManager.startTask(task, delay, period);
     }
 
-    public ScheduledFuture<?> startRedeliveryTask() {
-        return scheduledTaskManager.startTask(
-                redeliveryTask,
-                configuration.getMessageRetransmissionInterval(),
-                configuration.getMessageRetransmissionInterval());
+    public void startRedeliveryTask() {
+        // do nothing
     }
 
     public ScheduledFuture<?> startAckRequesterTask(Runnable ackRequesterTask) {
@@ -178,6 +171,7 @@ public final class RuntimeContext {
 
     public void stopAllTasks() {
         scheduledTaskManager.shutdown();
+        redeliveryTask.stop();
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
@@ -218,6 +212,5 @@ public final class RuntimeContext {
 
         this.sourceMessageHandler.setSequenceManager(newValue);
         this.destinationMessageHandler.setSequenceManager(newValue);
-        this.redeliveryTask.setTimeSynchronizer(newValue);
     }
 }

@@ -219,7 +219,6 @@ public final class InVmSequenceManager implements SequenceManager {
             dataLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
                 AbstractSequence sequence = sequences.remove(sequenceId);
-                sequence.setState(State.TERMINATING);
 
                 if (boundSequences.containsKey(sequenceId)) {
                     boundSequences.remove(sequenceId);

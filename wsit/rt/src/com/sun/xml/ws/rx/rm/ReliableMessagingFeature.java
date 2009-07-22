@@ -36,7 +36,6 @@
 package com.sun.xml.ws.rx.rm;
 
 import com.sun.xml.ws.api.FeatureConstructor;
-import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import javax.xml.ws.WebServiceFeature;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
@@ -203,8 +202,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         LINEAR() {
-            public long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer) {
-                return timeSynchronizer.currentTimeInMillis() + baseRate;
+            public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
+                return baseRate;
             }
         },
         /**
@@ -214,8 +213,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         EXPONENTIAL() {
-            public long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer) {
-                return timeSynchronizer.currentTimeInMillis() + resendAttemptNumber * baseRate;
+            public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
+                return resendAttemptNumber * baseRate;
             }
         };
 
@@ -231,14 +230,15 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         }
 
         /**
-         * Calculates the next possible scheduled resume time based on the resend attempt number.
+         * Calculates the delay before the next possible scheduled resume time based on the resend
+         * attempt number.
          *
          * @param resendAttemptNumber number of the resend attempt for a message
          * @param baseRate base resend interval
          *
          * @return next scheduled resume time
          */
-        public abstract long nextResendTime(int resendAttemptNumber, long baseRate, TimeSynchronizer timeSynchronizer);
+        public abstract long getDelayInMillis(int resendAttemptNumber, long baseRate);
     }
 
     // General RM config values

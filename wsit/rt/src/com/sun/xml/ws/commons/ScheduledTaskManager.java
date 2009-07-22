@@ -35,8 +35,6 @@
  */
 package com.sun.xml.ws.commons;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -45,7 +43,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.sun.istack.logging.Logger;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -64,28 +61,6 @@ public final class ScheduledTaskManager {
     private static final Logger LOGGER = Logger.getLogger(ScheduledTaskManager.class);
     private static final AtomicInteger instanceNumber = new AtomicInteger(1);
 
-    private static class NamedThreadFactory implements ThreadFactory {
-
-        private final ThreadGroup group;
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        NamedThreadFactory(String namePrefix) {
-            SecurityManager securityManager = System.getSecurityManager();
-            this.group = (securityManager != null)? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
-            this.namePrefix = "-thread-";
-        }
-
-        public Thread newThread(Runnable task) {
-            Thread newThread = new Thread(group, task, namePrefix + threadNumber.getAndIncrement());
-            if (newThread.getPriority() != Thread.NORM_PRIORITY) {
-                newThread.setPriority(Thread.NORM_PRIORITY);
-            }
-
-            return newThread;
-        }
-    }
-
     private static final long DELAY = 2000;
     private static final long PERIOD = 100;
     //
@@ -99,22 +74,10 @@ public final class ScheduledTaskManager {
         this.name = name.trim();
 
         // make all lowercase, replace all occurences of subsequent empty characters with a single dash and append some info
-        String threadNamePrefix = this.name.toLowerCase().replaceAll("\\s+", "-") + "-scheduler-" + instanceNumber.getAndIncrement() + "-thread-";
+        String threadNamePrefix = this.name.toLowerCase().replaceAll("\\s+", "-") + "-scheduler-" + instanceNumber.getAndIncrement();
 
         this.executorService = Executors.newScheduledThreadPool(1, new NamedThreadFactory(threadNamePrefix));
         this.scheduledTaskHandles = new ConcurrentLinkedQueue<ScheduledFuture<?>>();
-    }
-
-    /**
-     * Starts the scheduled task executor
-     */
-    public List<ScheduledFuture<?>> startTasks(Runnable... tasks) {
-        List<ScheduledFuture<?>> handles = new ArrayList<ScheduledFuture<?>>(tasks.length);
-        for (Runnable task : tasks) {
-            handles.add(startTask(task));
-        }
-        
-        return handles;
     }
 
     public void stopAllTasks() {
@@ -164,7 +127,7 @@ public final class ScheduledTaskManager {
      *
      * @param task new task to be executed regularly at a predefined rate
      */
-    public ScheduledFuture<?> startTask(Runnable task) {
+    public ScheduledFuture<?> runOnce(Runnable task) {
         return startTask(task, DELAY, PERIOD);
     }
 }

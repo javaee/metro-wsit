@@ -58,15 +58,6 @@ public class SuspendedFiberStorage extends TimestampedCollection<String, Fiber> 
     }
 
     @Override
-    public boolean register(Fiber subject) {
-        if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("Registering fiber [ %s ] for suspend", subject.toString()));
-        }
-
-        return super.register(subject);
-    }
-
-    @Override
     public boolean register(long timestamp, Fiber subject) {
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(String.format("Registering fiber [ %s ] with timestamp [ %d ] for suspend", subject.toString(), timestamp));

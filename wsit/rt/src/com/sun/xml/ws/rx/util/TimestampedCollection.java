@@ -139,15 +139,7 @@ public class TimestampedCollection<K, V> {
      * @see #removeOldest()
      */
     public boolean register(@NotNull V subject) {
-        try {
-            TimestampedRegistration<K, V> tr = new TimestampedRegistration<K, V>(System.currentTimeMillis(), null, subject);
-            rwLock.writeLock().lock();
-
-            return timestampedPriorityQueue.offer(tr);
-            // we don't put anything into correlationMap
-        } finally {
-            rwLock.writeLock().unlock();
-        }
+        return register(System.currentTimeMillis(), subject);
     }
 
     /**
