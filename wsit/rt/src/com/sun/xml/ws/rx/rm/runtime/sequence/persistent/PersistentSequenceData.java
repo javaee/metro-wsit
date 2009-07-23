@@ -475,7 +475,7 @@ final class PersistentSequenceData implements SequenceData {
             if (rowsAffected != 1) {
                 throw LOGGER.logException(
                         new PersistenceException(String.format(
-                        "Udating %s column data on a sequence with id = [ %s ]  failed: " +
+                        "Updating %s column data on a sequence with id = [ %s ]  failed: " +
                         "Expected updated rows: 1, Actual: %d",
                         fi.columnName,
                         sequenceId,
@@ -485,7 +485,7 @@ final class PersistentSequenceData implements SequenceData {
         } catch (SQLException ex) {
             // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
-                    "Udating %s column data on a sequence with id = [ %s ]  failed: " +
+                    "Updating %s column data on a sequence with id = [ %s ]  failed: " +
                     "An unexpected JDBC exception occured",
                     fi.columnName,
                     sequenceId), ex));
