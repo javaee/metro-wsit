@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.util.DelayedTaskManager;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.istack.logging.Logger;
@@ -46,6 +47,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Handles incomming application messages. This class encapsulates
@@ -54,7 +56,7 @@ import java.util.List;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
+class DestinationMessageHandler implements DelayedTaskManager.DelayedTask<ApplicationMessage> {
 
     private static final Logger LOGGER = Logger.getLogger(DestinationMessageHandler.class);
     //
@@ -144,8 +146,15 @@ class DestinationMessageHandler implements RedeliveryTask.DeliveryHandler {
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException {
         assert sequenceManager != null;
 
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format("Putting a message with number [ %d ] to the delivery queue of a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
+        }
+
         sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 
-    
+    public void handle(ApplicationMessage message, DelayedTaskManager<ApplicationMessage> manager) throws RxRuntimeException, UnknownSequenceException {
+        putToDeliveryQueue(message);
+    }
+   
 }

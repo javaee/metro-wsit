@@ -290,8 +290,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private void openRmSession() {
         createSequences();
 
-        rc.startRedeliveryTask();
-        rc.startAckRequesterTask(createAckRequesterTask(rc.configuration.getAcknowledgementRequestInterval()));
+        rc.scheduledTaskManager.startTask(
+                createAckRequesterTask(rc.configuration.getAcknowledgementRequestInterval()),
+                rc.configuration.getAcknowledgementRequestInterval(),
+                rc.configuration.getAcknowledgementRequestInterval());
     }
 
     private void closeRmSession() {
@@ -424,7 +426,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 try {
                     if (!rc.sequenceManager().getSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
                         doneSignal.countDown();
-                    }
+                    } 
                 } catch (UnknownSequenceException ex) {
                     LOGGER.severe(LocalizationMessages.WSRM_1111_UNEXPECTED_EXCEPTION_WHILE_WAITING_FOR_SEQ_ACKS(), ex);
                     doneSignal.countDown();

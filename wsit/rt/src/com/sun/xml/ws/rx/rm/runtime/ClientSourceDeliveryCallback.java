@@ -78,9 +78,11 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
-                        request.getNextResendCount(),
-                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
+                RedeliveryTask.getInstance().register(
+                        request,
+                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        TimeUnit.MILLISECONDS,
+                        rc.sourceMessageHandler);
             } else {
                 resumeParentFiber(error);
             }
@@ -112,17 +114,21 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                     onCompletion(ex);
                 }
             } else {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
-                        request.getNextResendCount(),
-                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
+                RedeliveryTask.getInstance().register(
+                        request,
+                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        TimeUnit.MILLISECONDS,
+                        rc.sourceMessageHandler);
             }
         }
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
-                        request.getNextResendCount(),
-                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
+                RedeliveryTask.getInstance().register(
+                        request,
+                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        TimeUnit.MILLISECONDS,
+                        rc.sourceMessageHandler);
             } else {
                 resumeParentFiber(error);
             }
@@ -166,9 +172,11 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                rc.redeliveryTask.register(request, rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(
-                        request.getNextResendCount(),
-                        rc.configuration.getMessageRetransmissionInterval()), TimeUnit.MILLISECONDS);
+                RedeliveryTask.getInstance().register(
+                        request,
+                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        TimeUnit.MILLISECONDS,
+                        rc.sourceMessageHandler);
             } else {
                 resumeParentFiber(error);
             }

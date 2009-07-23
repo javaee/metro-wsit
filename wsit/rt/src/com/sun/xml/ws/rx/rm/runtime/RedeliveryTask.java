@@ -35,121 +35,34 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.sun.istack.NotNull;
+import com.sun.xml.ws.rx.util.DelayedTaskManager;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.commons.NamedThreadFactory;
-import com.sun.xml.ws.rx.util.DelayedReference;
-import java.util.concurrent.Callable;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-final class RedeliveryTask implements Callable<Integer> {
-
-    public static interface DeliveryHandler {
-        public void putToDeliveryQueue(ApplicationMessage message);
-    }
-    //
+final class RedeliveryTask {
     private static final Logger LOGGER = Logger.getLogger(RedeliveryTask.class);
-    private static final ExecutorService executorService = Executors.newCachedThreadPool(new NamedThreadFactory("redelivery-task-executor"));
-    // TODO uncomment once this thread is singleton: private static final ExecutorService executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("redelivery-task-executor"));
+    private static final RedeliveryTask INSTANCE = new RedeliveryTask();
 
-    //
-    private final DelayQueue<DelayedReference<ApplicationMessage>> scheduledMessages = new DelayQueue<DelayedReference<ApplicationMessage>>();
-    private final DeliveryHandler deliveryHandler;
-    private final AtomicBoolean isRunning;
-    private final AtomicReference<Future<Integer>> runningStatusFutureReference;
-
-
-    private RedeliveryTask(@NotNull DeliveryHandler deliveryHandler) {
-        assert deliveryHandler != null;
-
-        this.deliveryHandler = deliveryHandler;
-        this.isRunning = new AtomicBoolean(false);
-        this.runningStatusFutureReference = new AtomicReference<Future<Integer>>();
+    public static RedeliveryTask getInstance() {
+        return INSTANCE;
     }
 
-    public static RedeliveryTask getInstance(@NotNull DeliveryHandler deliveryHandler) {
-        // TODO make singleton - a single thread should be able to take care of
-        // all redelivery awaiting messages from all endpoints / clients in a single VM
-        return new RedeliveryTask(deliveryHandler);
+    private final DelayedTaskManager<ApplicationMessage> delayedMessageHandler;
+
+    public RedeliveryTask() {
+        this.delayedMessageHandler = new DelayedTaskManager<ApplicationMessage>("redelivery-task");
     }
 
-    /**
-     * This method contains main task loop. It should not be called directly from outside.
-     */
-    public Integer call() throws InterruptedException {
-        try {
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest(String.format("Redelivery task executed - registered message queue size: [ %d ]", scheduledMessages.size()));
-            }
-
-
-            while (!scheduledMessages.isEmpty()) {
-                DelayedReference<ApplicationMessage> delayedMessageReference = scheduledMessages.take();
-                if (LOGGER.isLoggable(Level.FINER)) {
-                    LOGGER.finer(String.format("Putting to sequence [ %s ] delivery queue message with number [ %d ] ", delayedMessageReference.getData().getSequenceId(), delayedMessageReference.getData().getMessageNumber()));
-                }
-                deliveryHandler.putToDeliveryQueue(delayedMessageReference.getData());
-            }
-
-            isRunning.set(false);
-
-            return 0;
-        } catch (InterruptedException ex) {
-            throw LOGGER.logException(ex, Level.CONFIG);
-        } finally {
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest(String.format("Redelivery task execution finished - registered message queue size: [ %d ]", scheduledMessages.size()));
-            }            
-        }
-
-    }
-
-    /**
-     * Registers data for a timed execution
-     *
-     * @param request a packet to be resent at a given {@code executionTime}.
-     * @param resendCounter number of the resend attempt for a given packet
-     * @param executionTime determines the time of execution for a given {@code packet}
-     *
-     * @return {@code true} if the {@code request} has been successfully registered, {@code false} otherwise.
-     */
-    public final boolean register(@NotNull ApplicationMessage message, long delay, TimeUnit timeUnit) {
-
+    public boolean register(ApplicationMessage data, long delay, TimeUnit timeUnit, DelayedTaskManager.DelayedTask<ApplicationMessage> dataHandler) {
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format(
-                    "A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s",
-                    message.getMessageNumber(),
-                    message.getSequenceId(),
-                    delay,
-                    timeUnit.toString().toLowerCase()));
+            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s", data.getMessageNumber(), data.getSequenceId(), delay, timeUnit.toString().toLowerCase()));
         }
 
-        boolean offerResult = scheduledMessages.offer(new DelayedReference<ApplicationMessage>(message, delay, timeUnit));
-
-        if (isRunning.compareAndSet(false, true)) {
-            runningStatusFutureReference.set(RedeliveryTask.executorService.submit(this));
-        }
-
-        return offerResult;
-    }
-
-    /**
-     * Stops execution of the redelivery task
-     */
-    public void stop() {
-        if (isRunning.getAndSet(false) && runningStatusFutureReference.get() != null) {
-            runningStatusFutureReference.get().cancel(true);
-        }
+        return delayedMessageHandler.register(data, delay, timeUnit, dataHandler);
     }
 }

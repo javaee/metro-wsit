@@ -142,7 +142,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration);
 
         this.rc.setSequenceManager(sequenceManager);
-        rc.startRedeliveryTask();
     }
 
     @Override

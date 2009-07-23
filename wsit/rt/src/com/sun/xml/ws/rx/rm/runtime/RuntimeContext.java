@@ -46,7 +46,6 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
-import java.util.concurrent.ScheduledFuture;
 
 /**
  *
@@ -60,25 +59,12 @@ public final class RuntimeContext {
 
     public static final class Builder {
 
-        private final
-        @NotNull
-        RmConfiguration configuration;
-        private final
-        @NotNull
-        Communicator communicator;
-        private final
-        @NotNull
-        RedeliveryTask redeliveryTask;
+        private final @NotNull RmConfiguration configuration;
+        private final @NotNull Communicator communicator;
 
-        private
-        @Nullable
-        SequenceManager sequenceManager;
-        private
-        @Nullable
-        SourceMessageHandler sourceMessageHandler;
-        private
-        @Nullable
-        DestinationMessageHandler destinationMessageHandler;
+        private @Nullable SequenceManager sequenceManager;
+        private @Nullable SourceMessageHandler sourceMessageHandler;
+        private @Nullable DestinationMessageHandler destinationMessageHandler;
 
         public Builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
@@ -89,8 +75,6 @@ public final class RuntimeContext {
 
             this.sourceMessageHandler = new SourceMessageHandler(null);
             this.destinationMessageHandler = new DestinationMessageHandler(null);
-
-            this.redeliveryTask = RedeliveryTask.getInstance(sourceMessageHandler);
         }
 
         public Builder sequenceManager(SequenceManager sequenceManager) {
@@ -110,8 +94,7 @@ public final class RuntimeContext {
                     new SuspendedFiberStorage(),
                     new ScheduledTaskManager("RM Runtime Context"),
                     sourceMessageHandler,
-                    destinationMessageHandler,
-                    redeliveryTask);
+                    destinationMessageHandler);
         }
     }
     public final RmConfiguration configuration;
@@ -123,7 +106,6 @@ public final class RuntimeContext {
     public final SuspendedFiberStorage suspendedFiberStorage;
     public final WsrmProtocolHandler protocolHandler;
     public final ScheduledTaskManager scheduledTaskManager;
-    final RedeliveryTask redeliveryTask;
     final SourceMessageHandler sourceMessageHandler;
     final DestinationMessageHandler destinationMessageHandler;
 
@@ -134,8 +116,7 @@ public final class RuntimeContext {
             SuspendedFiberStorage suspendedFiberStorage,
             ScheduledTaskManager scheduledTaskManager,
             SourceMessageHandler srcMsgHandler,
-            DestinationMessageHandler dstMsgHandler,
-            RedeliveryTask redeliveryTask) {
+            DestinationMessageHandler dstMsgHandler) {
 
         this.configuration = configuration;
         this.sequenceManager = sequenceManager;
@@ -149,28 +130,10 @@ public final class RuntimeContext {
         this.soapVersion = configuration.getSoapVersion();
         this.rmVersion = configuration.getRmVersion();
 
-        this.redeliveryTask = redeliveryTask;
-
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
     }
 
-    public ScheduledFuture<?> startTask(Runnable task, long delay, long period) {
-        return scheduledTaskManager.startTask(task, delay, period);
-    }
-
-    public void startRedeliveryTask() {
-        // do nothing
-    }
-
-    public ScheduledFuture<?> startAckRequesterTask(Runnable ackRequesterTask) {
-        return scheduledTaskManager.startTask(
-                ackRequesterTask,
-                configuration.getAcknowledgementRequestInterval(),
-                configuration.getAcknowledgementRequestInterval());
-    }
-
     public void close() {
-        redeliveryTask.stop();
         scheduledTaskManager.shutdown();
         communicator.close();
     }
