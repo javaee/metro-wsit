@@ -85,6 +85,10 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final DeliveryQueueBuilder outboundQueueBuilder;
     /**
+     * Inactivity timeout for a sequence
+     */
+    private final long sequenceInactivityTimeout;
+    /**
      * Unique identifier of the WS endpoint for which this particular sequence manager will be used
      */
     private final String uniqueEndpointId;
@@ -94,8 +98,10 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
 
+        this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
+
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
-        
+
         ManagedObjectManager managedObjectManager = configuration.getManagedObjectManager();
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
@@ -182,7 +188,16 @@ public final class PersistentSequenceManager implements SequenceManager {
 
         try {
             dataLock.readLock().lock();
-            return sequences.get(sequenceId);
+            Sequence sequence = sequences.get(sequenceId);
+
+            if (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis()) {
+                // TODO this should be handled by a maintenace task running in a separate thread
+                dataLock.readLock().unlock();
+                terminateSequence(sequenceId);
+                dataLock.readLock().lock();
+            }
+
+            return sequence;
         } finally {
             dataLock.readLock().unlock();
         }
@@ -276,9 +291,12 @@ public final class PersistentSequenceManager implements SequenceManager {
 
             }
 
-            PersistentSequenceData.remove(cm, uniqueEndpointId, sequenceId);
-
             sequence.preDestroy();
+
+// TODO we should have a special task that terminates expired sequences and removes terminated sequences
+//      after some predefined period of time. Right now this must be handled manually
+// 
+//            PersistentSequenceData.remove(cm, uniqueEndpointId, sequenceId);
 
             return sequence;
         } finally {
