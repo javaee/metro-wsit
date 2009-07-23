@@ -142,13 +142,14 @@ final class RedeliveryTask implements Callable<Integer> {
         }
 
         return offerResult;
-
     }
 
     /**
      * Stops execution of the redelivery task
      */
     public void stop() {
-        runningStatusFutureReference.get().cancel(true);
+        if (isRunning.getAndSet(false) && runningStatusFutureReference.get() != null) {
+            runningStatusFutureReference.get().cancel(true);
+        }
     }
 }
