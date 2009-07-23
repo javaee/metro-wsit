@@ -48,13 +48,13 @@ import javax.xml.ws.EndpointReference;
 public class CreateSequenceResponseData {
     public static class Builder {
         private final @NotNull String sequenceId;
-        private long expirationTime;
+        private long duration;
         private @Nullable EndpointReference acceptedSequenceAcksTo;
         private Sequence.IncompleteSequenceBehavior incompleteSequenceBehavior;
 
         private Builder(String sequenceId) {
             this.sequenceId = sequenceId;
-            this.expirationTime = Sequence.NO_EXPIRY;
+            this.duration = Sequence.NO_EXPIRY;
             this.incompleteSequenceBehavior = Sequence.IncompleteSequenceBehavior.getDefault();
         }
 
@@ -63,8 +63,8 @@ public class CreateSequenceResponseData {
             return this;
         }
 
-        public Builder expirationTime(long expirationTime) {
-            this.expirationTime = expirationTime;
+        public Builder duration(long duration) {
+            this.duration = duration;
             return this;
         }
 
@@ -74,7 +74,7 @@ public class CreateSequenceResponseData {
         }
 
         public CreateSequenceResponseData build() {
-            return new CreateSequenceResponseData(sequenceId, expirationTime, acceptedSequenceAcksTo, incompleteSequenceBehavior);
+            return new CreateSequenceResponseData(sequenceId, duration, acceptedSequenceAcksTo, incompleteSequenceBehavior);
         }
     }
 
@@ -83,14 +83,14 @@ public class CreateSequenceResponseData {
     }
 
     private final @NotNull String sequenceId;
-    private final long expirationTime;
+    private final long duration;
     private final @Nullable EndpointReference acceptedSequenceAcksTo;
     private final Sequence.IncompleteSequenceBehavior incompleteSequenceBehavior;
     // TODO add incompleteSequenceBehavior handling
 
     private CreateSequenceResponseData(@NotNull String sequenceId, long expirationTime, @Nullable EndpointReference acceptedSequenceAcksTo, Sequence.IncompleteSequenceBehavior incompleteSequenceBehavior) {
         this.sequenceId = sequenceId;
-        this.expirationTime = expirationTime;
+        this.duration = expirationTime;
         this.acceptedSequenceAcksTo = acceptedSequenceAcksTo;
         this.incompleteSequenceBehavior = incompleteSequenceBehavior;
     }
@@ -99,8 +99,12 @@ public class CreateSequenceResponseData {
         return acceptedSequenceAcksTo;
     }
 
-    public long getExpirationTime() {
-        return expirationTime;
+    public long getDuration() {
+        return duration;
+    }
+
+    public boolean doesNotExpire() {
+        return duration == Sequence.NO_EXPIRY;
     }
 
     public @NotNull String getSequenceId() {

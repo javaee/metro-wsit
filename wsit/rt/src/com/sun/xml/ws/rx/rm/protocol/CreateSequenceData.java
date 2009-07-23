@@ -48,19 +48,19 @@ import javax.xml.ws.EndpointReference;
 public class CreateSequenceData {
     public static class Builder {
         private @NotNull final EndpointReference acksToEpr;
-        private long expiry;
+        private long duration;
         private @Nullable String offeredSequenceId;
         private long offeredSequenceExpiry;
         private @Nullable SecurityTokenReferenceType strType;
 
         private Builder(EndpointReference acksToEpr) {
             this.acksToEpr = acksToEpr;
-            this.expiry = Sequence.NO_EXPIRY;
+            this.duration = Sequence.NO_EXPIRY;
             this.offeredSequenceExpiry = Sequence.NO_EXPIRY;
         }
 
-        public void expiry(long expiry) {
-            this.expiry = expiry;
+        public void duration(long expiry) {
+            this.duration = expiry;
         }
 
         public void offeredSequenceExpiry(long offeredSequenceExpiry) {
@@ -81,7 +81,7 @@ public class CreateSequenceData {
         }
 
         public CreateSequenceData build() {
-            return new CreateSequenceData(acksToEpr, expiry, offeredSequenceId, offeredSequenceExpiry, strType);
+            return new CreateSequenceData(acksToEpr, duration, offeredSequenceId, offeredSequenceExpiry, strType);
         }
     }
 
@@ -90,7 +90,7 @@ public class CreateSequenceData {
     }
 
     private @NotNull final EndpointReference acksToEpr;
-    private final long expiry;
+    private final long duration;
     private @Nullable final String offeredSequenceId;
     private final long offeredSequenceExpiry;
     private @Nullable final SecurityTokenReferenceType strType;
@@ -102,7 +102,7 @@ public class CreateSequenceData {
             @Nullable long offeredSequenceExpiry,
             @Nullable SecurityTokenReferenceType strType) {
         this.acksToEpr = acksToEpr;
-        this.expiry = exipry;
+        this.duration = exipry;
         this.offeredSequenceId = offeredSequenceId;
         this.offeredSequenceExpiry = offeredSequenceExpiry;
         this.strType = strType;
@@ -112,12 +112,12 @@ public class CreateSequenceData {
         return acksToEpr;
     }
 
-    public long getExpiry() {
-        return expiry;
+    public long getDuration() {
+        return duration;
     }
 
-    public boolean isNoExpiry() {
-        return expiry == Sequence.NO_EXPIRY;
+    public boolean doesNotExpire() {
+        return duration == Sequence.NO_EXPIRY;
     }
 
     public @Nullable String getOfferedSequenceId() {

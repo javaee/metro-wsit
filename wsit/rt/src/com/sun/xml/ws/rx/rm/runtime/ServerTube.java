@@ -350,7 +350,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                 rc.sequenceManager().generateSequenceUID(),
                 receivedSctId,
-                calculateSequenceExpirationTime(requestData.getExpiry()));
+                calculateSequenceExpirationTime(requestData.getDuration()));
 
         if (requestData.getOfferedSequenceId() != null) {
             Sequence outboundSequence = rc.sequenceManager().createOutboundSequence(

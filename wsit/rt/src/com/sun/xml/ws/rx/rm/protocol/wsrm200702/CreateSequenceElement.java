@@ -106,8 +106,8 @@ public class CreateSequenceElement {
         this();
         
         acksTo = data.getAcksToEpr();
-        if (!data.isNoExpiry()) {
-            expires = new Expires(data.getExpiry());
+        if (!data.doesNotExpire()) {
+            expires = new Expires(data.getDuration());
         }
 
         if (data.getOfferedSequenceId() != null) {
@@ -128,7 +128,7 @@ public class CreateSequenceElement {
         dataBuilder.strType(securityTokenReference);
 
         if (expires != null) {
-            dataBuilder.expiry(expires.getDuration());
+            dataBuilder.duration(expires.getDuration());
         }
 
         if (offer != null) {

@@ -330,13 +330,13 @@ final class ClientTube extends AbstractFilterTubeImpl {
         this.outboundSequenceId.value = rc.sequenceManager().createOutboundSequence(
                 responseData.getSequenceId(),
                 (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                responseData.getExpirationTime()).getId();
+                (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis()).getId();
 
         if (requestData.getOfferedSequenceId() != null) {
             Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                     requestData.getOfferedSequenceId(),
                     (requestData.getStrType() != null) ? requestData.getStrType().getId() : null,
-                    responseData.getExpirationTime());
+                    (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis());
 
             rc.sequenceManager().bindSequences(outboundSequenceId.value, inboundSequence.getId());
         }
