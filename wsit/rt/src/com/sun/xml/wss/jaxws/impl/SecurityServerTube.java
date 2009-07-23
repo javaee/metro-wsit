@@ -294,7 +294,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         } catch (XWSSecurityException xwse) {
             thereWasAFault = true;    
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            if(sfe.getCause() != null){
+            if(sfe.getCause() == null){
                sfe.initCause(xwse) ;
             }
             msg = Messages.create(sfe, soapVersion);
@@ -480,6 +480,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
     }
     
+    @Override
     public void preDestroy() {
         if(super.next != null){
             super.next.preDestroy();
