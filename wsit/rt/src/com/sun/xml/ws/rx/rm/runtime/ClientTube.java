@@ -122,7 +122,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         this.rc = RuntimeContext.getBuilder(
                 configuration,
                 new Communicator(
-                "RmClientTubeCommunicator",
+                "rm-client-tube-communicator",
                 context.getAddress(),
                 super.next,
                 scInitiator,
@@ -300,7 +300,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             waitUntilAllRequestsAckedOrCloseOperationTimeout();
             terminateSequence();
         } finally {
-            rc.stopAllTasks();
+            rc.close();
         }
     }
 

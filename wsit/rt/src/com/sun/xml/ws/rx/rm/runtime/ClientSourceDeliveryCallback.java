@@ -45,6 +45,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationExcepti
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.xml.ws.WebServiceException;
 
 class ClientSourceDeliveryCallback implements Postman.Callback {
@@ -193,23 +194,34 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
     }
 
     private void deliver(JaxwsApplicationMessage message) {
-        rc.sourceMessageHandler.attachAcknowledgementInfo(message);
+        LOGGER.entering(message);
 
-        Packet outboundPacketCopy = message.getPacket().copy(true);
+        try {
 
-        rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
-        rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
+            rc.sourceMessageHandler.attachAcknowledgementInfo(message);
 
-        Fiber.CompletionCallback responseCallback;
-        if (outboundPacketCopy.expectReply == null) {
-            responseCallback = new AmbiguousMepCallbackHandler(message, rc);
-        } else if (outboundPacketCopy.expectReply.booleanValue()) {
-            responseCallback = new ReqRespMepCallbackHandler(message, rc);
-        } else {
-            responseCallback = new OneWayMepCallbackHandler(message, rc);
+            Packet outboundPacketCopy = message.getPacket().copy(true);
+
+            rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
+            rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
+
+            Fiber.CompletionCallback responseCallback;
+            if (outboundPacketCopy.expectReply == null) {
+                responseCallback = new AmbiguousMepCallbackHandler(message, rc);
+            } else if (outboundPacketCopy.expectReply.booleanValue()) {
+                responseCallback = new ReqRespMepCallbackHandler(message, rc);
+            } else {
+                responseCallback = new OneWayMepCallbackHandler(message, rc);
+            }
+
+            if (LOGGER.isLoggable(Level.FINEST)) {
+                LOGGER.finer("Selected Response callback class: " + responseCallback.getClass().getName());
+            }
+
+            rc.communicator.sendAsync(outboundPacketCopy, responseCallback);
+        } finally {
+            LOGGER.exiting();
         }
-
-        rc.communicator.sendAsync(outboundPacketCopy, responseCallback);
     }
 
     private static boolean isResendPossible(Throwable throwable) {

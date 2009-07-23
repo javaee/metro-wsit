@@ -162,4 +162,16 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("JAX-WS Application Message { ");
+        sb.append("sequenceId=[ ").append(this.getSequenceId()).append(" ], ");
+        sb.append("messageNumber=[ ").append(this.getMessageNumber()).append(" ], ");
+        sb.append("correlationId=[ ").append(this.getCorrelationId()).append(" ], ");
+        sb.append("nextResendCount=[ ").append(this.getNextResendCount()).append(" ], ");
+        sb.append("wsaAction=[ ").append(this.wsaAction);
+        sb.append(" ] }");
+        return super.toString();
+    }
 }

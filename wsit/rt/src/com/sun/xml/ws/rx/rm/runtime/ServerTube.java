@@ -113,7 +113,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
                 new Communicator(
-                "RmServerTubeCommunicator",
+                "rm-server-tube-communicator",
                 null, // TODO P3 can we get the endpoint address?
                 super.next,
                 null,
@@ -268,7 +268,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
     public void preDestroy() {
         LOGGER.entering();
         try {
-            rc.stopAllTasks();
+            rc.close();
 
             SessionManager.removeSessionManager(endpoint);
         } finally {

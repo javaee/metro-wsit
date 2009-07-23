@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.util;
 
 import com.sun.istack.NotNull;
@@ -42,10 +41,13 @@ import com.sun.xml.ws.api.pipe.Engine;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Fiber.CompletionCallback;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.commons.NamedThreadFactory;
 import com.sun.xml.ws.util.Pool;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * TODO javadoc
@@ -61,6 +63,7 @@ import java.util.List;
 public final class FiberExecutor {
 
     private static class Schedule {
+
         private final Packet request;
         private final Fiber.CompletionCallback completionCallback;
 
@@ -69,17 +72,15 @@ public final class FiberExecutor {
             this.completionCallback = completionCallback;
         }
     }
-
-    private final Tube masterTubeline;
-    private final Pool<Tube> tubelinePool;
+    private Pool<Tube> tubelinePool;
     private volatile Engine engine;
-
     private final List<Schedule> schedules = new LinkedList<Schedule>();
+    private ExecutorService fiberExecutorService;
 
     public FiberExecutor(String id, Tube masterTubeline) {
-        this.masterTubeline = masterTubeline;
         this.tubelinePool = new Pool.TubePool(masterTubeline);
-        this.engine = new Engine(id);
+        fiberExecutorService = Executors.newCachedThreadPool(new NamedThreadFactory(id + "-fiber-executor"));
+        this.engine = new Engine(id,fiberExecutorService);
     }
 
     public Packet runSync(Packet request) {
@@ -97,7 +98,7 @@ public final class FiberExecutor {
 
     public synchronized void startScheduledFibers() {
         Iterator<Schedule> iterator = schedules.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Schedule schedule = iterator.next();
             iterator.remove();
 
@@ -112,6 +113,7 @@ public final class FiberExecutor {
 //        }
         final Tube tube = tubelinePool.take();
         fiber.start(tube, request, new Fiber.CompletionCallback() {
+
             public void onCompletion(@NotNull Packet response) {
                 tubelinePool.recycle(tube);
                 callback.onCompletion(response);
@@ -123,5 +125,26 @@ public final class FiberExecutor {
                 callback.onCompletion(error);
             }
         });
+    }
+
+    public void close() {
+        Pool<Tube> tp = this.tubelinePool;
+        if (tp != null) {
+            // multi-thread safety of 'close' needs to be considered more carefully.
+            // some calls might be pending while this method is invoked. Should we
+            // block until they are complete, or should we abort them (but how?)
+            Tube p = tp.take();
+            p.preDestroy();
+            this.tubelinePool = null;
+            this.engine = null;
+            this.schedules.clear();
+        }
+
+
+        ExecutorService fes = this.fiberExecutorService;
+        if (fes != null) {
+            fes.shutdownNow();
+            this.fiberExecutorService = null;
+        }
     }
 }

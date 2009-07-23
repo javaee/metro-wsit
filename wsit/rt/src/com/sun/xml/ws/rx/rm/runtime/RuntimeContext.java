@@ -169,9 +169,10 @@ public final class RuntimeContext {
                 configuration.getAcknowledgementRequestInterval());
     }
 
-    public void stopAllTasks() {
-        scheduledTaskManager.shutdown();
+    public void close() {
         redeliveryTask.stop();
+        scheduledTaskManager.shutdown();
+        communicator.close();
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {

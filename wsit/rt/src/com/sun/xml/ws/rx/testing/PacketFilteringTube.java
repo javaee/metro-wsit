@@ -75,7 +75,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
                 new Communicator(
-                "PacketFilteringTubeCommunicator",
+                "packet-filtering-tube-communicator",
                 context.getAddress(),
                 super.next,
                 null,
@@ -95,7 +95,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
                 configuration,
                 new Communicator(
-                "PacketFilteringTubeCommunicator",
+                "packet-filtering-tube-communicator",
                 null, // TODO P3 can we get the endpoint address?
                 super.next,
                 null,
@@ -120,6 +120,8 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
 
     @Override
     public void preDestroy() {
+        rc.close();
+        
         super.preDestroy();
     }
 

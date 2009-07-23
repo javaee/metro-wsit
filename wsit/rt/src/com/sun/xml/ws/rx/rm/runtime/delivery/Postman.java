@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
+import com.sun.xml.ws.commons.NamedThreadFactory;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,7 +60,7 @@ public final class Postman {
     private final ExecutorService executor;
 
     Postman() {
-        executor = Executors.newCachedThreadPool();
+        executor = Executors.newCachedThreadPool(new NamedThreadFactory("postman-executor"));
     }
 
     public void deliver(final ApplicationMessage message, final Callback deliveryCallback) {

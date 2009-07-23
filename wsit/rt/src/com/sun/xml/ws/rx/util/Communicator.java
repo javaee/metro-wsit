@@ -73,7 +73,7 @@ public final class Communicator {
     public final QName soapMustUnderstandAttributeName;
     //
     private final SecureConversationInitiator scInitiator;
-    private final FiberExecutor fiberExecutor;
+    private FiberExecutor fiberExecutor;
     private final EndpointAddress destinationAddress;
     //
     private final AddressingVersion addressingVersion;
@@ -313,5 +313,13 @@ public final class Communicator {
     }
     public SOAPVersion getSoapVersion() {
         return soapVersion;
+    }
+
+    public void close() {
+        final FiberExecutor fe = this.fiberExecutor;
+        if (fe != null) {
+            this.fiberExecutor.close();
+            this.fiberExecutor = null;
+        }
     }
 }

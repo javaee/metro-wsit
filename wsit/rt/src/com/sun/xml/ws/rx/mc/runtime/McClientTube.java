@@ -183,6 +183,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
     @Override
     public void preDestroy() {
         scheduler.shutdown();
+        communicator.close();
 
         super.preDestroy();
     }
