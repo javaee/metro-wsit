@@ -42,7 +42,6 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
