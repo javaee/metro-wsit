@@ -67,7 +67,7 @@ final class ConnectionManager {
         try {
             Connection connection = dataSourceProvider.getDataSource().getConnection();
             
-            connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            // connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             connection.setAutoCommit(autoCommit);
             return connection;
         } catch (SQLException ex) {
