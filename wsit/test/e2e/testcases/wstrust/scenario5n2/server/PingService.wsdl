@@ -87,7 +87,7 @@
                 <sp:EndorsingSupportingTokens xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                     <wsp:Policy>
                         <sp:IssuedToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
-                            <Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                            <!--Issuer xmlns="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                                 <Address xmlns="http://www.w3.org/2005/08/addressing">local:///space/harsha/source/latest1/wsit/wsit/test/e2e/testcases/wstrust/scenario5n2/work/services/sts/war/</Address>
                                 <Metadata xmlns="http://www.w3.org/2005/08/addressing">
                                 <Metadata xmlns="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -98,7 +98,7 @@
                                     </wsx:MetadataSection>
                                 </Metadata>
                                 </Metadata>
-                            </Issuer>
+                            </Issuer-->
 
                             <sp:RequestSecurityTokenTemplate>
                                 <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>

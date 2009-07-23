@@ -158,7 +158,10 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
         }
         
         // Get claimed attributes
-        final Claims claims = rst.getClaims();
+        Claims claims = rst.getClaims();
+        if (claims == null){
+            claims = eleFac.createClaims();
+        }
         final STSAttributeProvider attrProvider = WSTrustFactory.getSTSAttributeProvider();
         final Map<QName, List<String>> claimedAttrs = attrProvider.getClaimedAttributes(subject, appliesTo, tokenType, claims);
         

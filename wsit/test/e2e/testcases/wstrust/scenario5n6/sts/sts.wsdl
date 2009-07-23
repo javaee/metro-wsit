@@ -96,7 +96,7 @@
                 </sc:ValidatorConfiguration>
                 <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="false" encryptIssuedToken="false">
                     <tc:LifeTime>36000</tc:LifeTime>
-                    <tc:Contract>InvalidClass</tc:Contract>
+                    <tc:Contract>com.sun.xml.ws.security.trust.impl.WSTrustContractImpl</tc:Contract>
                     <tc:ServiceProviders>
                         <tc:ServiceProvider endPoint="default" >
                             <tc:CertAlias>bob</tc:CertAlias>
