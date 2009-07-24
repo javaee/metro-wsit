@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.sun.xml.ws.rx.util.DelayedTaskManager;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.istack.logging.Logger;
@@ -56,7 +55,7 @@ import java.util.logging.Level;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-class DestinationMessageHandler implements DelayedTaskManager.DelayedTask<ApplicationMessage> {
+class DestinationMessageHandler implements MessageHandler {
 
     private static final Logger LOGGER = Logger.getLogger(DestinationMessageHandler.class);
     //
@@ -152,9 +151,4 @@ class DestinationMessageHandler implements DelayedTaskManager.DelayedTask<Applic
 
         sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
-
-    public void handle(ApplicationMessage message, DelayedTaskManager<ApplicationMessage> manager) throws RxRuntimeException, UnknownSequenceException {
-        putToDeliveryQueue(message);
-    }
-   
 }

@@ -44,25 +44,28 @@ import java.util.logging.Level;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-final class RedeliveryTask {
-    private static final Logger LOGGER = Logger.getLogger(RedeliveryTask.class);
-    private static final RedeliveryTask INSTANCE = new RedeliveryTask();
+enum RedeliveryTaskExecutor {
+    INSTANCE;
 
-    public static RedeliveryTask getInstance() {
-        return INSTANCE;
+    private static final Logger LOGGER = Logger.getLogger(RedeliveryTaskExecutor.class);
+
+    private final DelayedTaskManager delayedTaskManager;
+
+    private RedeliveryTaskExecutor() {
+        this.delayedTaskManager = DelayedTaskManager.createManager("redelivery-task-executor", 5);
     }
 
-    private final DelayedTaskManager<ApplicationMessage> delayedMessageHandler;
-
-    public RedeliveryTask() {
-        this.delayedMessageHandler = new DelayedTaskManager<ApplicationMessage>("redelivery-task");
-    }
-
-    public boolean register(ApplicationMessage data, long delay, TimeUnit timeUnit, DelayedTaskManager.DelayedTask<ApplicationMessage> dataHandler) {
+    public boolean register(final ApplicationMessage message, long delay, TimeUnit timeUnit, final MessageHandler messageHandler) {
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s", data.getMessageNumber(), data.getSequenceId(), delay, timeUnit.toString().toLowerCase()));
+            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s", message.getMessageNumber(), message.getSequenceId(), delay, timeUnit.toString().toLowerCase()));
         }
 
-        return delayedMessageHandler.register(data, delay, timeUnit, dataHandler);
+        return delayedTaskManager.register(new DelayedTaskManager.DelayedTask() {
+
+            public void run(DelayedTaskManager manager) {
+                messageHandler.putToDeliveryQueue(message);
+            }
+
+        }, delay, timeUnit);
     }
 }

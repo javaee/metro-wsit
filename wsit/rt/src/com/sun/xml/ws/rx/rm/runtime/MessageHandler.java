@@ -33,58 +33,16 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.util;
 
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+package com.sun.xml.ws.rx.rm.runtime;
+
+import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 
 /**
- * <p>
- * A generic immutable reference holder that implements {@link Delayed} interface
- * and thus is suitable for use in a {@link java.util.concurrent.DelayQueue}
- * instances.
- *</p>
- *
- * <p>
- * Instances of this {@code DelayedReference} class work with a milliseconds precision.
- *</p>
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class DelayedReference<V> implements Delayed {
-
-    private final V data;
-    private final long resumeTimeInMilliseconds;
-
-    private DelayedReference(V data, long resumeTimeInMilliseconds) {
-        this.data = data;
-        this.resumeTimeInMilliseconds = resumeTimeInMilliseconds;
-    }
-
-    public DelayedReference(V data, long delay, TimeUnit timeUnit) {
-        this(data, timeUnit.toMillis(delay) + System.currentTimeMillis());
-    }
-
-    public V getValue() {
-        return data;
-    }
-
-    public long getDelay(TimeUnit unit) {
-        return unit.convert(resumeTimeInMilliseconds - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-    }
-
-    public int compareTo(Delayed other) {
-        long thisDelay = resumeTimeInMilliseconds - System.currentTimeMillis();
-        long thatDelay = other.getDelay(TimeUnit.MILLISECONDS);
-
-        return (thisDelay < thatDelay) ? -1 : ((thisDelay == thatDelay) ? 0 : 1);
-    }
-
-    public DelayedReference<V> updateData(V data) {
-        return new DelayedReference<V>(data, resumeTimeInMilliseconds);
-    }
-
-    public DelayedReference<V> updateDelay(long newDelay, TimeUnit timeUnit) {
-        return new DelayedReference<V>(data, timeUnit.toMillis(newDelay) + System.currentTimeMillis());
-    }
+public interface MessageHandler {
+    void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException;
 }

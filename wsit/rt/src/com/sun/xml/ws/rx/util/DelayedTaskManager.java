@@ -38,10 +38,9 @@ package com.sun.xml.ws.rx.util;
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.NamedThreadFactory;
-import com.sun.xml.ws.rx.util.DelayedReference;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -50,74 +49,72 @@ import java.util.logging.Level;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class DelayedTaskManager<T> {
+public final class DelayedTaskManager {
 
     private static final Logger LOGGER = Logger.getLogger(DelayedTaskManager.class);
 
-    public static interface DelayedTask<T> {
+    public static interface DelayedTask {
 
-        public void handle(T data, DelayedTaskManager<T> manager);
+        public void run(DelayedTaskManager manager);
     }
 
-    private static class Registration<T> {
+    public static DelayedTaskManager createSingleThreadedManager(String name){
+        return new DelayedTaskManager(Executors.newSingleThreadScheduledExecutor(createThreadFactory(name)));
+    }
 
-        public final T message;
-        public final DelayedTask<T> handler;
+    public static DelayedTaskManager createManager(String name, int coreThreadPoolSize){
+        return new DelayedTaskManager(Executors.newScheduledThreadPool(coreThreadPoolSize, createThreadFactory(name)));
+    }
 
-        public Registration(T message, DelayedTask<T> handler) {
-            this.message = message;
-            this.handler = handler;
+    private static final ThreadFactory createThreadFactory(String name) {
+        return new NamedThreadFactory(name + "-worker-executor");
+    }
+
+    private class Worker implements Runnable {
+
+        public final DelayedTask task;
+
+        public Worker(DelayedTask handler) {
+            this.task = handler;
         }
-    }
-    //
-
-    private class WorkerTask implements Runnable {
-
-        private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
         /**
          * This method contains main task loop. It should not be called directly from outside.
          */
         public void run() {
+            LOGGER.entering();
             try {
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.finest(String.format("Worker task executed - registration queue size: [ %d ]", registrations.size()));
-                }
-
-                while (!registrations.isEmpty()) {
-                    DelayedReference<Registration<T>> registration = registrations.take();
-                    registration.getData().handler.handle(registration.getData().message, DelayedTaskManager.this);
-                }
-
-            } catch (InterruptedException ex) {
-                LOGGER.logException(ex, Level.CONFIG);
-                Thread.currentThread().interrupt();
+                task.run(DelayedTaskManager.this);
+            } catch (Exception ex) {
+                LOGGER.logException(ex, Level.WARNING);
             } finally {
-                isRunning.set(false);
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.finest(String.format("Worker task execution finished - registration queue size: [ %d ]", registrations.size()));
-                }
+                LOGGER.exiting();
             }
         }
     }
     //
-    private final ExecutorService executorService;
-    private final DelayQueue<DelayedReference<Registration<T>>> registrations;
-    private final WorkerTask workerTask;
+    private final ScheduledExecutorService executorService;
+    private final AtomicBoolean isClosed;
 
-    public DelayedTaskManager(String name) {
-        this.executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory(name + "-worker-executor"));
-        this.registrations = new DelayQueue<DelayedReference<Registration<T>>>();
-        this.workerTask = new WorkerTask();
+    private DelayedTaskManager(ScheduledExecutorService executorService) {
+        this.executorService = executorService;
+        this.isClosed = new AtomicBoolean(false);
     }
 
-    public boolean register(@NotNull T data, long delay, TimeUnit timeUnit, @NotNull DelayedTask<T> dataHandler) {
-        assert data != null;
-        assert dataHandler != null;
-        boolean offerResult = registrations.offer(new DelayedReference<Registration<T>>(new Registration<T>(data, dataHandler), delay, timeUnit));
-        if (workerTask.isRunning.compareAndSet(false, true)) {
-            executorService.submit(workerTask);
+    public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
+        if (isClosed.get()) {
+            throw new IllegalStateException(String.format("This '%s' instance has already been closed", this.getClass().getName()));
         }
-        return offerResult;
+
+        assert task != null;
+        executorService.schedule(new Worker(task), delay, timeUnit);
+
+        return true;
+    }
+
+    public void close() {
+        if (isClosed.compareAndSet(false, true)) {
+            executorService.shutdown();
+        }
     }
 }

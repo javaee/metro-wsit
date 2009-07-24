@@ -78,7 +78,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                RedeliveryTask.getInstance().register(
+                RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
@@ -114,7 +114,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                     onCompletion(ex);
                 }
             } else {
-                RedeliveryTask.getInstance().register(
+                RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
@@ -124,7 +124,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                RedeliveryTask.getInstance().register(
+                RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
@@ -172,7 +172,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
         public void onCompletion(Throwable error) {
             if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                RedeliveryTask.getInstance().register(
+                RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
