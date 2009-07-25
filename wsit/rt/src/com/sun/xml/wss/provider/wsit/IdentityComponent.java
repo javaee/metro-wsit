@@ -128,6 +128,9 @@ public class IdentityComponent implements EndpointComponent {
         QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
 
         public WSEndpointReference.EPRExtension getEPRExtension(WSEndpoint endpoint, @Nullable WSEndpointReference.EPRExtension extension) {
+           if(extension != null){
+               return extension;
+           }
             return new WSEndpointReference.EPRExtension() {
 
                 public XMLStreamReader readAsXMLStreamReader() throws XMLStreamException {
