@@ -98,7 +98,10 @@ class DestinationMessageHandler implements MessageHandler {
         if (acknowledgementData.getAcknowledgedSequenceId() != null) { // process outbound sequence acknowledgements           
             final List<AckRange> acknowledgedRanges = acknowledgementData.getAcknowledgedRanges();
             if (!acknowledgedRanges.isEmpty()) {
-                sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId()).acknowledgeMessageNumbers(acknowledgedRanges);
+                Sequence sequence = sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId());
+                if (!sequence.isClosed()) { // we ignore acknowledgments on closed sequences
+                    sequence.acknowledgeMessageNumbers(acknowledgedRanges);
+                }
             }
         }
 
