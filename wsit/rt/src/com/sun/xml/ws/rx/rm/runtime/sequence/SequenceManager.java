@@ -169,4 +169,18 @@ public interface SequenceManager extends TimeSynchronizer {
      * @exception UnknownSequenceExceptio in case no such reference sequence is registered within the sequence manager
      */
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException;
+
+    /**
+     * <p>
+     * Terminates all sequences that became expired in the meantime and removes all
+     * previously terminated sequences that were terminated sooner than a precofigured
+     * period of time.
+     * </p>
+     *
+     * <p>
+     * This maintenance method is intedned to be called externally by a {@link SequenceMaintenanceTask}
+     * instance associated with this {@code SequenceManager}.
+     * </p>
+     */
+    public void onMaintenance();
 }

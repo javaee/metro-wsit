@@ -67,46 +67,68 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
     }
 
     public RmVersion getRmVersion() {
-        return (rmFeature == null) ? null : rmFeature.getVersion();
+        checkState();
+        return rmFeature.getVersion();
     }
 
     public long getSequenceInactivityTimeout() {
-        return (rmFeature == null) ? null : rmFeature.getSequenceInactivityTimeout();
+        checkState();
+        return rmFeature.getSequenceInactivityTimeout();
     }
 
     public SecurityBinding getSecurityBinding() {
-        return (rmFeature == null) ? null : rmFeature.getSecurityBinding();
+        checkState();
+        return rmFeature.getSecurityBinding();
     }
 
     public DeliveryAssurance getDeliveryAssurance() {
-        return (rmFeature == null) ? null : rmFeature.getDeliveryAssurance();
+        checkState();
+        return rmFeature.getDeliveryAssurance();
     }
 
     public boolean isOrderedDeliveryEnabled() {
-        return (rmFeature == null) ? null : rmFeature.isOrderedDeliveryEnabled();
+        checkState();
+        return rmFeature.isOrderedDeliveryEnabled();
     }
 
     public long getDestinationBufferQuota() {
-        return (rmFeature == null) ? null : rmFeature.getDestinationBufferQuota();
+        checkState();
+        return rmFeature.getDestinationBufferQuota();
     }
 
     public long getMessageRetransmissionInterval() {
-        return (rmFeature == null) ? null : rmFeature.getMessageRetransmissionInterval();
+        checkState();
+        return rmFeature.getMessageRetransmissionInterval();
     }
 
     public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
-        return (rmFeature == null) ? null : rmFeature.getRetransmissionBackoffAlgorithm();
+        checkState();
+        return rmFeature.getRetransmissionBackoffAlgorithm();
     }
 
     public long getAcknowledgementRequestInterval() {
-        return (rmFeature == null) ? null : rmFeature.getAcknowledgementRequestInterval();
+        checkState();
+        return rmFeature.getAcknowledgementRequestInterval();
     }
 
     public long getCloseSequenceOperationTimeout() {
-        return (rmFeature == null) ? null : rmFeature.getCloseSequenceOperationTimeout();
+        checkState();
+        return rmFeature.getCloseSequenceOperationTimeout();
     }
 
     public boolean isPersistenceEnabled() {
-        return (rmFeature == null) ? null : rmFeature.isPersistenceEnabled();
+        checkState();
+        return rmFeature.isPersistenceEnabled();
+    }
+
+    public long getSequenceManagerMaintenancePeriod() {
+        checkState();
+        return rmFeature.getSequenceManagerMaintenancePeriod();
+    }
+
+    private void checkState() {
+        if (rmFeature == null || !rmFeature.isEnabled()) {
+            throw new IllegalStateException("Reliable messaging feature is not enabled");
+        }
     }
 }

@@ -103,4 +103,9 @@ public interface RmConfiguration extends RxConfiguration {
      * @see ReliableMessagingFeature#isPersistenceEnabled()
      */
     public boolean isPersistenceEnabled();
+
+    /**
+     * @see ReliableMessagingFeature#getSequenceMaintenancePeriod()
+     */
+    public long getSequenceManagerMaintenancePeriod();
 }

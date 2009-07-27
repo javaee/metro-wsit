@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-enum MaintenanceTaskExecutor {
+public enum MaintenanceTaskExecutor {
     INSTANCE;
 
     private DelayedTaskManager delayedTaskManager;
@@ -55,6 +55,10 @@ enum MaintenanceTaskExecutor {
     }
 
     public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
-        return register(task, delay, timeUnit);
+        return delayedTaskManager.register(task, delay, timeUnit);
     }
+
+    public boolean isClosed() {
+        return delayedTaskManager.isClosed();
+    }   
 }

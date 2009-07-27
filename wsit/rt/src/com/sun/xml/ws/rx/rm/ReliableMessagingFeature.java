@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm;
 
 import com.sun.xml.ws.api.FeatureConstructor;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import javax.xml.ws.WebServiceFeature;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
@@ -73,6 +74,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * Currently the default value is set to 3000.
      */
     public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
+    /**
+     * Default period (in milliseconds) of a sequence maintenance task execution.
+     * A sequence maintenance task is executed by invoking a
+     * {@link SequenceManager#onMaintenance()} method on a {@link SequenceManager} 
+     * instance.
+     */
+    public static final long DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD = 60000;
 
     /**
      * This enumeration defines possible security binding mechanism options that
@@ -254,6 +262,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final long ackRequestInterval;
     private final long closeSequenceOperationTimeout;
     private final boolean persistenceEnabled;
+    private final long sequenceManagerMaintenancePeriod;
 
 
     /**
@@ -279,8 +288,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
-                false // this.persistenceEnabled
-                );
+                false, // this.persistenceEnabled
+                DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD);
     }
 
     @FeatureConstructor({
@@ -292,7 +301,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         "makeConnectionEnabled",
         "deliveryAssurance",
         "securityBinding",
-        "persistenceEnabled"
+        "persistenceEnabled",
+        "sequenceManagerMaintenancePeriod"
     })
     public ReliableMessagingFeature(
             boolean enabled,
@@ -302,7 +312,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             boolean orderedDelivery,
             DeliveryAssurance deliveryAssurance,
             SecurityBinding securityBinding,
-            boolean persistenceEnabled) {
+            boolean persistenceEnabled,
+            long sequenceManagerMaintenancePeriod) {
 
         this(
                 enabled, // this.enabled
@@ -316,7 +327,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
-                persistenceEnabled // this.persistenceEnabled
+                persistenceEnabled, // this.persistenceEnabled
+                sequenceManagerMaintenancePeriod
                 );
     }
 
@@ -332,7 +344,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             BackoffAlgorithm retransmissionBackoffAlgorithm,
             long ackRequestInterval,
             long closeSequenceOperationTimeout,
-            boolean persistenceEnabled) {
+            boolean persistenceEnabled,
+            long sequenceManagerMaintenancePeriod) {
 
         super.enabled = enabled;
         this.version = version;
@@ -346,6 +359,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.ackRequestInterval = ackRequestInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
         this.persistenceEnabled = persistenceEnabled;
+        this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
     }
 
     @Override
@@ -520,5 +534,18 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public boolean isPersistenceEnabled() {
         return persistenceEnabled;
+    }
+
+    /**
+     * Specifies the period (in milliseconds) of a sequence maintenance task execution.
+     * A sequence maintenance task is executed by invoking a
+     * {@link SequenceManager#onMaintenance()} method on a {@link SequenceManager}
+     * instance.
+     *
+     * @return the period (in milliseconds) of a sequence maintenance task execution.
+     */
+    @ManagedAttribute
+    public long getSequenceManagerMaintenancePeriod() {
+        return sequenceManagerMaintenancePeriod;
     }
 }

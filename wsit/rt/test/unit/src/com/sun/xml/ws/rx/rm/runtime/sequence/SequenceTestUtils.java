@@ -133,7 +133,11 @@ final class SequenceTestUtils  {
             public boolean isPersistenceEnabled() {
                 return false;
             }
-        };
+
+            public long getSequenceManagerMaintenancePeriod() {
+                return ReliableMessagingFeature.DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
+            }
+       };
     }
 
     static final DeliveryQueueBuilder getDeliveryQueueBuilder() {

@@ -33,35 +33,52 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.rx.rm.runtime.sequence;
 
-package com.sun.xml.ws.rx.rm;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
-import static com.sun.xml.ws.rx.rm.ReliableMessagingFeature.*;
+import com.sun.istack.NotNull;
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.rx.util.DelayedTaskManager;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
-public @interface ReliableMessaging {
-    /**
-     * Specifies if this feature is enabled or disabled.
-     */
-    boolean enabled() default true;
+public class SequenceMaintenanceTask implements DelayedTaskManager.DelayedTask {
 
-    RmVersion version() default RmVersion.WSRM200702;
-    long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
-    long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
-    boolean orderedDeliveryEnabled() default false;
-    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
-    SecurityBinding securityBinding() default SecurityBinding.NONE;
-    boolean persistenceEnabled() default false;
-    long sequenceManagerMaintenancePeriod() default DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
+    private static final Logger LOGGER = Logger.getLogger(SequenceMaintenanceTask.class);
+    private final WeakReference<SequenceManager> smReference;
+    private final long period;
+    private final TimeUnit timeUnit;
+    private final String endpointUid;
+
+    public SequenceMaintenanceTask(@NotNull SequenceManager sequenceManager, long period, @NotNull TimeUnit timeUnit) {
+        assert sequenceManager != null;
+        assert period > 0;
+        assert timeUnit != null;
+
+        this.smReference = new WeakReference<SequenceManager>(sequenceManager);
+        this.period = period;
+        this.timeUnit = timeUnit;
+        this.endpointUid = sequenceManager.uniqueEndpointId();
+    }
+
+    public void run(DelayedTaskManager manager) {
+        SequenceManager sequenceManager = smReference.get();
+        if (sequenceManager != null) {
+            sequenceManager.onMaintenance();
+
+            if (!manager.isClosed()) {
+                boolean registrationSuccesfull = manager.register(this, period, timeUnit);
+
+                if (!registrationSuccesfull) {
+                    // TODO L10N
+                    LOGGER.config(String.format("Unable to re-schedule the sequence maintenance task for an endpoint UID [ %s ].", endpointUid));
+                }
+            }
+        } else {
+            LOGGER.config(String.format("Terminating sequence maintenance task for an endpoint UID [ %s ]: Sequence manager instance has been garbage-collected", endpointUid));
+        }
+    }
 }

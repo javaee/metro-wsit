@@ -103,7 +103,8 @@ public final class DelayedTaskManager {
 
     public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
         if (isClosed.get()) {
-            throw new IllegalStateException(String.format("This '%s' instance has already been closed", this.getClass().getName()));
+            LOGGER.finer(String.format("Attempt to register a new task has failed. This '%s' instance has already been closed", this.getClass().getName()));
+            return false;
         }
 
         assert task != null;
@@ -116,5 +117,9 @@ public final class DelayedTaskManager {
         if (isClosed.compareAndSet(false, true)) {
             executorService.shutdown();
         }
+    }
+
+    public boolean isClosed() {
+        return isClosed.get();
     }
 }

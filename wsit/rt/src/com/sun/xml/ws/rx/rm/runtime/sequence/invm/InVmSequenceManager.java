@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.rx.rm.runtime.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
@@ -43,11 +44,13 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceMaintenanceTask;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -98,6 +101,11 @@ public final class InVmSequenceManager implements SequenceManager {
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
+
+        MaintenanceTaskExecutor.INSTANCE.register(
+                new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
+                configuration.getSequenceManagerMaintenancePeriod(),
+                TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -181,10 +189,9 @@ public final class InVmSequenceManager implements SequenceManager {
             if (sequences.containsKey(sequenceId)) {
                 Sequence sequence = sequences.get(sequenceId);
 
-                if (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis()) {
-                    // TODO this should be handled by a maintenace task running in a separate thread
+                if (shouldTeminate(sequence)) {
                     dataLock.readLock().unlock();
-                    terminateSequence(sequenceId);
+                    tryTerminateSequence(sequenceId);
                     dataLock.readLock().lock();
                 }
 
@@ -210,29 +217,35 @@ public final class InVmSequenceManager implements SequenceManager {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
+    private Sequence tryTerminateSequence(String sequenceId) {
         try {
             dataLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
-                AbstractSequence sequence = sequences.remove(sequenceId);
+                AbstractSequence sequence = sequences.get(sequenceId);
 
-                if (boundSequences.containsKey(sequenceId)) {
-                    boundSequences.remove(sequenceId);
-
+                if (sequence.getState() != Sequence.State.TERMINATING) {
+                    sequence.preDestroy();
                 }
-
-                sequence.preDestroy();
 
                 return sequence;
             } else {
-                throw new UnknownSequenceException(sequenceId);
+                return null;
             }
         } finally {
             dataLock.writeLock().unlock();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence terminateSequence(String sequenceId) throws UnknownSequenceException {
+        Sequence sequence = tryTerminateSequence(sequenceId);
+        if (sequence == null) {
+            throw new UnknownSequenceException(sequenceId);
+        }
+
+        return sequence;
     }
 
     /**
@@ -296,5 +309,39 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     public long currentTimeInMillis() {
         return System.currentTimeMillis();
+    }
+
+    public void onMaintenance() {
+        try {
+            dataLock.writeLock().lock();
+
+            for (String key : sequences.keySet()) {
+                AbstractSequence sequence = sequences.get(key);
+
+                if (shouldRemove(sequence)) {
+                    sequences.remove(key);
+                    if (boundSequences.containsKey(sequence.getId())) {
+                        boundSequences.remove(sequence.getId());
+                    }
+                } else if (shouldTeminate(sequence)) {
+                    tryTerminateSequence(sequence.getId());
+                }
+
+            }
+
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
+
+    private boolean shouldTeminate(Sequence sequence) {
+        return sequence.getState() != Sequence.State.TERMINATING && (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis());
+    }
+
+    private boolean shouldRemove(Sequence sequence) {
+        // Right now we are going to remove all terminated sequences.
+        // Later we may decide to introduce a timeout before a terminated
+        // sequence is removed from the sequence storage
+        return sequence.getState() == Sequence.State.TERMINATING;
     }
 }

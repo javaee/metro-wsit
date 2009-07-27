@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.rx.rm.runtime.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Map;
@@ -46,9 +47,11 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.InboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.OutboundSequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceMaintenanceTask;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -106,6 +109,11 @@ public final class PersistentSequenceManager implements SequenceManager {
         if (managedObjectManager != null) {
             managedObjectManager.registerAtRoot(this, MANAGED_BEAN_NAME);
         }
+
+        MaintenanceTaskExecutor.INSTANCE.register(
+                new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
+                configuration.getSequenceManagerMaintenancePeriod(),
+                TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -190,10 +198,9 @@ public final class PersistentSequenceManager implements SequenceManager {
             dataLock.readLock().lock();
             Sequence sequence = sequences.get(sequenceId);
 
-            if (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis()) {
-                // TODO this should be handled by a maintenace task running in a separate thread
+            if (shouldTeminate(sequence)) {
                 dataLock.readLock().unlock();
-                terminateSequence(sequenceId);
+                tryTerminateSequence(sequenceId);
                 dataLock.readLock().lock();
             }
 
@@ -276,6 +283,22 @@ public final class PersistentSequenceManager implements SequenceManager {
         }
     }
 
+    private Sequence tryTerminateSequence(String sequenceId) {
+        try {
+            dataLock.writeLock().lock();
+
+            AbstractSequence sequence = sequences.get(sequenceId);
+
+            if (sequence != null && sequence.getState() != Sequence.State.TERMINATING) {
+                sequence.preDestroy();
+            }
+
+            return sequence;
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -285,20 +308,7 @@ public final class PersistentSequenceManager implements SequenceManager {
 
             checkIfExist(sequenceId); // Check if valid and prefetch sequence to a in-memory cache if not ready
 
-            AbstractSequence sequence = sequences.remove(sequenceId);
-            if (boundSequences.containsKey(sequenceId)) {
-                boundSequences.remove(sequenceId);
-
-            }
-
-            sequence.preDestroy();
-
-// TODO we should have a special task that terminates expired sequences and removes terminated sequences
-//      after some predefined period of time. Right now this must be handled manually
-// 
-//            PersistentSequenceData.remove(cm, uniqueEndpointId, sequenceId);
-
-            return sequence;
+            return tryTerminateSequence(sequenceId);
         } finally {
             dataLock.writeLock().unlock();
         }
@@ -364,5 +374,39 @@ public final class PersistentSequenceManager implements SequenceManager {
     public long currentTimeInMillis() {
         // TODO sync time with database
         return System.currentTimeMillis();
+    }
+
+    public void onMaintenance() {
+        try {
+            dataLock.writeLock().lock();
+
+            for (String key : sequences.keySet()) {
+                AbstractSequence sequence = sequences.get(key);
+
+                if (shouldRemove(sequence)) {
+                    sequences.remove(key);
+                    PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
+                    if (boundSequences.containsKey(sequence.getId())) {
+                        boundSequences.remove(sequence.getId());
+                    }
+                } else if (shouldTeminate(sequence)) {
+                    tryTerminateSequence(sequence.getId());
+                }
+            }
+
+        } finally {
+            dataLock.writeLock().unlock();
+        }
+    }
+
+    private boolean shouldTeminate(Sequence sequence) {
+        return sequence.getState() != Sequence.State.TERMINATING && (sequence.isExpired() || sequence.getLastActivityTime() + sequenceInactivityTimeout < currentTimeInMillis());
+    }
+
+    private boolean shouldRemove(Sequence sequence) {
+        // Right now we are going to remove all terminated sequences.
+        // Later we may decide to introduce a timeout before a terminated
+        // sequence is removed from the sequence storage
+        return sequence.getState() == Sequence.State.TERMINATING;
     }
 }

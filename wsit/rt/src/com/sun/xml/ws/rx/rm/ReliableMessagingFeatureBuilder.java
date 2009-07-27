@@ -56,6 +56,7 @@ public final class ReliableMessagingFeatureBuilder {
     private long ackRequestInterval = DEFAULT_ACK_REQUESTED_INTERVAL;
     private long closeSequenceOperationTimeout = DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
     private boolean persistenceEnabled = false;
+    private long sequenceMaintenancePeriod = DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
 
     public ReliableMessagingFeatureBuilder() {
     }
@@ -77,7 +78,8 @@ public final class ReliableMessagingFeatureBuilder {
                 this.retransmissionBackoffAlgorithm,
                 this.ackRequestInterval,
                 this.closeSequenceOperationTimeout,
-                this.persistenceEnabled);
+                this.persistenceEnabled,
+                this.sequenceMaintenancePeriod);
     }
 
     /**
@@ -173,6 +175,11 @@ public final class ReliableMessagingFeatureBuilder {
      */
     public ReliableMessagingFeatureBuilder disablePersistence() {
         this.persistenceEnabled = false;
+        return this;
+    }
+
+    public ReliableMessagingFeatureBuilder sequenceMaintenancePeriod(long newValue) {
+        this.sequenceMaintenancePeriod = newValue;
         return this;
     }
 }
