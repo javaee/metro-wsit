@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.IncompleteSequenceBehavior;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 
 
@@ -115,8 +116,14 @@ public class CreateSequenceElement {
             offer.setId(data.getOfferedSequenceId());
             // Microsoft does not accept CreateSequence messages if AcksTo and Offer/Endpoint are not the same
             offer.setEndpoint(data.getAcksToEpr());
+            
+            if (!data.offeredSequenceDoesNotExpire()) {
+                offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+            }
 
-            offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+            if (data.getOfferedSequenceIncompleteBehavior() != IncompleteSequenceBehavior.getDefault()) {
+                offer.setIncompleteSequenceBehavior(IncompleteSequenceBehaviorType.fromISB(data.getOfferedSequenceIncompleteBehavior()));
+            }
         }
         if (data.getStrType() != null) {
             securityTokenReference = data.getStrType();
@@ -135,6 +142,10 @@ public class CreateSequenceElement {
             dataBuilder.offeredInboundSequenceId(offer.getId());
             if (offer.getExpires() != null) {
                 dataBuilder.offeredSequenceExpiry(offer.getExpires().getDuration());
+            }
+
+            if (offer.getIncompleteSequenceBehavior() != null) {
+                dataBuilder.offeredSequenceIncompleteBehavior(offer.getIncompleteSequenceBehavior().translate());
             }
         }
 

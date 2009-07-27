@@ -39,6 +39,7 @@ package com.sun.xml.ws.rx.rm.protocol;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.IncompleteSequenceBehavior;
 import javax.xml.ws.EndpointReference;
 
 /**
@@ -109,5 +110,9 @@ public class CreateSequenceResponseData {
 
     public @NotNull String getSequenceId() {
         return sequenceId;
+    }
+
+    public IncompleteSequenceBehavior getIncompleteSequenceBehavior() {
+        return incompleteSequenceBehavior;
     }
 }

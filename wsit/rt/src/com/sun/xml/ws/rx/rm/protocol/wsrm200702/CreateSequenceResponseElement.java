@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceResponseData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.IncompleteSequenceBehavior;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,14 +99,20 @@ public class CreateSequenceResponseElement {
     private Map<QName, String> otherAttributes = new HashMap<QName, String>();
 
     public CreateSequenceResponseElement() {
-        incompleteSequenceBehavior = IncompleteSequenceBehaviorType.DISCARD_FOLLOWING_FIRST_GAP;
     }
 
     public CreateSequenceResponseElement(CreateSequenceResponseData data) {
         this();
 
         identifier = new Identifier(data.getSequenceId());
-        expires = new Expires(data.getDuration());
+
+        if (data.getIncompleteSequenceBehavior() != IncompleteSequenceBehavior.getDefault()) {
+            incompleteSequenceBehavior = IncompleteSequenceBehaviorType.fromISB(data.getIncompleteSequenceBehavior());
+        }
+
+        if (!data.doesNotExpire()) {
+            expires = new Expires(data.getDuration());
+        }
         if (data.getAcceptedSequenceAcksTo() != null) {
             accept = new AcceptType();
             accept.setAcksTo(data.getAcceptedSequenceAcksTo());

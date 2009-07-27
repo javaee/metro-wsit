@@ -90,6 +90,15 @@ public enum IncompleteSequenceBehaviorType {
         throw new IllegalArgumentException(v);
     }
 
+    public static IncompleteSequenceBehaviorType fromISB(Sequence.IncompleteSequenceBehavior v) {
+        for (IncompleteSequenceBehaviorType c : IncompleteSequenceBehaviorType.values()) {
+            if (c.translation == v) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v.toString());
+    }
+
     public Sequence.IncompleteSequenceBehavior translate() {
         return translation;
     }

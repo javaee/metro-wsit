@@ -112,7 +112,9 @@ public class CreateSequenceElement {
         if (data.getOfferedSequenceId() != null) {
             this.offer = new OfferType();
             offer.setId(data.getOfferedSequenceId());
-            offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+            if (!data.offeredSequenceDoesNotExpire()) {
+                offer.setExpires(new Expires(data.getOfferedSequenceExpiry()));
+            }
         }
         if (data.getStrType() != null) {
             securityTokenReference = data.getStrType();
