@@ -52,30 +52,6 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.xml.ws.WebServiceException;
 
-//import com.sun.ejb.Container;
-//import com.sun.ejb.Invocation;
-//import com.sun.enterprise.InvocationManager;
-//import com.sun.enterprise.Switch;
-//import com.sun.enterprise.deployment.Application;
-//import com.sun.enterprise.deployment.BundleDescriptor;
-//import com.sun.enterprise.deployment.EjbDescriptor;
-//import com.sun.enterprise.deployment.ServiceReferenceDescriptor;
-//import com.sun.enterprise.deployment.WebBundleDescriptor;
-//import com.sun.enterprise.deployment.WebServiceEndpoint;
-//import com.sun.enterprise.deployment.util.ModuleDescriptor;
-
-//import com.sun.enterprise.deployment.runtime.common.MessageSecurityBindingDescriptor;
-//
-//import com.sun.enterprise.security.audit.AuditManager;
-//import com.sun.enterprise.security.audit.AuditManagerFactory;
-//import com.sun.enterprise.security.ClientSecurityContext;
-//import com.sun.enterprise.security.AppservAccessController;
-//import com.sun.enterprise.security.SecurityContext;
-//import com.sun.enterprise.security.jmac.AuthMessagePolicy;
-//
-//import com.sun.enterprise.util.LocalStringManagerImpl;
-//import com.sun.enterprise.util.io.FileUtils;
-
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.WSBinding;
@@ -90,8 +66,6 @@ import com.sun.xml.ws.api.server.Module;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Object;
-import java.lang.Object;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
@@ -151,6 +125,7 @@ public class PipeHelper extends ConfigHelper {
         }
    }
 
+    @Override
     public ClientAuthContext getClientAuthContext(MessageInfo info, Subject s) 
     throws AuthException {
 	ClientAuthConfig c = (ClientAuthConfig)getAuthConfig(false);
@@ -161,6 +136,7 @@ public class PipeHelper extends ConfigHelper {
 	return null;
     }
 
+    @Override
     public ServerAuthContext getServerAuthContext(MessageInfo info, Subject s) 
     throws AuthException {
 	ServerAuthConfig c = (ServerAuthConfig)getAuthConfig(true);
@@ -263,6 +239,7 @@ public class PipeHelper extends ConfigHelper {
 	}
     }
  
+    @Override
     public void disable() {
 	listenerWrapper.disableWithRefCount();
     }
