@@ -40,7 +40,6 @@ import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
 import com.sun.xml.ws.tx.common.TransactionImportManager;
-import com.sun.xml.ws.tx.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Registrant;
@@ -49,7 +48,6 @@ import com.sun.xml.ws.tx.webservice.member.coord.CreateCoordinationContextType;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -87,6 +85,7 @@ public class ATSubCoordinator extends ATCoordinator {
         assert getContext().getRootRegistrationService() != null;
     }
 
+    @Override
     public void setTransaction(final Transaction txn) {
         super.setTransaction(txn);
         if (txn == null) {
@@ -96,6 +95,7 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
+    @Override
     protected void registerWithVolatileParent() {
         if (rootVolatileParticipant == null) {
             if (logger.isLogging(Level.FINE)) {
@@ -107,6 +107,7 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
+    @Override
     protected boolean registerWithDurableParent() {
         boolean result = false;
         if (rootDurableParticipant == null) {
@@ -129,6 +130,7 @@ public class ATSubCoordinator extends ATCoordinator {
         return result;
     }
 
+    @Override
     public boolean isSubordinateCoordinator() {
         return true;
     }
@@ -296,12 +298,14 @@ public class ATSubCoordinator extends ATCoordinator {
     /**
      * Subordinate Coordinator does not use this mechanism. Ensure it is not called.
      */
+    @Override
     public void beforeCompletion() {
         // Ensure that beforeCompletion disabled for subordinate coordinator
         // Subordinate coordinator should not be registered with TransactionSynchronizationRegistry.
         throw new UnsupportedOperationException("No beforeCompletion for subordinate coordinator");
     }
 
+    @Override
     public void afterCompletion(final int i) {
         // Ensure that afterCompletion disabled for subordinate coordinator    
         throw new UnsupportedOperationException("No afterCompletion for subordinate coordinator");
@@ -314,6 +318,7 @@ public class ATSubCoordinator extends ATCoordinator {
      * <p/>
      * <p>Prepare this coordinator and return result of preparation.
      */
+    @Override
     public int prepare(final Xid xid) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_prepare(xid=" + xid + ")");
@@ -331,6 +336,7 @@ public class ATSubCoordinator extends ATCoordinator {
         return result;
     }
 
+    @Override
     public void commit(final Xid xid, final boolean onePhase) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_commit(xid=" + xid + " ,onePhase=" + onePhase + ")");
@@ -345,6 +351,7 @@ public class ATSubCoordinator extends ATCoordinator {
         }
     }
 
+    @Override
     public void rollback(final Xid xid) throws XAException {
         if (logger.isLogging(Level.FINER)) {
             logger.entering("XAResource_rollback(xid=" + xid + ")");
@@ -388,6 +395,7 @@ public class ATSubCoordinator extends ATCoordinator {
      * @param id the registrant id
      * @return the Registrant object or null if the id does not exist
      */
+    @Override
     public Registrant getRegistrant(final String id) {
         Registrant result = super.getRegistrant(id);
 
@@ -404,6 +412,7 @@ public class ATSubCoordinator extends ATCoordinator {
         return result;
     }
 
+    @Override
     public void removeRegistrant(final String id) {
         forget(id);
     }
@@ -413,6 +422,7 @@ public class ATSubCoordinator extends ATCoordinator {
      * two special participants of SubordinateCoordinator. They are the only participants that parent
      * coordinator is aware of.
      */
+    @Override
     public boolean registerWithRootRegistrationService(final Registrant participant) {
         // Note: intended instance comparision, not object comparison
         if (participant == rootVolatileParticipant || participant == rootDurableParticipant) {
@@ -427,6 +437,7 @@ public class ATSubCoordinator extends ATCoordinator {
         return rootDurableParticipant != null || rootVolatileParticipant != null || super.hasOutstandingParticipants();
     }    
     
+    @Override
     public void forget(final String partId) {
         if (rootVolatileParticipant != null && rootVolatileParticipant.getIdValue().equals(partId)) {
             rootVolatileParticipant = null;
