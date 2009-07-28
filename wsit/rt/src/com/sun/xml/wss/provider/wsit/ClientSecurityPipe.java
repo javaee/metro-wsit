@@ -46,11 +46,6 @@ import javax.security.auth.message.config.*;
 import javax.security.auth.message.AuthStatus;
 import javax.xml.ws.WebServiceException;
 
-
-
-//import com.sun.enterprise.util.LocalStringManagerImpl;
-//import com.sun.logging.LogDomains;
-
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
@@ -96,6 +91,7 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
         this.helper = that.helper;
     }
 		       
+    @Override
     public void preDestroy() {
         //Give the AuthContext a chance to cleanup 
         //create a dummy request packet
@@ -122,6 +118,7 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
     }
     
     @SuppressWarnings("unchecked")
+    @Override
     public Packet process(Packet request) {
 
 	/*
