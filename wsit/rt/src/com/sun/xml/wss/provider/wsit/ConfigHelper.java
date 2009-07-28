@@ -64,10 +64,6 @@ import javax.security.auth.message.config.ServerAuthConfig;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.config.AuthConfigFactory.RegistrationContext;
 
-//import com.sun.enterprise.security.jmac.AuthMessagePolicy;
-//import com.sun.enterprise.security.jmac.config.HandlerContext;
-
-
 /**
  * This is based Helper class for 196 Configuration.
  * This class implements RegistrationListener. 
