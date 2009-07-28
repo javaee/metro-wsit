@@ -63,7 +63,7 @@
                                     <sp:RequestSecurityTokenTemplate>
                                         <t:TokenType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
                                         <t:KeyType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey</t:KeyType>
-                                        <t:KeySize xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">256</t:KeySize>
+                                        <t:KeySize xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">128</t:KeySize>
                                     </sp:RequestSecurityTokenTemplate>
                                     <wsp:Policy>
                                         <sp:RequireDerivedKeys/>

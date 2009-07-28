@@ -71,7 +71,7 @@
                         </sp:ProtectionToken>
                         <sp:AlgorithmSuite>
                             <wsp:Policy>
-                                <sp:Basic256/>
+                                <sp:Basic128/>
                             </wsp:Policy>
                         </sp:AlgorithmSuite>
                         <sp:Layout>
@@ -115,8 +115,8 @@
                                 <t:KeyType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey</t:KeyType>
                                 <t:KeySize xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">512</t:KeySize>
                                 <t:CanonicalizationAlgorithm xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2001/10/xml-exc-c14n#</t:CanonicalizationAlgorithm> 
-                                <t:EncryptionAlgorithm xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2001/04/xmlenc#aes256-cbc</t:EncryptionAlgorithm> 
-                                <t:EncryptWith xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2001/04/xmlenc#aes256-cbc</t:EncryptWith> 
+                                <t:EncryptionAlgorithm xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2001/04/xmlenc#aes128-cbc</t:EncryptionAlgorithm>
+                                <t:EncryptWith xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2001/04/xmlenc#aes128-cbc</t:EncryptWith>
                                 <t:SignWith xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://www.w3.org/2000/09/xmldsig#hmac-sha1</t:SignWith> 
                             </sp:RequestSecurityTokenTemplate>
                             <wsp:Policy>
