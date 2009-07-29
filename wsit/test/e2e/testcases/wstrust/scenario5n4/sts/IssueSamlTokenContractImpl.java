@@ -161,7 +161,7 @@ public  class IssueSamlTokenContractImpl extends MyIssueSamlTokenContract {
             
             if (stsConfig.getEncryptIssuedToken()){
                 // Create the encryption key
-                final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_256);
+                final XMLCipher cipher = XMLCipher.getInstance(XMLCipher.AES_128);
                 final int keysizeInBytes = 32;
                 final byte[] skey = WSTrustUtil.generateRandomSecret(keysizeInBytes);
                 cipher.init(XMLCipher.ENCRYPT_MODE, new SecretKeySpec(skey, "AES"));

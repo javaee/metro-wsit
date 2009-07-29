@@ -101,7 +101,7 @@ public abstract class MyIssueSamlTokenContract implements WSTrustContract<Reques
     protected static final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'sss'Z'", Locale.getDefault());
     
-    private static final int DEFAULT_KEY_SIZE = 256;
+    private static final int DEFAULT_KEY_SIZE = 128;
 
     
     public void init(final STSConfiguration config) {
