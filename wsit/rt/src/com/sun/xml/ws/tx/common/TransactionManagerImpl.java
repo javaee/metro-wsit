@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.tx.common;
 
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
@@ -53,17 +52,15 @@ import javax.transaction.*;
  * @author jf39279
  */
 public class TransactionManagerImpl implements TransactionManager, TransactionSynchronizationRegistry {
+
     private static final TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
-   
     // no standardized JNDI name exists across as implementations for TM, this is Sun App Server specific.
     private static final String AS_TXN_MGR_JNDI_NAME = "java:appserver/TransactionManager";
     private static final String TXN_MGR_JNDI_NAME = System.getProperty("com.sun.xml.ws.tx.txnMgrJndiName", AS_TXN_MGR_JNDI_NAME);
-
     // standardized name by JTA 1.1 spec
     private static final String TXN_SYNC_REG_JNDI_NAME = "java:comp/TransactionSynchronizationRegistry";
-    
     private static final String USER_TRANSACTION_JNDI_NAME = "java:comp/UserTransaction";
-
+    //
     private static final TransactionManagerImpl singleton = new TransactionManagerImpl();
 
     static public TransactionManagerImpl getInstance() {
@@ -80,7 +77,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         }
         return result;
     }
-
+    //
     private final TransactionManager javaeeTM;
     private final TransactionSynchronizationRegistry javaeeSynchReg;
 
@@ -91,19 +88,19 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         javaeeTM = (TransactionManager) jndiLookup(TXN_MGR_JNDI_NAME);
         javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
     }
-    
+
     TransactionManager getTransactionManager() {
         return javaeeTM;
     }
 
     public UserTransaction getUserTransaction() {
-        return (UserTransaction)jndiLookup(USER_TRANSACTION_JNDI_NAME);
+        return (UserTransaction) jndiLookup(USER_TRANSACTION_JNDI_NAME);
     }
-    
+
     public boolean isTransactionManagerAvailable() {
         return javaeeTM != null;
     }
-    
+
     public void begin() throws NotSupportedException, SystemException {
         javaeeTM.begin();
     }
@@ -157,19 +154,19 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     public void registerInterposedSynchronization(final Synchronization synchronization) {
         javaeeSynchReg.registerInterposedSynchronization(synchronization);
     }
-    
+
     public void registerSynchronization(final Synchronization sync) {
-        final String METHOD="registerSynchronization";
-        
+        final String METHOD = "registerSynchronization";
+
         if (sync == null) {
             return;
         }
-        
+
         Transaction txn = null;
         try {
             txn = javaeeTM.getTransaction();
         } catch (SystemException ex) {
-             logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010("getTransaction"), ex);
+            logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010("getTransaction"), ex);
         }
         if (txn == null) {
             logger.warning(METHOD, LocalizationMessages.REGISTER_SYNCH_NO_CURRENT_TXN_2011(sync.getClass().getName()));
@@ -177,11 +174,11 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
             try {
                 txn.registerSynchronization(sync);
             } catch (IllegalStateException ex) {
-                   logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
+                logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             } catch (RollbackException ex) {
-                   logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
+                logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             } catch (SystemException ex) {
-                  logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
+                logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
         }
     }
@@ -194,7 +191,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeSynchReg.getRollbackOnly();
     }
 
-  
     /**
      * Get the coordination context associated with the current transaction.
      * <p/>
@@ -210,7 +206,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     public void setCoordinationContext(final CoordinationContextInterface coordCtx) {
         putResource("WSCOOR-SUN", coordCtx);
     }
-    
+
     static private Method getMethod(Class<?> theClass, String methodName, Class<?> param) {
         Method method = null;
         try {
@@ -219,28 +215,25 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
             } else {
                 method = theClass.getMethod(methodName, param);
             }
-            logger.finest("getMethod", "found Sun App Server 9.1 container specific method via reflection " + theClass.getName() + "."  + methodName);
+            logger.finest("getMethod", "found Sun App Server 9.1 container specific method via reflection " + theClass.getName() + "." + methodName);
         } catch (Exception e) {
-            logger.finest("getMethod", "reflection lookup of  " + theClass.getName() + "." + methodName + "("
-                   + (param == null ? "" : param.getName()) 
-                   + ") failed with handled exception ", e);
+            logger.finest("getMethod", "reflection lookup of  " + theClass.getName() + "." + methodName + "(" + (param == null ? "" : param.getName()) + ") failed with handled exception ", e);
         }
         return method;
     }
-    
     static private boolean initialized = false;
     static private Method servletPreInvokeTxMethod = null;
     static private Method servletPostInvokeTxMethod = null;
-    
+
     private void initServletMethods() {
-         if (initialized == false) {
+        if (initialized == false) {
             initialized = true;
             servletPreInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPreInvokeTx", null);
             servletPostInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPostInvokeTx", boolean.class);
-         }
+        }
     }
-    
-     /**
+
+    /**
      * PreInvoke Transaction configuration for Servlet Container.
      * BaseContainer.preInvokeTx() handles all this for CMT EJB.
      *
@@ -252,17 +245,17 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * Note: this method is a no-op when invoked on an EJB.
      */
     public void servletPreInvokeTx() {
-       final String METHOD = "servletPreInvokeTx";
-       initServletMethods();
-       if (servletPreInvokeTxMethod != null) {
+        final String METHOD = "servletPreInvokeTx";
+        initServletMethods();
+        if (servletPreInvokeTxMethod != null) {
             try {
                 servletPreInvokeTxMethod.invoke(javaeeTM);
             } catch (Throwable ex) {
                 logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
-       }
+        }
     }
-    
+
     /**
      * PostInvoke Transaction configuration for Servlet Container.
      * BaseContainer.preInvokeTx() handles all this for CMT EJB.
@@ -275,25 +268,25 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * @param suspend indicate whether the delisting is due to suspension or transaction completion(commmit/rollback)
      */
     public void servletPostInvokeTx(Boolean suspend) {
-          final String METHOD = "servletPostInvokeTx";
-       initServletMethods();
-       if (servletPostInvokeTxMethod != null) {
+        final String METHOD = "servletPostInvokeTx";
+        initServletMethods();
+        if (servletPostInvokeTxMethod != null) {
             try {
                 servletPostInvokeTxMethod.invoke(javaeeTM, suspend);
             } catch (Throwable ex) {
-                 logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
+                logger.info(METHOD, LocalizationMessages.OPERATION_FAILED_2010(METHOD), ex);
             }
-       }
+        }
     }
- 
-     /**
+
+    /**
      * Returns in seconds duration till current transaction times out.
      * Returns negative value if transaction has already timedout.
      * Returns 0 if there is no timeout.
      * Returns 0 if any exceptions occur looking up remaining transaction timeout.
      */
     public int getRemainingTimeout() {
-        final String METHOD="getRemainingTimeout";
+        final String METHOD = "getRemainingTimeout";
         try {
             return TransactionImportManager.getInstance().getTransactionRemainingTimeout();
         } catch (SystemException se) {
@@ -303,12 +296,12 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
                 logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), se);
             }
         } catch (Throwable t) {
-             if (logger.isLogging(Level.FINEST)) {
+            if (logger.isLogging(Level.FINEST)) {
                 logger.finest(METHOD, "getTransactionRemainingTimeout() failed, default to no timeout", t);
             } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), t);        
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), t);
             }
         }
-         return 0;
+        return 0;
     }
 }
