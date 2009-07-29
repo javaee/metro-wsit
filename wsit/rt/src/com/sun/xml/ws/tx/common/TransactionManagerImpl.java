@@ -53,26 +53,21 @@ import javax.transaction.*;
  * @author jf39279
  */
 public class TransactionManagerImpl implements TransactionManager, TransactionSynchronizationRegistry {
-    final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
-    final private static TransactionManagerImpl singleton = new TransactionManagerImpl();
-    final private TransactionManager javaeeTM;
-    final private TransactionSynchronizationRegistry javaeeSynchReg;
-
+    private static final TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
    
     // no standardized JNDI name exists across as implementations for TM, this is Sun App Server specific.
     private static final String AS_TXN_MGR_JNDI_NAME = "java:appserver/TransactionManager";
+    private static final String TXN_MGR_JNDI_NAME = System.getProperty("com.sun.xml.ws.tx.txnMgrJndiName", AS_TXN_MGR_JNDI_NAME);
 
     // standardized name by JTA 1.1 spec
     private static final String TXN_SYNC_REG_JNDI_NAME = "java:comp/TransactionSynchronizationRegistry";
     
     private static final String USER_TRANSACTION_JNDI_NAME = "java:comp/UserTransaction";
 
+    private static final TransactionManagerImpl singleton = new TransactionManagerImpl();
+
     static public TransactionManagerImpl getInstance() {
         return singleton;
-    }
-    
-    TransactionManager getTransactionManager() {
-        return javaeeTM;
     }
 
     static private Object jndiLookup(final String jndiName) {
@@ -85,20 +80,28 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         }
         return result;
     }
+
+    private final TransactionManager javaeeTM;
+    private final TransactionSynchronizationRegistry javaeeSynchReg;
+
+    /**
+     * Creates a new instance of TransactionManagerImpl
+     */
+    private TransactionManagerImpl() {
+        javaeeTM = (TransactionManager) jndiLookup(TXN_MGR_JNDI_NAME);
+        javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
+    }
     
+    TransactionManager getTransactionManager() {
+        return javaeeTM;
+    }
+
     public UserTransaction getUserTransaction() {
         return (UserTransaction)jndiLookup(USER_TRANSACTION_JNDI_NAME);
     }
     
     public boolean isTransactionManagerAvailable() {
         return javaeeTM != null;
-    }
-    /**
-     * Creates a new instance of TransactionManagerImpl
-     */
-    private TransactionManagerImpl() {
-        javaeeTM = (TransactionManager) jndiLookup(AS_TXN_MGR_JNDI_NAME);
-        javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
     }
     
     public void begin() throws NotSupportedException, SystemException {
