@@ -183,7 +183,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             try {
                 INIT_LOCK.lock();
                 if (outboundSequenceId.value == null) { // RM session not initialized yet - need to synchronize
-                    openRmSession();
+                    openRmSession(request);
                 }
             } finally {
                 INIT_LOCK.unlock();
@@ -287,8 +287,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
         };
     }
 
-    private void openRmSession() {
-        createSequences();
+    private void openRmSession(Packet request) {
+        createSequences(request);
 
         rc.scheduledTaskManager.startTask(
                 createAckRequesterTask(rc.configuration.getAcknowledgementRequestInterval()),
@@ -306,9 +306,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private void createSequences() throws RxRuntimeException, DuplicateSequenceException {
+    private void createSequences(Packet appRequest) throws RxRuntimeException, DuplicateSequenceException {
         final CreateSequenceData.Builder csBuilder = CreateSequenceData.getBuilder(this.rmSourceReference.toSpec());
-        csBuilder.strType(rc.communicator.tryStartSecureConversation());
+        csBuilder.strType(rc.communicator.tryStartSecureConversation(appRequest));
         if (rc.configuration.requestResponseOperationsDetected()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration

@@ -265,12 +265,15 @@ public final class Communicator {
      * 
      * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
      */
-    public SecurityTokenReferenceType tryStartSecureConversation() {
+    public SecurityTokenReferenceType tryStartSecureConversation(Packet request) {
         SecurityTokenReferenceType strType = null;
         if (scInitiator != null) {
             try {
+                Packet emptyPacket = createEmptyRequestPacket(false);
+                emptyPacket.invocationProperties.putAll(request.invocationProperties);
+
                 @SuppressWarnings("unchecked")
-                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(createEmptyRequestPacket(false));
+                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(emptyPacket);
 
                 strType = (strElement != null) ? strElement.getValue() : null;
             } catch (WSSecureConversationException ex) {
