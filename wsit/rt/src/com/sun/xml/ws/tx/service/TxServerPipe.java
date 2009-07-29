@@ -61,6 +61,8 @@ import com.sun.xml.ws.tx.coordinator.CoordinationManager;
 
 import javax.servlet.ServletContext;
 import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.xml.bind.JAXBException;
@@ -76,7 +78,7 @@ import java.util.logging.Level;
  * <p/>
  * Supports following WS-Coordination protocols: 2004 WS-Atomic Transaction protocol
  *
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
@@ -238,6 +240,7 @@ public class TxServerPipe extends TxBasePipe {
         Packet responsePkt = null;
         Transaction jtaTxn = null;
         Exception rethrow = null;
+        boolean isRolledBackTxn = false;
         ATCoordinator coord = null;
 
         if (coordTxnCtx != null) {
@@ -301,6 +304,10 @@ public class TxServerPipe extends TxBasePipe {
                  // for Sun Application Server:  see BaseContainer.preInvokeTx
             try {
                 responsePkt = next.process(pkt);
+                if (isServlet(pkt)) {
+                    // Test if transaction was marked for rollback by method
+                    isRolledBackTxn = (txnMgr.getUserTransaction ().getStatus() == Status.STATUS_MARKED_ROLLBACK);
+                }
             } catch (Exception e) {
                 rethrow = e;
                 logger.warning(METHOD_NAME, 
@@ -308,7 +315,18 @@ public class TxServerPipe extends TxBasePipe {
                 txnMgr.setRollbackOnly();
             }
             if (isServlet(pkt)) {
-                 commitTransaction();
+                try {
+                  commitTransaction();
+                } catch (WebServiceException ex) {
+                    if (ex.getCause () instanceof RollbackException) {
+                        // Rethrow exception only if it was unexpected rollback
+                        if (!isRolledBackTxn) {
+                            throw ex;
+                        }
+                    } else {
+                        throw ex;
+                    }
+                }
             } // else allow Java EE EJB container to finish transaction context
               // for Sun Application Server:  see BaseContainer.postInvokeTx
         } else { 
