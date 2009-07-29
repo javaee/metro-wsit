@@ -46,13 +46,11 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.policy.PolicyMap;
-import static com.sun.xml.ws.policy.PolicyMap.createWsdlOperationScopeKey;
 import com.sun.xml.ws.tx.at.ATCoordinator;
 import com.sun.xml.ws.tx.common.ATAssertion;
 import static com.sun.xml.ws.tx.common.ATAssertion.NOT_ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.ALLOWED;
 import static com.sun.xml.ws.tx.common.ATAssertion.MANDATORY;
-import static com.sun.xml.ws.tx.common.Constants.AT_ASSERTION;
 import static com.sun.xml.ws.tx.common.Constants.WSAT_2004_PROTOCOL;
 import com.sun.xml.ws.tx.common.StatefulWebserviceFactoryFactory;
 import com.sun.xml.ws.tx.common.TxBasePipe;
@@ -75,7 +73,7 @@ import javax.xml.ws.WebServiceException;
  * This class process transactional context for client outgoing message.
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using pipes.
