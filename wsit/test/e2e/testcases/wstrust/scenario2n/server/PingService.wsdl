@@ -76,7 +76,7 @@
                                         </Metadata>
                                     </Issuer !-->
                                     <sp:RequestSecurityTokenTemplate>
-                                        <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">urn:oasis:names:tc:SAML:1.0:assertion</t:TokenType>
+                                        <t:TokenType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">urn:oasis:names:tc:SAML:2.0:assertion</t:TokenType>
                                         <t:KeyType xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
                                         <t:KeySize xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust">128</t:KeySize>
                                     </sp:RequestSecurityTokenTemplate>

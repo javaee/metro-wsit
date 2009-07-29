@@ -91,7 +91,7 @@
                     <wsp:Policy>
                         <sp:IssuedToken sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
                             <sp:RequestSecurityTokenTemplate>
-                                <t:TokenType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
+                                <t:TokenType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">urn:oasis:names:tc:SAML:2.0:assertion</t:TokenType>
                                 <t:KeyType xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer</t:KeyType>
                                 <t:KeySize xmlns:t="http://docs.oasis-open.org/ws-sx/ws-trust/200512">128</t:KeySize>
                             </sp:RequestSecurityTokenTemplate>
