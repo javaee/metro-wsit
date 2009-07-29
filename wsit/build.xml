@@ -135,7 +135,8 @@
         <!-- generate samples -->
         <unzip src="lib/jaxws-samples.zip" dest="${dist.image.wsit.dir}/samples" />
         <replace dir="${dist.image.wsit.dir}/samples">
-            <replacefilter token="env.JAXWS_HOME" value="env.METRO_HOME" />
+            <replacefilter token="JAXWS_HOME" value="METRO_HOME" />
+            <replacefilter token="JAX-WS installation directory" value="Metro installation directory" />
         </replace>
         <!-- copy over shell scripts -->
         <unzip src="lib/jaxws-bin.zip" dest="${dist.image.wsit.dir}/bin" />
