@@ -41,7 +41,6 @@ import com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeRPC;
 import com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType;
 
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,7 +51,7 @@ import java.util.logging.Level;
  * This class handles all address calculations for the wstx-service enpoints
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  */
 public class AddressManager {
@@ -151,11 +150,9 @@ public class AddressManager {
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest("static initializer", "getting host and port from AS...");
             }
-            Class<?> c = Class.forName("com.sun.enterprise.webservice.WsTxUtils");
-            Object instance = c.newInstance();
-            Method m = c.getMethod("getDefaultVirtualServerHostAndPort", boolean.class);
-            hostAndPort = (String) m.invoke(instance, false);
-            secureHostAndPort = (String) m.invoke(instance, true);
+           
+            hostAndPort = HostAndPortLookup.getInstance().getDefaultVirtualServerHostAndPort(false);
+            secureHostAndPort = HostAndPortLookup.getInstance().getDefaultVirtualServerHostAndPort(true);
 
             if (secureHostAndPort == null || hostAndPort == null) {
                 // there must have been an error on the GF-side, so fallback to a default
@@ -178,13 +175,14 @@ public class AddressManager {
         } catch (Throwable t) {  // trap every possible failure calling the gf code
             fallback();
             logger.info("static initializer",
-                    LocalizationMessages.HOST_AND_PORT_LOOKUP_FAILURE_2015(preferredScheme + "://" + secureHostAndPort));
+                    LocalizationMessages.HOST_AND_PORT_LOOKUP_FAILURE_2015(preferredScheme + "://" + hostAndPort),
+                    t);
             logger.finest("static initializer",
                     LocalizationMessages.HOST_AND_PORT_LOOKUP_FAILURE_2015(preferredScheme + "://" + secureHostAndPort),
                     t);
         }
     }
-
+    
     /**
      * Lookup any system props that override the preferred scheme, and http/s ports
      */

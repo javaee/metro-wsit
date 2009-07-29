@@ -33,13 +33,15 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.tx.common;
 
-import com.sun.enterprise.transaction.TransactionImport;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.transaction.xa.Xid;
 
 /**
@@ -51,83 +53,170 @@ import javax.transaction.xa.Xid;
  *  Assists in supporting application client and standalone client to separate from more commonly
  *  used methods in TransactionManagerImpl.
  */
-public class TransactionImportManager implements TransactionImport {
-    
-    final static private TxLogger logger = TxLogger.getATLogger(TransactionManagerImpl.class);
-    
-    static final TransactionImport instance = new TransactionImportManager();
-    static private TransactionImport javaeeTM;
-    
-    private TransactionImportManager() {
-        try {
-            javaeeTM = (TransactionImport)TransactionManagerImpl.getInstance().getTransactionManager();
-        } catch (ClassCastException cce) {
-            final String CLASSNAME = javaeeTM == null ? "null" : javaeeTM.getClass().getName();
-            logger.severe("TransactionImportManager", 
-                          LocalizationMessages.NO_TXN_IMPORT_2014(CLASSNAME), cce);
+public class TransactionImportManager implements TransactionImportWrapper {
+
+    private static final class MethodInfo<T> {
+        final String methodName;
+        final Class<?>[] parameterTypes;
+        final Class<T> returnType;
+        //
+        Method method;
+
+        public MethodInfo(String methodName, Class<?>[] parameterTypes, Class<T> returnType) {
+            this.methodName = methodName;
+            this.parameterTypes = parameterTypes;
+            this.returnType = returnType;
+        }
+
+        public boolean isCompatibleWith(Method m) {
+            if (!methodName.equals(m.getName())) {
+                return false;
+            }
+
+            if (!Modifier.isPublic(m.getModifiers())) {
+                return false;
+            }
+
+            if (!returnType.isAssignableFrom(m.getReturnType())) {
+                return false;
+            }
+            
+            Class<?>[] otherParamTypes = m.getParameterTypes();
+            if (parameterTypes.length != otherParamTypes.length) {
+                return false;
+            }
+            for (int i = 0; i < parameterTypes.length; i++) {
+                if (!parameterTypes[i].isAssignableFrom(otherParamTypes[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public T invoke(TransactionManager tmInstance, Object... args) {
+            try {
+                return returnType.cast(method.invoke(tmInstance, args));
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (IllegalArgumentException ex) {
+                throw new RuntimeException(ex);
+            } catch (InvocationTargetException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
-    
-    public static TransactionImport getInstance() {
-        return instance;
+    private static final TxLogger logger = TxLogger.getATLogger(TransactionImportManager.class);
+    private static final TransactionImportManager INSTANCE = new TransactionImportManager();
+
+    public static TransactionImportManager getInstance() {
+        return INSTANCE;
+    }
+    //
+    private final TransactionManager javaeeTM;
+    private final MethodInfo<?> recreate;
+    private final MethodInfo<?> release;
+    private final MethodInfo<XATerminator> getXATerminator;
+    private final MethodInfo<Integer> getTransactionRemainingTimeout;
+
+    private TransactionImportManager() {
+
+        this.recreate = new MethodInfo<Object>(
+                "recreate",
+                new Class<?>[]{Xid.class, long.class},
+                Object.class);
+        this.release = new MethodInfo<Object>(
+                "release",
+                new Class<?>[]{Xid.class},
+                Object.class);
+        this.getXATerminator = new MethodInfo<XATerminator>(
+                "getXATerminator",
+                new Class<?>[]{},
+                XATerminator.class);
+        this.getTransactionRemainingTimeout = new MethodInfo<Integer>(
+                "getTransactionRemainingTimeout",
+                new Class<?>[]{},
+                int.class);
+        MethodInfo<?>[] requiredMethods = new MethodInfo<?>[]{
+            recreate,
+            release,
+            getXATerminator,
+            getTransactionRemainingTimeout
+        };
+
+        javaeeTM = TransactionManagerImpl.getInstance().getTransactionManager();
+        int remainingMethodsToFind = requiredMethods.length;
+        for (Method m : javaeeTM.getClass().getDeclaredMethods()) {
+            for (MethodInfo mi : requiredMethods) {
+                if (mi.isCompatibleWith(m)) {
+                    mi.method = m;
+                    remainingMethodsToFind--;
+                }
+            }
+            if (remainingMethodsToFind == 0) {
+                break;
+            }
+        }
+
+        if (remainingMethodsToFind != 0) {
+            StringBuilder sb = new StringBuilder("Missing required extension methods detected on '" + TransactionManager.class.getName() + "' implementation '" + javaeeTM.getClass().getName() + "':\n");
+            for (MethodInfo mi : requiredMethods) {
+                if (mi.method == null) {
+                    sb.append(mi.methodName).append("\n");
+                }
+            }
+
+            // TODO log and throw? error
+        }
+
+//        if (transactionManager instanceof TransactionImport) {
+//            javaeeTM = (TransactionImport) transactionManager;
+//        } else {
+//            javaeeTM = null;
+//            logger.severe(
+//                    "<constructor>",
+//                    LocalizationMessages.NO_TXN_IMPORT_2014(transactionManager == null ? "null" : transactionManager.getClass().getName()));
+//        }
     }
 
     /**
-     * Recreate a transaction based on the Xid. This call causes the calling
-     * thread to be associated with the specified transaction.
-     * <p/>
-     *
-     * @param xid the Xid object representing a transaction.
+     * ${@inheritDoc }
      */
     public void recreate(final Xid xid, final long timeout) {
-       javaeeTM.recreate(xid, timeout);
+        recreate.invoke(javaeeTM, xid, timeout);
     }
 
     /**
-     * Release a transaction. This call causes the calling thread to be
-     * dissociated from the specified transaction.
-     *
-     * @param xid the Xid object representing a transaction.
+     * ${@inheritDoc }
      */
     public void release(final Xid xid) {
-        javaeeTM.release(xid);
+        release.invoke(javaeeTM, xid);
     }
 
     /**
-     * Used to import an external transaction into Java EE TM.
+     * ${@inheritDoc }
      */
     public XATerminator getXATerminator() {
-        return javaeeTM.getXATerminator();
+        return getXATerminator.invoke(javaeeTM);
     }
 
-     /**
-     * Returns in seconds duration till current transaction times out.
-     * Returns negative value if transaction has already timedout.
-     * Returns 0 if there is no timeout.
-     * Returns 0 if any exceptions occur looking up remaining transaction timeout.
+    /**
+     * ${@inheritDoc }
      */
     public int getTransactionRemainingTimeout() throws SystemException {
-        final String METHOD = "getRemainingTimeout";
+        final String METHOD = "getTransactionRemainingTimeout";
         int result = 0;
+
         try {
-            result = javaeeTM.getTransactionRemainingTimeout();
+            result = getTransactionRemainingTimeout.invoke(javaeeTM);
         } catch (IllegalStateException ise) {
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
             } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
-                                                                                    ise.getLocalizedMessage()));
-            }
-        } catch (Throwable t) {
-            if (logger.isLogging(Level.FINEST)) {
-                logger.finest(METHOD, "ignoring exception " + t.getClass().getName() + " thrown calling" +
-                        "TM.getTransactionRemainingTimeout method" );
-            } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout", 
-                        t.getLocalizedMessage()));
-         
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), ise);
             }
         }
+
         return result;
     }
 }

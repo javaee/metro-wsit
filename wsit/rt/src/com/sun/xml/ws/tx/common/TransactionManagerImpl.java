@@ -297,17 +297,13 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
             if (logger.isLogging(Level.FINEST)) {
                 logger.finest(METHOD, "getRemainingTimeout stack trace", se);
             } else {
-                logger.info(METHOD, 
-                        LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout",
-                                                                           se.getLocalizedMessage()));
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), se);
             }
         } catch (Throwable t) {
              if (logger.isLogging(Level.FINEST)) {
-                logger.finest(METHOD, "getTransactionRemainingTimeout() failed, default to no timeout" );
+                logger.finest(METHOD, "getTransactionRemainingTimeout() failed, default to no timeout", t);
             } else {
-                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout", 
-                        t.getLocalizedMessage()));
-         
+                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), t);        
             }
         }
          return 0;

@@ -35,11 +35,11 @@
  */
 package com.sun.xml.ws.tx.at;
 
-import com.sun.enterprise.transaction.TransactionImport;
 import com.sun.xml.ws.api.tx.Participant;
 import com.sun.xml.ws.api.tx.Protocol;
 import com.sun.xml.ws.api.tx.TXException;
 import com.sun.xml.ws.tx.common.TransactionImportManager;
+import com.sun.xml.ws.tx.common.TransactionImportWrapper;
 import com.sun.xml.ws.tx.common.TxLogger;
 import com.sun.xml.ws.tx.coordinator.CoordinationContextInterface;
 import com.sun.xml.ws.tx.coordinator.Registrant;
@@ -61,7 +61,7 @@ import javax.xml.ws.WebServiceException;
 public class ATSubCoordinator extends ATCoordinator {
     static private TxLogger logger = TxLogger.getATLogger(ATCoordinator.class);
     
-    final TransactionImport importTm = TransactionImportManager.getInstance();
+    final TransactionImportWrapper importTm = TransactionImportManager.getInstance();
 
     // This Subordinate coordinator is a volatile participant of parent coordinator.
     private ATParticipant rootVolatileParticipant = null;
