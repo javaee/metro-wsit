@@ -43,7 +43,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 
 /**
  *
@@ -86,7 +85,7 @@ public final class DelayedTaskManager {
             try {
                 task.run(DelayedTaskManager.this);
             } catch (Exception ex) {
-                LOGGER.logException(ex, Level.WARNING);
+                LOGGER.warning("An exception occured while running delayed task", ex);
             } finally {
                 LOGGER.exiting();
             }
