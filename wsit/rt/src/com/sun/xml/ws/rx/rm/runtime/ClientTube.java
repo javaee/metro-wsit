@@ -339,6 +339,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     (responseData.getDuration() == Sequence.NO_EXPIRY) ? Sequence.NO_EXPIRY : responseData.getDuration() + rc.sequenceManager().currentTimeInMillis());
 
             rc.sequenceManager().bindSequences(outboundSequenceId.value, inboundSequence.getId());
+            rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequenceId.value);
         }
     }
 

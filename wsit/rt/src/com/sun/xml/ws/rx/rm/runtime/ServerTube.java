@@ -358,6 +358,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                     receivedSctId,
                     calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()));
             rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequence.getId());
+            rc.sequenceManager().bindSequences(outboundSequence.getId(), inboundSequence.getId());
         }
 
         if (!hasSession(request)) { // security did not start session - we must do it
