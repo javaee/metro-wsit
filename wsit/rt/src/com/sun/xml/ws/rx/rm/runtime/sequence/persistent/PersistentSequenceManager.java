@@ -39,6 +39,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -377,25 +378,32 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     public void onMaintenance() {
+        LOGGER.entering();
         try {
             dataLock.writeLock().lock();
 
-            for (String key : sequences.keySet()) {
-                AbstractSequence sequence = sequences.get(key);
+            Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
+            while(sequenceKeyIterator.hasNext()) {
+                String key = sequenceKeyIterator.next();
 
+                AbstractSequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
-                    sequences.remove(key);
+                    // TODO L10N
+                    LOGGER.config(String.format("Removing sequence [ %s ]", sequence.getId()));
+                    sequenceKeyIterator.remove();
                     PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
                     if (boundSequences.containsKey(sequence.getId())) {
                         boundSequences.remove(sequence.getId());
                     }
                 } else if (shouldTeminate(sequence)) {
+                    // TODO L10N
+                    LOGGER.config(String.format("Terminating sequence [ %s ]", sequence.getId()));
                     tryTerminateSequence(sequence.getId());
                 }
             }
-
         } finally {
             dataLock.writeLock().unlock();
+            LOGGER.exiting();
         }
     }
 

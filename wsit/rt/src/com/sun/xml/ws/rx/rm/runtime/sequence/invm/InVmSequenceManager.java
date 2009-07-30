@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.runtime.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -48,6 +49,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceMaintenanceTask;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +62,8 @@ import org.glassfish.gmbal.ManagedObjectManager;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class InVmSequenceManager implements SequenceManager {
+    private static final Logger LOGGER = Logger.getLogger(InVmSequenceManager.class);
+
 
     /**
      * Internal in-memory data access lock
@@ -312,25 +316,32 @@ public final class InVmSequenceManager implements SequenceManager {
     }
 
     public void onMaintenance() {
+        LOGGER.entering();
         try {
             dataLock.writeLock().lock();
 
-            for (String key : sequences.keySet()) {
-                AbstractSequence sequence = sequences.get(key);
+            Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
+            while(sequenceKeyIterator.hasNext()) {
+                String key = sequenceKeyIterator.next();
 
+                AbstractSequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
-                    sequences.remove(key);
+                    // TODO L10N
+                    LOGGER.config(String.format("Removing sequence [ %s ]", sequence.getId()));
+                    sequenceKeyIterator.remove();
                     if (boundSequences.containsKey(sequence.getId())) {
                         boundSequences.remove(sequence.getId());
                     }
                 } else if (shouldTeminate(sequence)) {
+                    // TODO L10N
+                    LOGGER.config(String.format("Terminating sequence [ %s ]", sequence.getId()));
                     tryTerminateSequence(sequence.getId());
                 }
-
             }
 
         } finally {
             dataLock.writeLock().unlock();
+            LOGGER.exiting();
         }
     }
 
