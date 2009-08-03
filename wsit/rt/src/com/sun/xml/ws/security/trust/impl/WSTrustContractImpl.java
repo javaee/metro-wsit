@@ -305,6 +305,14 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             Object oboToken = obo.getAny();
             if (oboToken != null){
                 subject.getPublicCredentials().add(eleFac.toElement(oboToken));
+
+                 // set OnBehalfOf attribute
+                claims.getOtherAttributes().put(new QName("OnBehalfOf"), "true");
+
+                // Create a Subject with ActAs credential and put it in claims
+                Subject oboSubj = new Subject();
+                oboSubj.getPublicCredentials().add(eleFac.toElement(oboToken));
+                claims.getSupportingProperties().add(oboSubj);
                 String confirMethod = null;
                 if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
                     tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){
