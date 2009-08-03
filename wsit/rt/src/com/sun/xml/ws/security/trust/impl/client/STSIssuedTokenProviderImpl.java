@@ -114,8 +114,8 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
                 long currentTime = beforeTime - offset;
                 c.setTimeInMillis(currentTime);
                 Date currentTimeInDateFormat = c.getTime();
-                if(!currentTimeInDateFormat.before(ctx.getExpirationTime())){
-                    // Remove expired the context
+                if(cached.getExpirationTime() != null && currentTimeInDateFormat.after(cached.getExpirationTime())){
+                    // Remove the expired context
                     subject.getPrivateCredentials().remove(cached);
 
                     // ToDo: renew the expired token if required
