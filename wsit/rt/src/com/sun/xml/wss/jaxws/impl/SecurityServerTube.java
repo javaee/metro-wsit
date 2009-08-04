@@ -74,7 +74,6 @@ import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
@@ -112,7 +111,6 @@ import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
-import com.sun.xml.wss.impl.misc.SecurityUtil;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import java.security.AccessController;
@@ -121,14 +119,12 @@ import java.security.PrivilegedAction;
 
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
-import com.sun.xml.wss.provider.wsit.IdentityComponent;
 import com.sun.xml.wss.provider.wsit.PipeConstants;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.security.cert.Certificate;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**
@@ -189,24 +185,8 @@ public class SecurityServerTube extends SecurityTubeBase {
             props.put(PipeConstants.ENDPOINT, context.getEndpoint());
             props.put(PipeConstants.POLICY, context.getPolicyMap());
             props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
-            //Registers IdentityComponent if either url or cs is not null
-            URL url = SecurityUtil.loadFromClasspath("META-INF/ServerCertificate.cert");
-            Certificate cs = null;
-            CertificateRetriever cr = new CertificateRetriever();
-            try {
-                cs = cr.getServerKeyStore(props);
-            } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
-                 throw new WebServiceException(ex);
-            } catch (XWSSecurityException ex) {
-                log.log(Level.SEVERE, null, ex);
-                 throw new WebServiceException(ex);
-            }
-            if (url != null || cs != null) { //register the IdentityComponent
-                WSEndpoint wse = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
-                IdentityComponent idComponent = new IdentityComponent(cs, url);
-                boolean add = wse.getComponentRegistry().add(idComponent);
-            }
+            //Registers IdentityComponent if either cs is not null
+            
            
         } catch (Exception e) {
             log.log(Level.SEVERE, 

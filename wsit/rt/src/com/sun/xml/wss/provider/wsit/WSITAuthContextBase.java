@@ -1602,6 +1602,7 @@ public abstract class WSITAuthContextBase  {
             context.setSOAPVersion(soapVersion);
             context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setMustUnderstandValue(securityMUValue);
+            context.setWSSAssertion(((MessagePolicy)ctx.getSecurityPolicy()).getWSSAssertion());
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.pipeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);

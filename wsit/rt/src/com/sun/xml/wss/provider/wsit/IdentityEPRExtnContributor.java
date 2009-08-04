@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,70 +33,58 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 /*
- * IdentityComponent.java  Created on July 13, 2009, 4:40 PM
- *
-/* To change this template, choose Tools | Templates
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.security.core.ai.IdentityType;
 import com.sun.xml.stream.buffer.XMLStreamBufferResult;
-import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
-import com.sun.xml.ws.api.server.EndpointComponent;
+import com.sun.xml.ws.api.addressing.WSEndpointReference.EPRExtension;
 import com.sun.xml.ws.api.server.EndpointReferenceExtensionContributor;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.policy.PolicyMap;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
+import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
-import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
+
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import java.io.IOException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.security.cert.Certificate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  *
  * @author suresh
  */
-public class IdentityComponent implements EndpointComponent {
+public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContributor {
 
-    protected TubeConfiguration pipeConfig = null;
-    protected PolicyMap pm = null;
-    protected WSEndpoint e = null;
-    protected Map props = null;
     private Certificate cs = null;
-    protected SOAPVersion sp = null;
+    QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
     protected static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSIT_PVD_DOMAIN,
             LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
 
-
-    public IdentityComponent(Certificate cs) {
-
-       
-            this.cs = cs;
-         
-       
+    public IdentityEPRExtnContributor() {
     }
 
-    @SuppressWarnings("unchecked")
+     @SuppressWarnings("unchecked")
     public <T> T getSPI(@NotNull Class<T> spiType) {
         //if id policy enabled &&
         if (spiType.isAssignableFrom(EndpointReferenceExtensionContributor.class)) {
@@ -106,52 +94,60 @@ public class IdentityComponent implements EndpointComponent {
         return null;
     }
 
-     public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContributor {
+    public EPRExtension getEPRExtension(WSEndpoint wse, WSEndpointReference.EPRExtension extension) {
 
-        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+        if (extension != null) {
+            return extension;
+        }
 
-        public WSEndpointReference.EPRExtension getEPRExtension(WSEndpoint endpoint, @Nullable WSEndpointReference.EPRExtension extension) {
-           if(extension != null){
-               return extension;
-           }
-            return new WSEndpointReference.EPRExtension() {
+        CertificateRetriever cr = new CertificateRetriever();
+        try {
+            cs = cr.getServerKeyStore(wse);
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        } catch (XWSSecurityException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
 
-                public XMLStreamReader readAsXMLStreamReader() throws XMLStreamException {
-                    XMLStreamReader reader = null;
-                    try {
-                        String id = PolicyUtil.randomUUID();
-                        BinarySecurityTokenType bst = new BinarySecurityTokenType();
-                        bst.setValueType(MessageConstants.X509v3_NS);
-                        bst.setId(id);
-                        bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
-                        if(cs != null){
+        return new EPRExtension() {
+
+            public XMLStreamReader readAsXMLStreamReader() throws XMLStreamException {
+                XMLStreamReader reader = null;
+                try {
+
+                    String id = PolicyUtil.randomUUID();
+                    BinarySecurityTokenType bst = new BinarySecurityTokenType();
+                    bst.setValueType(MessageConstants.X509v3_NS);
+                    bst.setId(id);
+                    bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+                    if (cs != null) {
                         bst.setValue(cs.getEncoded());
-                        } 
-                        JAXBElement<BinarySecurityTokenType> bstElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createBinarySecurityToken(bst);
-                        IdentityType identityElement = new IdentityType();
-                        identityElement.getDnsOrSpnOrUpn().add(bstElem);
-
-                        reader = readHeader(identityElement);
-
-                    } catch (CertificateEncodingException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                        throw new RuntimeException(ex);
                     }
-                    return reader;
-                }
+                    JAXBElement<BinarySecurityTokenType> bstElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createBinarySecurityToken(bst);
+                    IdentityType identityElement = new IdentityType();
+                    identityElement.getDnsOrSpnOrUpn().add(bstElem);
 
-                public QName getQName() {
-                    return ID_QNAME;
-                }
-            };
-        }
+                    reader = readHeader(identityElement);
 
-        public QName getQName() {
-            return ID_QNAME;
-        }
+                } catch (CertificateEncodingException ex) {
+                    log.log(Level.SEVERE, null, ex);
+                    throw new RuntimeException(ex);
+                }
+                return reader;
+            }
+
+            public QName getQName() {
+                return ID_QNAME;
+            }
+        };
     }
 
-    
+    public QName getQName() {
+        return ID_QNAME;
+    }
+
     public XMLStreamReader readHeader(IdentityType identityElem) throws XMLStreamException {
         XMLStreamBufferResult xbr = new XMLStreamBufferResult();
         JAXBElement<IdentityType> idElem =
@@ -162,8 +158,8 @@ public class IdentityComponent implements EndpointComponent {
             m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
             m.marshal(idElem, xbr);
         } catch (JAXBException je) {
-           log.log(Level.SEVERE, null, je);
-           throw new XMLStreamException(je);
+            log.log(Level.SEVERE, null, je);
+            throw new XMLStreamException(je);
         }
         return xbr.getXMLStreamBuffer().readAsXMLStreamReader();
     }

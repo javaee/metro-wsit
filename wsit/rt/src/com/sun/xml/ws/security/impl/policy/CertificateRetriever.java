@@ -5,6 +5,7 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -32,7 +33,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +43,7 @@ import org.jvnet.staxex.Base64Data;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.Map;
 
 /**
  *
@@ -61,11 +62,11 @@ public class CertificateRetriever {
     private Certificate cs = null;
     private FileInputStream fis = null;
 
-    public Certificate getServerKeyStore(Map<Object, Object> props) throws IOException, XWSSecurityException {
+    public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
         QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
 
-        setLocationPasswordAndAlias(keyStoreQName, props);
+        setLocationPasswordAndAlias(keyStoreQName, wse);
         if (password == null || location == null || alias == null) {
             return null;
         }
@@ -188,10 +189,10 @@ public class CertificateRetriever {
         return valid;
     }
 
-    private void setLocationPasswordAndAlias(QName qName, Map props) throws IOException {
-
-        PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
-        WSDLPort port = (WSDLPort) props.get(PipeConstants.WSDL_MODEL);
+    private void setParameters(PolicyMap pm, WSDLPort port,QName qName) {
+        if(port == null){
+            return;
+        }
         QName serviceName = port.getOwner().getName();
         QName portName = port.getName();
 
@@ -232,17 +233,17 @@ public class CertificateRetriever {
                                 StringBuffer sb = null;
                                 sb = new StringBuffer(location);
                                 if (location.startsWith("$WSIT")) {
-                                    String path = System.getProperty("WSIT_HOME");                                    
+                                    String path = System.getProperty("WSIT_HOME");
                                     sb.replace(0, 10, path);
                                     location = sb.toString();
-                                }                               
-                                
+                                }
+
                             } else if (name.getLocalPart().equals("alias")) {
                                 alias = (String) atts.get(name);
                             }
                         }
 
-                    }                   
+                    }
 
                 }
 
@@ -253,5 +254,20 @@ public class CertificateRetriever {
 
         }
 
+    }
+
+    private void setLocationPasswordAndAlias(QName trustStoreQName, Map props) {
+
+        PolicyMap pm = (PolicyMap) props.get(PipeConstants.POLICY);
+        WSDLPort port = (WSDLPort) props.get(PipeConstants.WSDL_MODEL);
+        setParameters(pm,port,trustStoreQName);
+    }
+
+    private void setLocationPasswordAndAlias(QName qName, WSEndpoint wse) throws IOException {
+
+        PolicyMap pm = wse.getPolicyMap();
+        WSDLPort port =wse.getPort();
+        setParameters(pm,port,qName);
+        
     }
 }

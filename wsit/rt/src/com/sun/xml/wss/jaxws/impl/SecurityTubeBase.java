@@ -387,6 +387,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             context.setSOAPVersion(soapVersion);
             context.setAllowMissingTimestamp(allowMissingTimestamp);
             context.setMustUnderstandValue(securityMUValue);
+            context.setWSSAssertion(((MessagePolicy)ctx.getSecurityPolicy()).getWSSAssertion());
             context.setJAXWSMessage(message, soapVersion);
             context.isOneWayMessage(message.isOneWay(this.tubeConfig.getWSDLPort()));
             context.setDisableIncPrefix(disableIncPrefix);
@@ -431,6 +432,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         JAXBFilterProcessingContext  context = (JAXBFilterProcessingContext)ctx;
         context.setDisablePayloadBuffering(disablePayloadBuffer);
         context.setDisableIncPrefix(disableIncPrefix);
+        if (((MessagePolicy) ctx.getSecurityPolicy()) != null) {
+            context.setWSSAssertion(((MessagePolicy) ctx.getSecurityPolicy()).getWSSAssertion());
+        }
         context.setAllowMissingTimestamp(allowMissingTimestamp);
         context.setMustUnderstandValue(securityMUValue);
         context.setEncHeaderContent(encHeaderContent);
