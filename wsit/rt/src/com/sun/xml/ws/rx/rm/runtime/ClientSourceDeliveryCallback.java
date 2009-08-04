@@ -210,6 +210,10 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
             Packet outboundPacketCopy = message.getPacket().copy(true);
 
+            // TODO: remove the workaround bellow when JAX-WS FIXES the Packet.copy() method
+            outboundPacketCopy.expectReply = message.getPacket().expectReply;
+
+
             rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
             rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
