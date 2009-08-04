@@ -112,7 +112,30 @@ class SourceMessageHandler implements MessageHandler {
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         Sequence inboundSequence = sequenceManager.getBoundSequence(outboundSequenceId);
-        if (inboundSequence != null && inboundSequence.isAckRequested()) {
+        if (inboundSequence != null) {
+            /**
+             * If inbound sequence exists, we are not checking if inboundSequence.isAckRequested() is true.
+             * Instead, we are allways attaching inbound sequence acknowledegements (even if not requested by the other side)
+             * This is to avoid potential locks in InOrder delivery/redelivery scenarios.
+             *
+             * For example, following could happen on the client side with InOrder enabled
+             * if we strictly checked for inboundSequence.isAckRequested() to be true:
+             *
+             * 0. response to a previous client request arrives, endpoint is waiting for an acknowledgement
+             * 1. client request is put to delivery queue
+             * 2. acknowledgements are attached to the client request and ackRequested flag is cleared on inbound sequence
+             * 3. client request gets lost.
+             * 4. client request is scheduled for a resend
+             * 5. client request is put to delivery queue
+             * 6. this time, ackRequested flag is clear, so we will not append any acknowledgements
+             * 7. client request is processed on the endpoint and response is put to the endpoint's source delivery queue
+             * 8. since there was no acknowledgement of the previous response, the new response is blocekd in the delivery queue forever
+             *
+             * After step 8., communication between client and endpoint might freeze in a deadlock unless
+             * another means of communicating the sequence acknowledgements from client to the endpoint 
+             * are established.
+             */
+
             ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
             inboundSequence.clearAckRequestedFlag();
         }

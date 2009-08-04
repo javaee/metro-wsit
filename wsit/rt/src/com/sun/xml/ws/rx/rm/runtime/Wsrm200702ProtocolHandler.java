@@ -259,23 +259,19 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         }
 
         // sequence acknowledgement header
-        if (ackData.getAcknowledgedSequenceId() != null) {
+        if (ackData.getAcknowledgedSequenceId() != null && ackData.getAcknowledgedRanges() != null && !ackData.getAcknowledgedRanges().isEmpty()) {
             SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
             ackElement.setId(ackData.getAcknowledgedSequenceId());
 
-            if (ackData.getAcknowledgedRanges() != null && !ackData.getAcknowledgedRanges().isEmpty()) {
-                for (Sequence.AckRange range : ackData.getAcknowledgedRanges()) {
-                    ackElement.addAckRange(range.lower, range.upper);
-                }
-            } else {
-                ackElement.addAckRange(0, 0); // we don't have any ack ranges => we have not received any message yet
+            for (Sequence.AckRange range : ackData.getAcknowledgedRanges()) {
+                ackElement.addAckRange(range.lower, range.upper);
             }
 
             if (rc.getSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
                 ackElement.setFinal(new SequenceAcknowledgementElement.Final());
             }
 
-// TODO move this to server side - we don't have a buffer support on the client side
+// TODO decide whether we will advertise remaining buffer
 //        if (configuration.getDestinationBufferQuota() != Configuration.UNSPECIFIED) {
 //            ackElement.setBufferRemaining(-1/*calculate remaining quota*/);
 //        }
