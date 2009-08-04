@@ -66,9 +66,9 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     public static final long DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL = 2000;
     /**
      * A constant specifying the default value of interval between sending subsequent 
-     * acknowledgement request messages. Currently the default value is set to 200.
+     * acknowledgement request messages. Currently the default value is set to 2000.
      */
-    public static final long DEFAULT_ACK_REQUESTED_INTERVAL = 200;
+    public static final long DEFAULT_ACK_REQUESTED_INTERVAL = 2000;
     /**
      * A constant specifying the default value of close sequence operation timeout.
      * Currently the default value is set to 3000.

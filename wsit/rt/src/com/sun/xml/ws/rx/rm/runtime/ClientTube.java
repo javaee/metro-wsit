@@ -290,10 +290,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private void openRmSession(Packet request) {
         createSequences(request);
 
-        rc.scheduledTaskManager.startTask(
-                createAckRequesterTask(rc.configuration.getAcknowledgementRequestInterval()),
-                rc.configuration.getAcknowledgementRequestInterval(),
-                rc.configuration.getAcknowledgementRequestInterval());
+        ClientAckRequesterTask cart = new ClientAckRequesterTask(rc, outboundSequenceId.value);
+        MaintenanceTaskExecutor.INSTANCE.register(cart, cart.getExecutionDelay(), cart.getExecutionDelayTimeUnit());
     }
 
     private void closeRmSession() {
@@ -449,62 +447,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
         } finally {
             taskHandle.cancel(true);
         }
-    }
-
-    private Runnable createAckRequesterTask(final long acknowledgementRequestInterval) {
-        return new Runnable() {
-
-            public void run() {
-                final Sequence sequence = rc.getOutboundSequence(outboundSequenceId.value);
-                if (sequence.isStandaloneAcknowledgementRequestSchedulable(acknowledgementRequestInterval)) {
-                    requestAcknowledgement();
-                    sequence.updateLastAcknowledgementRequestTime();
-                }
-            }
-
-            private final void requestAcknowledgement() {
-                Packet request = rc.communicator.createEmptyRequestPacket(rc.rmVersion.ackRequestedAction, false);
-                JaxwsApplicationMessage requestMessage = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
-
-                rc.sourceMessageHandler.attachAcknowledgementInfo(requestMessage);
-                rc.protocolHandler.appendAcknowledgementHeaders(requestMessage.getPacket(), requestMessage.getAcknowledgementData());
-
-                rc.communicator.sendAsync(request, new Fiber.CompletionCallback() {
-
-                    public void onCompletion(Packet response) {
-                        if (response == null || response.getMessage() == null) {
-                            LOGGER.warning(LocalizationMessages.WSRM_1108_NULL_RESPONSE_FOR_ACK_REQUEST());
-                            return;
-                        }
-
-                        try {
-                            if (rc.protocolHandler.containsProtocolMessage(response)) {
-                                // TODO L10N
-                                LOGGER.finer("Processing RM protocol response message.");
-                                JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, null);
-                                rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-
-                                rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-                            } else {
-                                // TODO L10N
-                                LOGGER.severe("Unable to process response packet - the packet was not identified as an RM protocol message");
-                            }
-
-                            if (response.getMessage().isFault()) {
-                                LOGGER.warning(LocalizationMessages.WSRM_1109_SOAP_FAULT_RESPONSE_FOR_ACK_REQUEST());
-                            }
-                        } finally {
-                            response.getMessage().consume();
-                        }
-                    }
-
-                    public void onCompletion(Throwable error) {
-                        // TODO L10N
-                        LOGGER.severe("An unexpected exception occured while sending acknowledgement request", error);
-                    }
-                });
-            }
-        };
     }
 
     private Packet verifyResponse(final Packet response, final String requestId, Level logLevel) throws RxRuntimeException {

@@ -203,24 +203,25 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
     private void deliver(JaxwsApplicationMessage message) {
         LOGGER.entering(message);
-
         try {
-
             rc.sourceMessageHandler.attachAcknowledgementInfo(message);
 
             Packet outboundPacketCopy = message.getPacket().copy(true);
 
-            // TODO: remove the workaround bellow when JAX-WS FIXES the Packet.copy() method
+            // TODO: remove the workaround bellow when JAX-WS RI fixes the Packet.copy(boolean) method
             outboundPacketCopy.expectReply = message.getPacket().expectReply;
 
+            // TODO remove the workaround bellow when JAX-WS RI fixes ignoring server response in HttpTransportPipe.process(Packet) method
+            Boolean isResquestResponseMep = outboundPacketCopy.expectReply; // remembering original value to be able to pick proper CallbackHandler
+            outboundPacketCopy.expectReply = Boolean.TRUE; // setting to true to prevent HttpTransportPipe from ignoring server response (acknowledgement)
 
             rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
             rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
             Fiber.CompletionCallback responseCallback;
-            if (outboundPacketCopy.expectReply == null) {
+            if (isResquestResponseMep == null) {
                 responseCallback = new AmbiguousMepCallbackHandler(message, rc);
-            } else if (outboundPacketCopy.expectReply.booleanValue()) {
+            } else if (isResquestResponseMep.booleanValue()) {
                 responseCallback = new ReqRespMepCallbackHandler(message, rc);
             } else {
                 responseCallback = new OneWayMepCallbackHandler(message, rc);
