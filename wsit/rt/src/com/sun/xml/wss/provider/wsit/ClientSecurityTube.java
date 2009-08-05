@@ -35,19 +35,15 @@
  */
 package com.sun.xml.wss.provider.wsit;
 
-import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
-import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
-import com.sun.xml.ws.developer.WSBindingProvider;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
@@ -61,9 +57,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.config.ClientAuthContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -101,37 +94,7 @@ public class ClientSecurityTube extends AbstractFilterTubeImpl implements Secure
             props.put(PipeConstants.WSDL_SERVICE,
                     wsdlModel.getOwner().getName());
         }
-        this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
-        ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) props.get(PipeConstants.WRAPPED_CONTEXT);
-        WSBindingProvider bpr = context.getBindingProvider();
-        WSEndpointReference epr = bpr.getWSEndpointReference();
-        if (epr != null) {
-            WSEndpointReference.EPRExtension idExtn = null;
-            XMLStreamReader xmlReader = null;
-            try {
-                QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                idExtn = epr.getEPRExtension(ID_QNAME);
-                if (idExtn != null) {
-                    xmlReader = idExtn.readAsXMLStreamReader();
-                    CertificateRetriever cr = new CertificateRetriever();
-                    byte[] bstValue = cr.digestBST(xmlReader);
-                    if (bstValue == null) {
-                        throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
-                    }
-                    X509Certificate certificate = cr.constructCertificate(bstValue);
-                    boolean valid = cr.validateCertificate(certificate, props);
-                    if (!valid){
-                      throw new RuntimeException("certificate is not valid");
-                    }
-                    props.put(PipeConstants.SERVER_CERT, certificate);
-                    this.serverCert = certificate;
-                }
-            } catch (XMLStreamException ex) {
-                log.log(Level.SEVERE, null, ex);
-                throw new RuntimeException(ex);
-            }
-        }
-
+        this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);      
     }
      
     protected ClientSecurityTube(ClientSecurityTube that, TubeCloner cloner) {

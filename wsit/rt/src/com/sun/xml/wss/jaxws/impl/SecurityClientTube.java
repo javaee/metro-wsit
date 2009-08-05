@@ -69,6 +69,7 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
+import java.util.logging.Logger;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
@@ -94,6 +95,7 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
+import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.WssSoapFaultException;
@@ -132,6 +134,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     //private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
     private Set wsscConfig = null;
+    Properties props = new Properties();
+    private ClientTubelineAssemblyContext wsitContext;
 
     // Creates a new instance of SecurityClientTube
     @SuppressWarnings("unchecked")
@@ -159,37 +163,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
                 }
             }
-            Properties props = new Properties();
-            WSBindingProvider bpr = wsitContext.getWrappedContext().getBindingProvider();
+            this.wsitContext = wsitContext;
             props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
-            props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel());
-            WSEndpointReference epr = bpr.getWSEndpointReference();
-            if (epr != null) {
-                WSEndpointReference.EPRExtension idExtn = null;
-                XMLStreamReader xmlReader = null;
-                try {
-                    QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                    idExtn = epr.getEPRExtension(ID_QNAME);
-                    if (idExtn != null) {
-                        xmlReader = idExtn.readAsXMLStreamReader();
-                        CertificateRetriever cr = new CertificateRetriever();
-                        byte[] bstValue = cr.digestBST(xmlReader);
-                        if(bstValue == null){
-                             throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
-                        }
-                        X509Certificate certificate = cr.constructCertificate(bstValue);
-                        boolean valid = cr.validateCertificate(certificate, props);
-                        if (!valid) {
-                            throw new RuntimeException("certificate is not valid");
-                        }
-                        props.put(PipeConstants.SERVER_CERT, certificate);
-                    }
-                } catch (XMLStreamException ex) {
-                    log.log(Level.SEVERE, null, ex);
-                    throw new RuntimeException(ex);
-                }
-            }
-            
+            props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel()); 
+
             CallbackHandler handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
         } catch (Exception e) {
@@ -215,6 +192,47 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     @Override
     public NextAction processRequest(Packet packet) {
+        if (wsitContext != null) {
+            WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
+            WSEndpointReference epr = bpr.getWSEndpointReference();
+            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
+            if (x509Cert == null) {
+                if (epr != null) {
+                    WSEndpointReference.EPRExtension idExtn = null;
+                    XMLStreamReader xmlReader = null;
+                    try {
+                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                        idExtn = epr.getEPRExtension(ID_QNAME);
+                        if (idExtn != null) {
+                            xmlReader = idExtn.readAsXMLStreamReader();
+                            CertificateRetriever cr = new CertificateRetriever();
+                            byte[] bstValue = cr.digestBST(xmlReader);
+                            if (bstValue == null) {
+                                throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
+                            }
+                            X509Certificate certificate = cr.constructCertificate(bstValue);
+                            
+                           boolean valid  = secEnv.validateCertificate(certificate, null);
+                           
+                           
+                           // boolean valid = cr.validateCertificate(certificate, props);
+                            if (!valid) {
+                                throw new RuntimeException("certificate is not valid");
+                            }
+                            props.put(PipeConstants.SERVER_CERT, certificate);
+                        }
+                    } catch (XMLStreamException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new RuntimeException(ex);
+                    } catch (XWSSecurityException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else {
+                props.put(PipeConstants.SERVER_CERT, x509Cert);
+                this.serverCert = x509Cert;
+            }
+        }
         try {
             packet = processClientRequestPacket(packet);
         } catch (Throwable t) {

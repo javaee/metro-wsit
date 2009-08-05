@@ -550,6 +550,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(Packet packet, boolean isSCMessage) {
         ProcessingContextImpl ctx = null;
         if(optimized){
@@ -596,6 +597,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
             ctx.setSecurityEnvironment(secEnv);
             ctx.isInboundMessage(false);
+            if (serverCert != null) {
+               ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            }
             @SuppressWarnings("unchecked")
             Map<Object, Object> extProps = ctx.getExtraneousProperties();
             extProps.put(WSITServerAuthContext.WSDLPORT,pipeConfig.getWSDLPort());

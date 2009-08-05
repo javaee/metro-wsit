@@ -103,6 +103,9 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         CertificateRetriever cr = new CertificateRetriever();
         try {
             cs = cr.getServerKeyStore(wse);
+            if(cs == null){
+                return extension;
+            }
         } catch (IOException ex) {
             log.log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);

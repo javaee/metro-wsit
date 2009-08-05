@@ -1166,6 +1166,9 @@ public abstract class WSITAuthContextBase  {
         
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
+        if (serverCert != null) {
+            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        }
         ctx.isInboundMessage(true);
         if(isTrustMessage(packet)){
             ctx.isTrustMessage(true);

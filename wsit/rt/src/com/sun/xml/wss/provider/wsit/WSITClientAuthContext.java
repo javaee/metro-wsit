@@ -45,6 +45,7 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.WSService;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -53,12 +54,14 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -66,6 +69,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.Token;
@@ -80,6 +84,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.ProcessingContext;
+import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
@@ -130,6 +135,9 @@ import java.util.logging.Level;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.util.Hashtable;
 import java.util.ListIterator;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -170,11 +178,53 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     @SuppressWarnings("unchecked")
     public WSITClientAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
-        this.authConfig= (WSITClientAuthConfig)map.get(PipeConstants.AUTH_CONFIG);
+        this.authConfig = (WSITClientAuthConfig) map.get(PipeConstants.AUTH_CONFIG);
         this.tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
-        this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
-        WSService service = (WSService)map.get(PipeConstants.SERVICE);
-        if(service != null){
+        WSService service = (WSService) map.get(PipeConstants.SERVICE);
+
+        ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) map.get(PipeConstants.WRAPPED_CONTEXT);
+        if (context != null) {
+            WSBindingProvider bpr = context.getBindingProvider();
+            WSEndpointReference epr = bpr.getWSEndpointReference();
+            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
+            if (x509Cert == null) {
+                if (epr != null) {
+                    WSEndpointReference.EPRExtension idExtn = null;
+                    XMLStreamReader xmlReader = null;
+                    try {
+                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                        idExtn = epr.getEPRExtension(ID_QNAME);
+                        if (idExtn != null) {
+                            xmlReader = idExtn.readAsXMLStreamReader();
+                            CertificateRetriever cr = new CertificateRetriever();
+                            byte[] bstValue = cr.digestBST(xmlReader);
+                            if (bstValue == null) {
+                                throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
+                            }
+                            X509Certificate certificate = cr.constructCertificate(bstValue);
+                            boolean valid = secEnv.validateCertificate(certificate, null);
+                            //boolean valid = cr.validateCertificate(certificate, map);
+                            if (!valid) {
+                                throw new RuntimeException("certificate is not valid");
+                            }
+                            //props.put(PipeConstants.SERVER_CERT, certificate);
+                            this.serverCert = certificate;
+                        }
+                    } catch (XMLStreamException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new RuntimeException(ex);
+                    } catch (XWSSecurityException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else {
+                //props.put(PipeConstants.SERVER_CERT, x509Cert);
+                this.serverCert = x509Cert;
+            }
+        }
+        //this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
+
+        if (service != null) {
             container = service.getContainer();
         }
         //this.operation = operation;
