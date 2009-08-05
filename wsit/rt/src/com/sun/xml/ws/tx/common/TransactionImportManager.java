@@ -56,6 +56,7 @@ import javax.transaction.xa.Xid;
 public class TransactionImportManager implements TransactionImportWrapper {
 
     private static final class MethodInfo<T> {
+
         final String methodName;
         final Class<?>[] parameterTypes;
         final Class<?> returnType;
@@ -86,7 +87,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
             if (!returnType.isAssignableFrom(m.getReturnType())) {
                 return false;
             }
-            
+
             Class<?>[] otherParamTypes = m.getParameterTypes();
             if (parameterTypes.length != otherParamTypes.length) {
                 return false;
@@ -127,6 +128,11 @@ public class TransactionImportManager implements TransactionImportWrapper {
     private final MethodInfo<Integer> getTransactionRemainingTimeout;
 
     private TransactionImportManager() {
+        this(TransactionManagerImpl.getInstance().getTransactionManager());
+    }
+
+    private TransactionImportManager(TransactionManager tm) {
+        javaeeTM = tm;
 
         this.recreate = new MethodInfo<Void>(
                 "recreate",
@@ -152,17 +158,20 @@ public class TransactionImportManager implements TransactionImportWrapper {
             getTransactionRemainingTimeout
         };
 
-        javaeeTM = TransactionManagerImpl.getInstance().getTransactionManager();
         int remainingMethodsToFind = requiredMethods.length;
-        for (Method m : javaeeTM.getClass().getDeclaredMethods()) {
-            for (MethodInfo mi : requiredMethods) {
-                if (mi.isCompatibleWith(m)) {
-                    mi.method = m;
-                    remainingMethodsToFind--;
+
+        if (javaeeTM != null) {
+            for (Method m : javaeeTM.getClass().getDeclaredMethods()) {
+                for (MethodInfo mi : requiredMethods) {
+                    if (mi.isCompatibleWith(m)) {
+                        mi.method = m;
+                        remainingMethodsToFind--;
+                    }
                 }
-            }
-            if (remainingMethodsToFind == 0) {
-                break;
+
+                if (remainingMethodsToFind == 0) {
+                    break;
+                }
             }
         }
 
@@ -176,15 +185,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
 
             // TODO log and throw? error
         }
-
-//        if (transactionManager instanceof TransactionImport) {
-//            javaeeTM = (TransactionImport) transactionManager;
-//        } else {
-//            javaeeTM = null;
-//            logger.severe(
-//                    "<constructor>",
-//                    LocalizationMessages.NO_TXN_IMPORT_2014(transactionManager == null ? "null" : transactionManager.getClass().getName()));
-//        }
     }
 
     /**
