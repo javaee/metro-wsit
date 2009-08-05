@@ -58,14 +58,20 @@ public class TransactionImportManager implements TransactionImportWrapper {
     private static final class MethodInfo<T> {
         final String methodName;
         final Class<?>[] parameterTypes;
-        final Class<T> returnType;
+        final Class<?> returnType;
+        final Class<T> returnTypeCaster;
         //
         Method method;
 
         public MethodInfo(String methodName, Class<?>[] parameterTypes, Class<T> returnType) {
+            this(methodName, parameterTypes, returnType, returnType);
+        }
+
+        public MethodInfo(String methodName, Class<?>[] parameterTypes, Class<?> returnType, Class<T> returnTypeCaster) {
             this.methodName = methodName;
             this.parameterTypes = parameterTypes;
             this.returnType = returnType;
+            this.returnTypeCaster = returnTypeCaster;
         }
 
         public boolean isCompatibleWith(Method m) {
@@ -96,7 +102,8 @@ public class TransactionImportManager implements TransactionImportWrapper {
 
         public T invoke(TransactionManager tmInstance, Object... args) {
             try {
-                return returnType.cast(method.invoke(tmInstance, args));
+                Object result = method.invoke(tmInstance, args);
+                return returnTypeCaster.cast(result);
             } catch (IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             } catch (IllegalArgumentException ex) {
@@ -121,14 +128,14 @@ public class TransactionImportManager implements TransactionImportWrapper {
 
     private TransactionImportManager() {
 
-        this.recreate = new MethodInfo<Object>(
+        this.recreate = new MethodInfo<Void>(
                 "recreate",
                 new Class<?>[]{Xid.class, long.class},
-                Object.class);
-        this.release = new MethodInfo<Object>(
+                void.class);
+        this.release = new MethodInfo<Void>(
                 "release",
                 new Class<?>[]{Xid.class},
-                Object.class);
+                void.class);
         this.getXATerminator = new MethodInfo<XATerminator>(
                 "getXATerminator",
                 new Class<?>[]{},
@@ -136,7 +143,8 @@ public class TransactionImportManager implements TransactionImportWrapper {
         this.getTransactionRemainingTimeout = new MethodInfo<Integer>(
                 "getTransactionRemainingTimeout",
                 new Class<?>[]{},
-                int.class);
+                int.class,
+                Integer.class);
         MethodInfo<?>[] requiredMethods = new MethodInfo<?>[]{
             recreate,
             release,
