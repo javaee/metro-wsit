@@ -37,6 +37,7 @@
 package com.sun.xml.ws.security.trust.impl;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.STSAuthorizationProvider;
 import com.sun.xml.ws.api.security.trust.STSTokenProvider;
@@ -579,7 +580,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }
         
         // Create RequestSecurityTokenResponse
-        final RequestSecurityTokenResponse rstr = eleFac.createRSTRForValidate(tokenType, reqSecTok, context.getStatus());
+        final RequestSecurityTokenResponse rstr = eleFac.createRSTRForValidate(tokenType, reqSecTok, (Status)context.getOtherProperties().get(IssuedTokenContext.STATUS));
         
         if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13.getNamespaceURI())){
             List<RequestSecurityTokenResponse> list = new ArrayList<RequestSecurityTokenResponse>();

@@ -53,9 +53,6 @@ import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.policy.Token;
-import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
-import com.sun.xml.wss.provider.wsit.WSITClientAuthContext;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -85,13 +82,20 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
     private Tube clientSecurityTube = null;
     private Tube nextTube = null;
     private Packet packet = null;
-    private WSITClientAuthContext wsitClientAuthContext = null;
     private AddressingVersion addVer = null;
     private Token scToken = null;
     private String tokenId = null;
-    private MessagePolicy messagePolicy = null;
     private boolean addRenewPolicy = true;
 
+    public DefaultSCTokenConfiguration(String protocol){
+        this.protocol = protocol;
+    }
+
+    public DefaultSCTokenConfiguration(String protocol, boolean addRenewPolicy){
+        this(protocol);
+        this.addRenewPolicy = addRenewPolicy;
+    }
+    
     public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
             final WSBinding binding, final Tube securityTube, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken, Tube nextTube) {
         this.protocol = protocol;
@@ -119,29 +123,6 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         parseAssertions(scToken, localToken);
     }
 
-    public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
-            final WSBinding binding, final WSITClientAuthContext wsitClientAuthContext, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken){
-        this.protocol = protocol;
-        this.scToken = scToken;
-        this.wsdlPort = wsdlPort;
-        this.wsBinding = binding;
-        this.wsitClientAuthContext = wsitClientAuthContext;
-        this.packet = packet;
-        this.addVer = addVer;
-        this.tokenId = ((Token)scToken).getTokenId();
-        parseAssertions(scToken, localToken);
-    }
-
-    public DefaultSCTokenConfiguration(String protocol, final MessagePolicy messagePolicy){
-        super(protocol);
-        this.messagePolicy = messagePolicy;
-    }
-
-    public DefaultSCTokenConfiguration(String protocol, final MessagePolicy messagePolicy, boolean addRenewPolicy){
-        this(protocol, messagePolicy);
-        this.addRenewPolicy = addRenewPolicy;
-    }
-
     public DefaultSCTokenConfiguration(String protocol, String tokenId, boolean checkTokenExpiry){
         super(protocol);
         this.tokenId = tokenId;
@@ -152,6 +133,19 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this(protocol, tokenId, checkTokenExpiry);
         this.clientOutboundMessage = clientOutboundMessage;
     }
+
+     public DefaultSCTokenConfiguration(String protocol, SecureConversationToken scToken, final WSDLPort wsdlPort,
+            final WSBinding binding, final Packet packet, final AddressingVersion addVer, PolicyAssertion localToken){
+        this.protocol = protocol;
+        this.scToken = scToken;
+        this.wsdlPort = wsdlPort;
+        this.wsBinding = binding;
+        this.packet = packet;
+        this.addVer = addVer;
+        this.tokenId = ((Token)scToken).getTokenId();
+        parseAssertions(scToken, localToken);
+    }
+
     
     public DefaultSCTokenConfiguration(DefaultSCTokenConfiguration that, String tokenId) { 
         this.protocol = that.protocol;
@@ -159,14 +153,12 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.wsdlPort = that.wsdlPort;
         this.wsBinding = that.wsBinding;
         this.clientSecurityTube = that.clientSecurityTube;
-        this.wsitClientAuthContext = that.wsitClientAuthContext;
         this.packet = that.packet;
         this.addVer = that.addVer;        
         this.nextTube = that.nextTube;      
         this.tokenId = tokenId;
         this.checkTokenExpiry = that.checkTokenExpiry;
         this.clientOutboundMessage = that.clientOutboundMessage;
-        this.messagePolicy = that.messagePolicy;
         this.addRenewPolicy = that.addRenewPolicy;
         this.reqClientEntropy = that.reqClientEntropy;
         this.symBinding = that.symBinding;
@@ -177,6 +169,8 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         this.renewExpiredSCT = that.renewExpiredSCT;
         this.requireCancelSCT = that.requireCancelSCT;
         this.scTokenTimeout = that.scTokenTimeout;
+
+        this.getOtherOptions().putAll(that.getOtherOptions());
         
     }
 
@@ -237,10 +231,6 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
         return this.clientOutboundMessage;
     }
 
-    public MessagePolicy getMessagePolicy(){
-        return this.messagePolicy;
-    }
-
     public boolean addRenewPolicy(){
         return this.addRenewPolicy;
     }
@@ -274,10 +264,6 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
 
     public Tube getClientTube(){
         return this.clientSecurityTube;
-    }
-
-    public WSITClientAuthContext getWSITClientAuthContext(){
-        return this.wsitClientAuthContext;
     }
 
     public Tube getNextTube(){

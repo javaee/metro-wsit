@@ -439,40 +439,43 @@
             </classpath>
         </javac>
         <javac srcdir="${src.dir}"
-               includes="com/sun/xml/ws/api/security/trust/**,
-                         com/sun/xml/ws/api/security/secconv/**,
-                         com/sun/xml/ws/runtime/util/*,
+               includes="com/sun/xml/ws/api/security/trust/**.java,
+                         com/sun/xml/ws/api/security/trust/client/**.java,
+                         com/sun/xml/ws/api/security/secconv/client/**.java,
                          com/sun/xml/ws/security/policy/SecureConversationToken.java,
                          com/sun/xml/ws/security/secconv/WSSCVersion.java,
-                         com/sun/xml/ws/security/secconv/WSSecureConversationException.java,
-                         com/sun/xml/ws/security/secconv/impl/client/**,
+                         com/sun/xml/ws/security/secconv/WSSecureConversationException.java
+                         com/sun/xml/ws/security/secconv/impl/client/DefaultSCTokenConfiguration.java,
                          com/sun/xml/ws/security/trust/GenericToken.java,
-                         com/sun/xml/ws/security/trust/WSTrustConstants.java,
-                         com/sun/xml/ws/security/trust/WSTrustElementFactory.java,
+                         com/sun/xml/ws/security/trust/WSTrustConstants.java
                          com/sun/xml/ws/security/trust/WSTrustVersion.java,
                          com/sun/xml/ws/security/trust/elements/BinarySecret.java,
-                         com/sun/xml/ws/security/trust/impl/client/STSIssuedTokenProviderImpl.java"
+                         com/sun/xml/ws/runtime/util/Session.java,
+                         com/sun/xml/ws/runtime/util/SessionManager.java,
+                         com/sun/xml/ws/security/trust/WSTrustElementFactory.java"
                destdir="${wstrust.tmp}/classes">
             <classpath>
                 <path path="${javac.classpath}"/>
                 <pathelement location="${wstrust.tmp}/classes"/>
+                <pathelement location="${basedir}/../lib/tmp/xwss-for-wstrust-api.jar"/>
+                <pathelement location="${basedir}/../lib/tmp/trust-secconv-jaxbbindings.jar"/>
+                <pathelement location="${basedir}/../lib/tmp/trust-secconv-wssx-jaxbbindings.jar"/>
             </classpath>
         </javac>
         <jar jarfile="${wstrust.tmp}/lib/wstrust-api.jar"
              basedir="${wstrust.tmp}/classes"
              includes="com/sun/xml/ws/api/security/trust/**,
                        com/sun/xml/ws/api/security/secconv/**,
-                       com/sun/xml/ws/runtime/util/*,
+                       com/sun/xml/ws/runtime/util/**,
+                       com/sun/xml/ws/security/secconv/impl/client/DefaultSCTokenConfiguration.class,
                        com/sun/xml/ws/security/policy/SecureConversationToken.class,
                        com/sun/xml/ws/security/secconv/WSSCVersion.class,
                        com/sun/xml/ws/security/secconv/WSSecureConversationException.class,
-                       com/sun/xml/ws/security/secconv/impl/client/**,
                        com/sun/xml/ws/security/trust/GenericToken.class,
                        com/sun/xml/ws/security/trust/WSTrustConstants.class,
                        com/sun/xml/ws/security/trust/WSTrustElementFactory.class,
                        com/sun/xml/ws/security/trust/WSTrustVersion.class,
-                       com/sun/xml/ws/security/trust/elements/BinarySecret.class,
-                       com/sun/xml/ws/security/trust/impl/client/STSIssuedTokenProviderImpl.class"/>
+                       com/sun/xml/ws/security/trust/elements/BinarySecret.class"/>
     </target>
     
 </project>

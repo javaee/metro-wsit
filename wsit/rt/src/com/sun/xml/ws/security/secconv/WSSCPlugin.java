@@ -99,6 +99,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.provider.wsit.WSITClientAuthContext;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import java.io.StringWriter;
 import java.util.Iterator;
@@ -398,11 +399,14 @@ public class WSSCPlugin {
             Fiber fiber = getFiberEngine().createFiber(); 
             respPacket = fiber.runSync(tubeline, reqPacket);
             respPacket = ((SecurityClientTube)sctConfig.getClientTube()).processClientResponsePacket(respPacket);            
-        }else if(sctConfig.getWSITClientAuthContext() != null){
-            try{
-                respPacket = sctConfig.getWSITClientAuthContext().secureRequest(reqPacket, null, true);            
-            } catch (XWSSecurityException e) {                
-                throw new RuntimeException( e);
+        }else{
+            WSITClientAuthContext wsitAuthCtx = (WSITClientAuthContext)sctConfig.getOtherOptions().get("WSITClientAuthContext");
+            if (wsitAuthCtx != null){
+                try{
+                    respPacket = wsitAuthCtx.secureRequest(reqPacket, null, true);
+                } catch (XWSSecurityException e) {
+                    throw new RuntimeException( e);
+                }
             }
         }
         

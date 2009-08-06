@@ -358,7 +358,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             populateKerberosContext(packet, (ProcessingContextImpl)ctx, isSCMessage);
         }
         if(isSCRenew(packet)){
-            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (MessagePolicy)ctx.getSecurityPolicy());
+            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
+            config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
             IssuedTokenContext itc =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());                    
             try{
                 itm.renewIssuedToken(itc);
@@ -394,7 +395,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         if(isSCMessage){
             if(isSCRenew(packet)){
                 Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
-                SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), getOutgoingXWSBootstrapPolicy(scToken), false);
+                SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), false);
+                config.getOtherOptions().put("MessagePolicy", getOutgoingXWSBootstrapPolicy(scToken));
                 IssuedTokenContext itc =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 try{
                     itm.renewIssuedToken(itc);
@@ -686,7 +688,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
             //create RST for Issue
             try{
-                SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);
+                SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)tok, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), packet, addVer, scClientAssertion);
+                config.getOtherOptions().put("WSITClientAuthCOntext", this);
                 ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                 itm.getIssuedToken(ctx);
                 issuedTokenContextMap.put(((Token)tok).getTokenId(), ctx);
@@ -746,7 +749,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             if (issuedTokenContextMap.get(scToken.getTokenId()) == null) {
                 try{
                     //create RST for Issue         
-                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), this, packet, addVer, scClientAssertion);                     
+                    SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), packet, addVer, scClientAssertion);
+                    config.getOtherOptions().put("WSITClientAuthCOntext", this);
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);

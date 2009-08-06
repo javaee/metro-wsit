@@ -43,8 +43,6 @@ import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenConfiguration;
 import com.sun.xml.ws.security.policy.Token;
-import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.wss.provider.wsit.WSITClientAuthContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,8 +95,6 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     
     public abstract boolean isClientOutboundMessage();
     
-    public abstract MessagePolicy getMessagePolicy();
-    
     public abstract boolean addRenewPolicy();
     
     public abstract boolean getReqClientEntropy();
@@ -118,8 +114,6 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     public abstract WSDLPort getWSDLPort();
     
     public abstract WSBinding getWSBinding();
-    
-    public abstract WSITClientAuthContext getWSITClientAuthContext();
     
     public abstract AddressingVersion getAddressingVersion();
     

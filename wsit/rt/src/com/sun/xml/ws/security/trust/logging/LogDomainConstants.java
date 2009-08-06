@@ -1,5 +1,5 @@
 /*
- * $Id: LogDomainConstants.java,v 1.5 2008-02-26 06:33:30 ofung Exp $
+ * $Id: LogDomainConstants.java,v 1.6 2009-08-06 07:12:02 jdg6688 Exp $
  */
 
 /*
@@ -39,8 +39,6 @@
  */
 
 package com.sun.xml.ws.security.trust.logging;
-
-import com.sun.xml.wss.*;
 
 /**
  * @author Manveen Kaur

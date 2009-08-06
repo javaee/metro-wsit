@@ -145,6 +145,7 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         
     public void renew(IssuedTokenContext ctx)throws WSTrustException{
         SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
+        MessagePolicy msgPolicy = (MessagePolicy)sctConfig.getOtherOptions().get("MessagePolicy");
         if(issuedTokenContextMap.get(sctConfig.getTokenId()) != null ){
             ctx = issuedTokenContextMap.get(sctConfig.getTokenId());
             SCTokenConfiguration origSCTConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);            
@@ -156,12 +157,12 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
             }else{
                 throw new WSSecureConversationException("SecureConversation session for session Id:" + sctConfig.getTokenId() +"has expired.");
             }
-        }else if(sctConfig.getMessagePolicy() != null ){
+        }else if(msgPolicy != null ){
             try{
                 if(sctConfig.addRenewPolicy()){
-                    appendEndorsingSCTRenewPolicy(sctConfig.getMessagePolicy());
+                    appendEndorsingSCTRenewPolicy(msgPolicy);
                 }else{
-                    deleteRenewPolicy(sctConfig.getMessagePolicy());
+                    deleteRenewPolicy(msgPolicy);
                 }
             }catch(PolicyGenerationException e){
                 throw new WSTrustException(e.getMessage());

@@ -284,7 +284,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
 
         if (isSCRenew(packet)) {
-            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (MessagePolicy) ctx.getSecurityPolicy());
+            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
+            config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
             IssuedTokenContext itc = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
             try {
                 itm.renewIssuedToken(itc);
@@ -320,7 +321,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         packet.setMessage(msg);
         if (isSCRenew(packet)) {
             Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
-            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), getOutgoingXWSBootstrapPolicy(scToken), false);
+            SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), false);
+            config.getOtherOptions().put("MessagePolicy", getOutgoingXWSBootstrapPolicy(scToken));
             IssuedTokenContext itc = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
             try {
                 itm.renewIssuedToken(itc);

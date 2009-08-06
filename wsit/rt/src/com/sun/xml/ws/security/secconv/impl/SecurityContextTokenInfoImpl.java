@@ -43,7 +43,8 @@ import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
-import com.sun.xml.ws.security.secconv.WSSCElementFactory;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
 
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
@@ -71,8 +72,6 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     Map<String, byte[]> secretMap = new HashMap<String, byte[]>();
     Date creationTime = null;
     Date expirationTime = null;
-    
-    private static WSSCElementFactory factory = WSSCElementFactory.newInstance();
     
     // default constructor
     public SecurityContextTokenInfoImpl() {
@@ -159,7 +158,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
         // create security token based on id and extId
         URI uri = URI.create(this.getIdentifier());
         
-        final SecurityContextToken token = factory.createSecurityContextToken(
+        final SecurityContextToken token = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10).createSecurityContextToken(
                 uri, null , this.getExternalId());
         itc.setSecurityToken(token);
         
@@ -177,8 +176,8 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     
     private SecurityTokenReference createSecurityTokenReference(final String id, final boolean unattached){
         final String uri = (unattached?id:"#"+id);
-        final Reference ref = factory.createDirectReference(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE, uri);
-        return factory.createSecurityTokenReference(ref);
+        final Reference ref = WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10).createDirectReference(WSSCConstants.SECURITY_CONTEXT_TOKEN_TYPE, uri);
+        return WSTrustElementFactory.newInstance(WSSCVersion.WSSC_10).createSecurityTokenReference(ref);
     }
     
     //public static IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference) {

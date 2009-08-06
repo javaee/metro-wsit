@@ -246,7 +246,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         }
         
         // populate the IssuedTokenContext
-        ctx.setStatus(status);
+        ctx.getOtherProperties().put(IssuedTokenContext.STATUS, status);
     }
 
     public void renewToken(IssuedTokenContext ctx) throws WSTrustException {

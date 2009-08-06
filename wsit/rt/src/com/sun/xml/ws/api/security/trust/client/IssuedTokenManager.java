@@ -51,7 +51,7 @@ import java.util.Map;
  */
 public class IssuedTokenManager {
     private Map<String, IssuedTokenProvider> itpMap = new HashMap<String, IssuedTokenProvider>();
-    private Map<String, Class<?>> itpClassMap = new HashMap<String, Class<?>>();
+    private Map<String, String> itpClassMap = new HashMap<String, String>();
     private static IssuedTokenManager manager = new IssuedTokenManager();
     
     /** Creates a new instance of IssuedTokenManager */
@@ -98,25 +98,36 @@ public class IssuedTokenManager {
     }
     
     private void addDefaultProviders(){
-        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
-        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl.class);
-        itpClassMap.put(SCTokenConfiguration.PROTOCOL_10, com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl.class);
-        itpClassMap.put(SCTokenConfiguration.PROTOCOL_13, com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl.class);
+        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_10, "com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl");
+        itpClassMap.put(STSIssuedTokenConfiguration.PROTOCOL_13, "com.sun.xml.ws.security.trust.impl.client.STSIssuedTokenProviderImpl");
+        itpClassMap.put(SCTokenConfiguration.PROTOCOL_10, "com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl");
+        itpClassMap.put(SCTokenConfiguration.PROTOCOL_13, "com.sun.xml.ws.security.secconv.impl.client.SCTokenProviderImpl");
     }
 
     private IssuedTokenProvider getIssuedTokenProvider(String protocol) throws WSTrustException {
         IssuedTokenProvider itp = (IssuedTokenProvider)itpMap.get(protocol);
         if (itp == null){
-            Class itpClass = itpClassMap.get(protocol);
-            if (itpClass != null){
+            String type = itpClassMap.get(protocol);
+            if (type != null){
                 try {
-                    itp = (IssuedTokenProvider) itpClass.newInstance();
-                    itpMap.put(protocol, itp);
-                } catch (InstantiationException e) {
-                    throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
-                } catch (IllegalAccessException ee) {
-                    throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
-                }
+                    Class<?> clazz = null;
+                    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+                    if (loader == null) {
+                        clazz = Class.forName(type);
+                    } else {
+                        clazz = loader.loadClass(type);
+                    }
+
+                    if (clazz != null) {
+                        @SuppressWarnings("unchecked")
+                        Class<IssuedTokenProvider> typedClass = (Class<IssuedTokenProvider>)clazz;
+                        itp = (IssuedTokenProvider)typedClass.newInstance();
+                        itpMap.put(protocol, itp);
+                    }
+                } catch (Exception e) {
+                    throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported", e);
+                } 
             }else{
                 throw new WSTrustException("IssueTokenProvider for the protocol: "+protocol+ "is not supported");
             }

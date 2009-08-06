@@ -41,6 +41,7 @@ import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 
 import com.sun.xml.ws.api.security.trust.Claims;
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.AllowPostdating;
@@ -64,8 +65,6 @@ import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
 import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;
-import com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl;
-import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import java.net.URI;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
@@ -79,9 +78,13 @@ import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import java.util.List;
 
+import java.util.Map;
+import java.util.HashMap;
 import javax.xml.transform.Source;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -120,6 +123,7 @@ public abstract class WSTrustElementFactory {
     
     private static JAXBContext jaxbContext = null;
     private static JAXBContext jaxbContext13 = null;
+    private static Map<String, WSTrustElementFactory> intMap = new HashMap<String, WSTrustElementFactory>();
     
     static {
         try {
@@ -129,10 +133,6 @@ public abstract class WSTrustElementFactory {
             throw new RuntimeException(jbe.getMessage(),jbe);
         }        
     }
-    private static final WSTrustElementFactory trustElemFactory 
-            = new WSTrustElementFactoryImpl();
-    private static final WSTrustElementFactory trustElemFactory13 
-            = new com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl();        
 
     public static JAXBContext getContext() {
         return jaxbContext;
@@ -146,33 +146,61 @@ public abstract class WSTrustElementFactory {
     }
 
     public static WSTrustElementFactory newInstance() {
-        return trustElemFactory;
+        return newInstance(WSTrustVersion.WS_TRUST_10_NS_URI);
     }
 
     public static WSTrustElementFactory newInstance(String nsUri){
-        if (WSTrustVersion.WS_TRUST_13_NS_URI.equals(nsUri)){
-            return trustElemFactory13;
-        } else if (WSSCVersion.WSSC_13_NS_URI.equals(nsUri)){
-            return com.sun.xml.ws.security.secconv.WSSCElementFactory13.newInstance();
-        } else if (WSSCVersion.WSSC_10_NS_URI.equals(nsUri)){
-            return com.sun.xml.ws.security.secconv.WSSCElementFactory.newInstance();
+        WSTrustElementFactory fac = intMap.get(nsUri);
+        if (fac != null){
+            return fac;
         }
 
-        return trustElemFactory;
+        String type = getInstanceClassName(nsUri);
+        try {
+            Class<?> clazz = null;
+            final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+            if (loader == null) {
+                clazz = Class.forName(type);
+            } else {
+                clazz = loader.loadClass(type);
+            }
+
+            if (clazz != null) {
+                @SuppressWarnings("unchecked")
+                Class<WSTrustElementFactory> typedClass = (Class<WSTrustElementFactory>) clazz;
+                fac = typedClass.newInstance();
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("unable to initialize the WSTrustElementFactory for the protocol " + nsUri, ex);
+        } 
+
+        intMap.put(nsUri, fac);
+
+        return fac;
     }
     
     public static WSTrustElementFactory newInstance(WSTrustVersion wstVer) {
-        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
-            return trustElemFactory13;
-        }        
-        return trustElemFactory;
+        return newInstance(wstVer.getNamespaceURI());
     }
     
     public static WSTrustElementFactory newInstance(WSSCVersion wsscVer) {
-        if (wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13_NS_URI)){
-            return com.sun.xml.ws.security.secconv.WSSCElementFactory13.newInstance();            
+        return newInstance(wsscVer.getNamespaceURI());   
+    }
+
+    private static String getInstanceClassName(String nsUri) {
+        if (WSTrustVersion.WS_TRUST_10_NS_URI.equals(nsUri)){
+            return "com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl";
+        } else if (WSTrustVersion.WS_TRUST_13_NS_URI.equals(nsUri)){
+            return "com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl";
+
+        } else if (WSSCVersion.WSSC_10_NS_URI.equals(nsUri)){
+            return "com.sun.xml.ws.security.secconv.WSSCElementFactory";
+        }else if (WSSCVersion.WSSC_13_NS_URI.equals(nsUri)){
+            return "com.sun.xml.ws.security.secconv.WSSCElementFactory13";
         }
-        return com.sun.xml.ws.security.secconv.WSSCElementFactory.newInstance();        
+
+        return "com.sun.xml.ws.security.trust.impl.WSTrustElementFactoryImpl";
     }
     
     /** 
@@ -507,11 +535,12 @@ public abstract class WSTrustElementFactory {
             return (Element)jaxbEle;
         }
         try{
-            Document doc = WSTrustUtil.newDocument();
-
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.newDocument();
             getMarshaller().marshal((JAXBElement)jaxbEle, doc);
             return doc.getDocumentElement();
-
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
