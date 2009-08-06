@@ -104,7 +104,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         try {
             cs = cr.getServerKeyStore(wse);
             if(cs == null){
-                return extension;
+                return null;
             }
         } catch (IOException ex) {
             log.log(Level.SEVERE, null, ex);
