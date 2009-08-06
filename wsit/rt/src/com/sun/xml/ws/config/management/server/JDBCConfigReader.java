@@ -41,12 +41,12 @@ import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.persistence.JDBCConfigSaver;
-import com.sun.xml.ws.commons.ScheduledTaskManager;
-
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -179,4 +179,5 @@ public class JDBCConfigReader implements ConfigReader {
         }
 
     }
+    
 }
