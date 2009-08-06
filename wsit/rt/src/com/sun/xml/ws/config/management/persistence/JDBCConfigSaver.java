@@ -84,7 +84,6 @@ public class JDBCConfigSaver implements ConfigSaver {
             final DataSource source = getManagementDS();
             connection = source.getConnection();
             writeData(connection, endpointId, data);
-            connection.close();
         } catch (SQLException e) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(e));
