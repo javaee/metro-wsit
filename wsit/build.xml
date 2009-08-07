@@ -223,9 +223,11 @@
     </target>
     
     <target name="integrate-jaxb-osgi-hudson"
-        description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2-dist/216/artifact/osgi/build/jaxb-osgi.jar"
+        description="integrates latest JAXB 2.x OSGi bundles for GlassFish V3">
+        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
              dest="${lib.osgi.dir}/jaxb-osgi.jar" />
+        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-api-osgi.jar"
+             dest="${lib.osgi.dir}/jaxb-api-osgi.jar" />
     </target>
 
     <target name="integrate-xwss30-hudson"
