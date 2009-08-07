@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,68 +36,58 @@
 
 package com.sun.xml.ws.api.config.management;
 
-import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.config.management.ManagementMessages;
-
-import java.util.HashMap;
+import junit.framework.TestCase;
 
 /**
- * Provides type-safe named parameters.
  *
  * @author Fabian Ritzmann
  */
-public class NamedParameters {
-
-    private static final Logger LOGGER = Logger.getLogger(NamedParameters.class);
-
-    private final HashMap<String, Object> nameToInstance = new HashMap<String, Object>();
-
-    /**
-     * Add parameter with the given name.
-     *
-     * @param <T> The type of the parameter
-     * @param name The name of the parameter
-     * @param parameter The parameter
-     * @return This instance of NamedParameters (so that you can chain multiple put calls)
-     */
-    public <T> NamedParameters put(String name, T parameter) {
-        this.nameToInstance.put(name, parameter);
-        return this;
-    }
-
-    /**
-     * Get parameter with the given name and type. Returns null if a parameter
-     * with the name exists but has a different type.
-     *
-     * @param <T> The type of the parameter
-     * @param name The name of the parameter
-     * @return The parameter with the given name or null
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T get(String name) {
-        try {
-            return (T) this.nameToInstance.get(name);
-        } catch (ClassCastException e) {
-            LOGGER.warning(ManagementMessages.WSM_5017_FAILED_PARAMETERS_CAST(name), e);
-            return null;
-        }
+public class NamedParametersTest extends TestCase {
+    
+    public NamedParametersTest(String testName) {
+        super(testName);
     }
 
     @Override
-    public String toString() {
-        StringBuilder output = new StringBuilder("NamedParameters: {");
-        boolean firstEntry = true;
-        for (String name : nameToInstance.keySet()) {
-            if (firstEntry) {
-                firstEntry = false;
-            }
-            else {
-                output.append(", ");
-            }
-            output.append("\"").append(name).append("\" => ").append(nameToInstance.get(name));
-        }
-        output.append("}");
-        return output.toString();
+    protected void setUp() throws Exception {
+        super.setUp();
     }
-    
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    /**
+     * Test of get method, of class NamedParameters.
+     */
+    public void testGetSame() {
+        String name = "name";
+        Object expResult = new Object();
+        NamedParameters instance = new NamedParameters();
+        instance.put(name, expResult);
+        Object result = instance.get(name);
+        assertSame(expResult, result);
+    }
+
+    /**
+     * Test of toString method, of class NamedParameters.
+     */
+    public void testToStringEmpty() {
+        NamedParameters instance = new NamedParameters();
+        String result = instance.toString();
+        assertNotNull(result);
+    }
+
+    /**
+     * Test of toString method, of class NamedParameters.
+     */
+    public void testToString() {
+        NamedParameters instance = new NamedParameters();
+        instance.put("name1", new Object());
+        instance.put("name2", new Object());
+        String result = instance.toString();
+        assertNotNull(result);
+    }
+
 }
