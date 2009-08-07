@@ -170,7 +170,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected RmVersion rmVer = RmVersion.WSRM200502;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
-    
+
+    private final QName EPREnabled = new QName("http://schemas.sun.com/2006/03/wss/server","EnableEPRIdentity");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     private final QName disableSPBuffering = new QName("http://schemas.sun.com/2006/03/wss/server","DisablePayloadBuffering");
@@ -225,6 +226,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     //milliseconds
     protected long timestampTimeOut = 0;
     protected int iterationsForPDK = 0;
+    protected boolean isEPREnabled = false;
     /**
      * Constants for RM Security Processing
      */
@@ -527,7 +529,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     @SuppressWarnings("unchecked")
     protected ProcessingContext initializeInboundProcessingContext(
             Packet packet /*, boolean isSCMessage*/)  {
-        ProcessingContextImpl ctx  ;
+        ProcessingContextImpl ctx  ;       
         if(optimized){
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
             ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
@@ -1652,6 +1654,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
             if (policy.contains(optServerSecurity) || policy.contains(optClientSecurity)) {
                 optimized = false;
+            }
+            if (policy.contains(EPREnabled)){
+                isEPREnabled = true;
             }
             if (policy.contains(disableCPBuffering) || policy.contains(disableSPBuffering)) {
                 disablePayloadBuffer = true;

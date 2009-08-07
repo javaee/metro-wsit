@@ -425,7 +425,8 @@ public class SecurityPolicySelector {
         supportedAssertions.add(new QName(TRUST13_NS,UseKey));
         supportedAssertions.add(new QName(TRUST13_NS,SignWith));      
         supportedAssertions.add(new QName(TRUST13_NS,EncryptWith));
-        
+
+        supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","EnableEPRIdentity"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity"));
         

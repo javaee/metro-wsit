@@ -183,45 +183,6 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         WSService service = (WSService) map.get(PipeConstants.SERVICE);
 
         ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) map.get(PipeConstants.WRAPPED_CONTEXT);
-        if (context != null) {
-            WSBindingProvider bpr = context.getBindingProvider();
-            WSEndpointReference epr = bpr.getWSEndpointReference();
-            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
-            if (x509Cert == null) {
-                if (epr != null) {
-                    WSEndpointReference.EPRExtension idExtn = null;
-                    XMLStreamReader xmlReader = null;
-                    try {
-                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                        idExtn = epr.getEPRExtension(ID_QNAME);
-                        if (idExtn != null) {
-                            xmlReader = idExtn.readAsXMLStreamReader();
-                            CertificateRetriever cr = new CertificateRetriever();
-                            byte[] bstValue = cr.digestBST(xmlReader);
-                            if (bstValue == null) {
-                                throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
-                            }
-                            X509Certificate certificate = cr.constructCertificate(bstValue);
-                            boolean valid = secEnv.validateCertificate(certificate, null);
-                            //boolean valid = cr.validateCertificate(certificate, map);
-                            if (!valid) {
-                                throw new RuntimeException("certificate is not valid");
-                            }
-                            //props.put(PipeConstants.SERVER_CERT, certificate);
-                            this.serverCert = certificate;
-                        }
-                    } catch (XMLStreamException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                        throw new RuntimeException(ex);
-                    } catch (XWSSecurityException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                    }
-                }
-            } else {
-                //props.put(PipeConstants.SERVER_CERT, x509Cert);
-                this.serverCert = x509Cert;
-            }
-        }
         //this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
 
         if (service != null) {
@@ -255,7 +216,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 wsscConfig = holder.getConfigAssertions(
                         com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
             }
-        }      
+        }
 
         Properties props = new Properties();
         if (callbackHandler != null) {
@@ -291,7 +252,12 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
             }
         }
-
+        //computing EPR related stuff
+        X509Certificate cert = getCertificateFromEPR(context);
+        if (cert != null) {
+            props.put(PipeConstants.SERVER_CERT, cert);
+            this.serverCert = cert;
+        }
         //initialize the AuthModules and keep references to them
         authModule = new WSITClientAuthModule();
         try {
@@ -729,6 +695,48 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             throw new RuntimeException(
                     LogStringsMessages.WSITPVD_0032_ERROR_CONFIGURE_CLIENT_HANDLER(), e);
         }
+    }
+
+    private X509Certificate getCertificateFromEPR(ClientTubeAssemblerContext context) {
+        if (context != null) {
+            WSBindingProvider bpr = context.getBindingProvider();
+            WSEndpointReference epr = bpr.getWSEndpointReference();
+            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
+            if (x509Cert == null) {
+                if (epr != null) {
+                    WSEndpointReference.EPRExtension idExtn = null;
+                    XMLStreamReader xmlReader = null;
+                    try {
+                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                        idExtn = epr.getEPRExtension(ID_QNAME);
+                        if (idExtn != null) {
+                            xmlReader = idExtn.readAsXMLStreamReader();
+                            CertificateRetriever cr = new CertificateRetriever();
+                            byte[] bstValue = cr.digestBST(xmlReader);
+                            if (bstValue == null) {
+                                throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
+                            }
+                            X509Certificate certificate = cr.constructCertificate(bstValue);
+                            boolean valid = secEnv.validateCertificate(certificate, null);
+                            //boolean valid = cr.validateCertificate(certificate, map);
+                            if (!valid) {
+                                throw new RuntimeException("certificate is not valid");
+                            }
+                            return certificate;
+                        }
+                    } catch (XMLStreamException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new RuntimeException(ex);
+                    } catch (XWSSecurityException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else {
+                return x509Cert;
+            }
+            return null;
+        }
+        return null;
     }
 
     private void invokeSCPlugin(Packet packet) {

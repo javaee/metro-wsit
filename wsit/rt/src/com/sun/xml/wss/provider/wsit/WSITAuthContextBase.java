@@ -184,6 +184,7 @@ public abstract class WSITAuthContextBase  {
     //*************STATIC(s)**************************************
     //protected static QName bsOperationName =
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
+    private final QName EPREnabled = new QName("http://schemas.sun.com/2006/03/wss/server","EnableEPRIdentity");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     
@@ -263,6 +264,7 @@ public abstract class WSITAuthContextBase  {
     //milliseconds
     protected long timestampTimeOut = 0;
     protected int iterationsForPDK = 0;
+    protected boolean isEPREnabled = false;
 
     protected static final String REQ_PACKET = "REQ_PACKET";
     protected static final String RES_PACKET = "RES_PACKET";
@@ -480,7 +482,10 @@ public abstract class WSITAuthContextBase  {
                 if(policy.contains(optServerSecurity) || policy.contains(optClientSecurity)){
                     optimized = false;
                 }
-                if(policy.contains(disableIncPrefixServer) || policy.contains(disableIncPrefixClient)){
+                if (policy.contains(EPREnabled)) {
+                    isEPREnabled = true;
+                }
+                if (policy.contains(disableIncPrefixServer) || policy.contains(disableIncPrefixClient)){
                     disableIncPrefix = true;
                 }
                 if(policy.contains(encHeaderContentServer) || policy.contains(encHeaderContentClient)){
