@@ -103,9 +103,6 @@
              output="${dist.image.wsit.v3.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
 
-
-
-
         <copy todir="${dist.image.wsit.v3.dir}">
             <fileset dir="${lib.osgi.dir}">
                 <include name="*.jar"/>
