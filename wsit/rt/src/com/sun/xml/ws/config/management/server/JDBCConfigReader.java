@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
@@ -41,7 +40,9 @@ import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
-import com.sun.xml.ws.commons.ScheduledTaskManager;
+import com.sun.xml.ws.commons.DelayedTaskManager;
+import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
+import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.persistence.JDBCConfigSaver;
@@ -52,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.sql.DataSource;
 import javax.xml.ws.WebServiceException;
@@ -63,37 +65,47 @@ import javax.xml.ws.WebServiceException;
 public class JDBCConfigReader implements ConfigReader {
 
     private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
-    private final ScheduledTaskManager taskManager = new ScheduledTaskManager("JDBC config reader");
+    private volatile ConfigPoller poller = null;
 
-    private ConfigPoller poller = null;
-
-
-    public void init(NamedParameters parameters) {
-        this.poller = new ConfigPoller(parameters);
-    }
-
-    public void start() {
+    public synchronized void init(NamedParameters parameters) {
+        if (this.poller != null) {
+            throw new IllegalStateException(String.format("Duplicate initialization detected: This instance of [ %s ] class has already been initialized", this.getClass().getName()));
+        }
         // TODO make interval configurable
-        this.taskManager.startTask(this.poller, 0, 10000);
+        this.poller = new ConfigPoller(parameters, 10000);
     }
 
-    public void stop() {
-        this.taskManager.shutdown();
+    public synchronized void start() {
+        if (poller == null) {
+            throw new IllegalStateException(String.format("Unable to start poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
+        }
+
+        poller.start();
     }
 
-    
-    private static class ConfigPoller implements Runnable {
-        
+    public synchronized void stop() {
+        if (poller == null) {
+            throw new IllegalStateException(String.format("Unable to stop poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
+        }
+        poller.stop();
+    }
+
+    private static class ConfigPoller implements DelayedTask {
+
         private final ManagedEndpoint endpoint;
         private final EndpointStarter endpointStarter;
         private final NamedParameters configParameters;
-
+        private final long executionDelay;
+        private volatile boolean stopped;
         private volatile long version = 0L;
 
-        public ConfigPoller(NamedParameters parameters) {
+        public ConfigPoller(final NamedParameters parameters, final long executionDelay) {
             this.endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
             this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configParameters = parameters;
+
+            this.executionDelay = executionDelay;
+            this.stopped = true;
 
             ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
             final String start = assertion.getStart();
@@ -103,7 +115,11 @@ public class JDBCConfigReader implements ConfigReader {
             }
         }
 
-        public void run() {
+        public void run(DelayedTaskManager manager) {
+            if (stopped) {
+                return;
+            }
+
             Connection connection = null;
             try {
                 final DataSource source = JDBCConfigSaver.getManagementDS();
@@ -124,6 +140,11 @@ public class JDBCConfigReader implements ConfigReader {
                 } catch (SQLException e) {
                     // TODO add error message
                     LOGGER.logSevereException(e);
+                }
+
+                if (!stopped) {
+                    // schedule next run
+                    MaintenanceTaskExecutor.INSTANCE.register(this, executionDelay, TimeUnit.MILLISECONDS);
                 }
             }
         }
@@ -149,8 +170,7 @@ public class JDBCConfigReader implements ConfigReader {
                     this.version = result.getLong("version");
                     final Reader data = result.getCharacterStream("config");
                     reconfigure(data);
-                }
-                else {
+                } else {
                     if (LOGGER.isLoggable(Level.FINEST)) {
                         // TODO put log message into properties
                         LOGGER.finer("SQL query did not find any updated configuration data");
@@ -178,6 +198,31 @@ public class JDBCConfigReader implements ConfigReader {
             this.endpointStarter.startEndpoint();
         }
 
+        public String getName() {
+            return "JDBC policy configuration reader";
+        }
+
+        synchronized void start() {
+            LOGGER.entering();
+            try {
+                if (stopped) {
+                    stopped = false;
+                    MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
+                } else {
+                    LOGGER.warning(String.format("Duplicate start of [ %s ] instance detected: Instance already runing", this.getName()));
+                }
+            } finally {
+                LOGGER.exiting();
+            }
+        }
+
+        synchronized void stop() {
+            LOGGER.entering();
+            try {
+                stopped = true;
+            } finally {
+                LOGGER.exiting();
+            }
+        }
     }
-    
 }
