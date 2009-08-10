@@ -34,11 +34,10 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.rm.runtime;
+package com.sun.xml.ws.commons;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.util.DelayedTaskManager;
-import com.sun.xml.ws.rx.util.DelayedTaskManager.DelayedTask;
+import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import java.util.concurrent.TimeUnit;
 
 /**

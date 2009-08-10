@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
-import com.sun.xml.ws.rx.util.DelayedTaskManager;
+import com.sun.xml.ws.commons.DelayedTaskManager;
 import com.sun.istack.logging.Logger;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -64,6 +64,10 @@ enum RedeliveryTaskExecutor {
 
             public void run(DelayedTaskManager manager) {
                 messageHandler.putToDeliveryQueue(message);
+            }
+
+            public String getName() {
+                return String.format("redelivery of a message with number [ %d ] on a sequenece [ %s ]", message.getMessageNumber(), message.getSequenceId());
             }
 
         }, delay, timeUnit);

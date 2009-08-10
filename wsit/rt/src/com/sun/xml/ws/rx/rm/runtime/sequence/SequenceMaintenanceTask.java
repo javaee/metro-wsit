@@ -37,7 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.util.DelayedTaskManager;
+import com.sun.xml.ws.commons.DelayedTaskManager;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
@@ -80,5 +80,9 @@ public class SequenceMaintenanceTask implements DelayedTaskManager.DelayedTask {
         } else {
             LOGGER.config(String.format("Terminating sequence maintenance task for an endpoint UID [ %s ]: Sequence manager instance has been garbage-collected", endpointUid));
         }
+    }
+
+    public String getName() {
+        return "sequence maintenance task";
     }
 }

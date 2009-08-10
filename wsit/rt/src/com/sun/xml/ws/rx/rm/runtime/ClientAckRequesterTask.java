@@ -40,8 +40,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
-import com.sun.xml.ws.rx.util.DelayedTaskManager;
-import com.sun.xml.ws.rx.util.DelayedTaskManager.DelayedTask;
+import com.sun.xml.ws.commons.DelayedTaskManager;
+import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -140,5 +140,9 @@ public class ClientAckRequesterTask implements DelayedTask {
 
     public TimeUnit getExecutionDelayTimeUnit() {
         return TimeUnit.MILLISECONDS;
+    }
+
+    public String getName() {
+        return "client acknowledgement requester task";
     }
 }

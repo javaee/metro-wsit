@@ -33,16 +33,16 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.util;
+package com.sun.xml.ws.commons;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.commons.NamedThreadFactory;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 /**
  *
@@ -53,6 +53,7 @@ public final class DelayedTaskManager {
     private static final Logger LOGGER = Logger.getLogger(DelayedTaskManager.class);
 
     public static interface DelayedTask {
+        public String getName();
 
         public void run(DelayedTaskManager manager);
     }
@@ -66,7 +67,7 @@ public final class DelayedTaskManager {
     }
 
     private static final ThreadFactory createThreadFactory(String name) {
-        return new NamedThreadFactory(name + "-worker-executor");
+        return new NamedThreadFactory(name);
     }
 
     private class Worker implements Runnable {
@@ -82,11 +83,19 @@ public final class DelayedTaskManager {
          */
         public void run() {
             LOGGER.entering();
+
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(String.format("Starting delayed execution of [ %s ]", task.getName()));
+            }
             try {
                 task.run(DelayedTaskManager.this);
             } catch (Exception ex) {
-                LOGGER.warning("An exception occured while running delayed task", ex);
+                LOGGER.warning(String.format("An exception occured during execution of [ %s ]", task.getName()), ex);
             } finally {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format("Delayed execution of [ %s ] finished", task.getName()));
+                }
+
                 LOGGER.exiting();
             }
         }
