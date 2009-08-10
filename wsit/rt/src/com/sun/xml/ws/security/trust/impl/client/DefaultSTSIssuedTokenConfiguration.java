@@ -417,7 +417,7 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             }else if (config.getSTSWSDLLocation()!= null){
                 this.stsWSDLLocation = config.getSTSWSDLLocation();
                 this.stsServiceName = config.getSTSServiceName();
-                this.stsPortName = config.getSTSServiceName();
+                this.stsPortName = config.getSTSPortName();
                 this.stsNamespace = config.getSTSNamespace();
             }
         }
