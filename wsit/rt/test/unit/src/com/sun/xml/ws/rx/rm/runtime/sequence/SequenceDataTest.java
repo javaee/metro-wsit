@@ -300,7 +300,7 @@ public class SequenceDataTest extends TestCase {
             // TODO instance.attachMessageToUnackedMessageNumber(null);
             // TODO SequenceData.retrieveMessage(java.lang.String)
 
-            final int SLEEP_TIME = 10;
+            final int SLEEP_TIME = 100;
 
             oldLastActivityTime = instance.getLastActivityTime();
             instance.incrementAndGetLastMessageNumber(true);
