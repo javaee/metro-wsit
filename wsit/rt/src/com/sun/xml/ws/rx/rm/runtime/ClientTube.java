@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.commons.VolatileReference;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateSequenceException;
@@ -84,14 +85,6 @@ import java.util.logging.Level;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 final class ClientTube extends AbstractFilterTubeImpl {
-
-    private static final class VolatileReference<V> {
-        public volatile V value;
-
-        public VolatileReference(V value) {
-            this.value = value;
-        }
-    }
     //
     private static final Logger LOGGER = Logger.getLogger(ClientTube.class);
     private static final Lock INIT_LOCK = new ReentrantLock();
