@@ -335,7 +335,7 @@ public class SequenceDataTest extends TestCase {
 
     private void assertLowerThan(long lower, long greater) {
         LOGGER.log(Level.ALL, String.format("Lower number: %d Greater number: %d", lower, greater));
-//        System.out.println(String.format("Lower number: %d Greater number: %d", lower, greater));
+        System.out.println(String.format("Lower number: %d Greater number: %d", lower, greater));
 
         assertTrue(lower < greater);
     }
