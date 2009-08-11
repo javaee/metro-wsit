@@ -36,10 +36,10 @@
 
 package com.sun.xml.ws.config.management.server;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
@@ -49,6 +49,7 @@ import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
 import com.sun.xml.ws.resources.ManagementMessages;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
+
 import java.net.URI;
 import java.util.Map;
 import javax.xml.namespace.QName;
@@ -56,12 +57,14 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Remove all existing policies and policy references from the given XML document
+ * and insert the new effective policies.
  *
  * @author Fabian Ritzmann
  */
 public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagementWSDLPatcher.class);
+    private static final Logger LOGGER = Logger.getLogger(ManagementWSDLPatcher.class);
     private static final PolicyModelMarshaller POLICY_MARSHALLER = PolicyModelMarshaller.getXmlMarshaller(true);
     private static final PolicyModelGenerator POLICY_GENERATOR = PolicyModelGenerator.getGenerator();
     private final Map<URI, Policy> urnToPolicy;
@@ -77,7 +80,6 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
      * If we find a policy element, skip it. If we find a binding element,
      * marshal any policies onto it.
      *
-     * @param i The i-th attribute of the current element
      * @throws XMLStreamException If a parsing error occured
      */
     @Override
