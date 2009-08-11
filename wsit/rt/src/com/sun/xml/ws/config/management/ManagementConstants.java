@@ -57,5 +57,11 @@ public class ManagementConstants {
      * Fully qualified name of the ManagedService policy assertion.
      */
     public static final QName SERVICE_ASSERTION_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
+    
+    /**
+     * Prevent this class from being instantiated.
+     */
+    private ManagementConstants() {
+    }
 
 }
