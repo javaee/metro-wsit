@@ -85,7 +85,7 @@ public class NamedParameters {
 
     @Override
     public String toString() {
-        StringBuilder output = new StringBuilder("NamedParameters: {");
+        final StringBuilder output = new StringBuilder("NamedParameters: {");
         boolean firstEntry = true;
         for (String name : nameToInstance.keySet()) {
             if (firstEntry) {
