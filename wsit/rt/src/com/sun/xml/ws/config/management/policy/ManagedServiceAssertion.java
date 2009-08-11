@@ -79,6 +79,8 @@ public class ManagedServiceAssertion extends PolicyAssertion {
             PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ConfigSaverImplementation");
     private static final QName CONFIG_READER_IMPLEMENTATION_PARAMETER_QNAME = new QName(
             PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ConfigReaderImplementation");
+    private static final QName JDBC_DATA_SOURCE_NAME_PARAMETER_QNAME = new QName(
+            PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JDBCDataSourceName");
 
     public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
             throws AssertionCreationException {
@@ -163,7 +165,11 @@ public class ManagedServiceAssertion extends PolicyAssertion {
     public String getConfigReaderImplementation() {
         return getParameterValue(CONFIG_READER_IMPLEMENTATION_PARAMETER_QNAME);
     }
-    
+
+    public String getJDBCDataSourceName() {
+        return getParameterValue(JDBC_DATA_SOURCE_NAME_PARAMETER_QNAME);
+    }
+
     private String getParameterValue(final QName name) {
         final Iterator<PolicyAssertion> parameters = getParametersIterator();
         while (parameters.hasNext()) {

@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.config.management;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -44,12 +45,13 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
-import javax.xml.namespace.QName;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -59,7 +61,17 @@ import javax.xml.ws.WebServiceException;
  */
 public class ManagementUtil {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(ManagementUtil.class);
+    /**
+     * Name of the JDBC data source passed into the JDBC implementations.
+     */
+    public static final String DATA_SOURCE_PARAMETER_NAME = "DATA_SOURCE_NAME";
+
+    /**
+     * Default JDBC data source name if no custom name was given.
+     */
+    private static final String DEFAULT_DATA_SOURCE_NAME = "jdbc/metro/management";
+
+    private static final Logger LOGGER = Logger.getLogger(ManagementUtil.class);
 
     /**
      * Return ManagedService assertion if there is one associated with the endpoint.
@@ -67,7 +79,7 @@ public class ManagementUtil {
      * @param endpoint The endpoint. Must not be null.
      * @return The policy assertion if found. Null otherwise.
      */
-    public static ManagedServiceAssertion getAssertion(WSEndpoint endpoint) {
+    public static ManagedServiceAssertion getAssertion(WSEndpoint endpoint) throws WebServiceException {
         LOGGER.entering(endpoint);
         try {
             PolicyAssertion assertion = null;
@@ -100,7 +112,7 @@ public class ManagementUtil {
      * @param reader The reader. Must not be null
      * @return All data provided by the reader.
      */
-    public static String convert(Reader reader) {
+    public static String convert(Reader reader) throws WebServiceException {
         try {
             final StringBuilder data = new StringBuilder();
             final char[] buffer = new char[1024];
@@ -110,9 +122,26 @@ public class ManagementUtil {
             }
             return data.toString();
         } catch (IOException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5018_FAILED_READ(), e));
         }
     }
-    
+
+    /**
+     * Look up the data source for the JDBC implementation.
+     *
+     * @param dataSourceName May hold a custom name of the JDBC data source. Null otherwise.
+     * @return A data source.
+     * @throws WebServiceException If the lookup failed.
+     */
+    public static DataSource getManagementDS(String dataSourceName) throws WebServiceException {
+        final String sourceName = dataSourceName == null ? DEFAULT_DATA_SOURCE_NAME : dataSourceName;
+        try {
+            LOGGER.config(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
+            InitialContext initCtx = new InitialContext();
+            return (DataSource) initCtx.lookup(sourceName);
+        } catch (NamingException e) {
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5019_FAILED_LOOKUP(sourceName), e));
+        }
+    }
+
 }

@@ -41,14 +41,14 @@ import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.config.management.ManagementConstants;
+import com.sun.xml.ws.config.management.ManagementUtil;
 
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.ws.WebServiceException;
 
@@ -61,29 +61,20 @@ public class JDBCConfigSaver implements ConfigSaver {
 
     private static final Logger LOGGER = Logger.getLogger(JDBCConfigSaver.class);
 
+    /**
+     * Persist the data
+     *
+     * @param parameters
+     */
     public void persist(final NamedParameters parameters) {
-        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-        final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
-        writeData(endpoint.getId(), newConfig);
-    }
-
-    public static DataSource getManagementDS() {
-        try {
-            InitialContext initCtx = new InitialContext();
-            // TODO make name configurable, default to jdbc/metro/management
-            return (DataSource) initCtx.lookup("jdbc/managementDS");
-        } catch (NamingException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
-        }
-    }
-
-    private static void writeData(final String endpointId, final String data) {
         Connection connection = null;
         try {
-            final DataSource source = getManagementDS();
+            final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
+            final DataSource source = ManagementUtil.getManagementDS(assertion.getJDBCDataSourceName());
             connection = source.getConnection();
-            writeData(connection, endpointId, data);
+            final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
+            writeData(connection, endpoint.getId(), newConfig);
         } catch (SQLException e) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(e));
@@ -94,7 +85,7 @@ public class JDBCConfigSaver implements ConfigSaver {
                 }
             } catch (SQLException e) {
                 // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(e));
+                LOGGER.logException(new WebServiceException(e), Level.WARNING);
             }
         }
     }

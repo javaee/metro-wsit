@@ -45,7 +45,6 @@ import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.config.management.persistence.JDBCConfigSaver;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 
 import java.io.Reader;
@@ -59,6 +58,8 @@ import javax.sql.DataSource;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * This implementation polls a JDBC data sources for changes and if it finds a new
+ * configuration, it reconfigures the managed endpoint.
  *
  * @author Fabian Ritzmann
  */
@@ -69,6 +70,7 @@ public class JDBCConfigReader implements ConfigReader {
 
     public synchronized void init(NamedParameters parameters) {
         if (this.poller != null) {
+            // TODO Put text into properties
             throw new IllegalStateException(String.format("Duplicate initialization detected: This instance of [ %s ] class has already been initialized", this.getClass().getName()));
         }
         // TODO make interval configurable
@@ -77,6 +79,7 @@ public class JDBCConfigReader implements ConfigReader {
 
     public synchronized void start() {
         if (poller == null) {
+            // TODO Put text into properties
             throw new IllegalStateException(String.format("Unable to start poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
         }
 
@@ -85,15 +88,18 @@ public class JDBCConfigReader implements ConfigReader {
 
     public synchronized void stop() {
         if (poller == null) {
+            // TODO Put text into properties
             throw new IllegalStateException(String.format("Unable to stop poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
         }
         poller.stop();
     }
 
+
     private static class ConfigPoller implements DelayedTask {
 
         private final ManagedEndpoint endpoint;
         private final EndpointStarter endpointStarter;
+        private final String dataSourceName;
         private final NamedParameters configParameters;
         private final long executionDelay;
         private volatile boolean stopped;
@@ -104,10 +110,12 @@ public class JDBCConfigReader implements ConfigReader {
             this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configParameters = parameters;
 
+            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
+            this.dataSourceName = assertion.getJDBCDataSourceName();
+
             this.executionDelay = executionDelay;
             this.stopped = true;
 
-            ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
             final String start = assertion.getStart();
             // TODO log actions, put "notify" into constant
             if (start == null || !start.equals("notify")) {
@@ -122,7 +130,7 @@ public class JDBCConfigReader implements ConfigReader {
 
             Connection connection = null;
             try {
-                final DataSource source = JDBCConfigSaver.getManagementDS();
+                final DataSource source = ManagementUtil.getManagementDS(this.dataSourceName);
                 connection = source.getConnection();
                 pollData(connection, endpoint.getId());
                 connection.close();
@@ -139,7 +147,7 @@ public class JDBCConfigReader implements ConfigReader {
                     }
                 } catch (SQLException e) {
                     // TODO add error message
-                    LOGGER.logSevereException(e);
+                    LOGGER.logException(e, Level.WARNING);
                 }
 
                 if (!stopped) {
@@ -209,6 +217,7 @@ public class JDBCConfigReader implements ConfigReader {
                     stopped = false;
                     MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
                 } else {
+                    // TODO put text into properties
                     LOGGER.warning(String.format("Duplicate start of [ %s ] instance detected: Instance already runing", this.getName()));
                 }
             } finally {
