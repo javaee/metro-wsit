@@ -103,18 +103,19 @@ public class FSImpl implements IFinancialService {
     }
 
     private Element getSAMLAssertion() {
+        Element samlAssertion = null;
         try {
             Subject subj = SubjectAccessor.getRequesterSubject(context);
             Set<Object> set = subj.getPublicCredentials();
-            Element samlAssertion = null;
             for (Object obj : set) {
                 if (obj instanceof XMLStreamReader) {
                     XMLStreamReader reader = (XMLStreamReader) obj;
                     //To create a DOM Element representing the Assertion :
                     samlAssertion = SAMLUtil.createSAMLAssertion(reader);
-                    return samlAssertion;
+                    break;
                 } else if (obj instanceof Element) {
                     samlAssertion = (Element) obj;
+                    break;
                 }
             }
         } catch (XMLStreamException ex) {
@@ -122,6 +123,6 @@ public class FSImpl implements IFinancialService {
         } catch (XWSSecurityException ex) {
             throw new XWSSecurityRuntimeException(ex);
         }
-        return null;
+        return samlAssertion;
     }
 }
