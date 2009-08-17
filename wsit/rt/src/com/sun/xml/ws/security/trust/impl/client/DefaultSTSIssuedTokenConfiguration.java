@@ -304,8 +304,13 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                     }
                 }
                 String shareToken = attrs.get(new QName(CONFIG_NAMESPACE, SHARE_TOKEN));
-                if (shareToken != null){
+                if ("true".equals(shareToken)){
                     this.getOtherOptions().put(SHARE_TOKEN, shareToken);
+                }
+
+                String renewExpiredToken = attrs.get(new QName(CONFIG_NAMESPACE, RENEW_EXPIRED_TOKEN));
+                if ("true".equals(renewExpiredToken)){
+                    this.getOtherOptions().put(RENEW_EXPIRED_TOKEN, renewExpiredToken);
                 }
             }
         }

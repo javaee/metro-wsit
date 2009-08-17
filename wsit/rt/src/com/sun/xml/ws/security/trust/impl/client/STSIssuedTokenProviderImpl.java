@@ -70,7 +70,8 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
         STSIssuedTokenConfiguration config = (STSIssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
         ctx.setTokenIssuer(config.getSTSEndpoint());
         boolean shareToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.SHARE_TOKEN));
-        getIssuedTokenContext(shareToken, ctx);
+        boolean renewExpiredToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.RENEW_EXPIRED_TOKEN));
+        getIssuedTokenContext(shareToken, renewExpiredToken, ctx);
     } 
     
     public void cancel(IssuedTokenContext ctx)throws WSTrustException{
@@ -97,7 +98,7 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
         ctx.setAttachedSecurityTokenReference(cached.getAttachedSecurityTokenReference());
     }
 
-    private void getIssuedTokenContext(boolean shareToken, IssuedTokenContext ctx)throws WSTrustException {
+    private void getIssuedTokenContext(boolean shareToken, boolean renewExpiredToken, IssuedTokenContext ctx)throws WSTrustException {
         Subject subject = SubjectAccessor.getRequesterSubject();
         if (shareToken && subject != null){
             Set pcs = subject.getPrivateCredentials(IssuedTokenContext.class);
@@ -118,11 +119,12 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
                     // Remove the expired context
                     subject.getPrivateCredentials().remove(cached);
 
-                    // ToDo: renew the expired token if required
-                    
-                    log.log(Level.SEVERE,
-                    LogStringsMessages.WST_0046_TOKEN_EXPIRED(ctx.getCreationTime(), ctx.getExpirationTime(), currentTimeInDateFormat));
-                    throw new WSTrustException(LogStringsMessages.WST_0046_TOKEN_EXPIRED(ctx.getCreationTime(), ctx.getExpirationTime(), currentTimeInDateFormat));
+                    //if renewExpiredToke="true" is not set
+                    if (!renewExpiredToken){
+                        log.log(Level.SEVERE,
+                        LogStringsMessages.WST_0046_TOKEN_EXPIRED(cached.getCreationTime(), cached.getExpirationTime(), currentTimeInDateFormat));
+                        throw new WSTrustException(LogStringsMessages.WST_0046_TOKEN_EXPIRED(cached.getCreationTime(), cached.getExpirationTime(), currentTimeInDateFormat));
+                    }
                 } else if (cached.getTokenIssuer().equals(ctx.getTokenIssuer())){
                     updateContext(cached, ctx);
                     return;
