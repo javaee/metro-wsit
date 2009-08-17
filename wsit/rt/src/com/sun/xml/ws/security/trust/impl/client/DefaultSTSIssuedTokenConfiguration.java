@@ -55,6 +55,7 @@ import com.sun.xml.wss.impl.MessageConstants;
 import java.net.URI;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.Iterator;
 import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -303,14 +304,29 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                         this.stsPortName = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
                     }
                 }
+
+                // check if shareToken is set
                 String shareToken = attrs.get(new QName(CONFIG_NAMESPACE, SHARE_TOKEN));
                 if ("true".equals(shareToken)){
                     this.getOtherOptions().put(SHARE_TOKEN, shareToken);
                 }
 
+                // check if renewExpiredToken is set
                 String renewExpiredToken = attrs.get(new QName(CONFIG_NAMESPACE, RENEW_EXPIRED_TOKEN));
                 if ("true".equals(renewExpiredToken)){
                     this.getOtherOptions().put(RENEW_EXPIRED_TOKEN, renewExpiredToken);
+                }
+
+                // handle LifeTime
+                if (localToken.hasParameters()){
+                    Iterator<PolicyAssertion> pas = localToken.getParametersIterator();
+                    while (pas.hasNext()){
+                        PolicyAssertion pa = pas.next();
+                        if (LIFE_TIME.equals(pa.getName().getLocalPart())){
+                             this.getOtherOptions().put(LIFE_TIME, Integer.parseInt(pa.getValue()));
+                             break;
+                        }
+                    }
                 }
             }
         }

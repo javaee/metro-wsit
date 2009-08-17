@@ -63,6 +63,7 @@ import com.sun.xml.ws.security.trust.elements.ActAs;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
+import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.OnBehalfOf;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
@@ -232,9 +233,21 @@ public class TrustPluginImpl implements TrustPlugin {
 
         // Handle ActAs token
         Token actAsToken = (Token)stsConfig.getOtherOptions().get(STSIssuedTokenConfiguration.ACT_AS);
-       if (actAsToken != null){
+        if (actAsToken != null){
             ActAs actAs = fact.createActAs(actAsToken);
             rst.setActAs(actAs);
+        }
+
+        // Handle LifeTime requirement
+        Integer lf = (Integer)stsConfig.getOtherOptions().get(STSIssuedTokenConfiguration.LIFE_TIME);
+        if(lf != null){
+            // Create Lifetime
+            long lfValue = lf.longValue();
+            if (lfValue > 0){
+                long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
+                Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, lfValue, wstVer);
+                rst.setLifetime(lifetime);
+            }
         }
 
         String tokenType = null;

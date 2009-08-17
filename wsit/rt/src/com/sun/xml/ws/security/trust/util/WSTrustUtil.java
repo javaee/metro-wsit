@@ -113,6 +113,8 @@ import org.w3c.dom.Text;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.wss.impl.misc.Base64;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
@@ -382,6 +384,26 @@ public class WSTrustUtil {
             
             return lifetime;
         }
+    }
+
+    public static long getLifeSpan(Lifetime lifetime){
+        final SimpleDateFormat calendarFormatter
+            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
+
+        long timeout = 0;
+        try{
+            final AttributedDateTime created = lifetime.getCreated();
+            final AttributedDateTime expires = lifetime.getExpires();
+            synchronized (calendarFormatter){
+                final Date dateCreated = calendarFormatter.parse(created.getValue());
+                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+
+                timeout = dateExpires.getTime() - dateCreated.getTime();
+            }
+        }catch(ParseException ex){
+            throw new RuntimeException(ex);
+        }
+        return timeout;
     }
     
     public static EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert, final String keyWrapAlgorithm) throws Exception{

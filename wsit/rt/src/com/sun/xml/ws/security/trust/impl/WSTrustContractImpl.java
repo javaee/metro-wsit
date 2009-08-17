@@ -448,11 +448,18 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }
         
         // Create Lifetime
+        Lifetime lifetime = rst.getLifetime();
         long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
-        long lifeSpan = stsConfig.getIssuedTokenTimeout();
-        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, lifeSpan, wstVer);
+        long lifespan = -1;
+        if (lifetime == null){
+            lifespan = stsConfig.getIssuedTokenTimeout();
+            lifetime = WSTrustUtil.createLifetime(currentTime, lifespan, wstVer);
+           
+        }else{
+            lifespan = WSTrustUtil.getLifeSpan(lifetime);
+        }
         context.setCreationTime(new Date(currentTime));
-        context.setExpirationTime(new Date(currentTime + lifeSpan));
+        context.setExpirationTime(new Date(currentTime + lifespan));
         
         //==============================================
         // Create RequestedSecurityToken and references
