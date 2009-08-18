@@ -62,7 +62,7 @@ import javax.xml.ws.WebServiceException;
 
 /**
  * WS startup servlet for Servlet based deployment
- * Deprecared, use com.sun.xml.ws.transport.tcp.server.WSStartupServlet instead.
+ * Deprecared, use com.sun.xml.ws.transport.tcp.server.servlet.WSStartupServlet instead.
  * @author JAX-WS team
  */
 @SuppressWarnings({"unchecked"})

@@ -45,7 +45,6 @@ import com.sun.xml.ws.transport.tcp.server.IncomeMessageProcessor;
 import com.sun.xml.ws.transport.tcp.server.tomcat.WSTCPTomcatRegistry;
 import com.sun.xml.ws.transport.tcp.server.tomcat.WSTCPTomcatProtocolHandlerBase;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * @author Alexey Stashok

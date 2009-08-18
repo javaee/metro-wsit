@@ -269,7 +269,9 @@ public final class IncomeMessageProcessor implements SessionCloseListener {
      * Will be called by NIO framework, when it will decide to close connection
      */
     public void notifyClosed(@NotNull final SocketChannel socketChannel) {
-        connectionCache.close(getConnectionSession(socketChannel));
+        if (connectionCache != null) {
+            connectionCache.close(getConnectionSession(socketChannel));
+        }
     }
     
     /**

@@ -36,34 +36,17 @@
 
 package com.sun.xml.ws.transport.tcp.servicechannel;
 
-import com.sun.xml.ws.api.BindingID;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.server.InstanceResolver;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import javax.xml.namespace.QName;
-import org.xml.sax.EntityResolver;
+import com.sun.xml.ws.transport.tcp.server.WSTCPModule;
 
 /**
  * @author Alexey Stashok
  */
 public class ServiceChannelCreator {
     
-    private static final WSEndpoint<ServiceChannelWSImpl> endpoint = createEndpoint();
-    
-    private static WSEndpoint<ServiceChannelWSImpl> createEndpoint() {
-        final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
-        final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
-        final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
-        final WSBinding binding = bindingId.createBinding();
-            
-        return WSEndpoint.create(
-                    ServiceChannelWSImpl.class, true,
-                    null,
-                    serviceName, portName, null, binding,
-                    null, null, (EntityResolver) null, true
-                    );
-    }
-    
+    private static final WSEndpoint<ServiceChannelWSImpl> endpoint =
+            WSTCPModule.getInstance().createServiceChannelEndpoint();
+        
     public static WSEndpoint<ServiceChannelWSImpl> getServiceChannelEndpointInstance() {
         return endpoint;
     }

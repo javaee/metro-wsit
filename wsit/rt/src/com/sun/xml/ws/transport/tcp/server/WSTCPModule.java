@@ -36,10 +36,16 @@
 
 package com.sun.xml.ws.transport.tcp.server;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.transport.tcp.servicechannel.ServiceChannelWSImpl;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.xml.namespace.QName;
+import org.xml.sax.EntityResolver;
 
 /**
  * WSTCPModule. Singlton class, which contains SOAP/TCP related information.
@@ -47,7 +53,7 @@ import java.util.logging.Logger;
  * @author Alexey Stashok
  */
 public abstract class WSTCPModule {
-    private static WSTCPModule instance;
+    private static volatile WSTCPModule instance;
     
     protected static final Logger logger = Logger.getLogger(
             com.sun.xml.ws.transport.tcp.util.TCPConstants.LoggingDomain + ".server");
@@ -68,6 +74,18 @@ public abstract class WSTCPModule {
         WSTCPModule.instance = instance;
     }
     
+    public WSEndpoint<ServiceChannelWSImpl> createServiceChannelEndpoint() {
+        final QName serviceName = WSEndpoint.getDefaultServiceName(ServiceChannelWSImpl.class);
+        final QName portName = WSEndpoint.getDefaultPortName(serviceName, ServiceChannelWSImpl.class);
+        final BindingID bindingId = BindingID.parse(ServiceChannelWSImpl.class);
+        final WSBinding binding = bindingId.createBinding();
+
+        return WSEndpoint.create(ServiceChannelWSImpl.class, true,
+                    null,
+                    serviceName, portName, null, binding,
+                    null, null, (EntityResolver) null, true);
+    }
+
     public abstract void register(@NotNull final String contextPath,
             @NotNull final List<TCPAdapter> adapters);
     

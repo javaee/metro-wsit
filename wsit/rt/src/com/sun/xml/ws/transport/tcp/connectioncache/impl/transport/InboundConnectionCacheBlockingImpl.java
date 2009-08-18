@@ -233,7 +233,10 @@ public final class InboundConnectionCacheBlockingImpl<C extends Connection>
 	    dprint( "->close: " + conn ) ;
 	
 	try {
-	    final ConnectionState<C> cs = connectionMap.remove( conn ) ;
+	    final ConnectionState<C> cs = connectionMap.remove( conn );
+
+            if (cs == null) return;
+            
 	    int count = cs.busyCount ;
 	    if (debug())
 		dprint( ".close: " + conn + " count = " + count ) ;
