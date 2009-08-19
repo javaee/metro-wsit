@@ -302,6 +302,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
         if(authnCtxClass != null){
             config.getOtherOptions().put(WSTrustConstants.AUTHN_CONTEXT_CLASS, authnCtxClass);
         }
+        config.getOtherOptions().putAll(msgCtx);
       
         return config;
     }

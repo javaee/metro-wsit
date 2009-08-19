@@ -300,7 +300,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         }else{
             SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
             try{
-                cert = secEnv.getCertificate(new HashMap(), certAlias, false);
+                cert = secEnv.getCertificate(stsConfig.getOtherOptions(), certAlias, false);
             }catch( XWSSecurityException ex){
                 log.log(Level.SEVERE,
                     LogStringsMessages.WST_0033_UNABLE_GET_SERVICE_CERT(appliesTo), ex);
@@ -341,8 +341,8 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         }else{
             SecurityEnvironment secEnv = (SecurityEnvironment)stsConfig.getOtherOptions().get(WSTrustConstants.SECURITY_ENVIRONMENT);
             try{
-                stsCert = secEnv.getDefaultCertificate(new HashMap());
-                stsPrivKey = secEnv.getPrivateKey(new HashMap(), stsCert);
+                stsCert = secEnv.getDefaultCertificate(stsConfig.getOtherOptions());
+                stsPrivKey = secEnv.getPrivateKey(stsConfig.getOtherOptions(), stsCert);
             }catch( XWSSecurityException ex){
                 log.log(Level.SEVERE,
                     LogStringsMessages.WST_0043_UNABLE_GET_STS_KEY(), ex);
