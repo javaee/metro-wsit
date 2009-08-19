@@ -239,66 +239,84 @@ public class SecurityServerTube extends SecurityTubeBase {
                 Constructor ctor = contextDelegate.getConstructor(new Class[]{WebServiceContextDelegate.class});
                 packet.webServiceContextDelegate = (WebServiceContextDelegate) ctor.newInstance(new Object[]{current});
             } catch (InstantiationException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             } catch (IllegalArgumentException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             } catch (InvocationTargetException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             } catch (NoSuchMethodException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             } catch (SecurityException ex) {
-                Logger.getLogger(SecurityServerTube.class.getName()).log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             }
         }
-        
+
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer));
         ctx.setExtraneousProperty("SessionManager", sessionManager);
-        try{
-            if(!optimized) {
+        try {
+            if (!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = verifyInboundMessage(soapMessage, ctx);
                 msg = Messages.create(soapMessage);
-            }else{
+            } else {
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
-            thereWasAFault = true;  
+            thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
-            msg = Messages.create(sfe, soapVersion);
-        } catch (XWSSecurityException xwse) {
-            thereWasAFault = true;    
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            if(sfe.getCause() == null){
-               sfe.initCause(xwse) ;
+            if (sfe.getCause() == null) {
+                sfe.initCause(ex);
             }
             msg = Messages.create(sfe, soapVersion);
-          
+        } catch (XWSSecurityException xwse) {
+            thereWasAFault = true;
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
+            msg = Messages.create(sfe, soapVersion);
+
         } catch (XWSSecurityRuntimeException xwse) {
-            thereWasAFault = true;            
+            thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
             msg = Messages.create(sfe, soapVersion);
-            
+
         } catch (WebServiceException xwse) {
-            thereWasAFault = true;            
+            thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
             msg = Messages.create(sfe, soapVersion);
-          
-        } catch(SOAPException se){
+
+        } catch (SOAPException se) {
             // internal error
             // Log here because this catch is an internal error not logged by the callee
-            log.log(Level.SEVERE, 
+            log.log(Level.SEVERE,
                     LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
-            thereWasAFault = true;            
+            thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(se);
+            }
             msg = Messages.create(sfe, soapVersion);
-        } 
-        
+        }
+
         Packet retPacket = null;
          if (thereWasAFault) {
             //retPacket = packet;
