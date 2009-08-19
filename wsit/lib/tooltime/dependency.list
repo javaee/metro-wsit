@@ -1,0 +1,11 @@
+# 
+# This file tracks which domain(s) in WSIT codebase dependend on the listed JAR files that
+# are located in this directory
+# 
+
+jaxb-xjc.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxws-tools.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)

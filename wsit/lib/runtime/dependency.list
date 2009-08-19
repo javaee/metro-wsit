@@ -1,0 +1,151 @@
+# 
+# This file tracks which domain(s) in WSIT codebase dependend on the listed JAR files that
+# are located in this directory
+# 
+
+FastInfoset.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+GlassFish_Common_APIs.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+activation.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+gmbal.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+grizzly.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+http.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxb-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxb-impl.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxb1-impl.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxr-api.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxr-impl.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxrpc-api.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxrpc-impl.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxrpc-spi.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxws-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxws-local-transport.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jaxws-rt.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jmac-api.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - FIXME: this file is currently under compile-time as well as runtime dependencies, 
+           we need to remove one occurence
+  - TODO: define dependent domain(s)
+
+
+jsr173_api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jsr181-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+jsr250-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+mail-1.4.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+mimepull.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+policy.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+resolver.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+saaj-api.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+saaj-impl.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+sjsxp.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+stax-ex.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+stax-utils.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+streambuffer.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+txnannprocessor.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - WS-TX
+
+
+wom.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - FIXME: we depend on a snapshot version that does not get updated should we remove this jar?
+  - TODO: define dependent domain(s)
+
+
+woodstox.jar [ Taken from JAX-WS: yes | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+xmlsec.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
+xws-security.jar [ Taken from JAX-WS: no | version: TODO ]  
+  - TODO: define dependent domain(s)
+
+
