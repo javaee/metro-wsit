@@ -127,12 +127,12 @@
         <echo />
 
         <copy todir="${as.lib.home}" overwrite="true">
-            <fileset dir="${basedir}/lib">
+            <fileset dir="${basedir}/osgi">
                 <include name="webservices-osgi.jar"/>
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
-            <fileset dir="${basedir}/lib">
+            <fileset dir="${basedir}/osgi">
                 <include name="webservices-api-osgi.jar"/>
             </fileset>
         </copy>

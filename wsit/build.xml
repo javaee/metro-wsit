@@ -102,6 +102,11 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
+
+        <copy todir="${dist.image.wsit.dir}/osgi" filtering="true">
+            <fileset dir="${v3.build.dir}" includes="webservices*osgi.jar"/>
+        </copy>
+             
     </target>
 
     <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
