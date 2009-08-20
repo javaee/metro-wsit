@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -34,12 +34,6 @@
  and therefore, elected the GPL Version 2 license, then the option applies
  only if the new code is made subject to such option by the copyright
  holder.
--->
-<!--
- $Id: build.xml,v 1.4 2008-02-26 06:32:45 ofung Exp $
-
- Copyright (c) 2005 Sun Microsystems, Inc.
- All rights reserved.
 -->
 
 <project name="wsit.dev.java.net etc" default="main">
