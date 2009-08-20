@@ -219,14 +219,6 @@
         
     </target>
     
-    <target name="integrate-jaxb-osgi-hudson"
-        description="integrates latest JAXB 2.x OSGi bundles for GlassFish V3">
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
-             dest="${lib.osgi.dir}/jaxb-osgi.jar" />
-        <get src="http://hudson.sfbay.sun.com/job/jaxb-ri-2.2/lastSuccessfulBuild/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-api-osgi.jar"
-             dest="${lib.osgi.dir}/jaxb-api-osgi.jar" />
-    </target>
-
     <target name="integrate-xwss30-hudson"
             description="integrate the last successful XWSS 3.0 Hudson build">
         <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
