@@ -39,18 +39,17 @@
 <project name="wsit.dev.java.net build properties">
     <property name="name" value="webservices"/>
     <property name="install.name" value="metro"/>
-    <property name="v3.install.name" value="for_v3"/>
     <property name="lib.dir" value="lib"/>
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
     <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
-    <property name="lib.osgi.dir" value="${lib.dir}/osgi"/>
     <property name="lib.releasenotes.dir" value="${lib.dir}/releasenotes"/>
     <property name="dist.dir" value="dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/${install.name}"/>
-    <property name="dist.image.wsit.v3.dir" value="${dist.image.dir}/${install.name}/${v3.install.name}"/>
     <property name="dist.image.wsit.lib.dir" value="${dist.image.wsit.dir}/lib"/>
+    <property name="v3.build.dir.name" value="for_v3"/>
+    <property name="v3.build.dir" value="build/${v3.build.dir.name}"/>
     <property name="build.javadocs.dir" value="${basedir}/build/javadocs"/>
     
     <property name="etc.dir" value="etc"/>

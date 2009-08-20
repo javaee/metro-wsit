@@ -66,7 +66,7 @@
     <target name="main" depends="dist"
         description="Create the wsit tool and runtime jars and installers."/>
     
-    <target name="bundle" depends="init, image"
+    <target name="bundle" depends="init, compile"
             description="Create the Metro OSGi bundle for GlassFish V3.">
 
         <taskdef resource="aQute/bnd/ant/taskdef.properties"
@@ -85,10 +85,10 @@
             </filterset>
         </copy>
         
-        <mkdir dir="${dist.image.wsit.v3.dir}"/>
+        <mkdir dir="${v3.build.dir}"/>
         <bnd classpath="rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
              failok="false"
-             output="${dist.image.wsit.v3.dir}/webservices-osgi.jar"
+             output="${v3.build.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
 
 
@@ -100,14 +100,8 @@
              basedir="rt/${osgi.build.dir}/jar-without-staxapi"/>
         <bnd classpath="rt/${osgi.build.dir}/webservices-api-without-stax.jar"
              failok="false"
-             output="${dist.image.wsit.v3.dir}/webservices-api-osgi.jar"
+             output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
-
-        <copy todir="${dist.image.wsit.v3.dir}">
-            <fileset dir="${lib.osgi.dir}">
-                <include name="*.jar"/>
-            </fileset>
-        </copy>
     </target>
 
     <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
@@ -400,40 +394,6 @@
     </target>
 
    
-
-    <target name="push-to-maven-prepare" depends="dist">
-        <taskdef resource="maven-repository-importer.properties">
-            <classpath>
-                <pathelement path="${etc.lib.dir}/maven-repository-importer-1.0.jar" />
-            </classpath>
-        </taskdef>
-        <delete dir="build/maven-repo" /><!-- clean it -->
-        <maven-repository-importer destdir="build/maven-repo" version="1.2-SNAPSHOT">
-            <artifact jar="${dist.image.wsit.lib.dir}/webservices-api.jar"  pom="webservices-api.pom"  />
-            <!--This is taken from dist.image.wsit.v3.dir because we decided for TP2
-                to have webservices-rt without jaxrpc-spi and jaxrpc-impl.jar
-            -->
-            <artifact jar="${dist.image.wsit.v3.dir}/webservices-rt.jar"  pom="webservices-rt.pom"  />
-            <artifact jar="${dist.image.wsit.lib.dir}/webservices-tools.jar"  pom="webservices-tools.pom"  />
-        </maven-repository-importer>
-    </target>
-
-    <target name="push-to-maven" depends="push-to-maven-prepare">
-        <!-- import to CVS-->
-        <tstamp />
-        <echo>importing to CVS...</echo>
-        <cvs dest="build/maven-repo">
-            <commandline>
-                <argument value="-d:pserver:${user.name}@java-net-cvs:/cvs" />
-                <argument line="-z9 import -ko -W *.jar -kb -m" />
-                <argument value="deploying new jars to the java.net maven repository" />
-
-                <argument value="metro/repo" />
-                <argument line="deployment-to-maven-repository t${DSTAMP}${TSTAMP}" />
-            </commandline>
-        </cvs>
-    </target>
-
     <target name="package-for-hk2" depends="dist">
         <!-- run it with "-Dmaven-target=deploy" to deploy to the repository -->
         <!-- run it with "-Dmaven-target=deploy -DupdateReleaseInfo=true" to deploy releases -->

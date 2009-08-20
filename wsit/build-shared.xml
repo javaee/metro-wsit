@@ -71,7 +71,7 @@
                 </filterset>
             </copy>
             <bnd classpath="../@{dist-image-dir}/@{jarname}.jar"
-                 output="../${dist.image.wsit.v3.dir}"
+                 output="../${v3.build.dir}"
                  files="${build.dir}/bnd/@{jarname}.bnd"/>
         </sequential>
     </macrodef>
