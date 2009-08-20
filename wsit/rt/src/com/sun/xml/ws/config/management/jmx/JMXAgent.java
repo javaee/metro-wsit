@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.NamedParameters;
+import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
@@ -72,6 +73,8 @@ import javax.xml.ws.WebServiceException;
 /**
  * Implements the JMX server and connector for a managed endpoint.
  *
+ * @param <T> The endpoint implementation class
+ * 
  * @author Fabian Ritzmann
  */
 public class JMXAgent<T> implements CommunicationServer {
@@ -174,10 +177,15 @@ public class JMXAgent<T> implements CommunicationServer {
     }
 
     private ReconfigMBean createMBean() {
-        final HashMap<String, MBeanAttribute> attributeToListener = new HashMap<String, MBeanAttribute>();
-        attributeToListener.put(ReconfigMBeanAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
-                new ReconfigMBeanAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
-        return new ReconfigMBean(attributeToListener);
+        final HashMap<String, ReconfigAttribute> attributeToListener = new HashMap<String, ReconfigAttribute>();
+        final HashMap<String, ReconfigNotification> notificationToListener = new HashMap<String, ReconfigNotification>();
+        final Reconfig mbean = new Reconfig(attributeToListener, notificationToListener);
+        attributeToListener.put(ReconfigAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
+                new ReconfigAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
+        final ReconfigNotification notification = new ReconfigNotification(mbean, getObjectName());
+        notificationToListener.put(notification.getName(), notification);
+        this.managedEndpoint.addNotifier(notification);
+        return mbean;
     }
 
     private ObjectName getObjectName() {

@@ -123,6 +123,10 @@ public class JDBCConfigReader implements ConfigReader {
             }
         }
 
+        public String getName() {
+            return "JDBC configuration management reader";
+        }
+
         public void run(DelayedTaskManager manager) {
             if (stopped) {
                 return;
@@ -154,6 +158,30 @@ public class JDBCConfigReader implements ConfigReader {
                     // schedule next run
                     MaintenanceTaskExecutor.INSTANCE.register(this, executionDelay, TimeUnit.MILLISECONDS);
                 }
+            }
+        }
+
+        synchronized void start() {
+            LOGGER.entering();
+            try {
+                if (stopped) {
+                    stopped = false;
+                    MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
+                } else {
+                    // TODO put text into properties
+                    LOGGER.warning(String.format("Duplicate start of [ %s ] instance detected: Instance already runing", this.getName()));
+                }
+            } finally {
+                LOGGER.exiting();
+            }
+        }
+
+        synchronized void stop() {
+            LOGGER.entering();
+            try {
+                stopped = true;
+            } finally {
+                LOGGER.exiting();
             }
         }
 
@@ -206,32 +234,6 @@ public class JDBCConfigReader implements ConfigReader {
             this.endpointStarter.startEndpoint();
         }
 
-        public String getName() {
-            return "JDBC policy configuration reader";
-        }
-
-        synchronized void start() {
-            LOGGER.entering();
-            try {
-                if (stopped) {
-                    stopped = false;
-                    MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
-                } else {
-                    // TODO put text into properties
-                    LOGGER.warning(String.format("Duplicate start of [ %s ] instance detected: Instance already runing", this.getName()));
-                }
-            } finally {
-                LOGGER.exiting();
-            }
-        }
-
-        synchronized void stop() {
-            LOGGER.entering();
-            try {
-                stopped = true;
-            } finally {
-                LOGGER.exiting();
-            }
-        }
     }
+
 }

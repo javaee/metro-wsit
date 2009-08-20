@@ -54,11 +54,13 @@ import javax.xml.ws.WebServiceException;
 /**
  * Processes the input of new configuration data.
  *
+ * @param <T> The endpoint implementation class.
+ * 
  * @author Fabian Ritzmann
  */
-public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
+class ReconfigAttribute<T> {
 
-    private static final Logger LOGGER = Logger.getLogger(ReconfigMBeanAttribute.class);
+    private static final Logger LOGGER = Logger.getLogger(ReconfigAttribute.class);
     public final static String SERVICE_WSDL_ATTRIBUTE_NAME = ManagementMessages.RECONFIG_ATTRIBUTE_NAME();
 
     private final ManagedEndpoint<T> managedEndpoint;
@@ -67,7 +69,7 @@ public class ReconfigMBeanAttribute<T> implements MBeanAttribute {
 
     private volatile String newPolicies;
 
-    public ReconfigMBeanAttribute(ManagedEndpoint<T> endpoint,
+    public ReconfigAttribute(ManagedEndpoint<T> endpoint,
             EndpointCreationAttributes creationAttributes,
             ClassLoader classLoader) {
         this.managedEndpoint = endpoint;

@@ -36,15 +36,18 @@
 
 package com.sun.xml.ws.config.management.jmx;
 
+import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
+
+import java.io.Serializable;
 import java.util.Map;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
-import javax.management.DynamicMBean;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
+import javax.management.NotificationBroadcasterSupport;
 import javax.management.ReflectionException;
 import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
@@ -53,16 +56,26 @@ import javax.management.openmbean.OpenMBeanInfoSupport;
 import javax.management.openmbean.OpenMBeanOperationInfoSupport;
 import javax.management.openmbean.OpenMBeanParameterInfoSupport;
 
+
 /**
+ * Implements an MBean with support for JMX notifications.
+ *
+ * You can easily add new attributes and notifications to this implementation
+ * through listeners.
  *
  * @author Fabian Ritzmann
  */
-public class ReconfigMBean implements DynamicMBean {
+class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, Serializable {
 
-    final private Map<String, MBeanAttribute> attributeToListener;
+    // TODO put error messages into properties
 
-    public ReconfigMBean(Map<String, MBeanAttribute> attributeNameToListener) {
+    private final Map<String, ReconfigAttribute> attributeToListener;
+    private final Map<String, ReconfigNotification> notificationToListener;
+
+    public Reconfig(Map<String, ReconfigAttribute> attributeNameToListener,
+            Map<String, ReconfigNotification> notificationToListener) {
         this.attributeToListener = attributeNameToListener;
+        this.notificationToListener = notificationToListener;
     }
 
     public Object getAttribute(String attributeName) throws AttributeNotFoundException, MBeanException, ReflectionException {
@@ -71,8 +84,8 @@ public class ReconfigMBean implements DynamicMBean {
                  new IllegalArgumentException("Attribute name cannot be null"),
                  "Cannot call getAttribute with null attribute name");
         }
-        final MBeanAttribute listener = attributeToListener.get(attributeName);
-        if (listener != null) {
+        final ReconfigAttribute listener = attributeToListener.get(attributeName);
+           if (listener != null) {
             return listener.get();
         }
         throw new AttributeNotFoundException("Cannot find " + attributeName +
@@ -93,7 +106,7 @@ public class ReconfigMBean implements DynamicMBean {
         // Check for a recognized attribute name and call the corresponding
         // setter
         //
-        final MBeanAttribute listener = attributeToListener.get(name);
+        final ReconfigAttribute listener = attributeToListener.get(name);
         if (listener != null) {
             // if null value, try and see if the setter returns any exception
             if (value == null) {
@@ -124,7 +137,7 @@ public class ReconfigMBean implements DynamicMBean {
 
         for (int i=0 ; i < attributes.length ; i++) {
             try {
-                Object value = getAttribute((String) attributes[i]);
+                Object value = getAttribute(attributes[i]);
                 resultList.add(new Attribute(attributes[i],value));
             } catch (AttributeNotFoundException e) {
                 e.printStackTrace();
@@ -179,18 +192,26 @@ public class ReconfigMBean implements DynamicMBean {
         OpenMBeanOperationInfoSupport[] operations =
             new OpenMBeanOperationInfoSupport[0];
         MBeanNotificationInfo[] notifications =
-            new MBeanNotificationInfo[0];
+            new MBeanNotificationInfo[notificationToListener.size()];
 
         int i = 0;
         for (String attributeName : attributeToListener.keySet()) {
-            MBeanAttribute listener = attributeToListener.get(attributeName);
+            ReconfigAttribute listener = attributeToListener.get(attributeName);
             attributes[i] = new OpenMBeanAttributeInfoSupport(attributeName,
                 listener.getDescription(),
                 listener.getType(),
                 true,
                 true,
                 false);
-            ++i;
+            i++;
+        }
+
+        i = 0;
+        for (String notificationName : notificationToListener.keySet()) {
+            ReconfigNotification listener = notificationToListener.get(notificationName);
+            notifications[i] = new MBeanNotificationInfo(listener.getNotificationTypes(),
+                    listener.getName(),
+                    listener.getDescription());
         }
 
         constructors[0] = new OpenMBeanConstructorInfoSupport(

@@ -34,22 +34,15 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.jmx;
+package com.sun.xml.ws.api.config.management.jmx;
 
-import javax.management.InvalidAttributeValueException;
-import javax.management.openmbean.OpenType;
+import javax.management.DynamicMBean;
+import javax.management.NotificationEmitter;
 
 /**
  *
  * @author Fabian Ritzmann
  */
-public interface MBeanAttribute {
+public interface ReconfigMBean extends DynamicMBean, NotificationEmitter {
 
-    void update(Object value) throws InvalidAttributeValueException;
-
-    Object get();
-
-    String getDescription();
-
-    OpenType getType();
 }

@@ -55,6 +55,7 @@ import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.policy.PolicyMap;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -70,6 +71,8 @@ import org.glassfish.gmbal.ManagedObjectManager;
  *
  * This class forwards all method invocations to the wrapped WSEndpoint instance.
  *
+ * @param <T> The implementation class of the endpoint.
+ * 
  * @author Fabian Ritzmann
  */
 public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter {
@@ -89,6 +92,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     private final CountDownLatch startSignal = new CountDownLatch(1);
 
     private final Collection<CommunicationServer> commInterfaces;
+    private final Collection<ReconfigNotifier> reconfigNotifiers = new LinkedList<ReconfigNotifier>();
 
     /**
      * Initializes this endpoint.
@@ -99,7 +103,8 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
      *   instance and that cannot be queried from WSEndpoint itself. This is used by
      *   the communication API to recreate WSEndpoint instances with the same parameters.
      */
-    public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint, final EndpointCreationAttributes attributes) {
+    public ManagedEndpoint(final String id, final WSEndpoint<T> endpoint,
+            final EndpointCreationAttributes attributes) {
         try {
             this.id = id;
             this.creationAttributes = attributes;
@@ -131,8 +136,19 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         }
     }
 
+    /**
+     * @param notifier Callback object allows us to send a notification when the
+     *   endpoint was reconfigured.
+     */
+    public void addNotifier(final ReconfigNotifier notifier) {
+        this.reconfigNotifiers.add(notifier);
+    }
+
     public void startEndpoint() {
         this.startSignal.countDown();
+        for (ReconfigNotifier notifier : this.reconfigNotifiers) {
+            notifier.sendNotification();
+        }
     }
 
     /**
