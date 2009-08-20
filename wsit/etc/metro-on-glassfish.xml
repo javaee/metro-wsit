@@ -93,6 +93,9 @@
         <echo message="  Please use the update center to install Metro on GlassFish V3:"/>
         <echo message="  https://glassfish.dev.java.net/downloads/quickstart/v3-preview2.html"/>
         <echo/>
+        <echo message="  Alternatively you may try to use an experimental GlassFish v3 installer by running:"/>
+        <echo message="  ant -f metro-on-glassfish-v3.xml install"/>
+        <echo/>
     </target>
 
     <target name="gfv3-checkpoint" if="glassfish-v3">
