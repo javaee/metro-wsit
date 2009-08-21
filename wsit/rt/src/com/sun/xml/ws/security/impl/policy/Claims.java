@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,26 +36,16 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
-import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
+
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
