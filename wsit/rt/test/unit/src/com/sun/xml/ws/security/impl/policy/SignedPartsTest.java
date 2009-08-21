@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
