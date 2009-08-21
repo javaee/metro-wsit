@@ -97,11 +97,11 @@ public class SessionManagerImpl extends SessionManager {
      *
      * @returns The Set of keys.
      */
-    public Set<String> getKeys() {
+    public Set<String> keys() {
         return sessionMap.keySet();
     }
 
-    protected Collection<Session> getSessions() {
+    protected Collection<Session> sessions() {
         return sessionMap.values();
     }
 

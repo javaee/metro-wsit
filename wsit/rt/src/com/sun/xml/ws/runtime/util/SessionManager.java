@@ -89,14 +89,14 @@ public abstract class SessionManager {
      */
     @ManagedAttribute
     @Description("The set of valid Session keys")
-    public abstract Set<String> getKeys();
+    public abstract Set<String> keys();
 
     /**
      * @returns The Collection of valid Sessions.
      */
     @ManagedAttribute
     @Description("The collection of valid Sessions")
-    protected abstract Collection<Session> getSessions();
+    protected abstract Collection<Session> sessions();
 
     /**
      * Removed the Session with the given key.

@@ -120,7 +120,7 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public boolean isPersistent() {
+    public boolean persistent() {
         return true;
     }
 

@@ -115,7 +115,7 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
-    public boolean isPersistent() {
+    public boolean persistent() {
         return false;
     }
 

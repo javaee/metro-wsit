@@ -66,7 +66,7 @@ public interface SequenceManager extends TimeSynchronizer {
 
     @ManagedAttribute
     @Description("Determines whether this implementation of SeqenceManager is persistent")
-    public boolean isPersistent();
+    public boolean persistent();
 
     /**
      * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
