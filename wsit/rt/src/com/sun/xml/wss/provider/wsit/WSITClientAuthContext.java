@@ -758,7 +758,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 try{
                     //create RST for Issue         
                     SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), (SecureConversationToken)scToken, pipeConfig.getWSDLPort(), pipeConfig.getBinding(), packet, addVer, scClientAssertion);
-                    config.getOtherOptions().put("WSITClientAuthCOntext", this);
+                    config.getOtherOptions().put("WSITClientAuthContext", this);
                     IssuedTokenContext ctx =itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
                     itm.getIssuedToken(ctx);
                     issuedTokenContextMap.put(((Token)scToken).getTokenId(), ctx);
