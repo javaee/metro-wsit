@@ -77,8 +77,8 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 import javax.security.auth.message.config.AuthConfigFactory;
-import src.com.sun.xml.xwss.XWSSClientTube;
-import src.com.sun.xml.xwss.XWSSServerTube;
+import com.sun.xml.xwss.XWSSClientTube;
+import com.sun.xml.xwss.XWSSServerTube;
 
 public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
 
