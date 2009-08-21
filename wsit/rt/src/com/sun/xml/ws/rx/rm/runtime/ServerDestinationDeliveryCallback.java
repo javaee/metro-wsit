@@ -39,6 +39,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
@@ -97,9 +98,14 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
             }
 
             try {
-                if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message
-                    response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.sequenceAcknowledgementAction);
-                    rc.protocolHandler.appendAcknowledgementHeaders(response, rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId()));
+                if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
+                    AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
+                    if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+                        // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+                        response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.sequenceAcknowledgementAction);
+                        rc.protocolHandler.appendAcknowledgementHeaders(response,ackData);
+                    }
+
                     resumeParentFiber(response);
                 } else {
                     JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());

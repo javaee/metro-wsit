@@ -259,7 +259,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         }
 
         // sequence acknowledgement header
-        if (ackData.getAcknowledgedSequenceId() != null && ackData.getAcknowledgedRanges() != null && !ackData.getAcknowledgedRanges().isEmpty()) {
+        if (ackData.containsSequenceAcknowledgementData()) {
             SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
             ackElement.setId(ackData.getAcknowledgedSequenceId());
 

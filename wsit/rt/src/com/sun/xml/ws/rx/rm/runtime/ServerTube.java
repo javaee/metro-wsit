@@ -67,6 +67,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationExcepti
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
+import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -165,71 +166,48 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 } else { // protocol response
                     return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
                 }
-            } else { // application message
-                // prevent closing of TBC in case of one-way - we want to send acknowledgement back at least
-                request.keepTransportBackChannelOpen();
+            }
 
-                JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
+            // This is an application message
+            // prevent closing of TBC in case of one-way - we want to send acknowledgement back at least
+            request.keepTransportBackChannelOpen();
 
-                rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+            JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
 
-                if (!isSecurityContextTokenIdValid(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
-                    // TODO L10N + maybe throw SOAP fault exception?
-                    throw new RmSecurityException("Security context token on the message does not match the token bound to the sequence");
+            rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+
+            if (!isSecurityContextTokenIdValid(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
+                // TODO L10N + maybe throw SOAP fault exception?
+                throw new RmSecurityException("Security context token on the message does not match the token bound to the sequence");
+            }
+
+
+            rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
+            rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+
+            if (!hasSession(request)) { // security did not set session - we must do it
+                setSession(message.getSequenceId(), request);
+            }
+            exposeSequenceDataToUser(message);
+
+            try {
+                rc.destinationMessageHandler.registerMessage(message);
+            } catch (DuplicateMessageRegistrationException ex) {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(String.format("Duplicate message number [ %d ] received on sequence [ %s ]",
+                            message.getMessageNumber(),
+                            message.getSequenceId()), ex);
                 }
+                return handleDuplicateMessageException(message, request);
+            }
 
+            synchronized (message.getCorrelationId()) {
+                // this synchronization is needed so that all 3 operations occur before
+                // AbstractResponseHandler.getParentFiber() is invoked on the response thread
+                rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
+                rc.destinationMessageHandler.putToDeliveryQueue(message);
 
-                rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-                rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-
-                if (!hasSession(request)) { // security did not set session - we must do it
-                    setSession(message.getSequenceId(), request);
-                }
-                exposeSequenceDataToUser(message);
-
-                try {
-                    rc.destinationMessageHandler.registerMessage(message);
-                } catch (DuplicateMessageRegistrationException ex) {
-                    // Replay model behavior
-                    Sequence outboundSequence = rc.getBoundSequence(message.getSequenceId());
-                    if (outboundSequence != null) {
-                        final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
-                        if (_responseMessage == null) {
-                            return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
-                        }
-
-                        if (rc.configuration.isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
-                            JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
-                            if (jaxwsAppMsg.getPacket() == null) {
-
-                                // FIXME: loaded from DB without a valid packet - create one
-                                // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
-                                jaxwsAppMsg.setPacket(rc.communicator.createEmptyResponsePacket(request, jaxwsAppMsg.getWsaAction()));
-                            }
-                        }
-
-                        // retrieved response is not null
-
-
-                        Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
-                        if (oldRegisteredFiber != null) {
-                            oldRegisteredFiber.resume(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
-                        }
-                        rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
-                        return doSuspend();
-                    } else {
-                        return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
-                    }
-                }
-
-                synchronized (message.getCorrelationId()) {
-                    // this synchronization is needed so that all 3 operations occur before
-                    // AbstractResponseHandler.getParentFiber() is invoked on the response thread
-                    rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
-                    rc.destinationMessageHandler.putToDeliveryQueue(message);
-
-                    return doSuspend();
-                }
+                return doSuspend();
             }
         } catch (AbstractSoapFaultException ex) {
             LOGGER.logException(ex, PROTOCOL_FAULT_LOGGING_LEVEL);
@@ -273,6 +251,34 @@ public class ServerTube extends AbstractFilterTubeImpl {
         } finally {
             super.preDestroy();
             LOGGER.exiting();
+        }
+    }
+
+    private NextAction handleDuplicateMessageException(JaxwsApplicationMessage message, Packet request) throws UnknownSequenceException, RxRuntimeException {
+        // Replay model behavior
+        Sequence outboundSequence = rc.getBoundSequence(message.getSequenceId());
+        if (outboundSequence != null) {
+            final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
+            if (_responseMessage == null) {
+                return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+            }
+            if (rc.configuration.isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
+                JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
+                if (jaxwsAppMsg.getPacket() == null) {
+                    // FIXME: loaded from DB without a valid packet - create one
+                    // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
+                    jaxwsAppMsg.setPacket(rc.communicator.createEmptyResponsePacket(request, jaxwsAppMsg.getWsaAction()));
+                }
+            }
+            // retrieved response is not null
+            Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
+            if (oldRegisteredFiber != null) {
+                oldRegisteredFiber.resume(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+            }
+            rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
+            return doSuspend();
+        } else {
+            return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
         }
     }
 

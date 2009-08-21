@@ -124,4 +124,8 @@ public final class AcknowledgementData {
     public String getAckReqestedSequenceId() {
         return this.ackRequestedSequenceId;
     }
+
+    public boolean containsSequenceAcknowledgementData() {
+        return this.ackedSequenceId != null && this.ackedRanges != null && !this.ackedRanges.isEmpty();
+    }
 }
