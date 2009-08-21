@@ -61,7 +61,7 @@ public final class RmTubeFactory implements TubeFactory {
         RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(
                 context.getWsdlPort(),
                 context.getBinding(),
-                null);
+                context.getWrappedContext().getBindingProvider().getManagedObjectManager());
 
         if (configuration.isReliableMessagingEnabled()) {
              return new ClientTube(configuration, context.getTubelineHead(), context);
