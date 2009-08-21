@@ -1,5 +1,3 @@
-com.sun.xml.ws.encoding.policy.EncodingPolicyValidator
-com.sun.xml.ws.addressing.policy.AddressingPolicyValidator
 com.sun.xml.ws.addressing.policy.WsawAddressingPolicyValidator
 com.sun.xml.ws.config.management.policy.ManagementPolicyValidator
 com.sun.xml.ws.security.impl.policy.SecurityPolicyValidator

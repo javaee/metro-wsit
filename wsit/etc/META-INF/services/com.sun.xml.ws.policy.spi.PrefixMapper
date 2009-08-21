@@ -1,5 +1,3 @@
-com.sun.xml.ws.encoding.policy.EncodingPrefixMapper
-com.sun.xml.ws.addressing.policy.AddressingPrefixMapper
 com.sun.xml.ws.addressing.policy.WsawAddressingPrefixMapper
 com.sun.xml.ws.tx.common.TxPrefixMapper
 com.sun.xml.ws.rx.policy.spi_impl.RxPrefixMapper

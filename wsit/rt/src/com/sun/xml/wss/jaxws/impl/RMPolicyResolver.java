@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,13 +36,15 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
+import com.sun.xml.ws.api.policy.SourceModel;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -89,7 +91,7 @@ public class RMPolicyResolver {
     
     private PolicySourceModel unmarshalPolicy(String resource) throws PolicyException, IOException {
         Reader reader = getResourceReader(resource);
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
+        PolicySourceModel model = ModelUnmarshaller.getUnmarshaller().unmarshalModel(reader);
         reader.close();
         return model;
     }

@@ -38,12 +38,13 @@ package com.sun.xml.ws.policy.testutils;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,6 +52,7 @@ import java.io.Reader;
 import java.net.URL;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+
 import org.xml.sax.SAXException;
 
 /**
@@ -76,13 +78,13 @@ public final class PolicyResourceLoader {
     
     public static PolicySourceModel unmarshallModel(String resource) throws PolicyException, IOException {
         Reader resourceReader = getResourceReader(resource);
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(resourceReader);
+        PolicySourceModel model = ModelUnmarshaller.getUnmarshaller().unmarshalModel(resourceReader);
         resourceReader.close();
         return model;
     }
     
     public static PolicySourceModel unmarshallModel(Reader resourceReader) throws PolicyException, IOException {
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(resourceReader);
+        PolicySourceModel model = ModelUnmarshaller.getUnmarshaller().unmarshalModel(resourceReader);
         resourceReader.close();
         return model;
     }

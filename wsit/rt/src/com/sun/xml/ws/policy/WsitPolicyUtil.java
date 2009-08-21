@@ -36,19 +36,22 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.api.policy.ValidationProcessor;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
-import javax.xml.ws.WebServiceException;
 import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.ws.WebServiceException;
 
 /**
  * Policy util class to be in the same package of the Policy core so that it can access package default methods.
- * TODO check with Fabian if there is any other better way
+ *
  * @author Rama Pulavarthi
+ * @author Fabian Ritzmann
  */
 public class WsitPolicyUtil {
+
      /**
      * Checks if the PolicyMap has only single alternative in the scope.
      *
@@ -56,9 +59,8 @@ public class WsitPolicyUtil {
      *      PolicyMap that needs to be validated.
      */
     public static void validateServerPolicyMap(PolicyMap policyMap) {
-        final AssertionValidationProcessor validationProcessor;
         try {
-            validationProcessor = AssertionValidationProcessor.getInstance();
+            final ValidationProcessor validationProcessor = ValidationProcessor.getInstance();
 
             for (Policy policy : policyMap) {
 
@@ -66,8 +68,8 @@ public class WsitPolicyUtil {
 
                 for (AssertionSet assertionSet : policy) {
                     for (PolicyAssertion assertion : assertionSet) {
-                        PolicyAssertionValidator.Fitness validationResult = validationProcessor.validateServerSide(assertion);
-                        if (validationResult != PolicyAssertionValidator.Fitness.SUPPORTED) {
+                        Fitness validationResult = validationProcessor.validateServerSide(assertion);
+                        if (validationResult != Fitness.SUPPORTED) {
                             throw new PolicyException(LocalizationMessages.WSP_5017_SERVER_SIDE_ASSERTION_VALIDATION_FAILED(
                                     assertion.getName(),
                                     validationResult));
@@ -100,10 +102,12 @@ public class WsitPolicyUtil {
     }
 
     /**
-     * Merge Policies policyMap and clientPolicyMap
-     * @param policyMap
-     * @param clientPolicyMap
-     * @return merged PolicayMap
+     * Merge Policies policyMap and clientPolicyMap.
+     * 
+     * @param policyMap The first policy map to be merged.
+     * @param clientPolicyMap The second policy map to be merged.
+     * @return merged PolicyMap
+     * @throws PolicyException If merge failed.
      */
     public static PolicyMap mergePolicyMap(PolicyMap policyMap, PolicyMap clientPolicyMap) throws PolicyException {
         final PolicyMapExtender mapExtender = PolicyMapExtender.createPolicyMapExtender();

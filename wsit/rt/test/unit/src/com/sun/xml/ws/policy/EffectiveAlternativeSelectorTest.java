@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,12 +36,14 @@
 
 package com.sun.xml.ws.policy;
 
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
+import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
+
 import java.util.HashSet;
 import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
 
-import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
 
 /**
  *
@@ -49,7 +51,7 @@ import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
  */
 public class EffectiveAlternativeSelectorTest extends TestCase {
     
-    private static final PolicyModelUnmarshaller xmlUnmarshaller = PolicyModelUnmarshaller.getXmlUnmarshaller();
+    private static final ModelUnmarshaller xmlUnmarshaller = ModelUnmarshaller.getUnmarshaller();
     
     public EffectiveAlternativeSelectorTest(String testName) {
         super(testName);
@@ -57,6 +59,7 @@ public class EffectiveAlternativeSelectorTest extends TestCase {
        
     /**
      * Test of doSelection method, of class com.sun.xml.ws.policy.EffectiveAlternativeSelector.
+     * @throws Exception
      */
     public void testDoPositiveSelection() throws Exception {
         HashSet<PolicyMapMutator> mutators = new HashSet<PolicyMapMutator>();

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -35,16 +35,18 @@
  */
 
 package com.sun.xml.ws.security.impl.policy;
+
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.policy.ModelGenerator;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.XmlPolicyModelMarshaller;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -55,7 +57,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.WebServiceException;
+
 import org.w3c.dom.Document;
+
 /**
  *
  * @author K.Venugopal@sun.com Abhijit.Das@Sun.COM
@@ -1865,8 +1869,8 @@ public class PolicyUtil {
                            
             AssertionSet set = AssertionSet.createAssertionSet(Arrays.asList(new PolicyAssertion[] {token}));
             Policy policy = Policy.createPolicy(Arrays.asList(new AssertionSet[] { set }));
-            PolicySourceModel sourceModel = PolicyModelGenerator.getGenerator().translate(policy);
-            XmlPolicyModelMarshaller pm = (XmlPolicyModelMarshaller) XmlPolicyModelMarshaller.getXmlMarshaller(true);
+            PolicySourceModel sourceModel = ModelGenerator.getGenerator().translate(policy);
+            PolicyModelMarshaller pm = PolicyModelMarshaller.getXmlMarshaller(true);
             pm.marshal(sourceModel, writer);
             writer.close();
             

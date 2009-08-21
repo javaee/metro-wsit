@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,7 +38,13 @@
 package com.sun.xml.wss.jaxws.impl;
 
 
+import com.sun.xml.ws.api.addressing.*;
+import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.pipe.TubeCloner;
+import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -47,20 +53,6 @@ import com.sun.xml.ws.security.policy.KerberosConfig;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Hashtable;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
-import java.util.Set;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -86,13 +78,18 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.ws.soap.SOAPFaultException;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPException;
-
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.security.policy.KeyStore;
+import com.sun.xml.ws.security.policy.TrustStore;
+import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
+import com.sun.xml.ws.security.policy.Validator;
+import com.sun.xml.ws.security.policy.ValidatorConfiguration;
+import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.security.secconv.WSSCVersion;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
@@ -100,43 +97,45 @@ import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.SecurityAnnotator;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
 import com.sun.xml.wss.impl.PolicyViolationException;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.XWSSConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import com.sun.xml.wss.impl.MessageConstants;
-import java.security.cert.X509Certificate;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
-import com.sun.xml.ws.security.policy.KeyStore;
-import com.sun.xml.ws.security.policy.TrustStore;
-import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
-import com.sun.xml.ws.security.policy.Validator;
-import com.sun.xml.ws.security.policy.ValidatorConfiguration;
-import com.sun.xml.ws.security.policy.WSSAssertion;
-import java.util.Properties;
-import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.TubeCloner;
-import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
-import com.sun.xml.ws.rx.rm.RmVersion;
-import com.sun.xml.ws.security.secconv.WSSCVersion;
-import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;
+import com.sun.xml.wss.jaxws.impl.logging.LogDomainConstants;
+import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Hashtable;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.WebServiceException;
+import java.util.Set;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPException;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.security.cert.X509Certificate;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.xml.wss.jaxws.impl.logging.LogDomainConstants;
-import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 
 /**
  *
@@ -1073,7 +1072,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return null;
         }
         Reader reader =  new InputStreamReader(is);
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
+        PolicySourceModel model = ModelUnmarshaller.getUnmarshaller().unmarshalModel(reader);
         reader.close();
         return model;
     }

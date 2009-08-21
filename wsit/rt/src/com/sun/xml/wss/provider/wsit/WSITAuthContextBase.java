@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -32,15 +32,6 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- */
-
-/*
- * WSITAuthContextBase.java
- *
- * Created on November 1, 2006, 4:39 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
  */
 
 package com.sun.xml.wss.provider.wsit;
@@ -106,7 +97,6 @@ import javax.xml.soap.SOAPConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 
@@ -132,6 +122,7 @@ import java.util.Properties;
 
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
@@ -797,7 +788,7 @@ public abstract class WSITAuthContextBase  {
             return null;
         }
         Reader reader =  new InputStreamReader(is);
-        PolicySourceModel model = PolicyModelUnmarshaller.getXmlUnmarshaller().unmarshalModel(reader);
+        PolicySourceModel model = ModelUnmarshaller.getUnmarshaller().unmarshalModel(reader);
         reader.close();
         return model;
     }
