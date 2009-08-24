@@ -68,9 +68,14 @@
             <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
                     <fileset dir="@{libdir}">
                     <include name="*.jar"/>
-                    
+                    <include name="jaxrpc-api.jar"/>
                     <exclude name="*javadocs*.jar"/>
-                    <exclude name="*api*.jar"/>
+                    <exclude name="jaxb-api.jar"/>
+                    <exclude name="jaxr-api.jar"/>
+                    <exclude name="jaxws-api.jar"/>
+                    <exclude name="saaj-api.jar"/>
+                    <exclude name="jmac-api.jar"/>
+                    <exclude name="jsr*-api.jar"/>
                     <exclude name="jaxws-local-transport.jar"/>
                     <exclude name="activation.jar"/>
                     <exclude name="http.jar"/>
@@ -312,7 +317,7 @@
         <expand-api-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${apijar-tmpdir-v3}">
             <expandfiles>
                 <include name="jaxr-api.jar"/>
-                <include name="jaxrpc-api.jar"/>
+                <exclude name="jaxrpc-api.jar"/>
                 <exclude name="jaxb-api.jar"/>
             </expandfiles>
         </expand-api-jars-macro>
