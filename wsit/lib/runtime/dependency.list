@@ -3,8 +3,8 @@
 # are located in this directory
 # 
 
-FastInfoset.jar [ Taken from JAX-WS: yes | version: TODO ]  
-  - TODO: define dependent domain(s)
+FastInfoset.jar [ Taken from JAX-WS: yes | version: 1.2.4 ]
+  - Performance, SOAP/TCP
 
 GlassFish_Common_APIs.jar [ Taken from JAX-WS: yes | version: TODO ]  
   - TODO: define dependent domain(s)
@@ -18,8 +18,8 @@ gmbal.jar [ Taken from JAX-WS: yes | version: TODO ]
   - TODO: define dependent domain(s)
 
 
-grizzly.jar [ Taken from JAX-WS: no | version: TODO ]  
-  - TODO: define dependent domain(s)
+grizzly.jar [ Taken from JAX-WS: no | version: 1.0.23 ]
+  - SOAP/TCP
 
 
 http.jar [ Taken from JAX-WS: yes | version: TODO ]  

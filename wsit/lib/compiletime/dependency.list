@@ -7,8 +7,8 @@ ant.jar [ Taken from JAX-WS: yes/no | required version: TODO ]
   - TODO: define dependent domain(s)
 
 
-appserv-deployment.jar [ Taken from JAX-WS: yes/no | version: TODO ]  
-  - TODO: define dependent domain(s)
+appserv-deployment.jar [ Taken from JAX-WS: yes/no | version: N/A ]
+  - SOAP/TCP
 
 
 connector-api-1.5.jar [ Taken from JAX-WS: yes/no | version: TODO ]  
@@ -25,8 +25,8 @@ servlet.jar [ Taken from JAX-WS: no | version: TODO ]
   - TODO: define dependent domain(s)
 
 
-tomcat-coyote.jar [ Taken from JAX-WS: no | version: TODO ]  
-  - TODO: define dependent domain(s)
+tomcat-coyote.jar [ Taken from JAX-WS: no | version: 6.0.16 ]
+  - SOAP/TCP
 
 
 transaction-api-1.1.jar [ Taken from JAX-WS: no | version: 1.1 ]  
