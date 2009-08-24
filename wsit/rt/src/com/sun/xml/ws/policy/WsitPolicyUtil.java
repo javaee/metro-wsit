@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.xml.ws.api.policy.AlternativeSelector;
 import com.sun.xml.ws.api.policy.ValidationProcessor;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
@@ -92,7 +93,7 @@ public class WsitPolicyUtil {
         final EffectivePolicyModifier modifier = EffectivePolicyModifier.createEffectivePolicyModifier();
         modifier.connect(policyMap);
         try {
-            EffectiveAlternativeSelector.doSelection(modifier);
+            AlternativeSelector.doSelection(modifier);
         } catch (PolicyException e) {
             throw new WebServiceException(e);
         } finally {
