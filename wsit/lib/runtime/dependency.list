@@ -1,5 +1,5 @@
 # 
-# This file tracks which domain(s) in WSIT codebase dependend on the listed JAR files that
+# This file tracks which domain(s) in WSIT codebase depend on the listed JAR files that
 # are located in this directory
 # 
 
@@ -96,8 +96,8 @@ mimepull.jar [ Taken from JAX-WS: yes | version: TODO ]
   - TODO: define dependent domain(s)
 
 
-policy.jar [ Taken from JAX-WS: yes | version: TODO ]  
-  - TODO: define dependent domain(s)
+policy.jar [ Taken from JAX-WS: yes | version: N/A ]
+  - WS-Policy, WS-SecurityPolicy, WS-RM Policy, WS-AT
 
 
 resolver.jar [ Taken from JAX-WS: yes | version: TODO ]  
