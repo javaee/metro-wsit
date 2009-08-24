@@ -39,9 +39,6 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -85,7 +82,9 @@ public interface RxConfiguration {
     public boolean requestResponseOperationsDetected();
     
     /**
-     * GMBAL/JMX manager
+     * Returns GMBAL/JMX manager
+     *
+     * @return GMBAL/JMX manager. May return null.
      */
     public ManagedObjectManager getManagedObjectManager();
 }

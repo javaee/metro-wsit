@@ -101,7 +101,10 @@ public final class InVmSequenceManager implements SequenceManager {
 
         this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
         
-        configuration.getManagedObjectManager().registerAtRoot(this, MANAGED_BEAN_NAME);
+        ManagedObjectManager mom = configuration.getManagedObjectManager();
+        if (mom != null) {
+            mom.registerAtRoot(this, MANAGED_BEAN_NAME);
+        }
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),

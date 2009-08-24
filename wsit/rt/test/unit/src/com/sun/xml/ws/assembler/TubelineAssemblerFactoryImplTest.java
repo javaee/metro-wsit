@@ -67,6 +67,7 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.Service;
 import javax.xml.ws.soap.AddressingFeature;
 import junit.framework.TestCase;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -175,6 +176,10 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
             public void close() throws IOException {
                 throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public ManagedObjectManager getManagedObjectManager() {
+                return null;
             }
         };
 
@@ -294,6 +299,10 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
             public void close() throws IOException {
                 throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public ManagedObjectManager getManagedObjectManager() {
+                return null;
             }
         };
 

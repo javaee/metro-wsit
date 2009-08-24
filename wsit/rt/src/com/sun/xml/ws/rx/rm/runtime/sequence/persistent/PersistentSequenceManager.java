@@ -106,7 +106,10 @@ public final class PersistentSequenceManager implements SequenceManager {
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
 
-        configuration.getManagedObjectManager().registerAtRoot(this, MANAGED_BEAN_NAME);
+        ManagedObjectManager mom = configuration.getManagedObjectManager();
+        if (mom != null) {
+            mom.registerAtRoot(this, MANAGED_BEAN_NAME);
+        }
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),

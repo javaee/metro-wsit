@@ -77,6 +77,14 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
             public int getLoginTimeout() throws SQLException {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
+
+            public <T> T unwrap(Class<T> iface) throws SQLException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public boolean isWrapperFor(Class<?> iface) throws SQLException {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         };
 
         public DataSource getDataSource() throws PersistenceException {
