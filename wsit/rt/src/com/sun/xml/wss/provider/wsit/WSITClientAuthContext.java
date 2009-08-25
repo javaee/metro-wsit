@@ -63,6 +63,7 @@ import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
+import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
@@ -181,7 +182,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         this.authConfig = (WSITClientAuthConfig) map.get(PipeConstants.AUTH_CONFIG);
         this.tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
         WSService service = (WSService) map.get(PipeConstants.SERVICE);
-
+        WSDLPortImpl wpi = (WSDLPortImpl) map.get("WSDL_MODEL");
         ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) map.get(PipeConstants.WRAPPED_CONTEXT);
         //this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
 
@@ -253,7 +254,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             }
         }
         //computing EPR related stuff
-        X509Certificate cert = getCertificateFromEPR(context);
+        X509Certificate cert = getCertificateFromEPR(context,wpi);
         if (cert != null) {
             props.put(PipeConstants.SERVER_CERT, cert);
             this.serverCert = cert;
@@ -697,44 +698,46 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         }
     }
 
-    private X509Certificate getCertificateFromEPR(ClientTubeAssemblerContext context) {
+    private X509Certificate getCertificateFromEPR(ClientTubeAssemblerContext context, WSDLPortImpl wpi) {
+        X509Certificate x509Cert = null;
         if (context != null) {
             WSBindingProvider bpr = context.getBindingProvider();
-            WSEndpointReference epr = bpr.getWSEndpointReference();
-            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
+            x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
             if (x509Cert == null) {
-                if (epr != null) {
-                    WSEndpointReference.EPRExtension idExtn = null;
-                    XMLStreamReader xmlReader = null;
-                    try {
-                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                        idExtn = epr.getEPRExtension(ID_QNAME);
-                        if (idExtn != null) {
-                            xmlReader = idExtn.readAsXMLStreamReader();
-                            CertificateRetriever cr = new CertificateRetriever();
-                            byte[] bstValue = cr.digestBST(xmlReader);
-                            if (bstValue == null) {
-                                throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
-                            }
-                            X509Certificate certificate = cr.constructCertificate(bstValue);
-                            boolean valid = secEnv.validateCertificate(certificate, null);
-                            //boolean valid = cr.validateCertificate(certificate, map);
-                            if (!valid) {
-                                throw new RuntimeException("certificate is not valid");
-                            }
-                            return certificate;
-                        }
-                    } catch (XMLStreamException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                        throw new RuntimeException(ex);
-                    } catch (XWSSecurityException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                    }
-                }
-            } else {
                 return x509Cert;
             }
-            return null;
+        }
+        if (wpi != null) {
+            WSEndpointReference epr = wpi.getEPR();
+            if (epr != null) {
+                WSEndpointReference.EPRExtension idExtn = null;
+                XMLStreamReader xmlReader = null;
+                try {
+                    QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                    idExtn = epr.getEPRExtension(ID_QNAME);
+                    if (idExtn != null) {
+                        xmlReader = idExtn.readAsXMLStreamReader();
+                        CertificateRetriever cr = new CertificateRetriever();
+                        byte[] bstValue = cr.digestBST(xmlReader);
+                        if (bstValue == null) {
+                            throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
+                        }
+                        X509Certificate certificate = cr.constructCertificate(bstValue);
+                        boolean valid = secEnv.validateCertificate(certificate, null);
+                        //boolean valid = cr.validateCertificate(certificate, map);
+                        if (!valid) {
+                            throw new RuntimeException("certificate is not valid");
+                        }
+                        return certificate;
+                    }
+                } catch (XMLStreamException ex) {
+                    log.log(Level.SEVERE, null, ex);
+                    throw new RuntimeException(ex);
+                } catch (XWSSecurityException ex) {
+                    log.log(Level.SEVERE, null, ex);
+                }
+            }
+          return null;
         }
         return null;
     }

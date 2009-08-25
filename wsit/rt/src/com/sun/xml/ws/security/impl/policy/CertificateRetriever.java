@@ -62,11 +62,11 @@ public class CertificateRetriever {
     public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
         QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
-        QName eprQName = new QName("http://schemas.sun.com/2006/03/wss/server", "EnableEPRIdentity");
+        /*QName eprQName = new QName("http://schemas.sun.com/2006/03/wss/server", "EnableEPRIdentity");
         boolean found = checkforEPRIdentity(wse, eprQName);
         if (found == false) {
-            return null;
-        }
+        return null;
+        }*/
         setLocationPasswordAndAlias(keyStoreQName, wse);
         if (password == null || location == null || alias == null) {
             return null;
@@ -146,7 +146,7 @@ public class CertificateRetriever {
     }
 
   
-    private boolean checkforEPRIdentity(WSEndpoint wse, QName eprQName) {
+    public boolean checkforEPRIdentity(WSEndpoint wse, QName eprQName) {
 
         if (wse.getPort() == null) {
             return true;

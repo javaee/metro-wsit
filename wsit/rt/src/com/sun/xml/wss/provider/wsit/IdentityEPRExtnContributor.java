@@ -54,10 +54,15 @@ import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 
+import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -99,20 +104,36 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         if (extension != null) {
             return extension;
         }
-
+        QName eprQName = new QName("http://schemas.sun.com/2006/03/wss/server", "EnableEPRIdentity");
         CertificateRetriever cr = new CertificateRetriever();
-        try {
-            cs = cr.getServerKeyStore(wse);
-            if(cs == null){
-                return null;
+        boolean found = cr.checkforEPRIdentity(wse, eprQName);
+        if (found == false) {
+            return null;
+        } else {
+            try {
+                URL url = SecurityUtil.loadFromClasspath("META-INF/ServerCertificate.cert");
+                if (url != null) {
+                    CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+                    InputStream is = url.openStream();
+                    this.cs = certFact.generateCertificate(is);
+                    is.close();
+                } else {
+                    cs = cr.getServerKeyStore(wse);
+                    if (cs == null) {
+                        return null;
+                    }
+                }
+            } catch (CertificateException ex) {
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
+            } catch (IOException ex) {
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
+            } catch (XWSSecurityException ex) {
+                log.log(Level.SEVERE, null, ex);
+                throw new RuntimeException(ex);
             }
-        } catch (IOException ex) {
-            log.log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        } catch (XWSSecurityException ex) {
-            log.log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
+        }       
 
         return new EPRExtension() {
 
