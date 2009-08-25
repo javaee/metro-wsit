@@ -593,20 +593,21 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             }
         }
 
-        // Get issued tokens
+        // Get issued tokens policy assertions
         for (PolicyAssertion issuedTokenAssertion : policies) {
             // Get run time STSIssuedTokenConfiguration
+            //from STSIssuedTokenFeature
             STSIssuedTokenConfiguration rtConfig = null;
             STSIssuedTokenFeature stsFeature = tubeConfig.getBinding().getFeature(STSIssuedTokenFeature.class);
             if (stsFeature != null) {
                 rtConfig = stsFeature.getSTSIssuedTokenConfiguration();
             }
             
-            // Create the configuration
+            // Create the configuration to use
             STSIssuedTokenConfiguration config = null;
             if (issuedTokenContextMap.get(((Token) issuedTokenAssertion).getTokenId()) == null || rtConfig != null) {
                 try {
-                    // Get STS information from message context
+                    // Get STS information from the request message context
                     String stsEndpoint = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_ENDPOINT);
                     if (stsEndpoint != null) {
                         String stsMEXAddress = (String) packet.invocationProperties.get(STSIssuedTokenConfiguration.STS_MEX_ADDRESS);
@@ -627,6 +628,12 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     }
 
                     config.getOtherOptions().putAll(packet.invocationProperties);
+                    
+                    // put the server certificate, if available, in the configuration
+                    X509Certificate serverCert = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
+                    if (serverCert != null){
+                        config.getOtherOptions().put("Identity", serverCert);
+                    }
 
                     // get entries from run time configuration
                     if (rtConfig != null){

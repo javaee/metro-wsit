@@ -107,8 +107,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
+import javax.xml.bind.JAXBElement;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dom.DOMStructure;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
@@ -125,6 +128,11 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.transform.dom.DOMResult;
 import org.w3c.dom.Node;
+
+import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.security.core.ai.IdentityType;
+import java.security.cert.CertificateEncodingException;
 
 /**
  *
@@ -219,7 +227,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if (appliesTo != null){
             applTo = WSTrustUtil.createAppliesTo(appliesTo);
             if (stsConfig.getOtherOptions().containsKey("Identity")){
-                applTo.getAny().add(stsConfig.getOtherOptions().get("Identity"));
+                addServerIdentity(applTo, stsConfig.getOtherOptions().get("Identity"));
             }
         }
 
@@ -749,6 +757,33 @@ public class TrustPluginImpl implements TrustPlugin {
         context.putAll(stsConfig.getOtherOptions());
         if (context.containsKey(com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION)){
             context.remove(com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION);
+        }
+    }
+
+    private void addServerIdentity(AppliesTo aplTo, Object identity) throws WSTrustException {
+        if (identity instanceof Element){
+            aplTo.getAny().add(identity);
+        }else if (identity instanceof X509Certificate){
+            // Create Identity element with a BinarySecurityTOken for
+            // the server certificate
+
+            // Create BinarySecurityToken
+            String id = UUID.randomUUID().toString();
+            BinarySecurityTokenType bst = new BinarySecurityTokenType();
+            bst.setValueType(MessageConstants.X509v3_NS);
+            bst.setId(id);
+            bst.setEncodingType(MessageConstants.BASE64_ENCODING_NS);
+            try {
+                bst.setValue(((X509Certificate)identity).getEncoded());
+            }catch (CertificateEncodingException ex){
+                throw new WSTrustException(ex.getMessage());
+            }
+            JAXBElement<BinarySecurityTokenType> bstElem = new com.sun.xml.ws.security.secext10.ObjectFactory().createBinarySecurityToken(bst);
+            
+            // Cretae Identity element
+            IdentityType idElem = new IdentityType();
+            idElem.getDnsOrSpnOrUpn().add(bstElem);
+            aplTo.getAny().add(new com.sun.xml.security.core.ai.ObjectFactory().createIdentity(idElem));
         }
     }
 }

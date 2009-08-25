@@ -43,7 +43,6 @@
 
 package com.sun.xml.ws.security.trust.util;
 
-import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
@@ -76,7 +75,6 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import java.io.StringWriter;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -106,13 +104,14 @@ import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImp
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import java.security.cert.X509Certificate;
 
-//import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.util.Iterator;
 import org.w3c.dom.Text;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 
 import com.sun.xml.wss.impl.misc.Base64;
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateFactory;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
@@ -241,8 +240,7 @@ public class WSTrustUtil {
        EndpointReference epr = null;
        List<Object> result = new ArrayList<Object>();
        if (!list.isEmpty()){
-            for (int i = 0; i < list.size(); i++) {
-                final Object obj = list.get(i);
+            for (Object obj : list) {
                 if (obj instanceof EndpointReference){
                     epr = (EndpointReference)obj;
                 } else if (obj instanceof JAXBElement){
@@ -258,28 +256,26 @@ public class WSTrustUtil {
                     if (uri != null){
                         result.add(uri.getValue());
                     }
-                    final List<Object> content = epr.getAny();
-                    for (int j = 0; j < content.size(); j++) {
-                        final Object obj2 = content.get(j);
-                        if (obj2 instanceof Element){
-                            Element ele = (Element)obj2;
-                            NodeList nodeList = ele.getElementsByTagNameNS("*", "Identity");
-                            if (nodeList.getLength() > 0){
-                                Element identity = (Element)nodeList.item(0);
-                                result.add(identity);
-                                NodeList kis = identity.getElementsByTagNameNS("*", "KeyInfo");
-                                if (kis.getLength() > 0){
-                                    try{
-                                        KeyInfo ki = new KeyInfo((Element)kis.item(0), null);
-                                        X509Certificate cer = ki.getX509Certificate();
-                                        if (cer != null){
-                                            result.add(cer);
+                    for (Object obj2 : epr.getAny()) {
+                        try {
+                            Element ele = WSTrustElementFactory.newInstance().toElement(obj2);
+                            if (ele != null){
+                                NodeList nodeList = ele.getElementsByTagNameNS("*", "Identity");
+                                if (nodeList.getLength() > 0){
+                                    Element identity = (Element)nodeList.item(0);
+                                    result.add(identity);
+                                    NodeList clist = identity.getChildNodes();
+                                    for (int i = 0; i < clist.getLength(); i++){
+                                        if (clist.item(i).getNodeType() == Node.TEXT_NODE){
+                                            String data = ((Text)clist.item(i)).getData();
+                                            X509Certificate cert = (X509Certificate)CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(Base64.decode(data)));
+                                            result.add(cert);
                                         }
-                                    }catch(Exception ex){
-                                        ex.printStackTrace();
                                     }
                                 }
                             }
+                        } catch (Exception ex){
+                            ex.printStackTrace();
                         }
                     }
                 }

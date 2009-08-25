@@ -851,6 +851,11 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
                     config.getOtherOptions().putAll(packet.invocationProperties);
 
+                    // put the server certificate, if available, in the configuration
+                    if (serverCert != null){
+                        config.getOtherOptions().put("Identity", serverCert);
+                    }
+
                     // get entries from run time configuration
                     if (rtConfig != null){
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);

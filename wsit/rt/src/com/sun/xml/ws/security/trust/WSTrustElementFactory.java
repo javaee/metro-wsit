@@ -127,8 +127,8 @@ public abstract class WSTrustElementFactory {
     
     static {
         try {
-            jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
-            jaxbContext13 = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.wssx.bindings:com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.ws.policy.impl.bindings");
+            jaxbContext = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.bindings:com.sun.xml.ws.security.secconv.impl.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.security.core.ai:com.sun.xml.security.core.dsig:com.sun.xml.ws.policy.impl.bindings");
+            jaxbContext13 = JAXBContext.newInstance("com.sun.xml.ws.security.trust.impl.wssx.bindings:com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.ws.security.secext10:com.sun.xml.security.core.ai:com.sun.xml.security.core.dsig:com.sun.xml.ws.policy.impl.bindings");
         } catch (JAXBException jbe) {
             throw new RuntimeException(jbe.getMessage(),jbe);
         }        
