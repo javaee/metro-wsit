@@ -81,7 +81,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <attachArtifact file="../../build/for_v3/webservices-api-osgi.jar"/>
+                                <attachArtifact file="../../../build/for_v3/webservices-api-osgi.jar"/>
                             </tasks>
                         </configuration>
                     </execution>
