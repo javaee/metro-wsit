@@ -192,6 +192,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     @Override
     public NextAction processRequest(Packet packet) {
+         //computinbg EPR related stuff
+         //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
         if (wsitContext != null) {
             WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
             WSEndpointReference epr = bpr.getWSEndpointReference();
@@ -217,7 +219,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                            
                            // boolean valid = cr.validateCertificate(certificate, props);
                             if (!valid) {
-                                throw new RuntimeException("certificate is not valid");
+                                log.log(Level.WARNING, "The certificate is not valid");
+                                //throw new RuntimeException("certificate is not valid");
                             }
                             props.put(PipeConstants.SERVER_CERT, certificate);
                         }
@@ -232,7 +235,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                 props.put(PipeConstants.SERVER_CERT, x509Cert);
                 this.serverCert = x509Cert;
             }
-        }
+        }//done
         try {
             packet = processClientRequestPacket(packet);
         } catch (Throwable t) {

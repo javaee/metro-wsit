@@ -254,6 +254,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             }
         }
         //computing EPR related stuff
+        //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
         X509Certificate cert = getCertificateFromEPR(context,wpi);
         if (cert != null) {
             props.put(PipeConstants.SERVER_CERT, cert);
@@ -726,7 +727,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                         boolean valid = secEnv.validateCertificate(certificate, null);
                         //boolean valid = cr.validateCertificate(certificate, map);
                         if (!valid) {
-                            throw new RuntimeException("certificate is not valid");
+                            log.log(Level.WARNING, "The certificate is not valid");
+                            //throw new RuntimeException("certificate is not valid");
                         }
                         return certificate;
                     }
