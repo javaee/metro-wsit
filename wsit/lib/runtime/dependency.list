@@ -141,11 +141,11 @@ woodstox.jar [ Taken from JAX-WS: yes | version: TODO ]
   - TODO: define dependent domain(s)
 
 
-xmlsec.jar [ Taken from JAX-WS: no | version: TODO ]  
-  - TODO: define dependent domain(s)
+xmlsec.jar [ Taken from JAX-WS: no | version: 1.4.2 ]
+  - WS-Trust, WS-Secureconversation
 
 
-xws-security.jar [ Taken from JAX-WS: no | version: TODO ]  
-  - TODO: define dependent domain(s)
+xws-security.jar [ Taken from JAX-WS: no | version: 3.1 ]
+  - WS-Trust, WS-Secureconversation
 
 
