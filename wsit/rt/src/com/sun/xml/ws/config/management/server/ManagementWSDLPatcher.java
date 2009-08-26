@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.policy.ModelGenerator;
 import com.sun.xml.txw2.output.StaxSerializer;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
@@ -66,7 +67,7 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
 
     private static final Logger LOGGER = Logger.getLogger(ManagementWSDLPatcher.class);
     private static final PolicyModelMarshaller POLICY_MARSHALLER = PolicyModelMarshaller.getXmlMarshaller(true);
-    private static final ModelGenerator POLICY_GENERATOR = ModelGenerator.getGenerator();
+    private static final PolicyModelGenerator POLICY_GENERATOR = ModelGenerator.getGenerator();
     private final Map<URI, Policy> urnToPolicy;
     // Skip element if this value is 0 or positive
     private long skipDepth = -1L;
