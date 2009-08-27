@@ -37,7 +37,7 @@ public class SamlValidator implements SAMLAssertionValidator {
                 IssuedTokenContext ctx = manager.createIssuedTokenContext(config, null);
                 ctx.setTarget(new GenericToken(assertion));
                 manager.validateIssuedToken(ctx);
-                status = ctx.getStatus();
+                status = (Status)ctx.getOtherProperties().get(IssuedTokenContext.STATUS);
             }catch(Exception ex){
                 throw new SAMLValidationException(ex);
             }
