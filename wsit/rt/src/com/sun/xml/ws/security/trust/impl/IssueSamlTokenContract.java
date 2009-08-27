@@ -350,7 +350,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
             // Get UseKey
             UseKey useKey = rst.getUseKey();
             if (useKey != null){
-                Element keyInfo = (Element)useKey.getToken().getTokenValue();
+                Element keyInfo = eleFac.toElement(useKey.getToken().getTokenValue());
                 stsConfig.getOtherOptions().put("ConfirmationKeyInfo", keyInfo);
             }
             final Set certs = subject.getPublicCredentials();

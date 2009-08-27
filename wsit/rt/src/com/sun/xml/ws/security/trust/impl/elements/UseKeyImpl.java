@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.11 2008-02-26 06:33:25 ofung Exp $
+ * $Id: UseKeyImpl.java,v 1.12 2009-08-27 19:53:30 jdg6688 Exp $
  */
 
 /*
@@ -45,23 +45,19 @@ import java.net.URI;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;
-import java.net.URISyntaxException;
-import javax.xml.bind.JAXBElement;
 
 import com.sun.istack.NotNull;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
-import java.security.PublicKey;
 import org.w3c.dom.Element;
+import javax.xml.bind.JAXBElement;
 
 
 /**
@@ -91,6 +87,8 @@ public class UseKeyImpl extends UseKeyType implements UseKey {
         Object value = getAny();
         if (value instanceof Element){
             return new GenericToken((Element)value);
+        } else if (value instanceof JAXBElement){
+            return new GenericToken((JAXBElement)value);
         }
         
         //ToDo
