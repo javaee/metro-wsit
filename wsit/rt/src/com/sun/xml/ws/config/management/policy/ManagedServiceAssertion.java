@@ -38,9 +38,9 @@ package com.sun.xml.ws.config.management.policy;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 
@@ -53,10 +53,12 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Provides convenience methods to directly access the ManagedService policy
+ * assertion parameters.
  *
  * @author Fabian Ritzmann
  */
-public class ManagedServiceAssertion extends PolicyAssertion {
+public class ManagedServiceAssertion extends SimpleAssertion {
 
     private static final Logger LOGGER = Logger.getLogger(ManagedServiceAssertion.class);
 
@@ -82,9 +84,9 @@ public class ManagedServiceAssertion extends PolicyAssertion {
     private static final QName JDBC_DATA_SOURCE_NAME_PARAMETER_QNAME = new QName(
             PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JDBCDataSourceName");
 
-    public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative)
+    public ManagedServiceAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters)
             throws AssertionCreationException {
-        super(data, assertionParameters, nestedAlternative);
+        super(data, assertionParameters);
         if (!MANAGED_SERVICE_QNAME.equals(data.getName())) {
             throw new AssertionCreationException(data, ManagementMessages.WSM_5011_EXPECTED_MANAGED_SERVICE_ASSERTION());
         }
