@@ -251,7 +251,7 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
         if (obo != null){
             Object oboToken = obo.getAny();
             if (oboToken != null){
-                subject.getPublicCredentials().add((Element)oboToken);
+                subject.getPublicCredentials().add(eleFac.toElement(oboToken));
                 String confirMethod = null;
                 if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
                     tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){

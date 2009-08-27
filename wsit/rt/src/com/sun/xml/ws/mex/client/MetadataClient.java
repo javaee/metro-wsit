@@ -207,7 +207,7 @@ public class MetadataClient {
             if (serviceNode.getLocalName() != null &&
                 serviceNode.getLocalName().equals("service")) {
                 
-                final Node nameAtt = wsdlNode.getAttributes().getNamedItem("name");
+                final Node nameAtt = serviceNode.getAttributes().getNamedItem("name");
                 final QName serviceName = new QName(namespace,
                     nameAtt.getNodeValue());
                 final NodeList portNodes = serviceNode.getChildNodes();
