@@ -41,9 +41,10 @@ import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.config.management.ManagementConstants;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
-
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -64,28 +65,28 @@ public class JDBCConfigSaver implements ConfigSaver {
     /**
      * Persist the data
      *
-     * @param parameters
+     * @param parameters The parameters must contain the ManagedEndpoint instance
+     *   and the data to be persisted.
      */
     public void persist(final NamedParameters parameters) {
         Connection connection = null;
+        DataSource source = null;
         try {
             final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
             final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
-            final DataSource source = ManagementUtil.getManagementDS(assertion.getJDBCDataSourceName());
+            source = ManagementUtil.getManagementDS(assertion.getJDBCDataSourceName());
             connection = source.getConnection();
             final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
             writeData(connection, endpoint.getId(), newConfig);
         } catch (SQLException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e));
         } finally {
             try {
                 if (connection != null) {
                     connection.close();
                 }
             } catch (SQLException e) {
-                // TODO add error message
-                LOGGER.logException(new WebServiceException(e), Level.WARNING);
+                LOGGER.warning(ManagementMessages.WSM_5022_NO_DB_CLOSE(connection), e);
             }
         }
     }
@@ -99,8 +100,7 @@ public class JDBCConfigSaver implements ConfigSaver {
             updateStatement.setCharacterStream(1, new StringReader(config), config.length());
             updateStatement.setString(2, endpointId);
             if (LOGGER.isLoggable(Level.FINE)) {
-                // TODO put log message into properties
-                LOGGER.fine("Executing SQL command: " + update);
+                LOGGER.fine(ManagementMessages.WSM_5023_EXECUTE_SQL(update));
             }
             final int rowCount = updateStatement.executeUpdate();
             if (rowCount == 0) {
@@ -109,30 +109,26 @@ public class JDBCConfigSaver implements ConfigSaver {
                 insertStatement.setString(1, endpointId);
                 insertStatement.setCharacterStream(2, new StringReader(config), config.length());
                 if (LOGGER.isLoggable(Level.FINE)) {
-                    // TODO put log message into properties
-                    LOGGER.fine("SQL UPDATE returned row count 0. Executing SQL command: " + insert);
+                    LOGGER.fine(ManagementMessages.WSM_5024_EXECUTE_SQL_UPDATE(insert));
                 }
                 insertStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5025_SQL_FAILED(), e));
         } finally {
             try {
                 if (updateStatement != null) {
                     updateStatement.close();
                 }
             } catch (SQLException e) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(e));
+                LOGGER.warning(ManagementMessages.WSM_5026_FAILED_STATEMENT_CLOSE(updateStatement), e);
             } finally {
                 try {
                     if (insertStatement != null) {
                         insertStatement.close();
                     }
                 } catch (SQLException e) {
-                    // TODO add error message
-                    throw LOGGER.logSevereException(new WebServiceException(e));
+                    LOGGER.warning(ManagementMessages.WSM_5026_FAILED_STATEMENT_CLOSE(insertStatement), e);
                 }
             }
         }
