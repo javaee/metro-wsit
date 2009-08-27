@@ -59,9 +59,10 @@ public class ManagementAssertionCreator implements PolicyAssertionCreator {
         return new String[] { "http://java.sun.com/xml/ns/metro/management" };
     }
 
-    public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
+    public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters,
+            AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
         if (MANAGED_SERVICE_QNAME.equals(data.getName())) {
-            return new ManagedServiceAssertion(data, assertionParameters, nestedAlternative);
+            return new ManagedServiceAssertion(data, assertionParameters);
         }
         else {
             return defaultCreator.createAssertion(data, assertionParameters, nestedAlternative, null);
