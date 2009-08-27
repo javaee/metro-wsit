@@ -97,6 +97,8 @@
 
                 <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.client.after" value="true"/-->
 
+                <jvmarg value="-Xmx512m" />
+
                 <arg value="-report" />
                 <arg path="${logs.dir}" />
 
