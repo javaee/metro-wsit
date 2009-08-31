@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
+import com.sun.xml.internal.ws.client.ClientTransportException;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -192,6 +193,10 @@ final class RmClientTube extends AbstractFilterTubeImpl {
         if (throwable instanceof IOException) {
             return true;
         } else if (throwable instanceof WebServiceException) {
+            if (throwable instanceof ClientTransportException) {
+                return true; // if endpint went down, let's try to resend, as it may come up again
+            }
+
             //Unwrap exception and see if it makes sense to retry this request (no need to check for null).
             if (throwable.getCause() instanceof IOException) {
                 return true;
