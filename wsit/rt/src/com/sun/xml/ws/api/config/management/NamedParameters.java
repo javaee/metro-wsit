@@ -40,6 +40,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides type-safe named parameters.
@@ -55,13 +56,25 @@ public class NamedParameters {
     /**
      * Add parameter with the given name.
      *
-     * @param <T> The type of the parameter
-     * @param name The name of the parameter
-     * @param parameter The parameter
-     * @return This instance of NamedParameters (so that you can chain multiple put calls)
+     * @param <T> The type of the parameter.
+     * @param name The name of the parameter.
+     * @param parameter The parameter.
+     * @return This instance of NamedParameters (so that you can chain multiple put calls).
      */
     public <T> NamedParameters put(String name, T parameter) {
         this.nameToInstance.put(name, parameter);
+        return this;
+    }
+
+    /**
+     * Add all parameters from the given map.
+     *
+     * @param <T> The type of the parameters.
+     * @param mappings Maps the name of the parameters to the actual parameter.
+     * @return This instance of NamedParameters.
+     */
+    public <T> NamedParameters putAll(Map<? extends String, ? extends T> mappings) {
+        this.nameToInstance.putAll(mappings);
         return this;
     }
 
