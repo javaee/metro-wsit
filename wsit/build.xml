@@ -103,7 +103,7 @@
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
 
-        <copy todir="${dist.image.wsit.dir}/osgi" filtering="true">
+        <copy todir="${dist.image.wsit.dir}/osgi" filtering="false">
             <fileset dir="${v3.build.dir}" includes="webservices*osgi.jar"/>
         </copy>
              
