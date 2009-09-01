@@ -453,9 +453,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private Packet createEmptyAcknowledgementResponse(Packet request, String sequenceId) throws RxRuntimeException {
-        Packet response = rc.communicator.createEmptyResponsePacket(request, rc.rmVersion.sequenceAcknowledgementAction);
-        rc.protocolHandler.appendAcknowledgementHeaders(response, rc.destinationMessageHandler.getAcknowledgementData(sequenceId));
-        return response;
+
+        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(sequenceId);
+        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+            Packet response = rc.communicator.createEmptyResponsePacket(request, rc.rmVersion.sequenceAcknowledgementAction);
+            response = rc.communicator.setEmptyResponseMessage(response, request, rc.rmVersion.sequenceAcknowledgementAction);
+            rc.protocolHandler.appendAcknowledgementHeaders(response, ackData);
+            return response;
+        } else {
+            return rc.communicator.createNullResponsePacket(request);
+        }
     }
 
     /**

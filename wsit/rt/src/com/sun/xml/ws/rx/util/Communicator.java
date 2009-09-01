@@ -202,7 +202,10 @@ public final class Communicator {
     }
 
     public Packet createNullResponsePacket(Packet requestPacket) {
-        requestPacket.transportBackChannel.close();
+        if (requestPacket.transportBackChannel != null) {
+            requestPacket.transportBackChannel.close();
+        }
+        
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(requestPacket.invocationProperties);
         return emptyReturnPacket;
