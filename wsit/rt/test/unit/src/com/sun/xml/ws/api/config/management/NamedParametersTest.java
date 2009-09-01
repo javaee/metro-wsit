@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import java.util.HashMap;
 import junit.framework.TestCase;
 
 /**
@@ -66,6 +67,17 @@ public class NamedParametersTest extends TestCase {
         Object expResult = new Object();
         NamedParameters instance = new NamedParameters();
         instance.put(name, expResult);
+        Object result = instance.get(name);
+        assertSame(expResult, result);
+    }
+
+    public void testPutAll() {
+        String name = "name";
+        Object expResult = new Object();
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put(name, expResult);
+        NamedParameters instance = new NamedParameters();
+        instance.putAll(map);
         Object result = instance.get(name);
         assertSame(expResult, result);
     }
