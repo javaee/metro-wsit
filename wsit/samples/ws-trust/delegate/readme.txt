@@ -20,7 +20,7 @@ Run the sample:
 4. Start tomcat or glassfish.
 
 5. To run the sample, go to
-   /wsit/wsit/samples/ws-trust/share/src/fs, and run "ant run-sample".
+   /wsit/wsit/samples/ws-trust/delegate/src/fs, and run "ant run-sample".
 
 6. You will be prompted to enter the username/password. Two pairs alice/alice, bob/bob
    are pre-configured to use with this sample.
