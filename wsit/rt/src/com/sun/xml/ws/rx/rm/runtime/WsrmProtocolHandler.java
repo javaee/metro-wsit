@@ -122,6 +122,8 @@ public abstract class WsrmProtocolHandler {
 
     public abstract Header createSequenceFaultElementHeader(QName subcode, Object detail);
 
+    public abstract Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException;
+
     public final boolean containsProtocolMessage(@NotNull Packet packet) {
         assert packet != null;
 

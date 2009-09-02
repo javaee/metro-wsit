@@ -260,7 +260,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
         if (outboundSequence != null) {
             final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
             if (_responseMessage == null) {
-                return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+                return doReturnWith(rc.protocolHandler.createEmptyAcknowledgementResponse(
+                        rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
+                        request));
             }
             if (rc.configuration.isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
                 JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
@@ -273,12 +275,16 @@ public class ServerTube extends AbstractFilterTubeImpl {
             // retrieved response is not null
             Fiber oldRegisteredFiber = rc.suspendedFiberStorage.register(_responseMessage.getCorrelationId(), Fiber.current());
             if (oldRegisteredFiber != null) {
-                oldRegisteredFiber.resume(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+                oldRegisteredFiber.resume(rc.protocolHandler.createEmptyAcknowledgementResponse(
+                        rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
+                        request));
             }
             rc.sourceMessageHandler.putToDeliveryQueue(_responseMessage);
             return doSuspend();
         } else {
-            return doReturnWith(createEmptyAcknowledgementResponse(request, message.getSequenceId()));
+            return doReturnWith(rc.protocolHandler.createEmptyAcknowledgementResponse(
+                        rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
+                        request));
         }
     }
 
@@ -391,17 +397,20 @@ public class ServerTube extends AbstractFilterTubeImpl {
         // int lastMessageNumber = closeSeqElement.getLastMsgNumber();
 
         String boundSequenceId = rc.getBoundSequenceId(inboundSequence.getId());
-        try {
-            rc.sequenceManager().closeSequence(inboundSequence.getId());
-        } finally {
-            if (boundSequenceId != null) {
-                rc.sequenceManager().closeSequence(boundSequenceId);
-            }
-        }
 
-        final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
-        responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
-        return rc.protocolHandler.toPacket(responseBuilder.build(), request);
+        try {
+            final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
+            responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
+            return rc.protocolHandler.toPacket(responseBuilder.build(), request);            
+        } finally {
+            try {
+                rc.sequenceManager().closeSequence(inboundSequence.getId());
+            } finally {
+                if (boundSequenceId != null) {
+                    rc.sequenceManager().closeSequence(boundSequenceId);
+                }
+            }            
+        }
     }
 
     private Packet handleTerminateSequenceAction(Packet request) {
@@ -449,21 +458,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(request.getMessage());
         rc.destinationMessageHandler.processAcknowledgements(ackData);
 
-        return createEmptyAcknowledgementResponse(request, ackData.getAckReqestedSequenceId());
-    }
-
-    private Packet createEmptyAcknowledgementResponse(Packet request, String sequenceId) throws RxRuntimeException {
-
-        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(sequenceId);
-        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
-            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
-            Packet response = rc.communicator.createEmptyResponsePacket(request, rc.rmVersion.sequenceAcknowledgementAction);
-            response = rc.communicator.setEmptyResponseMessage(response, request, rc.rmVersion.sequenceAcknowledgementAction);
-            rc.protocolHandler.appendAcknowledgementHeaders(response, ackData);
-            return response;
-        } else {
-            return rc.communicator.createNullResponsePacket(request);
-        }
+        return rc.protocolHandler.createEmptyAcknowledgementResponse(rc.destinationMessageHandler.getAcknowledgementData(ackData.getAckReqestedSequenceId()), request);
     }
 
     /**

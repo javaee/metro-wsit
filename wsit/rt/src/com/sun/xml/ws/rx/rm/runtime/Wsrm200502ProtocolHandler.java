@@ -203,11 +203,26 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createEmptyResponsePacket(requestPacket, rmVersion.closeSequenceAction);
-
-        appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
-
-        return packet;
+        /**
+         * Server-side Replay model (https://www.wso2.org/library/2792#Server) requirements:
+         * 
+         * D) If there is no response to a given request – i.e. the request is a one-way message, 
+         *    then the Server MUST respond with an acknowledgement that includes the request message 
+         *    in one of the ranges.
+         * 
+         * ...
+         * 
+         * F) The Server SHOULD respond to an incoming LastMessage with a LastMessage for the Offered Sequence
+         */
+        Sequence boundSequence = rc.sequenceManager().getBoundSequence(data.getSequenceId());
+        if (boundSequence != null) {
+            // Apply requirement D)
+            CloseSequenceData closeSequenceData = CloseSequenceData.getBuilder(boundSequence.getId(), boundSequence.getLastMessageNumber()).acknowledgementData(data.getAcknowledgementData()).build();
+            return toPacket(closeSequenceData, requestPacket);
+        } else {
+            // Apply requirement F)
+            return createEmptyAcknowledgementResponse(data.getAcknowledgementData(), requestPacket);
+        }
     }
 
     public TerminateSequenceData toTerminateSequenceData(Packet packet) throws RxRuntimeException {
@@ -365,5 +380,18 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         return Headers.create(rmVersion.getJaxbContext( // TODO P2 include detail
                 addressingVersion),
                 Headers.create(RmVersion.WSRM200702.getJaxbContext(addressingVersion), new com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceFaultElement(subcode)));
+    }
+
+    @Override
+    public Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException {
+        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+            Packet response = rc.communicator.createEmptyResponsePacket(requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
+            response = rc.communicator.setEmptyResponseMessage(response, requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
+            appendAcknowledgementHeaders(response, ackData);
+            return response;
+        } else {
+            return rc.communicator.createNullResponsePacket(requestPacket);
+        }
     }
 }

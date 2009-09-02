@@ -55,8 +55,9 @@ public class CloseSequenceData {
             this.lastMessageId = lastMessageId;
         }
 
-        public void acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
+        public Builder acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
             this.acknowledgementData = acknowledgementData;
+            return this;
         }
 
         public CloseSequenceData build() {

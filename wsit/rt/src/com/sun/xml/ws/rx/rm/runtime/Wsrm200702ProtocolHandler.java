@@ -346,4 +346,17 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                 addressingVersion),
                 Headers.create(RmVersion.WSRM200702.getJaxbContext(addressingVersion), new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode)));
     }
+    
+    @Override
+    public Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException {
+        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+            Packet response = rc.communicator.createEmptyResponsePacket(requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
+            response = rc.communicator.setEmptyResponseMessage(response, requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
+            appendAcknowledgementHeaders(response, ackData);
+            return response;
+        } else {
+            return rc.communicator.createNullResponsePacket(requestPacket);
+        }
+    }
 }
