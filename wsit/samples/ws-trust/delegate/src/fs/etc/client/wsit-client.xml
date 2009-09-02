@@ -56,10 +56,7 @@
    
                  <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client"
                     endpoint="http://localhost:8080/jaxws-fs-sts/sts"
-                    wsdlLocation="http://localhost:8080/jaxws-fs-sts/sts?wsdl"
-                    serviceName="SecurityTokenService"
-                    portName="ISecurityTokenService_Port"
-                    namespace="http://tempuri.org/">
+                    metadata="http://localhost:8080/jaxws-fs-sts/sts/mex">
                 </tc:PreconfiguredSTS>
             </wsp:All>
         </wsp:ExactlyOne>

@@ -49,10 +49,10 @@
         port="{http://tempuri.org/}ISecurityTokenService_Port"
         binding="http://www.w3.org/2003/05/soap/bindings/HTTP/" 
         url-pattern="/sts" />
-    <!--endpoint
+    <endpoint
         name="sts_mex"
         implementation="com.sun.xml.ws.mex.server.MEXEndpoint"
         binding="http://www.w3.org/2003/05/soap/bindings/HTTP/" 
-        url-pattern="/sts/mex" /-->
+        url-pattern="/sts/mex" />
 
 </endpoints>

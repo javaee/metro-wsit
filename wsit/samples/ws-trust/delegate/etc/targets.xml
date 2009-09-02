@@ -481,65 +481,6 @@
 
 <target name="run-s1" depends="setup-tc, run-tc-s1"/>
 
-<target name="rundebug-tc">
-   <mkdir dir="${build.classes.home}/META-INF/services"/>
-   <copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/>
-   <java fork="true" classname="${client}">
-        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
-        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
-        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
-        <sysproperty key="service.url" value="${service.url}"/>
-        <sysproperty key="sts.host" value="${sts.host}"/>
-        <sysproperty key="sts.port" value="${sts.port}"/>
-        <sysproperty key="sts.url" value="${sts.url}"/>
-          <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
-        <classpath>
-            <path refid="jaxws.classpath"/>
-            <pathelement location="${build.classes.home}"/>
-            <pathelement location="${build.classes.home}/../"/>
-        </classpath>
-        <jvmarg value="-Xdebug"/>
-        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"/>
-    </java>  
-</target>
-
-<target name="rundebug" depends="rundebug-tc" />
-
-<target name="dispatch-client" depends="setup-tc, setup-glassfish">
-    <javac
-        fork="true"
-        debug="${debug}"
-        srcdir="${basedir}/src/${sample.name}"
-        destdir="${build.classes.home}"
-        includes="**/client/**,**/common/**">
-        <classpath refid="jaxws.classpath"/>
-    </javac>
-</target>
-
-<target name="run-dispatch-tc" if="tomcat.home">
-    <java fork="true" classname="${client}">
-        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
-        <classpath>
-            <path refid="jaxws.classpath"/>
-            <pathelement location="${build.classes.home}"/>
-        </classpath>
-    </java>
-</target>
-
-<target name="run-dispatch-glassfish" if="glassfish.home">
-    <java fork="true" classname="${client}">
-        <sysproperty key="glassfish.home" value="${glassfish.home}"/>
-        <classpath>
-            <path refid="jaxws.classpath"/>
-            <pathelement location="${build.classes.home}"/>
-        </classpath>
-       <jvmarg value="-Dhttp.proxyHost=${http.proxyHost}"/>
-        <jvmarg value="-Dhttp.proxyPort=${http.proxyPort}"/> 
-    </java>
-</target>
-
-<target name="run-dispatch" depends="run-dispatch-tc, run-dispatch-glassfish"/>
-
 <target name="clean">
     <delete dir="${build.home}" includeEmptyDirs="true" />
 </target>
