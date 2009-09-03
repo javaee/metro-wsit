@@ -78,6 +78,7 @@ public class ManagementUtil {
      *
      * @param endpoint The endpoint. Must not be null.
      * @return The policy assertion if found. Null otherwise.
+     * @throws WebServiceException If computing the effective policy of the endpoint failed.
      */
     public static ManagedServiceAssertion getAssertion(WSEndpoint endpoint) throws WebServiceException {
         LOGGER.entering(endpoint);
@@ -111,6 +112,7 @@ public class ManagementUtil {
      *
      * @param reader The reader. Must not be null
      * @return All data provided by the reader.
+     * @throws WebServiceException If an exception occurred when reading data from the reader.
      */
     public static String convert(Reader reader) throws WebServiceException {
         try {
