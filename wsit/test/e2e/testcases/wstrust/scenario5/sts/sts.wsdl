@@ -94,7 +94,7 @@
                 <sc:ValidatorConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/server">
                     <sc:Validator name="usernameValidator"  classname="wstrust.scenario5.sts.PlainTextPasswordValidator"/>  
                 </sc:ValidatorConfiguration>
-                <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="false">
+                <tc:STSConfiguration xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/server" encryptIssuedKey="true" encryptIssuedToken="true">
                     <tc:LifeTime>36000</tc:LifeTime>
                     <tc:Contract>com.sun.xml.ws.security.trust.impl.IssueSamlTokenContractImpl</tc:Contract>
                     <tc:ServiceProviders>
