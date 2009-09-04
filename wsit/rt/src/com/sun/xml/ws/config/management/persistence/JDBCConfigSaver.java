@@ -43,7 +43,9 @@ import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
+import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -74,10 +76,12 @@ public class JDBCConfigSaver implements ConfigSaver {
         try {
             final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
             final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
-            source = ManagementUtil.getManagementDS(assertion.getJDBCDataSourceName());
+            final ImplementationRecord record = assertion.getConfigSaverImplementation();
+            source = ManagementUtil.getJdbcDataSource(record, JDBCConfigSaver.class.getName());
             connection = source.getConnection();
+            final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record, JDBCConfigSaver.class.getName());
             final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
-            writeData(connection, endpoint.getId(), newConfig);
+            writeData(connection, tableNames, endpoint.getId(), newConfig);
         } catch (SQLException e) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e));
         } finally {
@@ -91,11 +95,14 @@ public class JDBCConfigSaver implements ConfigSaver {
         }
     }
 
-    private static void writeData(final Connection connection, final String endpointId, final String config) {
+    private static void writeData(final Connection connection,
+            final JdbcTableNames tableNames, final String endpointId, final String config) {
         PreparedStatement updateStatement = null;
         PreparedStatement insertStatement = null;
         try {
-            final String update = "UPDATE METRO_CONFIG SET version = version + 1, config = ? WHERE id = ?";
+            final String update = "UPDATE " + tableNames.getTableName() + " " +
+                    tableNames.getVersionName() + " = " + tableNames.getVersionName() +
+                    " + 1, " + tableNames.getConfigName() + " = ? WHERE id = ?";
             updateStatement = connection.prepareStatement(update);
             updateStatement.setCharacterStream(1, new StringReader(config), config.length());
             updateStatement.setString(2, endpointId);
@@ -104,7 +111,9 @@ public class JDBCConfigSaver implements ConfigSaver {
             }
             final int rowCount = updateStatement.executeUpdate();
             if (rowCount == 0) {
-                final String insert = "INSERT INTO METRO_CONFIG (id, version, config) VALUES (?, 1, ?)";
+                final String insert = "INSERT INTO " + tableNames.getTableName() +
+                        " (" + tableNames.getIdName() + ", " + tableNames.getVersionName() +
+                        ", " + tableNames.getConfigName() + ") VALUES (?, 1, ?)";
                 insertStatement = connection.prepareStatement(insert);
                 insertStatement.setString(1, endpointId);
                 insertStatement.setCharacterStream(2, new StringReader(config), config.length());

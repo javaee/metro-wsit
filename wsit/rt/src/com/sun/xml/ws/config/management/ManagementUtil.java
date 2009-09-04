@@ -39,6 +39,7 @@ package com.sun.xml.ws.config.management;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -49,6 +50,7 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
+import java.util.Map;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -131,12 +133,24 @@ public class ManagementUtil {
     /**
      * Look up the data source for the JDBC implementation.
      *
-     * @param dataSourceName May hold a custom name of the JDBC data source. Null otherwise.
+     * @param record May hold a custom name of the JDBC data source. Null otherwise.
+     * @param defaultClassName The class name that should match the implementation record.
      * @return A data source.
      * @throws WebServiceException If the lookup failed.
      */
-    public static DataSource getManagementDS(String dataSourceName) throws WebServiceException {
-        final String sourceName = dataSourceName == null ? DEFAULT_DATA_SOURCE_NAME : dataSourceName;
+    public static DataSource getJdbcDataSource(ImplementationRecord record, String defaultClassName)
+            throws WebServiceException {
+        String sourceName = DEFAULT_DATA_SOURCE_NAME;
+        if (record != null) {
+            final String className = record.getImplementation();
+            if (className == null || defaultClassName.equals(className)) {
+                final Map<String, String> parameters = record.getParameters();
+                if (parameters != null) {
+                    sourceName = parameters.get(ManagementConstants.JDBC_DATA_SOURCE_PARAMETER_NAME);
+                }
+            }
+        }
+
         try {
             LOGGER.config(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
             InitialContext initCtx = new InitialContext();
@@ -144,6 +158,97 @@ public class ManagementUtil {
         } catch (NamingException e) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5019_FAILED_LOOKUP(sourceName), e));
         }
+    }
+
+    /**
+     * Determines the JDBC database settings.
+     *
+     * @param record May hold custom JDBC database settings. Null otherwise.
+     * @param defaultClassName The class name that should match the implementation record.
+     * @return A record with the JDBC database settings.
+     */
+    public static JdbcTableNames getJdbcTableNames(final ImplementationRecord record, final String defaultClassName) {
+        String tableName = ManagementConstants.JDBC_DEFAULT_TABLE_NAME;
+        String idName = ManagementConstants.JDBC_DEFAULT_ID_COLUMN_NAME;
+        String versionName = ManagementConstants.JDBC_DEFAULT_VERSION_COLUMN_NAME;
+        String configName = ManagementConstants.JDBC_DEFAULT_CONFIG_COLUMN_NAME;
+
+        if (record != null) {
+            final String className = record.getImplementation();
+            if (className == null || className.equals(defaultClassName)) {
+                final Map<String, String> parameters = record.getParameters();
+                if (parameters.containsKey(ManagementConstants.JDBC_TABLE_NAME_PARAMETER_NAME)) {
+                    tableName = parameters.get(ManagementConstants.JDBC_TABLE_NAME_PARAMETER_NAME);
+                }
+                if (parameters.containsKey(ManagementConstants.JDBC_ID_COLUMN_NAME_PARAMETER_NAME)) {
+                    idName = parameters.get(ManagementConstants.JDBC_ID_COLUMN_NAME_PARAMETER_NAME);
+                }
+                if (parameters.containsKey(ManagementConstants.JDBC_VERSION_COLUMN_NAME_PARAMETER_NAME)) {
+                    versionName = parameters.get(ManagementConstants.JDBC_VERSION_COLUMN_NAME_PARAMETER_NAME);
+                }
+                if (parameters.containsKey(ManagementConstants.JDBC_CONFIG_COLUMN_NAME_PARAMETER_NAME)) {
+                    configName = parameters.get(ManagementConstants.JDBC_CONFIG_COLUMN_NAME_PARAMETER_NAME);
+                }
+            }
+        }
+
+        return new JdbcTableNames(tableName, idName, versionName, configName);
+    }
+
+
+    /**
+     * Holds the JDBC database settings.
+     */
+    public static class JdbcTableNames {
+
+        private final String tableName;
+        private final String idName;
+        private final String versionName;
+        private final String configName;
+
+        private JdbcTableNames(String tableName, String idName, String versionName, String configName) {
+            this.tableName = tableName;
+            this.idName = idName;
+            this.versionName = versionName;
+            this.configName = configName;
+        }
+
+        /**
+         * The name of the database table.
+         * 
+         * @return The name of the database table.
+         */
+        public String getTableName() {
+            return tableName;
+        }
+
+        /**
+         * The name of the ID column.
+         *
+         * @return The name of the ID column.
+         */
+        public String getIdName() {
+            return idName;
+        }
+
+        /**
+         * The name of the version column.
+         *
+         * @return The name of the version column.
+         */
+        public String getVersionName() {
+            return versionName;
+        }
+
+        /**
+         * The name of the config column.
+         *
+         * @return The name of the config column.
+         */
+        public String getConfigName() {
+            return configName;
+        }
+
     }
 
 }

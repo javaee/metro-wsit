@@ -48,13 +48,13 @@ import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyConstants;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.NestedParameters;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -67,7 +67,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -80,8 +79,8 @@ import javax.xml.ws.WebServiceException;
 public class JMXAgent<T> implements CommunicationServer {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
-    // TODO Move some functionality into ManagedServiceAssertion
-    private static final QName JMX_SERVICE_URL_PARAMETER_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JMXServiceURL");
+    private static final String JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME = "JmxConnectorServerEnviroment";
+    private static final String JMX_SERVICE_URL_PARAMETER_NAME = "jmxServiceUrl";
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
     private ConfigReader configReader;
@@ -115,7 +114,7 @@ public class JMXAgent<T> implements CommunicationServer {
             // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
             this.server = MBeanServerFactory.createMBeanServer();
             final JMXServiceURL jmxUrl = getServiceURL(managedService);
-            final Map<String, String> env = managedService.getJMXConnectorServerEnvironment();
+            final Map<String, String> env = getConnectorServerEnvironment(managedService);
             this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, this.server);
         } catch (MalformedURLException e) {
             // TODO add error message
@@ -197,23 +196,50 @@ public class JMXAgent<T> implements CommunicationServer {
         }
     }
 
-    private JMXServiceURL getServiceURL(PolicyAssertion managedService) {
+    private JMXServiceURL getServiceURL(ManagedServiceAssertion managedService) {
         try {
-            final Iterator<PolicyAssertion> parameters = managedService.getParametersIterator();
-            while (parameters.hasNext()) {
-                final PolicyAssertion parameter = parameters.next();
-                if (JMX_SERVICE_URL_PARAMETER_QNAME.equals(parameter.getName())) {
-                    return new JMXServiceURL(parameter.getValue().trim());
+            final Collection<ImplementationRecord> records = managedService.getCommunicationServerImplementations();
+            Map<String, String> parameters = null;
+            for (ImplementationRecord record : records) {
+                final String name = record.getImplementation();
+                if (name == null || name.equals(JMXAgent.class.getName())) {
+                    parameters = record.getParameters();
+                    break;
                 }
             }
-            // No JMXServiceURL found, return default
-            final String jmxServiceURL = JMX_SERVICE_URL_DEFAULT_PREFIX + this.endpointId;
-            LOGGER.config(ManagementMessages.WSM_5005_DEFAULT_JMX_SERVICE_URL(jmxServiceURL));
-            return new JMXServiceURL(jmxServiceURL);
+            String jmxServiceUrl = null;
+            if (parameters != null) {
+                jmxServiceUrl = parameters.get(JMX_SERVICE_URL_PARAMETER_NAME);
+            }
+            // The previous parameters.get might have returned null.
+            if (jmxServiceUrl == null) {
+                // No JmxServiceUrl found, use default
+                jmxServiceUrl = JMX_SERVICE_URL_DEFAULT_PREFIX + this.endpointId;
+            }
+            LOGGER.config(ManagementMessages.WSM_5005_JMX_SERVICE_URL(jmxServiceUrl));
+            return new JMXServiceURL(jmxServiceUrl);
         } catch (MalformedURLException ex) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(ex));
         }
+    }
+
+    private static Map<String, String> getConnectorServerEnvironment(ManagedServiceAssertion assertion) {
+        final Collection<ImplementationRecord> records = assertion.getCommunicationServerImplementations();
+        for (ImplementationRecord record : records) {
+            final String name = record.getImplementation();
+            if (name == null || name.equals(JMXAgent.class.getName())) {
+                final Collection<NestedParameters> nestedParameters = record.getNestedParameters();
+                if (nestedParameters != null) {
+                    for (NestedParameters parameter : nestedParameters) {
+                        if (JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME.equals(parameter.getName())) {
+                            return parameter.getParameters();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

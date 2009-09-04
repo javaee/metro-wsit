@@ -33,6 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
@@ -44,14 +45,18 @@ import com.sun.xml.ws.commons.DelayedTaskManager;
 import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.config.management.ManagementConstants;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
+import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.sql.DataSource;
@@ -66,21 +71,44 @@ import javax.xml.ws.WebServiceException;
 public class JDBCConfigReader implements ConfigReader {
 
     private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
+    private static final String POLLING_INTERVAL_PARAMETER_NAME = "pollingInterval";
+    private static final long DEFAULT_POLLING_INTERVAL = 10000L;
+
     private volatile ConfigPoller poller = null;
+
 
     public synchronized void init(NamedParameters parameters) {
         if (this.poller != null) {
-            // TODO Put text into properties
-            throw new IllegalStateException(String.format("Duplicate initialization detected: This instance of [ %s ] class has already been initialized", this.getClass().getName()));
+            throw LOGGER.logSevereException(new IllegalStateException(
+                    ManagementMessages.WSM_5031_DUPLICATE_INITIALIZATION(getClass().getName())));
         }
-        // TODO make interval configurable
-        this.poller = new ConfigPoller(parameters, 10000);
+
+        long pollingInterval = DEFAULT_POLLING_INTERVAL;
+        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
+        final ImplementationRecord record = assertion.getConfigReaderImplementation();
+        final String className = record.getImplementation();
+        if (className == null || className.equals(JDBCConfigReader.class.getName())) {
+            String pollingIntervalText = null;
+            try {
+                final Map<String, String> classParameters = record.getParameters();
+                pollingIntervalText = classParameters.get(POLLING_INTERVAL_PARAMETER_NAME);
+                if (pollingIntervalText != null) {
+                    pollingInterval = Long.parseLong(pollingIntervalText);
+                }
+            } catch (NumberFormatException e) {
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5039_FAILED_NUMBER_CONVERSION(
+                        POLLING_INTERVAL_PARAMETER_NAME, pollingIntervalText), e));
+            }
+        }
+        this.poller = new ConfigPoller(parameters, pollingInterval);
     }
 
     public synchronized void start() {
         if (poller == null) {
-            // TODO Put text into properties
-            throw new IllegalStateException(String.format("Unable to start poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
+            throw LOGGER.logSevereException(new IllegalStateException(
+                    ManagementMessages.WSM_5032_POLLER_START_FAILED(getClass().getName())));
         }
 
         poller.start();
@@ -88,8 +116,8 @@ public class JDBCConfigReader implements ConfigReader {
 
     public synchronized void stop() {
         if (poller == null) {
-            // TODO Put text into properties
-            throw new IllegalStateException(String.format("Unable to stop poller task: This instance of [ %s ] class has not been initialized yet. Please call init() method first.", this.getClass().getName()));
+            throw LOGGER.logSevereException(new IllegalStateException(
+                    ManagementMessages.WSM_5033_POLLER_STOP_FAILED(getClass().getName())));
         }
         poller.stop();
     }
@@ -97,11 +125,15 @@ public class JDBCConfigReader implements ConfigReader {
 
     private static class ConfigPoller implements DelayedTask {
 
+        private static final String START_ATTRIBUTE_NOTIFY_VALUE_NAME = "notify";
+        private static final String POLLER_NAME = "JDBC configuration management poller";
+
         private final ManagedEndpoint endpoint;
         private final EndpointStarter endpointStarter;
-        private final String dataSourceName;
+        private final ManagedServiceAssertion managedService;
         private final NamedParameters configParameters;
         private final long executionDelay;
+
         private volatile boolean stopped;
         private volatile long version = 0L;
 
@@ -110,48 +142,60 @@ public class JDBCConfigReader implements ConfigReader {
             this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
             this.configParameters = parameters;
 
-            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
-            this.dataSourceName = assertion.getJDBCDataSourceName();
+            this.managedService = ManagementUtil.getAssertion(this.endpoint);
 
             this.executionDelay = executionDelay;
             this.stopped = true;
 
-            final String start = assertion.getStart();
-            // TODO log actions, put "notify" into constant
-            if (start == null || !start.equals("notify")) {
+            final String start = this.managedService.getStart();
+            if (start == null || !start.equals(START_ATTRIBUTE_NOTIFY_VALUE_NAME)) {
+                if (LOGGER.isLoggable(Level.CONFIG)) {
+                    LOGGER.config(ManagementMessages.WSM_5035_START_ENDPOINT_IMMEDIATELY(start));
+                }
                 endpointStarter.startEndpoint();
+            }
+            else {
+                if (LOGGER.isLoggable(Level.CONFIG)) {
+                    LOGGER.config(ManagementMessages.WSM_5036_WAIT_ENDPOINT_START(start));
+                }
+            }
+            
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5040_CREATED_POLLER(executionDelay));
             }
         }
 
         public String getName() {
-            return "JDBC configuration management reader";
+            return POLLER_NAME;
         }
 
-        public void run(DelayedTaskManager manager) {
+        public void run(final DelayedTaskManager manager) {
             if (stopped) {
                 return;
             }
 
             Connection connection = null;
+            DataSource source = null;
             try {
-                final DataSource source = ManagementUtil.getManagementDS(this.dataSourceName);
+                final ImplementationRecord record = this.managedService.getConfigReaderImplementation();
+                final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record,
+                        JDBCConfigReader.class.getName());
+                source = ManagementUtil.getJdbcDataSource(record,
+                        JDBCConfigReader.class.getName());
                 connection = source.getConnection();
-                pollData(connection, endpoint.getId());
+                pollData(connection, tableNames, endpoint.getId());
                 connection.close();
             } catch (SQLException e) {
-                // TODO add error message
-                LOGGER.logSevereException(e);
+                LOGGER.warning(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e);
             } catch (WebServiceException e) {
-                // TODO add error message
-                LOGGER.logSevereException(e);
+                LOGGER.severe(ManagementMessages.WSM_5037_FAILED_RECONFIGURE(), e);
             } finally {
                 try {
                     if (connection != null) {
                         connection.close();
                     }
                 } catch (SQLException e) {
-                    // TODO add error message
-                    LOGGER.logException(e, Level.WARNING);
+                    LOGGER.warning(ManagementMessages.WSM_5022_NO_DB_CLOSE(connection), e);
                 }
 
                 if (!stopped) {
@@ -168,8 +212,7 @@ public class JDBCConfigReader implements ConfigReader {
                     stopped = false;
                     MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
                 } else {
-                    // TODO put text into properties
-                    LOGGER.warning(String.format("Duplicate start of [ %s ] instance detected: Instance already runing", this.getName()));
+                    LOGGER.warning(ManagementMessages.WSM_5034_DUPLICATE_START(getName()));
                 }
             } finally {
                 LOGGER.exiting();
@@ -185,13 +228,14 @@ public class JDBCConfigReader implements ConfigReader {
             }
         }
 
-        private void pollData(Connection connection, String endpointId) {
+        private void pollData(final Connection connection, final JdbcTableNames tableNames, final String endpointId) {
             PreparedStatement statement = null;
             try {
-                final String query = "SELECT version, config FROM METRO_CONFIG WHERE id = ? AND version > ?";
+                final String query = "SELECT " + tableNames.getVersionName() + ", " +
+                        tableNames.getConfigName() + " FROM " + tableNames.getTableName() +
+                        " WHERE " + tableNames.getIdName() + " = ? AND " + tableNames.getVersionName() + " > ?";
                 if (LOGGER.isLoggable(Level.FINER)) {
-                    // TODO put log message into properties
-                    LOGGER.finer("Executing SQL command: " + query);
+                    LOGGER.finer(ManagementMessages.WSM_5023_EXECUTE_SQL(query));
                 }
                 statement = connection.prepareStatement(query);
                 statement.setString(1, endpointId);
@@ -199,29 +243,24 @@ public class JDBCConfigReader implements ConfigReader {
                 final ResultSet result = statement.executeQuery();
                 if (result.next()) {
                     if (LOGGER.isLoggable(Level.FINE)) {
-                        // TODO put log message into properties
-                        LOGGER.fine("SQL query found updated configuration data");
+                        LOGGER.fine(ManagementMessages.WSM_5029_FOUND_UPDATED_CONFIG());
                     }
-                    // TODO put column names into constants and/or make them configurable
-                    this.version = result.getLong("version");
-                    final Reader data = result.getCharacterStream("config");
+                    this.version = result.getLong(tableNames.getVersionName());
+                    final Reader data = result.getCharacterStream(tableNames.getConfigName());
                     reconfigure(data);
                 } else {
                     if (LOGGER.isLoggable(Level.FINEST)) {
-                        // TODO put log message into properties
-                        LOGGER.finer("SQL query did not find any updated configuration data");
+                        LOGGER.finer(ManagementMessages.WSM_5030_NO_UPDATED_CONFIG());
                     }
                 }
             } catch (SQLException e) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(e));
+                throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5038_FAILED_CONFIG_READ(), e));
             } finally {
                 if (statement != null) {
                     try {
                         statement.close();
                     } catch (SQLException e) {
-                        // TODO add error message
-                        throw LOGGER.logSevereException(new WebServiceException(e));
+                        LOGGER.warning(ManagementMessages.WSM_5026_FAILED_STATEMENT_CLOSE(statement), e);
                     }
                 }
             }

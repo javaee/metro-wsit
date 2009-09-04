@@ -39,6 +39,7 @@ package com.sun.xml.ws.api.config.management;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -76,7 +77,7 @@ public class ManagementFactory {
      *
      * By default it returns a JMX-based implementation for the CommunicationServer.
      *
-     * @param parameters Parameters to initialize the implementations.
+     * @param parameters Parameters to initialize the implementations. Must not be null.
      * @return The initialized CommunicationServer implementations.
      * @throws WebServiceException If a CommunicationServer implementation could not
      *   be instantiated or initialized or if no CommunicationServer implementation
@@ -84,15 +85,18 @@ public class ManagementFactory {
      */
     public Collection<CommunicationServer> createCommunicationImpls(NamedParameters parameters) throws WebServiceException {
         final Collection<CommunicationServer> result = new LinkedList<CommunicationServer>();
-        final Collection<String> communicationServerNames = this.assertion.getCommunicationServerImplementations();
-        if (communicationServerNames.isEmpty()) {
-            final CommunicationServer implementation = instantiateImplementation(CommunicationServer.class, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME);
+        final Collection<ImplementationRecord> communicationServers = this.assertion.getCommunicationServerImplementations();
+        if (communicationServers.isEmpty()) {
+            final CommunicationServer implementation = instantiateImplementation(
+                    DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
             implementation.init(parameters);
             result.add(implementation);
         }
         else {
-            for (String communicationServerName : communicationServerNames) {
-                final CommunicationServer implementation = instantiateImplementation(CommunicationServer.class, communicationServerName);
+            for (ImplementationRecord record : communicationServers) {
+                final CommunicationServer implementation = instantiateImplementation(
+                        record, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
+                parameters.putAll(record.getParameters());
                 implementation.init(parameters);
                 result.add(implementation);
             }
@@ -110,11 +114,8 @@ public class ManagementFactory {
      *   instantiated or if no implementation was found.
      */
     public Configurator createConfiguratorImpl() throws WebServiceException {
-        String configuratorName = this.assertion.getConfiguratorImplementation();
-        if (configuratorName == null) {
-            configuratorName = DEFAULT_CONFIGURATOR_CLASS_NAME;
-        }
-        return instantiateImplementation(Configurator.class, configuratorName);
+        return instantiateImplementation(this.assertion.getConfiguratorImplementation(),
+                DEFAULT_CONFIGURATOR_CLASS_NAME, Configurator.class);
     }
 
     /**
@@ -128,11 +129,8 @@ public class ManagementFactory {
      *   instantiated or if no implementation was found.
      */
     public ConfigSaver createConfigSaverImpl() throws WebServiceException {
-        String configSaverName = this.assertion.getConfigSaverImplementation();
-        if (configSaverName == null) {
-            configSaverName = DEFAULT_CONFIG_SAVER_CLASS_NAME;
-        }
-        return instantiateImplementation(ConfigSaver.class, configSaverName);
+        return instantiateImplementation(this.assertion.getConfigSaverImplementation(),
+                DEFAULT_CONFIG_SAVER_CLASS_NAME, ConfigSaver.class);
     }
 
     /**
@@ -148,25 +146,47 @@ public class ManagementFactory {
      *   was found.
      */
     public ConfigReader createConfigReaderImpl(NamedParameters parameters) throws WebServiceException {
-        String configReaderName = this.assertion.getConfigReaderImplementation();
-        if (configReaderName == null) {
-            configReaderName = DEFAULT_CONFIG_READER_CLASS_NAME;
+        final ImplementationRecord record = this.assertion.getConfigReaderImplementation();
+        final ConfigReader reader = instantiateImplementation(record,
+                DEFAULT_CONFIG_READER_CLASS_NAME, ConfigReader.class);
+        if (record != null) {
+            parameters.putAll(record.getParameters());
         }
-        final ConfigReader reader = instantiateImplementation(ConfigReader.class, configReaderName);
         reader.init(parameters);
         return reader;
     }
 
-    private static <T> T instantiateImplementation(Class<T> type, String className) throws WebServiceException {
+    private static <T> T instantiateImplementation(ImplementationRecord record,
+            String defaultClassName, Class<T> type) throws WebServiceException {
+        final String className;
+        if (record != null) {
+            final String implementation = record.getImplementation();
+            if (implementation != null) {
+                className = implementation;
+            }
+            else {
+                className = defaultClassName;
+            }
+        }
+        else {
+            className = defaultClassName;
+        }
+        return instantiateImplementation(className, type);
+    }
+
+    private static <T> T instantiateImplementation(String className, Class<T> type) throws WebServiceException {
         try {
             final Class implementation = Class.forName(className);
             return type.cast(implementation.newInstance());
         } catch (ClassNotFoundException e) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5015_FAILED_LOAD_CLASS(className), e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5015_FAILED_LOAD_CLASS(className), e));
         } catch (InstantiationException e) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
         } catch (IllegalAccessException e) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
         }
     }
 

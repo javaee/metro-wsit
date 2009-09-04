@@ -54,10 +54,56 @@ public class ManagementConstants {
     public static final String CONFIGURATION_DATA_PARAMETER_NAME = "CONFIGURATION_DATA";
 
     /**
+     * Name of the JDBC data source parameter in the config management configuration.
+     */
+    public static final String JDBC_DATA_SOURCE_PARAMETER_NAME = "jdbcDataSourceName";
+
+    /**
+     * Name of the JDBC table for the config management configuration.
+     */
+    public static final String JDBC_TABLE_NAME_PARAMETER_NAME = "jdbcTableName";
+
+    /**
+     * Name of the JDBC table column that holds the web service ID.
+     */
+    public static final String JDBC_ID_COLUMN_NAME_PARAMETER_NAME = "jdbcIdColumnName";
+
+    /**
+     * Name of the JDBC table column that holds the current version number.
+     */
+    public static final String JDBC_VERSION_COLUMN_NAME_PARAMETER_NAME = "jdbcVersionColumnName";
+
+    /**
+     * Name of the JDBC table column that holds the web service configuration data.
+     */
+    public static final String JDBC_CONFIG_COLUMN_NAME_PARAMETER_NAME = "jdbcConfigColumnName";
+
+    /**
+     * Default name of the database table that holds the configuration data.
+     */
+    public static final String JDBC_DEFAULT_TABLE_NAME = "METRO_CONFIG";
+
+    /**
+     * Default name of the database column that holds the web service ID.
+     */
+    public static final String JDBC_DEFAULT_ID_COLUMN_NAME = "id";
+
+    /**
+     * Default name of the database column that holds the configuration data's
+     * current version number.
+     */
+    public static final String JDBC_DEFAULT_VERSION_COLUMN_NAME = "version";
+
+    /**
+     * Default name of the database column that holds the configuration data.
+     */
+    public static final String JDBC_DEFAULT_CONFIG_COLUMN_NAME = "config";
+
+    /**
      * Fully qualified name of the ManagedService policy assertion.
      */
     public static final QName SERVICE_ASSERTION_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
-    
+
     /**
      * Prevent this class from being instantiated.
      */
