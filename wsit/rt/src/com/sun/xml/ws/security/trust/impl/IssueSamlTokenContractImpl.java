@@ -380,7 +380,7 @@ public  class IssueSamlTokenContractImpl extends IssueSamlTokenContract {
         final KeyInfo keyInfo = new KeyInfo(doc);
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){
             final byte[] key = ctx.getProofKey();
-            if (!stsConfig.getEncryptIssuedToken() && stsConfig.getEncryptIssuedKey()){
+            if (stsConfig.getEncryptIssuedKey()){
                 final EncryptedKey encKey = encryptKey(doc, key, serCert, appliesTo, null);
                 try{
                     keyInfo.add(encKey);
