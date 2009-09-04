@@ -95,6 +95,7 @@ public class JMXAgent<T> implements CommunicationServer {
 
 
     public void init(NamedParameters parameters) {
+        JMXServiceURL jmxUrl = null;
         try {
             this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
             this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
@@ -113,40 +114,41 @@ public class JMXAgent<T> implements CommunicationServer {
             
             // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
             this.server = MBeanServerFactory.createMBeanServer();
-            final JMXServiceURL jmxUrl = getServiceURL(managedService);
+            jmxUrl = getServiceURL(managedService);
             final Map<String, String> env = getConnectorServerEnvironment(managedService);
             this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, this.server);
-        } catch (MalformedURLException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
         } catch (IOException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5045_MBEAN_CONNECTOR_CREATE_FAILED(jmxUrl), e));
         }
     }
 
     public void start() {
-        if (server != null && connector != null) {
+        if (this.server != null && this.connector != null) {
+            final ReconfigMBean mbean = createMBean();
             try {
-                server.registerMBean(createMBean(), getObjectName());
+                server.registerMBean(mbean, getObjectName());
                 connector.start();
-                LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, connector.getAddress()));
-
-                // TODO make interval configurable
+                LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, this.connector.getAddress()));
                 this.configReader.start();
             } catch (InstanceAlreadyExistsException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5041_MBEAN_INSTANCE_EXISTS(mbean), ex));
             } catch (MBeanRegistrationException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5042_MBEAN_REGISTRATION_FAILED(mbean), ex));
             } catch (NotCompliantMBeanException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5042_MBEAN_REGISTRATION_FAILED(mbean), ex));
+
             } catch (IOException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5043_MBEAN_CONNECTOR_START_FAILED(this.connector), ex));
             }
+        }
+        else {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5044_MBEAN_SERVER_START_FAILED(this.server, this.connector)));
         }
     }
 
@@ -156,23 +158,38 @@ public class JMXAgent<T> implements CommunicationServer {
                 connector.stop();
             }
         } catch (IOException ex) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(ex));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5046_MBEAN_CONNECTOR_STOP_FAILED(this.connector), ex));
         } finally {
+            final ObjectName name = getObjectName();
             try {
                 if (this.server != null) {
-                    this.server.unregisterMBean(getObjectName());
+                    this.server.unregisterMBean(name);
                 }
             } catch (InstanceNotFoundException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5047_MBEAN_UNREGISTER_INSTANCE_FAILED(name), ex));
             } catch (MBeanRegistrationException ex) {
-                // TODO add error message
-                throw LOGGER.logSevereException(new WebServiceException(ex));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        ManagementMessages.WSM_5048_MBEAN_UNREGISTRATION_FAILED(name), ex));
             } finally {
                 this.configReader.stop();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder("JMXAgent [ ");
+        text.append("Endpoint ID = ").append(this.endpointId);
+        text.append("ManagedEndpoint = ").append(this.managedEndpoint);
+        text.append(", MBeanServer = ").append(this.server);
+        text.append(", JMXConnectorServer = ").append(this.connector);
+        text.append(", ConfigReader = ").append(this.configReader);
+        text.append(", EndpointCreationAttributes = ").append(this.endpointCreationAttributes);
+        text.append(", ClassLoader = ").append(this.classLoader);
+        text.append(" ]");
+        return text.toString();
     }
 
     private ReconfigMBean createMBean() {
@@ -188,15 +205,17 @@ public class JMXAgent<T> implements CommunicationServer {
     }
 
     private ObjectName getObjectName() {
+        final String name = "com.sun.xml.ws.config.management:className=" + this.endpointId;
         try {
-            return new ObjectName("com.sun.xml.ws.config.management:className=" + this.endpointId);
+            return new ObjectName(name);
         } catch (MalformedObjectNameException ex) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(ex));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5049_INVALID_OBJECT_NAME(name), ex));
         }
     }
 
     private JMXServiceURL getServiceURL(ManagedServiceAssertion managedService) {
+        String jmxServiceUrl = null;
         try {
             final Collection<ImplementationRecord> records = managedService.getCommunicationServerImplementations();
             Map<String, String> parameters = null;
@@ -207,7 +226,6 @@ public class JMXAgent<T> implements CommunicationServer {
                     break;
                 }
             }
-            String jmxServiceUrl = null;
             if (parameters != null) {
                 jmxServiceUrl = parameters.get(JMX_SERVICE_URL_PARAMETER_NAME);
             }
@@ -219,8 +237,8 @@ public class JMXAgent<T> implements CommunicationServer {
             LOGGER.config(ManagementMessages.WSM_5005_JMX_SERVICE_URL(jmxServiceUrl));
             return new JMXServiceURL(jmxServiceUrl);
         } catch (MalformedURLException ex) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(ex));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5050_INVALID_JMX_SERVICE_URL(jmxServiceUrl), ex));
         }
     }
 
