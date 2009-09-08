@@ -361,7 +361,7 @@ public class TrustPluginImpl implements TrustPlugin {
         if (signatureAlgorithm == null){
             signatureAlgorithm = stsConfig.getSignatureAlgorithm();
             if (signatureAlgorithm != null){
-                rst.setSignWith(URI.create(signWith));
+                rst.setSignatureAlgorithm(URI.create(signatureAlgorithm));
             }
         }
 

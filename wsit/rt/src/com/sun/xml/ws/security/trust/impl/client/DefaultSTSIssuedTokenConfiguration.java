@@ -289,19 +289,19 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
             // Get STS information from local configuration
             if (PRE_CONFIGURED_STS.equals(localToken.getName().getLocalPart())) {
                 final Map<QName,String> attrs = localToken.getAttributes();
-                stsProtocol = attrs.get(new QName(CONFIG_NAMESPACE, WST_VERSION));
+                stsProtocol = trim(attrs.get(new QName(CONFIG_NAMESPACE, WST_VERSION)));
                 if (stsURI == null){
-                    this.stsNamespace = attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE));
-                    this.stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT));
+                    this.stsNamespace = trim(attrs.get(new QName(CONFIG_NAMESPACE,NAMESPACE)));
+                    this.stsEndpoint = trim(attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT)));
                     if (stsEndpoint == null){
-                        stsEndpoint = attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase()));
+                        stsEndpoint = trim(attrs.get(new QName(CONFIG_NAMESPACE,ENDPOINT.toLowerCase())));
                     }
-                    this.stsMEXAddress = attrs.get(new QName(CONFIG_NAMESPACE, METADATA));
+                    this.stsMEXAddress = trim(attrs.get(new QName(CONFIG_NAMESPACE, METADATA)));
                 
                     if (stsMEXAddress == null){
-                        this.stsWSDLLocation = attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION));
-                        this.stsServiceName = attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME));
-                        this.stsPortName = attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME));
+                        this.stsWSDLLocation = trim(attrs.get(new QName(CONFIG_NAMESPACE,WSDL_LOCATION)));
+                        this.stsServiceName = trim(attrs.get(new QName(CONFIG_NAMESPACE,SERVICE_NAME)));
+                        this.stsPortName = trim(attrs.get(new QName(CONFIG_NAMESPACE,PORT_NAME)));
                     }
                 }
 
@@ -383,33 +383,33 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
     }
       
     private void copy(RequestSecurityTokenTemplate rstt){
-        this.setTokenType(rstt.getTokenType());
-        this.setKeyType(rstt.getKeyType());
+        this.setTokenType(trim(rstt.getTokenType()));
+        this.setKeyType(trim(rstt.getKeyType()));
         this.setKeySize(rstt.getKeySize());
-        this.setSignWith(rstt.getSignWith());
-        this.setEncryptWith(rstt.getEncryptWith());
-        this.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
-        this.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
-        this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
+        this.setSignWith(trim(rstt.getSignWith()));
+        this.setEncryptWith(trim(rstt.getEncryptWith()));
+        this.setSignatureAlgorithm(trim(rstt.getSignatureAlgorithm()));
+        this.setEncryptionAlgorithm(trim(rstt.getEncryptionAlgorithm()));
+        this.setCanonicalizationAlgorithm(trim(rstt.getCanonicalizationAlgorithm()));
     }
 
     private void copy(RequestSecurityTokenTemplate rstt, SecondaryIssuedTokenParametersImpl sitp){
-        sitp.setTokenType(rstt.getTokenType());
-        sitp.setKeyType(rstt.getKeyType());
+        sitp.setTokenType(trim(rstt.getTokenType()));
+        sitp.setKeyType(trim(rstt.getKeyType()));
         sitp.setKeySize(rstt.getKeySize());
-        sitp.setSignWith(rstt.getSignWith());
-        sitp.setEncryptWith(rstt.getEncryptWith());
-        sitp.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
-        sitp.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
-        sitp.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
-        sitp.setKeyWrapAlgorithm(rstt.getKeyWrapAlgorithm());
+        sitp.setSignWith(trim(rstt.getSignWith()));
+        sitp.setEncryptWith(trim(rstt.getEncryptWith()));
+        sitp.setSignatureAlgorithm(trim(rstt.getSignatureAlgorithm()));
+        sitp.setEncryptionAlgorithm(trim(rstt.getEncryptionAlgorithm()));
+        sitp.setCanonicalizationAlgorithm(trim(rstt.getCanonicalizationAlgorithm()));
+        sitp.setKeyWrapAlgorithm(trim(rstt.getKeyWrapAlgorithm()));
     }
     
     private void copy(RequestSecurityTokenTemplate rstt, String stsWstProtocol, String serviceWstProtocol){
         // Convert KeyType
         WSTrustVersion stsWstVer = WSTrustVersion.getInstance(stsWstProtocol);
         WSTrustVersion serviceWstVer = WSTrustVersion.getInstance(serviceWstProtocol);
-        String rsttKeyType = rstt.getKeyType();
+        String rsttKeyType = trim(rstt.getKeyType());
         if (serviceWstVer.getPublicKeyTypeURI().equals(rsttKeyType)){
             setKeyType(stsWstVer.getPublicKeyTypeURI());
         }else if (serviceWstVer.getSymmetricKeyTypeURI().equals(rsttKeyType)){
@@ -417,13 +417,13 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         }else if (serviceWstVer.getBearerKeyTypeURI().equals(rsttKeyType)){
             setKeyType(stsWstVer.getBearerKeyTypeURI());
         }
-        this.setTokenType(rstt.getTokenType());
+        this.setTokenType(trim(rstt.getTokenType()));
         this.setKeySize(rstt.getKeySize());
-        this.setSignWith(rstt.getSignWith());
-        this.setEncryptWith(rstt.getEncryptWith());
-        this.setSignatureAlgorithm(rstt.getSignatureAlgorithm());
-        this.setEncryptionAlgorithm(rstt.getEncryptionAlgorithm());
-        this.setCanonicalizationAlgorithm(rstt.getCanonicalizationAlgorithm());
+        this.setSignWith(trim(rstt.getSignWith()));
+        this.setEncryptWith(trim(rstt.getEncryptWith()));
+        this.setSignatureAlgorithm(trim(rstt.getSignatureAlgorithm()));
+        this.setEncryptionAlgorithm(trim(rstt.getEncryptionAlgorithm()));
+        this.setCanonicalizationAlgorithm(trim(rstt.getCanonicalizationAlgorithm()));
     }
 
     public void copy(STSIssuedTokenConfiguration config){
@@ -517,6 +517,14 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
         }
 
         return new GenericToken(fact.createBinarySecurityToken(bst));
+    }
+
+    private String trim(String uriStr){
+        if (uriStr != null){
+            return uriStr.trim();
+        }
+
+        return uriStr;
     }
 }
 
