@@ -298,7 +298,6 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         "sequenceInactivityTimeout",
         "destinationBufferQuota",
         "orderedDeliveryEnabled",
-        "makeConnectionEnabled",
         "deliveryAssurance",
         "securityBinding",
         "persistenceEnabled",
