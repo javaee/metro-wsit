@@ -43,6 +43,8 @@ import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.Implement
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -96,7 +98,7 @@ public class ManagementFactory {
             for (ImplementationRecord record : communicationServers) {
                 final CommunicationServer implementation = instantiateImplementation(
                         record, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
-                parameters.putAll(record.getParameters());
+                addParameters(record.getParameters(), parameters);
                 implementation.init(parameters);
                 result.add(implementation);
             }
@@ -150,7 +152,7 @@ public class ManagementFactory {
         final ConfigReader reader = instantiateImplementation(record,
                 DEFAULT_CONFIG_READER_CLASS_NAME, ConfigReader.class);
         if (record != null) {
-            parameters.putAll(record.getParameters());
+            addParameters(record.getParameters(), parameters);
         }
         reader.init(parameters);
         return reader;
@@ -187,6 +189,12 @@ public class ManagementFactory {
         } catch (IllegalAccessException e) {
             throw LOGGER.logSevereException(new WebServiceException(
                     ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
+        }
+    }
+
+    private static void addParameters(Map<QName, String> inParameters, NamedParameters outParameters) {
+        for (QName name : inParameters.keySet()) {
+            outParameters.put(name.getLocalPart(), inParameters.get(name));
         }
     }
 

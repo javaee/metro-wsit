@@ -161,29 +161,34 @@ public class ManagedServiceAssertion extends SimpleAssertion {
 
     private ImplementationRecord getImplementation(PolicyAssertion rootParameter) {
         final String className = rootParameter.getAttributeValue(CLASS_NAME_ATTRIBUTE_QNAME);
-        final HashMap<String, String> parameterMap = new HashMap<String, String>();
+        final HashMap<QName, String> parameterMap = new HashMap<QName, String>();
         final Iterator<PolicyAssertion> implementationParameters = rootParameter.getParametersIterator();
+        final Collection<NestedParameters> nestedParameters = new LinkedList<NestedParameters>();
         while (implementationParameters.hasNext()) {
             final PolicyAssertion parameterAssertion = implementationParameters.next();
             final QName parameterName = parameterAssertion.getName();
-            if (PARAMETER_PARAMETER_QNAME.equals(parameterName)) {
-                final String name = parameterAssertion.getAttributeValue(NAME_ATTRIBUTE_QNAME);
-                if (name == null) {
-                    ManagementMessages.WSM_5027_PARAMETER_MISSING_ATTRIBUTE(parameterName, NAME_ATTRIBUTE_QNAME);
+            if (parameterAssertion.hasParameters()) {
+                final Map<QName, String> nestedParameterMap = new HashMap<QName, String>();
+                final Iterator<PolicyAssertion> parameters = parameterAssertion.getParametersIterator();
+                while (parameters.hasNext()) {
+                    final PolicyAssertion parameter = parameters.next();
+                    String value = parameter.getValue();
+                    if (value != null) {
+                        value = value.trim();
+                    }
+                    nestedParameterMap.put(parameter.getName(), value);
                 }
-                final String value = parameterAssertion.getValue();
-                if (value == null) {
-                    throw LOGGER.logSevereException(new WebServiceException(
-                        ManagementMessages.WSM_5014_XML_VALUE_EMPTY(PARAMETER_PARAMETER_QNAME)));
-                }
-                parameterMap.put(name, value.trim());
+                nestedParameters.add(new NestedParameters(parameterName, nestedParameterMap));
             }
             else {
-                throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5013_EXPECTED_XML_TAG(PARAMETER_PARAMETER_QNAME, parameterName)));
+                String value = parameterAssertion.getValue();
+                if (value != null) {
+                    value = value.trim();
+                }
+                parameterMap.put(parameterName, value);
             }
         }
-        return new ImplementationRecord(className, parameterMap, null);
+        return new ImplementationRecord(className, parameterMap, nestedParameters);
     }
 
 
@@ -194,10 +199,10 @@ public class ManagedServiceAssertion extends SimpleAssertion {
     public static class ImplementationRecord {
 
         private final String implementation;
-        private final Map<String, String> parameters;
+        private final Map<QName, String> parameters;
         private final Collection<NestedParameters> nestedParameters;
 
-        protected ImplementationRecord(String implementation, Map<String, String> parameters,
+        protected ImplementationRecord(String implementation, Map<QName, String> parameters,
                 Collection<NestedParameters> nestedParameters) {
             this.implementation = implementation;
             this.parameters = parameters;
@@ -208,7 +213,7 @@ public class ManagedServiceAssertion extends SimpleAssertion {
             return this.implementation;
         }
 
-        public Map<String, String> getParameters() {
+        public Map<QName, String> getParameters() {
             return this.parameters;
         }
 
@@ -261,19 +266,19 @@ public class ManagedServiceAssertion extends SimpleAssertion {
 
     public static class NestedParameters {
 
-        private final String name;
-        private final Map<String, String> parameters;
+        private final QName name;
+        private final Map<QName, String> parameters;
 
-        private NestedParameters(String name, Map<String, String> parameters) {
+        private NestedParameters(QName name, Map<QName, String> parameters) {
             this.name = name;
             this.parameters = parameters;
         }
 
-        public String getName() {
+        public QName getName() {
             return this.name;
         }
 
-        public Map<String, String> getParameters() {
+        public Map<QName, String> getParameters() {
             return this.parameters;
         }
 

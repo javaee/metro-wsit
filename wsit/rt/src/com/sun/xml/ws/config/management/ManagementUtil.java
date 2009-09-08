@@ -54,6 +54,7 @@ import java.util.Map;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -144,7 +145,7 @@ public class ManagementUtil {
         if (record != null) {
             final String className = record.getImplementation();
             if (className == null || defaultClassName.equals(className)) {
-                final Map<String, String> parameters = record.getParameters();
+                final Map<QName, String> parameters = record.getParameters();
                 if (parameters != null) {
                     sourceName = parameters.get(ManagementConstants.JDBC_DATA_SOURCE_PARAMETER_NAME);
                 }
@@ -176,7 +177,7 @@ public class ManagementUtil {
         if (record != null) {
             final String className = record.getImplementation();
             if (className == null || className.equals(defaultClassName)) {
-                final Map<String, String> parameters = record.getParameters();
+                final Map<QName, String> parameters = record.getParameters();
                 if (parameters.containsKey(ManagementConstants.JDBC_TABLE_NAME_PARAMETER_NAME)) {
                     tableName = parameters.get(ManagementConstants.JDBC_TABLE_NAME_PARAMETER_NAME);
                 }

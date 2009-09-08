@@ -50,6 +50,7 @@ import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.NestedParameters;
+import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -67,6 +68,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -79,8 +81,10 @@ import javax.xml.ws.WebServiceException;
 public class JMXAgent<T> implements CommunicationServer {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
-    private static final String JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME = "JmxConnectorServerEnviroment";
-    private static final String JMX_SERVICE_URL_PARAMETER_NAME = "jmxServiceUrl";
+    private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerEnviroment");
+    private static final QName JMX_SERVICE_URL_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxServiceUrl");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
     private ConfigReader configReader;
@@ -218,7 +222,7 @@ public class JMXAgent<T> implements CommunicationServer {
         String jmxServiceUrl = null;
         try {
             final Collection<ImplementationRecord> records = managedService.getCommunicationServerImplementations();
-            Map<String, String> parameters = null;
+            Map<QName, String> parameters = null;
             for (ImplementationRecord record : records) {
                 final String name = record.getImplementation();
                 if (name == null || name.equals(JMXAgent.class.getName())) {
@@ -251,7 +255,14 @@ public class JMXAgent<T> implements CommunicationServer {
                 if (nestedParameters != null) {
                     for (NestedParameters parameter : nestedParameters) {
                         if (JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME.equals(parameter.getName())) {
-                            return parameter.getParameters();
+                            final Map<QName, String> parameters = parameter.getParameters();
+                            final Map<String, String> result = new HashMap<String, String>();
+                            if (parameters != null) {
+                                for (QName key : parameters.keySet()) {
+                                    result.put(key.getLocalPart(), parameters.get(key));
+                                }
+                            }
+                            return result;
                         }
                     }
                 }

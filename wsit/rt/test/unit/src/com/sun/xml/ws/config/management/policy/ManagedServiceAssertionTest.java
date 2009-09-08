@@ -38,7 +38,9 @@ package com.sun.xml.ws.config.management.policy;
 
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.NestedParameters;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
@@ -142,8 +144,9 @@ public class ManagedServiceAssertionTest extends TestCase {
                 ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
 
         final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
-        final HashMap<String, String> expMap = new HashMap<String, String>();
-        final ImplementationRecord expResult = new ImplementationRecord("CommunicationServerTestClass", expMap, null);
+        final HashMap<QName, String> expMap = new HashMap<QName, String>();
+        final ImplementationRecord expResult = new ImplementationRecord(
+                "CommunicationServerTestClass", expMap, new LinkedList<NestedParameters>());
         final Collection<ImplementationRecord> records = instance.getCommunicationServerImplementations();
         assertEquals(1, records.size());
         final ImplementationRecord record = records.iterator().next();
@@ -169,8 +172,9 @@ public class ManagedServiceAssertionTest extends TestCase {
                 ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
 
         final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
-        final HashMap<String, String> expMap = new HashMap<String, String>();
-        ImplementationRecord expResult = new ImplementationRecord("ConfiguratorTestClass", expMap, null);
+        final HashMap<QName, String> expMap = new HashMap<QName, String>();
+        ImplementationRecord expResult = new ImplementationRecord(
+                "ConfiguratorTestClass", expMap, new LinkedList<NestedParameters>());
         ImplementationRecord result = instance.getConfiguratorImplementation();
         assertEquals(expResult, result);
     }
@@ -194,8 +198,9 @@ public class ManagedServiceAssertionTest extends TestCase {
                 ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
 
         final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
-        final HashMap<String, String> expMap = new HashMap<String, String>();
-        ImplementationRecord expResult = new ImplementationRecord("ConfigSaverTestClass", expMap, null);
+        final HashMap<QName, String> expMap = new HashMap<QName, String>();
+        ImplementationRecord expResult = new ImplementationRecord(
+                "ConfigSaverTestClass", expMap, new LinkedList<NestedParameters>());
         ImplementationRecord result = instance.getConfigSaverImplementation();
         assertEquals(expResult, result);
     }
@@ -219,17 +224,16 @@ public class ManagedServiceAssertionTest extends TestCase {
                 ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
 
         final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
-        final HashMap<String, String> expMap = new HashMap<String, String>();
-        ImplementationRecord expResult = new ImplementationRecord("ConfigReaderTestClass", expMap, null);
+        final HashMap<QName, String> expMap = new HashMap<QName, String>();
+        ImplementationRecord expResult = new ImplementationRecord(
+                "ConfigReaderTestClass", expMap, new LinkedList<NestedParameters>());
         ImplementationRecord result = instance.getConfigReaderImplementation();
         assertEquals(expResult, result);
     }
 
     public void testGetConfigReaderImplementationJdbcDataSourceName() throws AssertionCreationException {
-        final HashMap<QName, String> parameterAttributes = new HashMap<QName, String>();
-        parameterAttributes.put(ManagedServiceAssertion.NAME_ATTRIBUTE_QNAME, ManagementConstants.JDBC_DATA_SOURCE_PARAMETER_NAME);
         final AssertionData parameterData = AssertionData.createAssertionData(
-                ManagedServiceAssertion.PARAMETER_PARAMETER_QNAME, "source1", parameterAttributes, false, false);
+                ManagementConstants.JDBC_DATA_SOURCE_PARAMETER_NAME, "source1", null, false, false);
         final LinkedList<PolicyAssertion> configReaderParameters = new LinkedList<PolicyAssertion>();
         configReaderParameters.add(new SimpleAssertion(parameterData, null) { });
 
@@ -247,9 +251,49 @@ public class ManagedServiceAssertionTest extends TestCase {
         final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
         final HashMap<String, String> expMap = new HashMap<String, String>();
         ImplementationRecord implementation = instance.getConfigReaderImplementation();
-        Map<String, String> parameters = implementation.getParameters();
+        Map<QName, String> parameters = implementation.getParameters();
         String expResult = "source1";
         String result = parameters.get(ManagementConstants.JDBC_DATA_SOURCE_PARAMETER_NAME);
+        assertEquals(expResult, result);
+    }
+
+    public void testGetCommunicationServerJmxServerUrl() throws AssertionCreationException {
+        final QName parameterName = new QName("ParameterName");
+        final AssertionData nestedData = AssertionData.createAssertionData(
+                parameterName, "parameterValue", null, false, false);
+        final LinkedList<PolicyAssertion> nestedAssertions = new LinkedList<PolicyAssertion>();
+        nestedAssertions.add(new SimpleAssertion(nestedData, null) { });
+
+        final AssertionData environmentData = AssertionData.createAssertionData(
+                new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerEnviroment"), null, null, false, false);
+        final LinkedList<PolicyAssertion> environmentParameters = new LinkedList<PolicyAssertion>();
+        environmentParameters.add(new SimpleAssertion(environmentData, nestedAssertions) { });
+
+        final AssertionData commServerData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME, null, null, false, false);
+        final LinkedList<PolicyAssertion> commServerParameters = new LinkedList<PolicyAssertion>();
+        commServerParameters.add(new SimpleAssertion(commServerData, environmentParameters) { });
+
+        final AssertionData commServersData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.COMMUNICATION_SERVER_IMPLEMENTATIONS_PARAMETER_QNAME, null, null, false, false);
+        final LinkedList<PolicyAssertion> managedServiceParameters = new LinkedList<PolicyAssertion>();
+        managedServiceParameters.add(new SimpleAssertion(commServersData, commServerParameters) { });
+
+        final HashMap<QName, String> managedServiceAttributes = new HashMap<QName, String>();
+        managedServiceAttributes.put(ManagedServiceAssertion.ID_ATTRIBUTE_QNAME, "id1");
+        final AssertionData managedServiceData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
+
+        final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
+        final Collection<ImplementationRecord> implementations = instance.getCommunicationServerImplementations();
+        final ImplementationRecord implementation = implementations.iterator().next();
+        final Collection<NestedParameters> nestedParameters = implementation.getNestedParameters();
+        final NestedParameters nestedParameter = nestedParameters.iterator().next();
+        final QName nestedName = nestedParameter.getName();
+        assertEquals("JmxConnectorServerEnviroment", nestedName.getLocalPart());
+        final Map<QName, String> result = nestedParameter.getParameters();
+        final Map<QName, String> expResult = new HashMap<QName, String>();
+        expResult.put(parameterName, "parameterValue");
         assertEquals(expResult, result);
     }
 

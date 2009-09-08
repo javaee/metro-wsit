@@ -49,6 +49,7 @@ public interface ConfigSaver {
      * Persist configuration changes.
      *
      * @param parameters Any parameter that needs to be passed into the implementation
+     * @throws WebServiceException If persisting the configuration failed.
      */
     void persist(NamedParameters parameters) throws WebServiceException;
 

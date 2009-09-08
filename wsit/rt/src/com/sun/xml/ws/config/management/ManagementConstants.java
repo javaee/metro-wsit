@@ -56,27 +56,32 @@ public class ManagementConstants {
     /**
      * Name of the JDBC data source parameter in the config management configuration.
      */
-    public static final String JDBC_DATA_SOURCE_PARAMETER_NAME = "jdbcDataSourceName";
+    public static final QName JDBC_DATA_SOURCE_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JdbcDataSourceName");
 
     /**
      * Name of the JDBC table for the config management configuration.
      */
-    public static final String JDBC_TABLE_NAME_PARAMETER_NAME = "jdbcTableName";
+    public static final QName JDBC_TABLE_NAME_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JdbcTableName");
 
     /**
      * Name of the JDBC table column that holds the web service ID.
      */
-    public static final String JDBC_ID_COLUMN_NAME_PARAMETER_NAME = "jdbcIdColumnName";
+    public static final QName JDBC_ID_COLUMN_NAME_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JdbcIdColumnName");
 
     /**
      * Name of the JDBC table column that holds the current version number.
      */
-    public static final String JDBC_VERSION_COLUMN_NAME_PARAMETER_NAME = "jdbcVersionColumnName";
+    public static final QName JDBC_VERSION_COLUMN_NAME_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JdbcVersionColumnName");
 
     /**
      * Name of the JDBC table column that holds the web service configuration data.
      */
-    public static final String JDBC_CONFIG_COLUMN_NAME_PARAMETER_NAME = "jdbcConfigColumnName";
+    public static final QName JDBC_CONFIG_COLUMN_NAME_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JdbcConfigColumnName");
 
     /**
      * Default name of the database table that holds the configuration data.

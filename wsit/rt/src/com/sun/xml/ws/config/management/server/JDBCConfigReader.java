@@ -50,6 +50,7 @@ import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.Reader;
 import java.sql.Connection;
@@ -60,6 +61,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.sql.DataSource;
+import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -71,7 +73,8 @@ import javax.xml.ws.WebServiceException;
 public class JDBCConfigReader implements ConfigReader {
 
     private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
-    private static final String POLLING_INTERVAL_PARAMETER_NAME = "pollingInterval";
+    private static final QName POLLING_INTERVAL_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "PollingInterval");
     private static final long DEFAULT_POLLING_INTERVAL = 10000L;
 
     private volatile ConfigPoller poller = null;
@@ -91,7 +94,7 @@ public class JDBCConfigReader implements ConfigReader {
         if (className == null || className.equals(JDBCConfigReader.class.getName())) {
             String pollingIntervalText = null;
             try {
-                final Map<String, String> classParameters = record.getParameters();
+                final Map<QName, String> classParameters = record.getParameters();
                 pollingIntervalText = classParameters.get(POLLING_INTERVAL_PARAMETER_NAME);
                 if (pollingIntervalText != null) {
                     pollingInterval = Long.parseLong(pollingIntervalText);
