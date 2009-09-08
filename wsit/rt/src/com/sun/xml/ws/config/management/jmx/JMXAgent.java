@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.NamedParameters;
+import com.sun.xml.ws.api.config.management.jmx.JmxConnectorServerCreator;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
@@ -57,6 +58,7 @@ import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -85,6 +87,8 @@ public class JMXAgent<T> implements CommunicationServer {
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerEnviroment");
     private static final QName JMX_SERVICE_URL_PARAMETER_NAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxServiceUrl");
+    private static final QName JMX_CONNECTOR_SERVER_CREATOR_PARAMETER_NAME =
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerCreator");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
     private ConfigReader configReader;
@@ -100,31 +104,26 @@ public class JMXAgent<T> implements CommunicationServer {
 
     public void init(NamedParameters parameters) {
         JMXServiceURL jmxUrl = null;
-        try {
-            this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
-            this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-            this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
-            this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
+        this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
+        this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
+        this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
+        this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
 
-            final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint);
+        final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint);
 
-            final ManagementFactory factory = new ManagementFactory(managedService);
-            final EndpointStarter endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
-            this.configReader = factory.createConfigReaderImpl(new NamedParameters()
-                        .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
-                        .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
-                        .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
-                        .put(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME, endpointStarter));
-            
-            // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
-            this.server = MBeanServerFactory.createMBeanServer();
-            jmxUrl = getServiceURL(managedService);
-            final Map<String, String> env = getConnectorServerEnvironment(managedService);
-            this.connector = JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, this.server);
-        } catch (IOException e) {
-            throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5045_MBEAN_CONNECTOR_CREATE_FAILED(jmxUrl), e));
-        }
+        final ManagementFactory factory = new ManagementFactory(managedService);
+        final EndpointStarter endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
+        this.configReader = factory.createConfigReaderImpl(new NamedParameters()
+                    .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
+                    .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
+                    .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
+                    .put(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME, endpointStarter));
+
+        // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
+        this.server = MBeanServerFactory.createMBeanServer();
+        jmxUrl = getServiceURL(managedService);
+        final Map<String, String> env = getConnectorServerEnvironment(managedService);
+        this.connector = getJmxConnectorServer(managedService, jmxUrl, env, this.server);
     }
 
     public void start() {
@@ -221,15 +220,7 @@ public class JMXAgent<T> implements CommunicationServer {
     private JMXServiceURL getServiceURL(ManagedServiceAssertion managedService) {
         String jmxServiceUrl = null;
         try {
-            final Collection<ImplementationRecord> records = managedService.getCommunicationServerImplementations();
-            Map<QName, String> parameters = null;
-            for (ImplementationRecord record : records) {
-                final String name = record.getImplementation();
-                if (name == null || name.equals(JMXAgent.class.getName())) {
-                    parameters = record.getParameters();
-                    break;
-                }
-            }
+            final Map<QName, String> parameters = getParameters(managedService);
             if (parameters != null) {
                 jmxServiceUrl = parameters.get(JMX_SERVICE_URL_PARAMETER_NAME);
             }
@@ -269,6 +260,62 @@ public class JMXAgent<T> implements CommunicationServer {
             }
         }
         return null;
+    }
+
+    private static JMXConnectorServer getJmxConnectorServer(final ManagedServiceAssertion managedService,
+            JMXServiceURL jmxUrl, final Map<String, String> env, final MBeanServer server) {
+        String connectorServerName = null;
+        try {
+            final Map<QName, String> parameters = getParameters(managedService);
+
+            if (parameters != null) {
+                connectorServerName = parameters.get(JMX_CONNECTOR_SERVER_CREATOR_PARAMETER_NAME);
+                if (connectorServerName != null) {
+                    if (LOGGER.isLoggable(Level.FINE)) {
+                        LOGGER.fine(ManagementMessages.WSM_5051_FOUND_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName));
+                    }
+                    @SuppressWarnings("unchecked")
+                    final Class<JmxConnectorServerCreator> creatorClass =
+                            (Class<JmxConnectorServerCreator>) Class.forName(connectorServerName);
+                    final JmxConnectorServerCreator creator = creatorClass.newInstance();
+                    if (LOGGER.isLoggable(Level.CONFIG)) {
+                        LOGGER.config(ManagementMessages.WSM_5052_INVOKING_JMX_CONNECTOR_SERVER_CREATOR(
+                                creator, jmxUrl, env, server));
+                    }
+                    return creator.create(jmxUrl, env, server);
+                }
+            }
+
+            return JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, server);
+        } catch (ClassNotFoundException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5053_CLASS_NOT_FOUND_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5054_FAILED_CLASS_CAST_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+        } catch (InstantiationException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5054_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+        } catch (IllegalAccessException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5054_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+        } catch (IOException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5045_MBEAN_CONNECTOR_CREATE_FAILED(jmxUrl), e));
+        }
+    }
+
+    private static Map<QName, String> getParameters(final ManagedServiceAssertion assertion) {
+        final Collection<ImplementationRecord> records = assertion.getCommunicationServerImplementations();
+        Map<QName, String> parameters = null;
+        for (ImplementationRecord record : records) {
+            final String name = record.getImplementation();
+            if (name == null || name.equals(JMXAgent.class.getName())) {
+                parameters = record.getParameters();
+                break;
+            }
+        }
+        return parameters;
     }
 
 }
