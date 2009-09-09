@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -87,6 +88,9 @@ public class ManagementUtil {
         LOGGER.entering(endpoint);
         try {
             PolicyAssertion assertion = null;
+            // getPolicyMap is deprecated because it is only supposed to be used by Metro code
+            // and not by other clients.
+            @SuppressWarnings("deprecation")
             final PolicyMap policyMap = endpoint.getPolicyMap();
             if (policyMap != null) {
                 final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(endpoint.getServiceName(), endpoint.getPortName());
@@ -153,7 +157,9 @@ public class ManagementUtil {
         }
 
         try {
-            LOGGER.config(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
+            }
             InitialContext initCtx = new InitialContext();
             return (DataSource) initCtx.lookup(sourceName);
         } catch (NamingException e) {
