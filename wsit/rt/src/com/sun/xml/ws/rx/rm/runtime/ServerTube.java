@@ -55,6 +55,7 @@ import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
 import com.sun.xml.ws.rx.rm.faults.CreateSequenceRefusedFault;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
+import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData.Builder;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceResponseData;
 import com.sun.xml.ws.rx.rm.protocol.CreateSequenceData;
@@ -400,7 +401,12 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         try {
             final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
-            responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
+
+            // override the final sequence acknowledgement flag as this sequence is not closed yet (but is closing already)
+            Builder ackDataBuilder = AcknowledgementData.getBuilder(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
+            ackDataBuilder.setFinalAcknowledgement();
+            responseBuilder.acknowledgementData(ackDataBuilder.build());
+            
             return rc.protocolHandler.toPacket(responseBuilder.build(), request);            
         } finally {
             try {

@@ -332,10 +332,9 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                     }
                 }
             }
-            // TODO handle final and remaining buffer in the header
+            ackDataBuilder.acknowledgements(ackElement.getId(), ranges, ackElement.getFinal() != null);
+            // TODO handle remaining buffer in the header
             // ackElement.getBufferRemaining();
-            // ackElement.getFinal();
-            ackDataBuilder.acknowledgements(ackElement.getId(), ranges);
         }
         return ackDataBuilder.build();
     }

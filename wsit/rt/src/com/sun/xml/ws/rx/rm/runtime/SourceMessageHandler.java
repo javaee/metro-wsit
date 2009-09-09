@@ -136,7 +136,7 @@ class SourceMessageHandler implements MessageHandler {
              * are established.
              */
 
-            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
+            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers(), inboundSequence.isClosed());
             inboundSequence.clearAckRequestedFlag();
         }
         // outbound sequence ack requested flag

@@ -370,7 +370,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             }
             // TODO handle final and remaining buffer in the header
             // ackElement.getBufferRemaining();
-            ackDataBuilder.acknowledgements(ackElement.getId(), ranges);
+            ackDataBuilder.acknowledgements(ackElement.getId(), ranges, false);
         }
         return ackDataBuilder.build();
     }

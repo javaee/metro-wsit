@@ -50,8 +50,16 @@ public final class AcknowledgementData {
         private String ackedSequenceId;
         private List<AckRange> ackedRanges;
         private String ackRequestedSequenceId;
+        private boolean isFinalAcknowledgement;
 
         private Builder() {
+        }
+
+        private Builder(AcknowledgementData data) {
+            this.ackRequestedSequenceId = data.ackRequestedSequenceId;
+            this.ackedRanges = data.ackedRanges;
+            this.ackedSequenceId = data.ackedSequenceId;
+            this.isFinalAcknowledgement = data.isFinalAcknowledgement;
         }
 
         /**
@@ -59,12 +67,27 @@ public final class AcknowledgementData {
          *
          * @param ackedSequenceId idnetifier of a sequence to which acknowledged message number ranges (if any) belong
          * @param acknowledgedMessageIds acknowledged ranges for the sequence identified by {@code ackSequenceId}
+         * @param isFinal sets the final flag on the acknowledgement data which means that this is a final acknowledgement.
          */
-        public void acknowledgements(@NotNull String ackedSequenceId, List<AckRange> acknowledgedMessageIds) {
+        public Builder acknowledgements(@NotNull String ackedSequenceId, List<AckRange> acknowledgedMessageIds, boolean isFinal) {
             assert ackedSequenceId != null;
 
             this.ackedSequenceId = ackedSequenceId;
             this.ackedRanges = acknowledgedMessageIds;
+            this.isFinalAcknowledgement = isFinal;
+
+            return this;
+        }
+
+        /**
+         * Sets value of Final flag for the sequence acknowledgement
+         *
+         * @param ackRequestedSequenceId value of sequence identifier for which acknowledgement is requested
+         */
+        public Builder setFinalAcknowledgement() {
+            this.isFinalAcknowledgement = true;
+
+            return this;
         }
 
         /**
@@ -72,12 +95,16 @@ public final class AcknowledgementData {
          *
          * @param ackRequestedSequenceId value of sequence identifier for which acknowledgement is requested
          */
-        public void ackReqestedSequenceId(String ackRequestedSequenceId) {
+        public Builder ackReqestedSequenceId(@NotNull String ackRequestedSequenceId) {
+            assert ackRequestedSequenceId != null;
+
             this.ackRequestedSequenceId = ackRequestedSequenceId;
+
+            return this;
         }
 
         public AcknowledgementData build() {
-            return new AcknowledgementData(ackedSequenceId, ackedRanges, ackRequestedSequenceId);
+            return new AcknowledgementData(ackedSequenceId, ackedRanges, ackRequestedSequenceId, isFinalAcknowledgement);
         }
     }
 
@@ -85,14 +112,20 @@ public final class AcknowledgementData {
         return new Builder();
     }
 
-    private String ackedSequenceId;
-    private List<AckRange> ackedRanges;
-    private String ackRequestedSequenceId;
+    public static Builder getBuilder(AcknowledgementData data) {
+        return new Builder(data);
+    }
 
-    private AcknowledgementData(String ackedSequenceId, List<AckRange> ackedRanges, String ackRequestedSequenceId) {
+    private final String ackedSequenceId;
+    private final List<AckRange> ackedRanges;
+    private final String ackRequestedSequenceId;
+    private final boolean isFinalAcknowledgement;
+
+    private AcknowledgementData(String ackedSequenceId, List<AckRange> ackedRanges, String ackRequestedSequenceId, boolean isFinal) {
         this.ackedSequenceId = ackedSequenceId;
         this.ackedRanges = ackedRanges;
         this.ackRequestedSequenceId = ackRequestedSequenceId;
+        this.isFinalAcknowledgement = isFinal;
     }
     /**
      * Returns idnetifier of a sequence to which acknowledged message number ranges (if any) belong
@@ -125,6 +158,22 @@ public final class AcknowledgementData {
         return this.ackRequestedSequenceId;
     }
 
+    /**
+     * Returns value of the final flag which determines whether this is a final acknowledgement or not
+     *
+     * @return value of the final flag which determines whether this is a final acknowledgement or not
+     */
+    public boolean isFinalAcknowledgement() {
+        return isFinalAcknowledgement;
+    }
+
+    /**
+     * Returns {@code true} if the instance contains any acknowledgement data that could be sent
+     * to an RM source. Otherwise returns {@code false}.
+     *
+     * @return {@code true} if the instance contains any acknowledgement data that could be sent
+     * to an RM source. Otherwise returns {@code false}.
+     */
     public boolean containsSequenceAcknowledgementData() {
         return this.ackedSequenceId != null && this.ackedRanges != null && !this.ackedRanges.isEmpty();
     }

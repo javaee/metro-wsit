@@ -123,8 +123,8 @@ class DestinationMessageHandler implements MessageHandler {
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
         final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
-        if (inboundSequence.isAckRequested()) {
-            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers());
+        if (inboundSequence.isAckRequested() || inboundSequence.isClosed()) {
+            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers(), inboundSequence.isClosed());
             inboundSequence.clearAckRequestedFlag();
         }
 
@@ -134,10 +134,9 @@ class DestinationMessageHandler implements MessageHandler {
             ackDataBuilder.ackReqestedSequenceId(outboundSequence.getId());
             outboundSequence.updateLastAcknowledgementRequestTime();
         }
-        final AcknowledgementData acknowledgementData = ackDataBuilder.build();
-        return acknowledgementData;
+        
+        return ackDataBuilder.build();
     }
-
 
     public void acknowledgeApplicationLayerDelivery(ApplicationMessage inMessage) throws UnknownSequenceException {
         assert sequenceManager != null;

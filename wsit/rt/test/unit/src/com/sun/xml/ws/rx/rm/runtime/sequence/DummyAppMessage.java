@@ -15,7 +15,7 @@ class DummyAppMessage extends ApplicationMessageBase {
         if (ackReqestedFlag) {
             ackDataBuilder.ackReqestedSequenceId(sequenceId);
         }
-        ackDataBuilder.acknowledgements(ackSequenceId, ackRanges);
+        ackDataBuilder.acknowledgements(ackSequenceId, ackRanges, false);
 
         setAcknowledgementData(ackDataBuilder.build());
     }
@@ -26,9 +26,5 @@ class DummyAppMessage extends ApplicationMessageBase {
 
     public DummyAppMessage(String correlationId) {
         super(correlationId);
-    }
-
-    public byte[] toBytes() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
