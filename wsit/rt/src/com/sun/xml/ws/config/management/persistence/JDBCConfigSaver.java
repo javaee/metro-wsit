@@ -106,7 +106,7 @@ public class JDBCConfigSaver<T> implements ConfigSaver<T> {
         PreparedStatement updateStatement = null;
         PreparedStatement insertStatement = null;
         try {
-            final String update = "UPDATE " + tableNames.getTableName() + " " +
+            final String update = "UPDATE " + tableNames.getTableName() + " SET " +
                     tableNames.getVersionName() + " = " + tableNames.getVersionName() +
                     " + 1, " + tableNames.getConfigName() + " = ? WHERE id = ?";
             updateStatement = connection.prepareStatement(update);
