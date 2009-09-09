@@ -96,19 +96,21 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
         long pollingInterval = DEFAULT_POLLING_INTERVAL;
         final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
         final ImplementationRecord record = assertion.getConfigReaderImplementation();
-        final String className = record.getImplementation();
-        if (className == null || className.equals(JDBCConfigReader.class.getName())) {
-            String pollingIntervalText = null;
-            try {
-                final Map<QName, String> classParameters = record.getParameters();
-                pollingIntervalText = classParameters.get(POLLING_INTERVAL_PARAMETER_NAME);
-                if (pollingIntervalText != null) {
-                    pollingInterval = Long.parseLong(pollingIntervalText);
+        if (record != null) {
+            final String className = record.getImplementation();
+            if (className == null || className.equals(JDBCConfigReader.class.getName())) {
+                String pollingIntervalText = null;
+                try {
+                    final Map<QName, String> classParameters = record.getParameters();
+                    pollingIntervalText = classParameters.get(POLLING_INTERVAL_PARAMETER_NAME);
+                    if (pollingIntervalText != null) {
+                        pollingInterval = Long.parseLong(pollingIntervalText);
+                    }
+                } catch (NumberFormatException e) {
+                    throw LOGGER.logSevereException(new WebServiceException(
+                            ManagementMessages.WSM_5039_FAILED_NUMBER_CONVERSION(
+                            POLLING_INTERVAL_PARAMETER_NAME, pollingIntervalText), e));
                 }
-            } catch (NumberFormatException e) {
-                throw LOGGER.logSevereException(new WebServiceException(
-                        ManagementMessages.WSM_5039_FAILED_NUMBER_CONVERSION(
-                        POLLING_INTERVAL_PARAMETER_NAME, pollingIntervalText), e));
             }
         }
         this.poller = new ConfigPoller<T>(endpoint, attributes, classLoader, starter, pollingInterval);
