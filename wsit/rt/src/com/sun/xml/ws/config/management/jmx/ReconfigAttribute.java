@@ -64,15 +64,16 @@ class ReconfigAttribute<T> {
     public final static String SERVICE_WSDL_ATTRIBUTE_NAME = ManagementMessages.RECONFIG_ATTRIBUTE_NAME();
 
     private final ManagedEndpoint<T> managedEndpoint;
+    private final Configurator<T> configurator;
     private final EndpointCreationAttributes endpointCreationAttributes;
     private final ClassLoader classLoader;
 
     private volatile String newPolicies;
 
-    public ReconfigAttribute(ManagedEndpoint<T> endpoint,
-            EndpointCreationAttributes creationAttributes,
-            ClassLoader classLoader) {
+    public ReconfigAttribute(ManagedEndpoint<T> endpoint, Configurator<T> configurator,
+            EndpointCreationAttributes creationAttributes, ClassLoader classLoader) {
         this.managedEndpoint = endpoint;
+        this.configurator = configurator;
         this.endpointCreationAttributes = creationAttributes;
         this.classLoader = classLoader;
     }
@@ -102,13 +103,12 @@ class ReconfigAttribute<T> {
         try {
             this.newPolicies = value;
             final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(this.managedEndpoint));
-            final Configurator config = factory.createConfiguratorImpl();
             final NamedParameters parameters = new NamedParameters()
                     .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                     .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
                     .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
                     .put(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME, value);
-            config.recreate(parameters);
+            this.configurator.recreate(parameters);
         } catch (WebServiceException cause) {
             final InvalidAttributeValueException exception = new InvalidAttributeValueException(
                     ManagementMessages.WSM_5009_RECONFIGURATION_FAILED());

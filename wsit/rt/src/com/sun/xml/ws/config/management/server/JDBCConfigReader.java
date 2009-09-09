@@ -38,6 +38,7 @@ package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.ConfigReader;
+import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
@@ -68,26 +69,31 @@ import javax.xml.ws.WebServiceException;
  * This implementation polls a JDBC data sources for changes and if it finds a new
  * configuration, it reconfigures the managed endpoint.
  *
+ * This implementation starts the endpoint immediately unless the ManagedService
+ * start attribute was set to "notify". Otherwise it will start the endpoint
+ * only when it finds new configuration data.
+ *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public class JDBCConfigReader implements ConfigReader {
+public class JDBCConfigReader<T> implements ConfigReader<T> {
 
-    private static final Logger LOGGER = Logger.getLogger(ConfigPoller.class);
+    private static final Logger LOGGER = Logger.getLogger(JDBCConfigReader.class);
     private static final QName POLLING_INTERVAL_PARAMETER_NAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "PollingInterval");
     private static final long DEFAULT_POLLING_INTERVAL = 10000L;
 
-    private volatile ConfigPoller poller = null;
+    private volatile ConfigPoller<T> poller = null;
 
 
-    public synchronized void init(NamedParameters parameters) {
+    public synchronized void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes attributes,
+            ClassLoader classLoader, EndpointStarter starter) {
         if (this.poller != null) {
             throw LOGGER.logSevereException(new IllegalStateException(
                     ManagementMessages.WSM_5031_DUPLICATE_INITIALIZATION(getClass().getName())));
         }
 
         long pollingInterval = DEFAULT_POLLING_INTERVAL;
-        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
         final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
         final ImplementationRecord record = assertion.getConfigReaderImplementation();
         final String className = record.getImplementation();
@@ -105,10 +111,10 @@ public class JDBCConfigReader implements ConfigReader {
                         POLLING_INTERVAL_PARAMETER_NAME, pollingIntervalText), e));
             }
         }
-        this.poller = new ConfigPoller(parameters, pollingInterval);
+        this.poller = new ConfigPoller<T>(endpoint, attributes, classLoader, starter, pollingInterval);
     }
 
-    public synchronized void start() {
+    public synchronized void start(NamedParameters parameters) {
         if (poller == null) {
             throw LOGGER.logSevereException(new IllegalStateException(
                     ManagementMessages.WSM_5032_POLLER_START_FAILED(getClass().getName())));
@@ -126,24 +132,37 @@ public class JDBCConfigReader implements ConfigReader {
     }
 
 
-    private static class ConfigPoller implements DelayedTask {
+    /**
+     * This implementation polls the database for a new version of the configuration
+     * data. It reconfigures the endpoint as soon as it finds a new version.
+     *
+     * This implementation starts the endpoint immediately unless the ManagedService
+     * start attribute was set to "notify". Otherwise it will start the endpoint
+     * only when it finds new configuration data.
+     *
+     * @param <T> The endpoint implementation class type.
+     */
+    private static class ConfigPoller<T> implements DelayedTask {
 
         private static final String START_ATTRIBUTE_NOTIFY_VALUE_NAME = "notify";
         private static final String POLLER_NAME = "JDBC configuration management poller";
 
-        private final ManagedEndpoint endpoint;
+        private final ManagedEndpoint<T> endpoint;
+        private final EndpointCreationAttributes creationAttributes;
+        private final ClassLoader classLoader;
         private final EndpointStarter endpointStarter;
         private final ManagedServiceAssertion managedService;
-        private final NamedParameters configParameters;
         private final long executionDelay;
 
         private volatile boolean stopped;
         private volatile long version = 0L;
 
-        public ConfigPoller(final NamedParameters parameters, final long executionDelay) {
-            this.endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-            this.endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
-            this.configParameters = parameters;
+        public ConfigPoller(final ManagedEndpoint<T> endpoint, final EndpointCreationAttributes attributes,
+                final ClassLoader classLoader, final EndpointStarter starter, final long executionDelay) {
+            this.endpoint = endpoint;
+            this.creationAttributes = attributes;
+            this.classLoader = classLoader;
+            this.endpointStarter = starter;
 
             this.managedService = ManagementUtil.getAssertion(this.endpoint);
 
@@ -155,7 +174,7 @@ public class JDBCConfigReader implements ConfigReader {
                 if (LOGGER.isLoggable(Level.CONFIG)) {
                     LOGGER.config(ManagementMessages.WSM_5035_START_ENDPOINT_IMMEDIATELY(start));
                 }
-                endpointStarter.startEndpoint();
+                this.endpointStarter.startEndpoint();
             }
             else {
                 if (LOGGER.isLoggable(Level.CONFIG)) {
@@ -270,9 +289,12 @@ public class JDBCConfigReader implements ConfigReader {
         }
 
         private void reconfigure(Reader reader) {
-            this.configParameters.put(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME, ManagementUtil.convert(reader));
-            final ReDelegate redelegate = new ReDelegate();
-            redelegate.recreate(this.configParameters);
+            final NamedParameters parameters = new NamedParameters()
+                    .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.endpoint)
+                    .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
+                    .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
+                    .put(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME, ManagementUtil.convert(reader));
+            ReDelegate.recreate(parameters);
             this.endpointStarter.startEndpoint();
         }
 

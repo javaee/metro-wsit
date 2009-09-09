@@ -58,11 +58,18 @@ import javax.xml.ws.WebServiceException;
 /**
  * Default implementation that persists the new configuration data with JDBC.
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public class JDBCConfigSaver implements ConfigSaver {
+public class JDBCConfigSaver<T> implements ConfigSaver<T> {
 
     private static final Logger LOGGER = Logger.getLogger(JDBCConfigSaver.class);
+
+    private ManagedEndpoint<T> endpoint;
+
+    public void init(ManagedEndpoint<T> endpoint) {
+        this.endpoint = endpoint;
+    }
 
     /**
      * Persist the data
@@ -74,14 +81,13 @@ public class JDBCConfigSaver implements ConfigSaver {
         Connection connection = null;
         DataSource source = null;
         try {
-            final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
+            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
             final ImplementationRecord record = assertion.getConfigSaverImplementation();
             source = ManagementUtil.getJdbcDataSource(record, JDBCConfigSaver.class.getName());
             connection = source.getConnection();
             final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record, JDBCConfigSaver.class.getName());
             final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
-            writeData(connection, tableNames, endpoint.getId(), newConfig);
+            writeData(connection, tableNames, this.endpoint.getId(), newConfig);
         } catch (SQLException e) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e));
         } finally {

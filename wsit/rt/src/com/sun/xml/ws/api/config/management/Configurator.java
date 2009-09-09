@@ -36,12 +36,47 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import javax.xml.ws.WebServiceException;
+
 /**
+ * This interface encapsulates the logic to reconfigure an endpoint instance.
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface Configurator {
+public interface Configurator<T> {
 
-    public <T> void recreate(NamedParameters parameters);
+    /**
+     * Initializes the endpoint.
+     *
+     * @param endpoint The managed endpoint instance. Must not be null.
+     * @param reader A ConfigReader instance. Must not be null.
+     * @param saver A ConfigSaver instance. Must not be null.
+     * @throws WebServiceException If the initialization failed.
+     */
+    public void init(ManagedEndpoint<T> endpoint, ConfigReader<T> reader, ConfigSaver<T> saver)
+            throws WebServiceException;
+
+    /**
+     * Starts any concurrent tasks required by the implementation.
+     * 
+     * @throws WebServiceException If the start failed.
+     */
+    public void start() throws WebServiceException;
+
+    /**
+     * Starts any concurrent tasks required by the implementation.
+     *
+     * @throws WebServiceException If stopping failed.
+     */
+    public void stop() throws WebServiceException;
+
+    /**
+     * Reconfigures an endpoint instance.
+     *
+     * @param parameters The reconfiguration data.
+     * @throws WebServiceException If the reconfiguration failed.
+     */
+    public void recreate(NamedParameters parameters) throws WebServiceException;
 
 }

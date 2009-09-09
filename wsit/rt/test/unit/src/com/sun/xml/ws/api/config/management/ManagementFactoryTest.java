@@ -37,14 +37,14 @@
 package com.sun.xml.ws.api.config.management;
 
 //import com.sun.xml.ws.config.management.jmx.JMXAgent;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.server.DefaultConfigurator;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+//import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
+//import com.sun.xml.ws.config.management.server.DefaultConfigurator;
+//import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 
 //import java.util.Collection;
-import java.util.HashMap;
-import javax.xml.namespace.QName;
+//import java.util.HashMap;
+//import javax.xml.namespace.QName;
 import junit.framework.TestCase;
 
 /**
@@ -91,15 +91,15 @@ public class ManagementFactoryTest extends TestCase {
      * @throws AssertionCreationException
      */
     public void testCreateConfiguratorImpl() throws AssertionCreationException {
-        final HashMap<QName, String> attributes = new HashMap<QName, String>();
-        attributes.put(ManagedServiceAssertion.ID_ATTRIBUTE_QNAME, "id1");
-        final AssertionData data = AssertionData.createAssertionData(ManagedServiceAssertion.MANAGED_SERVICE_QNAME,
-                null, attributes, false, false);
-        final ManagedServiceAssertion assertion = new ManagedServiceAssertion(data, null);
-
-        ManagementFactory instance = new ManagementFactory(assertion);
-        Configurator result = instance.createConfiguratorImpl();
-        assertTrue(DefaultConfigurator.class.isInstance(result));
+//        final HashMap<QName, String> attributes = new HashMap<QName, String>();
+//        attributes.put(ManagedServiceAssertion.ID_ATTRIBUTE_QNAME, "id1");
+//        final AssertionData data = AssertionData.createAssertionData(ManagedServiceAssertion.MANAGED_SERVICE_QNAME,
+//                null, attributes, false, false);
+//        final ManagedServiceAssertion assertion = new ManagedServiceAssertion(data, null);
+//
+//        ManagementFactory instance = new ManagementFactory(assertion);
+//        Configurator result = instance.createConfiguratorImpl();
+//        assertTrue(DefaultConfigurator.class.isInstance(result));
     }
 
     /**

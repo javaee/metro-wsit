@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -86,13 +87,13 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     private static final Logger LOGGER = Logger.getLogger(ManagedEndpoint.class);
 
     private final String id;
-    private final EndpointCreationAttributes creationAttributes;
     private WSEndpoint<T> endpointDelegate;
 
     private final CountDownLatch startSignal = new CountDownLatch(1);
 
-    private final Collection<CommunicationServer> commInterfaces;
+    private final Collection<CommunicationServer<T>> commInterfaces;
     private final Collection<ReconfigNotifier> reconfigNotifiers = new LinkedList<ReconfigNotifier>();
+    private final Configurator<T> configurator;
 
     /**
      * Initializes this endpoint.
@@ -107,7 +108,6 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
             final EndpointCreationAttributes attributes) {
         try {
             this.id = id;
-            this.creationAttributes = attributes;
             this.endpointDelegate = endpoint;
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -116,20 +116,40 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
             }
 
             final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(endpoint));
-            final NamedParameters parameters = new NamedParameters()
-                    .put(ENDPOINT_ID_PARAMETER_NAME, this.id)
-                    .put(ENDPOINT_INSTANCE_PARAMETER_NAME, this)
-                    .put(CREATION_ATTRIBUTES_PARAMETER_NAME, this.creationAttributes)
-                    .put(CLASS_LOADER_PARAMETER_NAME, classLoader)
-                    .put(ENDPOINT_STARTER_PARAMETER_NAME, this);
-            this.commInterfaces = factory.createCommunicationImpls(parameters);
+
+            final ConfigReader<T> reader = factory.createConfigReaderImpl(
+                    this, attributes, classLoader, this);
+            final ConfigSaver<T> saver = factory.createConfigSaverImpl(this);
+            this.configurator = factory.createConfiguratorImpl(this, reader, saver);
+            this.commInterfaces = factory.createCommunicationImpls(this, attributes,
+                    classLoader, this.configurator, this);
+
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5055_STARTING_CONFIGURATOR(this.configurator));
+            }
+            this.configurator.start();
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5056_STARTED_CONFIGURATOR(this.configurator));
+            }
+            
             for (CommunicationServer commInterface : commInterfaces) {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(ManagementMessages.WSM_5057_STARTING_COMMUNICATION(commInterface));
+                }
                 commInterface.start();
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(ManagementMessages.WSM_5058_STARTED_COMMUNICATION(commInterface));
+                }
             }
 
-            // TODO log that we are blocking
             // block until we receive a start signal
+            if (LOGGER.isLoggable(Level.CONFIG)) {
+                LOGGER.config(ManagementMessages.WSM_5065_BLOCKING_ENDPOINT());
+            }
             startSignal.await();
+            if (LOGGER.isLoggable(Level.CONFIG)) {
+                LOGGER.config(ManagementMessages.WSM_5066_STARTING_ENDPOINT());
+            }
         } catch (InterruptedException e) {
             // TODO add error message
             throw LOGGER.logSevereException(new WebServiceException(e));
@@ -173,6 +193,37 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
 
         this.endpointDelegate = endpoint;
         LOGGER.info(ManagementMessages.WSM_5004_RECONFIGURED_ENDPOINT(this.id));
+    }
+
+    @Override
+    public void dispose() {
+        for (CommunicationServer commInterface: this.commInterfaces) {
+            try {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(ManagementMessages.WSM_5061_STOPPING_COMMUNICATION(commInterface));
+                }
+                commInterface.stop();
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(ManagementMessages.WSM_5062_STOPPED_COMMUNICATION(commInterface));
+                }
+            } catch (WebServiceException e) {
+                LOGGER.severe(ManagementMessages.WSM_5063_FAILED_COMMUNICATION_STOP(commInterface));
+            }
+        }
+        try {
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5059_STOPPING_CONFIGURATOR(this.configurator));
+            }
+            this.configurator.stop();
+            if (LOGGER.isLoggable(Level.FINE)) {
+                LOGGER.fine(ManagementMessages.WSM_5060_STOPPED_CONFIGURATOR(this.configurator));
+            }
+        } catch (WebServiceException e) {
+            LOGGER.severe(ManagementMessages.WSM_5064_FAILED_CONFIGURATOR_STOP(this.configurator));
+        }
+        if (this.endpointDelegate != null) {
+            this.endpointDelegate.dispose();
+        }
     }
 
     @Override
@@ -223,16 +274,6 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     @Override
     public PipeHead createPipeHead() {
         return this.endpointDelegate.createPipeHead();
-    }
-
-    @Override
-    public void dispose() {
-        for (CommunicationServer commInterface: this.commInterfaces) {
-            commInterface.stop();
-        }
-        if (this.endpointDelegate != null) {
-            this.endpointDelegate.dispose();
-        }
     }
 
     @Override

@@ -36,24 +36,39 @@
 
 package com.sun.xml.ws.config.management.server;
 
+import com.sun.xml.ws.api.config.management.ConfigReader;
 import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.NamedParameters;
-import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
-import com.sun.xml.ws.config.management.ManagementUtil;
 
 /**
+ * This implementation starts a ConfigReader and forwards all reconfiguration
+ * requests to the ConfigSaver implementation.
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public class DefaultConfigurator implements Configurator {
+public class DefaultConfigurator<T> implements Configurator<T> {
 
-    public <T> void recreate(NamedParameters parameters) {
-        final ManagedEndpoint endpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-        final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(endpoint));
-        final ConfigSaver persist = factory.createConfigSaverImpl();
-        persist.persist(parameters);
+    private ConfigSaver<T> configSaver;
+    private ConfigReader<T> configReader;
+
+    public void init(ManagedEndpoint<T> endpoint, ConfigReader<T> reader, ConfigSaver<T> saver) {
+        this.configSaver = saver;
+        this.configReader = reader;
+    }
+
+    public void start() {
+        this.configReader.start(new NamedParameters());
+    }
+
+    public void stop() {
+        this.configReader.stop();
+    }
+
+    public void recreate(NamedParameters parameters) {
+        this.configSaver.persist(parameters);
     }
 
 }

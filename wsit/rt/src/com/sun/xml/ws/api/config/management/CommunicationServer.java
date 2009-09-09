@@ -36,16 +36,45 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import javax.xml.ws.WebServiceException;
+
 /**
+ * The API that encapsulates any communication interface for configuration
+ * management.
  *
+ * @param <T> The endpoint type.
  * @author Fabian Ritzmann
  */
-public interface CommunicationServer {
+public interface CommunicationServer<T> {
 
-    public void init(NamedParameters parameters);
+    /**
+     * Initialize the communication interface.
+     *
+     * @param endpoint The ManagedEndpoint instance. Must not be null.
+     * @param creationAttributes The attributes with which the original endpoint
+     *   was created.
+     * @param classLoader The class loader that is associated with the original
+     *   endpoint.
+     * @param configurator A Configurator instance. May not be null.
+     * @param starter An EndpointStarter instance. May not be null.
+     * @throws WebServiceException If initialization failed.
+     */
+    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes creationAttributes,
+            ClassLoader classLoader, Configurator<T> configurator, EndpointStarter starter)
+            throws WebServiceException;
 
-    public void start();
+    /**
+     * Start the communication interface.
+     *
+     * @throws WebServiceException If the start failed.
+     */
+    public void start() throws WebServiceException;
 
-    public void stop();
+    /**
+     * Stop the communication interface.
+     *
+     * @throws WebServiceException If stopping the interface failed.
+     */
+    public void stop() throws WebServiceException;
     
 }

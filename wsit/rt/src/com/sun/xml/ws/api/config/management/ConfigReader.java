@@ -39,16 +39,45 @@ package com.sun.xml.ws.api.config.management;
 import javax.xml.ws.WebServiceException;
 
 /**
- * Read configuration changes.
+ * Establish if the configuration data has changed and reconfigure the endpoint
+ * with the new configuration data.
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface ConfigReader {
+public interface ConfigReader<T> {
 
-    public void init(NamedParameters parameters) throws WebServiceException;
+    /**
+     * Initialize the reader.
+     *
+     * @param endpoint A ManagedEndpoint instance. Must not be null.
+     * @param attributes The attributes with which the original WSEndpoint instance
+     *   was created.
+     * @param classLoader The class loader that is associated with the original
+     *   WSEndpoint instance.
+     * @param starter An EndpointStarter instance. Must not be null.
+     * @throws WebServiceException If the initialization failed.
+     */
+    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes attributes,
+            ClassLoader classLoader, EndpointStarter starter) throws WebServiceException;
 
-    public void start() throws WebServiceException;
+    /**
+     * Start this reader.
+     *
+     * It is assumed that the reader will concurrently poll or wait for a
+     * configuration change event.
+     *
+     * @param parameters Custom configurator implementations can use this to pass
+     *   in their own parameters.
+     * @throws WebServiceException If the start failed.
+     */
+    public void start(NamedParameters parameters) throws WebServiceException;
 
+    /**
+     * Stop this reader.
+     *
+     * @throws WebServiceException If stopping failed.
+     */
     public void stop() throws WebServiceException;
     
 }

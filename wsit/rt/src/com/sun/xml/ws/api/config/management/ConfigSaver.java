@@ -41,9 +41,18 @@ import javax.xml.ws.WebServiceException;
 /**
  * Persist configuration changes
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface ConfigSaver {
+public interface ConfigSaver<T> {
+
+    /**
+     * Initialize this instance.
+     * 
+     * @param endpoint The ManagedEndpoint instance. Must not be null.
+     * @throws WebServiceException If initialization failed.
+     */
+    void init(ManagedEndpoint<T> endpoint) throws WebServiceException;
 
     /**
      * Persist configuration changes.

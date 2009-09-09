@@ -43,8 +43,6 @@ import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.Implement
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
-import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -77,33 +75,50 @@ public class ManagementFactory {
     /**
      * Finds and returns all CommunicationServer implementations.
      *
-     * By default it returns a JMX-based implementation for the CommunicationServer.
+     * By default it returns a JMX based implementation for the CommunicationServer.
      *
-     * @param parameters Parameters to initialize the implementations. Must not be null.
+     * @param <T> The type of the endpoint implementation.
+     * @param endpoint The ManagedEndpoint instance. May not be null.
+     * @param creationAttributes The attributes with which the original endpoint
+     *   was created. May not be null.
+     * @param classLoader The class loader that is associated with the original
+     *   endpoint. Must not be null.
+     * @param configurator A Configurator instance. May not be null.
+     * @param starter An Endpoint starter instance. May not be null.
      * @return The initialized CommunicationServer implementations.
      * @throws WebServiceException If a CommunicationServer implementation could not
      *   be instantiated or initialized or if no CommunicationServer implementation
      *   was found.
      */
-    public Collection<CommunicationServer> createCommunicationImpls(NamedParameters parameters) throws WebServiceException {
-        final Collection<CommunicationServer> result = new LinkedList<CommunicationServer>();
-        final Collection<ImplementationRecord> communicationServers = this.assertion.getCommunicationServerImplementations();
-        if (communicationServers.isEmpty()) {
-            final CommunicationServer implementation = instantiateImplementation(
-                    DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
-            implementation.init(parameters);
-            result.add(implementation);
-        }
-        else {
-            for (ImplementationRecord record : communicationServers) {
-                final CommunicationServer implementation = instantiateImplementation(
-                        record, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
-                addParameters(record.getParameters(), parameters);
-                implementation.init(parameters);
+    public <T> Collection<CommunicationServer<T>> createCommunicationImpls(ManagedEndpoint<T> endpoint,
+            EndpointCreationAttributes creationAttributes, ClassLoader classLoader,
+            Configurator<T> configurator, EndpointStarter starter) throws WebServiceException {
+        try {
+            final Collection<CommunicationServer<T>> result = new LinkedList<CommunicationServer<T>>();
+            final Collection<ImplementationRecord> communicationServers = this.assertion.getCommunicationServerImplementations();
+            if (communicationServers.isEmpty()) {
+                // Cannot instantiate a generic type with reflection.
+                @SuppressWarnings("unchecked")
+                final CommunicationServer<T> implementation = instantiateImplementation(
+                        DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
+                implementation.init(endpoint, creationAttributes, classLoader, configurator, starter);
                 result.add(implementation);
             }
+            else {
+                for (ImplementationRecord record : communicationServers) {
+                    // Cannot instantiate a generic type with reflection.
+                    @SuppressWarnings("unchecked")
+                    final CommunicationServer<T> implementation = instantiateImplementation(
+                            record, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
+                    implementation.init(endpoint, creationAttributes, classLoader, configurator, starter);
+                    result.add(implementation);
+                }
+            }
+            return result;
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5068_FAILED_COMMUNICATION_SERVER_CAST(), e));
         }
-        return result;
     }
 
     /**
@@ -111,13 +126,27 @@ public class ManagementFactory {
      *
      * The default Configurator implementation passes the request into a ConfigSaver.
      *
+     * @param <T> The endpoint implementation class type.
+     * @param endpoint The managed endpoint instance. Must not be null.
+     * @param reader A ConfigReader instance. Must not be null.
+     * @param saver A ConfigSaver instance. Must not be null.
      * @return A Configurator implementation
      * @throws WebServiceException If a Configurator implementation could not be
      *   instantiated or if no implementation was found.
      */
-    public Configurator createConfiguratorImpl() throws WebServiceException {
-        return instantiateImplementation(this.assertion.getConfiguratorImplementation(),
-                DEFAULT_CONFIGURATOR_CLASS_NAME, Configurator.class);
+    public <T> Configurator<T> createConfiguratorImpl(ManagedEndpoint<T> endpoint,
+            ConfigReader<T> reader, ConfigSaver<T> saver) throws WebServiceException {
+        try {
+            final ImplementationRecord record = this.assertion.getConfiguratorImplementation();
+            @SuppressWarnings("unchecked")
+            final Configurator<T> configurator = instantiateImplementation(record,
+                    DEFAULT_CONFIGURATOR_CLASS_NAME, Configurator.class);
+            configurator.init(endpoint, reader, saver);
+            return configurator;
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5071_FAILED_CONFIGURATOR_CAST(), e));
+        }
     }
 
     /**
@@ -126,13 +155,24 @@ public class ManagementFactory {
      * The default ConfigSaver implementation writes the configuration data to a
      * database with JDBC.
      *
+     * @param <T> The endpoint implementation class type.
+     * @param endpoint The endpoint implementation class type.
      * @return A ConfigSaver implementation
      * @throws WebServiceException If a ConfigSaver implementation could not be
      *   instantiated or if no implementation was found.
      */
-    public ConfigSaver createConfigSaverImpl() throws WebServiceException {
-        return instantiateImplementation(this.assertion.getConfigSaverImplementation(),
-                DEFAULT_CONFIG_SAVER_CLASS_NAME, ConfigSaver.class);
+    public <T> ConfigSaver<T> createConfigSaverImpl(ManagedEndpoint<T> endpoint) throws WebServiceException {
+        try {
+            final ImplementationRecord record = this.assertion.getConfigSaverImplementation();
+            @SuppressWarnings("unchecked")
+            final ConfigSaver<T> configSaver = instantiateImplementation(record,
+                    DEFAULT_CONFIG_SAVER_CLASS_NAME, ConfigSaver.class);
+            configSaver.init(endpoint);
+            return configSaver;
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5070_FAILED_CONFIG_SAVER_CAST(), e));
+        }
     }
 
     /**
@@ -141,21 +181,33 @@ public class ManagementFactory {
      * By default it returns an implementation that polls a database with JDBC for
      * changes to the configuration data.
      *
-     * @param parameters Parameters to initialize the implementations.
+     * @param <T> The endpoint implementation class type.
+     * @param endpoint A ManagedEndpoint instance. Must not be null.
+     * @param attributes The attributes with which the original WSEndpoint instance
+     *   was created.
+     * @param classLoader The class loader that is associated with the original
+     *   WSEndpoint instance.
+     * @param starter An EndpointStarter instance. Must not be null.
      * @return The initialized ConfigReader implementation.
      * @throws WebServiceException If a ConfigReader implementation could not
      *   be instantiated or initialized or if no ConfigReader implementation
      *   was found.
      */
-    public ConfigReader createConfigReaderImpl(NamedParameters parameters) throws WebServiceException {
-        final ImplementationRecord record = this.assertion.getConfigReaderImplementation();
-        final ConfigReader reader = instantiateImplementation(record,
-                DEFAULT_CONFIG_READER_CLASS_NAME, ConfigReader.class);
-        if (record != null) {
-            addParameters(record.getParameters(), parameters);
+    public <T> ConfigReader<T> createConfigReaderImpl(ManagedEndpoint<T> endpoint,
+            EndpointCreationAttributes attributes, ClassLoader classLoader, EndpointStarter starter)
+            throws WebServiceException {
+        try {
+            final ImplementationRecord record = this.assertion.getConfigReaderImplementation();
+            // Cannot instantiate a generic type with reflection.
+            @SuppressWarnings("unchecked")
+            final ConfigReader<T> reader = instantiateImplementation(record,
+                    DEFAULT_CONFIG_READER_CLASS_NAME, ConfigReader.class);
+            reader.init(endpoint, attributes, classLoader, starter);
+            return reader;
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5069_FAILED_CONFIG_READER_CAST(), e));
         }
-        reader.init(parameters);
-        return reader;
     }
 
     private static <T> T instantiateImplementation(ImplementationRecord record,
@@ -178,23 +230,20 @@ public class ManagementFactory {
 
     private static <T> T instantiateImplementation(String className, Class<T> type) throws WebServiceException {
         try {
-            final Class implementation = Class.forName(className);
-            return type.cast(implementation.newInstance());
+            final Class<? extends T> implementation = Class.forName(className).asSubclass(type);
+            return implementation.newInstance();
         } catch (ClassNotFoundException e) {
             throw LOGGER.logSevereException(new WebServiceException(
                     ManagementMessages.WSM_5015_FAILED_LOAD_CLASS(className), e));
+        } catch (ClassCastException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5067_FAILED_CLASS_CAST(className, type), e));
         } catch (InstantiationException e) {
             throw LOGGER.logSevereException(new WebServiceException(
                     ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
         } catch (IllegalAccessException e) {
             throw LOGGER.logSevereException(new WebServiceException(
                     ManagementMessages.WSM_5016_FAILED_INSTANTIATE_OBJECT(type.getName()), e));
-        }
-    }
-
-    private static void addParameters(Map<QName, String> inParameters, NamedParameters outParameters) {
-        for (QName name : inParameters.keySet()) {
-            outParameters.put(name.getLocalPart(), inParameters.get(name));
         }
     }
 

@@ -38,12 +38,10 @@ package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.CommunicationServer;
-import com.sun.xml.ws.api.config.management.ConfigReader;
+import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
-import com.sun.xml.ws.api.config.management.ManagementFactory;
-import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.jmx.JmxConnectorServerCreator;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.config.management.ManagementMessages;
@@ -80,7 +78,7 @@ import javax.xml.ws.WebServiceException;
  * 
  * @author Fabian Ritzmann
  */
-public class JMXAgent<T> implements CommunicationServer {
+public class JMXAgent<T> implements CommunicationServer<T> {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME =
@@ -91,8 +89,6 @@ public class JMXAgent<T> implements CommunicationServer {
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerCreator");
     private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
-    private ConfigReader configReader;
-
     private MBeanServer server;
     private JMXConnectorServer connector;
 
@@ -100,26 +96,20 @@ public class JMXAgent<T> implements CommunicationServer {
     private ManagedEndpoint<T> managedEndpoint;
     private EndpointCreationAttributes endpointCreationAttributes;
     private ClassLoader classLoader;
+    private Configurator<T> configurator;
 
 
-    public void init(NamedParameters parameters) {
+    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes creationAttributes,
+            ClassLoader classLoader, Configurator<T> configurator, EndpointStarter starter) {
         JMXServiceURL jmxUrl = null;
-        this.endpointId = parameters.get(ManagedEndpoint.ENDPOINT_ID_PARAMETER_NAME);
-        this.managedEndpoint = parameters.get(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME);
-        this.endpointCreationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
-        this.classLoader = parameters.get(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME);
+        this.managedEndpoint = endpoint;
+        this.endpointId = endpoint.getId();
+        this.endpointCreationAttributes = creationAttributes;
+        this.classLoader = classLoader;
+        this.configurator = configurator;
 
         final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint);
 
-        final ManagementFactory factory = new ManagementFactory(managedService);
-        final EndpointStarter endpointStarter = parameters.get(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME);
-        this.configReader = factory.createConfigReaderImpl(new NamedParameters()
-                    .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
-                    .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)
-                    .put(ManagedEndpoint.CLASS_LOADER_PARAMETER_NAME, this.classLoader)
-                    .put(ManagedEndpoint.ENDPOINT_STARTER_PARAMETER_NAME, endpointStarter));
-
-        // TODO allow to register a callback handler that creates an MBeanServer and a JMXConnectorServer
         this.server = MBeanServerFactory.createMBeanServer();
         jmxUrl = getServiceURL(managedService);
         final Map<String, String> env = getConnectorServerEnvironment(managedService);
@@ -133,7 +123,6 @@ public class JMXAgent<T> implements CommunicationServer {
                 server.registerMBean(mbean, getObjectName());
                 connector.start();
                 LOGGER.info(ManagementMessages.WSM_5001_ENDPOINT_CREATED(this.endpointId, this.connector.getAddress()));
-                this.configReader.start();
             } catch (InstanceAlreadyExistsException ex) {
                 throw LOGGER.logSevereException(new WebServiceException(
                         ManagementMessages.WSM_5041_MBEAN_INSTANCE_EXISTS(mbean), ex));
@@ -175,8 +164,6 @@ public class JMXAgent<T> implements CommunicationServer {
             } catch (MBeanRegistrationException ex) {
                 throw LOGGER.logSevereException(new WebServiceException(
                         ManagementMessages.WSM_5048_MBEAN_UNREGISTRATION_FAILED(name), ex));
-            } finally {
-                this.configReader.stop();
             }
         }
     }
@@ -188,7 +175,6 @@ public class JMXAgent<T> implements CommunicationServer {
         text.append("ManagedEndpoint = ").append(this.managedEndpoint);
         text.append(", MBeanServer = ").append(this.server);
         text.append(", JMXConnectorServer = ").append(this.connector);
-        text.append(", ConfigReader = ").append(this.configReader);
         text.append(", EndpointCreationAttributes = ").append(this.endpointCreationAttributes);
         text.append(", ClassLoader = ").append(this.classLoader);
         text.append(" ]");
@@ -200,7 +186,8 @@ public class JMXAgent<T> implements CommunicationServer {
         final HashMap<String, ReconfigNotification> notificationToListener = new HashMap<String, ReconfigNotification>();
         final Reconfig mbean = new Reconfig(attributeToListener, notificationToListener);
         attributeToListener.put(ReconfigAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
-                new ReconfigAttribute<T>(this.managedEndpoint, this.endpointCreationAttributes, classLoader));
+                new ReconfigAttribute<T>(this.managedEndpoint, this.configurator,
+                this.endpointCreationAttributes, classLoader));
         final ReconfigNotification notification = new ReconfigNotification(mbean, getObjectName());
         notificationToListener.put(notification.getName(), notification);
         this.managedEndpoint.addNotifier(notification);
