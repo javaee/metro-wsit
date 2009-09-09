@@ -95,10 +95,15 @@
                 <!--sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
                 <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/-->
 
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.dump.client.after" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.dump.endpoint.before" value="true"/-->
+                <!--sysproperty key="com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.client.after" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory.dump.client.before" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.client.after" value="true"/-->
+                
                 <!-- DO NOT REMOVE OR SET TO FALSE -->
                 <sysproperty key="com.sun.xml.ws.monitoring.client" value="true"/>
 
-                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.client.after" value="true"/-->
 
                 <jvmarg value="-Xmx512m" />
 
