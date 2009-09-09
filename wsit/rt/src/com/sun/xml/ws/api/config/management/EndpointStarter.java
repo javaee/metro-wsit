@@ -36,12 +36,21 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import javax.xml.ws.WebServiceException;
+
 /**
+ * Provides a simple interface to start an endpoint. This interface allows to
+ * prevent compile-time dependencies on the large WSEndpoint interface.
  *
  * @author Fabian Ritzmann
  */
 public interface EndpointStarter {
 
-    public void startEndpoint();
+    /**
+     * Start the endpoint.
+     *
+     * @throws WebServiceException If starting the endpoint failed.
+     */
+    public void startEndpoint() throws WebServiceException;
     
 }
