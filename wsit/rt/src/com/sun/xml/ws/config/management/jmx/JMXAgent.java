@@ -172,7 +172,7 @@ public class JMXAgent<T> implements CommunicationServer<T> {
     public String toString() {
         StringBuilder text = new StringBuilder("JMXAgent [ ");
         text.append("Endpoint ID = ").append(this.endpointId);
-        text.append("ManagedEndpoint = ").append(this.managedEndpoint);
+        text.append(", ManagedEndpoint = ").append(this.managedEndpoint);
         text.append(", MBeanServer = ").append(this.server);
         text.append(", JMXConnectorServer = ").append(this.connector);
         text.append(", EndpointCreationAttributes = ").append(this.endpointCreationAttributes);
