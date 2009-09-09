@@ -36,7 +36,9 @@
 
 package com.sun.xml.ws.config.management.jmx;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
+import com.sun.xml.ws.config.management.ManagementMessages;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -67,7 +69,7 @@ import javax.management.openmbean.OpenMBeanParameterInfoSupport;
  */
 class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, Serializable {
 
-    // TODO put error messages into properties
+    private static final Logger LOGGER = Logger.getLogger(Reconfig.class);
 
     private final Map<String, ReconfigAttribute> attributeToListener;
     private final Map<String, ReconfigNotification> notificationToListener;
@@ -78,26 +80,28 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
         this.notificationToListener = notificationToListener;
     }
 
-    public Object getAttribute(String attributeName) throws AttributeNotFoundException, MBeanException, ReflectionException {
+    public Object getAttribute(String attributeName)
+            throws AttributeNotFoundException, MBeanException, ReflectionException {
         if (attributeName == null) {
-            throw new RuntimeOperationsException(
-                 new IllegalArgumentException("Attribute name cannot be null"),
-                 "Cannot call getAttribute with null attribute name");
+            throw LOGGER.logSevereException(new RuntimeOperationsException(
+                 new IllegalArgumentException(ManagementMessages.WSM_5073_ATTRIBUTE_NAME_NULL()),
+                 ManagementMessages.WSM_5074_GET_ATTRIBUTE_NULL_NAME()));
         }
         final ReconfigAttribute listener = attributeToListener.get(attributeName);
            if (listener != null) {
             return listener.get();
         }
-        throw new AttributeNotFoundException("Cannot find " + attributeName +
-                                             " attribute ");
+        throw LOGGER.logSevereException(new AttributeNotFoundException(
+                ManagementMessages.WSM_5075_CANNOT_FIND_ATTRIBUTE(attributeName)));
     }
 
-    public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+    public void setAttribute(Attribute attribute) throws AttributeNotFoundException,
+            InvalidAttributeValueException, MBeanException, ReflectionException {
         // Check attribute is not null to avoid NullPointerException later on
         if (attribute == null) {
-            throw new RuntimeOperationsException(
-                  new IllegalArgumentException("Attribute cannot be null"),
-                  "Cannot invoke a setter of ReconfigMBean with null attribute");
+            throw LOGGER.logSevereException(new RuntimeOperationsException(
+                  new IllegalArgumentException(ManagementMessages.WSM_5076_ATTRIBUTE_NULL()),
+                  ManagementMessages.WSM_5077_SETTER_ATTRIBUTE_NULL(ManagementMessages.RECONFIG_MBEAN_NAME())));
         }
         String name = attribute.getName(); // Note: Attribute's constructor
                                            // ensures it is not null
@@ -110,25 +114,30 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
         if (listener != null) {
             // if null value, try and see if the setter returns any exception
             if (value == null) {
-                throw new InvalidAttributeValueException(
-                      "Attribute " + name + " may not be null");
+                throw LOGGER.logSevereException(new InvalidAttributeValueException(
+                        ManagementMessages.WSM_5078_ATTRIBUTE_VALUE_NULL(name)));
             }
             else {
-                listener.update(value);
+                try {
+                    listener.update(value);
+                } catch (RuntimeException e) {
+                    throw LOGGER.logSevereException(new RuntimeOperationsException(e,
+                            ManagementMessages.WSM_5072_ATTRIBUTE_UPDATE_FAILED(name, value)));
+                }
             }
         }
         // unrecognized attribute name:
         else {
-            throw new AttributeNotFoundException("Attribute " + name +
-                                                 " not found in ReconfigMBean");
+            throw LOGGER.logSevereException(new AttributeNotFoundException(
+                    ManagementMessages.WSM_5079_ATTRIBUTE_NOT_FOUND(name, ManagementMessages.RECONFIG_MBEAN_NAME())));
         }
     }
 
     public AttributeList getAttributes(String[] attributes) {
         if (attributes == null) {
-            throw new RuntimeOperationsException(
-                new IllegalArgumentException("attributeNames[] cannot be null"),
-                "Cannot call getAttributes with null attribute names");
+            throw LOGGER.logSevereException(new RuntimeOperationsException(
+                new IllegalArgumentException(ManagementMessages.WSM_5080_ATTRIBUTE_NAMES_ARRAY_NULL()),
+                ManagementMessages.WSM_5081_GET_ATTRIBUTES_NULL_NAME()));
         }
         AttributeList resultList = new AttributeList();
 
@@ -140,11 +149,11 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
                 Object value = getAttribute(attributes[i]);
                 resultList.add(new Attribute(attributes[i],value));
             } catch (AttributeNotFoundException e) {
-                e.printStackTrace();
+                LOGGER.logSevereException(e);
             } catch (MBeanException e) {
-                e.printStackTrace();
+                LOGGER.logSevereException(e);
             } catch (ReflectionException e) {
-                e.printStackTrace();
+                LOGGER.logSevereException(e);
             }
         }
         return(resultList);
@@ -153,10 +162,9 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
     public AttributeList setAttributes(AttributeList attributes) {
         // Check attributes is not null to avoid NullPointerException later on
         if (attributes == null) {
-            throw new RuntimeOperationsException(
-                new IllegalArgumentException(
-                           "AttributeList attributes cannot be null"),
-                "Cannot invoke a setter of ReconfigMBean");
+            throw LOGGER.logSevereException(new RuntimeOperationsException(
+                new IllegalArgumentException(ManagementMessages.WSM_5082_ATTRIBUTE_LIST_NULL()),
+                ManagementMessages.WSM_5083_CANNOT_INVOKE_SETTER(ManagementMessages.RECONFIG_MBEAN_NAME())));
         }
         AttributeList resultList = new AttributeList();
 
@@ -174,13 +182,14 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
                 Object value = getAttribute(name);
                 resultList.add(new Attribute(name,value));
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.logSevereException(e);
             }
         }
         return resultList;
     }
 
-    public Object invoke(String actionName, Object[] params, String[] signature) throws MBeanException, ReflectionException {
+    public Object invoke(String actionName, Object[] params, String[] signature)
+            throws MBeanException, ReflectionException {
         return null;
     }
 
@@ -215,17 +224,16 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
         }
 
         constructors[0] = new OpenMBeanConstructorInfoSupport(
-                              "ReconfigMBean",
-                              "Constructs a ReconfigMBean instance " +
-                              "allowing to reconfigure Metro.",
-                              new OpenMBeanParameterInfoSupport[0]);
+                ManagementMessages.RECONFIG_MBEAN_NAME(),
+                ManagementMessages.RECONFIG_MBEAN_CONSTRUCTOR_DESCRIPTION(ManagementMessages.RECONFIG_MBEAN_NAME()),
+                new OpenMBeanParameterInfoSupport[0]);
 
         return new OpenMBeanInfoSupport(this.getClass().getName(),
-                                           "Metro reconfiguration",
-                                           attributes,
-                                           constructors,
-                                           operations,
-                                           notifications);
+                                        ManagementMessages.RECONFIG_MBEAN_DESCRIPTION(),
+                                        attributes,
+                                        constructors,
+                                        operations,
+                                        notifications);
     }
 
 }
