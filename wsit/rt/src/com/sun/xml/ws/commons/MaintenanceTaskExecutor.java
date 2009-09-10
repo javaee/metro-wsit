@@ -50,7 +50,7 @@ public enum MaintenanceTaskExecutor {
     private DelayedTaskManager delayedTaskManager;
 
     private MaintenanceTaskExecutor() {
-        this.delayedTaskManager = DelayedTaskManager.createManager("maintenace-task-executor", 5);
+        this.delayedTaskManager = DelayedTaskManager.createManager("maintenance-task-executor", 5);
     }
 
     public boolean register(@NotNull DelayedTask task, long delay, TimeUnit timeUnit) {
