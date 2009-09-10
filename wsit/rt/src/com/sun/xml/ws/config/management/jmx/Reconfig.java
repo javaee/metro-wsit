@@ -121,8 +121,9 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
                 try {
                     listener.update(value);
                 } catch (RuntimeException e) {
+                    LOGGER.severe(ManagementMessages.WSM_5072_ATTRIBUTE_UPDATE_FAILED(name, value), e);
                     throw LOGGER.logSevereException(new RuntimeOperationsException(e,
-                            ManagementMessages.WSM_5072_ATTRIBUTE_UPDATE_FAILED(name, value)));
+                            ManagementMessages.WSM_5084_ATTRIBUTE_UPDATE_FAILED(name)));
                 }
             }
         }
