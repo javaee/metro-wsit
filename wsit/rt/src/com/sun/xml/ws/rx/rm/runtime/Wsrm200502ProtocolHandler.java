@@ -266,8 +266,17 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(TerminateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        requestPacket.transportBackChannel.close();
-        return communicator.createNullResponsePacket(requestPacket);
+        if (data.getBoundSequenceId() != null) { // send back terminate sequence
+            TerminateSequenceData tsData = TerminateSequenceData
+                    .getBuilder(data.getBoundSequenceId(), data.getBoundSequenceLastMessageId())
+                    .acknowledgementData(data.getAcknowledgementData())
+                    .build();
+
+            return toPacket(tsData, requestPacket);
+        } else {
+            requestPacket.transportBackChannel.close();
+            return communicator.createNullResponsePacket(requestPacket);            
+        }
     }
 
     public void appendSequenceHeader(@NotNull Message jaxwsMessage, @NotNull ApplicationMessage message) throws RxRuntimeException {

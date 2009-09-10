@@ -47,18 +47,29 @@ public class TerminateSequenceResponseData {
     public static class Builder {
 
         private @NotNull final String sequenceId;
+        private @Nullable String boundSequenceId;
+        private long boundSequenceLastMessageId;
         private @Nullable AcknowledgementData acknowledgementData;
 
         public Builder(@NotNull String sequenceId) {
             this.sequenceId = sequenceId;
         }
 
-        public void acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
+        public Builder acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
             this.acknowledgementData = acknowledgementData;
+
+            return this;
+        }
+
+        public Builder boundSequenceData(String sequenceId, long lastMessageId) {
+            this.boundSequenceId = sequenceId;
+            this.boundSequenceLastMessageId = lastMessageId;
+
+            return this;
         }
 
         public TerminateSequenceResponseData build() {
-            return new TerminateSequenceResponseData(sequenceId, acknowledgementData);
+            return new TerminateSequenceResponseData(sequenceId, boundSequenceId, boundSequenceLastMessageId, acknowledgementData);
         }
     }
 
@@ -67,10 +78,18 @@ public class TerminateSequenceResponseData {
     }
 
     private @NotNull final String sequenceId;
+    private @Nullable final String boundSequenceId;
+    private final long boundSequenceLastMessageId;
     private @Nullable final AcknowledgementData acknowledgementData;
 
-    private TerminateSequenceResponseData(@NotNull String sequenceId, @Nullable AcknowledgementData acknowledgementData) {
+    private TerminateSequenceResponseData(
+            @NotNull String sequenceId,
+            @Nullable String boundSequenceId,
+            long boundSequenceLastMessageId,
+            @Nullable AcknowledgementData acknowledgementData) {
         this.sequenceId = sequenceId;
+        this.boundSequenceId = boundSequenceId;
+        this.boundSequenceLastMessageId = boundSequenceLastMessageId;
         this.acknowledgementData = acknowledgementData;
     }
 
@@ -80,5 +99,13 @@ public class TerminateSequenceResponseData {
 
     public @Nullable AcknowledgementData getAcknowledgementData() {
         return acknowledgementData;
+    }
+
+    public @Nullable String getBoundSequenceId() {
+        return boundSequenceId;
+    }
+
+    public long getBoundSequenceLastMessageId() {
+        return boundSequenceLastMessageId;
     }
 }

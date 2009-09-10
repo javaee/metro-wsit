@@ -284,8 +284,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
             return doSuspend();
         } else {
             return doReturnWith(rc.protocolHandler.createEmptyAcknowledgementResponse(
-                        rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
-                        request));
+                    rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
+                    request));
         }
     }
 
@@ -409,8 +409,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
             inboundSequence.clearAckRequestedFlag();
 
             responseBuilder.acknowledgementData(ackDataBuilder.build());
-            
-            return rc.protocolHandler.toPacket(responseBuilder.build(), request);            
+
+            return rc.protocolHandler.toPacket(responseBuilder.build(), request);
         } finally {
             try {
                 rc.sequenceManager().closeSequence(inboundSequence.getId());
@@ -418,7 +418,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 if (boundSequenceId != null) {
                     rc.sequenceManager().closeSequence(boundSequenceId);
                 }
-            }            
+            }
         }
     }
 
@@ -433,16 +433,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
         Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
         Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
         try {
+            final TerminateSequenceResponseData.Builder responseBuilder = TerminateSequenceResponseData.getBuilder(inboundSequence.getId());
+            responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
+
             if (outboundSeqence != null) {
-                TerminateSequenceData.Builder responseBuilder = TerminateSequenceData.getBuilder(outboundSeqence.getId(), outboundSeqence.getLastMessageNumber());
-                responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
-                return rc.protocolHandler.toPacket(responseBuilder.build(), request);
-            } else {
-                final TerminateSequenceResponseData.Builder responseBuilder = TerminateSequenceResponseData.getBuilder(inboundSequence.getId());
-                responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
-                return rc.protocolHandler.toPacket(responseBuilder.build(), request);
+                responseBuilder.boundSequenceData(outboundSeqence.getId(), outboundSeqence.getLastMessageNumber());
             }
 
+            return rc.protocolHandler.toPacket(responseBuilder.build(), request);
         } finally {
             Utilities.endSessionIfExists(request.endpoint, inboundSequence.getId());
             try {

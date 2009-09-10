@@ -54,8 +54,10 @@ public class TerminateSequenceData {
             this.lastMessageId = lastMessageId;
         }
 
-        public void acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
+        public Builder acknowledgementData(@Nullable AcknowledgementData acknowledgementData) {
             this.acknowledgementData = acknowledgementData;
+
+            return this;
         }
 
         public TerminateSequenceData build() {
