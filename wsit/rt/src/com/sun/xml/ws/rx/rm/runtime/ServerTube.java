@@ -402,9 +402,12 @@ public class ServerTube extends AbstractFilterTubeImpl {
         try {
             final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
 
-            // override the final sequence acknowledgement flag as this sequence is not closed yet (but is closing already)
+            // override the final sequence acknowledgement data as this sequence is not closed yet, but is closing already
             Builder ackDataBuilder = AcknowledgementData.getBuilder(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
-            ackDataBuilder.setFinalAcknowledgement();
+
+            ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers(), true);
+            inboundSequence.clearAckRequestedFlag();
+
             responseBuilder.acknowledgementData(ackDataBuilder.build());
             
             return rc.protocolHandler.toPacket(responseBuilder.build(), request);            

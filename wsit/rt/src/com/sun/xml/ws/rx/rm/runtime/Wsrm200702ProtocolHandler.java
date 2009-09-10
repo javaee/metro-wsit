@@ -267,7 +267,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
                 ackElement.addAckRange(range.lower, range.upper);
             }
 
-            if (rc.getSequence(ackData.getAcknowledgedSequenceId()).isClosed()) {
+            if (ackData.isFinalAcknowledgement()) {
                 ackElement.setFinal(new SequenceAcknowledgementElement.Final());
             }
 

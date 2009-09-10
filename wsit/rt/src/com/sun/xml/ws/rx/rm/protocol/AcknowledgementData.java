@@ -80,17 +80,6 @@ public final class AcknowledgementData {
         }
 
         /**
-         * Sets value of Final flag for the sequence acknowledgement
-         *
-         * @param ackRequestedSequenceId value of sequence identifier for which acknowledgement is requested
-         */
-        public Builder setFinalAcknowledgement() {
-            this.isFinalAcknowledgement = true;
-
-            return this;
-        }
-
-        /**
          * Sets value of AckRequested flag for the sequence associated with this message
          *
          * @param ackRequestedSequenceId value of sequence identifier for which acknowledgement is requested
