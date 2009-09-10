@@ -157,8 +157,8 @@ public class ManagementUtil {
         }
 
         try {
-            if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(ManagementMessages.WSM_5020_LOOKUP_DATASOURCE(sourceName));
             }
             InitialContext initCtx = new InitialContext();
             return (DataSource) initCtx.lookup(sourceName);
