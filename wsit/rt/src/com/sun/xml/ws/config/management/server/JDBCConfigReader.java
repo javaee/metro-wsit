@@ -211,7 +211,7 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
                 connection.close();
             } catch (SQLException e) {
                 LOGGER.warning(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e);
-            } catch (WebServiceException e) {
+            } catch (Exception e) {
                 LOGGER.severe(ManagementMessages.WSM_5037_FAILED_RECONFIGURE(), e);
             } finally {
                 try {
