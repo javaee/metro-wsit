@@ -105,11 +105,6 @@ public class ManagementConstants {
     public static final String JDBC_DEFAULT_CONFIG_COLUMN_NAME = "config";
 
     /**
-     * Fully qualified name of the ManagedService policy assertion.
-     */
-    public static final QName SERVICE_ASSERTION_QNAME = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
-
-    /**
      * Prevent this class from being instantiated.
      */
     private ManagementConstants() {

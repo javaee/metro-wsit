@@ -38,6 +38,7 @@ package com.sun.xml.ws.api.config.management;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -51,7 +52,6 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.policy.PolicyMap;
 
 import java.util.Collection;
@@ -88,6 +88,8 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
 
     private final String id;
     private WSEndpoint<T> endpointDelegate;
+    // Holds the policy to configure the managed endpoint.
+    private ManagedServiceAssertion assertion;
 
     private final CountDownLatch startSignal = new CountDownLatch(1);
 
@@ -109,13 +111,17 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         try {
             this.id = id;
             this.endpointDelegate = endpoint;
+            // We need to extract the ManagedService assertion from the endpoint policy
+            // right away because any reconfiguration will overwrite the policies in
+            // the endpoint.
+            this.assertion = EndpointUtil.getAssertion(endpoint);
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
                 classLoader = getClass().getClassLoader();
             }
 
-            final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(endpoint));
+            final ManagementFactory factory = new ManagementFactory(this.assertion);
 
             final ConfigReader<T> reader = factory.createConfigReaderImpl(
                     this, attributes, classLoader, this);

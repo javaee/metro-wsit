@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.policy;
+package com.sun.xml.ws.api.config.management.policy;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;

@@ -45,10 +45,9 @@ import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.jmx.JmxConnectorServerCreator;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.NestedParameters;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.NestedParameters;
 import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.IOException;
@@ -99,8 +98,9 @@ public class JMXAgent<T> implements CommunicationServer<T> {
     private Configurator<T> configurator;
 
 
-    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes creationAttributes,
-            ClassLoader classLoader, Configurator<T> configurator, EndpointStarter starter) {
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            EndpointCreationAttributes creationAttributes, ClassLoader classLoader,
+            Configurator<T> configurator, EndpointStarter starter) {
         JMXServiceURL jmxUrl = null;
         this.managedEndpoint = endpoint;
         this.endpointId = endpoint.getId();
@@ -108,12 +108,10 @@ public class JMXAgent<T> implements CommunicationServer<T> {
         this.classLoader = classLoader;
         this.configurator = configurator;
 
-        final ManagedServiceAssertion managedService = ManagementUtil.getAssertion(this.managedEndpoint);
-
         this.server = MBeanServerFactory.createMBeanServer();
-        jmxUrl = getServiceURL(managedService);
-        final Map<String, String> env = getConnectorServerEnvironment(managedService);
-        this.connector = getJmxConnectorServer(managedService, jmxUrl, env, this.server);
+        jmxUrl = getServiceURL(assertion);
+        final Map<String, String> env = getConnectorServerEnvironment(assertion);
+        this.connector = getJmxConnectorServer(assertion, jmxUrl, env, this.server);
     }
 
     public void start() {

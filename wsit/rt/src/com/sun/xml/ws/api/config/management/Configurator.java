@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -50,11 +52,14 @@ public interface Configurator<T> {
      * Initializes the endpoint.
      *
      * @param endpoint The managed endpoint instance. Must not be null.
+     * @param assertion This assertion contains the policy that configured the
+     *   managed endpoint. May be null.
      * @param reader A ConfigReader instance. Must not be null.
      * @param saver A ConfigSaver instance. Must not be null.
      * @throws WebServiceException If the initialization failed.
      */
-    public void init(ManagedEndpoint<T> endpoint, ConfigReader<T> reader, ConfigSaver<T> saver)
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            ConfigReader<T> reader, ConfigSaver<T> saver)
             throws WebServiceException;
 
     /**

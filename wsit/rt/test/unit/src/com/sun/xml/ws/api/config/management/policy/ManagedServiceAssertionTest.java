@@ -34,11 +34,11 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.policy;
+package com.sun.xml.ws.api.config.management.policy;
 
 import com.sun.xml.ws.config.management.ManagementConstants;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.NestedParameters;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.NestedParameters;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.SimpleAssertion;

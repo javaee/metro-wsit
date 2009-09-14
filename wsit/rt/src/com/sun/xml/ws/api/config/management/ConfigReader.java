@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -51,6 +53,8 @@ public interface ConfigReader<T> {
      * Initialize the reader.
      *
      * @param endpoint A ManagedEndpoint instance. Must not be null.
+     * @param assertion This assertion contains the policy that configured the
+     *   managed endpoint. May be null.
      * @param attributes The attributes with which the original WSEndpoint instance
      *   was created.
      * @param classLoader The class loader that is associated with the original
@@ -58,7 +62,7 @@ public interface ConfigReader<T> {
      * @param starter An EndpointStarter instance. Must not be null.
      * @throws WebServiceException If the initialization failed.
      */
-    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes attributes,
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion, EndpointCreationAttributes attributes,
             ClassLoader classLoader, EndpointStarter starter) throws WebServiceException;
 
     /**

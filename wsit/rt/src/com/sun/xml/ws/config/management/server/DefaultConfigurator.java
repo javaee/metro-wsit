@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 
 /**
  * This implementation starts a ConfigReader and forwards all reconfiguration
@@ -54,7 +55,8 @@ public class DefaultConfigurator<T> implements Configurator<T> {
     private ConfigSaver<T> configSaver;
     private ConfigReader<T> configReader;
 
-    public void init(ManagedEndpoint<T> endpoint, ConfigReader<T> reader, ConfigSaver<T> saver) {
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            ConfigReader<T> reader, ConfigSaver<T> saver) {
         this.configSaver = saver;
         this.configReader = reader;
     }

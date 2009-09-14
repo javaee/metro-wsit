@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -50,9 +52,11 @@ public interface ConfigSaver<T> {
      * Initialize this instance.
      * 
      * @param endpoint The ManagedEndpoint instance. Must not be null.
+     * @param assertion This assertion contains the policy that configured the
+     *   managed endpoint. May be null.
      * @throws WebServiceException If initialization failed.
      */
-    void init(ManagedEndpoint<T> endpoint) throws WebServiceException;
+    void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion) throws WebServiceException;
 
     /**
      * Persist configuration changes.

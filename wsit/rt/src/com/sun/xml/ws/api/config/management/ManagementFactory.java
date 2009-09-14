@@ -38,8 +38,8 @@ package com.sun.xml.ws.api.config.management;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -101,7 +101,7 @@ public class ManagementFactory {
                 @SuppressWarnings("unchecked")
                 final CommunicationServer<T> implementation = instantiateImplementation(
                         DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
-                implementation.init(endpoint, creationAttributes, classLoader, configurator, starter);
+                implementation.init(endpoint, this.assertion, creationAttributes, classLoader, configurator, starter);
                 result.add(implementation);
             }
             else {
@@ -110,7 +110,7 @@ public class ManagementFactory {
                     @SuppressWarnings("unchecked")
                     final CommunicationServer<T> implementation = instantiateImplementation(
                             record, DEFAULT_COMMUNICATION_SERVER_CLASS_NAME, CommunicationServer.class);
-                    implementation.init(endpoint, creationAttributes, classLoader, configurator, starter);
+                    implementation.init(endpoint, this.assertion, creationAttributes, classLoader, configurator, starter);
                     result.add(implementation);
                 }
             }
@@ -141,7 +141,7 @@ public class ManagementFactory {
             @SuppressWarnings("unchecked")
             final Configurator<T> configurator = instantiateImplementation(record,
                     DEFAULT_CONFIGURATOR_CLASS_NAME, Configurator.class);
-            configurator.init(endpoint, reader, saver);
+            configurator.init(endpoint, this.assertion, reader, saver);
             return configurator;
         } catch (ClassCastException e) {
             throw LOGGER.logSevereException(new WebServiceException(
@@ -167,7 +167,7 @@ public class ManagementFactory {
             @SuppressWarnings("unchecked")
             final ConfigSaver<T> configSaver = instantiateImplementation(record,
                     DEFAULT_CONFIG_SAVER_CLASS_NAME, ConfigSaver.class);
-            configSaver.init(endpoint);
+            configSaver.init(endpoint, this.assertion);
             return configSaver;
         } catch (ClassCastException e) {
             throw LOGGER.logSevereException(new WebServiceException(
@@ -202,7 +202,7 @@ public class ManagementFactory {
             @SuppressWarnings("unchecked")
             final ConfigReader<T> reader = instantiateImplementation(record,
                     DEFAULT_CONFIG_READER_CLASS_NAME, ConfigReader.class);
-            reader.init(endpoint, attributes, classLoader, starter);
+            reader.init(endpoint, this.assertion, attributes, classLoader, starter);
             return reader;
         } catch (ClassCastException e) {
             throw LOGGER.logSevereException(new WebServiceException(

@@ -39,11 +39,11 @@ package com.sun.xml.ws.config.management.server;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
+import com.sun.xml.ws.api.config.management.EndpointUtil;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagedEndpointFactory;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.config.management.ManagementUtil;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
 
 /**
  * Create a ManagedEndpoint if the policy of the endpoint requires it. Otherwise
@@ -56,7 +56,7 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
     private static final Logger LOGGER = Logger.getLogger(EndpointFactoryImpl.class);
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
-        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
+        final ManagedServiceAssertion assertion = EndpointUtil.getAssertion(endpoint);
         if (assertion != null) {
             return new ManagedEndpoint<T>(assertion.getID(), endpoint, attributes);
         }

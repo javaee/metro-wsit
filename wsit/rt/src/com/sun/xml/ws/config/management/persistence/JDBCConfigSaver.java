@@ -44,8 +44,8 @@ import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -66,9 +66,11 @@ public class JDBCConfigSaver<T> implements ConfigSaver<T> {
     private static final Logger LOGGER = Logger.getLogger(JDBCConfigSaver.class);
 
     private ManagedEndpoint<T> endpoint;
+    private ManagedServiceAssertion assertion;
 
-    public void init(ManagedEndpoint<T> endpoint) {
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion) {
         this.endpoint = endpoint;
+        this.assertion = assertion;
     }
 
     /**
@@ -81,8 +83,7 @@ public class JDBCConfigSaver<T> implements ConfigSaver<T> {
         Connection connection = null;
         DataSource source = null;
         try {
-            final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(this.endpoint);
-            final ImplementationRecord record = assertion.getConfigSaverImplementation();
+            final ImplementationRecord record = this.assertion.getConfigSaverImplementation();
             source = ManagementUtil.getJdbcDataSource(record, JDBCConfigSaver.class.getName());
             connection = source.getConnection();
             final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record, JDBCConfigSaver.class.getName());

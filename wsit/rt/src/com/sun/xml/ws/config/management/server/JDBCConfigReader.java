@@ -49,8 +49,8 @@ import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.Reader;
@@ -83,18 +83,25 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "PollingInterval");
     private static final long DEFAULT_POLLING_INTERVAL = 10000L;
 
+    private ManagedEndpoint<T> endpoint;
+    private ManagedServiceAssertion assertion;
+    private EndpointCreationAttributes creationAttributes;
+    private ClassLoader endpointClassLoader;
+    private EndpointStarter endpointStarter;
+    private long pollingInterval;
+
     private volatile ConfigPoller<T> poller = null;
 
 
-    public synchronized void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes attributes,
-            ClassLoader classLoader, EndpointStarter starter) {
-        if (this.poller != null) {
-            throw LOGGER.logSevereException(new IllegalStateException(
-                    ManagementMessages.WSM_5031_DUPLICATE_INITIALIZATION(getClass().getName())));
-        }
+    public synchronized void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            EndpointCreationAttributes attributes, ClassLoader classLoader, EndpointStarter starter) {
+        this.endpoint = endpoint;
+        this.assertion = assertion;
+        this.creationAttributes = attributes;
+        this.endpointClassLoader = classLoader;
+        this.endpointStarter = starter;
 
-        long pollingInterval = DEFAULT_POLLING_INTERVAL;
-        final ManagedServiceAssertion assertion = ManagementUtil.getAssertion(endpoint);
+        this.pollingInterval = DEFAULT_POLLING_INTERVAL;
         final ImplementationRecord record = assertion.getConfigReaderImplementation();
         if (record != null) {
             final String className = record.getImplementation();
@@ -104,7 +111,7 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
                     final Map<QName, String> classParameters = record.getParameters();
                     pollingIntervalText = classParameters.get(POLLING_INTERVAL_PARAMETER_NAME);
                     if (pollingIntervalText != null) {
-                        pollingInterval = Long.parseLong(pollingIntervalText);
+                        this.pollingInterval = Long.parseLong(pollingIntervalText);
                     }
                 } catch (NumberFormatException e) {
                     throw LOGGER.logSevereException(new WebServiceException(
@@ -113,19 +120,19 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
                 }
             }
         }
-        this.poller = new ConfigPoller<T>(endpoint, attributes, classLoader, starter, pollingInterval);
     }
 
-    public synchronized void start(NamedParameters parameters) {
-        if (poller == null) {
+    public synchronized void start(NamedParameters parameters) throws IllegalStateException {
+        if (this.poller != null && !this.poller.isStopped()) {
             throw LOGGER.logSevereException(new IllegalStateException(
-                    ManagementMessages.WSM_5032_POLLER_START_FAILED(getClass().getName())));
+                    ManagementMessages.WSM_5087_FAILED_POLLER_START()));
         }
-
-        poller.start();
+        this.poller = new ConfigPoller<T>(this.endpoint, this.assertion, this.creationAttributes,
+                this.endpointClassLoader, this.endpointStarter, this.pollingInterval);
+        this.poller.start();
     }
 
-    public synchronized void stop() {
+    public synchronized void stop() throws IllegalStateException {
         if (poller == null) {
             throw LOGGER.logSevereException(new IllegalStateException(
                     ManagementMessages.WSM_5033_POLLER_STOP_FAILED(getClass().getName())));
@@ -159,14 +166,15 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
         private volatile boolean stopped;
         private volatile long version = 0L;
 
-        public ConfigPoller(final ManagedEndpoint<T> endpoint, final EndpointCreationAttributes attributes,
-                final ClassLoader classLoader, final EndpointStarter starter, final long executionDelay) {
+        public ConfigPoller(final ManagedEndpoint<T> endpoint, final ManagedServiceAssertion assertion,
+                final EndpointCreationAttributes attributes, final ClassLoader classLoader,
+                final EndpointStarter starter, final long executionDelay) {
             this.endpoint = endpoint;
             this.creationAttributes = attributes;
             this.classLoader = classLoader;
             this.endpointStarter = starter;
 
-            this.managedService = ManagementUtil.getAssertion(this.endpoint);
+            this.managedService = assertion;
 
             this.executionDelay = executionDelay;
             this.stopped = true;
@@ -250,6 +258,10 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
             } finally {
                 LOGGER.exiting();
             }
+        }
+
+        synchronized boolean isStopped() {
+            return this.stopped;
         }
 
         private void pollData(final Connection connection, final JdbcTableNames tableNames, final String endpointId) {

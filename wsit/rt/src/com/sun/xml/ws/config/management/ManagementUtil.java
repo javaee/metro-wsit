@@ -37,19 +37,10 @@
 package com.sun.xml.ws.config.management;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.naming.InitialContext;
@@ -77,42 +68,6 @@ public class ManagementUtil {
 
     private static final Logger LOGGER = Logger.getLogger(ManagementUtil.class);
 
-    /**
-     * Return ManagedService assertion if there is one associated with the endpoint.
-     *
-     * @param endpoint The endpoint. Must not be null.
-     * @return The policy assertion if found. Null otherwise.
-     * @throws WebServiceException If computing the effective policy of the endpoint failed.
-     */
-    public static ManagedServiceAssertion getAssertion(WSEndpoint endpoint) throws WebServiceException {
-        LOGGER.entering(endpoint);
-        try {
-            PolicyAssertion assertion = null;
-            // getPolicyMap is deprecated because it is only supposed to be used by Metro code
-            // and not by other clients.
-            @SuppressWarnings("deprecation")
-            final PolicyMap policyMap = endpoint.getPolicyMap();
-            if (policyMap != null) {
-                final PolicyMapKey key = PolicyMap.createWsdlEndpointScopeKey(endpoint.getServiceName(), endpoint.getPortName());
-                final Policy policy = policyMap.getEndpointEffectivePolicy(key);
-                if (policy != null) {
-                    final Iterator<AssertionSet> assertionSets = policy.iterator();
-                    if (assertionSets.hasNext()) {
-                        final AssertionSet assertionSet = assertionSets.next();
-                        final Iterator<PolicyAssertion> assertions = assertionSet.get(
-                                ManagementConstants.SERVICE_ASSERTION_QNAME).iterator();
-                        if (assertions.hasNext()) {
-                            assertion = assertions.next();
-                        }
-                    }
-                }
-            }
-            LOGGER.exiting(assertion);
-            return assertion == null ? null : assertion.getImplementation(ManagedServiceAssertion.class);
-        } catch (PolicyException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
-        }
-    }
 
     /**
      * Read all data and return it as a String.

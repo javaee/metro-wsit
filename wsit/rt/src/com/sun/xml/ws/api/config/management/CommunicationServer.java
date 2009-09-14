@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -51,6 +53,8 @@ public interface CommunicationServer<T> {
      * Initialize the communication interface.
      *
      * @param endpoint The ManagedEndpoint instance. Must not be null.
+     * @param assertion This assertion contains the policy that configured the
+     *   managed endpoint. May be null.
      * @param creationAttributes The attributes with which the original endpoint
      *   was created.
      * @param classLoader The class loader that is associated with the original
@@ -59,8 +63,9 @@ public interface CommunicationServer<T> {
      * @param starter An EndpointStarter instance. May not be null.
      * @throws WebServiceException If initialization failed.
      */
-    public void init(ManagedEndpoint<T> endpoint, EndpointCreationAttributes creationAttributes,
-            ClassLoader classLoader, Configurator<T> configurator, EndpointStarter starter)
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            EndpointCreationAttributes creationAttributes, ClassLoader classLoader,
+            Configurator<T> configurator, EndpointStarter starter)
             throws WebServiceException;
 
     /**
