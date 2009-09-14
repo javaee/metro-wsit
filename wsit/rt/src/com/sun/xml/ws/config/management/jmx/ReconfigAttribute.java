@@ -41,6 +41,7 @@ import com.sun.xml.ws.api.config.management.Configurator;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.NamedParameters;
+import com.sun.xml.ws.api.config.management.jmx.JmxConstants;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
@@ -59,7 +60,6 @@ import javax.xml.ws.WebServiceException;
 class ReconfigAttribute<T> implements MBeanAttribute {
 
     private static final Logger LOGGER = Logger.getLogger(ReconfigAttribute.class);
-    public final static String SERVICE_WSDL_ATTRIBUTE_NAME = ManagementMessages.RECONFIG_ATTRIBUTE_NAME();
 
     private final ManagedEndpoint<T> managedEndpoint;
     private final Configurator<T> configurator;
@@ -100,7 +100,8 @@ class ReconfigAttribute<T> implements MBeanAttribute {
             update((String) value);
         } else {
             throw LOGGER.logSevereException(new InvalidAttributeValueException(
-                    ManagementMessages.WSM_5010_EXPECTED_STRING(SERVICE_WSDL_ATTRIBUTE_NAME, value.getClass().getName())));
+                    ManagementMessages.WSM_5010_EXPECTED_STRING(
+                    JmxConstants.SERVICE_POLICIES_ATTRIBUTE_NAME, value.getClass().getName())));
         }
     }
 

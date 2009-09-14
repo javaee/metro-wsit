@@ -49,6 +49,8 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 
 import java.util.Iterator;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -60,11 +62,18 @@ import javax.xml.ws.WebServiceException;
 public class EndpointUtil {
 
     private static final Logger LOGGER = Logger.getLogger(EndpointUtil.class);
+
     /**
      * Fully qualified name of the ManagedService policy assertion.
      */
     private static final QName SERVICE_ASSERTION_QNAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "ManagedService");
+
+    /**
+     * JMX object name prefix.
+     */
+    private static final String JMX_CLASS_NAME = "com.sun.xml.ws.config.management:className=";
+
 
     /**
      * Return ManagedService assertion if there is one associated with the endpoint.
@@ -101,6 +110,24 @@ public class EndpointUtil {
         } catch (PolicyException ex) {
             throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5003_FAILED_ASSERTION(), ex));
         }
+    }
+
+    /**
+     * Computes the object name of the web service management MBean.
+     *
+     * @param serviceId The ID of the web service endpoint. Must not be null.
+     * @return The name of the management MBean.
+     * @throws MalformedObjectNameException If the serviceId yields an invalid URL.
+     * @throws IllegalArgumentException If the serviceId is null.
+     */
+    public static ObjectName getObectName(final String serviceId)
+            throws MalformedObjectNameException, IllegalArgumentException {
+        if (serviceId == null) {
+            throw LOGGER.logSevereException(new IllegalArgumentException(
+                    ManagementMessages.WSM_5088_SERVICE_ID_NULL()));
+        }
+        final ObjectName name = new ObjectName(JMX_CLASS_NAME + serviceId);
+        return name;
     }
 
 }

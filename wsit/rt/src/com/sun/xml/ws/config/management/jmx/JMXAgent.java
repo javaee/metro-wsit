@@ -43,11 +43,12 @@ import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.jmx.JmxConnectorServerCreator;
+import com.sun.xml.ws.api.config.management.jmx.JmxConstants;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
-import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.NestedParameters;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.IOException;
@@ -86,7 +87,6 @@ public class JMXAgent<T> implements CommunicationServer<T> {
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxServiceUrl");
     private static final QName JMX_CONNECTOR_SERVER_CREATOR_PARAMETER_NAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerCreator");
-    private static final String JMX_SERVICE_URL_DEFAULT_PREFIX = "service:jmx:rmi:///jndi/rmi://localhost:8686/metro/";
 
     private MBeanServer server;
     private JMXConnectorServer connector;
@@ -183,7 +183,7 @@ public class JMXAgent<T> implements CommunicationServer<T> {
         final HashMap<String, MBeanAttribute> attributeToListener = new HashMap<String, MBeanAttribute>();
         final HashMap<String, ReconfigNotification> notificationToListener = new HashMap<String, ReconfigNotification>();
         final Reconfig mbean = new Reconfig(attributeToListener, notificationToListener);
-        attributeToListener.put(ReconfigAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,
+        attributeToListener.put(JmxConstants.SERVICE_POLICIES_ATTRIBUTE_NAME,
                 new ReconfigAttribute<T>(this.managedEndpoint, this.configurator,
                 this.endpointCreationAttributes, classLoader));
         final ReconfigNotification notification = new ReconfigNotification(mbean, getObjectName());
@@ -212,7 +212,7 @@ public class JMXAgent<T> implements CommunicationServer<T> {
             // The previous parameters.get might have returned null.
             if (jmxServiceUrl == null) {
                 // No JmxServiceUrl found, use default
-                jmxServiceUrl = JMX_SERVICE_URL_DEFAULT_PREFIX + this.endpointId;
+                jmxServiceUrl = JmxConstants.JMX_SERVICE_URL_DEFAULT_PREFIX + this.endpointId;
             }
             LOGGER.config(ManagementMessages.WSM_5005_JMX_SERVICE_URL(jmxServiceUrl));
             return new JMXServiceURL(jmxServiceUrl);
