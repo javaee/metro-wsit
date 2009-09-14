@@ -290,8 +290,15 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
     private void closeRmSession() {
         try {
+            String inboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
+            if (inboundSequenceId != null) {
+                waitForMissingAcknowledgements(inboundSequenceId,rc.configuration.getCloseSequenceOperationTimeout());
+            }
+
             closeSequence();
-            waitUntilAllRequestsAckedOrCloseOperationTimeout();
+
+            waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getCloseSequenceOperationTimeout());
+
             terminateSequence();
         } finally {
             rc.close();
@@ -411,33 +418,33 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private void waitUntilAllRequestsAckedOrCloseOperationTimeout() {
+    private void waitForMissingAcknowledgements(final String sequenceId, final long timeoutInMillis) {
         final CountDownLatch doneSignal = new CountDownLatch(1);
         ScheduledFuture<?> taskHandle = rc.scheduledTaskManager.startTask(new Runnable() {
 
             public void run() {
                 try {
-                    if (!rc.sequenceManager().getSequence(outboundSequenceId.value).hasUnacknowledgedMessages()) {
+                    if (!rc.sequenceManager().getSequence(sequenceId).hasUnacknowledgedMessages()) {
                         doneSignal.countDown();
                     } 
                 } catch (UnknownSequenceException ex) {
-                    LOGGER.severe(LocalizationMessages.WSRM_1111_UNEXPECTED_EXCEPTION_WHILE_WAITING_FOR_SEQ_ACKS(), ex);
+                    LOGGER.severe(LocalizationMessages.WSRM_1111_WAITING_FOR_SEQ_ACKS_UNEXPECTED_EXCEPTION(sequenceId), ex);
                     doneSignal.countDown();
                 }
             }
         }, 10, 10);
 
         try {
-            if (rc.configuration.getCloseSequenceOperationTimeout() > 0) {
-                boolean waitResult = doneSignal.await(rc.configuration.getCloseSequenceOperationTimeout(), TimeUnit.MILLISECONDS);
+            if (timeoutInMillis > 0) {
+                boolean waitResult = doneSignal.await(timeoutInMillis, TimeUnit.MILLISECONDS);
                 if (!waitResult) {
-                    LOGGER.info(LocalizationMessages.WSRM_1112_CLOSE_OUTBOUND_SEQUENCE_TIMED_OUT(outboundSequenceId));
+                    LOGGER.info(LocalizationMessages.WSRM_1112_WAITING_FOR_SEQ_ACKS_TIMED_OUT(sequenceId, timeoutInMillis));
                 }
             } else {
                 doneSignal.await();
             }
         } catch (InterruptedException ex) {
-            LOGGER.fine(LocalizationMessages.WSRM_1113_CLOSE_OUTBOUND_SEQUENCE_INTERRUPTED(outboundSequenceId), ex);
+            LOGGER.fine(LocalizationMessages.WSRM_1113_WAITING_FOR_SEQ_ACKS_INTERRUPTED(sequenceId), ex);
         } finally {
             taskHandle.cancel(true);
         }
