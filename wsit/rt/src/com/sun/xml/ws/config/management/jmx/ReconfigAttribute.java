@@ -38,13 +38,11 @@ package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.Configurator;
-import com.sun.xml.ws.api.config.management.ManagementFactory;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
-import com.sun.xml.ws.config.management.ManagementUtil;
 
 import javax.management.InvalidAttributeValueException;
 import javax.management.openmbean.OpenType;
@@ -58,7 +56,7 @@ import javax.xml.ws.WebServiceException;
  * 
  * @author Fabian Ritzmann
  */
-class ReconfigAttribute<T> {
+class ReconfigAttribute<T> implements MBeanAttribute {
 
     private static final Logger LOGGER = Logger.getLogger(ReconfigAttribute.class);
     public final static String SERVICE_WSDL_ATTRIBUTE_NAME = ManagementMessages.RECONFIG_ATTRIBUTE_NAME();
@@ -68,8 +66,6 @@ class ReconfigAttribute<T> {
     private final EndpointCreationAttributes endpointCreationAttributes;
     private final ClassLoader classLoader;
 
-    private volatile String newPolicies;
-
     public ReconfigAttribute(ManagedEndpoint<T> endpoint, Configurator<T> configurator,
             EndpointCreationAttributes creationAttributes, ClassLoader classLoader) {
         this.managedEndpoint = endpoint;
@@ -78,8 +74,12 @@ class ReconfigAttribute<T> {
         this.classLoader = classLoader;
     }
 
-    public Object get() {
-        return this.newPolicies;
+    public boolean isReadable() {
+        return false;
+    }
+
+    public boolean isWritable() {
+        return true;
     }
 
     public String getDescription() {
@@ -90,7 +90,12 @@ class ReconfigAttribute<T> {
         return SimpleType.STRING;
     }
 
-    public void update(Object value) throws InvalidAttributeValueException {
+    public Object getValue() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException(
+                ManagementMessages.WSM_5085_ATTRIBUTE_UNREADABLE(ManagementMessages.RECONFIG_ATTRIBUTE_NAME()));
+    }
+
+    public void setValue(Object value) throws InvalidAttributeValueException {
         if (String.class.isAssignableFrom(value.getClass())) {
             update((String) value);
         } else {
@@ -101,8 +106,6 @@ class ReconfigAttribute<T> {
 
     private void update(String value) throws InvalidAttributeValueException {
         try {
-            this.newPolicies = value;
-            final ManagementFactory factory = new ManagementFactory(ManagementUtil.getAssertion(this.managedEndpoint));
             final NamedParameters parameters = new NamedParameters()
                     .put(ManagedEndpoint.ENDPOINT_INSTANCE_PARAMETER_NAME, this.managedEndpoint)
                     .put(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME, this.endpointCreationAttributes)

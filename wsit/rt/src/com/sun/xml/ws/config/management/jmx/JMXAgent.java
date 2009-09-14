@@ -182,7 +182,7 @@ public class JMXAgent<T> implements CommunicationServer<T> {
     }
 
     private ReconfigMBean createMBean() {
-        final HashMap<String, ReconfigAttribute> attributeToListener = new HashMap<String, ReconfigAttribute>();
+        final HashMap<String, MBeanAttribute> attributeToListener = new HashMap<String, MBeanAttribute>();
         final HashMap<String, ReconfigNotification> notificationToListener = new HashMap<String, ReconfigNotification>();
         final Reconfig mbean = new Reconfig(attributeToListener, notificationToListener);
         attributeToListener.put(ReconfigAttribute.SERVICE_WSDL_ATTRIBUTE_NAME,

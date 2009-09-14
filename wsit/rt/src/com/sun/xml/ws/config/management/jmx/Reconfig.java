@@ -71,10 +71,10 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
 
     private static final Logger LOGGER = Logger.getLogger(Reconfig.class);
 
-    private final Map<String, ReconfigAttribute> attributeToListener;
+    private final Map<String, MBeanAttribute> attributeToListener;
     private final Map<String, ReconfigNotification> notificationToListener;
 
-    public Reconfig(Map<String, ReconfigAttribute> attributeNameToListener,
+    public Reconfig(Map<String, MBeanAttribute> attributeNameToListener,
             Map<String, ReconfigNotification> notificationToListener) {
         this.attributeToListener = attributeNameToListener;
         this.notificationToListener = notificationToListener;
@@ -87,9 +87,13 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
                  new IllegalArgumentException(ManagementMessages.WSM_5073_ATTRIBUTE_NAME_NULL()),
                  ManagementMessages.WSM_5074_GET_ATTRIBUTE_NULL_NAME()));
         }
-        final ReconfigAttribute listener = attributeToListener.get(attributeName);
-           if (listener != null) {
-            return listener.get();
+        final MBeanAttribute listener = attributeToListener.get(attributeName);
+        if (listener != null) {
+            if (!listener.isReadable()) {
+                throw LOGGER.logSevereException(new AttributeNotFoundException(
+                    ManagementMessages.WSM_5085_ATTRIBUTE_UNREADABLE(attributeName)));
+            }
+            return listener.getValue();
         }
         throw LOGGER.logSevereException(new AttributeNotFoundException(
                 ManagementMessages.WSM_5075_CANNOT_FIND_ATTRIBUTE(attributeName)));
@@ -110,16 +114,19 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
         // Check for a recognized attribute name and call the corresponding
         // setter
         //
-        final ReconfigAttribute listener = attributeToListener.get(name);
+        final MBeanAttribute listener = attributeToListener.get(name);
         if (listener != null) {
-            // if null value, try and see if the setter returns any exception
+            if (!listener.isWritable()) {
+                throw LOGGER.logSevereException(new AttributeNotFoundException(
+                    ManagementMessages.WSM_5086_ATTRIBUTE_UNWRITABLE(name)));
+            }
             if (value == null) {
                 throw LOGGER.logSevereException(new InvalidAttributeValueException(
                         ManagementMessages.WSM_5078_ATTRIBUTE_VALUE_NULL(name)));
             }
             else {
                 try {
-                    listener.update(value);
+                    listener.setValue(value);
                 } catch (RuntimeException e) {
                     LOGGER.severe(ManagementMessages.WSM_5072_ATTRIBUTE_UPDATE_FAILED(name, value), e);
                     throw LOGGER.logSevereException(new RuntimeOperationsException(e,
@@ -206,12 +213,12 @@ class Reconfig extends NotificationBroadcasterSupport implements ReconfigMBean, 
 
         int i = 0;
         for (String attributeName : attributeToListener.keySet()) {
-            ReconfigAttribute listener = attributeToListener.get(attributeName);
+            final MBeanAttribute listener = attributeToListener.get(attributeName);
             attributes[i] = new OpenMBeanAttributeInfoSupport(attributeName,
                 listener.getDescription(),
                 listener.getType(),
-                true,
-                true,
+                listener.isReadable(),
+                listener.isWritable(),
                 false);
             i++;
         }
