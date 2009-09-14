@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.jmx.JmxConnectorServerCreator;
 import com.sun.xml.ws.api.config.management.jmx.JmxConstants;
+import com.sun.xml.ws.api.config.management.jmx.JmxUtil;
 import com.sun.xml.ws.api.config.management.jmx.ReconfigMBean;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
@@ -193,12 +194,11 @@ public class JMXAgent<T> implements CommunicationServer<T> {
     }
 
     private ObjectName getObjectName() {
-        final String name = "com.sun.xml.ws.config.management:className=" + this.endpointId;
         try {
-            return new ObjectName(name);
-        } catch (MalformedObjectNameException ex) {
+            return JmxUtil.getObjectName(this.endpointId);
+        } catch (MalformedObjectNameException e) {
             throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5049_INVALID_OBJECT_NAME(name), ex));
+                    ManagementMessages.WSM_5049_INVALID_OBJECT_NAME(), e));
         }
     }
 
