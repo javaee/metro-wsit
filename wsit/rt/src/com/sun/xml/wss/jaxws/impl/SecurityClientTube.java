@@ -134,6 +134,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     //private WSSCPlugin  scPlugin;
     private Set trustConfig = null;
     private Set wsscConfig = null;
+    private Set<PolicyAssertion> configAssertions = null;
     Properties props = new Properties();
     private ClientTubelineAssemblyContext wsitContext;
 
@@ -143,8 +144,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         super(new ClientTubeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
         //scPlugin = new WSSCPlugin(null, wsscVer);
         try {
-            Iterator it = outMessagePolicyMap.values().iterator();
-            Set<PolicyAssertion> configAssertions = null;
+            Iterator it = outMessagePolicyMap.values().iterator();            
             while (it.hasNext()) {
                 SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
                 if (configAssertions != null) {
@@ -164,8 +164,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                 }
             }
             this.wsitContext = wsitContext;
-            props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
-            props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel()); 
+            //props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
+            //props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel());
 
             CallbackHandler handler = configureClientHandler(configAssertions, props);
             secEnv = new DefaultSecurityEnvironmentImpl(handler, props);
