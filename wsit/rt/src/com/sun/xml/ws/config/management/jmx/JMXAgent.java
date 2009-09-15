@@ -271,6 +271,9 @@ public class JMXAgent<T> implements CommunicationServer<T> {
                 }
             }
 
+            if (LOGGER.isLoggable(Level.CONFIG)) {
+                LOGGER.config(ManagementMessages.WSM_5089_CREATING_JMX_CONNECTOR_SERVER(jmxUrl, env, server));
+            }
             return JMXConnectorServerFactory.newJMXConnectorServer(jmxUrl, env, server);
         } catch (ClassNotFoundException e) {
             throw LOGGER.logSevereException(new WebServiceException(
@@ -280,10 +283,10 @@ public class JMXAgent<T> implements CommunicationServer<T> {
                     ManagementMessages.WSM_5054_FAILED_CLASS_CAST_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
         } catch (InstantiationException e) {
             throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5054_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+                    ManagementMessages.WSM_5090_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
         } catch (IllegalAccessException e) {
             throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5054_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
+                    ManagementMessages.WSM_5090_FAILED_INSTANTIATION_JMX_CONNECTOR_SERVER_CREATOR(connectorServerName), e));
         } catch (IOException e) {
             throw LOGGER.logSevereException(new WebServiceException(
                     ManagementMessages.WSM_5045_MBEAN_CONNECTOR_CREATE_FAILED(jmxUrl), e));
