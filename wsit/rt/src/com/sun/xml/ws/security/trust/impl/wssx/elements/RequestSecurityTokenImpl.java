@@ -1,5 +1,5 @@
 /*
- * $Id: RequestSecurityTokenImpl.java,v 1.11 2009-07-15 18:19:10 jdg6688 Exp $
+ * $Id: RequestSecurityTokenImpl.java,v 1.12 2009-09-15 22:52:02 jdg6688 Exp $
  */
 
 /*
@@ -352,8 +352,8 @@ public class RequestSecurityTokenImpl  extends RequestSecurityTokenType
 
         //Create ActAs element
         Document doc = WSTrustUtil.newDocument();
-        Element actAsElement = doc.createElementNS(WSTrustVersion.WS_TRUST_13_NS_URI, "wst:ActAs");
-        actAsElement.setAttribute("xmlns:wst", WSTrustVersion.WS_TRUST_13_NS_URI);
+        Element actAsElement = doc.createElementNS("http://docs.oasis-open.org/ws-sx/ws-trust/200802", "wst14:ActAs");
+        actAsElement.setAttribute("xmlns:wst14", "http://docs.oasis-open.org/ws-sx/ws-trust/200802");
         doc.appendChild(actAsElement);
         actAsElement.appendChild(doc.importNode(WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_13).toElement(actAs.getAny()), true));
         getAny().add(actAsElement);

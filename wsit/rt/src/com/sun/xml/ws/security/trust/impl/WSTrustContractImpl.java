@@ -101,6 +101,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.UUID;
+
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -298,6 +299,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }else{
             claims = eleFac.createClaims();
         }
+
+        String confirMethod = null;
         
         // Handle OnBehalfOf token
         OnBehalfOf obo = rst.getOnBehalfOf();
@@ -313,16 +316,7 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 Subject oboSubj = new Subject();
                 oboSubj.getPublicCredentials().add(eleFac.toElement(oboToken));
                 claims.getSupportingProperties().add(oboSubj);
-                String confirMethod = null;
-                if (tokenType.equals(WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE)||
-                    tokenType.equals(WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE)){
-                    confirMethod = SAML_SENDER_VOUCHES_1_0;
-                } else if (tokenType.equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
-                    confirMethod = SAML_SENDER_VOUCHES_2_0;
-                }
-                if (confirMethod != null){
-                    context.getOtherProperties().put(IssuedTokenContext.CONFIRMATION_METHOD, confirMethod);
-                }
+                confirMethod = getSenderVouchesMethod(tokenType);
             }
         }
         
@@ -338,7 +332,12 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
                 Subject actAsSubj = new Subject();
                 actAsSubj.getPublicCredentials().add(eleFac.toElement(actAsToken));
                 claims.getSupportingProperties().add(actAsSubj);
+                confirMethod = getSenderVouchesMethod(tokenType);
             }
+        }
+
+        if (confirMethod != null){
+            context.getOtherProperties().put(IssuedTokenContext.CONFIRMATION_METHOD, confirMethod);
         }
 
         // Check if the client is authorized to be issued the token from the STSAuthorizationProvider
@@ -723,5 +722,18 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         }
         
         return encDataEle;
+    }
+
+    private String getSenderVouchesMethod(String tokenType){
+        if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
+            WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+            return SAML_SENDER_VOUCHES_1_0;
+        }
+
+        if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)){
+            return SAML_SENDER_VOUCHES_2_0;
+        }
+
+        return null;
     }
 }

@@ -38,6 +38,9 @@ package com.sun.xml.ws.security.trust.impl;
 
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
+import com.sun.xml.wss.saml.*;
+import com.sun.xml.wss.saml.util.SAMLUtil;
+
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -46,23 +49,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
-import org.w3c.dom.Element;
-
 import javax.xml.stream.XMLStreamReader;
 
-import com.sun.xml.wss.saml.*;
-import com.sun.xml.wss.saml.util.SAMLUtil;
+import org.w3c.dom.Element;
 
 /**
  *
  * @author Jiandong Guo
  */
 public class DefaultSTSAttributeProvider implements STSAttributeProvider{
-    private static final String SAML_1_0_NS = "urn:oasis:names:tc:SAML:1.0:assertion";
-    private static final String SAML_2_0_NS = "urn:oasis:names:tc:SAML:2.0:assertion";
-
+   
     public Map<QName, List<String>> getClaimedAttributes(final Subject subject, final String appliesTo, final String tokenType, final Claims claims){
         final Set<Principal> principals = subject.getPrincipals();
         final Map<QName, List<String>> attrs = new HashMap<QName, List<String>>();

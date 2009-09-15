@@ -43,27 +43,14 @@
 
 package com.sun.xml.ws.security.trust.util;
 
+import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
+import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
-import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
-import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
-
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import javax.xml.soap.SOAPFault;
-import javax.xml.bind.JAXBElement;
-
-import com.sun.xml.wss.saml.SAMLAssertionFactory;
-import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;
+import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustSOAPFaultException;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
@@ -73,53 +60,61 @@ import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
+import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
+import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
+import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
+import com.sun.xml.ws.security.trust.impl.bindings.AttributedURI;
+import com.sun.xml.ws.security.trust.impl.bindings.EndpointReference;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+
+import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
+import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.misc.Base64;
+import com.sun.xml.wss.saml.Assertion;
+import com.sun.xml.wss.saml.SAMLAssertionFactory;
 
 import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-import java.security.PublicKey;
-import javax.crypto.spec.SecretKeySpec;
 
-import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
-
-import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
-import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.trust.impl.elements.str.KeyIdentifierImpl;
-import com.sun.xml.wss.saml.Assertion;
-import com.sun.xml.wss.impl.MessageConstants;
-
-import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import java.security.cert.X509Certificate;
-
-import java.util.Iterator;
-import org.w3c.dom.Text;
-
-import com.sun.xml.ws.api.security.trust.WSTrustException;
-
-import com.sun.xml.wss.impl.misc.Base64;
 import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
+import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.soap.SOAPFault;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 
 /**
@@ -472,20 +467,21 @@ public class WSTrustUtil {
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
                 final List<String> values = entry.getValue();
-                Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
-                attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
-                attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
-                if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(samlNS)){
-                    attrEle.setAttribute("Name", attrKey.getLocalPart());
-                    attrEle.setAttribute("NameFormat", attrKey.getNamespaceURI());
-                }
-  
-                Iterator valueIt = values.iterator();
-                while (valueIt.hasNext()){
-                    Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
-                    Text text = doc.createTextNode((String)valueIt.next());
-                    attrValueEle.appendChild(text);
-                    attrEle.appendChild(attrValueEle);
+                Element attrEle = null;
+                if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) &&
+                    values.size() > 0){
+                    // create an "actor" attribute
+                    attrEle = createActorAttribute(doc, samlNS, samlPrefix, values.get(0));
+
+                }else {
+                    attrEle = createAttribute(doc, samlNS, samlPrefix, attrKey);
+                    Iterator valueIt = values.iterator();
+                    while (valueIt.hasNext()){
+                        Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+                        Text text = doc.createTextNode((String)valueIt.next());
+                        attrValueEle.appendChild(text);
+                        attrEle.appendChild(attrValueEle);
+                    }
                 }
                 as.appendChild(attrEle);
             }
@@ -494,6 +490,42 @@ public class WSTrustUtil {
         }catch (Exception ex){
             throw new WSTrustException(ex.getMessage());
         }
+    }
+
+    private static Element createAttribute(Document doc, String samlNS, String samlPrefix, QName attrKey)throws Exception {
+        Element attrEle = doc.createElementNS(samlNS, samlPrefix+":Attribute");
+        attrEle.setAttribute("AttributeName", attrKey.getLocalPart());
+        attrEle.setAttribute("AttributeNamespace", attrKey.getNamespaceURI());
+        if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(samlNS)){
+            attrEle.setAttribute("Name", attrKey.getLocalPart());
+            attrEle.setAttribute("NameFormat", attrKey.getNamespaceURI());
+        }
+        return attrEle;
+    }
+
+    private static Element createActorAttribute(Document doc, String samlNS, String samlPrefix, String name)throws Exception {
+        // Create Attribute of the form:
+        // <saml:Attribute AttributeName="actor" 
+        //          AttributeNamespace="http://schemas.xmlsoap.com/ws/2009/09/identity/claims">
+        //      ...
+        // </saml:Attribute>
+        Element actorEle = createAttribute(doc, samlNS, samlPrefix, new QName("actor", "http://schemas.xmlsoap.com/ws/2009/09/identity/claims"));
+        Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+        actorEle.appendChild(attrValueEle);
+
+        // Create inner Attribute of the form:
+        // <saml:Attribute AttributeName="name"
+        //          AttributeNamespace="http://schemas.xmlsoap.org/ws/2005/05/identity/claims"       			                  AttributeNamespace="http://schemas.xmlsoap.org/ws/2005/05/identity/claims"    	                  xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion">
+        //    <saml:AttributeValue>name</saml:AttributeValue>
+        // </saml:Attribute>
+        Element nameEle = createAttribute(doc, samlNS, samlPrefix, new QName("name", "http://schemas.xmlsoap.com/ws/2005/05/identity/claims"));
+        attrValueEle.appendChild(nameEle);
+        Element nameAttrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+        nameEle.appendChild(nameAttrValueEle);
+        Text text = doc.createTextNode(name);
+        nameAttrValueEle.appendChild(text);
+
+        return actorEle;
     }
 
     public static Document newDocument(){

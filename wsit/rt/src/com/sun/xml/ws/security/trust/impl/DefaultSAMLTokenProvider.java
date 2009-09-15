@@ -44,9 +44,12 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import com.sun.xml.ws.security.trust.util.WSTrustUtil;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
+import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
@@ -66,35 +69,32 @@ import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.saml.SubjectConfirmation;
 import com.sun.xml.wss.saml.KeyInfoConfirmationData;
 import com.sun.xml.wss.saml.util.SAMLUtil;
+
+import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
+import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
+import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
+
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
-import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 
-import java.security.cert.X509Certificate;
-import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
-import com.sun.org.apache.xml.internal.security.keys.content.X509Data;
-
-
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import java.security.PrivateKey;
-
-/**
+/** 
  *
  * @author Jiandong Guo
  */
@@ -188,7 +188,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         // Validate the token and create the Status
         // Only for SAML tokens for now: verify the signature and check 
         // the time stamp
-        Element element = (Element) token.getTokenValue();
+        Element element = eleFac.toElement(token.getTokenValue());
         
         String code = wstVer.getValidStatusCodeURI();
         String reason = "The Trust service successfully validate the input";
@@ -269,23 +269,22 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             
             List<AudienceRestrictionCondition> arc = null;
             final List<String> confirmMethods = new ArrayList<String>();
-            if (confirMethod == null){
-                if (keyType.equals(wstVer.getBearerKeyTypeURI())){
-                     confirMethod = SAML_BEARER_1_0;
-                     if (appliesTo != null){
-                         arc = new ArrayList<AudienceRestrictionCondition>();
-                         List<String> au = new ArrayList<String>();
-                         au.add(appliesTo);
-                         arc.add(samlFac.createAudienceRestrictionCondition(au));
-                     }
-                }else{
+            Element keyInfoEle = null;
+            if (keyType.equals(wstVer.getBearerKeyTypeURI())){
+                confirMethod = SAML_BEARER_1_0;
+                if (appliesTo != null){
+                    arc = new ArrayList<AudienceRestrictionCondition>();
+                    List<String> au = new ArrayList<String>();
+                    au.add(appliesTo);
+                    arc.add(samlFac.createAudienceRestrictionCondition(au));
+                }
+            }else{
+                if (confirMethod == null){
                     confirMethod = SAML_HOLDER_OF_KEY_1_0;
                 }
-            }
-            
-            Element keyInfoEle = null;
-            if (keyInfo != null && !wstVer.getBearerKeyTypeURI().equals(keyType)){
-                keyInfoEle = keyInfo.getElement();
+                if (keyInfo != null){
+                    keyInfoEle = keyInfo.getElement();
+                }
             }
             confirmMethods.add(confirMethod);
             
@@ -295,17 +294,25 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     samlFac.createConditions(issuerInst, notOnOrAfter, null, arc, null);
             final Advice advice = samlFac.createAdvice(null, null, null);
             
-           com.sun.xml.wss.saml.Subject subj = null;
+            com.sun.xml.wss.saml.Subject subj = null;
             //final List<Attribute> attrs = new ArrayList<Attribute>();
             QName idName = null;
+            String id = null;
+            String idNS = null;
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
                 final List<String> values = entry.getValue();
                 if (values != null && values.size() > 0){
-                    if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
-                        final NameIdentifier nameId = samlFac.createNameIdentifier(values.get(0), attrKey.getNamespaceURI(), null);
-                        subj = samlFac.createSubject(nameId, subjectConfirm);
+                    if ("ActAs".equals(attrKey.getLocalPart())){
+                        id = values.get(0);
+                        idNS = attrKey.getNamespaceURI();
+                        idName = attrKey;
+
+                        break;
+                    } else if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
+                        id = values.get(0);
+                        idNS = attrKey.getNamespaceURI();
                         idName = attrKey;
                     }//else{
                        // final Attribute attr = samlFac.createAttribute(attrKey.getLocalPart(), attrKey.getNamespaceURI(), values);
@@ -313,11 +320,12 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     //}
                 }
             }
-            
+            NameIdentifier nameId = null;
             if (idName != null){
+                nameId = samlFac.createNameIdentifier(id, idNS, null);
                 claimedAttrs.remove(idName);
             }
-            
+            subj = samlFac.createSubject(nameId, subjectConfirm);
             final List<Object> statements = new ArrayList<Object>();
            //if (attrs.isEmpty()){
             if (claimedAttrs.isEmpty()){
@@ -329,7 +337,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             }
             assertion =
                     samlFac.createAssertion(assertionId, issuer, issuerInst, conditions, advice, statements);
-             if (!claimedAttrs.isEmpty()){
+            if (!claimedAttrs.isEmpty()){
                 return WSTrustUtil.addSamlAttributes(assertion, claimedAttrs);
             }
         }catch(SAMLException ex){
@@ -360,23 +368,22 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             
             List<AudienceRestriction> arc = null;
             KeyInfoConfirmationData keyInfoConfData = null;
-            if (confirMethod == null){
-                if (keyType.equals(wstVer.getBearerKeyTypeURI())){
-                     confirMethod = SAML_BEARER_2_0;
-                     if (appliesTo != null){
-                         arc = new ArrayList<AudienceRestriction>();
-                         List<String> au = new ArrayList<String>();
-                         au.add(appliesTo);
-                         arc.add(samlFac.createAudienceRestriction(au));
-                     }
-
-                }else{
-                    confirMethod = SAML_HOLDER_OF_KEY_2_0;
-                    if (keyInfo != null){
-                        keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
-                    }
+            if (keyType.equals(wstVer.getBearerKeyTypeURI())){
+                confirMethod = SAML_BEARER_2_0;
+                if (appliesTo != null){
+                    arc = new ArrayList<AudienceRestriction>();
+                    List<String> au = new ArrayList<String>();
+                    au.add(appliesTo);
+                    arc.add(samlFac.createAudienceRestriction(au));
                 }
-            }
+            }else{
+                if (confirMethod == null){
+                    confirMethod = SAML_HOLDER_OF_KEY_2_0;
+                }
+                if (keyInfo != null){
+                    keyInfoConfData = samlFac.createKeyInfoConfirmationData(keyInfo.getElement());
+                }
+            }         
             
             final Conditions conditions = samlFac.createConditions(issueInst, notOnOrAfter, null, arc, null, null);
                
@@ -386,14 +393,22 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             com.sun.xml.wss.saml.Subject subj = null;
             //final List<Attribute> attrs = new ArrayList<Attribute>();
             QName idName = null;
+            String id = null;
+            String idNS = null;
             final Set<Map.Entry<QName, List<String>>> entries = claimedAttrs.entrySet();
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
                 final List<String> values = entry.getValue();
                 if (values != null && values.size() > 0){
-                    if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
-                        final NameID nameId = samlFac.createNameID(values.get(0), attrKey.getNamespaceURI(), null);
-                        subj = samlFac.createSubject(nameId, subjectConfirm);
+                    if ("ActAs".equals(attrKey.getLocalPart())){
+                        id = values.get(0);
+                        idNS = attrKey.getNamespaceURI();
+                        idName = attrKey;
+
+                        break;
+                    } else if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
+                        id = values.get(0);
+                        idNS = attrKey.getNamespaceURI();
                         idName = attrKey;
                     }
                     //else{
@@ -402,10 +417,13 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                     //}
                 }
             }
-            
+
+            NameID nameId = null;
             if (idName != null){
+                nameId = samlFac.createNameID(id, idNS, null);
                 claimedAttrs.remove(idName);
             }
+            subj = samlFac.createSubject(nameId, subjectConfirm);
         
             final List<Object> statements = new ArrayList<Object>();
             //if (attrs.isEmpty()){
