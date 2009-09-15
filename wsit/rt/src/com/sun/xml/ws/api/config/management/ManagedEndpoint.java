@@ -308,6 +308,11 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     }
 
     @Override
+    public void closeManagedObjectManager() {
+        this.endpointDelegate.closeManagedObjectManager();
+    }
+
+    @Override
     public ServerTubeAssemblerContext getAssemblerContext() {
         return this.endpointDelegate.getAssemblerContext();
     }
