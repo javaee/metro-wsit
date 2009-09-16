@@ -48,9 +48,9 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.config.management.ManagementConstants;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
-import com.sun.xml.ws.resources.ManagementMessages;
 import com.sun.xml.ws.server.EndpointFactory;
 
 import java.io.IOException;
@@ -92,13 +92,12 @@ public class ReDelegate {
             final EndpointCreationAttributes creationAttributes = parameters.get(ManagedEndpoint.CREATION_ATTRIBUTES_PARAMETER_NAME);
             WSEndpoint<T> delegate = recreateEndpoint(managedEndpoint, creationAttributes, urnToPolicy);
             if (LOGGER.isLoggable(Level.FINE)) {
-                LOGGER.fine(ManagementMessages.WSM_0002_NEW_ENDPOINT_DELEGATE(delegate));
+                LOGGER.fine(ManagementMessages.WSM_5092_NEW_ENDPOINT_DELEGATE(delegate));
             }
             managedEndpoint.swapEndpointDelegate(delegate);
 
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, ManagementMessages.WSM_0001_ENDPOINT_CREATION_FAILED(e), e);
-            throw new WebServiceException(ManagementMessages.WSM_0001_ENDPOINT_CREATION_FAILED(e), e);
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5091_ENDPOINT_CREATION_FAILED(), e));
         } finally {
             Thread.currentThread().setContextClassLoader(savedClassLoader);
         }
@@ -109,7 +108,7 @@ public class ReDelegate {
             Map<URI, Policy> urnToPolicy) {
         final ServiceDefinition serviceDefinition = endpoint.getServiceDefinition();
         if (serviceDefinition == null) {
-            throw new WebServiceException(ManagementMessages.WSM_0003_NO_SERVICE_DEFINITION());
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5093_NO_SERVICE_DEFINITION()));
         }
 
         final LinkedList<SDDocumentSource> documentSources = new LinkedList<SDDocumentSource>();
@@ -121,6 +120,10 @@ public class ReDelegate {
                 documentSources.add(convertDocument(doc));
             }
         }
+
+        // This allows the new endpoint to register with the same name for monitoring
+        // as the old one.
+        endpoint.closeManagedObjectManager();
 
         return EndpointFactory.createEndpoint(endpoint.getImplementationClass(),
                 creationAttributes.isProcessHandlerAnnotation(),
@@ -156,11 +159,11 @@ public class ReDelegate {
             final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(newWSDLXMLReader);
             return SDDocumentSource.create(doc.getURL(), buffer);
         } catch (IOException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException("", e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5094_FAILED_POLICIES_REPLACE(doc), e));
         } catch (XMLStreamException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException("", e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5094_FAILED_POLICIES_REPLACE(doc), e));
         }
     }
 
@@ -180,11 +183,11 @@ public class ReDelegate {
             final XMLStreamBuffer buffer = XMLStreamBuffer.createNewBufferFromXMLStreamReader(xmlReader);
             return SDDocumentSource.create(doc.getURL(), buffer);
         } catch (IOException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException("", e), e);
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5094_FAILED_SDDOCUMENT_CONVERSION(doc), e));
         } catch (XMLStreamException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException("", e), e);
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5094_FAILED_SDDOCUMENT_CONVERSION(doc), e));
         }
     }
 

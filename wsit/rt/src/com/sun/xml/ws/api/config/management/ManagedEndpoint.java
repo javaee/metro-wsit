@@ -198,7 +198,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         endpointComponents.add(new ManagedHttpMetadataPublisher());
 
         this.endpointDelegate = endpoint;
-        LOGGER.info(ManagementMessages.WSM_5004_RECONFIGURED_ENDPOINT(this.id));
+        LOGGER.info(ManagementMessages.WSM_5000_RECONFIGURED_ENDPOINT(this.id));
     }
 
     @Override

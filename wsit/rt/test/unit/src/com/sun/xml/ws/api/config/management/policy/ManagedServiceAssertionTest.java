@@ -258,6 +258,37 @@ public class ManagedServiceAssertionTest extends TestCase {
     }
 
     public void testGetCommunicationServerJmxServerUrl() throws AssertionCreationException {
+        final QName jmxServerUrlName = new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxServerUrl");
+        final AssertionData environmentData = AssertionData.createAssertionData(
+                jmxServerUrlName, "http://localhost/", null, false, false);
+        final LinkedList<PolicyAssertion> environmentParameters = new LinkedList<PolicyAssertion>();
+        environmentParameters.add(new SimpleAssertion(environmentData, null) { });
+
+        final AssertionData commServerData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.COMMUNICATION_SERVER_IMPLEMENTATION_PARAMETER_QNAME, null, null, false, false);
+        final LinkedList<PolicyAssertion> commServerParameters = new LinkedList<PolicyAssertion>();
+        commServerParameters.add(new SimpleAssertion(commServerData, environmentParameters) { });
+
+        final AssertionData commServersData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.COMMUNICATION_SERVER_IMPLEMENTATIONS_PARAMETER_QNAME, null, null, false, false);
+        final LinkedList<PolicyAssertion> managedServiceParameters = new LinkedList<PolicyAssertion>();
+        managedServiceParameters.add(new SimpleAssertion(commServersData, commServerParameters) { });
+
+        final HashMap<QName, String> managedServiceAttributes = new HashMap<QName, String>();
+        managedServiceAttributes.put(ManagedServiceAssertion.ID_ATTRIBUTE_QNAME, "id1");
+        final AssertionData managedServiceData = AssertionData.createAssertionData(
+                ManagedServiceAssertion.MANAGED_SERVICE_QNAME, null, managedServiceAttributes, false, false);
+
+        final ManagedServiceAssertion instance = new ManagedServiceAssertion(managedServiceData, managedServiceParameters);
+        final Collection<ImplementationRecord> implementations = instance.getCommunicationServerImplementations();
+        final ImplementationRecord implementation = implementations.iterator().next();
+        final Map<QName, String> result = implementation.getParameters();
+        final Map<QName, String> expResult = new HashMap<QName, String>();
+        expResult.put(jmxServerUrlName, "http://localhost/");
+        assertEquals(expResult, result);
+    }
+
+    public void testGetCommunicationServerConnectorServerEnvironment() throws AssertionCreationException {
         final QName parameterName = new QName("ParameterName");
         final AssertionData nestedData = AssertionData.createAssertionData(
                 parameterName, "parameterValue", null, false, false);
