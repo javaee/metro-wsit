@@ -97,6 +97,7 @@ public class EndpointFactoryImplTest extends TestCase {
 
     /**
      * Test of createEndpoint method, of class EndpointFactoryImpl.
+     * @throws Exception 
      */
     public void testCreateEndpointNoManagedAssertion() throws Exception {
         final URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource("management/factory/unmanaged.wsdl");
@@ -217,6 +218,10 @@ public class EndpointFactoryImplTest extends TestCase {
         @Override
         public ServerTubeAssemblerContext getAssemblerContext() {
             return null;
+        }
+
+        @Override
+        public void closeManagedObjectManager() {
         }
     }
 
