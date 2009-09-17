@@ -184,10 +184,10 @@ public class ReDelegate {
             return SDDocumentSource.create(doc.getURL(), buffer);
         } catch (IOException e) {
             throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5094_FAILED_SDDOCUMENT_CONVERSION(doc), e));
+                    ManagementMessages.WSM_5095_FAILED_SDDOCUMENT_CONVERSION(doc), e));
         } catch (XMLStreamException e) {
             throw LOGGER.logSevereException(new WebServiceException(
-                    ManagementMessages.WSM_5094_FAILED_SDDOCUMENT_CONVERSION(doc), e));
+                    ManagementMessages.WSM_5095_FAILED_SDDOCUMENT_CONVERSION(doc), e));
         }
     }
 

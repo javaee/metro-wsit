@@ -37,8 +37,9 @@
 package com.sun.xml.ws.config.management.server;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.policy.ModelGenerator;
 import com.sun.xml.txw2.output.StaxSerializer;
+import com.sun.xml.ws.api.policy.ModelGenerator;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelGenerator;
@@ -47,7 +48,6 @@ import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
-import com.sun.xml.ws.resources.ManagementMessages;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import com.sun.xml.ws.wsdl.parser.WSDLConstants;
 
@@ -185,7 +185,7 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
             final StaxSerializer serializer = new FragmentSerializer(this.out);
             POLICY_MARSHALLER.marshal(policyModel, serializer);
         } catch (PolicyException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_0004_CANNOT_MARSHAL(this.out)), ex);
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5096_CANNOT_MARSHAL(this.out)), ex);
         }
     }
 
