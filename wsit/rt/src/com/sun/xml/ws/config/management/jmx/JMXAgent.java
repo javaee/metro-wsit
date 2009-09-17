@@ -83,7 +83,7 @@ public class JMXAgent<T> implements CommunicationServer<T> {
 
     private static final Logger LOGGER = Logger.getLogger(JMXAgent.class);
     private static final QName JMX_CONNECTOR_SERVER_ENVIRONMENT_NAME =
-            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerEnviroment");
+            new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxConnectorServerEnvironment");
     private static final QName JMX_SERVICE_URL_PARAMETER_NAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "JmxServiceUrl");
     private static final QName JMX_CONNECTOR_SERVER_CREATOR_PARAMETER_NAME =
