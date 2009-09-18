@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.rm.runtime;
 
-import com.sun.xml.internal.ws.client.ClientTransportException;
+import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
