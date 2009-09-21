@@ -40,12 +40,14 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ConfigSaver;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
 
 import java.io.StringReader;
 import java.sql.Connection;
@@ -74,23 +76,27 @@ public class JDBCConfigSaver<T> implements ConfigSaver<T> {
     }
 
     /**
-     * Persist the data
+     * Persist the data.
      *
      * @param parameters The parameters must contain the ManagedEndpoint instance
      *   and the data to be persisted.
      */
     public void persist(final NamedParameters parameters) {
+        final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
+        validate(newConfig);
+
         Connection connection = null;
         DataSource source = null;
         try {
             final ImplementationRecord record = this.assertion.getConfigSaverImplementation();
             source = ManagementUtil.getJdbcDataSource(record, JDBCConfigSaver.class.getName());
             connection = source.getConnection();
-            final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record, JDBCConfigSaver.class.getName());
-            final String newConfig = parameters.get(ManagementConstants.CONFIGURATION_DATA_PARAMETER_NAME);
+            final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(
+                    record, JDBCConfigSaver.class.getName());
             writeData(connection, tableNames, this.endpoint.getId(), newConfig);
         } catch (SQLException e) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e));
         } finally {
             try {
                 if (connection != null) {
@@ -99,6 +105,24 @@ public class JDBCConfigSaver<T> implements ConfigSaver<T> {
             } catch (SQLException e) {
                 LOGGER.warning(ManagementMessages.WSM_5022_NO_DB_CLOSE(connection), e);
             }
+        }
+    }
+
+    /**
+     * The best way to ensure that the configuration data is valid is to do a
+     * full parse before we are writing it to the database. This may cost a
+     * little performance but since the reconfiguration is happening asynchronously,
+     * it allows to give immediate feedback.
+     *
+     * @param configData The new policies.
+     * @throws WebServiceException If parsing the policies failed.
+     */
+    private static void validate(final String configData) throws WebServiceException {
+        try {
+            ExternalAttachmentsUnmarshaller.unmarshal(new StringReader(configData));
+        } catch (PolicyException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5097_FAILED_CONFIG_PARSE(), e));
         }
     }
 
