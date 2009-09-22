@@ -99,7 +99,7 @@
     </target>
 
     <!-- If we install into Tomcat 5.x, install the webservices-api.jar into common/endorsed. -->
-    <!-- If we install into Tomcat 6, install the webservices-api.jar into shared/lib.        -->
+    <!-- If we install into Tomcat 6, install the webservices-api.jar into endorsed.          -->
     <!-- If we install with Java SE 6, additionally install the webservices-api.jar           -->
     <!-- into $JAVA_HOME/lib/endorsed.                                                        -->
 
@@ -113,8 +113,9 @@
         </copy>
     </target>
 
-    <target name="install-api-tomcat6" description="Installs 'webservices-api.jar' into $CATALINA_HOME/shared/lib" if="tomcat6">
-        <copy toDir="${catalina.lib.home}" overwrite="true">
+    <target name="install-api-tomcat6" description="Installs 'webservices-api.jar' into $CATALINA_HOME/endorsed" if="tomcat6">
+        <mkdir dir="${catalina.home}/endorsed"/>
+        <copy toDir="${catalina.home}/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -170,4 +171,5 @@
         <echo/>
         <antcall target="jdk6-message"/>
     </target>
+    
 </project>
