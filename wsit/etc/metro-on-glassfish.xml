@@ -48,14 +48,6 @@
         </not>
     </condition>
 
-    <condition property="ext" value="" else=".bat">
-        <os family="unix"/>
-    </condition>
-
-    <condition property="unix">
-        <os family="unix"/>
-    </condition>
-
     <condition property="glassfish-v3">
         <available file="${as.home}/modules" type="dir"/>
     </condition>
@@ -63,10 +55,6 @@
     <!-- Check if we are running JAVA SE 6 --> 
     <condition property="jdk6">
         <contains string="${java.version}" substring="1.6.0"/>
-    </condition>
-
-    <condition property="endorsed-api-flagged">
-        <equals arg1="${install.api}" arg2="true"/>
     </condition>
 
     <target name="jdk6-message" if="jdk6">
