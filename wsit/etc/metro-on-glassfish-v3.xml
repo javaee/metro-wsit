@@ -48,12 +48,8 @@
         </not>
     </condition>
 
-    <condition property="ext" value="" else=".bat">
-        <os family="unix"/>
-    </condition>
-
-    <condition property="unix">
-        <os family="unix"/>
+    <condition property="as.home.exists">
+        <available file="${as.home}" type="dir"/>
     </condition>
 
     <condition property="glassfish-v3">
@@ -63,10 +59,6 @@
     <!-- Check if we are running JAVA SE 6 --> 
     <condition property="jdk6">
         <contains string="${java.version}" substring="1.6.0"/>
-    </condition>
-
-    <condition property="endorsed-api-flagged">
-        <equals arg1="${install.api}" arg2="true"/>
     </condition>
 
     <!--target name="jdk6-message" if="jdk6">
@@ -103,12 +95,18 @@
         <echo/>
     </target>
 
-    <target name="gfv3-checkpoint" unless="glassfish-v3">
+    <target name="ashome-test" unless="as.home.exists">
+        <fail message="The environment variable AS_HOME was not set or does not point to an existing directory."/>
+    </target>
+
+    <target name="gfv3-test" unless="glassfish-v3">
         <antcall target="gfv3-message"/>
         <fail message="It looks like you are trying to install Metro on GlassFish v2."/>
     </target>
 
-    <target name="init" if="notInstalled" depends="gfv3-checkpoint"
+    <target name="init" depends="ashome-test, gfv3-test"/>
+
+    <target name="backup" if="notInstalled"
             description="Back-up existing Metro jars">
         <echo message="Creating a back-up of default Metro installation..."/>
 
@@ -121,7 +119,7 @@
         <echo message="To restore the original Metro installation, run this script with 'uninstall' target"/>
     </target>
 
-    <target name="install" depends="init" description="Install latest Metro jars">
+    <target name="install" depends="init, backup" description="Install latest Metro jars">
         <antcall target="warning-note" />
         <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
         <echo />
@@ -140,7 +138,7 @@
     </target>
 
     <target name="uninstall" unless="notInstalled"
-            depends="gfv3-checkpoint"
+            depends="init"
             description="Restore original Metro jars and tool scripts">
         <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
 
