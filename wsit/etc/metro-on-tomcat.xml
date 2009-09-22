@@ -49,12 +49,22 @@
         <contains string="${java.version}" substring="1.6.0"/>
     </condition>
 
+    <condition property="catalina.home.exists">
+        <available file="${catalina.home}" type="dir"/>
+    </condition>
+
     <condition property="tomcat6">
         <not>
             <available file="${catalina.home}/common/endorsed"/>
         </not>
     </condition>
  
+    <target name="catalinahome-test" unless="catalina.home.exists">
+        <fail message="The environment variable CATALINA_HOME was not set or does not point to an existing directory."/>
+    </target>
+
+    <target name="init" depends="catalinahome-test"/>
+
     <target name="jdk6-message" if="jdk6">
         <echo message="NOTE: Metro is being installed using Java SE 6."/>
         <echo/>
@@ -73,7 +83,7 @@
         <echo/>
     </target>
     
-    <target name="install" depends="uninstall,update-catalina-props,install-api" description="Install latest Metro jars">
+    <target name="install" depends="init,uninstall,update-catalina-props,install-api" description="Install latest Metro jars">
         <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ for ${catalina.home} ..."/>
 
         <mkdir dir="${catalina.lib.home}"/>
@@ -122,7 +132,7 @@
 
     <taskdef name="updatesharedloaderprop" classname="com.sun.xml.ws.installer.UpdateSharedLoaderProp">
         <classpath>
-            <fileset dir="./lib" includes="webservices-rt.jar"/>
+            <fileset dir="${basedir}/lib" includes="webservices-rt.jar"/>
         </classpath>
     </taskdef>
 
@@ -130,7 +140,8 @@
         <updatesharedloaderprop catalinaprops="${catalina.home}/conf/catalina.properties"/>
     </target>
 
-    <target name="uninstall">
+    <target name="uninstall" depends="init"
+            description="Remove the Metro jar files.">
         <delete quiet="true">
             <fileset dir="${catalina.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
