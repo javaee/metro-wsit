@@ -40,12 +40,16 @@
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
-    <property name="backup.dir" value="${as.home}/.wsit-@release.impl.version@"/>
+    <property name="backup.dir" value="${as.home}/.metro-@release.impl.version@"/>
 
     <condition property="notInstalled">
         <not>
             <available file="${backup.dir}"/>
         </not>
+    </condition>
+
+    <condition property="as.home.exists">
+        <available file="${as.home}" type="dir"/>
     </condition>
 
     <condition property="glassfish-v3">
@@ -86,12 +90,18 @@
         <echo/>
     </target>
 
-    <target name="gfv3-checkpoint" if="glassfish-v3">
+    <target name="ashome-test" unless="as.home.exists">
+        <fail message="The environment variable AS_HOME was not set or does not point to an existing directory."/>
+    </target>
+
+    <target name="gfv3-test" if="glassfish-v3">
         <antcall target="gfv3-message"/>
         <fail message="It looks like you are trying to install Metro on GlassFish V3. Please use the update center."/>
     </target>
 
-    <target name="init" if="notInstalled" depends="gfv3-checkpoint"
+    <target name="init" depends="ashome-test, gfv3-test"/>
+
+    <target name="backup" if="notInstalled"
             description="Backup existing Metro jars and tool scripts">
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
@@ -100,7 +110,7 @@
         </copy>
     </target>
 
-    <target name="install" depends="init" description="Install latest Metro jars">
+    <target name="install" depends="init, backup" description="Install latest Metro jars">
         <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
@@ -118,7 +128,7 @@
         <echo message="... installation complete."/>
     </target>
 
-    <target name="install-api" if="jdk6" depends="gfv3-checkpoint"
+    <target name="install-api" if="jdk6" depends="init"
             description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed">
         <mkdir dir="${java.home}/lib/endorsed"/>
         <copy toDir="${java.home}/lib/endorsed" overwrite="true">
@@ -129,7 +139,7 @@
     </target>
 
     <target name="uninstall" unless="notInstalled"
-            depends="gfv3-checkpoint"
+            depends="init"
             description="Restore original Metro jars and tool scripts">
         <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
 
