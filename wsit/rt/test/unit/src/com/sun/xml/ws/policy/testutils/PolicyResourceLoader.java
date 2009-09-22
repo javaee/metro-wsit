@@ -62,16 +62,11 @@ import org.xml.sax.SAXException;
  * @author Fabian Ritzmann
  */
 public final class PolicyResourceLoader {
+
     public static final String POLICY_UNIT_TEST_RESOURCE_ROOT = "policy/";
+
     private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
-    public static final String[] SINGLE_ALTERNATIVE_POLICY = new String[] {
-        "single_alternative_policy/policy1.xml",
-        "single_alternative_policy/policy2.xml",
-        "single_alternative_policy/policy3.xml",
-        "single_alternative_policy/policy4.xml",
-        "single_alternative_policy/policy5.xml"
-    };
     
     private PolicyResourceLoader() {
     }
@@ -156,6 +151,5 @@ public final class PolicyResourceLoader {
             throw new PolicyException("Failed to parse document", ex);
         }
     }
-    
-    
+ 
 }

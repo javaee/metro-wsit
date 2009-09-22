@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,11 +37,12 @@
 package com.sun.xml.ws.policy.sourcemodel;
 
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+
 import java.io.StringWriter;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+
 import junit.framework.TestCase;
 
 /**
@@ -61,21 +62,10 @@ public class PolicySourceModelTest extends TestCase {
     protected void tearDown() throws Exception {
     }
     
-    public void testCloneModel() throws Exception {
-        PolicySourceModel model = PolicyResourceLoader.unmarshallModel("complex_policy/nested_assertions_with_alternatives.xml");
-        PolicySourceModel clone = model.clone();
-        
-        //System.out.println("Model: \n" + model.toString());
-        //System.out.println("Clone: \n" + clone.toString());
-        //System.out.println("====================================================================");
-        model.toString();
-        clone.toString();
-        assertEquals(model, clone);
-    }
-
     /**
      * This method will only run properly if META-INF/services/com.sun.xml.ws.policy.spi.PrefixMapper
      * is on the class path.
+     * @throws Exception
      */
     public void testPrefixMapping() throws Exception {
         PolicySourceModel model = PolicySourceModel.createPolicySourceModel(NamespaceVersion.v1_5, "testid", null);
