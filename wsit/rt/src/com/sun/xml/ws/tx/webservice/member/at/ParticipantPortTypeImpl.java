@@ -61,7 +61,7 @@ import java.util.logging.Level;
  * WS-Atomic Transaction participant protocol service
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -125,7 +125,7 @@ public class ParticipantPortTypeImpl implements ParticipantPortType {
         }
 
         ATCoordinator coordinator = null;
-        if (activityId == UNKNOWN_ID) {
+        if (UNKNOWN_ID.equals(activityId)) {
             if (logger.isLogging(Level.INFO)) {
                 logger.info("Two Phase Commit Participant", "handling notification for an unknown transaction");
             }
