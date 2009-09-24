@@ -114,7 +114,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
             // We need to extract the ManagedService assertion from the endpoint policy
             // right away because any reconfiguration will overwrite the policies in
             // the endpoint.
-            this.assertion = EndpointUtil.getAssertion(endpoint);
+            this.assertion = ManagedServiceAssertion.getAssertion(endpoint);
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
