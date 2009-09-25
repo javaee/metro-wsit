@@ -182,10 +182,15 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
     private void writePolicy(final Policy policy) {
         try {
             final PolicySourceModel policyModel = POLICY_GENERATOR.translate(policy);
+            this.out.writeCharacters("\n");
             final StaxSerializer serializer = new FragmentSerializer(this.out);
             POLICY_MARSHALLER.marshal(policyModel, serializer);
-        } catch (PolicyException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5096_CANNOT_MARSHAL(this.out)), ex);
+        } catch (PolicyException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5096_CANNOT_MARSHAL(this.out)), e);
+        } catch (XMLStreamException e) {
+            throw LOGGER.logSevereException(new WebServiceException(
+                    ManagementMessages.WSM_5096_CANNOT_MARSHAL(this.out)), e);
         }
     }
 
