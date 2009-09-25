@@ -292,7 +292,7 @@
             </metainf>
             <expandfiles>
                 <exclude name="gmbal*.jar"/>
-                <exclude name="GlassFish_Common_APIs*.jar"/>
+                <exclude name="management-api*.jar"/>
                 <exclude name="jaxb*.jar"/>
             </expandfiles>
         </expand-jars-macro>
