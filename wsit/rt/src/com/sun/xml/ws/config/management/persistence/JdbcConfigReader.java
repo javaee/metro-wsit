@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.config.management.server;
+package com.sun.xml.ws.config.management.persistence;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.ConfigReader;
@@ -42,6 +42,8 @@ import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.EndpointStarter;
 import com.sun.xml.ws.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.commons.DelayedTaskManager;
 import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
@@ -49,8 +51,7 @@ import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
 import com.sun.xml.ws.config.management.ManagementUtil.JdbcTableNames;
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
+import com.sun.xml.ws.config.management.server.ReDelegate;
 import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.Reader;
@@ -76,9 +77,9 @@ import javax.xml.ws.WebServiceException;
  * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public class JDBCConfigReader<T> implements ConfigReader<T> {
+public class JdbcConfigReader<T> implements ConfigReader<T> {
 
-    private static final Logger LOGGER = Logger.getLogger(JDBCConfigReader.class);
+    private static final Logger LOGGER = Logger.getLogger(JdbcConfigReader.class);
     private static final QName POLLING_INTERVAL_PARAMETER_NAME =
             new QName(PolicyConstants.SUN_MANAGEMENT_NAMESPACE, "PollingInterval");
     private static final long DEFAULT_POLLING_INTERVAL = 10000L;
@@ -105,7 +106,7 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
         final ImplementationRecord record = assertion.getConfigReaderImplementation();
         if (record != null) {
             final String className = record.getImplementation();
-            if (className == null || className.equals(JDBCConfigReader.class.getName())) {
+            if (className == null || className.equals(JdbcConfigReader.class.getName())) {
                 String pollingIntervalText = null;
                 try {
                     final Map<QName, String> classParameters = record.getParameters();
@@ -211,9 +212,9 @@ public class JDBCConfigReader<T> implements ConfigReader<T> {
             try {
                 final ImplementationRecord record = this.managedService.getConfigReaderImplementation();
                 final JdbcTableNames tableNames = ManagementUtil.getJdbcTableNames(record,
-                        JDBCConfigReader.class.getName());
+                        JdbcConfigReader.class.getName());
                 source = ManagementUtil.getJdbcDataSource(record,
-                        JDBCConfigReader.class.getName());
+                        JdbcConfigReader.class.getName());
                 connection = source.getConnection();
                 pollData(connection, tableNames, endpoint.getId());
                 connection.close();

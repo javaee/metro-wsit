@@ -56,7 +56,7 @@ public class ManagementFactory {
 
     private static final String DEFAULT_COMMUNICATION_SERVER_CLASS_NAME = "com.sun.xml.ws.config.management.jmx.JMXAgent";
     private static final String DEFAULT_CONFIGURATOR_CLASS_NAME = "com.sun.xml.ws.config.management.server.DefaultConfigurator";
-    private static final String DEFAULT_CONFIG_READER_CLASS_NAME = "com.sun.xml.ws.config.management.server.JDBCConfigReader";
+    private static final String DEFAULT_CONFIG_READER_CLASS_NAME = "com.sun.xml.ws.config.management.persistence.JdbcConfigReader";
     private static final String DEFAULT_CONFIG_SAVER_CLASS_NAME = "com.sun.xml.ws.config.management.persistence.JDBCConfigSaver";
 
     private final ManagedServiceAssertion assertion;
