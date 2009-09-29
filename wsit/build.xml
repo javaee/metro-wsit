@@ -90,15 +90,7 @@
              failok="false"
              output="${v3.build.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
-
-
-        <mkdir  dir="rt/${osgi.build.dir}/jar-without-staxapi"/>
-        <unzip src="rt/${osgi.build.dir}/webservices-api.jar"  dest="rt/${osgi.build.dir}/jar-without-staxapi"/>
-        <delete dir="rt/${osgi.build.dir}/jar-without-staxapi/javax/xml/stream"/>
-        <!-- for v3 we should not bundle stax apis hence created this jar-->
-        <jar  file="rt/${osgi.build.dir}/webservices-api-without-stax.jar"
-             basedir="rt/${osgi.build.dir}/jar-without-staxapi"/>
-        <bnd classpath="rt/${osgi.build.dir}/webservices-api-without-stax.jar"
+        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar"
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
