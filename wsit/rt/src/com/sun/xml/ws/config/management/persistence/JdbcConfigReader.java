@@ -46,7 +46,6 @@ import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.commons.DelayedTaskManager;
 import com.sun.xml.ws.commons.DelayedTaskManager.DelayedTask;
-import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.config.management.ManagementUtil;
@@ -155,7 +154,7 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
     private static class ConfigPoller<T> implements DelayedTask {
 
         private static final String START_ATTRIBUTE_NOTIFY_VALUE_NAME = "notify";
-        private static final String POLLER_NAME = "JDBC configuration management poller";
+        private static final String POLLER_NAME = "Configuration management JDBC poller";
 
         private final ManagedEndpoint<T> endpoint;
         private final EndpointCreationAttributes creationAttributes;
@@ -163,6 +162,8 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
         private final EndpointStarter endpointStarter;
         private final ManagedServiceAssertion managedService;
         private final long executionDelay;
+        private final DelayedTaskManager taskManager =
+                DelayedTaskManager.createSingleThreadedManager("config-management-jdbc-poller");
 
         private volatile boolean stopped;
         private volatile long version = 0L;
@@ -220,7 +221,7 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
                 connection.close();
             } catch (SQLException e) {
                 LOGGER.warning(ManagementMessages.WSM_5021_NO_DB_CONNECT(source), e);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LOGGER.severe(ManagementMessages.WSM_5037_FAILED_RECONFIGURE(), e);
             } finally {
                 try {
@@ -233,7 +234,7 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
 
                 if (!stopped) {
                     // schedule next run
-                    MaintenanceTaskExecutor.INSTANCE.register(this, executionDelay, TimeUnit.MILLISECONDS);
+                    this.taskManager.register(this, executionDelay, TimeUnit.MILLISECONDS);
                 }
             }
         }
@@ -243,7 +244,7 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
             try {
                 if (stopped) {
                     stopped = false;
-                    MaintenanceTaskExecutor.INSTANCE.register(this, 0, TimeUnit.MILLISECONDS);
+                    this.taskManager.register(this, 0, TimeUnit.MILLISECONDS);
                 } else {
                     LOGGER.warning(ManagementMessages.WSM_5034_DUPLICATE_START(getName()));
                 }
