@@ -36,20 +36,20 @@
 
 package com.sun.xml.ws.config.management.policy;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
 import javax.xml.namespace.QName;
 
 /**
+ * Validate the ManagedService policy assertion.
  *
  * @author Fabian Ritzmann
  */
 public class ManagementPolicyValidator implements PolicyAssertionValidator {
-
-    // TODO: Consolidate with other declarations of this QName
-    private static final QName MANAGED_SERVICE_QNAME = new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService");
 
     public Fitness validateClientSide(PolicyAssertion assertion) {
         return Fitness.UNKNOWN;
@@ -57,7 +57,7 @@ public class ManagementPolicyValidator implements PolicyAssertionValidator {
 
     public Fitness validateServerSide(PolicyAssertion assertion) {
         final QName assertionName = assertion.getName();
-        if (MANAGED_SERVICE_QNAME.equals(assertionName)) {
+        if (ManagedServiceAssertion.MANAGED_SERVICE_QNAME.equals(assertionName)) {
             return Fitness.SUPPORTED;
         } else {
             return Fitness.UNKNOWN;
@@ -65,8 +65,7 @@ public class ManagementPolicyValidator implements PolicyAssertionValidator {
     }
 
     public String[] declareSupportedDomains() {
-        // TODO: Use constant
-        return new String[] { "http://java.sun.com/xml/ns/metro/management" };
+        return new String[] { PolicyConstants.SUN_MANAGEMENT_NAMESPACE };
     }
 
 }

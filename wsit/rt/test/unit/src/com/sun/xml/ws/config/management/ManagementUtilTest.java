@@ -36,12 +36,8 @@
 
 package com.sun.xml.ws.config.management;
 
-//import com.sun.xml.ws.management.policy.ManagementAssertion;
-//import com.sun.xml.ws.policy.PolicyMap;
-
 import java.io.Reader;
 import java.io.StringReader;
-//import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
@@ -64,21 +60,6 @@ public class ManagementUtilTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
     }
-
-    /**
-     * Test of getAssertion method, of class ManagementUtil.
-     */
-//    public void testGetAssertion() {
-//        System.out.println("getAssertion");
-//        QName serviceName = null;
-//        QName portName = null;
-//        PolicyMap policyMap = null;
-//        ManagementAssertion expResult = null;
-//        ManagementAssertion result = ManagementUtil.getAssertion(serviceName, portName, policyMap);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
 
     /**
      * Test of convert method, of class ManagementUtil.

@@ -157,8 +157,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
                 LOGGER.config(ManagementMessages.WSM_5066_STARTING_ENDPOINT());
             }
         } catch (InterruptedException e) {
-            // TODO add error message
-            throw LOGGER.logSevereException(new WebServiceException(e));
+            throw LOGGER.logSevereException(new WebServiceException(ManagementMessages.WSM_5099_START_INTERRUPTED(), e));
         }
     }
 

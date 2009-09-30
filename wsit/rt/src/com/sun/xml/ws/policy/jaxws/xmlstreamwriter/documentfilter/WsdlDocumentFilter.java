@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
@@ -43,6 +44,7 @@ import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.transport.tcp.wsit.PortAttributeInvocationTransformer;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -55,7 +57,7 @@ import javax.xml.stream.XMLStreamWriter;
 public class WsdlDocumentFilter implements SDDocumentFilter {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsdlDocumentFilter.class);
     
-    private static final InvocationProcessorFactory FILTERING_FACOTRY = new InvocationProcessorFactory() {
+    private static final InvocationProcessorFactory FILTERING_FACTORY = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
             return new FilteringInvocationProcessor(
                     writer,
@@ -85,7 +87,7 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
                     
                     new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS"),
 
-                    new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService")
+                    ManagedServiceAssertion.MANAGED_SERVICE_QNAME
                     )
                     );
         }
@@ -97,7 +99,7 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
         }
         XMLStreamWriter result = null;
         try {
-            result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, FILTERING_FACOTRY);
+            result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, FILTERING_FACTORY);
             return result;
         } finally {
             LOGGER.exiting(result);

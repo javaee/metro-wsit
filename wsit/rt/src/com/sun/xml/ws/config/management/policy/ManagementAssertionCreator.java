@@ -39,30 +39,27 @@ package com.sun.xml.ws.config.management.policy;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
 
 import java.util.Collection;
-import javax.xml.namespace.QName;
 
 /**
+ * Instantiates a PolicyAssertion of type ManagedServiceAssertion.
  *
  * @author Fabian Ritzmann
  */
 public class ManagementAssertionCreator implements PolicyAssertionCreator {
 
-    // TODO: Consolidate with other declarations of this QName
-    private static final QName MANAGED_SERVICE_QNAME = new QName("http://java.sun.com/xml/ns/metro/management", "ManagedService");
-
     public String[] getSupportedDomainNamespaceURIs() {
-        // TODO: Use constant
-        return new String[] { "http://java.sun.com/xml/ns/metro/management" };
+        return new String[] { PolicyConstants.SUN_MANAGEMENT_NAMESPACE };
     }
 
     public PolicyAssertion createAssertion(AssertionData data, Collection<PolicyAssertion> assertionParameters,
             AssertionSet nestedAlternative, PolicyAssertionCreator defaultCreator) throws AssertionCreationException {
-        if (MANAGED_SERVICE_QNAME.equals(data.getName())) {
+        if (ManagedServiceAssertion.MANAGED_SERVICE_QNAME.equals(data.getName())) {
             return new ManagedServiceAssertion(data, assertionParameters);
         }
         else {

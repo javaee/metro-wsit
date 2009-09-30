@@ -40,17 +40,20 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.config.management.ReconfigNotifier;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
+import java.util.logging.Level;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 import javax.management.ObjectName;
 
 /**
+ * Send a notification that the service was reconfigured successfully to all
+ * listeners.
  *
  * @author Fabian Ritzmann
  */
 public class ReconfigNotification implements ReconfigNotifier {
 
-    public static final String NOTIFICATION_TYPE = "sun.metro.config.reconfig.success";
+    public static final String NOTIFICATION_SUCCESS = "sun.metro.config.reconfig.success";
     
     private static final Logger LOGGER = Logger.getLogger(ReconfigNotification.class);
 
@@ -71,7 +74,7 @@ public class ReconfigNotification implements ReconfigNotifier {
     }
 
     public String[] getNotificationTypes() {
-        final String[] types = { NOTIFICATION_TYPE };
+        final String[] types = { NOTIFICATION_SUCCESS };
         return types;
     }
 
@@ -84,13 +87,17 @@ public class ReconfigNotification implements ReconfigNotifier {
     }
 
     public void sendNotification() {
-        // TODO put messages into properties, define constants
-        Notification notification = new Notification(NOTIFICATION_TYPE,
+        LOGGER.entering();
+        Notification notification = new Notification(NOTIFICATION_SUCCESS,
                 source,
                 this.sequenceNumber++,
                 System.currentTimeMillis(),
-                "Reconfigured the endpoint successfully");
+                ManagementMessages.RECONFIG_NOTIFICATION_MESSAGE());
         this.support.sendNotification(notification);
+        if (LOGGER.isLoggable(Level.FINE)) {
+            LOGGER.fine(ManagementMessages.WSM_5098_NOTIFICATION_SENT(notification));
+        }
+        LOGGER.exiting();
     }
 
 }
