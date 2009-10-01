@@ -294,6 +294,7 @@
                 <exclude name="gmbal*.jar"/>
                 <exclude name="management-api*.jar"/>
                 <exclude name="jaxb*.jar"/>
+                <exclude name="woodstox.jar"/>
             </expandfiles>
         </expand-jars-macro>
 
@@ -323,17 +324,12 @@
 
     <target name="expand-jars-extra-api" unless="runtime.jars.expanded">
         <expand-extra-api-jars-macro libdir="../${lib.runtime.dir}">
-
         </expand-extra-api-jars-macro>
-
     </target>
 
     <target name="expand-jars-extra" unless="runtime.jars.expanded">
         <expand-extra-jars-macro libdir="../${lib.runtime.dir}">
-
         </expand-extra-jars-macro>
-
-       
     </target>
 
     <target name="combine-jars-runtime">
