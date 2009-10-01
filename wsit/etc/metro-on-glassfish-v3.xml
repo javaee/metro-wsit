@@ -112,7 +112,10 @@
 
         <mkdir dir="${backup.dir}"/>
         <copy todir="${backup.dir}" failonerror="false">
-            <fileset dir="${as.lib.home}" includes="webservices-osgi.jar"/>
+            <fileset dir="${as.lib.home}">
+                <include name="webservices-osgi.jar"/>
+                <include name="woodstox-osgi.jar"/>
+            </fileset>
             <fileset dir="${as.lib.home}/endorsed" includes="webservices-api-osgi.jar"/>
         </copy>
         <echo message="...done: You can find the original Metro files stored in ${backup.dir}"/>
@@ -127,6 +130,7 @@
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/osgi">
                 <include name="webservices-osgi.jar"/>
+                <include name="woodstox-osgi.jar"/>
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
@@ -143,7 +147,10 @@
         <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
-            <fileset dir="${backup.dir}" includes="webservices-osgi.jar"/>
+            <fileset dir="${backup.dir}">
+                <include name="webservices-osgi.jar"/>
+                <include name="woodstox-osgi.jar"/>
+            </fileset>
         </copy>
 
         <copy todir="${as.lib.home}/endorsed" overwrite="true">

@@ -94,9 +94,16 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
+        <bnd classpath="lib/runtime/woodstox.jar"
+             failok="false"
+             output="${v3.build.dir}/woodstox-osgi.jar"
+             files="etc/bnd/woodstox.bnd"/>
 
         <copy todir="${dist.image.wsit.dir}/osgi" filtering="false">
-            <fileset dir="${v3.build.dir}" includes="webservices*osgi.jar"/>
+            <fileset dir="${v3.build.dir}">
+                <include name="webservices*osgi.jar"/>
+                <include name="woodstox-osgi.jar"/>
+            </fileset>
         </copy>
              
     </target>

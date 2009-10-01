@@ -1,0 +1,9 @@
+Bundle-SymbolicName: com.ctc.wstx
+Bundle-Name: woodstox
+Export-Package: \
+  com.ctc.wstx.*;version=3.2.1, \
+  org.codehaus.stax2;version=3.2.1, \
+  org.codehaus.stax2.*;version=3.2.1, \
+  *
+Import-Package: *
+Private-Package: *
