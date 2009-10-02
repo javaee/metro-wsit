@@ -70,7 +70,6 @@ import javax.xml.ws.handler.MessageContext;
 //import javax.xml.ws.RespectBinding;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import org.w3c.dom.*;
 
 /**
  * The Base class of an STS implementation. This could be used to implement

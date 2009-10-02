@@ -348,7 +348,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             } else if (wsTrustVer.getIssueRequestAction().equals(reqAction)||
                        wsTrustVer.getValidateRequestAction().equals(reqAction)) {
                 isTrustMessage = true;
-                packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
+                //packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
@@ -407,9 +407,9 @@ public class SecurityServerTube extends SecurityTubeBase {
     public NextAction processResponse(Packet retPacket) {
                 
         // Add addrsssing headers to trust message
-        if (isTrustMessage){
-            retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
-        }
+        //if (isTrustMessage){
+          //  retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
+       // }
         
         if(retPacket.getMessage() == null){
             return doReturnWith(retPacket);

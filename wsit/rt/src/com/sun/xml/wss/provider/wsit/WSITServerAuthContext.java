@@ -277,9 +277,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //TODO: this is the one that came from nextPipe.process
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
         Packet retPacket = getResponsePacket(messageInfo);
-        if (isTrustMessage){
-            retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction((String)messageInfo.getMap().get("TRUST_REQUEST_ACTION")));
-        }
+       // if (isTrustMessage){
+         //   retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction((String)messageInfo.getMap().get("TRUST_REQUEST_ACTION")));
+       // }
         Packet ret = null;
         try {
             ret= secureResponse(retPacket, serviceSubject, messageInfo.getMap());
@@ -411,7 +411,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 isTrustMessage = true;
                 sharedState.put("IS_TRUST_MESSAGE", TRUE);
                 sharedState.put("TRUST_REQUEST_ACTION", action);
-                packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
+                //packet.getMessage().getHeaders().getTo(addVer, pipeConfig.getBinding().getSOAPVersion());
                 
                 if(trustConfig != null){
                     packet.invocationProperties.put(
