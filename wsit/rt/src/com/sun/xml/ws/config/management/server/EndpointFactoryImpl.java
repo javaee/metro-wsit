@@ -56,8 +56,8 @@ public class EndpointFactoryImpl implements ManagedEndpointFactory {
 
     public <T> WSEndpoint<T> createEndpoint(WSEndpoint<T> endpoint, EndpointCreationAttributes attributes) {
         final ManagedServiceAssertion assertion = ManagedServiceAssertion.getAssertion(endpoint);
-        if (assertion != null) {
-            return new ManagedEndpoint<T>(assertion.getID(), endpoint, attributes);
+        if (assertion != null && assertion.isManagementEnabled()) {
+            return new ManagedEndpoint<T>(assertion.getId(), endpoint, attributes);
         }
         else {
             LOGGER.config(ManagementMessages.WSM_5002_ENDPOINT_NOT_CREATED());
