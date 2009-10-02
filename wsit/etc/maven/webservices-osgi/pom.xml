@@ -77,6 +77,11 @@
             <artifactId>webservices-api-osgi</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ctc.wstx</groupdId>
+            <artifactId>woodstox-osgi</artifactId>
+            <version>3.2.1</version>
+        </dependency>
     </dependencies>
 
     <build>
