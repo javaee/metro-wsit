@@ -239,6 +239,18 @@
             depends="integrate-jaxws-hudson"
             description="integrates the last successful policy Hudson build"/>
 
+    <target name="integrate-jaxr-hudson"
+            description="Integrate the last successful JAXR Hudson build.">
+        <get src="http://hudson.sfbay.sun.com/job/jaxr-javanet/lastSuccessfulBuild/artifact/glassfish/jaxr-api/build/lib/jaxr-api.jar"
+             dest="lib/runtime/jaxr-api.jar"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxr-javanet/lastSuccessfulBuild/artifact/glassfish/jaxr-api/build/jaxr-api-src.zip"
+             dest="lib/runtime/jaxr-api-src.zip"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxr-javanet/lastSuccessfulBuild/artifact/glassfish/jaxr-ri/build/lib/jaxr-impl.jar"
+             dest="lib/runtime/jaxr-impl.jar"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxr-javanet/lastSuccessfulBuild/artifact/glassfish/jaxr-ri/build/jaxr-impl-src.zip"
+             dest="lib/runtime/jaxr-impl-src.zip"/>
+    </target>
+
     <target name="runtests">
         <ant antfile="run-ql-tests.xml"/>
     </target>
