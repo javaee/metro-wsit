@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,16 +51,19 @@ import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Expand;
 import org.apache.tools.ant.taskdefs.Taskdef;
 import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.types.PatternSet;
 
 /**
  * This Ant task concats manifest information from multiple jar files.
  *
  * @author Arun Gupta
+ * @author Fabian Ritzmann
  */
 public final class ConcatManifest extends Taskdef {
     private File tempdir;
     private File manifest;
     private FileSet fileset;
+    private PatternSet expandPatterns;
 
     public File getTempdir() {
         return tempdir;
@@ -72,6 +75,10 @@ public final class ConcatManifest extends Taskdef {
 
     public void addConfiguredFileset(FileSet fileset) {
         this.fileset = fileset;
+    }
+
+    public void addConfiguredPatternset(PatternSet patternSet) {
+        this.expandPatterns = patternSet;
     }
 
     public File getManifest() {
@@ -91,6 +98,9 @@ public final class ConcatManifest extends Taskdef {
         if (!getTempdir().isDirectory())
             throw new BuildException("tempdir must be a directory.");
         expand.setDest(tempdir);
+        if (this.expandPatterns != null) {
+            expand.addPatternset(this.expandPatterns);
+        }
 
         final File m = new File(tempdir + File.separator + "META-INF/MANIFEST.MF");
         Delete delete = newDelete();

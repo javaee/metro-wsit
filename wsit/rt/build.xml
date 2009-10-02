@@ -66,7 +66,7 @@
             <updateManifestWithVersion file="@{tmpdirtowork}/MANIFEST.MF"
             class-path="webservices-api.jar webservices-extra.jar webservices-rt_l10n.jar webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar"/>
             <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
-                    <fileset dir="@{libdir}">
+                <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <include name="jaxrpc-api.jar"/>
                     <exclude name="*javadocs*.jar"/>
@@ -83,6 +83,11 @@
                     <exclude name="grizzly.jar"/>
                     <expandfiles/>
                 </fileset>
+                <patternset>
+                    <!-- The webservices-osgi.jar should not contain these files
+                         and the webservices-rt.jar installs its own files.      -->
+                    <exclude name="META-INF/services/javax.xml.stream.XML*Factory"/>
+                </patternset>
             </concatmanifest>
             <delete dir="@{tmpdirtowork}/META-INF" includeemptydirs="true" excludes="services/**"/>
             <metainf/>
@@ -271,7 +276,10 @@
             <metainf>
                 <!-- Replace JAX-WS services files with ours -->
                 <copy todir="${rtjar-tmpdir-v3}/META-INF/services" overwrite="true">
-                    <fileset dir="../etc/META-INF/services"/>
+                    <fileset dir="../etc/META-INF/services">
+                        <!-- The Woodstox settings have to go straight into the woodstox-osgi.jar -->
+                        <exclude name="javax.xml.stream.XML*Factory"/>
+                    </fileset>
                 </copy>
                 <!-- Copying the default Metro configuration file into META-INF folder -->
                 <copy todir="${rtjar-tmpdir-v3}/META-INF" overwrite="true">
