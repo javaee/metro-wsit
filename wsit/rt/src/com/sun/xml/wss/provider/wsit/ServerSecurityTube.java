@@ -41,6 +41,8 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 
 import java.security.PrivilegedActionException;
@@ -68,12 +70,14 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
     private AuthStatus status = AuthStatus.SEND_SUCCESS;
     private ServerAuthContext sAC = null;
     private PacketMessageInfo info = null;
+    private WSEndpoint wsEndpoint = null;
     @SuppressWarnings("unchecked")
     public ServerSecurityTube(Map<Object, Object> props, final Tube next, boolean isHttpBinding) {
         super(next);
         props.put(PipeConstants.SECURITY_PIPE, this);
         this.helper = new PipeHelper(PipeConstants.SOAP_LAYER, props, null);
         this.isHttpBinding = isHttpBinding;
+        this.wsEndpoint = (WSEndpoint) props.get(PipeConstants.ENDPOINT);
 
         //Registers IdentityComponent if either cs is not null        
         
@@ -243,5 +247,6 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
         Fix for bug 3932/4052
          */
         next.preDestroy();
+        NonceManager.deleteInstance(wsEndpoint);
     }
 }

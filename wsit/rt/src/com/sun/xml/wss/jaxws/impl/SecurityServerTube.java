@@ -106,6 +106,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
@@ -146,12 +147,13 @@ public class SecurityServerTube extends SecurityTubeBase {
     private boolean isSCIssueMessage;
     private boolean isSCCancelMessage;
     private String reqAction = null;
+    private WSEndpoint wsEndpoint = null; 
     
     // Creates a new instance of SecurityServerTube
     @SuppressWarnings("unchecked")
     public SecurityServerTube(ServerTubelineAssemblyContext context, Tube nextTube) {
         super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
-        
+         this.wsEndpoint = context.getEndpoint();
         try {
             Iterator it = inMessagePolicyMap.values().iterator();
             Set<PolicyAssertion> configAssertions = null;
@@ -485,6 +487,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         issuedTokenContextMap.clear();
         SessionManager.removeSessionManager(((ServerTubeConfiguration)tubeConfig).getEndpoint());
+        NonceManager.deleteInstance(wsEndpoint);
     }        
     
     public Packet processMessage(XMLStreamReaderMessage msg) {

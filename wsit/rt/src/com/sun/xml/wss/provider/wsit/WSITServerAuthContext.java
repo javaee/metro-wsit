@@ -75,6 +75,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
+import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.SubjectAccessor;
@@ -299,6 +300,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         issuedTokenContextMap.clear();
         SessionManager.removeSessionManager(endPoint);
+        NonceManager.deleteInstance(endPoint);
     }
     
     public Packet validateRequest(Packet packet, Subject clientSubject, Subject serviceSubject, Map<Object, Object> sharedState)
