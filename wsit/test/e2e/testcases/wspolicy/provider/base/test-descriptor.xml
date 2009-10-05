@@ -33,7 +33,7 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-<descriptor skip="true">
+<descriptor>
   <description>
       Test a provider service with WSDL. The service has RM enabled. The client
       will fail if RM is not used.
