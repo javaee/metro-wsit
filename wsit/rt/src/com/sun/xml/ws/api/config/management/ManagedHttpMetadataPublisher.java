@@ -37,8 +37,10 @@
 package com.sun.xml.ws.api.config.management;
 
 import com.sun.istack.NotNull;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.server.EndpointComponent;
 import com.sun.xml.ws.api.server.ServiceDefinition;
+import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.transport.http.HttpAdapter;
 import com.sun.xml.ws.transport.http.HttpMetadataPublisher;
 import com.sun.xml.ws.transport.http.WSHTTPConnection;
@@ -55,6 +57,8 @@ import java.io.IOException;
  */
 class ManagedHttpMetadataPublisher extends HttpMetadataPublisher implements EndpointComponent {
 
+    private static final Logger LOGGER = Logger.getLogger(ManagedHttpMetadataPublisher.class);
+
     public <T> T getSPI(Class<T> spiType) {
         if (spiType.isAssignableFrom(this.getClass())) {
             return spiType.cast(this);
@@ -67,8 +71,13 @@ class ManagedHttpMetadataPublisher extends HttpMetadataPublisher implements Endp
     @Override
     public boolean handleMetadataRequest(HttpAdapter adapter, WSHTTPConnection connection)
             throws IOException {
-        if (isWSDLQuery(connection.getQueryString())) {
+        final String query = connection.getQueryString();
+        if (isWSDLQuery(query)) {
             publishWSDL(connection, adapter);
+            return true;
+        }
+        else if (isInitQuery(query)) {
+            LOGGER.info(ManagementMessages.WSM_5100_INIT_RECEIVED());
             return true;
         }
         else {
@@ -87,6 +96,16 @@ class ManagedHttpMetadataPublisher extends HttpMetadataPublisher implements Endp
      */
     private boolean isWSDLQuery(String query) {
         return query != null && (query.equals("WSDL") || query.startsWith("wsdl"));
+    }
+
+    /**
+     * Returns true if the given query string is init-wscm. The case is ignored.
+     *
+     * @param query The query string. May be null.
+     * @return True if the query string is init-wscm. False otherwise.
+     */
+    private boolean isInitQuery(String query) {
+        return query != null && query.toLowerCase().equals("init-wscm");
     }
 
     /**
