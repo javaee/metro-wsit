@@ -60,7 +60,7 @@ import java.util.logging.Level;
  * Proceses notificaions from participants in coordinated atomic transaction activity.
  *
  * @author Joe.Fialli@Sun.COM
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  */
 @MemberSubmissionAddressing
@@ -113,7 +113,7 @@ public class CoordinatorPortTypeImpl implements CoordinatorPortType {
             }
         }
 
-        if (activityId == UNKNOWN_ID) {
+        if (UNKNOWN_ID.equals(activityId)) {
             if (logger.isLogging(Level.INFO)) {
                 logger.info("Atomic Transaction Coordinator", "handling notification for an unknown transaction");
             }
