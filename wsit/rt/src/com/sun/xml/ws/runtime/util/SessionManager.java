@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.runtime.util;
 
+import com.sun.istack.logging.Logger;
+
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -72,6 +74,7 @@ import java.util.Set;
 @Description("Session manager used by RM and SC")
 @AMXMetadata(type="RM_SC_SessionManager")
 public abstract class SessionManager {
+    private static final Logger LOGGER = Logger.getLogger(SessionManager.class);
     private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
      
     /**
@@ -165,9 +168,18 @@ public abstract class SessionManager {
     public abstract void addSecurityContext(String key, IssuedTokenContext itctx);
     
     public static void removeSessionManager(WSEndpoint endpoint){
-        Object o = sessionManagers.remove(endpoint);
-        if (o != null) {
-            endpoint.getManagedObjectManager().unregister(o);
+        synchronized (SessionManager.class) {
+            try {
+                LOGGER.entering();
+                Object o = sessionManagers.remove(endpoint);
+                LOGGER.config(String.format("removeSessionManager(%s): %s",
+                                            endpoint, o));
+                if (o != null) {
+                    endpoint.getManagedObjectManager().unregister(o);
+                }
+            } finally {
+                LOGGER.exiting();
+            }
         }
     }
 
@@ -181,20 +193,28 @@ public abstract class SessionManager {
      */ 
     public static SessionManager getSessionManager(WSEndpoint endpoint) {
         synchronized (SessionManager.class) {
-            SessionManager sm = sessionManagers.get(endpoint);
-            if (sm == null) {
-                ServiceFinder<SessionManager> finder = 
-                    ServiceFinder.find(SessionManager.class);
-                if (finder != null && finder.toArray().length > 0) {
-                    sm = finder.toArray()[0];
+            try {
+                LOGGER.entering();
+                SessionManager sm = sessionManagers.get(endpoint);
+                if (sm == null) {
+                    ServiceFinder<SessionManager> finder = 
+                        ServiceFinder.find(SessionManager.class);
+                    if (finder != null && finder.toArray().length > 0) {
+                        sm = finder.toArray()[0];
+                    } else {
+                        sm = new SessionManagerImpl();
+                    }
+                    sessionManagers.put(endpoint, sm);
+                    endpoint.getManagedObjectManager()
+                        .registerAtRoot(sm, "RM_SC_SessionManager");
+                    LOGGER.config(String.format("getSessionManager(%s): created: %s", endpoint, sm));
                 } else {
-                    sm = new SessionManagerImpl();
+                    LOGGER.config(String.format("getSessionManager(%s): found existing: %s", endpoint, sm));
                 }
-                sessionManagers.put(endpoint, sm);
-                endpoint.getManagedObjectManager()
-                    .registerAtRoot(sm, "RM_SC_SessionManager");
+                return sm;
+            } finally {
+                LOGGER.exiting();
             }
-            return sm;
         }
     }
 }
