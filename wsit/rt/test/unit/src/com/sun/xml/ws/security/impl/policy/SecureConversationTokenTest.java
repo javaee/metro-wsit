@@ -36,12 +36,12 @@
 
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class SecureConversationTokenTest extends TestCase {
     public Policy unmarshalPolicy(String xmlFile)throws Exception{
         PolicySourceModel model =  unmarshalPolicyResource(
                 xmlFile);
-        Policy mbp = PolicyModelTranslator.getTranslator().translate(model);
+        Policy mbp = ModelTranslator.getTranslator().translate(model);
         return mbp;
         
     }

@@ -36,11 +36,11 @@
 
 package com.sun.xml.wss.jaxws.impl;
 
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.policy.SourceModel;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
@@ -85,7 +85,7 @@ public class RMPolicyResolver {
         }catch (IOException ex) {
             throw new PolicyException(ex);
         }
-        Policy mbp = PolicyModelTranslator.getTranslator().translate(model);
+        Policy mbp = ModelTranslator.getTranslator().translate(model);
         return mbp;
     }
     

@@ -35,12 +35,12 @@
  */
 package com.sun.xml.ws.rx.testutil;
 
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 
 import java.io.IOException;
@@ -107,7 +107,7 @@ public class ResourceLoader {
     }
 
     private static Policy translateModel(PolicySourceModel model) throws PolicyException {
-        return PolicyModelTranslator.getTranslator().translate(model);
+        return ModelTranslator.getTranslator().translate(model);
     }
 
     public static <T extends PolicyAssertion> T getAssertionFromPolicy(String resourceName, Class<T> assertionClass) {

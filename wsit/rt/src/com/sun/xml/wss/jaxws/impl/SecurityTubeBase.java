@@ -60,6 +60,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -77,7 +78,6 @@ import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.security.policy.Token;
@@ -1052,7 +1052,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
             PolicySourceModel model =  unmarshalPolicy(
                     "com/sun/xml/ws/security/impl/policyconv/"+ bootstrapMessagePolicy);
-            bpMSP = PolicyModelTranslator.getTranslator().translate(model);
+            bpMSP = ModelTranslator.getTranslator().translate(model);
         }
         return bpMSP;
     }

@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.security.impl.policy;
 
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
@@ -43,7 +44,6 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
@@ -188,7 +188,7 @@ public class SecurityPoliciesTest extends TestCase {
     public Policy unmarshalPolicy(String xmlFile)throws Exception{
         PolicySourceModel model =  unmarshalPolicyResource(
                 xmlFile);
-        Policy mbp = PolicyModelTranslator.getTranslator().translate(model);
+        Policy mbp = ModelTranslator.getTranslator().translate(model);
         return mbp;
         
     }

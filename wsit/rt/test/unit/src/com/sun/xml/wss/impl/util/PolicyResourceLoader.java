@@ -36,10 +36,10 @@
 
 package com.sun.xml.wss.impl.util;
 
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class PolicyResourceLoader {
     }
     
     public static Policy translateModel(PolicySourceModel model) throws PolicyException {
-        return PolicyModelTranslator.getTranslator().translate(model);
+        return ModelTranslator.getTranslator().translate(model);
     }
     
     public static Policy loadPolicy(String resourceName) throws PolicyException, IOException {

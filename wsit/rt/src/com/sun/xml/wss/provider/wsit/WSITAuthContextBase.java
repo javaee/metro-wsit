@@ -66,6 +66,7 @@ import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.security.impl.policyconv.SCTokenWrapper;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
@@ -87,7 +88,6 @@ import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.IssuedTokenContext;
 
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPFactory;
@@ -767,7 +767,7 @@ public abstract class WSITAuthContextBase  {
             }
             PolicySourceModel model =  unmarshalPolicy(
                     "com/sun/xml/ws/security/impl/policyconv/"+ bootstrapMessagePolicy);
-            bpMSP = PolicyModelTranslator.getTranslator().translate(model);
+            bpMSP = ModelTranslator.getTranslator().translate(model);
         }
         return bpMSP;
     }
