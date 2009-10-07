@@ -36,233 +36,247 @@
  holder.
 -->
 
-<web-app metadata-complete="true" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-<context-param>
-<param-name>com.sun.faces.injectionProvider</param-name>
-<param-value>com.sun.faces.vendor.GlassFishInjectionProvider</param-value>
-</context-param>
-<context-param>
-<param-name>com.sun.faces.validateXml</param-name>
-<param-value>true</param-value>
-</context-param>
-<context-param>
-<param-name>com.sun.faces.forceLoadConfiguration</param-name>
-<param-value>true</param-value>
-</context-param>
-<servlet>
-<description>WS-Coordination createCoordinationContext service endpoint</description>
-<display-name>WSCoord CreateCoordinationContext</display-name>
-<servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-Coordination createCoordinationContextResponse service endpoint</description>
-<display-name>WSCoord CreateCoordinationContextResponse</display-name>
-<servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-Coordination register service endpoint</description>
-<display-name>WSCoord Register</display-name>
-<servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-Coordination registerResponse service endpoint</description>
-<display-name>WSCoord RegisterResponse</display-name>
-<servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-Coordination register RPC service endpoint</description>
-<display-name>WSCoord Register RPC</display-name>
-<servlet-name>RegistrationPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-AtomicTransaction Coordinator service endpoint</description>
-<display-name>WSAT Coordinator</display-name>
-<servlet-name>CoordinatorPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-AtomicTransaction participant service endpoint</description>
-<display-name>WSAT Participant</display-name>
-<servlet-name>ParticipantPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-AtomicTransaction completionCoordinator service endpoint</description>
-<display-name>WSAT CompletionCoordinator</display-name>
-<servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet>
-<description>WS-AtomicTransaction txInitiator service endpoint</description>
-<display-name>WSAT Completion Initiator</display-name>
-<servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
-<servlet-class>com.sun.enterprise.webservice.JAXWSServlet</servlet-class>
-</servlet>
-<servlet-mapping>
-<servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/createCoordinationContext</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/createCoordinationContext/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/createCoordinationContextResponse</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/createCoordinationContextResponse/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/register</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/register/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/registerResponse</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/registerResponse/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/synchRegister</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>RegistrationPortTypeImpl</servlet-name>
-<url-pattern>/wscoor/coordinator/synchRegister/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/coordinator</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/coordinator/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>ParticipantPortTypeImpl</servlet-name>
-<url-pattern>/wsat/2pc</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>ParticipantPortTypeImpl</servlet-name>
-<url-pattern>/wsat/2pc/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/completion/coordinator</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/completion/coordinator/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/completion/initiator</url-pattern>
-</servlet-mapping>
-<servlet-mapping>
-<servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
-<url-pattern>/wsat/completion/initiator/__container$publishing$subctx/*</url-pattern>
-</servlet-mapping>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
-<resource-ref>
-<res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl/wsContext</res-ref-name>
-<res-type>javax.xml.ws.WebServiceContext</res-type>
-<res-auth>Container</res-auth>
-<res-sharing-scope>Shareable</res-sharing-scope>
-<injection-target>
-<injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl</injection-target-class>
-<injection-target-name>wsContext</injection-target-name>
-</injection-target>
-</resource-ref>
+<web-app
+    metadata-complete="true"
+    version="2.5"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <context-param>
+        <param-name>com.sun.faces.injectionProvider</param-name>
+        <param-value>com.sun.faces.vendor.GlassFishInjectionProvider</param-value>
+    </context-param>
+    <context-param>
+        <param-name>com.sun.faces.validateXml</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <param-name>com.sun.faces.forceLoadConfiguration</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <servlet>
+        <description>WS-Coordination createCoordinationContext service endpoint</description>
+        <display-name>WSCoord CreateCoordinationContext</display-name>
+        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-Coordination createCoordinationContextResponse service endpoint</description>
+        <display-name>WSCoord CreateCoordinationContextResponse</display-name>
+        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-Coordination register service endpoint</description>
+        <display-name>WSCoord Register</display-name>
+        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-Coordination registerResponse service endpoint</description>
+        <display-name>WSCoord RegisterResponse</display-name>
+        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-Coordination register RPC service endpoint</description>
+        <display-name>WSCoord Register RPC</display-name>
+        <servlet-name>RegistrationPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction Coordinator service endpoint</description>
+        <display-name>WSAT Coordinator</display-name>
+        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction participant service endpoint</description>
+        <display-name>WSAT Participant</display-name>
+        <servlet-name>ParticipantPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction completionCoordinator service endpoint</description>
+        <display-name>WSAT CompletionCoordinator</display-name>
+        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction txInitiator service endpoint</description>
+        <display-name>WSAT Completion Initiator</display-name>
+        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContext</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContext/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContextResponse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/createCoordinationContextResponse/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/register</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/register/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/registerResponse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/registerResponse/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/synchRegister</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationPortTypeImpl</servlet-name>
+        <url-pattern>/wscoor/coordinator/synchRegister/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/coordinator</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/coordinator/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ParticipantPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/2pc</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ParticipantPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/2pc/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/coordinator</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/coordinator/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/initiator</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
+        <url-pattern>/wsat/completion/initiator/__container$publishing$subctx/*</url-pattern>
+    </servlet-mapping>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl/wsContext</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl</injection-target-class>
+            <injection-target-name>wsContext</injection-target-name>
+        </injection-target>
+    </resource-ref>
 </web-app>
