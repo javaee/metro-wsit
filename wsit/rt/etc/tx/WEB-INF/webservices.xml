@@ -36,96 +36,102 @@
  holder.
 -->
 
-<webservices xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.ibm.com/webservices/xsd/javaee_web_services_1_2.xsd">
-<webservice-description>
-<display-name>WSATCoordinator</display-name>
-<webservice-description-name>WSATCoordinator</webservice-description-name>
-<wsdl-file>WEB-INF/wsdl/wsat.wsdl</wsdl-file>
-<port-component>
-<port-component-name>ParticipantPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wsat">WSATCoordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wsat">ns1:Participant</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>ParticipantPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>CompletionCoordinatorPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wsat">WSATCoordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wsat">ns1:CompletionCoordinator</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>CompletionCoordinatorPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>CoordinatorPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wsat">WSATCoordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wsat">ns1:Coordinator</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>CoordinatorPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>CompletionInitiatorPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wsat">WSATCoordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wsat">ns1:CompletionInitiator</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>CompletionInitiatorPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-</webservice-description>
-<webservice-description>
-<display-name>Coordinator</display-name>
-<webservice-description-name>Coordinator</webservice-description-name>
-<wsdl-file>WEB-INF/wsdl/wscoor.wsdl</wsdl-file>
-<port-component>
-<port-component-name>ActivationCoordinatorPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wscoor">Coordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wscoor">ns1:ActivationCoordinator</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>ActivationCoordinatorPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>ActivationRequesterPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wscoor">Coordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wscoor">ns1:ActivationRequester</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>ActivationRequesterPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>RegistrationPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wscoor">Coordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wscoor">ns1:Registration</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeRPC</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>RegistrationPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>RegistrationCoordinatorPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wscoor">Coordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wscoor">ns1:RegistrationCoordinator</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>RegistrationCoordinatorPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-<port-component>
-<port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
-<wsdl-service xmlns="http://schemas.xmlsoap.org/ws/2004/10/wscoor">Coordinator</wsdl-service>
-<wsdl-port xmlns:ns1="http://schemas.xmlsoap.org/ws/2004/10/wscoor">ns1:RegistrationRequester</wsdl-port>
-<service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType</service-endpoint-interface>
-<service-impl-bean>
-<servlet-link>RegistrationRequesterPortTypeImpl</servlet-link>
-</service-impl-bean>
-</port-component>
-</webservice-description>
+<webservices
+    version="1.2"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:wsat="http://schemas.xmlsoap.org/ws/2004/10/wsat"
+    xmlns:wscoor="http://schemas.xmlsoap.org/ws/2004/10/wscoor"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.ibm.com/webservices/xsd/javaee_web_services_1_2.xsd">
+    <webservice-description>
+        <display-name>WSATCoordinator</display-name>
+        <webservice-description-name>WSATCoordinator</webservice-description-name>
+        <wsdl-file>WEB-INF/wsdl/wsat.wsdl</wsdl-file>
+        <port-component>
+            <port-component-name>ParticipantPortTypeImpl</port-component-name>
+            <wsdl-service>wsat:WSATCoordinator</wsdl-service>
+            <wsdl-port>wsat:Participant</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>ParticipantPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>CompletionCoordinatorPortTypeImpl</port-component-name>
+            <wsdl-service>wsat:WSATCoordinator</wsdl-service>
+            <wsdl-port>wsat:CompletionCoordinator</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>CompletionCoordinatorPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>CoordinatorPortTypeImpl</port-component-name>
+            <wsdl-service>wsat:WSATCoordinator</wsdl-service>
+            <wsdl-port>wsat:Coordinator</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>CoordinatorPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>CompletionInitiatorPortTypeImpl</port-component-name>
+            <wsdl-service>wsat:WSATCoordinator</wsdl-service>
+            <wsdl-port>wsat:CompletionInitiator</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>CompletionInitiatorPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+    </webservice-description>
+    <webservice-description>
+        <display-name>Coordinator</display-name>
+        <webservice-description-name>Coordinator</webservice-description-name>
+        <wsdl-file>WEB-INF/wsdl/wscoor.wsdl</wsdl-file>
+        <port-component>
+            <port-component-name>ActivationCoordinatorPortTypeImpl</port-component-name>
+            <wsdl-service>wscoor:Coordinator</wsdl-service>
+            <wsdl-port>wscoor:ActivationCoordinator</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>ActivationCoordinatorPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>ActivationRequesterPortTypeImpl</port-component-name>
+            <wsdl-service>wscoor:Coordinator</wsdl-service>
+            <wsdl-port>wscoor:ActivationRequester</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>ActivationRequesterPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>RegistrationPortTypeImpl</port-component-name>
+            <wsdl-service>wscoor:Coordinator</wsdl-service>
+            <wsdl-port>wscoor:Registration</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeRPC</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>RegistrationPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>RegistrationCoordinatorPortTypeImpl</port-component-name>
+            <wsdl-service>wscoor:Coordinator</wsdl-service>
+            <wsdl-port>wscoor:RegistrationCoordinator</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>RegistrationCoordinatorPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
+            <wsdl-service>wscoor:Coordinator</wsdl-service>
+            <wsdl-port>wscoor:RegistrationRequester</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>RegistrationRequesterPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+    </webservice-description>
 </webservices>
