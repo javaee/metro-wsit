@@ -302,6 +302,7 @@
                 <exclude name="gmbal*.jar"/>
                 <exclude name="management-api*.jar"/>
                 <exclude name="jaxb*.jar"/>
+                <exclude name="jsr173_api.jar"/>
                 <exclude name="woodstox.jar"/>
             </expandfiles>
         </expand-jars-macro>

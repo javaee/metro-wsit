@@ -94,7 +94,7 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
-        <bnd classpath="lib/runtime/woodstox.jar"
+        <bnd classpath="lib/runtime/woodstox.jar, lib/runtime/jsr173_api.jar"
              failok="false"
              output="${v3.build.dir}/woodstox-osgi.jar"
              files="etc/bnd/woodstox.bnd"/>
