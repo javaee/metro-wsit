@@ -5,5 +5,7 @@ Export-Package: \
   org.codehaus.stax2;version=3.2.1, \
   org.codehaus.stax2.*;version=3.2.1, \
   *
-Import-Package: *
+Import-Package: \
+  com.sun.msv.*;resolution:=optional, \
+  *
 Private-Package: *
