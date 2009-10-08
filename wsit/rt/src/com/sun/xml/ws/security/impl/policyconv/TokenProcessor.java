@@ -157,7 +157,7 @@ public class TokenProcessor {
             //this code need not be called for UT
             setTokenInclusion(untBinding,(Token) tokenAssertion);
             setTokenValueType(untBinding, tokenAssertion);
-            
+            untBinding.isOptional(tokenAssertion.isOptional());
             if(unToken.getIssuer() != null){
                 Address addr = unToken.getIssuer().getAddress();
                 if(addr != null)
@@ -211,6 +211,7 @@ public class TokenProcessor {
             setX509TokenRefType(x509CB, x509Token);
             setTokenInclusion(x509CB,(Token) tokenAssertion);
             setTokenValueType(x509CB, tokenAssertion);
+            x509CB.isOptional(tokenAssertion.isOptional());
             
             if(x509Token.getIssuer() != null){
                 Address addr = x509Token.getIssuer().getAddress();
@@ -244,6 +245,7 @@ public class TokenProcessor {
             sab.setSTRID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             setTokenInclusion(sab,(Token) tokenAssertion);
+            sab.isOptional(tokenAssertion.isOptional());
             //sab.setPolicyToken((Token) tokenAssertion);
             
             if(samlToken.getIssuer() != null){
@@ -273,6 +275,7 @@ public class TokenProcessor {
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
             itkb.setSTRID(token.getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
+            itkb.isOptional(tokenAssertion.isOptional());
             
             if(it.getIssuer() != null){
                 Address addr = it.getIssuer().getAddress();
@@ -297,7 +300,7 @@ public class TokenProcessor {
         }else if(PolicyUtil.isSecureConversationToken(tokenAssertion, spVersion)){
             SecureConversationTokenKeyBinding sct = new SecureConversationTokenKeyBinding();
             SecureConversationToken sctPolicy = (SecureConversationToken)tokenAssertion;
-            
+            sct.isOptional(tokenAssertion.isOptional());
             if(sctPolicy.getIssuer() != null){
                 Address addr = sctPolicy.getIssuer().getAddress();
                 if(addr != null)
@@ -347,8 +350,9 @@ public class TokenProcessor {
     protected void setTokenInclusion(KeyBindingBase xwssToken , Token token) throws PolicyException  {
         boolean change = false;
         SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
+        String iTokenType = token.getIncludeToken();
         if(this.isServer && !isIncoming){
-            if(!spVersion.includeTokenAlways.equals(token.getIncludeToken())){
+            if(!spVersion.includeTokenAlways.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenNever);
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
@@ -356,8 +360,8 @@ public class TokenProcessor {
                 return;
             }
         }else if(!this.isServer && isIncoming){
-            if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken()) ||
-                    spVersion.includeTokenOnce.equals(token.getIncludeToken())){
+            if(spVersion.includeTokenAlwaysToRecipient.equals(iTokenType) ||
+                    spVersion.includeTokenOnce.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenNever);
                 
                 if(logger.isLoggable(Level.FINEST)){
@@ -368,19 +372,19 @@ public class TokenProcessor {
         }
         
         if(logger.isLoggable(Level.FINEST)){
-            logger.log(Level.FINEST,"Token Inclusion value of"+token.getIncludeToken()+" has been set to Token"+ xwssToken);
+            logger.log(Level.FINEST,"Token Inclusion value of"+iTokenType+" has been set to Token"+ xwssToken);
         }
         if(spVersion == SecurityPolicyVersion.SECURITYPOLICY200507){
-            xwssToken.setIncludeToken(token.getIncludeToken());
+            xwssToken.setIncludeToken(iTokenType);
         } else{
             // SecurityPolicy 1.2
-            if(spVersion.includeTokenAlways.equals(token.getIncludeToken())){
+            if(spVersion.includeTokenAlways.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenAlways);
-            } else if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken())){
+            } else if(spVersion.includeTokenAlwaysToRecipient.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
-            } else if(spVersion.includeTokenNever.equals(token.getIncludeToken())){
+            } else if(spVersion.includeTokenNever.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenNever);
-            } else if(spVersion.includeTokenOnce.equals(token.getIncludeToken())){
+            } else if(spVersion.includeTokenOnce.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenOnce);
             }
         }
