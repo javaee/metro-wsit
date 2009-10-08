@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
+import com.sun.xml.ws.api.config.management.policy.ManagedClientAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
@@ -65,31 +66,32 @@ public class WsdlDocumentFilter implements SDDocumentFilter {
                     new MexImportFilteringStateMachine(),
                     new PrivateAttributeFilteringStateMachine(),
                     new PrivateElementFilteringStateMachine(
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "ValidatorConfiguration"),
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "DisablePayloadBuffering"),
-                    new QName("http://schemas.sun.com/2006/03/wss/server", "KerberosConfig"),
-                    
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "KeyStore"),
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "TrustStore"),
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "CallbackHandlerConfiguration"),
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "ValidatorConfiguration"),
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "DisablePayloadBuffering"),
-                    new QName("http://schemas.sun.com/2006/03/wss/client", "KerberosConfig"),
-                    
-                    new QName("http://schemas.sun.com/ws/2006/05/sc/server", "SCConfiguration"),
-                    
-                    new QName("http://schemas.sun.com/ws/2006/05/sc/client", "SCClientConfiguration"),
-                    
-                    new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
-                    
-                    new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "ValidatorConfiguration"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "DisablePayloadBuffering"),
+                        new QName("http://schemas.sun.com/2006/03/wss/server", "KerberosConfig"),
 
-                    ManagedServiceAssertion.MANAGED_SERVICE_QNAME
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "KeyStore"),
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "TrustStore"),
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "CallbackHandlerConfiguration"),
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "ValidatorConfiguration"),
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "DisablePayloadBuffering"),
+                        new QName("http://schemas.sun.com/2006/03/wss/client", "KerberosConfig"),
+
+                        new QName("http://schemas.sun.com/ws/2006/05/sc/server", "SCConfiguration"),
+
+                        new QName("http://schemas.sun.com/ws/2006/05/sc/client", "SCClientConfiguration"),
+
+                        new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
+
+                        new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS"),
+
+                        ManagedServiceAssertion.MANAGED_SERVICE_QNAME,
+                        ManagedClientAssertion.MANAGED_CLIENT_QNAME
                     )
-                    );
+                );
         }
     };
     
