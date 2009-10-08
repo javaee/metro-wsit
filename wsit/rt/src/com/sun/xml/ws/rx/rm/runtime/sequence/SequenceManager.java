@@ -48,7 +48,7 @@ import org.glassfish.gmbal.ManagedObject;
  */
 @ManagedObject
 @Description("Reliable Messaging Sequence Manager")
-@AMXMetadata(type = "RMSequenceManager")
+@AMXMetadata(type = "WSRMSequenceManager")
 public interface SequenceManager extends TimeSynchronizer {
     public static final String MANAGED_BEAN_NAME = "RMSequenceManager";
 

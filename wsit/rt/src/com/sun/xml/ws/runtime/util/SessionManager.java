@@ -72,7 +72,7 @@ import java.util.Set;
 
 @ManagedObject
 @Description("Session manager used by RM and SC")
-@AMXMetadata(type="RM_SC_SessionManager")
+@AMXMetadata(type="WSRMSCSessionManager")
 public abstract class SessionManager {
     private static final Logger LOGGER = Logger.getLogger(SessionManager.class);
     private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
