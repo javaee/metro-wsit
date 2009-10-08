@@ -176,7 +176,51 @@ public class ManagementWSDLPatcher extends XMLStreamReaderToXMLStreamWriter {
 
     @Override
     protected void handleCharacters() throws XMLStreamException {
-        super.handleCharacters();
+        if (this.skipDepth < 0L) {
+            super.handleCharacters();
+        }
+    }
+
+    @Override
+    protected void handleComment() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handleComment();
+        }
+    }
+
+    @Override
+    protected void handlePI() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handlePI();
+        }
+    }
+
+    @Override
+    protected void handleDTD() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handleDTD();
+        }
+    }
+
+    @Override
+    protected void handleEntityReference() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handleEntityReference();
+        }
+    }
+
+    @Override
+    protected void handleSpace() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handleSpace();
+        }
+    }
+
+    @Override
+    protected void handleCDATA() throws XMLStreamException {
+        if (this.skipDepth < 0L) {
+            super.handleCDATA();
+        }
     }
 
     private void writePolicy(final Policy policy) {

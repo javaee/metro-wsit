@@ -38,8 +38,8 @@ package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
-
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -51,8 +51,11 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
 import junit.framework.TestCase;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -242,6 +245,12 @@ public class ManagementWSDLPatcherTest extends TestCase {
         assertEquals(1, bindingElements.getLength());
         final NodeList policyElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "Policy");
         assertEquals(0, policyElements.getLength());
+
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("", definitionsElement.getTextContent().trim());
     }
 
     public void testBridgeWsdlWithoutPolicyAddPolicies() throws Exception {
@@ -266,6 +275,12 @@ public class ManagementWSDLPatcherTest extends TestCase {
         assertEquals(1, bindingElements.getLength());
         final NodeList policyElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "Policy");
         assertEquals(4, policyElements.getLength());
+
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("", definitionsElement.getTextContent().trim());
     }
 
     public void testBridgeWsdlRemovePolicies() throws Exception {
@@ -285,6 +300,12 @@ public class ManagementWSDLPatcherTest extends TestCase {
         assertEquals(1, bindingElements.getLength());
         final NodeList policyElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "Policy");
         assertEquals(0, policyElements.getLength());
+
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("", definitionsElement.getTextContent().trim());
     }
 
     public void testBridgeWsdl2RemovePolicies() throws Exception {
@@ -304,6 +325,12 @@ public class ManagementWSDLPatcherTest extends TestCase {
         assertEquals(1, bindingElements.getLength());
         final NodeList policyElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "Policy");
         assertEquals(0, policyElements.getLength());
+
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("", definitionsElement.getTextContent().trim());
     }
 
     public void testBridgeWsdlRemoveAndAddPolicies() throws Exception {
@@ -330,9 +357,15 @@ public class ManagementWSDLPatcherTest extends TestCase {
         assertEquals(4, policyElements.getLength());
         final NodeList policyReferenceElements = result.getElementsByTagNameNS("http://www.w3.org/ns/ws-policy", "PolicyReference");
         assertEquals(0, policyReferenceElements.getLength());
+
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("", definitionsElement.getTextContent().trim());
     }
 
-    public void testOut() throws Exception {
+    public void testTextValues() throws Exception {
         final HashMap<URI, Policy> urnToPolicy = new HashMap<URI, Policy>();
         urnToPolicy.put(ExternalAttachmentsUnmarshaller.BINDING_ID, Policy.createEmptyPolicy(null, "binding-policy"));
         urnToPolicy.put(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_ID, Policy.createEmptyPolicy(null, "operation-policy"));
@@ -351,6 +384,12 @@ public class ManagementWSDLPatcherTest extends TestCase {
         instance.bridge(xmlReader, xmlWriter);
         xmlWriter.flush();
 
-        System.out.println(writer.toString());
+        final Document result = builder.parse(new InputSource(new StringReader(writer.toString())));
+        // Make sure there are no random text values left in the XML
+        final NodeList definitionsElements = result.getElementsByTagNameNS("http://schemas.xmlsoap.org/wsdl/", "definitions");
+        assertEquals(1, definitionsElements.getLength());
+        final Node definitionsElement = definitionsElements.item(0);
+        assertEquals("http://localhost:8080/jaxws-fs/simple", definitionsElement.getTextContent().trim());
     }
+    
 }
