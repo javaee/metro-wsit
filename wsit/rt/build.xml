@@ -108,7 +108,6 @@
             <concatmanifest tempdir="@{tmpdirtowork}" manifest="@{tmpdirtowork}/MANIFEST.MF">
                 <fileset dir="@{libdir}" >
                     <include name="jaxb-api.jar"/>
-                    <include name="jsr173_api.jar"/>
                     <include name="saaj-api.jar"/>
                     <include name="jaxws-api.jar"/>
                     <include name="jsr181-api.jar"/>
@@ -324,7 +323,6 @@
         <expand-api-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${apijar-tmpdir-v3}">
             <expandfiles>
                 <include name="jaxr-api.jar"/>
-                <exclude name="jsr173_api.jar"/>
                 <exclude name="jaxrpc-api.jar"/>
                 <exclude name="jaxb-api.jar"/>
             </expandfiles>
