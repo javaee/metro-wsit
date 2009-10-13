@@ -212,17 +212,16 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             if (bstValue == null) {
                                 throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
                             }
-                            X509Certificate certificate = cr.constructCertificate(bstValue);
-                            
-                           boolean valid  = secEnv.validateCertificate(certificate, null);
-                           
-                           
-                           // boolean valid = cr.validateCertificate(certificate, props);
-                            if (!valid) {
-                                log.log(Level.WARNING, "The certificate is not valid");
-                                //throw new RuntimeException("certificate is not valid");
-                            }
-                            props.put(PipeConstants.SERVER_CERT, certificate);
+                            X509Certificate certificate = cr.constructCertificate(bstValue);                            
+                            boolean valid = false;
+                            try {
+                                valid = secEnv.validateCertificate(certificate, null);
+                            } catch (WssSoapFaultException ex) {
+                                log.log(Level.WARNING, "Could not validate the the server certificate "+certificate);
+                            }                           
+                            if (valid) {
+                                 props.put(PipeConstants.SERVER_CERT, certificate);
+                            } 
                         }
                     } catch (XMLStreamException ex) {
                         log.log(Level.SEVERE, null, ex);

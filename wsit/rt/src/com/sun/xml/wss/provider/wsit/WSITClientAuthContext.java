@@ -724,13 +724,16 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                             throw new RuntimeException("binary security token value obtained from XMLStreamReader is null");
                         }
                         X509Certificate certificate = cr.constructCertificate(bstValue);
-                        boolean valid = secEnv.validateCertificate(certificate, null);
-                        //boolean valid = cr.validateCertificate(certificate, map);
-                        if (!valid) {
-                            log.log(Level.WARNING, "The certificate is not valid");
-                            //throw new RuntimeException("certificate is not valid");
+                       
+                        boolean valid = false;
+                        try {
+                            valid = secEnv.validateCertificate(certificate, null);
+                        } catch (WssSoapFaultException ex) {
+                            log.log(Level.WARNING, "Could not validate the certificate "+ certificate);
                         }
-                        return certificate;
+                        if (valid) {
+                            return certificate;
+                        }
                     }
                 } catch (XMLStreamException ex) {
                     log.log(Level.SEVERE, null, ex);
