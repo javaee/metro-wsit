@@ -67,7 +67,7 @@ import java.util.logging.Level;
  * This class ...
  *
  * @author Ryan.Shoemaker@Sun.COM
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  */
 // suppress known deprecation warnings about using short term workaround StatefulWebService.export(Class, String webServiceEndpoint, PortType)
@@ -187,6 +187,11 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                 if (ParticipantPortTypeImpl.getManager() != null) {
                     ParticipantPortTypeImpl.getManager().setFallbackInstance(participant);
                 } else {
+                    if (logger.isLogging(Level.FINER)) {
+                        logger.finer(
+                                "registerFallback",
+                                String.format("No stateful webservice manager returned from %s instance", ParticipantPortTypeImpl.class.getName()));
+                    }
                     wstxServiceAvailable = false;
                 }
                 
@@ -195,6 +200,11 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                 if (CoordinatorPortTypeImpl.getManager() != null) {
                      CoordinatorPortTypeImpl.getManager().setFallbackInstance(coordinator);
                 } else {
+                    if (logger.isLogging(Level.FINER)) {
+                        logger.finer(
+                                "registerFallback",
+                                String.format("No stateful webservice manager returned from %s instance", CoordinatorPortTypeImpl.class.getName()));
+                    }
                     wstxServiceAvailable = false;
                 }
                
@@ -204,6 +214,11 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                  if (RegistrationRequesterPortTypeImpl.getManager() != null) {
                     RegistrationRequesterPortTypeImpl.getManager().setFallbackInstance(registrationRequester);
                 } else {
+                    if (logger.isLogging(Level.FINER)) {
+                        logger.finer(
+                                "registerFallback",
+                                String.format("No stateful webservice manager returned from %s instance", RegistrationRequesterPortTypeImpl.class.getName()));
+                    }
                     wstxServiceAvailable = false;
                 }
                
@@ -212,6 +227,11 @@ final public class TXStatefulWebserviceFactoryImpl implements StatefulWebservice
                 if (RegistrationCoordinatorPortTypeImpl.getManager() != null) {
                     RegistrationCoordinatorPortTypeImpl.getManager().setFallbackInstance(registrationCoordinator);
                 } else {
+                    if (logger.isLogging(Level.FINER)) {
+                        logger.finer(
+                                "registerFallback",
+                                String.format("No stateful webservice manager returned from %s instance", RegistrationCoordinatorPortTypeImpl.class.getName()));
+                    }
                     wstxServiceAvailable = false;
                 }
             } else {
