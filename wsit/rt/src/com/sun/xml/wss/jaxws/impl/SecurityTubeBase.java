@@ -1590,7 +1590,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         log.log(Level.FINE,
                 LogStringsMessages.WSSTUBE_0011_COULD_NOT_FIND_USER_CLASS(), classname);
-        throw new XWSSecurityException(LogStringsMessages.WSSTUBE_0011_COULD_NOT_FIND_USER_CLASS());
+        throw new XWSSecurityException("Error : could not find user class :" + classname);
     }
     
     
