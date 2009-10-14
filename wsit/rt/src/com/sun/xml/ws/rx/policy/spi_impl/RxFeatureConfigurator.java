@@ -46,14 +46,14 @@ import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
-import com.sun.xml.ws.rx.policy.assertion.Rm10Assertion;
-import com.sun.xml.ws.rx.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rx.policy.assertion.RmAssertionTranslator;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceFeature;
+
 
 /**
  *
@@ -78,8 +78,15 @@ public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
             Policy policy = policyMap.getEndpointEffectivePolicy(key);
             if (policy != null) {
                 for (AssertionSet alternative : policy) {
-                    if (isPresentAndMandatory(alternative, Rm10Assertion.NAME) || isPresentAndMandatory(alternative, Rm11Assertion.NAME)) {
-                        ReliableMessagingFeatureBuilder rmFeatureBuilder = new ReliableMessagingFeatureBuilder();
+                    ReliableMessagingFeatureBuilder rmFeatureBuilder = null;
+                    for (RmVersion rmv : RmVersion.values()) {
+                        if (isPresentAndMandatory(alternative, rmv.rmAssertionName)) {
+                            rmFeatureBuilder = new ReliableMessagingFeatureBuilder(rmv);
+                            break;
+                        }
+                    }
+
+                    if (rmFeatureBuilder != null) {
                         for (PolicyAssertion assertion : alternative) {
                             if (assertion instanceof RmAssertionTranslator) {
                                 rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
@@ -94,8 +101,8 @@ public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
             } // end-if policy not null
         }
         return features;
-    }
 
+    }
     private Collection<PolicyAssertion> getAssertionsWithName(AssertionSet alternative, QName name) throws PolicyException {
         Collection<PolicyAssertion> assertions = alternative.get(name);
         if (assertions.size() > 1) {

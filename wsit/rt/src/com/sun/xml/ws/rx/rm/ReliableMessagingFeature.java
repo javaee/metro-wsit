@@ -65,10 +65,16 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      */
     public static final long DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL = 2000;
     /**
-     * A constant specifying the default value of interval between sending subsequent 
+     * Specifies the duration in milliseconds after which the RM Destination will
+     * transmit an acknowledgement.
+     * Currently the default value is set to -1 => unspecified.
+     */
+    public static final long DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL = -1;
+    /**
+     * A constant specifying the default value of interval between sending subsequent
      * acknowledgement request messages. Currently the default value is set to 2000.
      */
-    public static final long DEFAULT_ACK_REQUESTED_INTERVAL = 2000;
+    public static final long DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL = 2000;
     /**
      * A constant specifying the default value of close sequence operation timeout.
      * Currently the default value is set to 3000.
@@ -83,7 +89,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     public static final long DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD = 60000;
 
     /**
-     * This enumeration defines possible security binding mechanism options that
+     * Defines the enumeration of possible security binding mechanism options that
      * can be applied to a created sequence.
      *
      * @see SecurityBinding#NONE
@@ -134,7 +140,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
-     * This enumeration defines a number of Delivery Assurance options, which
+     * Defines the enumeration of Delivery Assurance options, which
      * can be supported by RM Sources and RM Destinations.
      *
      * @see DeliveryAssurance#EXACTLY_ONCE
@@ -194,13 +200,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         }
     }
 
-        /**
-         * This enumeration defines all possible backoff algortihms that can be applied
-         * for to message retransmission.
-         *
-         * @see BackoffAlgorithm#LINEAR
-         * @see BackoffAlgorithm#EXPONENTIAL
-         */
+    /**
+     * Defines the enumeration of all possible backoff algortihms that can be applied
+     * for to message retransmission.
+     *
+     * @see BackoffAlgorithm#LINEAR
+     * @see BackoffAlgorithm#EXPONENTIAL
+     */
     public static enum BackoffAlgorithm {
 
         /**
@@ -210,6 +216,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         LINEAR() {
+
             public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
                 return baseRate;
             }
@@ -221,6 +228,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          * @see BackoffAlgorithm
          */
         EXPONENTIAL() {
+
             public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
                 return resendAttemptNumber * baseRate;
             }
@@ -259,11 +267,11 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     // Client-specific RM config values
     private final long messageRetransmissionInterval;
     private final BackoffAlgorithm retransmissionBackoffAlgorithm;
-    private final long ackRequestInterval;
+    private final long acknowledgementTransmissionInterval;
+    private final long ackRequestTransmissionInterval;
     private final long closeSequenceOperationTimeout;
     private final boolean persistenceEnabled;
     private final long sequenceManagerMaintenancePeriod;
-
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -286,7 +294,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 SecurityBinding.getDefault(), // this.securityBinding
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
-                DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
+                DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
+                DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 false, // this.persistenceEnabled
                 DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD);
@@ -324,11 +333,11 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 securityBinding, // this.securityBinding
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
-                DEFAULT_ACK_REQUESTED_INTERVAL, // this.ackRequestInterval
+                DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
+                DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 persistenceEnabled, // this.persistenceEnabled
-                sequenceManagerMaintenancePeriod
-                );
+                sequenceManagerMaintenancePeriod);
     }
 
     public ReliableMessagingFeature(
@@ -341,7 +350,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             SecurityBinding securityBinding,
             long messageRetransmissionInterval,
             BackoffAlgorithm retransmissionBackoffAlgorithm,
-            long ackRequestInterval,
+            long acknowledgementTransmissionInterval,
+            long ackRequestTransmissionInterval,
             long closeSequenceOperationTimeout,
             boolean persistenceEnabled,
             long sequenceManagerMaintenancePeriod) {
@@ -355,7 +365,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.securityBinding = securityBinding;
         this.messageRetransmissionInterval = messageRetransmissionInterval;
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
-        this.ackRequestInterval = ackRequestInterval;
+        this.acknowledgementTransmissionInterval = acknowledgementTransmissionInterval;
+        this.ackRequestTransmissionInterval = ackRequestTransmissionInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
         this.persistenceEnabled = persistenceEnabled;
         this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
@@ -497,16 +508,29 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
-     * Specifies interval between sending subsequent acknowledgement request messages 
-     * by an RM Source in case of any unacknowledged messages on the sequence.
+     * Specifies the duration after which the RM Destination will transmit an acknowledgement.
+     * Specified in milliseconds.
      * 
-     * @return currently configured acknowledgement request interval. If not set explicitly, 
-     *         the default value is specified by the {@link #DEFAULT_ACK_REQUESTED_INTERVAL}
+     * @return currently configured acknowledgement transmission interval. If not set explicitly,
+     *         the default value is specified by the {@link #DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL}
      *         constant.
      */
     @ManagedAttribute
-    public long getAcknowledgementRequestInterval() {
-        return ackRequestInterval;
+    public long getAcknowledgementTransmissionInterval() {
+        return acknowledgementTransmissionInterval;
+    }
+
+    /**
+     * Specifies interval between sending subsequent acknowledgement request messages
+     * by an RM Source in case of any unacknowledged messages on the sequence.
+     *
+     * @return currently configured acknowledgement request transmission interval.
+     *         If not set explicitly, the default value is specified by the
+     *         {@link #DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL} constant.
+     */
+    @ManagedAttribute
+    public long getAckRequestTransmissionInterval() {
+        return ackRequestTransmissionInterval;
     }
 
     /**

@@ -43,8 +43,9 @@ import static com.sun.xml.ws.rx.rm.ReliableMessagingFeature.*;
  */
 public final class ReliableMessagingFeatureBuilder {
     // General RM config values
+    private final RmVersion version;
+    
     private boolean enabled = true;
-    private RmVersion version = RmVersion.getDefault();
     private long inactivityTimeout = DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
     private long destinationBufferQuota = DEFAULT_DESTINATION_BUFFER_QUOTA;
     private boolean orderedDelivery = false;
@@ -53,13 +54,11 @@ public final class ReliableMessagingFeatureBuilder {
     // Client-specific RM config values
     private long messageRetransmissionInterval = DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL;
     private BackoffAlgorithm retransmissionBackoffAlgorithm = BackoffAlgorithm.getDefault();
-    private long ackRequestInterval = DEFAULT_ACK_REQUESTED_INTERVAL;
+    private long ackTransmittionInterval = DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL;
+    private long ackRequestTransmissionInterval = DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL;
     private long closeSequenceOperationTimeout = DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
     private boolean persistenceEnabled = false;
     private long sequenceMaintenancePeriod = DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
-
-    public ReliableMessagingFeatureBuilder() {
-    }
 
     public ReliableMessagingFeatureBuilder(RmVersion version) {
         this.version = version;
@@ -76,57 +75,66 @@ public final class ReliableMessagingFeatureBuilder {
                 this.securityBinding,
                 this.messageRetransmissionInterval,
                 this.retransmissionBackoffAlgorithm,
-                this.ackRequestInterval,
+                this.ackTransmittionInterval,
+                this.ackRequestTransmissionInterval,
                 this.closeSequenceOperationTimeout,
                 this.persistenceEnabled,
                 this.sequenceMaintenancePeriod);
     }
 
     /**
-     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
+     * @see ReliableMessagingFeature#getAcknowledgementTransmissionInterval()
      */
-    public ReliableMessagingFeatureBuilder ackRequestInterval(long ackRequestInterval) {
-        this.ackRequestInterval = ackRequestInterval;
+    public ReliableMessagingFeatureBuilder acknowledgementTransmittionInterval(long value) {
+        this.ackTransmittionInterval = value;
+        return this;
+    }
+
+    /**
+     * @see ReliableMessagingFeature#getAckRequestTransmissionInterval()
+     */
+    public ReliableMessagingFeatureBuilder ackRequestTransmissionInterval(long value) {
+        this.ackRequestTransmissionInterval = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getMessageRetransmissionInterval() 
      */
-    public ReliableMessagingFeatureBuilder messageRetransmissionInterval(long messageRetransmissionInterval) {
-        this.messageRetransmissionInterval = messageRetransmissionInterval;
+    public ReliableMessagingFeatureBuilder messageRetransmissionInterval(long value) {
+        this.messageRetransmissionInterval = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getDestinationBufferQuota()
      */
-    public ReliableMessagingFeatureBuilder destinationBufferQuota(long bufferQuota) {
-        this.destinationBufferQuota = bufferQuota;
+    public ReliableMessagingFeatureBuilder destinationBufferQuota(long value) {
+        this.destinationBufferQuota = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout()
      */
-    public ReliableMessagingFeatureBuilder closeSequenceOperationTimeout(long closeSequenceOperationTimeout) {
-        this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
+    public ReliableMessagingFeatureBuilder closeSequenceOperationTimeout(long value) {
+        this.closeSequenceOperationTimeout = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getDeliveryAssurance()
      */
-    public ReliableMessagingFeatureBuilder deliveryAssurance(DeliveryAssurance deliveryAssurance) {
-        this.deliveryAssurance = deliveryAssurance;
+    public ReliableMessagingFeatureBuilder deliveryAssurance(DeliveryAssurance value) {
+        this.deliveryAssurance = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getSequenceInactivityTimeout()
      */
-    public ReliableMessagingFeatureBuilder sequenceInactivityTimeout(long inactivityTimeout) {
-        this.inactivityTimeout = inactivityTimeout;
+    public ReliableMessagingFeatureBuilder sequenceInactivityTimeout(long value) {
+        this.inactivityTimeout = value;
         return this;
     }
 
@@ -141,24 +149,23 @@ public final class ReliableMessagingFeatureBuilder {
     /**
      * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
      */
-    public ReliableMessagingFeatureBuilder retransmissionBackoffAlgorithm(BackoffAlgorithm retransmissionBackoffAlgorithm) {
-        this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
+    public ReliableMessagingFeatureBuilder retransmissionBackoffAlgorithm(BackoffAlgorithm value) {
+        this.retransmissionBackoffAlgorithm = value;
         return this;
     }
 
     /**
      * @see ReliableMessagingFeature#getVersion()
      */
-    public ReliableMessagingFeatureBuilder version(RmVersion version) {
-        this.version = version;
-        return this;
+    public RmVersion getVersion() {
+        return this.version;
     }
 
     /**
      * @see ReliableMessagingFeature#getSecurityBinding()
      */
-    public ReliableMessagingFeatureBuilder securityBinding(SecurityBinding securityBinding) {
-        this.securityBinding = securityBinding;
+    public ReliableMessagingFeatureBuilder securityBinding(SecurityBinding value) {
+        this.securityBinding = value;
         return this;
     }
 
@@ -178,8 +185,8 @@ public final class ReliableMessagingFeatureBuilder {
         return this;
     }
 
-    public ReliableMessagingFeatureBuilder sequenceMaintenancePeriod(long newValue) {
-        this.sequenceMaintenancePeriod = newValue;
+    public ReliableMessagingFeatureBuilder sequenceMaintenancePeriod(long value) {
+        this.sequenceMaintenancePeriod = value;
         return this;
     }
 }

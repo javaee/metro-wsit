@@ -70,6 +70,7 @@ public enum RmVersion {
      * @see RmVersion
      */
     WSRM200502(
+    "RMAssertion",
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
     AssertionNamespace.WSRMP_200502.toString(),
     "/LastMessage",
@@ -97,6 +98,7 @@ public enum RmVersion {
      * @see RmVersion
      */
     WSRM200702(
+    "RMAssertion",
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
     AssertionNamespace.WSRMP_200702.toString(),
     "/CloseSequence",
@@ -150,6 +152,7 @@ public enum RmVersion {
     /**
      * Fault codes
      */
+    public final QName rmAssertionName;
     public final QName sequenceTerminatedFaultCode;
     public final QName unknownSequenceFaultCode;
     public final QName invalidAcknowledgementFaultCode;
@@ -163,9 +166,10 @@ public enum RmVersion {
      */
     private final JaxbContextRepository jaxbContextRepository;
 
-    private RmVersion(String nsUri, String policyNsUri, String closeSequenceActionSuffix, Class<?>... rmProtocolClasses) {
+    private RmVersion(String rmAssertionLocalName, String nsUri, String policyNsUri, String closeSequenceActionSuffix, Class<?>... rmProtocolClasses) {
         this.namespaceUri = nsUri;
         this.policyNamespaceUri = policyNsUri;
+        this.rmAssertionName = new QName(policyNsUri, rmAssertionLocalName);
 
         this.ackRequestedAction = namespaceUri + "/AckRequested";
         this.createSequenceAction = namespaceUri + "/CreateSequence";

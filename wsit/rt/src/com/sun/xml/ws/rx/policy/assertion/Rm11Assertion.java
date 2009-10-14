@@ -49,6 +49,7 @@ import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
+import javax.xml.ws.WebServiceException;
 
 /**
  * <wsrmp:RMAssertion [wsp:Optional="true"]? ... >
@@ -76,7 +77,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
 
     private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
     //
-    public static final QName NAME = AssertionNamespace.WSRMP_200702.getQName("RMAssertion");
+    public static final QName NAME = RmVersion.WSRM200702.rmAssertionName;
     private static final QName SEQUENCE_STR_QNAME = AssertionNamespace.WSRMP_200702.getQName("SequenceSTR");
     private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = AssertionNamespace.WSRMP_200702.getQName("SequenceTransportSecurity");
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
@@ -143,12 +144,15 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        if (builder.getVersion() != RmVersion.WSRM200702) {
+            // TODO L10N
+            throw new WebServiceException("Multiple WS-ReliableMessaging versions detected within a single WS-Policy expression.");
+        }
+
         if (isOrderedDelivery) {
             builder = builder.enableOrderedDelivery();
         }
 
-        return builder.version(RmVersion.WSRM200702)
-                .deliveryAssurance(deliveryAssurance)
-                .securityBinding(securityBinding);
+        return builder.deliveryAssurance(deliveryAssurance).securityBinding(securityBinding);
     }
 }

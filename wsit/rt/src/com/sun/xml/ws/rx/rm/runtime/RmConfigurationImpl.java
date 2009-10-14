@@ -108,7 +108,7 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
 
     public long getAcknowledgementRequestInterval() {
         checkState();
-        return rmFeature.getAcknowledgementRequestInterval();
+        return rmFeature.getAckRequestTransmissionInterval();
     }
 
     public long getCloseSequenceOperationTimeout() {

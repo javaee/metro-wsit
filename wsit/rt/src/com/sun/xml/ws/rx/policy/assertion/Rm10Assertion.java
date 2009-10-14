@@ -47,6 +47,7 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import javax.xml.ws.WebServiceException;
 
 /**
  * <wsrm:RMAssertion [wsp:Optional="true"]? ... >
@@ -63,7 +64,7 @@ import com.sun.xml.ws.rx.rm.RmVersion;
  */
 public final class Rm10Assertion extends SimpleAssertion implements RmAssertionTranslator {
 
-    public static final QName NAME = AssertionNamespace.WSRMP_200502.getQName("RMAssertion");
+    public static final QName NAME = RmVersion.WSRM200502.rmAssertionName;
     private static final QName INACTIVITY_TIMEOUT_QNAME = AssertionNamespace.WSRMP_200502.getQName("InactivityTimeout");
     private static final QName RETRANSMITTION_INTERVAL_QNAME = AssertionNamespace.WSRMP_200502.getQName("BaseRetransmissionInterval");
     private static final QName EXPONENTIAL_BACKOFF_QNAME = AssertionNamespace.WSRMP_200502.getQName("ExponentialBackoff");
@@ -119,7 +120,11 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        builder.version(RmVersion.WSRM200502);
+        if (builder.getVersion() != RmVersion.WSRM200502) {
+            // TODO L10N
+            throw new WebServiceException("Multiple WS-ReliableMessaging versions detected within a single WS-Policy expression.");
+        }
+
         if (inactivityTimeout != ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT) { // prevents overwriting values set by other assertions
             builder.sequenceInactivityTimeout(inactivityTimeout);
         }

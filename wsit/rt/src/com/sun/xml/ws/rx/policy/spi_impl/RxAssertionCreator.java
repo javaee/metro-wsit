@@ -46,6 +46,7 @@ import com.sun.xml.ws.rx.policy.assertion.Rm10Assertion;
 import com.sun.xml.ws.rx.policy.assertion.DeliveryAssuranceAssertion;
 import com.sun.xml.ws.rx.policy.assertion.Rm11Assertion;
 import com.sun.xml.ws.rx.policy.assertion.AckRequestIntervalClientAssertion;
+import com.sun.xml.ws.rx.policy.assertion.AcknowledgementIntervalAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AllowDuplicatesAssertion;
 import com.sun.xml.ws.rx.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rx.policy.assertion.InactivityTimeoutAssertion;
@@ -80,6 +81,7 @@ public final class RxAssertionCreator implements PolicyAssertionCreator {
         instantiationMap.put(OrderedDeliveryAssertion.NAME, OrderedDeliveryAssertion.getInstantiator());
         instantiationMap.put(ResendIntervalClientAssertion.NAME, ResendIntervalClientAssertion.getInstantiator());
         instantiationMap.put(InactivityTimeoutAssertion.NAME, InactivityTimeoutAssertion.getInstantiator());
+        instantiationMap.put(AcknowledgementIntervalAssertion.NAME, AcknowledgementIntervalAssertion.getInstantiator());
         instantiationMap.put(PersistentAssertion.NAME, PersistentAssertion.getInstantiator());
     }    
     

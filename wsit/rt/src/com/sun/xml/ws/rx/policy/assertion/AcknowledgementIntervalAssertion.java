@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -45,41 +45,44 @@ import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:AckRequestInterval Milliseconds="..." />
- */
-/**
- * Defines an inactivity period after which a client with unacknowledged messages 
- * autonomously sends acknowledgment request to the service.
+ * Assertion which replaces acknowledgement interval attribute of WS-RMP v1.0 RMAssertion.
+ * The same assertion is used by .Net framework which could simplify the interoperability.
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * <pre>
+ * <netrmp:AcknowledgementInterval Milliseconds="200" xmlns:netrmp="http://schemas.microsoft.com/ws-rx/wsrmp/200702"/>
+ * </pre>
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class AckRequestIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_CLIENT_200603.getQName("AckRequestInterval");
-    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+public class AcknowledgementIntervalAssertion extends SimpleAssertion implements RmAssertionTranslator {
+    public static final QName NAME = AssertionNamespace.MICROSOFT_200702.getQName("AcknowledgementInterval");
+    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
-            return new AckRequestIntervalClientAssertion(data, assertionParameters);
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
+            return new AcknowledgementIntervalAssertion(data, assertionParameters);
         }
     };
-    
+
     public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
-    
-    private final long interval;
-    
-    private AckRequestIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+
+    private final long timeout;
+
+    public AcknowledgementIntervalAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
-        
-        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
+
+        timeout = Long.parseLong(data.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
     }
-   
-    public long getInterval() {
-        return interval;
+
+    public long getTimeout() {
+        return timeout;
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.ackRequestTransmissionInterval(interval);
+        return builder.acknowledgementTransmittionInterval(timeout);
     }
+
+
+
 }

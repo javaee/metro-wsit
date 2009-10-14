@@ -42,8 +42,10 @@ import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
+import javax.xml.ws.WebServiceException;
 
 /**
  * <sunc:AllowDuplicates />
@@ -73,6 +75,11 @@ public class AllowDuplicatesAssertion extends SimpleAssertion implements RmAsser
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        if (builder.getVersion() != RmVersion.WSRM200502) {
+            // TODO L10N
+            throw new WebServiceException(String.format("WS-RM version [ %s ] is not compatible with [ %s ] assertion", builder.getVersion(), NAME));
+        }
+
         return builder.deliveryAssurance(DeliveryAssurance.AT_LEAST_ONCE);
     }
 }

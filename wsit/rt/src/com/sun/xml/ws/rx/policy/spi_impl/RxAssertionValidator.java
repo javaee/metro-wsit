@@ -43,6 +43,7 @@ import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
 import com.sun.xml.ws.rx.policy.assertion.RmFlowControlAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AckRequestIntervalClientAssertion;
+import com.sun.xml.ws.rx.policy.assertion.AcknowledgementIntervalAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AllowDuplicatesAssertion;
 import com.sun.xml.ws.rx.policy.assertion.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rx.policy.assertion.OrderedDeliveryAssertion;
@@ -72,6 +73,7 @@ public class RxAssertionValidator implements PolicyAssertionValidator {
         SERVER_SIDE_ASSERTIONS.add(AllowDuplicatesAssertion.NAME);
         SERVER_SIDE_ASSERTIONS.add(RmFlowControlAssertion.NAME);
         SERVER_SIDE_ASSERTIONS.add(InactivityTimeoutAssertion.NAME);
+        SERVER_SIDE_ASSERTIONS.add(AcknowledgementIntervalAssertion.NAME);
         SERVER_SIDE_ASSERTIONS.add(PersistentAssertion.NAME);
 
         CLIENT_SIDE_ASSERTIONS.add(AckRequestIntervalClientAssertion.NAME);
