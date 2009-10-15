@@ -173,7 +173,7 @@
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v3. (e.g. '.../glassfish-v3/glassfish')"/>
         <echo/>
         <echo message="Usage:"/>
-        <echo message="  ant -f metro-on-glassfish.xml {install | uninstall}"/>
+        <echo message="  ant -f metro-on-glassfish-v3.xml {install | uninstall}"/>
         <!--antcall target="jdk6-message"/-->
         <antcall target="gfv3-message"/>
         <antcall target="warning-note"/>
