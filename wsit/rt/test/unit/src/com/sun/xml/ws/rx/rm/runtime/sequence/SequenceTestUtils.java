@@ -119,7 +119,7 @@ final class SequenceTestUtils  {
             }
 
             public long getAcknowledgementRequestInterval() {
-                return ReliableMessagingFeature.DEFAULT_ACK_REQUESTED_INTERVAL;
+                return ReliableMessagingFeature.DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL;
             }
 
             public long getCloseSequenceOperationTimeout() {
