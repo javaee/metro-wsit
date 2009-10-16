@@ -303,6 +303,7 @@
                 <exclude name="jaxb*.jar"/>
                 <exclude name="jsr173_api.jar"/>
                 <exclude name="woodstox.jar"/>
+                <exclude name="mimepull.jar"/>
             </expandfiles>
         </expand-jars-macro>
 
