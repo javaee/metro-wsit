@@ -2,7 +2,7 @@
 <!--
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+    Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -44,20 +44,36 @@
     - Complex XSD types are suffixed with "CType"
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://sun.com/2006/03/rm/client"
-    xmlns:tns="http://sun.com/2006/03/rm/client"
+    targetNamespace="http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702"
+    xmlns:tns="http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702"
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-    <xs:complexType name="IntervalCType">
-        <xs:sequence />
-        <xs:attribute name="Milliseconds" type="xs:unsignedLong" use="required"/>
-    </xs:complexType>
+    <xs:element name="Ordered">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute namespace="##other" processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
 
-    <xs:element name="AckRequestInterval" type="tns:IntervalCType" />
+    <xs:element name="AllowDuplicates">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute namespace="##other" processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
 
-    <xs:element name="CloseTimeout" type="tns:IntervalCType" />
-
-    <xs:element name="ResendInterval" type="tns:IntervalCType" />
+    <xs:element name="Persistent">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute namespace="##other" processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
 
 </xs:schema>

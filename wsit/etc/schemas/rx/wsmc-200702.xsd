@@ -36,8 +36,8 @@
     holder.
 -->
 <!--
-    This XML schema document describes format of the Metro configuration file
-    (metro.xml).
+    This XML schema document describes format of the standard WS-MakeConnection 
+    200702 elements.
 
     Naming conventiotns:
     - Simple XSD types are suffixed with "SType"
@@ -62,11 +62,11 @@
         </xsd:documentation>
         <xsd:appinfo>
             <jaxb:schemaBindings>
-                <jaxb:package name="com.sun.xml.ws.rm.protocol.wsmc200702" />
+                <jaxb:package name="com.sun.xml.ws.rx.mc.protocol.wsmc200702" />
             </jaxb:schemaBindings>
         </xsd:appinfo>
     </xsd:annotation>
-    <xsd:complexType name="MessagePendingCType">
+    <xsd:element name="MessagePending">
         <xsd:annotation>
             <xsd:documentation>
                 When MakeConnection is used, and a message is returned on the
@@ -77,15 +77,17 @@
                 MakeConnection element.
             </xsd:documentation>
             <xsd:appinfo>
-                <jaxb:class name="MessagePending" />
+                <jaxb:class name="MessagePendingElement" />
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:sequence>
-            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
-        <xsd:attribute name="pending" type="xsd:boolean"/>
-        <xsd:anyAttribute namespace="##other" processContents="lax"/>
-    </xsd:complexType>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attribute name="pending" type="xsd:boolean"/>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+        </xsd:complexType>
+    </xsd:element>
 
     <xsd:complexType name="ExtensibleUriCType">
         <xsd:annotation>
@@ -104,7 +106,7 @@
         </xsd:simpleContent>
     </xsd:complexType>
 
-    <xsd:complexType name="MakeConnectionCType">
+    <xsd:element name="MakeConnection">
         <xsd:annotation>
             <xsd:documentation>
                 The MakeConnection element is sent in the body of a one-way message that
@@ -115,13 +117,14 @@
                 a server for the purpose of receiving asynchronous response messages.
             </xsd:documentation>
             <xsd:appinfo>
-                <jaxb:class name="MakeConnection" />
+                <jaxb:class name="MakeConnectionElement" />
             </xsd:appinfo>
         </xsd:annotation>
-        <xsd:sequence>
-            <xsd:element name="Address" type="wsmc:ExtensibleUriCType" minOccurs="0" maxOccurs="1">
-                <xsd:annotation>
-                    <xsd:documentation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="Address" type="wsmc:ExtensibleUriCType" minOccurs="0" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
                         This element specifies the URI (wsa:Address) of the initiating Endpoint.
                         Endpoints MUST NOT return messages on the transport-specific back-channel unless
                         they have been addressed to this URI. This Address property and a message’s
@@ -130,13 +133,14 @@
                         this sense may in fact be functionally equivalent. Examples include URI references
                         which differ only in case, or which are in external entities which have different
                         effective base URIs.
-                    </xsd:documentation>
-                </xsd:annotation>
-            </xsd:element>
-            <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-        </xsd:sequence>
-        <xsd:anyAttribute namespace="##other" processContents="lax"/>
-    </xsd:complexType>
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:anyAttribute namespace="##other" processContents="lax"/>
+        </xsd:complexType>
+    </xsd:element>
 
     <xsd:simpleType name="UnsupportedSelectionSType">
         <xsd:annotation>
@@ -144,7 +148,7 @@
                 The QName of the unsupported element(s) are included in the detail.
             </xsd:documentation>
             <xsd:appinfo>
-                <jaxb:class name="UnsupportedSelection" />
+                <jaxb:class name="UnsupportedSelectionType" />
             </xsd:appinfo>
         </xsd:annotation>
         <xsd:restriction base="xsd:QName"/>

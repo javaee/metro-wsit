@@ -35,8 +35,8 @@
 -->
 
 <!--
-    This XML schema document describes format of the Metro configuration file
-    (metro.xml).
+    This XML schema document describes format of the .Net WS-ReliableMessaging
+    custom WS-Policy assertions.
 
     Naming conventiotns:
     - Simple XSD types are suffixed with "SType"
