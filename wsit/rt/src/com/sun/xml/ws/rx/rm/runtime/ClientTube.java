@@ -53,6 +53,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -122,7 +123,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 scInitiator,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
+                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
 
         DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc.configuration,
@@ -249,18 +250,21 @@ final class ClientTube extends AbstractFilterTubeImpl {
             final RmConfiguration configuration,
             final WsrmProtocolHandler protocolHandler,
             final DestinationMessageHandler dstMsgHandler) {
+
+        final RmVersion rmVersion = configuration.getRmFeature().getVersion();
+
         return new ProtocolMessageHandler() {
 
             Collection<String> SUPPORTED_WSA_ACTIONS = Collections.unmodifiableCollection(Arrays.asList(new String[]{
-                        configuration.getRmVersion().ackRequestedAction,
-                        // configuration.getRmVersion().closeSequenceAction,
-                        // configuration.getRmVersion().closeSequenceResponseAction,
-                        // configuration.getRmVersion().createSequenceAction,
-                        // configuration.getRmVersion().createSequenceResponseAction,
-                        // configuration.getRmVersion().lastAction,
-                        configuration.getRmVersion().sequenceAcknowledgementAction, // configuration.getRmVersion().terminateSequenceAction,
-                    // configuration.getRmVersion().terminateSequenceResponseAction,
-                    // configuration.getRmVersion().wsrmFaultAction
+                        rmVersion.ackRequestedAction,
+                        // rmVersion.closeSequenceAction,
+                        // rmVersion.closeSequenceResponseAction,
+                        // rmVersion.createSequenceAction,
+                        // rmVersion.createSequenceResponseAction,
+                        // rmVersion.lastAction,
+                        rmVersion.sequenceAcknowledgementAction, // rmVersion.terminateSequenceAction,
+                        // rmVersion.terminateSequenceResponseAction,
+                        // rmVersion.wsrmFaultAction
                     }));
 
             public Collection<String> getSuportedWsaActions() {
@@ -292,12 +296,12 @@ final class ClientTube extends AbstractFilterTubeImpl {
         try {
             String inboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
             if (inboundSequenceId != null) {
-                waitForMissingAcknowledgements(inboundSequenceId,rc.configuration.getCloseSequenceOperationTimeout());
+                waitForMissingAcknowledgements(inboundSequenceId,rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
             }
 
             closeSequence();
 
-            waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getCloseSequenceOperationTimeout());
+            waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
 
             terminateSequence();
         } finally {

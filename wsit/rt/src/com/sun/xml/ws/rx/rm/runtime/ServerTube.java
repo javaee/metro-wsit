@@ -121,7 +121,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
+                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion())));
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -137,7 +137,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
 
         SequenceManager sequenceManager = SequenceManagerFactory.INSTANCE.createSequenceManager(
-                configuration.isPersistenceEnabled(),
+                configuration.getRmFeature().isPersistenceEnabled(),
                 context.getEndpoint().getServiceName() + "::" + context.getEndpoint().getPortName(),
                 inboundQueueBuilder,
                 outboundQueueBuilder,
@@ -265,7 +265,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
                         request));
             }
-            if (rc.configuration.isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
+            if (rc.configuration.getRmFeature().isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
                 JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
                 if (jaxwsAppMsg.getPacket() == null) {
                     // FIXME: loaded from DB without a valid packet - create one
@@ -495,7 +495,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
 
-        if (session == null && rc.configuration.isPersistenceEnabled()) {
+        if (session == null && rc.configuration.getRmFeature().isPersistenceEnabled()) {
             // inbound sequence id (session id) is valid, but there's no session 
             // in the session manager => there must have been a crash or redeploy
             // starting a new session

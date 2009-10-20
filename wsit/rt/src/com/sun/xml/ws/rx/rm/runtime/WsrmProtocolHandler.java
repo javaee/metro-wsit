@@ -70,7 +70,7 @@ public abstract class WsrmProtocolHandler {
     private static final Logger LOGGER = Logger.getLogger(WsrmProtocolHandler.class);
 
     public static WsrmProtocolHandler getInstance(RmConfiguration configuration, Communicator communicator, RuntimeContext rc) {
-        switch (configuration.getRmVersion()) {
+        switch (configuration.getRmFeature().getVersion()) {
             case WSRM200502:
                 return new Wsrm200502ProtocolHandler(configuration, rc, communicator);
             case WSRM200702:
@@ -144,10 +144,9 @@ public abstract class WsrmProtocolHandler {
 
     protected WsrmProtocolHandler(@NotNull RmVersion rmVersion, @NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
         assert rmVersion != null;
-        assert rmVersion == configuration.getRmVersion();
+        assert rmVersion == configuration.getRmFeature().getVersion();
         assert configuration != null;
         assert communicator != null;
-        assert configuration.getRmVersion() == rmVersion;
 
         this.rmVersion = rmVersion;
         this.communicator = communicator;

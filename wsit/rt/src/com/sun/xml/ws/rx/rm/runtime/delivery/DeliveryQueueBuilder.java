@@ -72,8 +72,8 @@ public final class DeliveryQueueBuilder {
     }
 
     public DeliveryQueue build() {
-        if (configuration.isOrderedDeliveryEnabled()) {
-            return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, configuration.getDestinationBufferQuota());
+        if (configuration.getRmFeature().isOrderedDeliveryEnabled()) {
+            return new InOrderDeliveryQueue(postman, deliveryCallback, sequence, configuration.getRmFeature().getDestinationBufferQuota());
         } else {
             return new SimpleDeliveryQueue(postman, deliveryCallback);
         }

@@ -38,74 +38,11 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.RxConfiguration;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
-import com.sun.xml.ws.rx.rm.RmVersion;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public interface RmConfiguration extends RxConfiguration {
-
-    /**
-     * @see ReliableMessagingFeature#getVersion()
-     */
-    public RmVersion getRmVersion();
-
-    /**
-     * @see ReliableMessagingFeature#getSequenceInactivityTimeout()
-     */
-    public long getSequenceInactivityTimeout();
-
-    /**
-     * @see ReliableMessagingFeature#getSecurityBinding()
-     */
-    public SecurityBinding getSecurityBinding();
-
-    /**
-     * @see ReliableMessagingFeature#getDeliveryAssurance()
-     */
-    public DeliveryAssurance getDeliveryAssurance();
-
-    /**
-     * @see ReliableMessagingFeature#isOrderedDeliveryEnabled()
-     */
-    public boolean isOrderedDeliveryEnabled();
-
-    /**
-     * @see ReliableMessagingFeature#getDestinationBufferQuota()
-     */
-    public long getDestinationBufferQuota();
-
-    /**
-     * @see ReliableMessagingFeature#getMessageRetransmissionInterval()
-     */
-    public long getMessageRetransmissionInterval();
-
-    /**
-     * @see ReliableMessagingFeature#getRetransmissionBackoffAlgorithm()
-     */
-    public BackoffAlgorithm getRetransmissionBackoffAlgorithm();
-
-    /**
-     * @see ReliableMessagingFeature#getAcknowledgementRequestInterval()
-     */
-    public long getAcknowledgementRequestInterval();
-
-    /**
-     * @see ReliableMessagingFeature#getCloseSequenceOperationTimeout()
-     */
-    public long getCloseSequenceOperationTimeout();
-
-    /**
-     * @see ReliableMessagingFeature#isPersistenceEnabled()
-     */
-    public boolean isPersistenceEnabled();
-
-    /**
-     * @see ReliableMessagingFeature#getSequenceMaintenancePeriod()
-     */
-    public long getSequenceManagerMaintenancePeriod();
+    public ReliableMessagingFeature getRmFeature();
 }

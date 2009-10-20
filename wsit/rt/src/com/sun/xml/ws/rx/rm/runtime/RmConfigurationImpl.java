@@ -41,10 +41,6 @@ import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -66,64 +62,11 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
         this.rmFeature = rmFeature;
     }
 
-    public RmVersion getRmVersion() {
-        checkState();
-        return rmFeature.getVersion();
-    }
 
-    public long getSequenceInactivityTimeout() {
+    public ReliableMessagingFeature getRmFeature() {
         checkState();
-        return rmFeature.getSequenceInactivityTimeout();
-    }
 
-    public SecurityBinding getSecurityBinding() {
-        checkState();
-        return rmFeature.getSecurityBinding();
-    }
-
-    public DeliveryAssurance getDeliveryAssurance() {
-        checkState();
-        return rmFeature.getDeliveryAssurance();
-    }
-
-    public boolean isOrderedDeliveryEnabled() {
-        checkState();
-        return rmFeature.isOrderedDeliveryEnabled();
-    }
-
-    public long getDestinationBufferQuota() {
-        checkState();
-        return rmFeature.getDestinationBufferQuota();
-    }
-
-    public long getMessageRetransmissionInterval() {
-        checkState();
-        return rmFeature.getMessageRetransmissionInterval();
-    }
-
-    public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
-        checkState();
-        return rmFeature.getRetransmissionBackoffAlgorithm();
-    }
-
-    public long getAcknowledgementRequestInterval() {
-        checkState();
-        return rmFeature.getAckRequestTransmissionInterval();
-    }
-
-    public long getCloseSequenceOperationTimeout() {
-        checkState();
-        return rmFeature.getCloseSequenceOperationTimeout();
-    }
-
-    public boolean isPersistenceEnabled() {
-        checkState();
-        return rmFeature.isPersistenceEnabled();
-    }
-
-    public long getSequenceManagerMaintenancePeriod() {
-        checkState();
-        return rmFeature.getSequenceManagerMaintenancePeriod();
+        return rmFeature;
     }
 
     private void checkState() {

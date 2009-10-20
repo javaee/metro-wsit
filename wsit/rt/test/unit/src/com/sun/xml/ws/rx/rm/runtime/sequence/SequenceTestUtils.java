@@ -37,11 +37,8 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
@@ -60,6 +57,8 @@ final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
     static final RmConfiguration getConfiguration() {
+        final ReliableMessagingFeature rmf = new ReliableMessagingFeatureBuilder(RmVersion.WSRM200702).build();
+
         return new RmConfiguration() {
 
             public boolean isReliableMessagingEnabled() {
@@ -68,14 +67,6 @@ final class SequenceTestUtils  {
 
             public boolean isMakeConnectionSupportEnabled() {
                 return false;
-            }
-
-            public RmVersion getRmVersion() {
-                return RmVersion.WSRM200702;
-            }
-
-            public McVersion getMcVersion() {
-                return null;
             }
 
             public SOAPVersion getSoapVersion() {
@@ -90,52 +81,11 @@ final class SequenceTestUtils  {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
 
-            public long getSequenceInactivityTimeout() {
-                return ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
+            public ReliableMessagingFeature getRmFeature() {
+                return rmf;
             }
-
-            public SecurityBinding getSecurityBinding() {
-                return ReliableMessagingFeature.SecurityBinding.getDefault();
-            }
-
-            public DeliveryAssurance getDeliveryAssurance() {
-                return ReliableMessagingFeature.DeliveryAssurance.getDefault();
-            }
-
-            public boolean isOrderedDeliveryEnabled() {
-                return false;
-            }
-
-            public long getDestinationBufferQuota() {
-                return ReliableMessagingFeature.DEFAULT_DESTINATION_BUFFER_QUOTA;
-            }
-
-            public long getMessageRetransmissionInterval() {
-                return ReliableMessagingFeature.DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL;
-            }
-
-            public BackoffAlgorithm getRetransmissionBackoffAlgorithm() {
-                return ReliableMessagingFeature.BackoffAlgorithm.getDefault();
-            }
-
-            public long getAcknowledgementRequestInterval() {
-                return ReliableMessagingFeature.DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL;
-            }
-
-            public long getCloseSequenceOperationTimeout() {
-                return ReliableMessagingFeature.DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
-            }
-
             public ManagedObjectManager getManagedObjectManager() {
                 return null;
-            }
-
-            public boolean isPersistenceEnabled() {
-                return false;
-            }
-
-            public long getSequenceManagerMaintenancePeriod() {
-                return ReliableMessagingFeature.DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
             }
        };
     }

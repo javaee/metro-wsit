@@ -81,7 +81,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
+                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion())));
 
         this.rc = rcBuilder.build();
 
@@ -101,7 +101,7 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmVersion().getJaxbContext(configuration.getAddressingVersion())));
+                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion())));
 
         this.rc = rcBuilder.build();
 

@@ -58,7 +58,7 @@ public class ClientAckRequesterTask implements DelayedTask {
 
     public ClientAckRequesterTask(RuntimeContext rc, String outboundSequenceId) {
         this.rc = rc;
-        this.acknowledgementRequestInterval = rc.configuration.getAcknowledgementRequestInterval();
+        this.acknowledgementRequestInterval = rc.configuration.getRmFeature().getAckRequestTransmissionInterval();
         this.outboundSequenceId = outboundSequenceId;
     }
 

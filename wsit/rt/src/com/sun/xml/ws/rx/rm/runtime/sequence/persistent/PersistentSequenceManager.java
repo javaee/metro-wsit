@@ -102,7 +102,7 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
 
-        this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
+        this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
 
@@ -112,8 +112,8 @@ public final class PersistentSequenceManager implements SequenceManager {
         }
 
         MaintenanceTaskExecutor.INSTANCE.register(
-                new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
-                configuration.getSequenceManagerMaintenancePeriod(),
+                new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
+                configuration.getRmFeature().getSequenceManagerMaintenancePeriod(),
                 TimeUnit.MILLISECONDS);
     }
 

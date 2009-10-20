@@ -99,7 +99,7 @@ public final class InVmSequenceManager implements SequenceManager {
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
 
-        this.sequenceInactivityTimeout = configuration.getSequenceInactivityTimeout();
+        this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
         
         ManagedObjectManager mom = configuration.getManagedObjectManager();
         if (mom != null) {
@@ -107,8 +107,8 @@ public final class InVmSequenceManager implements SequenceManager {
         }
 
         MaintenanceTaskExecutor.INSTANCE.register(
-                new SequenceMaintenanceTask(this, configuration.getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
-                configuration.getSequenceManagerMaintenancePeriod(),
+                new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
+                configuration.getRmFeature().getSequenceManagerMaintenancePeriod(),
                 TimeUnit.MILLISECONDS);
     }
 

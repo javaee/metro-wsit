@@ -91,7 +91,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                 LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
-                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
                         rc.destinationMessageHandler);
                 return;
@@ -123,7 +123,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
             if (ServerDestinationDeliveryCallback.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
-                        rc.configuration.getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getMessageRetransmissionInterval()),
+                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
                         rc.destinationMessageHandler);
             } else {

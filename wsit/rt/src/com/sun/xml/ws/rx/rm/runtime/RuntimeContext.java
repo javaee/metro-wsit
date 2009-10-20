@@ -128,7 +128,7 @@ public final class RuntimeContext {
 
         this.addressingVersion = configuration.getAddressingVersion();
         this.soapVersion = configuration.getSoapVersion();
-        this.rmVersion = configuration.getRmVersion();
+        this.rmVersion = configuration.getRmFeature().getVersion();
 
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
     }
