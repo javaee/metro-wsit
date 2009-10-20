@@ -49,23 +49,22 @@
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-    <xs:element name="Ordered">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:anyAttribute namespace="##other" processContents="lax"/>
-        </xs:complexType>
-    </xs:element>
+<!-- TODO
+MaxConcurrentSessions
+MessageRetransmission/Interval
+MessageRetransmission/Algorithm
+MessageRetransmission/MaxRetries
+-->
+    <xs:complexType name="IntervalCType">
+        <xs:sequence />
+        <xs:attribute name="Milliseconds" type="xs:unsignedLong" use="required"/>
+    </xs:complexType>
 
-    <xs:element name="AllowDuplicates">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:anyAttribute namespace="##other" processContents="lax"/>
-        </xs:complexType>
-    </xs:element>
+    <xs:element name="CloseSequenceTimeout" type="tns:IntervalCType" />
+
+    <xs:element name="MaintenanceTaskPeriod" type="tns:IntervalCType" />
+
+    <xs:element name="AckRequestInterval" type="tns:IntervalCType" />
 
     <xs:element name="Persistent">
         <xs:complexType>
