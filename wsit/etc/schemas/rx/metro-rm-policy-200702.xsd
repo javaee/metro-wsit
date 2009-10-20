@@ -49,16 +49,34 @@
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-<!-- TODO
-MaxConcurrentSessions
-MessageRetransmission/Interval
-MessageRetransmission/Algorithm
-MessageRetransmission/MaxRetries
--->
+    <xs:simpleType name="BackoffAlgorithmSType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Exponential" />
+            <xs:enumeration value="Linear" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="MessageRetransmissionCType">
+        <xs:sequence >
+            <xs:element name="Interval" type="tns:IntervalCType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="BackoffAlgorithm" type="tns:BackoffAlgorithmSType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="MaxRetries" type="xs:unsignedLong" minOccurs="0" maxOccurs="1"/>
+            <xs:any namespace="##other"
+                processContents="lax"
+                minOccurs="0"
+                maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:anyAttribute namespace="##any" processContents="lax" />
+    </xs:complexType>
+
     <xs:complexType name="IntervalCType">
         <xs:sequence />
         <xs:attribute name="Milliseconds" type="xs:unsignedLong" use="required"/>
     </xs:complexType>
+
+    <xs:element name="MaxConcurrentSessions" type="xs:unsignedLong" />
+
+    <xs:element name="MessageRetransmission" type="tns:MessageRetransmissionCType" />
 
     <xs:element name="CloseSequenceTimeout" type="tns:IntervalCType" />
 
@@ -74,5 +92,4 @@ MessageRetransmission/MaxRetries
             <xs:anyAttribute namespace="##other" processContents="lax"/>
         </xs:complexType>
     </xs:element>
-
 </xs:schema>
