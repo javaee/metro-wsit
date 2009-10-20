@@ -65,6 +65,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      */
     public static final long DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL = 2000;
     /**
+     * A constant specifies the default value of maximum number of message redelivery
+     * attempts.
+     *
+     * Currently, the default value is set to infinity (-1).
+     */
+    public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = -1;
+    /**
      * Specifies the duration in milliseconds after which the RM Destination will
      * transmit an acknowledgement.
      * Currently the default value is set to -1 => unspecified.
@@ -87,6 +94,15 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * instance.
      */
     public static final long DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD = 60000;
+    /**
+     * A constant specifying the default value for how many concurrently active
+     * RM sessions (measured based on inbound RM sequences) the {@link SequenceManager}
+     * dedicated to the WS Endpoint accepts before starting to refuse new requests
+     * for sequence creation.
+     *
+     * Currently, the default value is set to infinity (-1).
+     */
+    public static final long DEFAULT_MAX_CONCURRENT_SESSIONS = -1;
 
     /**
      * Defines the enumeration of possible security binding mechanism options that
@@ -256,22 +272,28 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          */
         public abstract long getDelayInMillis(int resendAttemptNumber, long baseRate);
     }
-
-    // General RM config values
+    //
     private final RmVersion version;
     private final long sequenceInactivityTimeout;
     private final long destinationBufferQuota;
     private final boolean orderedDelivery;
     private final DeliveryAssurance deliveryAssurance;
     private final SecurityBinding securityBinding;
-    // Client-specific RM config values
+    //
     private final long messageRetransmissionInterval;
     private final BackoffAlgorithm retransmissionBackoffAlgorithm;
+    private final long maxMessageRetransmissionCount;
+    //
     private final long acknowledgementTransmissionInterval;
     private final long ackRequestTransmissionInterval;
+    //
     private final long closeSequenceOperationTimeout;
+    //
     private final boolean persistenceEnabled;
+    //
     private final long sequenceManagerMaintenancePeriod;
+    //
+    private final long maxConcurrentSessions;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -294,11 +316,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 SecurityBinding.getDefault(), // this.securityBinding
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
+                DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT,
                 DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
                 DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 false, // this.persistenceEnabled
-                DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD);
+                DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD,
+                DEFAULT_MAX_CONCURRENT_SESSIONS);
     }
 
     @FeatureConstructor({
@@ -310,7 +334,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         "deliveryAssurance",
         "securityBinding",
         "persistenceEnabled",
-        "sequenceManagerMaintenancePeriod"
+        "sequenceManagerMaintenancePeriod",
+        "maxConcurrentSessions"
     })
     public ReliableMessagingFeature(
             boolean enabled,
@@ -321,7 +346,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             DeliveryAssurance deliveryAssurance,
             SecurityBinding securityBinding,
             boolean persistenceEnabled,
-            long sequenceManagerMaintenancePeriod) {
+            long sequenceManagerMaintenancePeriod,
+            long maxConcurrentSessions) {
 
         this(
                 enabled, // this.enabled
@@ -331,13 +357,17 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 orderedDelivery, // this.orderedDelivery
                 deliveryAssurance, // this.deliveryAssurance
                 securityBinding, // this.securityBinding
+
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
+                DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT,
+
                 DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
                 DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 persistenceEnabled, // this.persistenceEnabled
-                sequenceManagerMaintenancePeriod);
+                sequenceManagerMaintenancePeriod,
+                maxConcurrentSessions);
     }
 
     public ReliableMessagingFeature(
@@ -350,11 +380,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             SecurityBinding securityBinding,
             long messageRetransmissionInterval,
             BackoffAlgorithm retransmissionBackoffAlgorithm,
+            long maxMessageRetransmissionCount,
             long acknowledgementTransmissionInterval,
             long ackRequestTransmissionInterval,
             long closeSequenceOperationTimeout,
             boolean persistenceEnabled,
-            long sequenceManagerMaintenancePeriod) {
+            long sequenceManagerMaintenancePeriod,
+            long maxConcurrentRmSessions) {
 
         super.enabled = enabled;
         this.version = version;
@@ -365,11 +397,13 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.securityBinding = securityBinding;
         this.messageRetransmissionInterval = messageRetransmissionInterval;
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
+        this.maxMessageRetransmissionCount = maxMessageRetransmissionCount;
         this.acknowledgementTransmissionInterval = acknowledgementTransmissionInterval;
         this.ackRequestTransmissionInterval = ackRequestTransmissionInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
         this.persistenceEnabled = persistenceEnabled;
         this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
+        this.maxConcurrentSessions = maxConcurrentRmSessions;
     }
 
     @Override
@@ -508,6 +542,29 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
+     * A message is considered to be transferred if its delivery at the recipient
+     * has been acknowledged by the recipient.
+     *
+     * If an acknowledgment has not been received within a certain amount of time
+     * for a message that has been transmitted, the infrastructure automatically
+     * retransmits the message. The infrastructure tries to send the message for
+     * at most a {@link #getMaxMessageRetransmissionCount()}  number of times.
+     * Not receiving an acknowledgment before this limit is reached is considered
+     * a fatal communication failure, and causes the RM session failure.
+     *
+     * The infrastructure uses a back-off algorithm retrieved via
+     * {@link #getRetransmissionBackoffAlgorithm()} to determine when to retransmit,
+     * based on a computed average round-trip time. The initial retry time is
+     * retrieved from {@link #getRetransmissionBackoffAlgorithm()}.
+     *
+     * @return maximum number of message transmission retries
+     */
+    @ManagedAttribute
+    public long getMaxMessageRetransmissionCount() {
+        return maxMessageRetransmissionCount;
+    }
+
+    /**
      * Specifies the duration after which the RM Destination will transmit an acknowledgement.
      * Specified in milliseconds.
      * 
@@ -548,9 +605,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
-     * <p>
      * Specifies whether the runtime should use persistent message storage or not.
-     * </p>
      * 
      * @return {@code true} if the runtime should use persistent message storage, {@code false} otherwise
      */
@@ -570,5 +625,17 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public long getSequenceManagerMaintenancePeriod() {
         return sequenceManagerMaintenancePeriod;
+    }
+
+    /**
+     * Specifies how many concurrently active RM sessions (measured based on
+     * inbound RM sequences) the {@link SequenceManager} dedicated to the WS Endpoint
+     * accepts before starting to refuse new requests for sequence creation.
+     *
+     * @return maximum number of concurrent RM sessions
+     */
+    @ManagedAttribute
+    public long getMaxConcurrentSessions() {
+        return maxConcurrentSessions;
     }
 }

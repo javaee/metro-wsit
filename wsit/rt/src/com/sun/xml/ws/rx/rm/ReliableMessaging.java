@@ -64,4 +64,5 @@ public @interface ReliableMessaging {
     SecurityBinding securityBinding() default SecurityBinding.NONE;
     boolean persistenceEnabled() default false;
     long sequenceManagerMaintenancePeriod() default DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
+    long maxConcurrentSessions() default DEFAULT_MAX_CONCURRENT_SESSIONS;
 }
