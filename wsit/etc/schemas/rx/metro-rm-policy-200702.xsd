@@ -56,11 +56,44 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:complexType name="MessageRetransmissionCType">
+    <xs:complexType name="RetransmissionConfigCType">
         <xs:sequence >
-            <xs:element name="Interval" type="tns:IntervalCType" minOccurs="0" maxOccurs="1"/>
-            <xs:element name="BackoffAlgorithm" type="tns:BackoffAlgorithmSType" minOccurs="0" maxOccurs="1"/>
-            <xs:element name="MaxRetries" type="xs:unsignedLong" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Interval" type="tns:IntervalCType" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies how long the RM Source will wait after transmitting
+                        a message and before retransmitting the message.
+                        If omitted, there is no implied value. Specified in milliseconds.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="BackoffAlgorithm" type="tns:BackoffAlgorithmSType" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        Specifies that the retransmission interval will be adjusted using a specific
+                        (e.g. exponential back-off) algorithm.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="MaxRetries" type="xs:unsignedLong" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        A message is considered to be transferred if its delivery at the recipient
+                        has been acknowledged by the recipient.
+
+                        If an acknowledgment has not been received within a certain amount of time
+                        for a message that has been transmitted, the infrastructure automatically
+                        retransmits the message. The infrastructure tries to send the message for
+                        at most the configured number of times. Not receiving an acknowledgment
+                        before this limit is reached is considered a fatal communication failure,
+                        and causes the RM session failure.
+
+                        The infrastructure uses the configured back-off algorithm to determine when
+                        to retransmit, based on a configured base retransmission time.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            
             <xs:any namespace="##other"
                 processContents="lax"
                 minOccurs="0"
@@ -74,17 +107,66 @@
         <xs:attribute name="Milliseconds" type="xs:unsignedLong" use="required"/>
     </xs:complexType>
 
-    <xs:element name="MaxConcurrentSessions" type="xs:unsignedLong" />
+    <xs:element name="MaxConcurrentSessions" type="xs:unsignedLong" >
+        <xs:annotation>
+            <xs:documentation>
+                Specifies how many concurrently active RM sessions (measured based
+                on inbound RM sequences) the SequenceManager dedicated to the
+                WS Endpoint accepts before starting to refuse new requests for
+                a sequence creation.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="MessageRetransmission" type="tns:MessageRetransmissionCType" />
+    <xs:element name="RetransmissionConfig" type="tns:RetransmissionConfigCType" >
+        <xs:annotation>
+            <xs:documentation>
+                Configures message retransmission. See nested elements for details.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="CloseSequenceTimeout" type="tns:IntervalCType" />
+    <xs:element name="CloseSequenceTimeout" type="tns:IntervalCType" >
+        <xs:annotation>
+            <xs:documentation>
+                By default, the call to proxy.close() will not return until all
+                messages have been acknowledged. RM close timeout is the interval
+                (in milliseconds) that the client runtime will block waiting for
+                a call to close() to return. If there are still unacknowledged
+                messages after this interval is reached, and the call to close
+                has returned, an error will be logged about messages being lost.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="MaintenanceTaskPeriod" type="tns:IntervalCType" />
+    <xs:element name="MaintenanceTaskPeriod" type="tns:IntervalCType" >
+        <xs:annotation>
+            <xs:documentation>
+                Specifies the period (in milliseconds) of a sequence maintenance
+                task execution. Sequence maintenance task takes care of terminating
+                inactive sequences and removing the terminated sequences from the
+                sequence repository.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="AckRequestInterval" type="tns:IntervalCType" />
+    <xs:element name="AckRequestInterval" type="tns:IntervalCType" >
+        <xs:annotation>
+            <xs:documentation>
+                Defines the suggested minimum time that the sender (RM Source)
+                should allow to elapse between sending consecutive Acknowledgement
+                request messages to the RM Destination.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
     <xs:element name="Persistent">
+        <xs:annotation>
+            <xs:documentation>
+                Specifies whether the runtime should use persistent message storage
+                or not.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
