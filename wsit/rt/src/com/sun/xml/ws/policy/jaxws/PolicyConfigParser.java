@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.policy.jaxws;
 
+import com.sun.istack.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -52,7 +53,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 
 /**
@@ -62,7 +62,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class PolicyConfigParser {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyConfigParser.class);
+    private static final Logger LOGGER = Logger.getLogger(PolicyConfigParser.class);
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     // Prefixing with META-INF/ instead of /META-INF/. /META-INF/ is working fine
     // when loading from a JAR file but not when loading from a plain directory.
