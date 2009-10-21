@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.wsrm200502;
 
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -45,6 +45,9 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import javax.xml.ws.WebServiceException;
@@ -59,10 +62,12 @@ import javax.xml.ws.WebServiceException;
  * </wsrm:RMAssertion>
  */
 /** 
- * 
+ * Specifies that WS-ReliableMessaging protocol MUST be used when sending messages.
+ * Defines also the version of the WS-RM protocol to be used.
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Rm10Assertion extends SimpleAssertion implements RmAssertionTranslator {
+public final class Rm10Assertion extends SimpleAssertion implements RmConfigurator {
 
     public static final QName NAME = RmVersion.WSRM200502.rmAssertionName;
     private static final QName INACTIVITY_TIMEOUT_QNAME = AssertionNamespace.WSRMP_200502.getQName("InactivityTimeout");
@@ -137,5 +142,9 @@ public final class Rm10Assertion extends SimpleAssertion implements RmAssertionT
         }
 
         return builder;
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200502 == version;
     }
 }

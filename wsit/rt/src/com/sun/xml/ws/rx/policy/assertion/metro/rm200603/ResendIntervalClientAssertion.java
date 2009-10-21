@@ -34,31 +34,40 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200603;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:CloseTimeout Milliseconds="..." />
+ * <sunc:ResendInterval Milliseconds="..." />
  */
 /**
- * Defines a period of time after which an attempt to close a session would timeout.
+ * Specifies how long the RM Source will wait after transmitting a message and
+ * before retransmitting the message. If omitted, value from
+ * {@link ReliableMessagingFeature#DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL}
+ * is used. Specified in milliseconds.
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class CloseTimeoutClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_CLIENT_200603.getQName("CloseTimeout");
+public class ResendIntervalClientAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_CLIENT_200603.getQName("ResendInterval");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new CloseTimeoutClientAssertion(data, assertionParameters);
+            return new ResendIntervalClientAssertion(data, assertionParameters);
         }
     };
     
@@ -66,19 +75,23 @@ public class CloseTimeoutClientAssertion extends SimpleAssertion implements RmAs
         return instantiator;
     }
 
-    private final long timeout;
+    private final long interval;
     
-    public CloseTimeoutClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
         
-        timeout = Long.parseLong(data.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
+        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
     }
    
-    public long getTimeout() {
-        return timeout;
+    public long getInterval() {
+        return interval;
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.closeSequenceOperationTimeout(timeout);
+        return builder.messageRetransmissionInterval(interval);
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200502 == version;
     }
 }

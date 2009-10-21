@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.net.rm200702.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

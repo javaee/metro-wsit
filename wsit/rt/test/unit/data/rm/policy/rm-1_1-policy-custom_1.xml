@@ -41,7 +41,8 @@ xmlns:wsp="http://www.w3.org/ns/ws-policy"
 xmlns:wsrm="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
 xmlns:sunrm="http://sun.com/2006/03/rm"
 xmlns:net="http://schemas.microsoft.com/net/2005/02/rm/policy"
-xmlns:net35="http://schemas.microsoft.com/ws-rx/wsrmp/200702" >
+xmlns:net35="http://schemas.microsoft.com/ws-rx/wsrmp/200702"
+xmlns:metro200702="http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702" >
     <wsp:ExactlyOne>
         <wsp:All>
             <wsrm:RMAssertion>
@@ -56,7 +57,7 @@ xmlns:net35="http://schemas.microsoft.com/ws-rx/wsrmp/200702" >
                 </wsp:Policy>
             </wsrm:RMAssertion>
             <net35:InactivityTimeout Milliseconds="1000"/>
-            <sunrm:Persistent />
+            <metro200702:Persistent />
         </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>

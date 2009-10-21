@@ -34,18 +34,46 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200702;
 
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.SimpleAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
+import java.util.Collection;
+import javax.xml.namespace.QName;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public interface RmAssertionTranslator {
+public class PersistentAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_200702.getQName("Persistent");
 
-    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder);
+    private static AssertionInstantiator instantiator = new AssertionInstantiator() {
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
+            return new PersistentAssertion(data, assertionParameters);
+        }
+    };
 
-    // TODO need to solve the backwards translation but it should be via a static method
-    //public PolicyAssertion createFrom(ReliableMessagingFeature feature);
+    public static AssertionInstantiator getInstantiator() {
+        return instantiator;
+    }
+
+    public PersistentAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.enablePersistence();
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
+    }
 }

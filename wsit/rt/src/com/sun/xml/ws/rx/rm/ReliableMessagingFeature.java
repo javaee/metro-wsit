@@ -231,7 +231,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          *
          * @see BackoffAlgorithm
          */
-        LINEAR() {
+        LINEAR("Linear") {
 
             public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
                 return baseRate;
@@ -243,12 +243,28 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          *
          * @see BackoffAlgorithm
          */
-        EXPONENTIAL() {
+        EXPONENTIAL("Exponential") {
 
             public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
                 return resendAttemptNumber * baseRate;
             }
         };
+
+        private final String name;
+
+        private BackoffAlgorithm(String name) {
+            this.name = name;
+        }
+
+        public static BackoffAlgorithm parse(String name) {
+            for (BackoffAlgorithm value : values()) {
+                if (value.name.equals(name)) {
+                    return value;
+                }
+            }
+            
+            return null;
+        }
 
         /**
          * Provides a default back-off algorithm value.
@@ -260,6 +276,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         public static BackoffAlgorithm getDefault() {
             return BackoffAlgorithm.LINEAR; // if changed, update also in ReliableMesaging annotation
         }
+
+
 
         /**
          * Calculates the delay before the next possible scheduled resume time based on the resend
@@ -554,8 +572,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * The infrastructure uses a back-off algorithm retrieved via
      * {@link #getRetransmissionBackoffAlgorithm()} to determine when to retransmit,
-     * based on a computed average round-trip time. The initial retry time is
-     * retrieved from {@link #getRetransmissionBackoffAlgorithm()}.
+     * based on the configured base retransmission time retrieved via a call to
+     * {@link #getMessageRetransmissionInterval()}.
      *
      * @return maximum number of message transmission retries
      */

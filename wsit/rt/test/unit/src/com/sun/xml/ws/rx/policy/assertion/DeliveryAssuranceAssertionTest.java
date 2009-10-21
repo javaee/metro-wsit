@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.wsrm200702.DeliveryAssuranceAssertion;
 import junit.framework.TestCase;
 
 /**

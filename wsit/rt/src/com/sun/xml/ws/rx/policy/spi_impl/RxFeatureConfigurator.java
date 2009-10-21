@@ -45,8 +45,8 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
-import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
-import com.sun.xml.ws.rx.policy.assertion.RmAssertionTranslator;
+import com.sun.xml.ws.rx.policy.assertion.wsmc200702.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
@@ -88,8 +88,24 @@ public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
 
                     if (rmFeatureBuilder != null) {
                         for (PolicyAssertion assertion : alternative) {
-                            if (assertion instanceof RmAssertionTranslator) {
-                                rmFeatureBuilder = RmAssertionTranslator.class.cast(assertion).update(rmFeatureBuilder);
+                            if (assertion instanceof RmConfigurator) {
+                                final RmConfigurator rmAssertion = RmConfigurator.class.cast(assertion);
+                                if (!rmAssertion.isCompatibleWith(rmFeatureBuilder.getVersion())) {
+                                    // TODO L10N
+                                    LOGGER.warning(String.format(
+                                            "Inconsistency detected in a WS-Policy expression:\n" +
+                                            "[ %s ] assertion is not compatible with WS-ReliableMessaging version [ %s ].\n" +
+                                            "Please, update your WS-Policy expression by replacing current assertion " +
+                                            "with the assertions compatible with the used WS-ReliableMessaging version. " +
+                                            "Note that future Metro release may decide reject such inconsistent policies " +
+                                            "and fail to deploy your web service.",
+                                            rmAssertion.getName(),
+                                            rmFeatureBuilder.getVersion()));
+
+                                    // TODO replace warning with exception in Metro >2.0:
+                                    // throw new WebServiceException(/*message*/);
+                                }
+                                rmFeatureBuilder = rmAssertion.update(rmFeatureBuilder);
                             }
                         } // next assertion
                         features.add(rmFeatureBuilder.build());

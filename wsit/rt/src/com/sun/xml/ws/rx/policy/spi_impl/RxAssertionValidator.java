@@ -35,24 +35,24 @@
  */
 package com.sun.xml.ws.rx.policy.spi_impl;
 
-import com.sun.xml.ws.rx.policy.assertion.Rm10Assertion;
-import com.sun.xml.ws.rx.policy.assertion.Rm11Assertion;
+import com.sun.xml.ws.rx.policy.assertion.wsrm200502.Rm10Assertion;
+import com.sun.xml.ws.rx.policy.assertion.wsrm200702.Rm11Assertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
-import com.sun.xml.ws.rx.policy.assertion.RmFlowControlAssertion;
-import com.sun.xml.ws.rx.policy.assertion.AckRequestIntervalClientAssertion;
-import com.sun.xml.ws.rx.policy.assertion.AcknowledgementIntervalAssertion;
-import com.sun.xml.ws.rx.policy.assertion.AllowDuplicatesAssertion;
-import com.sun.xml.ws.rx.policy.assertion.CloseTimeoutClientAssertion;
-import com.sun.xml.ws.rx.policy.assertion.OrderedDeliveryAssertion;
-import com.sun.xml.ws.rx.policy.assertion.ResendIntervalClientAssertion;
-import com.sun.xml.ws.rx.policy.assertion.InactivityTimeoutAssertion;
+import com.sun.xml.ws.rx.policy.assertion.net.rm200502.RmFlowControlAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.AckRequestIntervalClientAssertion;
+import com.sun.xml.ws.rx.policy.assertion.net.rm200702.AcknowledgementIntervalAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.AllowDuplicatesAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.CloseTimeoutClientAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.OrderedDeliveryAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.ResendIntervalClientAssertion;
+import com.sun.xml.ws.rx.policy.assertion.net.rm200702.InactivityTimeoutAssertion;
 import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 
-import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
-import com.sun.xml.ws.rx.policy.assertion.PersistentAssertion;
+import com.sun.xml.ws.rx.policy.assertion.wsmc200702.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200702.PersistentAssertion;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collections;

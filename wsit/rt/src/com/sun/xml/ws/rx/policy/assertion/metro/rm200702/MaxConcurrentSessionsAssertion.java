@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,36 +34,36 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200702;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <wsmc:MCSupported ...>...</wsmc:MCSupported>
+ * <metro:MaxConcurrentSessions>...</metro:MaxConcurrentSessions>
  */
 /**
- * <p>
- * The MakeConnection policy assertion indicates that the MakeConnection protocol
- * (operation and the use of the MakeConnection URI template in EndpointReferences)
- * is required for messages sent from this endpoint.
- * </p>
- * <p>
- * This assertion has Endpoint Policy Subject
- * </p>
+ * Specifies how many concurrently active RM sessions (measured based on inbound
+ * RM sequences) the SequenceManager dedicated to the WS Endpoint accepts before
+ * starting to refuse new requests for sequence creation.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class MakeConnectionSupportedAssertion extends SimpleAssertion {
-    public static final QName NAME = AssertionNamespace.WSMC_200702.getQName("MCSupported");
+public class MaxConcurrentSessionsAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_200702.getQName("MaxConcurrentSessions");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
-            return new MakeConnectionSupportedAssertion(data, assertionParameters);
+            return new MaxConcurrentSessionsAssertion(data, assertionParameters);
         }
     };
 
@@ -71,11 +71,23 @@ public class MakeConnectionSupportedAssertion extends SimpleAssertion {
         return instantiator;
     }
 
-    public MakeConnectionSupportedAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    private final long longValue;
+
+    private MaxConcurrentSessionsAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
+
+        longValue = Long.parseLong(super.getValue());
     }
 
-    public MakeConnectionSupportedAssertion() {
-        super(AssertionData.createAssertionData(NAME), null);
+    public long getInterval() {
+        return longValue;
+    }
+
+    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
+        return builder.maxConcurrentSessions(longValue);
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
     }
 }

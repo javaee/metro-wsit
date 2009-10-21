@@ -34,55 +34,50 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.wsmc200702;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * Assertion which replaces inactivity timeout attribute of WS-RMP v1.0 RMAssertion.
- * The same assertion is used by .Net framework which could simplify the interoperability.
- * 
- * <pre>
- * <netrmp:InactivityTimeout Milliseconds="600000" xmlns:netrmp="http://schemas.microsoft.com/ws-rx/wsrmp/200702"/> 
- * </pre>
+ * <wsmc:MCSupported ...>...</wsmc:MCSupported>
+ */
+/**
+ * <p>
+ * The MakeConnection policy assertion indicates that the MakeConnection protocol
+ * (operation and the use of the MakeConnection URI template in EndpointReferences)
+ * is required for messages sent from this endpoint.
+ * </p>
+ * <p>
+ * This assertion has Endpoint Policy Subject
+ * </p>
+ *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class InactivityTimeoutAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.MICROSOFT_200702.getQName("InactivityTimeout");
-    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
+public class MakeConnectionSupportedAssertion extends SimpleAssertion {
+    public static final QName NAME = AssertionNamespace.WSMC_200702.getQName("MCSupported");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new InactivityTimeoutAssertion(data, assertionParameters);
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            return new MakeConnectionSupportedAssertion(data, assertionParameters);
         }
     };
-    
+
     public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
 
-    private final long timeout;
-    
-    public InactivityTimeoutAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    public MakeConnectionSupportedAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
-        
-        timeout = Long.parseLong(data.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
-    }
-   
-    public long getTimeout() {
-        return timeout;
     }
 
-    public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.sequenceInactivityTimeout(timeout);
+    public MakeConnectionSupportedAssertion() {
+        super(AssertionData.createAssertionData(NAME), null);
     }
-    
-    
-
 }

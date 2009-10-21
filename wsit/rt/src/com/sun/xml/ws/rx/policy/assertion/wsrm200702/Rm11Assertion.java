@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.wsrm200702;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
@@ -45,6 +45,9 @@ import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
@@ -72,7 +75,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class Rm11Assertion extends ComplexAssertion implements RmAssertionTranslator {
+public final class Rm11Assertion extends ComplexAssertion implements RmConfigurator {
     // TODO: add new assertions for acknowledgement interval and backoff algorithm
 
     private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
@@ -154,5 +157,9 @@ public final class Rm11Assertion extends ComplexAssertion implements RmAssertion
         }
 
         return builder.deliveryAssurance(deliveryAssurance).securityBinding(securityBinding);
+    }
+    
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
     }
 }

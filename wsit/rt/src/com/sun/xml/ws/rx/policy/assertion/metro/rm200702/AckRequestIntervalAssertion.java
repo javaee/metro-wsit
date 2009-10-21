@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,26 +34,37 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200702;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- *
- * @author Marek Potociar <marek.potociar at sun.com>
+ * <metro:AckRequestInterval Milliseconds="..." />
  */
-public class PersistentAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("Persistent");
+/**
+ * Defines the suggested minimum time that the sender (RM Source) should allow
+ * to elapse between sending consecutive Acknowledgement request messages to the
+ * RM Destination.
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
+public class AckRequestIntervalAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_200702.getQName("AckRequestInterval");
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new PersistentAssertion(data, assertionParameters);
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            return new AckRequestIntervalAssertion(data, assertionParameters);
         }
     };
 
@@ -61,11 +72,23 @@ public class PersistentAssertion extends SimpleAssertion implements RmAssertionT
         return instantiator;
     }
 
-    public PersistentAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    private final long interval;
+
+    private AckRequestIntervalAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
+
+        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
+    }
+
+    public long getInterval() {
+        return interval;
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.enablePersistence();
+        return builder.ackRequestTransmissionInterval(interval);
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
     }
 }

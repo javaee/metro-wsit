@@ -51,8 +51,9 @@ public enum AssertionNamespace {
     WSMC_200702("http://docs.oasis-open.org/ws-rx/wsmc/200702", "wsmc"),
     MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy", "net30rmp"),
     MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702", "net35rmp"),
-    SUN_200603("http://sun.com/2006/03/rm", "sunrmp"),
-    SUN_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp");
+    METRO_200603("http://sun.com/2006/03/rm", "sunrmp"),
+    METRO_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp"),
+    METRO_200702("http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702", "metro");
     
     public static List<String> namespacesList() {
         List<String> retVal = new ArrayList<String>(AssertionNamespace.values().length);

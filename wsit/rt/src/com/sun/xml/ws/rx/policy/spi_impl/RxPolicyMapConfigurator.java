@@ -48,7 +48,7 @@ import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.policy.assertion.MakeConnectionSupportedAssertion;
+import com.sun.xml.ws.rx.policy.assertion.wsmc200702.MakeConnectionSupportedAssertion;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;

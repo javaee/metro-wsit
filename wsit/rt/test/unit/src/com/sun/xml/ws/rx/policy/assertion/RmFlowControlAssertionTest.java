@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.net.rm200502.RmFlowControlAssertion;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

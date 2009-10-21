@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.wsrm200702.Rm11Assertion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;

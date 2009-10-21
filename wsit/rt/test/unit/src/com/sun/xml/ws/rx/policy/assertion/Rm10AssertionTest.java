@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.wsrm200502.Rm10Assertion;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;

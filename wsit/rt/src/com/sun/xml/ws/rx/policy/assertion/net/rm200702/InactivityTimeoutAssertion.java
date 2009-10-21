@@ -34,31 +34,36 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.net.rm200702;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
 /**
- * <sunc:ResendInterval Milliseconds="..." />
- */
-/**
- * Specifies a time period for client attempts to resend unacknowledged messages.
+ * Assertion which replaces inactivity timeout attribute of WS-RMP v1.0 RMAssertion.
+ * The same assertion is used by .Net framework which could simplify the interoperability.
  * 
- * @author Marek Potociar (marek.potociar at sun.com)
+ * <pre>
+ * <netrmp:InactivityTimeout Milliseconds="600000" xmlns:netrmp="http://schemas.microsoft.com/ws-rx/wsrmp/200702"/> 
+ * </pre>
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class ResendIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_CLIENT_200603.getQName("ResendInterval");
-    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+public class InactivityTimeoutAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.MICROSOFT_200702.getQName("InactivityTimeout");
+    private static final QName MILISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");    
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new ResendIntervalClientAssertion(data, assertionParameters);
+            return new InactivityTimeoutAssertion(data, assertionParameters);
         }
     };
     
@@ -66,19 +71,23 @@ public class ResendIntervalClientAssertion extends SimpleAssertion implements Rm
         return instantiator;
     }
 
-    private final long interval;
+    private final long timeout;
     
-    public ResendIntervalClientAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    public InactivityTimeoutAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
         
-        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
+        timeout = Long.parseLong(data.getAttributeValue(MILISECONDS_ATTRIBUTE_QNAME));
     }
    
-    public long getInterval() {
-        return interval;
+    public long getTimeout() {
+        return timeout;
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.messageRetransmissionInterval(interval);
+        return builder.sequenceInactivityTimeout(timeout);
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
     }
 }

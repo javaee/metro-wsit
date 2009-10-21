@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,49 +34,61 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200702;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
 
 /**
- * <sunc:Ordered />
+ * <metro:MaintenanceTaskPeriod Milliseconds="..." />
  */
 /**
- * Tells RM destination that ordered delivery of messages is expected.
+ * Specifies the period (in milliseconds) of a sequence maintenance task execution. 
+ * Sequence maintenance task takes care of terminating inactive sequences and 
+ * removing the terminated sequences from the sequence repository.
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class OrderedDeliveryAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("Ordered");
-    
+public class MaintenanceTaskPeriodAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_200702.getQName("MaintenanceTaskPeriod");
+    private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
+
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
-        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative){
-            return new OrderedDeliveryAssertion(data, assertionParameters);
+        public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
+            return new MaintenanceTaskPeriodAssertion(data, assertionParameters);
         }
     };
-    
+
     public static AssertionInstantiator getInstantiator() {
         return instantiator;
     }
 
-    public OrderedDeliveryAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+    private final long interval;
+
+    private MaintenanceTaskPeriodAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
         super(data, assertionParameters);
+
+        interval = Long.parseLong(super.getAttributeValue(MILLISECONDS_ATTRIBUTE_QNAME));
+    }
+
+    public long getInterval() {
+        return interval;
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        if (builder.getVersion() != RmVersion.WSRM200502) {
-            // TODO L10N
-            throw new WebServiceException(String.format("WS-RM version [ %s ] is not compatible with [ %s ] assertion", builder.getVersion(), NAME));
-        }
+        return builder.sequenceMaintenancePeriod(interval);
+    }
 
-        return builder.enableOrderedDelivery();
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200702 == version;
     }
 }

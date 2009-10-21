@@ -34,12 +34,15 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200603;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.RmVersion;
@@ -51,14 +54,25 @@ import javax.xml.ws.WebServiceException;
  * <sunc:AllowDuplicates />
  */
 /**
- * Tells the RM destination that multiple delivery of a single message is allowed.
- * 
- * TODO: this assertion is not used yet
+ * Proprietary assertion that works with WS-RM v1.0 (WSRM200502) and enables 
+ * "At Least Once" message delivery:
+ * <p />
+ * Each message is to be delivered at least once, or else an error MUST be raised 
+ * by the RM Source and/or RM Destination. The requirement on an RM Source is that 
+ * it SHOULD retry transmission of every message sent by the Application Source 
+ * until it receives an acknowledgement from the RM Destination. The requirement 
+ * on the RM Destination is that it SHOULD retry the transfer to the Application 
+ * Destination of any message that it accepts from the RM Source, until that message 
+ * has been successfully delivered. There is no requirement for the RM Destination 
+ * to apply duplicate message filtering.
+ * <p />
+ * NOTE: this assertion has currently no effect, we treat the case the same way as 
+ * "Exactly Once" delivery mode.
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class AllowDuplicatesAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_200603.getQName("AllowDuplicates");
+public class AllowDuplicatesAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_200603.getQName("AllowDuplicates");
     
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
         public PolicyAssertion newInstance(AssertionData data, Collection<PolicyAssertion> assertionParameters, AssertionSet nestedAlternative) {
@@ -81,5 +95,9 @@ public class AllowDuplicatesAssertion extends SimpleAssertion implements RmAsser
         }
 
         return builder.deliveryAssurance(DeliveryAssurance.AT_LEAST_ONCE);
+    }
+    
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200502 == version;
     }
 }

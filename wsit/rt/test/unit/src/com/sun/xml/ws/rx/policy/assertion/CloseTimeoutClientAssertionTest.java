@@ -36,6 +36,7 @@
 
 package com.sun.xml.ws.rx.policy.assertion;
 
+import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.CloseTimeoutClientAssertion;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

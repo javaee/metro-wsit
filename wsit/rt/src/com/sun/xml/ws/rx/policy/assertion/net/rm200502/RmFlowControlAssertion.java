@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.net.rm200502;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.AssertionSet;
@@ -41,7 +41,11 @@ import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -56,7 +60,7 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class RmFlowControlAssertion extends ComplexAssertion implements RmAssertionTranslator {
+public class RmFlowControlAssertion extends ComplexAssertion implements RmConfigurator {
 
     public static final QName NAME = AssertionNamespace.MICROSOFT_200502.getQName("RmFlowControl");
     //    
@@ -101,5 +105,9 @@ public class RmFlowControlAssertion extends ComplexAssertion implements RmAssert
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         return builder.destinationBufferQuota(maxBufferSize);
+    }
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200502 == version || RmVersion.WSRM200702 == version;
     }
 }

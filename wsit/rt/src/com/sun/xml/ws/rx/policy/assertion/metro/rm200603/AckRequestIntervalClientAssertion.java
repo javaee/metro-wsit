@@ -34,13 +34,17 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.policy.assertion;
+package com.sun.xml.ws.rx.policy.assertion.metro.rm200603;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.rx.policy.assertion.AssertionInstantiator;
+import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -48,13 +52,14 @@ import javax.xml.namespace.QName;
  * <sunc:AckRequestInterval Milliseconds="..." />
  */
 /**
- * Defines an inactivity period after which a client with unacknowledged messages 
- * autonomously sends acknowledgment request to the service.
+ * Defines the suggested minimum time that the sender (RM Source) should allow to
+ * elapse between sending consecutive Acknowledgement request messages to the
+ * RM Destination.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class AckRequestIntervalClientAssertion extends SimpleAssertion implements RmAssertionTranslator {
-    public static final QName NAME = AssertionNamespace.SUN_CLIENT_200603.getQName("AckRequestInterval");
+public class AckRequestIntervalClientAssertion extends SimpleAssertion implements RmConfigurator {
+    public static final QName NAME = AssertionNamespace.METRO_CLIENT_200603.getQName("AckRequestInterval");
     private static final QName MILLISECONDS_ATTRIBUTE_QNAME = new QName("", "Milliseconds");
 
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
@@ -81,5 +86,10 @@ public class AckRequestIntervalClientAssertion extends SimpleAssertion implement
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         return builder.ackRequestTransmissionInterval(interval);
+    }
+
+
+    public boolean isCompatibleWith(RmVersion version) {
+        return RmVersion.WSRM200502 == version;
     }
 }

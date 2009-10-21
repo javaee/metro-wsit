@@ -36,43 +36,31 @@
 
 package com.sun.xml.ws.rx.policy.assertion;
 
-import com.sun.xml.ws.rx.policy.assertion.metro.rm200702.PersistentAssertion;
-import com.sun.xml.ws.rx.policy.assertion.metro.rm200603.OrderedDeliveryAssertion;
-import com.sun.xml.ws.rx.testutil.ResourceLoader;
-import junit.framework.TestCase;
+import com.sun.istack.NotNull;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.RmVersion;
+import javax.xml.namespace.QName;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class PersistentAssertionTest extends TestCase {
-
-    public PersistentAssertionTest(String testName) {
-        super(testName);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+public interface RmConfigurator {
+    /**
+     * TODO javadoc
+     */
+    public @NotNull QName getName();
 
     /**
-     * Test of getInstantiator method, of class OrderedDeliveryAssertion.
+     * TODO javadoc
      */
-    public void testGetInstantiator() {
-        assertNotNull(OrderedDeliveryAssertion.getInstantiator());
-    }
-
+    public boolean isCompatibleWith(RmVersion version);
+    
     /**
-     * Test presence of OrderedDelivery assertion in the policy.
+     * TODO javadoc
      */
-    public void testAssertionPresenceInPolicy() {
-        assertNull(ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_1_DEFAULT_POLICY_RESOURCE_NAME, PersistentAssertion.class));
-        assertNotNull(ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_1_CUSTOM_1_POLICY_RESOURCE_NAME, PersistentAssertion.class));
-    }
+    public @NotNull ReliableMessagingFeatureBuilder update(@NotNull ReliableMessagingFeatureBuilder builder);
+
+    // TODO need to solve the backwards translation but it should be via a static method
+    //public PolicyAssertion createFrom(ReliableMessagingFeature feature);
 }
