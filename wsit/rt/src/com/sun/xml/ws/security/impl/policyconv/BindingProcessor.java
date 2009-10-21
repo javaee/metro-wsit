@@ -37,6 +37,7 @@
 package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
 import com.sun.xml.ws.security.policy.EncryptedParts;
@@ -52,6 +53,7 @@ import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.WSSAssertion;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
@@ -66,6 +68,7 @@ import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
 import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.namespace.QName;
 import static com.sun.xml.wss.impl.policy.mls.Target.SIGNATURE_CONFIRMATION;
 /**
  *
@@ -148,13 +151,18 @@ public abstract class BindingProcessor {
         if (primarySP == null){
             return;
         }
-        protectToken(token,false,spVersion);
-    }
+        String includeToken = ((KeyBindingBase) token).getIncludeToken();
+        if(!spVersion.includeTokenNever.equals(includeToken)){
+            protectToken(token,false,spVersion);
+        }
+        }
     
     protected void protectToken(WSSPolicy token,boolean ignoreSTR,SecurityPolicyVersion spVersion){
-        String uid = token.getUUID();
+        String uuid = token.getUUID();
+        String uid = null;
         String includeToken = null;
         boolean strIgnore = false;
+        QName qName = null;
         MLSPolicy kb = null;
         if (PolicyTypeUtil.symmetricKeyBinding(token)) {
             kb = token.getKeyBinding();
@@ -166,6 +174,7 @@ public abstract class BindingProcessor {
                 }
                 // includeToken = ((AuthenticationTokenPolicy.UsernameTokenBinding) kb).getIncludeToken();
                 strIgnore = true;
+                qName = new QName(MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
             } else if (PolicyTypeUtil.x509CertificateBinding(kb)) {
                 uid = ((AuthenticationTokenPolicy.X509CertificateBinding) token).getSTRID();
                 if (uid == null) {
@@ -177,6 +186,7 @@ public abstract class BindingProcessor {
                         spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) {
                     strIgnore = true;
                 }
+                qName = new QName(MessageConstants.WSSE_NS, MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME);
             }
         }else if(PolicyTypeUtil.x509CertificateBinding(token)){
             uid = ((AuthenticationTokenPolicy.X509CertificateBinding) token).getSTRID();
@@ -189,6 +199,7 @@ public abstract class BindingProcessor {
                     spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) {
                 strIgnore = true;
             }
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME);
         }else if(PolicyTypeUtil.samlTokenPolicy(token)){
             //uid = ((AuthenticationTokenPolicy.SAMLAssertionBinding) token).getSTRID();
             uid = generateSAMLSTRID();
@@ -201,6 +212,7 @@ public abstract class BindingProcessor {
                     spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) {
                 strIgnore = true;
             }
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.SAML_ASSERTION_LNAME);
         } else if(PolicyTypeUtil.issuedTokenKeyBinding(token)){
             uid = ((IssuedTokenKeyBinding)token).getSTRID();
             if(uid == null){
@@ -210,15 +222,16 @@ public abstract class BindingProcessor {
         }
         //TODO:: Handle DTK and IssuedToken.
         if(!ignoreSTR){
-            if ( uid != null ) {
+            if ( uuid != null ) {
                 SignatureTargetCreator stc = iAP.getTargetCreator();
-                SignatureTarget st = stc.newURISignatureTarget(uid);
+                SignatureTarget st = stc.newURISignatureTarget(uuid);
                 stc.addTransform(st);
                 if(strIgnore != true){
                     stc.addSTRTransform(st);
 
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
+                st.setQName(qName);
                 fb.addTargetBinding(st);
             }
         }else{
@@ -237,6 +250,7 @@ public abstract class BindingProcessor {
             }
             stc.addTransform(st);
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
+            st.setQName(qName);
             fb.addTargetBinding(st);
         }
     }
