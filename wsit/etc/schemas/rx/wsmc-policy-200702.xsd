@@ -51,6 +51,14 @@ elementFormDefault="qualified"
 attributeFormDefault="unqualified">
     <!-- Policy Element -->
     <xs:element name="MCSupported">
+        <xs:annotation>
+            <xs:documentation>
+                Indicates that the MakeConnection protocol (operation and the use
+                of the MakeConnection URI template in EndpointReferences) is required
+                for messages sent from this endpoint. This assertion has Endpoint
+                Policy Subject.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>

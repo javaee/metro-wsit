@@ -50,6 +50,25 @@
     attributeFormDefault="unqualified">
 
     <xs:element name="Ordered">
+        <xs:annotation>
+            <xs:documentation>
+                 Messages from each individual Sequence are to be delivered in the
+                 same order they have been sent by the Application Source. The
+                 requirement on an RM Source is that it MUST ensure that the ordinal
+                 position of each message in the Sequence (as indicated by a message
+                 Sequence number) is consistent with the order in which the messages
+                 have been sent from the Application Source. The requirement on the
+                 RM Destination is that it MUST deliver received messages for each
+                 Sequence in the order indicated by the message numbering. This
+                 DeliveryAssurance can be used in combination with any of the AtLeastOnce,
+                 AtMostOnce or ExactlyOnce assertions, and the requirements of those
+                 assertions MUST also be met. In particular if the AtLeastOnce or
+                 ExactlyOnce assertion applies and the RM Destination detects a gap
+                 in the Sequence then the RM Destination MUST NOT deliver any subsequent
+                 messages from that Sequence until the missing messages are received
+                 or until the Sequence is closed.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
@@ -59,6 +78,19 @@
     </xs:element>
 
     <xs:element name="AllowDuplicates">
+        <xs:annotation>
+            <xs:documentation>
+                Each message is to be delivered at least once, or else an error MUST
+                be raised by the RM Source and/or RM Destination. The requirement
+                on an RM Source is that it SHOULD retry transmission of every message
+                sent by the Application Source until it receives an acknowledgement
+                from the RM Destination. The requirement on the RM Destination is
+                that it SHOULD retry the transfer to the Application Destination
+                of any message that it accepts from the RM Source, until that message
+                has been successfully delivered. There is no requirement for the
+                RM Destination to apply duplicate message filtering.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
@@ -66,5 +98,4 @@
             <xs:anyAttribute namespace="##other" processContents="lax"/>
         </xs:complexType>
     </xs:element>
-
 </xs:schema>

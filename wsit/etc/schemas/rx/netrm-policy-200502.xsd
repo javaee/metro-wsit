@@ -43,21 +43,53 @@
     - Complex XSD types are suffixed with "CType"
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://schemas.microsoft.com/net/2005/02/rm/policy"
-    xmlns:tns="http://schemas.microsoft.com/net/2005/02/rm/policy"
-    elementFormDefault="qualified"
-    attributeFormDefault="unqualified">
+           targetNamespace="http://schemas.microsoft.com/net/2005/02/rm/policy"
+           xmlns:tns="http://schemas.microsoft.com/net/2005/02/rm/policy"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
 
     <xs:complexType name="RmFlowControlCType">
         <xs:sequence >
-            <xs:element name="MaxReceiveBufferSize" type="xs:unsignedLong" />
+            <xs:element name="MaxReceiveBufferSize" type="xs:unsignedLong" >
+                <xs:annotation>
+                    <xs:documentation>
+                        If Flow control is enabled, this value specifies the number of
+                        request messages that will be buffered in the RM session.
+                        The default setting is 32. For more information, see the
+                        description of the Flow Control option.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:any namespace="##other"
-                processContents="lax"
-                minOccurs="0"
-                maxOccurs="unbounded" />
+                    processContents="lax"
+                    minOccurs="0"
+                    maxOccurs="unbounded" />
         </xs:sequence>
         <xs:anyAttribute namespace="##any" processContents="lax" />
     </xs:complexType>
 
-    <xs:element name="RmFlowControl" type="tns:RmFlowControlCType" />
+    <xs:element name="RmFlowControl" type="tns:RmFlowControlCType">
+        <xs:annotation>
+            <xs:documentation>
+                Enables or disables the flow control feature. When enabled, this
+                feature works in conjunction with the Max Buffer Size setting to
+                determine the maximum number of messages for sequence that can be
+                stored at the endpoint awaiting delivery to the application. Messages
+                may have to be withheld from the application if ordered delivery
+                is required and some of their predecessors have not arrived.
+                If the number of stored messages reaches the threshold specified
+                in the Max Buffer Size setting, incoming messages belonging to the
+                sequence are ignored.
+
+                From MSDN:
+                Flow control is a mechanism that reliable sessions implement to ensure
+                that senders do not send more messages than a receiver can handle.
+                Receivers have a buffer of messages that is used to accommodate
+                message bursts and out-of-order messages. Receivers advertise to
+                senders the amount of space remaining in this buffer in each of
+                their acknowledgements. Senders can use this information to stop
+                sending new messages whenever the receiver has no buffer space left.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 </xs:schema>

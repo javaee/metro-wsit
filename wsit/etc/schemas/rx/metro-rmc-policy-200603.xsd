@@ -54,10 +54,36 @@
         <xs:attribute name="Milliseconds" type="xs:unsignedLong" use="required"/>
     </xs:complexType>
 
-    <xs:element name="AckRequestInterval" type="tns:IntervalCType" />
+    <xs:element name="AckRequestInterval" type="tns:IntervalCType">
+        <xs:annotation>
+            <xs:documentation>
+                Defines the suggested minimum time that the sender (RM Source) should
+                allow to elapse between sending consecutive Acknowledgement request
+                messages to the RM Destination.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="CloseTimeout" type="tns:IntervalCType" />
+    <xs:element name="CloseTimeout" type="tns:IntervalCType">
+        <xs:annotation>
+            <xs:documentation>
+                By default, the call to proxy.close() will not return until all
+                messages have been acknowledged. RM close timeout is the interval
+                (in milliseconds) that the client runtime will block waiting for
+                a call to close() to return. If there are still unacknowledged
+                messages after this interval is reached, and the call to close has
+                returned, an error will be logged about messages being lost.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
-    <xs:element name="ResendInterval" type="tns:IntervalCType" />
-
+    <xs:element name="ResendInterval" type="tns:IntervalCType">
+        <xs:annotation>
+            <xs:documentation>
+                Specifies how long the RM Source will wait after transmitting a message
+                and before retransmitting the message. If omitted, there is no implied
+                value.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
 </xs:schema>
