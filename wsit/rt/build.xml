@@ -216,7 +216,14 @@
         <mkdir dir="../${dist.image.wsit.lib.dir}" />
     </target>
 
-    <target name="-post-jar" depends="create-wstx-war"/>
+    <target name="-post-jar" depends="create-wstx-war">
+        <!-- We need to include the StAX API separately in the distribution -->
+        <copy todir="../${dist.image.wsit.lib.dir}">
+            <fileset dir="../${lib.runtime.dir}">
+                <include name="jsr173_api.jar"/>
+            </fileset>
+        </copy>
+    </target>
 
     <!-- include wsdl files for wstx resource lookups -->
     <property name="tx.tmp" value="${tmpdir}/tx"/>
@@ -304,6 +311,7 @@
                 <exclude name="jsr173_api.jar"/>
                 <exclude name="woodstox.jar"/>
                 <exclude name="mimepull.jar"/>
+                <exclude name="FastInfoset.jar"/>
             </expandfiles>
         </expand-jars-macro>
 
