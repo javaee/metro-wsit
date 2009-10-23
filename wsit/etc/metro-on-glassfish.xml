@@ -62,20 +62,27 @@
     </condition>
 
     <target name="jdk6-message" if="jdk6">
-        <echo message="NOTE: Metro is being installed using Java SE 6."/>
+        <echo message="Metro is being installed using Java SE 6."/>
         <echo/>
-        <echo message="  The file 'web-services-api.jar' must be installed"/>
-        <echo message="  into $JAVA_HOME/lib/endorsed for Metro to prevent"/>
-        <echo message="  conflicts between the JAX-WS classes bundled"/>
-        <echo message="  with Java SE 6 and JAX-WS 2.2 bundled with Metro."/>
+        <echo message="  Metro provides JAX-WS 2.2 while Java SE includes"/>
+        <echo message="  JAX-WS 2.1. If you want to run Metro applications"/>
+        <echo message="  outside GlassFish you will need to use the endorsed"/>
+        <echo message="  standards override mechanism. For more details see"/>
+        <echo message="  http://java.sun.com/javase/6/docs/technotes/guides/standards/index.html"/>
         <echo/>
-        <echo message="  You must have write-permissions on the Java SE 6 directory."/>
-        <echo message="  This is a concern when using a system-wide JDK installation."/>
+        <echo message="  If you want to enable JAX-WS 2.2 for all applications"/>
+        <echo message="  running under Java SE 6, you may run the command"/>
+        <echo message="  'ant install-api'."/>
+        <echo message="  That command will copy the file webservices-api.jar to"/>
+        <echo message="  ${java.home}/lib/endorsed."/>
+        <echo message="  The command needs to be run by a user that has the"/>
+        <echo message="  permissions to copy files into ${java.home}/lib/endorsed."/>
         <echo/>
-        <echo message="  To install webservices-api.jar:"/>
-        <echo/>
-        <echo message="  Invoke 'ant install-api' to install only"/>
-        <echo message="  webservices-api.jar into the 'endorsed' directory."/>
+        <echo message="  NOTE that any Java application that incidentally"/>
+        <echo message="  uses one of the APIs included in Metro but does"/>
+        <echo message="  not have all Metro JARs on its classpath may"/>
+        <echo message="  experience class loading issues if you proceed with"/>
+        <echo message="  'install-api'."/>
         <echo/>
     </target>
 
@@ -87,7 +94,6 @@
         <echo/>
         <echo message="  Alternatively you may try to use an experimental GlassFish v3 installer by running:"/>
         <echo message="  ant -f metro-on-glassfish-v3.xml install"/>
-        <echo/>
     </target>
 
     <target name="ashome-test" unless="as.home.exists">
@@ -110,7 +116,7 @@
         </copy>
     </target>
 
-    <target name="install" depends="init, backup" description="Install latest Metro jars">
+    <target name="install" depends="init, backup, check-api" description="Install latest Metro jars">
         <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
@@ -125,8 +131,28 @@
                 <include name="jsr173_api.jar"/>
             </fileset>
         </copy>
-        <antcall target="install-api"/>
         <echo message="... installation complete."/>
+    </target>
+
+    <target name="test-api" description="Test if 'webservices-api.jar' is already installed in $JAVA_HOME/lib/endorsed" if="jdk6">
+        <echo message="${java.home}/lib/endorsed/webservices-api.jar"/>
+        <available property="api.installed" file="${java.home}/lib/endorsed/webservices-api.jar"/>
+    </target>
+
+    <target name="check-api" depends="test-api" if="api.installed"
+            description="Print a warning if 'webservices-api.jar' is found in $JAVA_HOME/lib/endorsed">
+        <echo message="Found the file webservices-api.jar in ${java.home}/lib/endorsed."/>
+        <echo/>
+        <echo message="  This installation does not automatically overwrite"/>
+        <echo message="  'webservices-api.jar' in ${java.home}/lib/endorsed."/>
+        <echo message="  Please execute the command 'ant install-api' to"/>
+        <echo message="  update 'webservices-api.jar'."/>
+        <echo/>
+        <echo message="  NOTE that any Java application that incidentally uses"/>
+        <echo message="  one of the APIs included in Metro but does not"/>
+        <echo message="  have all Metro JARs on its classpath may experience"/>
+        <echo message="  class loading issues if you install webservices-api.jar"/>
+        <echo message="  into ${java.home}/lib/endorsed."/>
     </target>
 
     <target name="install-api" if="jdk6" depends="init"
