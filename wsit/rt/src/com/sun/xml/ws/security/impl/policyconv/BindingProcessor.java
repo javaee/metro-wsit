@@ -64,6 +64,7 @@ import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
+import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.Vector;
@@ -151,10 +152,7 @@ public abstract class BindingProcessor {
         if (primarySP == null){
             return;
         }
-        String includeToken = ((KeyBindingBase) token).getIncludeToken();
-        if(!spVersion.includeTokenNever.equals(includeToken)){
-            protectToken(token,false,spVersion);
-        }
+        protectToken(token,false,spVersion);
         }
     
     protected void protectToken(WSSPolicy token,boolean ignoreSTR,SecurityPolicyVersion spVersion){
@@ -220,6 +218,10 @@ public abstract class BindingProcessor {
                 ((IssuedTokenKeyBinding)token).setSTRID(uid);
             }
         }
+        
+        if(spVersion.includeTokenNever.equals(includeToken)){
+            uuid = uid; 
+        }
         //TODO:: Handle DTK and IssuedToken.
         if(!ignoreSTR){
             if ( uuid != null ) {
@@ -231,7 +233,7 @@ public abstract class BindingProcessor {
 
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-                st.setQName(qName);
+                st.setPolicyName(qName);
                 fb.addTargetBinding(st);
             }
         }else{
@@ -250,7 +252,7 @@ public abstract class BindingProcessor {
             }
             stc.addTransform(st);
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-            st.setQName(qName);
+            st.setPolicyName(qName);
             fb.addTargetBinding(st);
         }
     }
