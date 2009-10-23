@@ -35,7 +35,6 @@
  */
 package com.sun.xml.ws.policy.jaxws;
 
-import com.sun.istack.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -45,6 +44,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.xml.sax.SAXException;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
@@ -70,7 +70,7 @@ public final class PolicyConfigParser {
     private static final String WAR_PREFIX = "/WEB-INF/";
 
     /**
-     * Private constructor for the utility class to prevend class instantiation
+     * Private constructor for the utility class to prevent class instantiation
      */
     private PolicyConfigParser() {
     }
@@ -139,7 +139,7 @@ public final class PolicyConfigParser {
     }
 
     /**
-     * The function uses {@code configFileIdentifier} parameter to construct a WSIT config
+     * The method uses {@code configFileIdentifier} parameter to construct a WSIT config
      * file name according to following pattern:
      * <p />
      * <code>wsit-<i>[configFileIdentifier]</i>.xml</code>
@@ -153,8 +153,8 @@ public final class PolicyConfigParser {
      * </ul>
      *
      * If the file is found it is parsed and resulting {@link WSDLModel} object containig the
-     * populated {@link PolicyMap} instance is returned. If config file is not found, warning
-     * message is logged and {@code null} is returned as a result of this function call. In case
+     * populated {@link PolicyMap} instance is returned. If config file is not found,
+     * {@code null} is returned as a result of this function call. In case
      * of any other problems that may occur while reading the WSIT config file, a
      * {@link PolicyException} is thrown.
      * <p/>
@@ -179,31 +179,17 @@ public final class PolicyConfigParser {
     public static WSDLModel parseModel(final String configFileIdentifier, final Container container, final PolicyMapMutator... mutators)
             throws PolicyException {
         LOGGER.entering(configFileIdentifier, container, mutators);
-        WSDLModel model = null;
-        try {
-            final String configFileName = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest(LocalizationMessages.WSP_5011_CONFIG_FILE_IS(configFileName));
-            }
-
-            // Try loading config file
-            URL configFileUrl;
-            final WsitConfigResourceLoader loader = new WsitConfigResourceLoader(container);
-            try {
-                configFileUrl = loader.getResource(configFileName);
-            } catch (MalformedURLException e) {
-                throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5021_FAILED_RESOURCE_FROM_LOADER(configFileName, loader), e));
-            }
-
-            if (configFileUrl != null) {
-                model = parseModel(configFileUrl, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier), mutators);
-                LOGGER.info(LocalizationMessages.WSP_5018_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
-            }
-
-            return model;
-        } finally {
-            LOGGER.exiting(model);
+        final URL configFileUrl = findConfigFile(configFileIdentifier, container);
+        final WSDLModel model;
+        if (configFileUrl != null) {
+            model = parseModel(configFileUrl, PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER.equals(configFileIdentifier), mutators);
+            LOGGER.info(LocalizationMessages.WSP_5018_LOADED_WSIT_CFG_FILE(configFileUrl.toExternalForm()));
         }
+        else {
+            model = null;
+        }
+        LOGGER.exiting(model);
+        return model;
     }
 
     /**
@@ -224,24 +210,76 @@ public final class PolicyConfigParser {
      *        and constructing the {@link WSDLModel} object or populating {@link PolicyMap} instance.
      * @throws IllegalArgumentException in case {@code configFileUrl} parameter is {@code null}.
      */
-    public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators) throws PolicyException, IllegalArgumentException {
+    public static WSDLModel parseModel(final URL configFileUrl, final boolean isClient, final PolicyMapMutator... mutators)
+            throws PolicyException, IllegalArgumentException {
         LOGGER.entering(configFileUrl, isClient, mutators);
         WSDLModel model = null;
         try {
             if (null == configFileUrl) {
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5007_FAILED_TO_READ_NULL_WSIT_CFG()));
+                throw LOGGER.logSevereException(new IllegalArgumentException(
+                        LocalizationMessages.WSP_5007_FAILED_TO_READ_NULL_WSIT_CFG()));
             }
 
             return PolicyResourceLoader.getWsdlModel(configFileUrl, isClient);
         } catch (XMLStreamException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(
+                    LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (IOException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(
+                    LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } catch (SAXException ex) {
-            throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
+            throw LOGGER.logSevereException(new PolicyException(
+                    LocalizationMessages.WSP_5001_WSIT_CFG_FILE_PROCESSING_FAILED(configFileUrl.toString()), ex));
         } finally {
             LOGGER.exiting(model);
         }
+    }
+
+    /**
+     * Find a WSIT config file based on the {@code configFileIdentifier} parameter
+     * according to following pattern:
+     * <p />
+     * <code>wsit-<i>[configFileIdentifier]</i>.xml</code>
+     * <p />
+     * After constructing the WSIT config file name, the function tries to find the WSIT
+     * config file in the following locations:
+     * <ul>
+     *      <li>{@code WEB-INF} - for servlet-based web service implementations</li>
+     *      <li>{@code META-INF} - for EJB-based web service implementations</li>
+     *      <li>{@code classpath} - for web service clients</li>
+     * </ul>
+     *
+     * If the file is found it is parsed and the resulting {@link WSDLModel} object containig the
+     * populated {@link PolicyMap} instance is returned. If config file is not found,
+     * {@code null} is returned as a result of this method call. In case
+     * of any other problems that may occur while locating the WSIT config file, a
+     * {@link PolicyException} is thrown.
+     * <p/>
+     *
+     * @param configFileIdentifier base of WSIT config file name (web service name for WSIT service
+     *        config file or "client" for WSIT client configuration). Must not be {@code null}.
+     * @param container if the application is run inside a web container, the container instance
+     *        should be passed into this function, in order to get access to the servlet context
+     *        that is used to load config file stored in {@code WEB-INF} directory of the application.
+     *        May be {@code null}.
+     *
+     * @return A {@link URL} pointing to the WSIT configuration file. Null if not found.
+     * @throws PolicyException in case of any problems that may occur while locating the WSIT config file.
+     */
+    public static URL findConfigFile(final String configFileIdentifier, final Container container) throws PolicyException {
+        final String configFileName = PolicyUtils.ConfigFile.generateFullName(configFileIdentifier);
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.finest(LocalizationMessages.WSP_5011_CONFIG_FILE_IS(configFileName));
+        }
+        final URL configFileUrl;
+        final WsitConfigResourceLoader loader = new WsitConfigResourceLoader(container);
+        try {
+            configFileUrl = loader.getResource(configFileName);
+        } catch (MalformedURLException e) {
+            throw LOGGER.logSevereException(new PolicyException(
+                    LocalizationMessages.WSP_5021_FAILED_RESOURCE_FROM_LOADER(configFileName, loader), e));
+        }
+        return configFileUrl;
     }
 
     /**
@@ -328,4 +366,5 @@ public final class PolicyConfigParser {
             return ("wsit-" + PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER + ".xml").equals(resource);
         }
     }
+
 }

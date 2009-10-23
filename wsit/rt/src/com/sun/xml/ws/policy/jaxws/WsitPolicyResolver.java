@@ -46,10 +46,14 @@ import com.sun.xml.ws.policy.WsitPolicyUtil;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
 
+import java.net.URL;
 import java.util.Collection;
 import javax.xml.ws.WebServiceException;
 
 /**
+ * Load and process the WSIT configuration files. If they are not present, fall
+ * back to the JAX-WS default implementation.
+ *
  * @author Rama Pulavarthi
  * @author Fabian Ritzmann
  */
@@ -58,35 +62,45 @@ public class WsitPolicyResolver implements PolicyResolver {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
 
     public PolicyMap resolve(ServerContext context) throws WebServiceException {
+        final String configId = context.getEndpointClass().getName();
         if (!context.hasWsdl()) {
-            //parse WSIT -config file.
+            // Parse WSIT config file.
             PolicyMap map = null;
-            final String configId = context.getEndpointClass().getName();
             try {
                 Collection<PolicyMapMutator> mutators = context.getMutators();
                 map = PolicyConfigParser.parse(configId, context.getContainer(),
                                                mutators.toArray(new PolicyMapMutator[mutators.size()]));
             } catch (PolicyException e) {
-                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e));
+                throw LOGGER.logSevereException(new WebServiceException(
+                        LocalizationMessages.WSP_5006_FAILED_TO_READ_WSIT_CONFIG_FOR_ID(configId), e));
             }
             if (map == null)
                 LOGGER.config(LocalizationMessages.WSP_5008_CREATE_POLICY_MAP_FOR_CONFIG(configId));
             else {
-                //Validate server-side Policies such that there exists a single alternative in each scope.
+                // Validate server-side Policies such that there exists a single alternative in each scope.
                 WsitPolicyUtil.validateServerPolicyMap(map);
-            }    
+            }
             return map;
         }
         else {
-            //Server-side, there should be only one policy configuration either wsdl or WSIT config.
-            return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
+            try {
+                // Server-side, there should be only one policy configuration either WSDL or WSIT config.
+                final URL wsitConfigFile = PolicyConfigParser.findConfigFile(configId, context.getContainer());
+                if (wsitConfigFile != null) {
+                    LOGGER.warning(LocalizationMessages.WSP_5024_WSIT_CONFIG_AND_WSDL(wsitConfigFile));
+                }
+                return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
+            } catch (PolicyException e) {
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5023_FIND_WSIT_CONFIG_FAILED(), e));
+            }
         }
     }
 
     public PolicyMap resolve(ClientContext context) {
         PolicyMap effectivePolicyMap;
         try {
-            final PolicyMap clientConfigPolicyMap = PolicyConfigParser.parse(PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
+            final PolicyMap clientConfigPolicyMap = PolicyConfigParser.parse(
+                    PolicyConstants.CLIENT_CONFIGURATION_IDENTIFIER, context.getContainer());
             if (clientConfigPolicyMap == null) {
                 LOGGER.config(LocalizationMessages.WSP_5014_CLIENT_CONFIG_PROCESSING_SKIPPED());
                 effectivePolicyMap = context.getPolicyMap();
@@ -95,7 +109,8 @@ public class WsitPolicyResolver implements PolicyResolver {
                 effectivePolicyMap = WsitPolicyUtil.mergePolicyMap(context.getPolicyMap(), clientConfigPolicyMap);
             }
         } catch (PolicyException e) {
-            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSP_5004_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e));
+            throw LOGGER.logSevereException(new WebServiceException(
+                    LocalizationMessages.WSP_5004_ERROR_WHILE_PROCESSING_CLIENT_CONFIG(), e));
         }
         // Chooses best alternative and sets it as effective Policy in each scope.
         if(effectivePolicyMap != null)
