@@ -62,12 +62,14 @@ public class WsitPolicyResolver implements PolicyResolver {
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
 
     public PolicyMap resolve(ServerContext context) throws WebServiceException {
-        final String configId = context.getEndpointClass().getName();
+        final Class endpointClass = context.getEndpointClass();
+        final String configId = endpointClass == null ? null : endpointClass.getName();
         if (!context.hasWsdl()) {
             // Parse WSIT config file.
             PolicyMap map = null;
             try {
                 Collection<PolicyMapMutator> mutators = context.getMutators();
+                // No need to check if configId != null because it never is if we have WSDL
                 map = PolicyConfigParser.parse(configId, context.getContainer(),
                                                mutators.toArray(new PolicyMapMutator[mutators.size()]));
             } catch (PolicyException e) {
@@ -84,10 +86,12 @@ public class WsitPolicyResolver implements PolicyResolver {
         }
         else {
             try {
-                // Server-side, there should be only one policy configuration either WSDL or WSIT config.
-                final URL wsitConfigFile = PolicyConfigParser.findConfigFile(configId, context.getContainer());
-                if (wsitConfigFile != null) {
-                    LOGGER.warning(LocalizationMessages.WSP_5024_WSIT_CONFIG_AND_WSDL(wsitConfigFile));
+                if (configId != null) {
+                    // Server-side, there should be only one policy configuration either WSDL or WSIT config.
+                    final URL wsitConfigFile = PolicyConfigParser.findConfigFile(configId, context.getContainer());
+                    if (wsitConfigFile != null) {
+                        LOGGER.warning(LocalizationMessages.WSP_5024_WSIT_CONFIG_AND_WSDL(wsitConfigFile));
+                    }
                 }
                 return PolicyResolverFactory.DEFAULT_POLICY_RESOLVER.resolve(context);
             } catch (PolicyException e) {
