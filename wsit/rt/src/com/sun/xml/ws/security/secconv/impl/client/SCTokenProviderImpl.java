@@ -55,12 +55,14 @@ import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
+import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -229,8 +231,9 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
     private void appendEndorsingSCTRenewPolicy(final MessagePolicy policy) throws PolicyGenerationException{
         SignaturePolicy sp = scp.getRenewSignaturePolicy();
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
-        ArrayList list = policy.getPrimaryPolicies();
+        List list = policy.getPrimaryPolicies();
         Iterator i = list.iterator();
+        boolean addedSigTarget = false;
         while (i.hasNext()) {
             SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
             if(PolicyTypeUtil.signaturePolicy(primaryPolicy)){
@@ -241,10 +244,34 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
                 SecurityPolicyUtil.setName(sigTarget, sigPolicy);
                 spFB.addTargetBinding(sigTarget);
                 spFB.isEndorsingSignature(true);
+                addedSigTarget = true;
                 break;
             }
-        }        
-        policy.append((SecurityPolicy)sp);
+        }
+
+        // If no primary signature (e.g. TransportBinding), sign the
+        // TimeStamp.
+        if (!addedSigTarget){
+            List sList = policy.getSecondaryPolicies();
+            Iterator j = sList.iterator();
+            while (j.hasNext()) {
+                SecurityPolicy secPolicy = (SecurityPolicy) j.next();
+                if(PolicyTypeUtil.timestampPolicy(secPolicy)){
+                    TimestampPolicy tsPolicy = (TimestampPolicy)secPolicy;
+                    IntegrityAssertionProcessor iAP = new IntegrityAssertionProcessor(scp.getAlgorithmSuite(), true);
+                    SignatureTargetCreator stc = iAP.getTargetCreator();
+                    SignatureTarget sigTarget = stc.newURISignatureTarget(tsPolicy.getUUID());
+                    SecurityPolicyUtil.setName(sigTarget, tsPolicy);
+                    spFB.addTargetBinding(sigTarget);
+                    spFB.isEndorsingSignature(true);
+                    addedSigTarget = true;
+                    break;
+                }
+            }
+        }
+        if (addedSigTarget){
+            policy.append((SecurityPolicy)sp);
+        }
     }
     
     private void deleteRenewPolicy(final MessagePolicy policy){
