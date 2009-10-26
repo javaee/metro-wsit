@@ -104,7 +104,7 @@
 														<sp:OnlySignEntireHeadersAndBody/>
 													</wsp:Policy>
 												</sp:SymmetricBinding>
-												<!--sp:EndorsingSupportingTokens>
+												<sp:EndorsingSupportingTokens>
 													<wsp:Policy>
 														<sp:X509Token sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient">
 															<wsp:Policy>
@@ -113,7 +113,7 @@
 															</wsp:Policy>
 														</sp:X509Token>
 													</wsp:Policy>
-												</sp:EndorsingSupportingTokens-->
+												</sp:EndorsingSupportingTokens>
 												<sp:Wss11>
 													<wsp:Policy>
 														<sp:MustSupportRefKeyIdentifier/>
