@@ -221,7 +221,6 @@
         <copy todir="../${dist.image.wsit.lib.dir}">
             <fileset dir="../${lib.runtime.dir}">
                 <include name="jsr173_api.jar"/>
-                <include name="activation.jar"/>
             </fileset>
         </copy>
     </target>
@@ -326,6 +325,9 @@
 
     <target name="expand-jars-api" unless="runtime.jars.expanded">
         <expand-api-jars-macro libdir="../${lib.runtime.dir}">
+            <expandfiles>
+                <include name="activation.jar"/>
+            </expandfiles>
         </expand-api-jars-macro>
     </target>
 

@@ -116,7 +116,6 @@
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
                 <include name="jsr173_api.jar"/>
-                <include name="activation.jar"/>
             </fileset>
         </copy>
     </target>
@@ -127,7 +126,6 @@
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
                 <include name="jsr173_api.jar"/>
-                <include name="activation.jar"/>
             </fileset>
         </copy>
     </target>
@@ -177,10 +175,10 @@
             <fileset dir="${catalina.lib.home}" includes="webservices-rt.jar, webservices-tools.jar, webservices-extra.jar, webservices-extra-api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${catalina.endorsed}" includes="webservices-api.jar, jsr173_api.jar, activation.jar"/>
+            <fileset dir="${catalina.endorsed}" includes="webservices-api.jar, jsr173_api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${java.home}/lib/endorsed" includes="webservices-api.jar, jsr173_api.jar, activation.jar"/>
+            <fileset dir="${java.home}/lib/endorsed" includes="webservices-api.jar, jsr173_api.jar"/>
         </delete>
     </target>
 
