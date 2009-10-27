@@ -349,15 +349,15 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                 return true;
             }
         } catch (Exception e) {
-            boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
-            return bool;
+            //boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
+            return true;
         }
         //returning true by default for now, because the Client Side Security Config is
         //only accessible as a Runtime Property on BindingProvider.RequestContext
         //With Metro 2.0 we are disabling the default rule above and one would need to
         //set System Property USE_XWSS_SECURITY to enable the client pipeline.
-        boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
-        return bool;
+        //boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
+        return true;
     }
 
     private boolean isSecurityConfigPresent(ServerTubelineAssemblyContext context) {
