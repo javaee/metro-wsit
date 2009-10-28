@@ -115,8 +115,12 @@
             <fileset dir="${as.lib.home}">
                 <include name="webservices-osgi.jar"/>
                 <include name="woodstox-osgi.jar"/>
+                <include name="jaxb-osgi.jar"/>
             </fileset>
-            <fileset dir="${as.lib.home}/endorsed" includes="webservices-api-osgi.jar"/>
+            <fileset dir="${as.lib.home}/endorsed">
+                <include name="webservices-api-osgi.jar"/>
+                <include name="jaxb-api-osgi.jar"/>
+            </fileset>
         </copy>
         <echo message="...done: You can find the original Metro files stored in ${backup.dir}"/>
         <echo message="To restore the original Metro installation, run this script with 'uninstall' target"/>
@@ -131,11 +135,13 @@
             <fileset dir="${basedir}/osgi">
                 <include name="webservices-osgi.jar"/>
                 <include name="woodstox-osgi.jar"/>
+                <include name="jaxb-osgi.jar"/>
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
             <fileset dir="${basedir}/osgi">
                 <include name="webservices-api-osgi.jar"/>
+                <include name="jaxb-api-osgi.jar"/>
             </fileset>
         </copy>
         <echo message="... installation complete."/>
@@ -150,11 +156,15 @@
             <fileset dir="${backup.dir}">
                 <include name="webservices-osgi.jar"/>
                 <include name="woodstox-osgi.jar"/>
+                <include name="jaxb-osgi.jar"/>
             </fileset>
         </copy>
 
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
-            <fileset dir="${backup.dir}" includes="webservices-api-osgi.jar"/>
+            <fileset dir="${backup.dir}">
+                <include name="webservices-api-osgi.jar"/>
+                <include name="jaxb-api-osgi.jar"/>
+            </fileset>
         </copy>
 
         <delete dir="${backup.dir}" includeemptydirs="true"/>

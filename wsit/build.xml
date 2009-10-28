@@ -104,6 +104,9 @@
                 <include name="webservices*osgi.jar"/>
                 <include name="woodstox-osgi.jar"/>
             </fileset>
+            <fileset dir="${lib.osgi.dir}">
+                <include name="jaxb*osgi.jar"/>
+            </fileset>
         </copy>
              
     </target>
@@ -210,6 +213,12 @@
             <zip file="lib/jaxws-bin.zip">
                 <fileset dir="${tmpdir}/jaxws-ri/bin" />
             </zip>
+
+            <!-- retrieve the JAXB OSGi bundles -->
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/v3-osgi/jaxb-api-osgi.jar"
+                 dest="${lib.osgi.dir}/jaxb-api-osgi.jar"/>
+            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/v3-osgi/jaxb-osgi.jar"
+                 dest="${lib.osgi.dir}/jaxb-osgi.jar"/>
 
             <!-- retrieve the JAX-WS source zips -->
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/dist/jaxws-ri/lib/jaxws-rt.src.zip"

@@ -43,6 +43,7 @@
     <property name="lib.runtime.dir" value="${lib.dir}/runtime"/>
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
     <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
+    <property name="lib.osgi.dir" value="${lib.dir}/osgi"/>
     <property name="lib.releasenotes.dir" value="${lib.dir}/releasenotes"/>
     <property name="dist.dir" value="dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
