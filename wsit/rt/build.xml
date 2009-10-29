@@ -72,7 +72,6 @@
                     <exclude name="*javadocs*.jar"/>
                     <exclude name="jaxb-api.jar"/>
                     <exclude name="jaxws-api.jar"/>
-                    <exclude name="saaj-api.jar"/>
                     <exclude name="jmac-api.jar"/>
                     <exclude name="jsr*-api.jar"/>
                     <exclude name="jaxws-local-transport.jar"/>
@@ -268,6 +267,7 @@
             </metainf>
             <expandfiles>
                 <exclude name="jaxr-api.jar"/>
+                <exclude name="saaj-api.jar"/>
             </expandfiles>
         </expand-jars-macro>
 
@@ -307,6 +307,7 @@
                 </copy>
             </metainf>
             <expandfiles>
+                <include name="saaj-api.jar"/>
                 <include name="jaxr-api.jar"/>
                 <exclude name="gmbal*.jar"/>
                 <exclude name="management-api*.jar"/>
@@ -337,6 +338,7 @@
     <target name="expand-jars-v3-api" unless="runtime.jars.expanded">
         <expand-api-jars-macro libdir="../${lib.runtime.dir}" tmpdirtowork="${apijar-tmpdir-v3}">
             <expandfiles>
+                <exclude name="saaj-api.jar"/>
                 <exclude name="jaxrpc-api.jar"/>
                 <exclude name="jaxb-api.jar"/>
             </expandfiles>
