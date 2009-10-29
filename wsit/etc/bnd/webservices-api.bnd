@@ -6,23 +6,5 @@ Export-Package: \
   javax.xml.ws;version=2.2, \
   javax.xml.ws.*;version=2.2, \
   *
-Import-Package: \
-  com.sun.enterprise.security.*;resolution:=optional, \
-  com.sun.enterprise.transaction.*;resolution:=optional, \
-  com.sun.enterprise.web.*;resolution:=optional, \
-  com.sun.enterprise.webservice;resolution:=optional, \
-  com.sun.enterprise.webservice.monitoring;resolution:=optional, \
-  com.sun.mail.util;resolution:=optional, \
-  com.sun.msv.*;resolution:=optional, \
-  com.sun.xml.bind.serializer;resolution:=optional, \
-  com.sun.xml.bind.validator;resolution:=optional, \
-  com.sun.xml.rpc.*;resolution:=optional, \
-  com.sun.xml.ws.spi.runtime;resolution:=optional, \
-  org.iso_relax.verifier.impl;resolution:=optional, \
-  org.relaxng.datatype;resolution:=optional, \
-  com.sun.appserv.server;resolution:=optional, \
-  org.apache.tomcat.util.buf;resolution:=optional, \
-  org.apache.coyote;resolution:=optional, \
-  javax.ejb;resolution:=optional, \
-  *
+Import-Package: *
 Private-Package: *
