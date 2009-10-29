@@ -7,7 +7,5 @@ Export-Package: \
   javax.xml.stream;version=1.0, \
   javax.xml.stream.*;version=1.0, \
   *
-Import-Package: \
-  com.sun.msv.*;resolution:=optional, \
-  *
+Import-Package: *
 Private-Package: *
