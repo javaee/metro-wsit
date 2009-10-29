@@ -24,6 +24,8 @@ Export-Package: \
   com.sun.xml.ws.transport.http.servlet;version=2.2, \
   com.sun.xml.ws.transport.tcp.wsit;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.tx.common;version=@RELEASE_VERSION@, \
+  javax.xml.registry;version=1.0, \
+  javax.xml.registry.*;version=1.0, \
   javax.xml.rpc;version=1.1, \
   javax.xml.rpc.*;version=1.1, \
   javax.xml.soap;version=1.3, \

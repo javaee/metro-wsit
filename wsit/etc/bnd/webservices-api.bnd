@@ -3,12 +3,8 @@ Bundle-Name: metro
 Export-Package: \
   javax.jws;version=@RELEASE_VERSION@, \
   javax.jws.soap;version=@RELEASE_VERSION@, \
-  javax.xml.registry;version=1.0, \
-  javax.xml.registry.*;version=1.0, \
   javax.xml.ws;version=2.2, \
   javax.xml.ws.*;version=2.2, \
-  javax.xml.ws.handler;version=2.2, \
-  javax.xml.ws.handler.*;version=2.2, \
   *
 Import-Package: \
   com.sun.enterprise.security.*;resolution:=optional, \
