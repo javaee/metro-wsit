@@ -341,9 +341,9 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
 
     @Override
     public Header createSequenceFaultElementHeader(QName subcode, Object detail) {
-        return Headers.create(rmVersion.getJaxbContext( // TODO P2 include detail
-                addressingVersion),
-                Headers.create(RmVersion.WSRM200702.getJaxbContext(addressingVersion), new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode)));
+        return Headers.create(rmVersion.getJaxbContext(addressingVersion),
+                new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode));
+// TODO include detail: new com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceFaultElement(subcode, detail));
     }
     
     @Override

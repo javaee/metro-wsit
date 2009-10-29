@@ -94,6 +94,15 @@ public class SequenceFaultElement {
     public SequenceFaultElement(QName faultCode) {
         this.faultCode = faultCode;
     }
+
+    public SequenceFaultElement(QName faultCode, List<Object> detail) {
+        this.faultCode = faultCode;
+
+        if (detail != null && !detail.isEmpty()) {
+            this.detail = new DetailType();            
+            this.detail.getAny().addAll(detail);
+        }
+    }
   
     /**
      * Gets the value of the faultCode property.
