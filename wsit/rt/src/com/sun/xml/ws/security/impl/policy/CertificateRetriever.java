@@ -16,6 +16,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
@@ -28,11 +29,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -58,19 +59,23 @@ public class CertificateRetriever {
     private Certificate cs = null;
     private FileInputStream fis = null;
     private Policy ep = null;
+    private String callbackHandler = null;
+    private String aliasSelector = null;
 
     public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
-        QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
-        /*QName eprQName = new QName("http://schemas.sun.com/2006/03/wss/server", "EnableEPRIdentity");
-        boolean found = checkforEPRIdentity(wse, eprQName);
-        if (found == false) {
-        return null;
-        }*/
+        QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");       
         setLocationPasswordAndAlias(keyStoreQName, wse);
+        
         if (password == null || location == null || alias == null) {
-            return null;
-        }
+            if(callbackHandler == null){
+                return null;
+            }else {
+                cs = getCertificateFromCallbackHandler(callbackHandler);                
+                return cs;
+            }
+
+        }        
         KeyStore keyStore = null;
         try {
             keyStore = KeyStore.getInstance("JKS");
@@ -78,19 +83,19 @@ public class CertificateRetriever {
             keyStore.load(fis, password.toCharArray());
             cs = keyStore.getCertificate(alias);
         } catch (FileNotFoundException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new XWSSecurityException(ex);
         } catch (IOException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new RuntimeException(ex);
         } catch (NoSuchAlgorithmException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new XWSSecurityException(ex);
         } catch (CertificateException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new XWSSecurityException(ex);
         } catch (KeyStoreException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new XWSSecurityException(ex);
         } finally {
             keyStore = null;
@@ -165,6 +170,55 @@ public class CertificateRetriever {
         return false;
     }
 
+    private X509Certificate getCertificateFromCallbackHandler(String callbackHandler) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class callbackHandlerClass = null;
+        if (loader != null) {
+            try {
+                callbackHandlerClass = loader.loadClass(callbackHandler);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (callbackHandlerClass == null) {
+            // if context classloader didnt work, try this
+            loader = this.getClass().getClassLoader();
+            try {
+                callbackHandlerClass = loader.loadClass(callbackHandler);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (callbackHandlerClass == null) {
+            return null;
+        }
+        KeyStoreCallback ksc = new KeyStoreCallback();
+        Callback[] callbacks = new Callback[1];
+        callbacks[0] = ksc;
+        try {
+            javax.security.auth.callback.CallbackHandler cbh = (CallbackHandler) callbackHandlerClass.newInstance();
+            cbh.handle(callbacks);
+            X509Certificate cert = null;
+            cert = (X509Certificate) ((ksc.getKeystore() != null) ? (ksc.getKeystore().getCertificate(alias)) : null);
+            return cert;
+        } catch (IOException ex) {
+            log.log(Level.WARNING, null, ex);
+            return null;
+        } catch (UnsupportedCallbackException ex) {
+            log.log(Level.WARNING, null, ex);
+            return null;
+        } catch (InstantiationException ex) {
+            log.log(Level.WARNING, null, ex);
+            return null;
+        } catch (IllegalAccessException ex) {
+            log.log(Level.WARNING, null, ex);
+            return null;
+        } catch (KeyStoreException ex) {
+            log.log(Level.WARNING, null, ex);
+            return null;
+        }
+    }
+
     private void getEndpointOROperationalLevelPolicy(WSEndpoint wse) {
         PolicyMap pm = wse.getPolicyMap();
         WSDLPort port = wse.getPort();
@@ -187,10 +241,10 @@ public class CertificateRetriever {
                 }
             }
         } catch (PolicyException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new RuntimeException(ex);
         } catch (IllegalArgumentException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.WARNING, null, ex);
             throw new RuntimeException(ex);
         }
     }
@@ -208,34 +262,22 @@ public class CertificateRetriever {
                     if (!pa.getName().equals(qName)) {
                         continue;
                     }
-                    HashMap atts = (HashMap) pa.getAttributes();
-                    Set ks = atts.keySet();
-                    Iterator itt = ks.iterator();
 
-                    while (itt.hasNext()) {
-                        QName name = (QName) itt.next();
-                        if (name.getLocalPart().equals("storepass")) {
-                            password = (String) atts.get(name);
-                        } else if (name.getLocalPart().equals("location")) {
-                            location = (String) atts.get(name);
-                            StringBuffer sb = null;
-                            sb = new StringBuffer(location);
-                            if (location.startsWith("$WSIT")) {
-                                String path = System.getProperty("WSIT_HOME");
-                                sb.replace(0, 10, path);
-                                location = sb.toString();
-                            }
+                    password = pa.getAttributeValue(new QName("storepass"));
+                    location = pa.getAttributeValue(new QName("location"));
+                    alias = pa.getAttributeValue(new QName("alias"));
+                    callbackHandler = pa.getAttributeValue(new QName("callbackHandler"));
+                    aliasSelector = pa.getAttributeValue(new QName("aliasSelector"));
 
-                        } else if (name.getLocalPart().equals("alias")) {
-                            alias = (String) atts.get(name);
-                        }
+                    StringBuffer sb = null;
+                    sb = new StringBuffer(location);
+                    if (location.startsWith("$WSIT")) {
+                        String path = System.getProperty("WSIT_HOME");
+                        sb.replace(0, 10, path);
+                        location = sb.toString();
                     }
-
                 }
-
             }
-
         }
-
-    }   
+    }
 }
