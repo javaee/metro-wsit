@@ -167,7 +167,7 @@
 
     <wsdl:binding name="ActivationRPCBinding" type="wscoor:ActivationPortTypeRPC">
         <wsp:PolicyReference URI="#Addressing_policy"/>
-        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/https" style="document"/>
         <wsdl:operation name="CreateCoordinationContextOperation">
             <soap:operation soapAction="http://schemas.xmlsoap.org/ws/2004/10/wscoor/CreateCoordinationContextSynch"/>
             <wsdl:input>
@@ -194,23 +194,23 @@
 
     <wsdl:service name="Coordinator">
         <wsdl:port binding="wscoor:ActivationCoordinatorBinding" name="ActivationCoordinator">
-            <soap:address location="http://localhost:8080/wstx-services/coordinator/createCoordinationContext"/>
+            <soap:address location="https://localhost:8181/wstx-services/coordinator/createCoordinationContext"/>
         </wsdl:port>
         <wsdl:port binding="wscoor:ActivationRequesterBinding" name="ActivationRequester">
-            <soap:address location="http://localhost:8080/wstx-services/coordinator/createCoordinationContextResponse"/>
+            <soap:address location="https://localhost:8181/wstx-services/coordinator/createCoordinationContextResponse"/>
         </wsdl:port>
         <wsdl:port binding="wscoor:RegistrationCoordinatorBinding" name="RegistrationCoordinator">
-            <soap:address location="http://localhost:8080/wstx-services/coordinator/register"/>
+            <soap:address location="https://localhost:8181/wstx-services/coordinator/register"/>
         </wsdl:port>
         <wsdl:port binding="wscoor:RegistrationRequesterBinding" name="RegistrationRequester">
-            <soap:address location="http://localhost:8080/wstx-services/coordinator/registerResponse"/>
+            <soap:address location="https://localhost:8181/wstx-services/coordinator/registerResponse"/>
         </wsdl:port>
 
         <wsdl:port binding="wscoor:ActivationRPCBinding" name="Activation">
-            <soap:address location="http://localhost:8080/wstx-services/ActivationRPC"/>
+            <soap:address location="https://localhost:8181/wstx-services/ActivationRPC"/>
         </wsdl:port>
         <wsdl:port binding="wscoor:RegistrationRPCBinding" name="Registration">
-            <soap:address location="http://localhost:8080/wstx-services/coordinator/synchRegister"/>
+            <soap:address location="https://localhost:8181/wstx-services/coordinator/synchRegister"/>
         </wsdl:port>
     </wsdl:service>
 

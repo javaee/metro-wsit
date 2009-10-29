@@ -227,7 +227,7 @@
     </wsdl:binding>
     <wsdl:binding name="ParticipantBinding" type="wsat:ParticipantPortType">
         <wsp:PolicyReference URI="#Addressing_policy"/>
-        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/https" style="document"/>
         <wsdl:operation name="PrepareOperation">
             <soap:operation soapAction="http://schemas.xmlsoap.org/ws/2004/10/wsat/Prepare"/>
             <wsdl:input>
@@ -250,16 +250,16 @@
 
     <wsdl:service name="WSATCoordinator">
         <wsdl:port binding="wsat:CompletionCoordinatorBinding" name="CompletionCoordinator">
-            <soap:address location="http://localhost:8080/wstx-services/wsat/completion/coordinator"/>
+            <soap:address location="https://localhost:8181/wstx-services/wsat/completion/coordinator"/>
         </wsdl:port>
         <wsdl:port binding="wsat:CoordinatorBinding" name="Coordinator">
-            <soap:address location="http://localhost:8080/wstx-services/wsat/coordinator"/>
+            <soap:address location="https://localhost:8181/wstx-services/wsat/coordinator"/>
         </wsdl:port>
         <wsdl:port binding="wsat:ParticipantBinding" name="Participant">
-            <soap:address location="http://localhost:8080/wstx-services/wsat/2pc"/>
+            <soap:address location="https://localhost:8181/wstx-services/wsat/2pc"/>
         </wsdl:port>
         <wsdl:port binding="wsat:CompletionInitiatorBinding" name="CompletionInitiator">
-            <soap:address location="http://localhost:8080/wstx-services/wsat/completion/initiator"/>
+            <soap:address location="https://localhost:8181/wstx-services/wsat/completion/initiator"/>
         </wsdl:port>
     </wsdl:service>
     <!--
