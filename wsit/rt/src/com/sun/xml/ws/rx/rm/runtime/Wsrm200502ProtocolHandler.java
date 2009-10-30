@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceResponseData;
@@ -138,8 +139,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             try {
                 inboundSequence.registerMessage(lastAppMessage, false);
             } catch (Exception ex) {
-                // TODO L10N
-                throw LOGGER.logSevereException(new RxRuntimeException("Unexpected exception", ex));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1146_UNEXPECTED_ERROR_WHILE_REGISTERING_MESSAGE(), ex));
             }
             inboundSequence.acknowledgeMessageNumber(lastAppMessage.getMessageNumber());
             inboundSequence.setAckRequestedFlag();

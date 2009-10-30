@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.DelayedTaskManager;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
@@ -73,12 +74,11 @@ public class SequenceMaintenanceTask implements DelayedTaskManager.DelayedTask {
                 boolean registrationSuccesfull = manager.register(this, period, timeUnit);
 
                 if (!registrationSuccesfull) {
-                    // TODO L10N
-                    LOGGER.config(String.format("Unable to re-schedule the sequence maintenance task for an endpoint UID [ %s ].", endpointUid));
+                    LOGGER.config(LocalizationMessages.WSRM_1150_UNABLE_TO_RESCHEDULE_SEQUENCE_MAINTENANCE_TASK(endpointUid));
                 }
             }
         } else {
-            LOGGER.config(String.format("Terminating sequence maintenance task for an endpoint UID [ %s ]: Sequence manager instance has been garbage-collected", endpointUid));
+            LOGGER.config(LocalizationMessages.WSRM_1151_TERMINATING_SEQUENCE_MAINTENANCE_TASK(endpointUid));
         }
     }
 

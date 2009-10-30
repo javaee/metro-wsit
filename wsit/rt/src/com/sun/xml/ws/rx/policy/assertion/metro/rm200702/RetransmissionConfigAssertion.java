@@ -49,6 +49,7 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -110,9 +111,9 @@ public class RetransmissionConfigAssertion extends ComplexAssertion implements R
         for (PolicyAssertion assertion : assertionParameters) {
             if (parameterName.equals(assertion.getName())) {
                 if (parameterSet) {
-                    // TODO L10N
-                    throw LOGGER.logSevereException(new AssertionCreationException(data,
-                            String.format("Multiple occurences of assertion parameter [ %s ] detected in the policy assertion [ %s ]", parameterName, NAME)));
+                    throw LOGGER.logSevereException(new AssertionCreationException(
+                            data,
+                            LocalizationMessages.WSRM_1007_MULTIPLE_OCCURENCES_OF_ASSERTION_PARAMETER(parameterName, NAME)));
                 } else {
                     parameter = assertion;
                 }

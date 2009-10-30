@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
 import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,13 +110,12 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
                 try {
                     packet.getMessage().copy().writeTo(xsw);
                 } catch (XMLStreamException ex) {
-                    // TODO L10N
-                    throw LOGGER.logSevereException(new RxRuntimeException("Unable to serialize message to XML stream", ex));
+                    throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1142_UNABLE_TO_SERIALIZE_MSG_TO_XML_STREAM(), ex));
                 } finally {
                     try {
                         xsw.close();
                     } catch (XMLStreamException ex) {
-                        LOGGER.warning("Error closing XMLStreamWriter after message was serialized to XML stream", ex);
+                        LOGGER.warning(LocalizationMessages.WSRM_1143_ERROR_CLOSING_XSW_AFTER_MSG_SERIALIZATION(), ex);
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
             try {
                 baos.close();
             } catch (IOException ex) {
-                LOGGER.warning("Error closing ByteArrayOutputStream after message was serialized to bytes", ex);
+                LOGGER.warning(LocalizationMessages.WSRM_1144_ERROR_CLOSING_BAOS_AFTER_MSG_SERIALIZATION(), ex);
             }
         }
     }

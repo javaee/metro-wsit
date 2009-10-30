@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
@@ -60,10 +61,7 @@ public final class InboundSequence extends AbstractSequence {
         this.getState().verifyAcceptingMessageRegistration(getId(), Code.Receiver);
 
         if (!this.getId().equals(message.getSequenceId())) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new IllegalArgumentException(String.format(
-                    "Cannot register message: sequence identifier on the application message [ %s ] " +
-                    "is different from the identifier of this sequence [ %s ].",
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSRM_1149_DIFFERENT_MSG_SEQUENCE_ID(
                     message.getSequenceId(),
                     this.getId())));
         }

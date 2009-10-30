@@ -71,7 +71,6 @@ public class SuspendedFiberStorage extends TimestampedCollection<String, Fiber> 
     public void resumeFiber(String correlationId, Packet response) throws ResumeFiberException {
         Fiber fiber = remove(correlationId);
         if (fiber == null) {
-            // TODO L10N
             throw LOGGER.logSevereException(new ResumeFiberException(String.format("Unable to resume fiber with a response packet: No registered fiber found for correlationId [ %s ].", correlationId)));
         }
 
@@ -85,7 +84,6 @@ public class SuspendedFiberStorage extends TimestampedCollection<String, Fiber> 
     public void resumeFiber(String correlationId, Throwable error) throws ResumeFiberException {
         Fiber fiber = remove(correlationId);
         if (fiber == null) {
-            // TODO L10N
             throw LOGGER.logSevereException(new ResumeFiberException(String.format("Unable to resume fiber with a response packet: No registered fiber found for correlationId [ %s ].", correlationId)));
         }
 

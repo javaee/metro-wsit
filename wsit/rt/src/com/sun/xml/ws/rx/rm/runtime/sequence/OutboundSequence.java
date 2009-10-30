@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException.Code;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
@@ -86,8 +87,7 @@ public final class OutboundSequence extends AbstractSequence {
     }
 
     public void acknowledgeMessageNumber(long messageId) {
-        // TODO L10N
-        throw new UnsupportedOperationException(String.format("This operation is not supported on %s class", this.getClass().getName()));
+        throw new UnsupportedOperationException(LocalizationMessages.WSRM_1101_UNSUPPORTED_OPERATION(this.getClass().getName()));
     }
 
     public void acknowledgeMessageNumbers(List<AckRange> ranges) throws InvalidAcknowledgementException, AbstractSoapFaultException {

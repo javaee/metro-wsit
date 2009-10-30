@@ -231,7 +231,6 @@ final class PersistentSequenceData implements SequenceData {
             return data;
         } catch (SQLException ex) {
             cm.rollback(con);
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Inserting sequence data for %s sequence with id = [ %s ] failed: " +
                     "An unexpected JDBC exception occured",
@@ -271,7 +270,6 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             if (!rs.isFirst() && !rs.isLast()) {
-                // TODO L10N
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
                         "Duplicate sequence records detected for a sequence with id [ %s ]", sequenceId)));
             }
@@ -287,7 +285,6 @@ final class PersistentSequenceData implements SequenceData {
                     rs.getLong("EXP_TIME"));
 
         } catch (SQLException ex) {
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Loading sequence data for a sequence with id = [ %s ] failed: " +
                     "An unexpected JDBC exception occured",
@@ -334,7 +331,6 @@ final class PersistentSequenceData implements SequenceData {
 
         } catch (SQLException ex) {
             cm.rollback(con);
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Removing sequence with id = [ %s ] failed: " +
                     "An unexpected JDBC exception occured",
@@ -373,7 +369,6 @@ final class PersistentSequenceData implements SequenceData {
             cm.commit(con);
         } catch (SQLException ex) {
             cm.rollback(con);
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Binding a sequence with id = [ %s ] to a sequence with id [ %s ] failed: " +
                     "An unexpected JDBC exception occured",
@@ -424,14 +419,12 @@ final class PersistentSequenceData implements SequenceData {
             }
 
             if (!rs.isFirst() && !rs.isLast()) {
-                // TODO L10N
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
                         "Duplicate sequence records detected for a sequence with id [ %s ]", sequenceId)));
             }
 
             return fi.javaClass.cast(rs.getObject(fi.columnName));
         } catch (SQLException ex) {
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Loading %s column data on a sequence with id = [ %s ]  failed: " +
                     "An unexpected JDBC exception occured",
@@ -483,7 +476,6 @@ final class PersistentSequenceData implements SequenceData {
                         Level.WARNING);
             }
         } catch (SQLException ex) {
-            // TODO L10N
             throw LOGGER.logSevereException(new PersistenceException(String.format(
                     "Updating %s column data on a sequence with id = [ %s ]  failed: " +
                     "An unexpected JDBC exception occured",
@@ -903,7 +895,6 @@ final class PersistentSequenceData implements SequenceData {
 
             if (!rs.isFirst() && !rs.isLast()) {
                 cm.rollback(con);
-                // TODO L10N
                 throw LOGGER.logSevereException(new PersistenceException(String.format(
                         "Duplicate records detected for unacked message registration on %s sequence with id = [ %s ] and correlation id [ %d ]",
                         type,

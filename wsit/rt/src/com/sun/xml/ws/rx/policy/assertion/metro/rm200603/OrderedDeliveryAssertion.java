@@ -45,6 +45,7 @@ import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -91,8 +92,7 @@ public class OrderedDeliveryAssertion extends SimpleAssertion implements RmConfi
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         if (builder.getVersion() != RmVersion.WSRM200502) {
-            // TODO L10N
-            throw new WebServiceException(String.format("WS-RM version [ %s ] is not compatible with [ %s ] assertion", builder.getVersion(), NAME));
+            throw new WebServiceException(LocalizationMessages.WSRM_1001_ASSERTION_NOT_COMPATIBLE_WITH_RM_VERSION(NAME, builder.getVersion()));
         }
 
         return builder.enableOrderedDelivery();

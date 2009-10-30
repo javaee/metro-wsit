@@ -50,6 +50,7 @@ import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
 import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.BackoffAlgorithm;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -126,8 +127,7 @@ public final class Rm10Assertion extends SimpleAssertion implements RmConfigurat
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         if (builder.getVersion() != RmVersion.WSRM200502) {
-            // TODO L10N
-            throw new WebServiceException("Multiple WS-ReliableMessaging versions detected within a single WS-Policy expression.");
+            throw new WebServiceException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY());
         }
 
         if (inactivityTimeout != ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT) { // prevents overwriting values set by other assertions

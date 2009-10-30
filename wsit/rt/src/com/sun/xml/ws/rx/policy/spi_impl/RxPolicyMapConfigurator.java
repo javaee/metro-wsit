@@ -99,7 +99,6 @@ public class RxPolicyMapConfigurator implements PolicyMapConfigurator {
         }
 
         if (LOGGER.isLoggable(Level.FINEST)) {
-            // TODO L10N
             LOGGER.finest(String.format("Make connection feature enabled on service '%s', port '%s'", model.getServiceQName(), model.getPortName()));
         }
 
@@ -111,11 +110,9 @@ public class RxPolicyMapConfigurator implements PolicyMapConfigurator {
             final PolicySubject subject = new PolicySubject(wsdlSubject, mcPolicy);
             subjects.add(subject);
             if (LOGGER.isLoggable(Level.FINE)) {
-                // TODO L10N
                 LOGGER.fine(String.format("Added make connection policy with ID '%s' to binding element '%s'", mcPolicy.getIdOrName(), model.getBoundPortTypeName()));
             }
         } else if (LOGGER.isLoggable(Level.FINE)) {
-            // TODO L10N
             LOGGER.fine("Make connection assertion is already present in the endpoint policy");
         }
     }

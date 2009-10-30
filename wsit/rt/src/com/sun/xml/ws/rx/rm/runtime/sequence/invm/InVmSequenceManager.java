@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
@@ -326,15 +327,13 @@ public final class InVmSequenceManager implements SequenceManager {
 
                 AbstractSequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
-                    // TODO L10N
-                    LOGGER.config(String.format("Removing sequence [ %s ]", sequence.getId()));
+                    LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
                     sequenceKeyIterator.remove();
                     if (boundSequences.containsKey(sequence.getId())) {
                         boundSequences.remove(sequence.getId());
                     }
                 } else if (shouldTeminate(sequence)) {
-                    // TODO L10N
-                    LOGGER.config(String.format("Terminating sequence [ %s ]", sequence.getId()));
+                    LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
                     tryTerminateSequence(sequence.getId());
                 }
             }

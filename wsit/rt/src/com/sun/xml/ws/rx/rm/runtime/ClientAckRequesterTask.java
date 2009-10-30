@@ -108,15 +108,13 @@ public class ClientAckRequesterTask implements DelayedTask {
 
                 try {
                     if (rc.protocolHandler.containsProtocolMessage(response)) {
-                        // TODO L10N
                         LOGGER.finer("Processing RM protocol response message.");
                         JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, "");
                         rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
                         rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
                     } else {
-                        // TODO L10N
-                        LOGGER.severe("Unable to process response packet - the packet was not identified as an RM protocol message");
+                        LOGGER.severe(LocalizationMessages.WSRM_1120_RESPONSE_NOT_IDENTIFIED_AS_PROTOCOL_MESSAGE());
                     }
 
                     if (response.getMessage().isFault()) {
@@ -128,8 +126,7 @@ public class ClientAckRequesterTask implements DelayedTask {
             }
 
             public void onCompletion(Throwable error) {
-                // TODO L10N
-                LOGGER.severe("An unexpected exception occured while sending acknowledgement request", error);
+                LOGGER.warning(LocalizationMessages.WSRM_1127_UNEXPECTED_EXCEPTION_WHEN_SENDING_ACK_REQUEST(), error);
             }
         });
     }

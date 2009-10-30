@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
@@ -193,9 +194,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         if (message instanceof JaxwsApplicationMessage) {
             deliver(JaxwsApplicationMessage.class.cast(message));
         } else {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException(String.format(
-                    "Unexpected message class '%s', expected class '%s'",
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1141_UNEXPECTED_MESSAGE_CLASS(
                     message.getClass().getName(),
                     JaxwsApplicationMessage.class.getName())));
         }

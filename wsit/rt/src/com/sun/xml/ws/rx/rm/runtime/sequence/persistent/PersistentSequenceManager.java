@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import java.util.Iterator;
@@ -388,16 +389,14 @@ public final class PersistentSequenceManager implements SequenceManager {
 
                 AbstractSequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
-                    // TODO L10N
-                    LOGGER.config(String.format("Removing sequence [ %s ]", sequence.getId()));
+                    LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
                     sequenceKeyIterator.remove();
                     PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
                     if (boundSequences.containsKey(sequence.getId())) {
                         boundSequences.remove(sequence.getId());
                     }
                 } else if (shouldTeminate(sequence)) {
-                    // TODO L10N
-                    LOGGER.config(String.format("Terminating sequence [ %s ]", sequence.getId()));
+                    LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
                     tryTerminateSequence(sequence.getId());
                 }
             }

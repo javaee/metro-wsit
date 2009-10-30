@@ -273,13 +273,11 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
             public void processProtocolMessage(Packet protocolMessagePacket) {
                 if (protocolHandler.containsProtocolMessage(protocolMessagePacket)) {
-                    // TODO L10N
                     LOGGER.finer("Processing RM protocol response message.");
                     AcknowledgementData ackData = protocolHandler.getAcknowledgementData(protocolMessagePacket.getMessage());
                     dstMsgHandler.processAcknowledgements(ackData);
                 } else {
-                    // TODO L10N
-                    LOGGER.severe("Unable to process response packet - the packet was not identified as an RM protocol message");
+                    LOGGER.severe(LocalizationMessages.WSRM_1120_RESPONSE_NOT_IDENTIFIED_AS_PROTOCOL_MESSAGE());
                 }
             }
         };

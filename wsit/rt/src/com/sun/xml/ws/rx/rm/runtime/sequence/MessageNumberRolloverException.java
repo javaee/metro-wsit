@@ -72,7 +72,6 @@ public final class MessageNumberRolloverException extends AbstractSoapFaultExcep
     }    
     
     public MessageNumberRolloverException(String sequenceId, long messageNumber) {
-        // TODO L10N localization code change
         super(
                 LocalizationMessages.WSRM_1138_MESSAGE_NUMBER_ROLLOVER(sequenceId, messageNumber),
                 "The maximum value for wsrm:MessageNumber has been exceeded.",

@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime.delivery;
 import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman.Callback;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
@@ -99,8 +100,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
         try {
             postponedMessageQueue.put(message);
         } catch (InterruptedException ex) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException("Adding message to an internal message queue was interrupted.", ex));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1147_ADDING_MSG_TO_QUEUE_INTERRUPTED(), ex));
         }
 
         tryDelivery();

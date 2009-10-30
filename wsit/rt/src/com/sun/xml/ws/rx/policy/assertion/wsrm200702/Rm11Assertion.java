@@ -148,8 +148,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmConfigura
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
         if (builder.getVersion() != RmVersion.WSRM200702) {
-            // TODO L10N
-            throw new WebServiceException("Multiple WS-ReliableMessaging versions detected within a single WS-Policy expression.");
+            throw new WebServiceException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY());
         }
 
         if (isOrderedDelivery) {

@@ -37,6 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.RxException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 
 /**
  * Exception used by sequence implementation to notify RM runtime infrastructure of
@@ -51,9 +52,7 @@ public class DuplicateMessageRegistrationException extends RxException {
     private final long messageNumber;
 
     public DuplicateMessageRegistrationException(String sequenceId, long messageNumber) {
-        // TODO L10N
-        super(String.format(
-                "Attempt to register  a duplicate message number [ %d ] detected on the sequence [ %s ]",
+        super(LocalizationMessages.WSRM_1148_DUPLICATE_MSG_NUMBER_REGISTRATION_ATTEMPTED(
                 messageNumber,
                 sequenceId));
 

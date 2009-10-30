@@ -35,8 +35,6 @@
  */
 package com.sun.xml.ws.rx.rm.protocol.wsrm200502;
 
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -133,11 +131,6 @@ public class AckRequestedElement {
      */
     public void setMaxMessageNumberUsed(BigInteger value) {
         this.maxMessageNumberUsed = value;
-    }
-
-    @Override
-    public String toString() {
-        return LocalizationMessages.WSRM_4000_ACKREQUESTED_TOSTRING_STRING(getId(), getMaxMessageNumber());
     }
 
     /**

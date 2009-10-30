@@ -49,6 +49,7 @@ import com.sun.xml.ws.rx.policy.assertion.wsmc200702.MakeConnectionSupportedAsse
 import com.sun.xml.ws.rx.policy.assertion.RmConfigurator;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;
@@ -91,14 +92,7 @@ public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
                             if (assertion instanceof RmConfigurator) {
                                 final RmConfigurator rmAssertion = RmConfigurator.class.cast(assertion);
                                 if (!rmAssertion.isCompatibleWith(rmFeatureBuilder.getVersion())) {
-                                    // TODO L10N
-                                    LOGGER.warning(String.format(
-                                            "Inconsistency detected in a WS-Policy expression:\n" +
-                                            "[ %s ] assertion is not compatible with WS-ReliableMessaging version [ %s ].\n" +
-                                            "Please, update your WS-Policy expression by replacing current assertion " +
-                                            "with the assertions compatible with the used WS-ReliableMessaging version. " +
-                                            "Note that future Metro release may decide reject such inconsistent policies " +
-                                            "and fail to deploy your web service.",
+                                    LOGGER.warning(LocalizationMessages.WSRM_1009_INCONSISTENCIES_IN_POLICY(
                                             rmAssertion.getName(),
                                             rmFeatureBuilder.getVersion()));
 
@@ -122,8 +116,8 @@ public class RxFeatureConfigurator implements PolicyFeatureConfigurator {
     private Collection<PolicyAssertion> getAssertionsWithName(AssertionSet alternative, QName name) throws PolicyException {
         Collection<PolicyAssertion> assertions = alternative.get(name);
         if (assertions.size() > 1) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new PolicyException(String.format("%n duplicate [%s] policy assertions in a single policy alternative detected", assertions.size(), name)));
+            throw LOGGER.logSevereException(new PolicyException(
+                    LocalizationMessages.WSRM_1008_DUPLICATE_ASSERTION_IN_POLICY(assertions.size(), name)));
         }
         return assertions;
     }

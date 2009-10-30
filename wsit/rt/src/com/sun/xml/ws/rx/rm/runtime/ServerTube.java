@@ -177,11 +177,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
 
-            if (!isSecurityContextTokenIdValid(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket())) {
-                // TODO L10N + maybe throw SOAP fault exception?
-                throw new RmSecurityException("Security context token on the message does not match the token bound to the sequence");
-            }
-
+            validateSecurityContextTokenId(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket());
 
             rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
             rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
@@ -195,7 +191,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 rc.destinationMessageHandler.registerMessage(message);
             } catch (DuplicateMessageRegistrationException ex) {
                 if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine(String.format("Duplicate message number [ %d ] received on sequence [ %s ]",
+                    LOGGER.fine(LocalizationMessages.WSRM_1145_DUPLICATE_MSG_NUMBER_RECEIVED(
                             message.getMessageNumber(),
                             message.getSequenceId()), ex);
                 }
@@ -524,11 +520,15 @@ public class ServerTube extends AbstractFilterTubeImpl {
      *
      * @param expectedStrId expected security context token identifier
      * @param packet packet wrapping the checked message
-     * @returns {code true} if the actual security context token identifier equals to the expected one
+     * @throws RmSecurityException if the actual security context token identifier does not equal to the expected one
      */
-    public final boolean isSecurityContextTokenIdValid(String expectedSctId, Packet packet) {
+    private final void validateSecurityContextTokenId(String expectedSctId, Packet packet) throws RmSecurityException {
         String actualSctId = getSecurityContextTokenId(packet);
-        return (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
+        boolean isValid = (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
+
+        if (!isValid) {
+            throw new RmSecurityException(LocalizationMessages.WSRM_1131_SECURITY_TOKEN_AUTHORIZATION_ERROR(actualSctId, expectedSctId));
+        }
     }
 
     private final long calculateSequenceExpirationTime(long expiryDuration) {
