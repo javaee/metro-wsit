@@ -15,6 +15,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
+import com.sun.xml.wss.AliasSelector;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
@@ -62,20 +63,27 @@ public class CertificateRetriever {
     private String callbackHandler = null;
     private String aliasSelector = null;
 
+
+    public CertificateRetriever(){
+        
+    }
     public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
         QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");       
         setLocationPasswordAndAlias(keyStoreQName, wse);
         
-        if (password == null || location == null || alias == null) {
-            if(callbackHandler == null){
-                return null;
-            }else {
-                cs = getCertificateFromCallbackHandler(callbackHandler);                
+        if (password == null || location == null) {
+            if (callbackHandler == null) {               
+                    return null;
+            } else {
+                cs = getCertificateUsingCallbackHandler(callbackHandler);
                 return cs;
             }
+        }
+        if(alias == null){
+            alias = getAliasUsingAliasSelector();
 
-        }        
+        }
         KeyStore keyStore = null;
         try {
             keyStore = KeyStore.getInstance("JKS");
@@ -83,20 +91,20 @@ public class CertificateRetriever {
             keyStore.load(fis, password.toCharArray());
             cs = keyStore.getCertificate(alias);
         } catch (FileNotFoundException ex) {
-            log.log(Level.WARNING, null, ex);
-            throw new XWSSecurityException(ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
         } catch (IOException ex) {
-            log.log(Level.WARNING, null, ex);
-            throw new RuntimeException(ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
         } catch (NoSuchAlgorithmException ex) {
-            log.log(Level.WARNING, null, ex);
-            throw new XWSSecurityException(ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+           return null;
         } catch (CertificateException ex) {
-            log.log(Level.WARNING, null, ex);
-            throw new XWSSecurityException(ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
         } catch (KeyStoreException ex) {
-            log.log(Level.WARNING, null, ex);
-            throw new XWSSecurityException(ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
         } finally {
             keyStore = null;
             fis.close();
@@ -120,13 +128,10 @@ public class CertificateRetriever {
                 if (data instanceof Base64Data) {
                     Base64Data binaryData = (Base64Data) data;
                     bstValue = binaryData.getExact();
-
                 }
             }
             try {
                 bstValue = Base64.decode(StreamUtil.getCV(reader));
-
-
             } catch (Base64DecodingException ex) {
                 log.log(Level.SEVERE, null, ex);
                 throw new RuntimeException(ex);
@@ -170,7 +175,45 @@ public class CertificateRetriever {
         return false;
     }
 
-    private X509Certificate getCertificateFromCallbackHandler(String callbackHandler) {
+    private String getAliasUsingAliasSelector() {
+        if(aliasSelector == null){
+            return null;
+        }
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class aliasSelectorClass = null;
+        if (loader != null) {
+            try {
+                aliasSelectorClass = loader.loadClass(aliasSelector);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (aliasSelectorClass == null) {
+            // if context classloader didnt work, try this
+            loader = this.getClass().getClassLoader();
+            try {
+                aliasSelectorClass = loader.loadClass(aliasSelector);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+        if (aliasSelectorClass == null) {
+            return null;
+        }
+        try {
+            com.sun.xml.wss.AliasSelector as = (AliasSelector) aliasSelectorClass.newInstance();
+            return as.select(new java.util.HashMap());//passing empty map as runtime properties is not available;
+        } catch (InstantiationException ex) {
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
+        } catch (IllegalAccessException ex) {
+           log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            return null;
+        }      
+    }
+
+    private X509Certificate getCertificateUsingCallbackHandler(String callbackHandler) {
+
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Class callbackHandlerClass = null;
         if (loader != null) {
@@ -202,19 +245,19 @@ public class CertificateRetriever {
             cert = (X509Certificate) ((ksc.getKeystore() != null) ? (ksc.getKeystore().getCertificate(alias)) : null);
             return cert;
         } catch (IOException ex) {
-            log.log(Level.WARNING, null, ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         } catch (UnsupportedCallbackException ex) {
-            log.log(Level.WARNING, null, ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         } catch (InstantiationException ex) {
-            log.log(Level.WARNING, null, ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         } catch (IllegalAccessException ex) {
-            log.log(Level.WARNING, null, ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         } catch (KeyStoreException ex) {
-            log.log(Level.WARNING, null, ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         }
     }
