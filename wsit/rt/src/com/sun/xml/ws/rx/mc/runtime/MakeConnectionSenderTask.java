@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
@@ -126,10 +127,7 @@ final class MakeConnectionSenderTask implements Runnable {
             final ProtocolMessageHandler oldHandler = mapOfRegisteredProtocolMessageHandlers.put(wsaAction, handler);
 
             if (oldHandler != null && LOGGER.isLoggable(Level.WARNING)) {
-                // TODO L10N
-                LOGGER.warning(String.format(
-                        "Duplicate ProtocolMessageHandler registration detected for WS-A action [ %s ].%n" +
-                        "Previously registered handler of class [ %s ] has been replaced with a new handler of class [ %s ]",
+                LOGGER.warning(LocalizationMessages.WSMC_0101_DUPLICATE_PROTOCOL_MESSAGE_HANDLER(
                         wsaAction,
                         oldHandler.getClass().getName(),
                         handler.getClass().getName()));

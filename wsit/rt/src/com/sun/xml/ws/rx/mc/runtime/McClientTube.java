@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
@@ -141,8 +142,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet request) {
         final Message message = request.getMessage();
         if (!message.hasHeaders()) {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException("Required WS-Addressing headers not found: No SOAP headers present on a client request message."));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0102_NO_SOAP_HEADERS()));
         }
 
 
@@ -209,8 +209,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
             try {
                 return replyToHeader.readAsEPR(configuration.getAddressingVersion()).isAnonymous();
             } catch (XMLStreamException ex) {
-                // TODO L10N
-                throw LOGGER.logSevereException(new RxRuntimeException("Error unmarshalling content of WS-A ReplyTo header", ex));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0103_ERROR_RETRIEVING_WSA_REPLYTO_CONTENT(), ex));
             }
         }
 

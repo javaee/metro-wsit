@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.ResumeFiberException;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
@@ -73,15 +74,12 @@ class WsMcResponseHandler extends McResponseHandlerBase {
             Message responseMessage = response.getMessage();
 
             if (responseMessage == null) {
-                // TODO L10N
-                LOGGER.warning("No response returned for a WS-MakeConnection request");
+                LOGGER.warning(LocalizationMessages.WSMC_0112_NO_RESPONSE_RETURNED());
                 return;
             }
 
             if (!responseMessage.hasHeaders()) {
-                // TODO L10N
-                LOGGER.severe("Unable to find a proper response receiver: " +
-                        "The response to a WS-MakeConnection request does not contain any headers.");
+                LOGGER.severe(LocalizationMessages.WSMC_0113_NO_WSMC_HEADERS_IN_RESPONSE());
                 return;
             }
 
@@ -95,10 +93,10 @@ class WsMcResponseHandler extends McResponseHandlerBase {
                     try {
                         fault = responseMessage.readAsSOAPMessage().getSOAPBody().getFault();
                     } catch (SOAPException ex) {
-                        throw LOGGER.logSevereException(new RxRuntimeException("Unable to unmarshall SOAP fault from the SOAP message.", ex));
+                        throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0114_ERROR_UNMARSHALLING_SOAP_FAULT(), ex));
                     }
 
-                    throw LOGGER.logSevereException(new RxRuntimeException(String.format("Unexpected WS-MakeConnection protocol error: %s", fault.getFaultString())));
+                    throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0115_UNEXPECTED_PROTOCOL_ERROR(fault.getFaultString())));
                 }
             }
 
@@ -109,32 +107,26 @@ class WsMcResponseHandler extends McResponseHandlerBase {
                 try {
                     resumeParentFiber(response);
                 } catch (ResumeFiberException ex) {
-                    // TODO L10N
-                    LOGGER.warning("Unable to resume parent fiber for a response to a WS-MakeConnection request", ex);
+                    LOGGER.warning(LocalizationMessages.WSMC_0116_RESUME_PARENT_FIBER_ERROR(), ex);
                 }
             }
 
-            // TODO L10N
-            LOGGER.finer("Proceeding with processing the response as a protocol message.");
+            LOGGER.finer(LocalizationMessages.WSMC_0117_PROCESSING_RESPONSE_AS_PROTOCOL_MESSAGE());
             Header wsaActionHeader = responseMessage.getHeaders().get(configuration.getAddressingVersion().actionTag, false);
             if (wsaActionHeader != null) {
                 String wsaAction = wsaActionHeader.getStringContent();
                 ProtocolMessageHandler handler = actionToProtocolHandlerMap.get(wsaAction);
                 if (handler != null) {
-                    LOGGER.finer(String.format(
-                            "Processing WS-MC response with WS-Addressing action [ %s ] using ProtocolMessageHandler of class [ %s ]",
+                    LOGGER.finer(LocalizationMessages.WSMC_0118_PROCESSING_RESPONSE_IN_PROTOCOL_HANDLER(
                             wsaAction,
                             handler.getClass().getName()));
 
                     handler.processProtocolMessage(response);
                 } else {
-                    LOGGER.warning(String.format(
-                            "Unable to find a ProtocolMessageHandler to process WS-MC response with WS-Addressing action [ %s ]",
-                            wsaAction));
+                    LOGGER.warning(LocalizationMessages.WSMC_0119_UNABLE_TO_FIND_PROTOCOL_HANDLER(wsaAction));
                 }
             } else {
-                LOGGER.severe("Unable to find a proper response receiver: " +
-                        "The response to a WS-MakeConnection request does not contain WS-Addressing Action header.");
+                LOGGER.severe(LocalizationMessages.WSMC_0120_WSA_ACTION_HEADER_MISSING());
             }
         } finally {
             mcSenderTask.clearMcRequestPendingFlag();
@@ -143,8 +135,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
 
     public void onCompletion(Throwable error) {
         try {
-            // TODO L10N
-            throw LOGGER.logSevereException(new RxRuntimeException("Sening WS-MakeConnection request failed", error));
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0121_FAILED_TO_SEND_WSMC_REQUEST(), error));
         } finally {
             mcSenderTask.clearMcRequestPendingFlag();
         }

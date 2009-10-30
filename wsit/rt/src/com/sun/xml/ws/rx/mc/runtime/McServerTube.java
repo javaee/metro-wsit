@@ -49,6 +49,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
 import com.sun.xml.ws.rx.util.FiberExecutor;
@@ -73,8 +74,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
         void store(@NotNull Packet response, @NotNull String clientUID) {
             if (!getClientQueue(clientUID).offer(response)) {
-                // TODO L10N
-                LOGGER.severe(String.format("Storing response fo client UUID [ %s ] has failed.", clientUID));
+                LOGGER.severe(LocalizationMessages.WSMC_0104_ERROR_STORING_RESPONSE(clientUID));
             }
         }
 
@@ -141,8 +141,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         }
 
         public void onCompletion(Packet response) {
-            // TODO L10N
-            LOGGER.finer(String.format("Request processing finished. Storing a response for client UUID [ %s ]", clientUID));
+            LOGGER.finer(LocalizationMessages.WSMC_0105_STORING_RESPONSE(clientUID));
 
             if (response.getMessage() != null) {
                 final HeaderList headers = response.getMessage().getHeaders();
@@ -156,8 +155,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         }
 
         public void onCompletion(Throwable error) {
-            // TODO L10N
-            LOGGER.severe(String.format("An exception has been thrown during a request processing for the client UID [ %s ]", clientUID), error);
+            LOGGER.severe(LocalizationMessages.WSMC_0106_EXCEPTION_IN_REQUEST_PROCESSING(clientUID), error);
         }
     }
     //
@@ -246,31 +244,27 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 MakeConnectionElement mcElement = request.getMessage().readPayloadAsJAXB(configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
                 selectionUID = configuration.getMcVersion().getClientId(mcElement.getAddress().getValue());
             } catch (JAXBException ex) {
-                throw LOGGER.logSevereException(new RxRuntimeException("Error unmarshalling content of a MakeConnection message", ex));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0107_ERROR_UNMARSHALLING_PROTOCOL_MESSAGE(), ex));
             }
 
             if (selectionUID == null) {
                 // TODO return a MissingSelection SOAP fault
-                // TODO L10N
-                throw LOGGER.logSevereException(new RxRuntimeException("Selection address is [null]."));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0108_NULL_SELECTION_ADDRESS()));
             }
 
             if (!selectionUID.equals(clientUID)) {
                 // TODO return a SOAP fault?
-                // TODO L10N
-                throw LOGGER.logSevereException(new RxRuntimeException("Selection address does not match ReplyTo address."));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0109_SELECTION_ADDRESS_NOT_MATCHING_WSA_REPLYTO()));
             }
 
             Packet response = null;
             if (selectionUID != null && responseStorage.hasPendingResponse(selectionUID)) {
-                // TODO L10N
-                LOGGER.finer(String.format("A pending message found for selection UUID [ %s ]", selectionUID));
+                LOGGER.finer(LocalizationMessages.WSMC_0110_PENDING_MESSAGE_FOUND_FOR_SELECTION_UUID(selectionUID));
                 response = responseStorage.getPendingResponsePacket(selectionUID);
             }
 
             if (response == null) {
-                // TODO L10N
-                LOGGER.finer(String.format("No pending message found for selection UUID [ %s ]", selectionUID));
+                LOGGER.finer(LocalizationMessages.WSMC_0111_NO_PENDING_MESSAGE_FOUND_FOR_SELECTION_UUID(selectionUID));
                 response = createEmptyResponse(request);
             } else {
                 Message message = response.getMessage();
@@ -311,8 +305,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 String replyToAddress = replyToHeader.readAsEPR(configuration.getAddressingVersion()).getAddress();
                 return configuration.getMcVersion().getClientId(replyToAddress);
             } catch (XMLStreamException ex) {
-                // TODO L10N - same as on client side in McClientTube
-                throw LOGGER.logSevereException(new RxRuntimeException("Error unmarshalling content of WS-A ReplyTo header", ex));
+                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0103_ERROR_RETRIEVING_WSA_REPLYTO_CONTENT(), ex));
             }
         }
 
