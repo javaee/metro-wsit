@@ -39,6 +39,7 @@ import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.ResourceLoader;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.assembler.localization.LocalizationMessages;
 import com.sun.xml.ws.runtime.config.MetroConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import com.sun.xml.ws.runtime.config.TubelineDefinition;
@@ -102,27 +103,27 @@ class MetroConfigLoader {
     private MetroConfigLoader(ResourceLoader loader) {
         this.defaultConfigUrl = locateResource(DEFAULT_METRO_CFG_NAME, loader);
         if (defaultConfigUrl == null) {
-            throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not found.")); // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0001_DEFAULT_CFG_FILE_NOT_FOUND()));
         }
 
-        LOGGER.config(String.format("Default metro-default.xml configuration file located at: '%s'", defaultConfigUrl)); // TODO L10N
+        LOGGER.config(LocalizationMessages.MASM_0002_DEFAULT_CFG_FILE_LOCATED(defaultConfigUrl));
         this.defaultConfig = MetroConfigLoader.loadMetroConfig(defaultConfigUrl);
         if (defaultConfig == null) {
-            throw LOGGER.logSevereException(new IllegalStateException("Default metro-default.xml configuration file was not loaded")); // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0003_DEFAULT_CFG_FILE_NOT_LOADED()));
         }
         if (defaultConfig.getTubelines() == null) {
-            throw LOGGER.logSevereException(new IllegalStateException("No <tubelines> section found in the default metro-default.xml configuration file")); // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0004_NO_TUBELINES_SECTION_IN_DEFAULT_CFG_FILE()));
         }
         if (defaultConfig.getTubelines().getDefault() == null) {
-            throw LOGGER.logSevereException(new IllegalStateException("No default tubeline is defined in the default metro-default.xml configuration file")); // TODO L10N
+            throw LOGGER.logSevereException(new IllegalStateException(LocalizationMessages.MASM_0005_NO_DEFAULT_TUBELINE_IN_DEFAULT_CFG_FILE()));
         }
 
         this.appConfigUrl = locateResource(APP_METRO_CFG_NAME, loader);
         if (appConfigUrl != null) {
-            LOGGER.config(String.format("Application metro.xml configuration file located at: '%s'", appConfigUrl)); // TODO L10N
+            LOGGER.config(LocalizationMessages.MASM_0006_APP_CFG_FILE_LOCATED(appConfigUrl));
             this.appConfig = MetroConfigLoader.loadMetroConfig(appConfigUrl);
         } else {
-            LOGGER.config("No application metro.xml configuration file found."); // TODO L10N
+            LOGGER.config(LocalizationMessages.MASM_0007_APP_CFG_FILE_NOT_FOUND());
             this.appConfig = null;
         }
     }
@@ -186,7 +187,7 @@ class MetroConfigLoader {
         try {
             return new URI(reference);
         } catch (URISyntaxException ex) {
-            throw LOGGER.logSevereException(new WebServiceException(String.format("Invalid URI reference: \'%s\'", reference), ex)); // TODO L10N
+            throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.MASM_0008_INVALID_URI_REFERENCE(reference), ex));
         }
     }
 
@@ -195,7 +196,7 @@ class MetroConfigLoader {
         try {
             return loader.getResource(resource);
         } catch (MalformedURLException ex) {
-            LOGGER.severe(String.format("Cannot form a valid URL from the resource name '%s'. For more details see the nested exception.", resource), ex); // TODO L10N
+            LOGGER.severe(LocalizationMessages.MASM_0009_CANNOT_FORM_VALID_URL(resource), ex);
         }
         return null;
     }
@@ -208,8 +209,7 @@ class MetroConfigLoader {
             final JAXBElement<MetroConfig> configElement = unmarshaller.unmarshal(XMLInputFactory.newInstance().createXMLStreamReader(resourceUrl.openStream()), MetroConfig.class);
             result = configElement.getValue();
         } catch (Exception e) {
-            // TODO L10N
-            LOGGER.warning(String.format("Unable to unmarshall metro config file from location: '%s'", resourceUrl.toString()), e); // TODO L10N
+            LOGGER.warning(LocalizationMessages.MASM_0010_ERROR_READING_CFG_FILE_FROM_LOCATION(resourceUrl.toString()), e);
         }
         return result;
     }
@@ -235,7 +235,7 @@ class MetroConfigLoader {
             try {
                 if (parentLoader != null) {
                     if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine(String.format("Trying to load '%s' via parent resouce loader '%s'", resource, parentLoader)); // TODO L10N
+                        LOGGER.fine(LocalizationMessages.MASM_0011_LOADING_RESOURCE(resource, parentLoader));
                     }
 
                     resourceUrl = parentLoader.getResource(resource);
@@ -279,19 +279,19 @@ class MetroConfigLoader {
                 context = container.getSPI(contextClass);
                 if (context != null) {
                     if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine(String.format("Trying to load '%s' via servlet context '%s'", resource, context)); // TODO L10N
+                        LOGGER.fine(LocalizationMessages.MASM_0012_LOADING_VIA_SERVLET_CONTEXT(resource, context));
                     }
                     try {
                         final Method method = context.getClass().getMethod("getResource", String.class);
                         final Object result = method.invoke(context, "/WEB-INF/" + resource);
                         return URL.class.cast(result);
                     } catch (Exception e) {
-                        throw LOGGER.logSevereException(new RuntimeException("Unable to invoke getResource() method on servlet context instance"), e); // TODO L10N
+                        throw LOGGER.logSevereException(new RuntimeException(LocalizationMessages.MASM_0013_ERROR_INVOKING_SERVLET_CONTEXT_METHOD("getResource()")), e);
                     }
                 }
             } catch (ClassNotFoundException e) {
                 if (LOGGER.isLoggable(Level.FINE)) {
-                    LOGGER.fine("Unable to load javax.servlet.ServletContext class"); // TODO L10N
+                    LOGGER.fine(LocalizationMessages.MASM_0014_UNABLE_TO_LOAD_CLASS("javax.servlet.ServletContext"));
                 }
             }
             return null;

@@ -37,14 +37,14 @@ package com.sun.xml.ws.assembler;
 
 import com.sun.istack.NotNull;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.assembler.localization.LocalizationMessages;
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 
 /**
@@ -127,9 +127,8 @@ public class TubelineAssemblyController {
         try {
             return new URI(sb.toString());
         } catch (URISyntaxException ex) {
-            // TODO L10N
-            Logger.getLogger(TubelineAssemblyController.class.getName()).log(Level.WARNING,
-                    String.format("Unable to create a new URI instance for generated endpoint URI string '%s'", sb.toString()),
+            Logger.getLogger(TubelineAssemblyController.class).warning(
+                    LocalizationMessages.MASM_0020_ERROR_CREATING_URI_FROM_GENERATED_STRING(sb.toString()),
                     ex);
             return null;
         }

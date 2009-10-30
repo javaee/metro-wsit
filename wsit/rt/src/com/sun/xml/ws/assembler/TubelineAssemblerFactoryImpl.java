@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
 import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.assembler.localization.LocalizationMessages;
 import com.sun.xml.ws.dump.LoggingDumpTube;
 import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
 import java.util.Collection;
@@ -272,8 +273,7 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             String stringValue = System.getProperty(propertyName);
             if (stringValue != null) {
                 retVal = Boolean.valueOf(stringValue);
-                // TODO L10N
-                LOGGER.fine(String.format("%s system property detected to be set to value %b", propertyName, retVal));
+                LOGGER.fine(LocalizationMessages.MASM_0018_MSG_LOGGING_SYSTEM_PROPERTY_SET_TO_VALUE(propertyName, retVal));
             }
 
             return retVal;
@@ -285,14 +285,11 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
             String stringValue = System.getProperty(propertyName);
             if (stringValue != null) {
                 // if value is not null => property is set, we will try to override the default logging level
-                LOGGER.fine(String.format("%s system property detected to be set to value %s", propertyName, stringValue));
+                LOGGER.fine(LocalizationMessages.MASM_0018_MSG_LOGGING_SYSTEM_PROPERTY_SET_TO_VALUE(propertyName, stringValue));
                 try {
                     retVal = Level.parse(stringValue);
                 } catch (IllegalArgumentException ex) {
-                    // TODO L10N
-                    LOGGER.warning(
-                            String.format("Illegal logging level value stored in %s system property: '%s'. Using default logging level.", propertyName, stringValue),
-                            ex);
+                    LOGGER.warning(LocalizationMessages.MASM_0019_MSG_LOGGING_SYSTEM_PROPERTY_ILLEGAL_VALUE(propertyName, stringValue), ex);
                 }
             }
 

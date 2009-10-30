@@ -35,10 +35,10 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.assembler.localization.LocalizationMessages;
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Utility class that encapsulates logic of loading TubeFactory 
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * @author m_potociar
  */
 final class TubeCreator {
-
+    private static final Logger LOGGER = Logger.getLogger(TubeCreator.class);
     private final TubeFactory factory;
     private final String msgDumpPropertyBase;
 
@@ -61,24 +61,14 @@ final class TubeCreator {
                 this.factory = typedClass.newInstance();
                 this.msgDumpPropertyBase = this.factory.getClass().getName() + ".dump";
             } else {
-                // TODO L10N
-                throw new RuntimeException(String.format("Class '%s' does not implement '%s' interface", factoryClass.getName(), TubeFactory.class.getName()));
+                throw new RuntimeException(LocalizationMessages.MASM_0015_CLASS_DOES_NOT_IMPLEMENT_INTERFACE(factoryClass.getName(), TubeFactory.class.getName()));
             }
         } catch (InstantiationException ex) {
-            // TODO L10N
-            String message = String.format("Unable to instantiate tube factory class");
-            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
-            throw new RuntimeException(message, ex);
+            throw LOGGER.logSevereException(new RuntimeException(LocalizationMessages.MASM_0016_UNABLE_TO_INSTANTIATE_TUBE_FACTORY(config.getClassName()), ex), true);
         } catch (IllegalAccessException ex) {
-            // TODO L10N
-            String message = String.format("Unable to instantiate tube factory class");
-            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
-            throw new RuntimeException(message, ex);
+            throw LOGGER.logSevereException(new RuntimeException(LocalizationMessages.MASM_0016_UNABLE_TO_INSTANTIATE_TUBE_FACTORY(config.getClassName()), ex), true);
         } catch (ClassNotFoundException ex) {
-            // TODO L10N
-            String message = String.format("Unable to load tube factory class");
-            Logger.getLogger(TubeCreator.class.getName()).log(Level.SEVERE, message, ex);
-            throw new RuntimeException(message, ex);
+            throw LOGGER.logSevereException(new RuntimeException(LocalizationMessages.MASM_0017_UNABLE_TO_LOAD_TUBE_FACTORY_CLASS(config.getClassName()), ex), true);
         }
     }
 
