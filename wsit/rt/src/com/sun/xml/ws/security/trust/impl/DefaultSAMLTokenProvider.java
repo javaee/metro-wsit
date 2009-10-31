@@ -207,24 +207,13 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         final X509Certificate stsCert = (X509Certificate)ctx.getOtherProperties().get(IssuedTokenContext.STS_CERTIFICATE);
        
        try{
-            // Get SAML version and create SAML Assertion
-            String samlVer = SAMLAssertionFactory.SAML1_1;
-            if (element.getNamespaceURI().equals(WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE)){
-                samlVer = SAMLAssertionFactory.SAML2_0;
-            }
-            SAMLAssertionFactory samlAsserFac = SAMLAssertionFactory.newInstance(samlVer);
-            Assertion assertion = samlAsserFac.createAssertion(element);
-        
             boolean isValid = true;
-           // Verify the signature of the SAML assertion
-            if (!assertion.verifySignature(stsCert.getPublicKey())){
-                isValid = false;
-            }
+
+            // Verify the signature of the SAML assertion
+            isValid = SAMLUtil.verifySignature(element, stsCert.getPublicKey());
         
             // validate time in Conditions
-            if(!SAMLUtil.validateTimeInConditionsStatement(element)){
-                isValid = false;
-            }
+            isValid = SAMLUtil.validateTimeInConditionsStatement(element);
            
             if (!isValid){
                  code = wstVer.getInvalidStatusCodeURI();
@@ -232,8 +221,6 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             }
         }catch (XWSSecurityException ex){
             throw new WSTrustException(ex.getMessage());
-        }catch (SAMLException ex){
-             throw new WSTrustException(ex.getMessage());
         }
         
         // Create the Status
