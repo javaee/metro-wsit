@@ -316,6 +316,7 @@
                 <exclude name="woodstox.jar"/>
                 <exclude name="mimepull.jar"/>
                 <exclude name="FastInfoset.jar"/>
+                <exclude name="stax-ex.jar"/>
             </expandfiles>
         </expand-jars-macro>
 
