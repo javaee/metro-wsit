@@ -233,7 +233,9 @@ public abstract class BindingProcessor {
 
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
+                if(isServer && isIncoming){
                 st.setPolicyName(qName);
+                }
                 fb.addTargetBinding(st);
             }
         }else{
@@ -252,7 +254,9 @@ public abstract class BindingProcessor {
             }
             stc.addTransform(st);
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-            st.setPolicyName(qName);
+             if(isServer && isIncoming){
+                st.setPolicyName(qName);
+             }
             fb.addTargetBinding(st);
         }
     }
