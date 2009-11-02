@@ -106,7 +106,7 @@ public final class TCPConstants {
     public static final String PROTOCOL_SCHEMA = "vnd.sun.ws.tcp";
     
     /** SOAP/TCP logging domain root */
-    public static final String LoggingDomain = "com.sun.xml.ws.transport.tcp";
+    public static final String LoggingDomain = "com.sun.metro.transport.tcp";
     
     /** Connection management property names*/
     public static final String HIGH_WATER_MARK = "high-water-mark";
