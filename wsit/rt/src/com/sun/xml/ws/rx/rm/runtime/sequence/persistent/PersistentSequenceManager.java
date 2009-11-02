@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -54,6 +55,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -94,6 +96,14 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final long sequenceInactivityTimeout;
     /**
+     * Maximum number of concurrent inbound sequences
+     */
+    private final long maxConcurrentInboundSequences;
+    /**
+     * Actual number of concurrent inbound sequences
+     */
+    private final AtomicLong actualConcurrentInboundSequences;
+    /**
      * Unique identifier of the WS endpoint for which this particular sequence manager will be used
      */
     private final String uniqueEndpointId;
@@ -104,6 +114,9 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.outboundQueueBuilder = outboundQueueBuilder;
 
         this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
+
+        this.actualConcurrentInboundSequences = new AtomicLong(0);
+        this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
 
@@ -161,6 +174,13 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
+    public long concurrentlyOpenedInboundSequencesCount() {
+        return actualConcurrentInboundSequences.longValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Sequence createOutboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
         PersistentSequenceData data = PersistentSequenceData.newInstance(this, cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Outbound, strId, expirationTime, Sequence.State.CREATED, false, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new OutboundSequence(data, outboundQueueBuilder, this), data.getBoundSequenceId());
@@ -170,6 +190,14 @@ public final class PersistentSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(final String sequenceId, final String strId, final long expirationTime) throws DuplicateSequenceException {
+        final long actualSessions = actualConcurrentInboundSequences.incrementAndGet();
+        if (maxConcurrentInboundSequences >= 0) {
+            if (maxConcurrentInboundSequences < actualSessions) {
+                actualConcurrentInboundSequences.decrementAndGet();
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1156_MAX_CONCURRENT_SESSIONS_REACHED(maxConcurrentInboundSequences));
+            }
+        }
+
         PersistentSequenceData data = PersistentSequenceData.newInstance(this, cm, uniqueEndpointId, sequenceId, PersistentSequenceData.SequenceType.Inbound, strId, expirationTime, Sequence.State.CREATED, false, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis(), 0L);
         return registerSequence(new InboundSequence(data, inboundQueueBuilder, this), data.getBoundSequenceId());
     }
@@ -272,6 +300,9 @@ public final class PersistentSequenceManager implements SequenceManager {
             if (sequenceData != null) {
                 switch (sequenceData.getType()) {
                     case Inbound:
+                        if (sequenceData.getState() != Sequence.State.TERMINATING) {
+                            actualConcurrentInboundSequences.incrementAndGet();
+                        }
                         return registerSequence(new InboundSequence(sequenceData, inboundQueueBuilder, this), sequenceData.getBoundSequenceId());
                     case Outbound:
                         return registerSequence(new OutboundSequence(sequenceData, outboundQueueBuilder, this), sequenceData.getBoundSequenceId());
@@ -289,9 +320,12 @@ public final class PersistentSequenceManager implements SequenceManager {
         try {
             dataLock.writeLock().lock();
 
-            AbstractSequence sequence = sequences.get(sequenceId);
+            final AbstractSequence sequence = sequences.get(sequenceId);
 
             if (sequence != null && sequence.getState() != Sequence.State.TERMINATING) {
+                if (sequence instanceof InboundSequence) {
+                    actualConcurrentInboundSequences.decrementAndGet();
+                }
                 sequence.preDestroy();
             }
 
@@ -384,7 +418,7 @@ public final class PersistentSequenceManager implements SequenceManager {
             dataLock.writeLock().lock();
 
             Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
-            while(sequenceKeyIterator.hasNext()) {
+            while (sequenceKeyIterator.hasNext()) {
                 String key = sequenceKeyIterator.next();
 
                 AbstractSequence sequence = sequences.get(key);

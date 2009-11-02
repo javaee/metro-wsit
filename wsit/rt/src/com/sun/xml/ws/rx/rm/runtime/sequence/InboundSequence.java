@@ -49,7 +49,6 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class InboundSequence extends AbstractSequence {
-
     private static final Logger LOGGER = Logger.getLogger(InboundSequence.class);
     public static final long INITIAL_LAST_MESSAGE_ID = Sequence.UNSPECIFIED_MESSAGE_ID;
 

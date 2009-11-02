@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -54,6 +55,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.gmbal.ManagedObjectManager;
@@ -94,6 +96,14 @@ public final class InVmSequenceManager implements SequenceManager {
      * Inactivity timeout for a sequence
      */
     private final long sequenceInactivityTimeout;
+    /**
+     * Maximum number of concurrent inbound sequences
+     */
+    private final long maxConcurrentInboundSequences;
+    /**
+     * Actual number of concurrent inbound sequences
+     */
+    private final AtomicLong actualConcurrentInboundSequences;
 
     public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
         this.uniqueEndpointId = uniqueEndpointId;
@@ -101,6 +111,9 @@ public final class InVmSequenceManager implements SequenceManager {
         this.outboundQueueBuilder = outboundQueueBuilder;
 
         this.sequenceInactivityTimeout = configuration.getRmFeature().getSequenceInactivityTimeout();
+
+        this.actualConcurrentInboundSequences = new AtomicLong(0);
+        this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
         
         ManagedObjectManager mom = configuration.getManagedObjectManager();
         if (mom != null) {
@@ -156,6 +169,13 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
+    public long concurrentlyOpenedInboundSequencesCount() {
+        return actualConcurrentInboundSequences.longValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
         SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
         return registerSequence(new OutboundSequence(data, this.outboundQueueBuilder, this));
@@ -165,6 +185,14 @@ public final class InVmSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createInboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
+        final long actualSessions = actualConcurrentInboundSequences.incrementAndGet();
+        if (maxConcurrentInboundSequences >= 0) {
+            if (maxConcurrentInboundSequences < actualSessions) {
+                actualConcurrentInboundSequences.decrementAndGet();
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1156_MAX_CONCURRENT_SESSIONS_REACHED(maxConcurrentInboundSequences));
+            }
+        }
+
         SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
         return registerSequence(new InboundSequence(data, this.inboundQueueBuilder, this));
     }
@@ -226,9 +254,12 @@ public final class InVmSequenceManager implements SequenceManager {
         try {
             dataLock.writeLock().lock();
             if (sequences.containsKey(sequenceId)) {
-                AbstractSequence sequence = sequences.get(sequenceId);
+                final AbstractSequence sequence = sequences.get(sequenceId);
 
                 if (sequence.getState() != Sequence.State.TERMINATING) {
+                    if (sequence instanceof InboundSequence) {
+                        actualConcurrentInboundSequences.decrementAndGet();
+                    }
                     sequence.preDestroy();
                 }
 
@@ -325,7 +356,7 @@ public final class InVmSequenceManager implements SequenceManager {
             while(sequenceKeyIterator.hasNext()) {
                 String key = sequenceKeyIterator.next();
 
-                AbstractSequence sequence = sequences.get(key);
+                final AbstractSequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
                     LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
                     sequenceKeyIterator.remove();

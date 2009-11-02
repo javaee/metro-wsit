@@ -68,6 +68,10 @@ public interface SequenceManager extends TimeSynchronizer {
     @Description("Determines whether this implementation of SeqenceManager is persistent")
     public boolean persistent();
 
+    @ManagedAttribute
+    @Description("Number of concurrently opened (not terminated) inbound sequences (determines number of concurrent RM sessions)")
+    public long concurrentlyOpenedInboundSequencesCount();
+
     /**
      * Closes an existing sequence. The closed sequence is still kept in the internal sequence storage
      * 
