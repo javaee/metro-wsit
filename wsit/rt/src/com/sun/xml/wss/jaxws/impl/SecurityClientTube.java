@@ -192,7 +192,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     @Override
     public NextAction processRequest(Packet packet) {
-         //computinbg EPR related stuff
+         //computing EPR related stuff
          //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
         if (wsitContext != null) {
             WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
@@ -221,6 +221,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             }                           
                             if (valid) {
                                  props.put(PipeConstants.SERVER_CERT, certificate);
+                                 this.serverCert = x509Cert;
                             } 
                         }
                     } catch (XMLStreamException ex) {

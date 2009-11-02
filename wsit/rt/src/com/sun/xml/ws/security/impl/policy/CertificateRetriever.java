@@ -69,7 +69,7 @@ public class CertificateRetriever {
     }
     public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
-        QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");       
+        QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
         setLocationPasswordAndAlias(keyStoreQName, wse);
         
         if (password == null || location == null) {
@@ -202,7 +202,7 @@ public class CertificateRetriever {
         }
         try {
             com.sun.xml.wss.AliasSelector as = (AliasSelector) aliasSelectorClass.newInstance();
-            return as.select(new java.util.HashMap());//passing empty map as runtime properties is not available;
+            return as.select(new java.util.HashMap());//passing empty map as runtime properties is not available here;
         } catch (InstantiationException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;

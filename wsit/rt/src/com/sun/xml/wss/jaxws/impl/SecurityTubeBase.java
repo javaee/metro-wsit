@@ -545,8 +545,11 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
+        ctx.setiterationsForPDK(this.iterationsForPDK);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-        
+        if (serverCert != null) {
+            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        }
         // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
