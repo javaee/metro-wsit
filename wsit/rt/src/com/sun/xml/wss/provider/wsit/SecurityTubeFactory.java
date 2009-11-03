@@ -92,6 +92,11 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     private static final String WSDL_MODEL = "WSDL_MODEL";
     private static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
 
+    private static final boolean disable;
+    static  {
+       disable = Boolean.getBoolean("DISABLE_XWSS_SECURITY");
+    }
+
     public void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
             context.setCodec(createSecurityCodec(context.getBinding()));
@@ -350,13 +355,14 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
             }
         } catch (Exception e) {
             //boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
-            return true;
         }
         //returning true by default for now, because the Client Side Security Config is
         //only accessible as a Runtime Property on BindingProvider.RequestContext
-        //With Metro 2.0 we are disabling the default rule above and one would need to
-        //set System Property USE_XWSS_SECURITY to enable the client pipeline.
-        //boolean bool = Boolean.getBoolean("USE_XWSS_SECURITY");
+        //With Metro 2.0 provide a way of disabling the default rule above and one would need to
+        //set System Property DISABLE_XWSS_SECURITY to disable the client pipeline.
+        if (disable) {
+            return false;
+        }
         return true;
     }
 
