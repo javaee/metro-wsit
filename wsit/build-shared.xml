@@ -61,6 +61,7 @@
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
             <classpath>
                 <pathelement location="../etc/lib/maven-artifact-ant-2.0.4-dep.jar" />
+                <pathelement location="etc/lib/maven-artifact-ant-2.0.4-dep.jar" />
             </classpath>
         </typedef>
         <remoteRepository id="maven.repository" url="http://www.ibiblio.org/maven2/"/>
