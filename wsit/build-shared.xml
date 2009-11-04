@@ -56,26 +56,6 @@
         </sequential>
     </macrodef>
     
-    <macrodef name="create-OSGi-bundle"
-              description="Run the bnd tool on a JAR file">
-
-        <attribute name="jarname"/>
-        <attribute name="dist-image-dir" default="${dist.image.wsit.lib.dir}"/>
-        <sequential>
-            <taskdef resource="aQute/bnd/ant/taskdef.properties"
-                     classpath="${bnd.jar}"/>
-            <mkdir dir="${build.dir}/bnd"/>
-            <copy file="${basedir}/etc/bnd/@{jarname}.bnd" todir="${build.dir}/bnd">
-                <filterset>
-                    <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
-                </filterset>
-            </copy>
-            <bnd classpath="../@{dist-image-dir}/@{jarname}.jar"
-                 output="../${v3.build.dir}"
-                 files="${build.dir}/bnd/@{jarname}.bnd"/>
-        </sequential>
-    </macrodef>
-
     <target name="maven-tasks"
             description="Import the Ant tasks from the Maven 2 Antlib and define a default Maven 2 repository">
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
