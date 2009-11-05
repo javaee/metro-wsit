@@ -291,6 +291,18 @@
                 <regexpmapper from="jaxr-(api|impl)(-.*).jar" to="jaxr-\1.jar"/>
             </chainedmapper>
         </copy>
+        <dependencies filesetId="jaxr.sources.dependencies">
+            <dependency groupId="javax.xml" artifactId="jaxr-api" classifier="sources" version="1.0_03"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.6"/>
+            <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
+        </dependencies>
+        <copy todir="lib/runtime">
+            <fileset refid="jaxr.sources.dependencies"/>
+            <chainedmapper>
+                <flattenmapper/>
+                <regexpmapper from="jaxr-(api|impl)(-.*)-sources.jar" to="jaxr-\1-sources.jar"/>
+            </chainedmapper>
+        </copy>
     </target>
 
     <target name="runtests">
