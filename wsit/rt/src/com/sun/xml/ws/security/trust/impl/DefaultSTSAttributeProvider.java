@@ -199,7 +199,9 @@ public class DefaultSTSAttributeProvider implements STSAttributeProvider{
 
         String idName = isActAs ? "ActAs" : NAME_IDENTIFIER;
         List<String> nameIds = new ArrayList<String>();
-        nameIds.add(name);
+        if (name != null){
+            nameIds.add(name);
+        }
         attrs.put(new QName(nameNS, idName), nameIds);
     }
 }

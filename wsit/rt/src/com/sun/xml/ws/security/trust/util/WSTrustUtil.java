@@ -448,7 +448,6 @@ public class WSTrustUtil {
                
             return  samlFac.createAssertion(assertionEle);
         }catch (Exception ex){
-            ex.printStackTrace();
             throw new WSTrustException(ex.getMessage());
         }
     }
@@ -467,23 +466,24 @@ public class WSTrustUtil {
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
                 final List<String> values = entry.getValue();
-                Element attrEle = null;
-                if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) &&
-                    values.size() > 0){
-                    // create an "actor" attribute
-                    attrEle = createActorAttribute(doc, samlNS, samlPrefix, values.get(0));
+                if (values.size() > 0){
+                    Element attrEle = null;
+                    if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart())){
+                        // create an "actor" attribute
+                        attrEle = createActorAttribute(doc, samlNS, samlPrefix, values.get(0));
 
-                }else {
-                    attrEle = createAttribute(doc, samlNS, samlPrefix, attrKey);
-                    Iterator valueIt = values.iterator();
-                    while (valueIt.hasNext()){
-                        Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
-                        Text text = doc.createTextNode((String)valueIt.next());
-                        attrValueEle.appendChild(text);
-                        attrEle.appendChild(attrValueEle);
+                    }else {
+                        attrEle = createAttribute(doc, samlNS, samlPrefix, attrKey);
+                        Iterator valueIt = values.iterator();
+                        while (valueIt.hasNext()){
+                            Element attrValueEle = doc.createElementNS(samlNS, samlPrefix+":AttributeValue");
+                            Text text = doc.createTextNode((String)valueIt.next());
+                            attrValueEle.appendChild(text);
+                            attrEle.appendChild(attrValueEle);
+                        }
                     }
+                    as.appendChild(attrEle);
                 }
-                as.appendChild(attrEle);
             }
             
             return as;
