@@ -4,5 +4,5 @@ Implementation-Version: 1.0
 Implementation-Vendor: Sun Microsystems, Inc.
 Implementation-Vendor-Id: com.sun
 Class-Path: webservices-rt_ja.jar webservices-rt_zh.jar webservices-rt_fr.jar webservices-rt_de.jar webservices-rt_es.jar webservices-rt_it.jar webservices-rt_sw.jar webservices-rt_ko.jar webservices-rt_zh_TW.jar
-probe-provider-class-names: com.sun.xml.ws.transport.http.servlet.JAXWSRIDeploymentProbeProvider
+probe-provider-class-names: com.sun.xml.ws.transport.http.servlet.JAXWSRIDeploymentProbeProvider,com.sun.xml.ws.transport.http.servlet.JAXWSRIServletProbeProvider
 DynamicImport-Package: org.glassfish.flashlight.provider
