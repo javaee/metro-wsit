@@ -151,6 +151,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.lang.ref.WeakReference;
 import java.security.cert.X509Certificate;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -228,7 +229,7 @@ public abstract class WSITAuthContextBase  {
     protected SOAPVersion soapVersion = null;
     // SOAP Factory
     protected  SOAPFactory soapFactory = null;
-    protected PolicyMap wsPolicyMap = null;
+    //protected PolicyMap wsPolicyMap = null;
     
     protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> outMessagePolicyMap = null;
     protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
@@ -247,7 +248,7 @@ public abstract class WSITAuthContextBase  {
     boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     AddressingVersion addVer = null;
-    WSDLPort port = null;
+    //WSDLPort port = null;
     
     // Security Policy version 
     protected SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
@@ -282,11 +283,10 @@ public abstract class WSITAuthContextBase  {
     
     /** Creates a new instance of WSITAuthContextBase */
     public WSITAuthContextBase(Map<Object, Object> map) {
-        
-        this.nextPipe= (Pipe)map.get("NEXT_PIPE");
+        this.nextPipe = (Pipe)map.get("NEXT_PIPE");
         this.nextTube = (Tube)map.get("NEXT_TUBE");
-        wsPolicyMap = (PolicyMap)map.get("POLICY");
-        port =(WSDLPort)map.get("WSDL_MODEL");
+        PolicyMap wsPolicyMap = (PolicyMap)map.get("POLICY");
+        WSDLPort port =(WSDLPort)map.get("WSDL_MODEL");
         if (this instanceof WSITClientAuthContext) {
 //            WSService service = (WSService)map.get("SERVICE");
             WSBinding binding = (WSBinding)map.get("BINDING");
@@ -308,7 +308,7 @@ public abstract class WSITAuthContextBase  {
         this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
         
         if(wsPolicyMap != null){
-            collectPolicies();
+            collectPolicies(wsPolicyMap);
         }
         
         //unmarshaller as instance variable of the pipe
@@ -340,7 +340,7 @@ public abstract class WSITAuthContextBase  {
      *   2)wsdl:Binding
      */
     
-    protected void collectPolicies(){
+    protected void collectPolicies(PolicyMap wsPolicyMap){
         try{
             if (wsPolicyMap == null) {
                 return;

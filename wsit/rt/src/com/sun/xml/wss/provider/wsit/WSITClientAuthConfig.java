@@ -85,7 +85,6 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private ReentrantReadWriteLock.WriteLock wLock;
     private volatile boolean secEnabled;
     private Map<Object, WSITClientAuthContext> tubetoClientAuthContextHash = Collections.synchronizedMap(new WeakHashMap<Object, WSITClientAuthContext>());
-
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;

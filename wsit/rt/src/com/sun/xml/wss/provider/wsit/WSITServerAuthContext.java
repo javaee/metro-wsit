@@ -93,6 +93,7 @@ import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ import java.net.URI;
 import javax.xml.bind.JAXBElement;
 
 import java.util.logging.Level;
-import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.lang.ref.WeakReference;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**
@@ -139,7 +140,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     String operation = null;
     //Subject subject = null;
     //Map map = null;
-    WSEndpoint endPoint =  null;
+    WeakReference<WSEndpoint> endPoint =  null;
     
     //***************AuthModule Instance**********
     WSITServerAuthModule  authModule = null;
@@ -153,8 +154,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         this.operation = operation;
         //this.subject = subject;
         //this.map = map;
-        endPoint = (WSEndpoint)map.get("ENDPOINT");
-        sessionManager = SessionManager.getSessionManager(endPoint);
+        endPoint = new WeakReference((WSEndpoint)map.get("ENDPOINT"));
+        sessionManager = SessionManager.getSessionManager(endPoint.get());
         Iterator it = inMessagePolicyMap.values().iterator();
         Set configAssertions = null;
         while (it.hasNext()) {
@@ -299,8 +300,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         issuedTokenContextMap.clear();
-        SessionManager.removeSessionManager(endPoint);
-        NonceManager.deleteInstance(endPoint);
+        SessionManager.removeSessionManager(endPoint.get());
+        NonceManager.deleteInstance(endPoint.get());
     }
     
     public Packet validateRequest(Packet packet, Subject clientSubject, Subject serviceSubject, Map<Object, Object> sharedState)
@@ -696,7 +697,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 return (CallbackHandler)obj;
             } else {
                 //ServletContext context = endPoint.getContainer().getSPI(ServletContext.class);
-                RealmAuthenticationAdapter adapter = this.getRealmAuthenticationAdapter(endPoint);
+                RealmAuthenticationAdapter adapter = this.getRealmAuthenticationAdapter(endPoint.get());
                 return new DefaultCallbackHandler("server", props, adapter);
             }
         }catch (Exception e) {

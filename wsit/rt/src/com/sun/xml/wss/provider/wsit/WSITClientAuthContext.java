@@ -44,7 +44,6 @@
  */
 package com.sun.xml.wss.provider.wsit;
 
-import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.AttachmentSet;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -60,7 +59,6 @@ import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
@@ -125,6 +123,7 @@ import javax.xml.bind.JAXBElement;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.OPERATION_SCOPE;
 import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
@@ -133,12 +132,11 @@ import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import java.util.logging.Level;
-import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import java.lang.ref.WeakReference;
 import java.util.Hashtable;
 import java.util.ListIterator;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -166,12 +164,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     private Set wsscConfig = null;
     private CallbackHandler handler = null;
     //***************AuthModule Instance**********
-    WSITClientAuthModule authModule = null;
-    private Container container = null;  
+    WSITClientAuthModule authModule = null;  
     private Hashtable<String, String> scPolicyIDtoSctIdMap = new Hashtable<String, String>();
-
-    protected WSITClientAuthConfig authConfig = null;
-    protected Object tubeOrPipe;
+    protected WeakReference<WSITClientAuthConfig> authConfig;
+    protected WeakReference<Object> tubeOrPipe;
 
 
     
@@ -179,16 +175,12 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     @SuppressWarnings("unchecked")
     public WSITClientAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
-        this.authConfig = (WSITClientAuthConfig) map.get(PipeConstants.AUTH_CONFIG);
-        this.tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
-        WSService service = (WSService) map.get(PipeConstants.SERVICE);
+        this.authConfig = new WeakReference<WSITClientAuthConfig>((WSITClientAuthConfig) map.get(PipeConstants.AUTH_CONFIG));
+        this.tubeOrPipe = new WeakReference<Object>(map.get(PipeConstants.SECURITY_PIPE));
         WSDLPortImpl wpi = (WSDLPortImpl) map.get("WSDL_MODEL");
         ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) map.get(PipeConstants.WRAPPED_CONTEXT);
         //this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
 
-        if (service != null) {
-            container = service.getContainer();
-        }
         //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
@@ -431,7 +423,9 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         cancelSecurityContextToken();
-        authConfig.cleanupAuthContext(this.tubeOrPipe);
+        authConfig.get().cleanupAuthContext(this.tubeOrPipe.get());
+        authConfig.clear();
+        this.tubeOrPipe.clear();
         //issuedTokenContextMap.clear();
         //scPolicyIDtoSctIdMap.clear();
     }
