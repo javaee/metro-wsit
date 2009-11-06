@@ -667,11 +667,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         if(cachedOp != null){
             WSDLOperation wsdlOperation = cachedOp.getOperation();
             QName faultDetail = packet.getMessage().getFirstDetailEntryName();
-            if(faultDetail == null){
-                return null;
+            WSDLFault fault = null;
+            if (faultDetail != null) {
+                fault = wsdlOperation.getFault(faultDetail);
             }
-            WSDLFault fault = wsdlOperation.getFault(faultDetail);
             SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOp);
+            if (fault == null) {
+                MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
+                return faultPolicy1;
+            }
             SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
             MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
             return faultPolicy;
