@@ -290,15 +290,21 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             for(Map.Entry<QName, List<String>> entry : entries){
                 final QName attrKey = entry.getKey();
                 final List<String> values = entry.getValue();
-                if (values != null && values.size() > 0){
+                if (values != null){
                     if ("ActAs".equals(attrKey.getLocalPart())){
-                        id = values.get(0);
+                         if (values.size() > 0){
+                            id = values.get(0);
+                        }else{
+                            id = null;
+                        }
                         idNS = attrKey.getNamespaceURI();
                         idName = attrKey;
 
                         break;
                     } else if (STSAttributeProvider.NAME_IDENTIFIER.equals(attrKey.getLocalPart()) && subj == null){
-                        id = values.get(0);
+                        if (values.size() > 0){
+                            id = values.get(0);
+                        }
                         idNS = attrKey.getNamespaceURI();
                         idName = attrKey;
                     }//else{
@@ -308,7 +314,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
                 }
             }
             NameIdentifier nameId = null;
-            if (idName != null){
+            if (idName != null && id != null){
                 nameId = samlFac.createNameIdentifier(id, idNS, null);
                 claimedAttrs.remove(idName);
             }
