@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
+import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -808,6 +809,11 @@ public class SecurityServerTube extends SecurityTubeBase {
     
     private CallbackHandler configureServerHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         //Properties props = new Properties();
+        CallbackHandlerFeature cbFeature =
+                tubeConfig.getBinding().getFeature(CallbackHandlerFeature.class);
+        if (cbFeature != null) {
+            return cbFeature.getHandler();
+        }
         String ret = populateConfigProperties(configAssertions, props);
         try {
             if (ret != null) {
