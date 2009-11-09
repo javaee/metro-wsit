@@ -69,6 +69,7 @@
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <include name="jaxrpc-api.jar"/>
+                    <exclude name="*-sources.jar"/>
                     <exclude name="*javadocs*.jar"/>
                     <exclude name="jaxb-api.jar"/>
                     <exclude name="jaxws-api.jar"/>
@@ -128,7 +129,6 @@
             <updateManifestWithVersion file="${extrajar-tmpdir}/MANIFEST.MF" class-path="webservices-extra-api.jar"/>
             <concatmanifest tempdir="${extrajar-tmpdir}" manifest="${extrajar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="jmac-api.jar,http.jar,jsr250-api.jar,mail-1.4.jar,grizzly.jar">
-                    <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
@@ -147,7 +147,6 @@
             <updateManifestWithVersion file="${extraapijar-tmpdir}/MANIFEST.MF"/>
             <concatmanifest tempdir="${extraapijar-tmpdir}" manifest="${extraapijar-tmpdir}/MANIFEST.MF">
                 <fileset dir="@{libdir}" includes="jaxr-api.jar,jaxrpc-api.jar">
-                    <!--<includesfile name="*.jar"/>-->
                     <exclude name="*javadocs*.jar"/>
                 </fileset>
             </concatmanifest>
