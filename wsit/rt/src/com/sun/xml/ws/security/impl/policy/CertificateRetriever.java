@@ -313,11 +313,13 @@ public class CertificateRetriever {
                     aliasSelector = pa.getAttributeValue(new QName("aliasSelector"));
 
                     StringBuffer sb = null;
-                    sb = new StringBuffer(location);
-                    if (location.startsWith("$WSIT")) {
-                        String path = System.getProperty("WSIT_HOME");
-                        sb.replace(0, 10, path);
-                        location = sb.toString();
+                    if (location != null) {
+                        sb = new StringBuffer(location);
+                        if (location.startsWith("$WSIT")) {
+                            String path = System.getProperty("WSIT_HOME");
+                            sb.replace(0, 10, path);
+                            location = sb.toString();
+                        }
                     }
                 }
             }
