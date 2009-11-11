@@ -202,7 +202,11 @@ public class CertificateRetriever {
         }
         try {
             com.sun.xml.wss.AliasSelector as = (AliasSelector) aliasSelectorClass.newInstance();
-            return as.select(new java.util.HashMap());//passing empty map as runtime properties is not available here;
+            String myAlias = as.select(new java.util.HashMap());//passing empty map as runtime properties is not available here;
+            if(myAlias == null){
+               log.log(Level.WARNING, "alias retrieved using the aliasSelector is null");
+            }
+            return myAlias;
         } catch (InstantiationException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
@@ -243,6 +247,9 @@ public class CertificateRetriever {
             cbh.handle(callbacks);
             X509Certificate cert = null;
             cert = (X509Certificate) ((ksc.getKeystore() != null) ? (ksc.getKeystore().getCertificate(alias)) : null);
+            if(cert == null && alias != null){
+                log.log(Level.WARNING, "certificate not found corrosponding to the alias =  "+ alias);
+            }
             return cert;
         } catch (IOException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
