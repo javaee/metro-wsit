@@ -698,7 +698,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         if (context != null) {
             WSBindingProvider bpr = context.getBindingProvider();
             x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
-            if (x509Cert == null) {
+            if (x509Cert != null) {
+                log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
                 return x509Cert;
             }
         }
@@ -723,9 +724,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                         try {
                             valid = secEnv.validateCertificate(certificate, null);
                         } catch (WssSoapFaultException ex) {
-                            log.log(Level.WARNING, "Could not validate the certificate "+ certificate);
+                           log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it  "+certificate);
                         }
                         if (valid) {
+                            log.log(Level.INFO, "validation of the certificate found in the server wsdl is successful,so using it");
                             return certificate;
                         }
                     }
