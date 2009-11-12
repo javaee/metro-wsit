@@ -67,12 +67,12 @@
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>webservices-api</artifactId>
-            <version>${project.version}</version>
+            <version>@metro.version@</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>webservices-rt</artifactId>
-            <version>${project.version}</version>
+            <version>@metro.version@</version>
         </dependency>
     </dependencies>
     
