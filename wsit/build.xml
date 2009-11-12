@@ -281,7 +281,7 @@
         <echo message="Remember to update the JAXR version settings before running this target."/>
         <dependencies filesetId="jaxr.dependencies">
             <dependency groupId="javax.xml" artifactId="jaxr-api" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="1.0.6"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="1.0.7"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
@@ -293,7 +293,7 @@
         </copy>
         <dependencies filesetId="jaxr.sources.dependencies">
             <dependency groupId="javax.xml" artifactId="jaxr-api" classifier="sources" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.6"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.7"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
