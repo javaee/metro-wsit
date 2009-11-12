@@ -57,7 +57,7 @@
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>webservices-api</artifactId>
-            <version>${project.version}</version>
+            <version>@metro.version@</version>
         </dependency>
     </dependencies>
     <description>
