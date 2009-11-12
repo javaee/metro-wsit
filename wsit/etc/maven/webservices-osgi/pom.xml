@@ -75,7 +75,7 @@
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>webservices-api-osgi</artifactId>
-            <version>${project.version}</version>
+            <version>@metro.version@</version>
         </dependency>
         <dependency>
             <groupId>com.ctc.wstx</groupId>
