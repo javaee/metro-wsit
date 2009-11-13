@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,38 +62,38 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
     }
     
     public void testUnmarshallSingleSimplePolicyModel() throws Exception {
-        unmarshallModel("single_alternative_policy/policy5.xml");
+        unmarshalModel("single_alternative_policy/policy5.xml");
     }
     
     public void testUnmarshallSingleComplexPolicyModel() throws Exception {
-        unmarshallModel("complex_policy/nested_assertions_with_alternatives.xml");
+        unmarshalModel("complex_policy/nested_assertions_with_alternatives.xml");
     }
     
     public void testUnmarshallComplexPolicyModelWithAssertionParameters() throws Exception {
-        unmarshallModel("complex_policy/assertion_parameters1.xml");
+        unmarshalModel("complex_policy/assertion_parameters1.xml");
     }
     
     public void testUnmarshallComplexPolicyModelWithAssertionParametersWithValues() throws Exception {
-        unmarshallModel("bug_reproduction/assertion_parameter_value_unmarshalling.xml");
+        unmarshalModel("bug_reproduction/assertion_parameter_value_unmarshalling.xml");
     }
     
     public void testUnmarshallPolicyModelWithPolicyReference() throws Exception {
-        unmarshallModel("bug_reproduction/policy_reference1.xml");
+        unmarshalModel("bug_reproduction/policy_reference1.xml");
     }
     
     public void testUnmarshallPolicyModelWithXmlId() throws Exception {
-        PolicySourceModel model = unmarshallModel("complex_policy/policy_with_xmlid.xml");
+        PolicySourceModel model = unmarshalModel("complex_policy/policy_with_xmlid.xml");
         assertEquals("Unmarshalled xml:id is not the same as expected", "testXmlId", model.getPolicyId());
     }
     
     public void testUnmarshallPolicyModelWithWsuId() throws Exception {
-        PolicySourceModel model = unmarshallModel("complex_policy/policy_with_wsuid.xml");
+        PolicySourceModel model = unmarshalModel("complex_policy/policy_with_wsuid.xml");
         assertEquals("Unmarshalled wsu:Id is not the same as expected", "testWsuId", model.getPolicyId());
     }
     
     public void testUnmarshallPolicyModelWithXmlIdAndWsuId() throws Exception {
         try {
-            unmarshallModel("complex_policy/policy_with_xmlid_and_wsuid.xml");
+            unmarshalModel("complex_policy/policy_with_xmlid_and_wsuid.xml");
             fail("Should throw an exception");
         } catch (PolicyException ignored) {
             // ok.
@@ -103,14 +103,23 @@ public class XmlPolicyModelUnmarshallerTest extends TestCase {
     }
     
     public void testUnmarshallModelWithProperPolicyNamespaceVersion() throws Exception {
-        PolicySourceModel model = unmarshallModel("namespaces/policy-v1.2.xml");
+        PolicySourceModel model = unmarshalModel("namespaces/policy-v1.2.xml");
         assertEquals("Unmarshalled policy namespace version does not match with original.", NamespaceVersion.v1_2, model.getNamespaceVersion());
 
-        model = unmarshallModel("namespaces/policy-v1.5.xml");
+        model = unmarshalModel("namespaces/policy-v1.5.xml");
         assertEquals("Unmarshalled policy namespace version does not match with original.", NamespaceVersion.v1_5, model.getNamespaceVersion());
     }
     
-    private PolicySourceModel unmarshallModel(String resource) throws Exception {
+    /**
+     * Testcase for https://wsit.dev.java.net/issues/show_bug.cgi?id=1305
+     * @throws Exception
+     */
+    public void testPolicyAssertionOptionalFalse() throws Exception {
+        PolicySourceModel model = unmarshalModel("bug_reproduction/assertion_optional_false_unmarshalling.xml");
+        assertFalse(model.getRootNode().getChildren().iterator().next().getNodeData().isOptionalAttributeSet());
+    }
+
+    private PolicySourceModel unmarshalModel(String resource) throws Exception {
         Reader reader = PolicyResourceLoader.getResourceReader(resource);
         PolicySourceModel model = xmlUnmarshaller.unmarshalModel(reader);
         reader.close();

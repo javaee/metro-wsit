@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -207,9 +207,9 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
                 throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0059_MULTIPLE_ATTRS_WITH_SAME_NAME_DETECTED_FOR_ASSERTION(nextAttribute.getName(), childElement.getName())));
             } else {
                 if (nsVersion.asQName(XmlToken.Optional).equals(name)) {
-                    optional = true;
+                    optional = parseBooleanValue(nextAttribute.getValue());
                 } else if (nsVersion.asQName(XmlToken.Ignorable).equals(name)) {
-                    ignorable = true;
+                    ignorable = parseBooleanValue(nextAttribute.getValue());
                 } else {
                     attributeMap.put(name, nextAttribute.getValue());
                 }
@@ -335,4 +335,24 @@ final class XmlPolicyModelUnmarshaller extends PolicyModelUnmarshaller {
 
         }
     }
+
+    /**
+     * Return true if the value is "true" or "1". Return false if the value is
+     * "false" or "0". Throw an exception otherwise. The test is case sensitive.
+     *
+     * @param value The String representation of the value. Must not be null.
+     * @return True if the value is "true" or "1". False if the value is
+     *   "false" or "0".
+     * @throws PolicyException If the value is not "true", "false", "0" or "1".
+     */
+    private boolean parseBooleanValue(String value) throws PolicyException {
+        if ("true".equals(value) || "1".equals(value)) {
+            return true;
+        }
+        else if ("false".equals(value) || "0".equals(value)) {
+            return false;
+        }
+        throw LOGGER.logSevereException(new PolicyException(LocalizationMessages.WSP_0095_INVALID_BOOLEAN_VALUE(value)));
+    }
+
 }

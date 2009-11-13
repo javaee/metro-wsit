@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,26 +39,28 @@ package com.sun.xml.ws.policy.sourcemodel;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.privateutil.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.policy.privateutil.PolicyUtils;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
 
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
-import java.io.Serializable;
-
 /**
  * Wrapper class for possible data that each 'assertion' and 'assertion parameter content' policy source model node may
  * have attached.
  * <p/>
- * These data, when stored in an 'assertion' model node, are intended to be used as input parameter when creating
+ * This data, when stored in an 'assertion' model node, is intended to be used as input parameter when creating
  * {@link com.sun.xml.ws.policy.PolicyAssertion} objects via {@link com.sun.xml.ws.policy.spi.PolicyAssertionCreator}
  * implementations.
  *
  * @author Marek Potociar (marek.potociar@sun.com)
+ * @author Fabian Ritzmann
  */
 public final class AssertionData implements Cloneable, Serializable {
+    private static final long serialVersionUID = 4416256070795526315L;
     private static final PolicyLogger LOGGER = PolicyLogger.getLogger(AssertionData.class);
     
     private final QName name;
@@ -167,9 +169,11 @@ public final class AssertionData implements Cloneable, Serializable {
                     LocalizationMessages.WSP_0074_CANNOT_CREATE_ASSERTION_BAD_TYPE(type, ModelNode.Type.ASSERTION, ModelNode.Type.ASSERTION_PARAMETER_NODE)));
         }
     }
-    
+
     /**
-     * TODO: javadoc
+     * Copy constructor.
+     *
+     * @param data The instance that is to be copied.
      */
     AssertionData(final AssertionData data) {
         this.name = data.name;
@@ -190,7 +194,10 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Returns true if the given attribute exists, false otherwise.
+     *
+     * @param name The name of the attribute. Must not be null.
+     * @return True if the given attribute exists, false otherwise.
      */
     public boolean containsAttribute(final QName name) {
         synchronized (attributes) {
@@ -199,9 +206,6 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     
-    /**
-     * An {@code Object.equals(Object obj)} method override.
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -226,7 +230,12 @@ public final class AssertionData implements Cloneable, Serializable {
     
     
     /**
-     * TODO: javadoc
+     * Returns the value of the given attribute. Returns null if the attribute
+     * does not exist.
+     *
+     * @param name The name of the attribute. Must not be null.
+     * @return The value of the given attribute. Returns null if the attribute
+     *   does not exist.
      */
     public String getAttributeValue(final QName name) {
         synchronized (attributes) {
@@ -315,7 +324,10 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Removes the given attribute from the assertion data.
+     *
+     * @param name The name of the attribute. Must not be null
+     * @return The value of the removed attribute.
      */
     public String removeAttribute(final QName name) {
         synchronized (attributes) {
@@ -324,7 +336,10 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Adds or overwrites an attribute.
+     *
+     * @param name The name of the attribute.
+     * @param value The value of the attribute.
      */
     public void setAttribute(final QName name, final String value) {
         synchronized (attributes) {
@@ -333,7 +348,9 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Sets the optional attribute.
+     *
+     * @param value The value of the optional attribute.
      */
     public void setOptionalAttribute(final boolean value) {
         optional = value;
@@ -341,14 +358,18 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Tests if the optional attribute is set.
+     *
+     * @return True if optional is set and is true. False otherwise.
      */
     public boolean isOptionalAttributeSet() {
         return optional;
     }
     
     /**
-     * TODO: javadoc
+     * Sets the ignorable attribute.
+     *
+     * @param value The value of the ignorable attribute.
      */
     public void setIgnorableAttribute(final boolean value) {
         ignorable = value;
@@ -356,15 +377,14 @@ public final class AssertionData implements Cloneable, Serializable {
     }
     
     /**
-     * TODO: javadoc
+     * Tests if the ignorable attribute is set.
+     *
+     * @return True if ignorable is set and is true. False otherwise.
      */
     public boolean isIgnorableAttributeSet() {
         return ignorable;
     }
     
-    /**
-     * An {@code Object.toString()} method override.
-     */
     @Override
     public String toString() {
         return toString(0, new StringBuffer()).toString();
