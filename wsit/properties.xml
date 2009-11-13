@@ -66,11 +66,11 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
-    <property name="jaxb.osgi.dependency.version" value="2.2-promoted-b50"/>
+    <property name="jaxb.osgi.dependency.version" value="2.2-promoted-b65"/>
 
     <property name="release.impl.version" value="2.0"/>
     <property name="release.underscore.version" value="2_0"/>
-    <property name="release.impl.version.suffix" value="SNAPSHOT"/>
+    <property name="release.impl.version.suffix" value="FCS"/>
     <tstamp>
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
     </tstamp>
