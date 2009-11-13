@@ -108,6 +108,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         }
         if (tubeOrPipe == null) {
             //this is a cloned pipe
+            System.out.println("coming to getAuthContext() of WsitClientAuthConfig..");
             return clientAuthContext;
         }
         //now check if security is enabled

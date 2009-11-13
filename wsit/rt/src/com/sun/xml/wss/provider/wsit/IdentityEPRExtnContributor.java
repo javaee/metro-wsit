@@ -110,6 +110,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         if (found == false) {
             return null;
         } else {
+            log.log(Level.INFO, "EnableEPRIdentity assertion is enabled");
             try {
                 URL url = SecurityUtil.loadFromClasspath("META-INF/ServerCertificate.cert");
                 if (url != null) {

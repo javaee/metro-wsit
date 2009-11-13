@@ -260,7 +260,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);
             throw new RuntimeException(LogStringsMessages.WSITPVD_0028_ERROR_INIT_AUTH_MODULE(), e);
         }
-    }
+            }
 
     public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException {
 
@@ -729,6 +729,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                         if (valid) {
                             log.log(Level.INFO, "validation of the certificate found in the server wsdl is successful,so using it");
                             return certificate;
+                        }else{
+                            log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it  "+certificate);
                         }
                     }
                 } catch (XMLStreamException ex) {

@@ -82,7 +82,6 @@ public class CertificateRetriever {
         }
         if(alias == null){
             alias = getAliasUsingAliasSelector();
-
         }
         KeyStore keyStore = null;
         try {
@@ -90,6 +89,9 @@ public class CertificateRetriever {
             fis = new java.io.FileInputStream(location);
             keyStore.load(fis, password.toCharArray());
             cs = keyStore.getCertificate(alias);
+            if(cs == null){
+              log.log(Level.WARNING, "certificate not found corrosponding to the alias = "+ alias);
+            }
         } catch (FileNotFoundException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
