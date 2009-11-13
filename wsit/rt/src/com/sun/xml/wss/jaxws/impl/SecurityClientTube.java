@@ -220,9 +220,9 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                                 log.log(Level.WARNING, "Could not validate the the server certificate found in the wsdl, so not using it  "+certificate);
                             }
                             if (valid) {
-                                log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
+                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
                                  props.put(PipeConstants.SERVER_CERT, certificate);
-                                 this.serverCert = x509Cert;
+                                 this.serverCert = certificate;
                             } 
                         }
                     } catch (XMLStreamException ex) {
