@@ -43,6 +43,8 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
@@ -64,11 +66,11 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
         SecurityPolicyUtil.setName(target, policy);
 
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
-
+       
         String includeToken = token.getIncludeToken();
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
+        if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
-           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)){
+           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) || PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
