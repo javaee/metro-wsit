@@ -94,7 +94,7 @@
                                 
                                 <zip destfile="${project.build.directory}/webservices-api-src.zip" update="false" duplicate="fail">
                                     <fileset dir="${project.build.directory}/api-src"/>
-                                    <zipfileset src="../../../lib/runtime/jaxr-api-src.zip"/>
+                                    <zipfileset src="../../../lib/runtime/jaxr-api-sources.jar"/>
                                     <zipfileset src="../../../lib/runtime/jaxws-api-src.zip"/>
                                     <zipfileset src="../../../lib/runtime/jsr181-api.src.zip"/>
                                     <zipfileset src="../../../lib/runtime/saaj-api-src.zip"/>
