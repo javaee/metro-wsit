@@ -66,9 +66,9 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
 
         String includeToken = token.getIncludeToken();
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
+        if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
-           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)){
+           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken))|| PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();

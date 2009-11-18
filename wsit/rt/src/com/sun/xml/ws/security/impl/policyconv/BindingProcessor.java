@@ -152,7 +152,9 @@ public abstract class BindingProcessor {
         if (primarySP == null){
             return;
         }
-        protectToken(token,false,spVersion);
+        if ((isServer && isIncoming) || (!isServer && !isIncoming)) {
+            protectToken(token, false, spVersion);
+        }
         }
     
     protected void protectToken(WSSPolicy token,boolean ignoreSTR,SecurityPolicyVersion spVersion){
@@ -218,8 +220,10 @@ public abstract class BindingProcessor {
                 ((IssuedTokenKeyBinding)token).setSTRID(uid);
             }
         }
-        
-        if(spVersion.includeTokenNever.equals(includeToken)){
+
+        //when the include token is Never , the sig. reference will refer to the id of the token which is not present in the message
+        // also in case of saml token we have to use the id #_SAML, so ,
+        if(spVersion.includeTokenNever.equals(includeToken) || PolicyTypeUtil.samlTokenPolicy(token)){
             uuid = uid; 
         }
         //TODO:: Handle DTK and IssuedToken.

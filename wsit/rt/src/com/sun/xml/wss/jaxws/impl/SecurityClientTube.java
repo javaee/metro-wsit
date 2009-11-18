@@ -221,7 +221,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             }                           
                             if (valid) {
                                  props.put(PipeConstants.SERVER_CERT, certificate);
-                                 this.serverCert = x509Cert;
+                                 this.serverCert = certificate;
                             } 
                         }
                     } catch (XMLStreamException ex) {
