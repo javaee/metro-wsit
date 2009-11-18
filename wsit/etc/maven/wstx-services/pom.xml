@@ -80,6 +80,14 @@
         <plugins>
             <!-- fake out maven and install the binary artifact -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.jvnet.maven-antrun-extended-plugin</groupId>
                 <artifactId>maven-antrun-extended-plugin</artifactId>
                 <executions>
