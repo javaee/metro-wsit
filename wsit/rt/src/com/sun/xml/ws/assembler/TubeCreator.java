@@ -51,9 +51,9 @@ final class TubeCreator {
     private final TubeFactory factory;
     private final String msgDumpPropertyBase;
 
-    TubeCreator(TubeFactoryConfig config) {
+    TubeCreator(TubeFactoryConfig config, ClassLoader tubeFactoryClassLoader) {
         try {
-            Class<?> factoryClass = Class.forName(config.getClassName());
+            Class<?> factoryClass = Class.forName(config.getClassName(), true, tubeFactoryClassLoader);
             if (TubeFactory.class.isAssignableFrom(factoryClass)) {
                 @SuppressWarnings("unchecked") 
                 // We can suppress "unchecked" warning here as we are checking for the correct type in the if statement above

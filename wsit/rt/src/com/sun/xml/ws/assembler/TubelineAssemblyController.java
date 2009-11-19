@@ -112,9 +112,11 @@ public class TubelineAssemblyController {
     }
 
     private Collection<TubeCreator> initializeTubeCreators(TubeFactoryList tfl) {
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+
         LinkedList<TubeCreator> tubeCreators = new LinkedList<TubeCreator>();
         for (TubeFactoryConfig tubeFactoryConfig : tfl.getTubeFactoryConfigs()) {
-            tubeCreators.addFirst(new TubeCreator(tubeFactoryConfig));
+            tubeCreators.addFirst(new TubeCreator(tubeFactoryConfig, contextClassLoader));
         }
         return tubeCreators;
     }
