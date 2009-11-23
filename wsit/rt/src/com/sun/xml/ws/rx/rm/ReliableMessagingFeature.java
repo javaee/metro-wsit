@@ -568,7 +568,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * retransmits the message. The infrastructure tries to send the message for
      * at most a {@link #getMaxMessageRetransmissionCount()}  number of times.
      * Not receiving an acknowledgment before this limit is reached is considered
-     * a fatal communication failure, and causes the RM session failure.
+     * a fatal communication failure, and causes the RM session to fail.
      *
      * The infrastructure uses a back-off algorithm retrieved via
      * {@link #getRetransmissionBackoffAlgorithm()} to determine when to retransmit,
