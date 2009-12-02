@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -45,23 +45,11 @@
     <import file="properties.xml"/>
     <import file="build-shared.xml"/>
 
-    <taskdef name="installerBuilder"
-        classname="com.sun.tools.xjc.installer.builder.BuilderTask">
-        <classpath>
-            <fileset dir="${etc.lib.dir}" includes="installer-builder.jar, sfx4j-1.0.jar"/>
-        </classpath>
-    </taskdef>
-
     <target name="-do-jar-without-manifest" depends="image, bundle, create-pom-files">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
     
-    <target name="installer">
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
-    </target>
-
     <target name="dist" depends="jar"/>
 
     <target name="main" depends="dist"
@@ -69,7 +57,6 @@
     
     <target name="bundle" depends="init, compile"
             description="Create the Metro OSGi bundle for GlassFish V3.">
-
         <taskdef resource="aQute/bnd/ant/taskdef.properties"
                  classpath="${bnd.jar}"/>
 
@@ -108,8 +95,7 @@
             <fileset dir="${lib.osgi.dir}">
                 <include name="jaxb*osgi.jar"/>
             </fileset>
-        </copy>
-             
+        </copy>             
     </target>
 
     <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
