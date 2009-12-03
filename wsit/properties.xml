@@ -44,7 +44,6 @@
     <property name="lib.tooltime.dir" value="${lib.dir}/tooltime"/>
     <property name="lib.compiletime.dir" value="${lib.dir}/compiletime"/>
     <property name="lib.osgi.dir" value="${lib.dir}/osgi"/>
-    <property name="lib.releasenotes.dir" value="${lib.dir}/releasenotes"/>
     <property name="dist.dir" value="dist"/>
     <property name="dist.image.dir" value="${dist.dir}/image"/>
     <property name="dist.image.wsit.dir" value="${dist.image.dir}/${install.name}"/>
@@ -68,9 +67,27 @@
 
     <property name="jaxb.osgi.dependency.version" value="2.2-promoted-b65"/>
 
+    <!-- BEGIN: RELEASE SECTION -->
+    <!-- This section needs to be updated with each new release -->
+
     <property name="release.impl.version" value="2.0"/>
     <property name="release.underscore.version" value="2_0"/>
+    <property name="release.dash.version" value="2-0"/>
     <property name="release.impl.version.suffix" value="FCS"/>
+    <property name="release.context.url" value="2.0"/>
+
+    <property name="release.build.date" value="December 10, 2009"/>
+
+    <property name="product.name" value="Metro ${release.impl.version}" />
+
+    <property name="jaxws.release.version" value="2.2"/>
+    <property name="jaxws.release.context.url" value="2.2"/>
+
+    <property name="jaxb.release.version" value="2.2"/>
+    <property name="jaxb.release.context.url" value="2.2"/>
+
+    <!-- END: RELEASE SECTION -->
+
     <tstamp>
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
     </tstamp>

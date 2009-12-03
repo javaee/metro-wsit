@@ -3,7 +3,7 @@
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  
- Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
@@ -45,23 +45,11 @@
     <import file="properties.xml"/>
     <import file="build-shared.xml"/>
 
-    <taskdef name="installerBuilder"
-        classname="com.sun.tools.xjc.installer.builder.BuilderTask">
-        <classpath>
-            <fileset dir="${etc.lib.dir}" includes="installer-builder.jar, sfx4j-1.0.jar"/>
-        </classpath>
-    </taskdef>
-
     <target name="-do-jar-without-manifest" depends="image, bundle, create-pom-files">
         <mkdir dir="${dist.dir}"/>
         <zip basedir="${dist.image.dir}" destfile="${dist.dir}/${install.name}.zip"/>
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
     </target>
     
-    <target name="installer">
-        <installerBuilder classFile="${dist.dir}/${install.name}-installer.jar" licenseFile="LICENSE.txt" zipFile="${dist.dir}/${install.name}.zip"/>
-    </target>
-
     <target name="dist" depends="jar"/>
 
     <target name="main" depends="dist"
@@ -69,7 +57,6 @@
     
     <target name="bundle" depends="init, compile"
             description="Create the Metro OSGi bundle for GlassFish V3.">
-
         <taskdef resource="aQute/bnd/ant/taskdef.properties"
                  classpath="${bnd.jar}"/>
 
@@ -108,8 +95,7 @@
             <fileset dir="${lib.osgi.dir}">
                 <include name="jaxb*osgi.jar"/>
             </fileset>
-        </copy>
-             
+        </copy>             
     </target>
 
     <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
@@ -125,18 +111,39 @@
     <target name="image" description="Create the Metro tool and runtime jars.">
         <filter token="release.impl.version" value="${release.impl.version}"/>
         <filter token="release.impl.version.suffix" value="${release.impl.version.suffix}"/>
+        <filter token="release.underscore.version" value="${release.underscore.version}" />
+        <filter token="release.dash.version" value="${release.dash.version}" />
+        <filter token="release.date" value="${release.build.date}"/>
+
+        <filter token="release.context.url" value="${release.context.url}"/>
+        
+        <filter token="wsit.release.version" value="${release.impl.version}"/>
+        
+        <filter token="jaxws.release.version" value="${jaxws.release.version}"/>
+        <filter token="jaxws.release.context.url" value="${jaxws.release.context.url}"/>
+
+        <filter token="jaxb.release.version" value="${jaxb.release.version}"/>
+        <filter token="jaxb.release.context.url" value="${jaxb.release.context.url}"/>
+
+        <filter token="product.name" value="${product.name}"/>
+        <filter token="product.shortname" value="Metro"/>
+
         <copy todir="${dist.image.wsit.dir}" filtering="true">
             <fileset dir="${basedir}" includes="CDDL*.*"/>
             <fileset dir="${basedir}" includes="LICENSE.txt"/>
+            <fileset dir="${etc.dir}" includes="readme.html"/>
             <fileset dir="${etc.dir}" includes="metro-on-*.*"/>
         </copy>
-        <generate-release-notes target="${dist.image.wsit.dir}/docs"/>
         <!-- generate samples -->
         <unzip src="lib/jaxws-samples.zip" dest="${dist.image.wsit.dir}/samples" />
+        <copy todir="${dist.image.wsit.dir}/samples">
+            <fileset dir="${basedir}/samples"/>
+        </copy>
         <replace dir="${dist.image.wsit.dir}/samples">
             <replacefilter token="JAXWS_HOME" value="METRO_HOME" />
             <replacefilter token="JAX-WS installation directory" value="Metro installation directory" />
         </replace>
+
         <!-- copy over shell scripts -->
         <unzip src="lib/jaxws-bin.zip" dest="${dist.image.wsit.dir}/bin" />
         <replace dir="${dist.image.wsit.dir}/bin">
@@ -231,11 +238,7 @@
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
                     dest="${lib.runtime.dir}/jaxws-local-transport.jar"/>
             <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
-                    dest="${lib.runtime.dir}/jaxws-local-transport-src.zip"/>
-            
-            <!-- release notes source -->
-            <get src="@{jaxws.base.url}/artifact/jax-ws-sources/jaxws-ri/build/release-notes-src.zip"
-                    dest="lib/releasenotes/release-notes-src.zip"/>
+                    dest="${lib.runtime.dir}/jaxws-local-transport-src.zip"/>            
         </sequential>
         
     </macrodef>
@@ -281,7 +284,7 @@
         <echo message="Remember to update the JAXR version settings before running this target."/>
         <dependencies filesetId="jaxr.dependencies">
             <dependency groupId="javax.xml" artifactId="jaxr-api" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="1.0.6"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="1.0.7"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
@@ -293,7 +296,7 @@
         </copy>
         <dependencies filesetId="jaxr.sources.dependencies">
             <dependency groupId="javax.xml" artifactId="jaxr-api" classifier="sources" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.6"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.7"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
@@ -350,143 +353,7 @@
              target="test"
              inheritAll="false"/>
     </target>
-
-    <target name="integrate-htmlmacro-hudson"
-            description="integrate the last successful htmlmacro Hudson build">
-        <get
-          src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
-          dest="${lib.releasenotes.dir}/htmlmacro.zip"/>
-        <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
-        <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
-        <copy todir="${lib.releasenotes.dir}" overwrite="true">
-            <fileset dir="${lib.releasenotes.dir}/htmlmacro/" includes="*.zip,*.jar"/>
-        </copy>
-        <delete dir="${lib.releasenotes.dir}/htmlmacro"/>
-        <delete file="${lib.releasenotes.dir}/htmlmacro.zip"/>
-    </target>
-
-    <macrodef name="generate-release-notes">
-        <attribute name="target" /><!-- where to put the generated docs? -->
-        <sequential>
-            <mkdir dir="@{target}"/>
-            <copy todir="@{target}">
-                <fileset dir="docs/releasenotes" includes="style/*, Copyright.txt" />
-            </copy>
-            <taskdef name="htmlmacro" classname="com.sun.wts.tools.htmlmacro.HtmlMacroTask">
-                <classpath>
-                    <fileset dir="lib/releasenotes" />
-                </classpath>
-            </taskdef>
-            <mkdir dir="build/release-notes-src"/>
-            <unzip src="lib/releasenotes/release-notes-src.zip" dest="build/release-notes-src"/>
-            <copy todir="build/release-notes-src" overwrite="true">
-                <fileset dir="docs/releasenotes" />
-            </copy>
-            <htmlmacro destdir="@{target}">
-                <documents dir="build/release-notes-src" includes="*.html" />
-                <tags dir="docs/releasenotes/tags" includes="**/*.tag" />
-                <property key="IMPL_VERSION" value="${release.impl.version}"/>
-                <property key="UNDERSCORE_VERSION" value="${release.underscore.version}" />
-                <property key="IMPL_VERSION_SUFFIX" value="${release.impl.version.suffix}"/>
-                <property key="DATE" value="${DSTAMP}"/>
-                <!-- Product name so that we can switch between JAX-WS RI and Metro -->
-                <property key="PRODUCT_SHORT_NAME" value="Metro"/>
-                <property key="PRODUCT_NAME" value="Metro ${release.impl.version} ${release.impl.version.suffix}"/>
-                <!-- Used in various places to refer to installation dir -->
-                <property key="HOME" value="METRO_HOME" />
-            </htmlmacro>
-        </sequential>
-    </macrodef>
     
-    <target name="test-docs"
-            description="Generate documentation. Useful for checking the output during authoring">
-        <generate-release-notes target="build/releasenotes"/>
-    </target>
-
-
-    
-
-    <target name="generate-bundle-for-licensee" depends="init">
-        <property name="wsit.ws.dir" value="${basedir}"/>
-        <property name="source.drop.dir" value="build/source-bundle"/>
-        <property name="source.dist.dir.name" value="wsit-sourcebundle-${BUILD_TAG}"/>
-
-
-        <property name="ws.source.dir" value="${source.drop.dir}"/>
-        <echo message="wsit.ws.dir => ${wsit.ws.dir}" />
-        <echo message="ws.source.dir => ${ws.source.dir}" />
-        <mkdir dir="${ws.source.dir}" />
-        <delete dir="${ws.source.dir}" />
-
-        <echo message="Copying wsit sources"/>
-        <mkdir dir="${ws.source.dir}/wsit/rt" />
-
-        <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/build.xml"/>
-        <copy todir="${ws.source.dir}/wsit" file ="${wsit.ws.dir}/properties.xml"/>
-        <copy todir="${ws.source.dir}/wsit/rt">
-            <fileset dir="${wsit.ws.dir}/rt"/>
-        </copy>
-
-        <copy todir="${ws.source.dir}/wsit/tools">
-            <fileset dir="${wsit.ws.dir}/tools"/>
-        </copy>
-
-        <copy todir="${ws.source.dir}/wsit/lib/">
-            <fileset dir="${wsit.ws.dir}/lib"/>
-        </copy>
-
-        <copy todir="${ws.source.dir}/wsit/docs">
-            <fileset dir="${wsit.ws.dir}/docs"/>
-        </copy>
-
-
-        <copy todir="${ws.source.dir}/wsit">
-            <fileset dir="${wsit.ws.dir}">
-                <include name="*.html"/>
-                <include name="*.txt"/>
-            </fileset>
-        </copy>
-         
-        <copy todir="${ws.source.dir}/wsit/nbproject">
-            <fileset dir="${wsit.ws.dir}/nbproject"/>
-        </copy>
-        <copy todir="${ws.source.dir}/wsit/etc">
-            <fileset dir="${wsit.ws.dir}/etc"/>
-        </copy>
-        <delete>
-            <fileset dir="${wsit.ws.dir}" includes="**/CVS" />
-        </delete>
-
-
-        <zip destfile="${source.drop.dir}/wsit-licensee-bundle.zip"
-              basedir="${ws.source.dir}"
-                 />
-    </target>
-
-   
-    <target name="package-for-hk2" depends="dist">
-        <!-- run it with "-Dmaven-target=deploy" to deploy to the repository -->
-        <!-- run it with "-Dmaven-target=deploy -DupdateReleaseInfo=true" to deploy releases -->
-        <property name="maven-target" value="install" />
-        <property name="mavendir" value="maven-hk2"/>
-        <property name="webservices.rt.target.dir" value="${mavendir}/webservices-rt/target/classes"/>
-        <property name="webservices.api.target.dir" value="${mavendir}/webservices-api/target/classes"/>
-        <property name="webservices.tools.target.dir" value="${mavendir}/webservices-tools/target/classes"/>
-
-        <mkdir dir="${webservices.rt.target.dir}"/>
-        <mkdir dir="${webservices.api.target.dir}"/>
-        <mkdir dir="${webservices.tools.target.dir}"/>
-
-        <unjar src="${dist.image.wsit.v3.dir}/webservices-rt.jar"
-            dest="${webservices.rt.target.dir}"/>
-        <unjar src="${dist.image.wsit.lib.dir}/webservices-api.jar"
-            dest="${webservices.api.target.dir}"/>
-        <unjar src="${dist.image.wsit.lib.dir}/webservices-tools.jar"
-            dest="${webservices.tools.target.dir}"/>
-
-        <exec command="mvn -U ${maven-target}" dir="maven-hk2" />
-    </target>
-   
     <!-- 
 
     GLASSFISH UPDATE CENTER SCRIPTS
