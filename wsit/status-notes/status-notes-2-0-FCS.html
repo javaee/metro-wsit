@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-07 16:27:26 $ by $Author: jdg6688 $</pre>
+        <pre>Last Modified : $Date: 2009-12-07 16:49:46 $ by $Author: jdg6688 $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -607,18 +607,21 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <br>
         <hr>
         <h2><a name="trust"></a>Trust Status</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: 2009-12-7</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Run time STS configuration with STSIssuedTokenConfiguration</li>
+            <li>Identity delegation with WS-Trust 1.4 ActAs mechanism </li>
+            <li>Issued Token Cache and sharing, SSO among services</li>
+            <li>Managing token lifetime and renew</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1063">Issue 1063</a>: Support oasis tokentype for SAML 2.0</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1063">Issue 1064</a>: Make it possible to inject a STSIssuedTokenConfiguration</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1083">Issue 1111</a>: Possible typo in user visible error message</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1073">Issue 1063</a>: STS does not support TruststoreCBH, etc</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1162">Issue 1162</a>: KeyInfo is empty for the EncryptedKey in an issued SAML assertion fro STS if the service cert don't support SubjectKeyIndentifer</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1158">Issue 1158</a>: Policy verification failed with optional KeyValueToken</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1105">Issue 1205</a>: AsymmetricBinding with an IssuedToken as anSupportingToken. The certificate for signing the SAML assertion is mistakenly used as the client certificate in the process</li>
         </ul>
         <p><b>Known issues</b></p>
         <ul>
@@ -627,7 +630,6 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Token Cache and SSO</li>
             <li>Token Cancellation Protocol. </li>
             <li>Token Renewing Protocol </li>
             <li>Any profiles on top of Negotiation and Challenge Extensions</li>
