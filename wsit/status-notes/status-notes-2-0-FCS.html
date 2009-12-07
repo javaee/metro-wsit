@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-02 13:53:54 $ by $Author: ritzmann $</pre>
+        <pre>Last Modified : $Date: 2009-12-07 15:02:34 $ by $Author: kumarjayanti $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -188,7 +188,7 @@
         <br>
         <hr>
         <h2><a name="security"></a>Security Status</h2>
-        <p><code> Updated:  ??</code></p>
+        <p><code> Updated:  2009-12-07</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -198,6 +198,7 @@
         <p><b>Fixed in this release</b></p>
         <ul>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue 206 </a>: validation of server side policy failed.</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=710">Issue 710 </a>: Support Policies at Operation Scope</li>
         </ul>
 
         <p><b>Known Issues</b></p>
@@ -212,19 +213,6 @@
                     </th>
                     <td>
                         <p><b>Remark</b></p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top;"><a
-                            href="https://wsit.dev.java.net/issues/show_bug.cgi?id=710">Issue 710 </a>:&nbsp;
-                        &lt;sp:IncludeTimestamp&gt; is a binding level assertion in
-                        WS-SecurityPolicy. This prevents a clean approach to having some secure
-                        and some non-secure methods in a WebService<br>
-                    </td>
-                    <td style="vertical-align: top;">Scheduled for Metro 1.3
-                        release.&nbsp; <br>
-                    </td>
-                    <td style="vertical-align: top;"><br>
                     </td>
                 </tr>
                 <tr>
@@ -326,19 +314,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: top;">ProtectToken with X509Token and
-                        RequireDerivedKeys<br>
-                    </td>
-                    <td style="vertical-align: top;"> The client is uanble to
-                        generate the request soap message and the exception thrown is:
-                        <pre>javax.xml.crypto.URIReferenceException: <br> No elements exist with Id/WsuId: 3</pre>
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
-                    </td>
-                    <td style="vertical-align: top;">Will be fixed in a future
-                        release. Note that WCF RTM does not support sp:ProtectTokens assertion<br>
-                    </td>
-                </tr>
-                <tr>
                     <td style="vertical-align: top;">Security with List data type
                         dropping xs namespace declaration&nbsp; <br>
                     </td>
@@ -357,7 +332,16 @@
                     <td style="vertical-align: top;">GlassFish V3 Prelude does not have WS-Security support for JSR 109 WebService<br>
                     </td>
                 </tr>
-
+                <tr>
+                    <td style="vertical-align: top;"> Client side Memory Leak with Metro Secure 109 WebServices Clients running on GlassFish.
+                        &nbsp; <br>
+                    </td>
+                    <td style="vertical-align: top;"><a
+                        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1260">Issue#1260</a></td>
+                    <td style="vertical-align: top;">This issue affects glassfish 109 WebService Client deployments only (and does not affect metro clients on other non-glassfish platforms or standalone webservice clients). The workaround is to call close() on the Proxy once the client has finished its tasks w.r.t that proxy. The workaround details are documented in the issue link. 
+                        <br>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
@@ -382,15 +366,6 @@
                 of&nbsp; catching a Mismatch in AlgorithmSuite values between the
                 Service Policy and the Policy used by the Client to secure the message
             (refer known Issue# 22)</li>
-            <li>The Policy Verification for incoming messages is not capable
-                of&nbsp; catching&nbsp; a Mismatch in reference types used in Keyinfo
-                of Signature (for example if the server requires a KeyIdentifier, but
-                the incoming request makes use of&nbsp; Direct reference, then we do
-                not detect this). Part of the problem arises from the fact that the
-                &lt;sp:Require*&gt; does not entirely govern the reference type
-                actually used, the IncludeTokenPolicy on the Token overrides the
-                &lt;sp:Require*&gt;. This will be fixed in future releases.<br>
-            </li>
             <li>The SAML 2.0 API's supported&nbsp; by WSIT security has only a
                 placeholder for AuthnContextStatement implementation. This will be
                 fixed by adding an appropriate Constructor which takes necessary
@@ -398,8 +373,8 @@
                 individual members.<br>
             </li>
             <li>
-                The Following WS-SecurityPolicy Features from specification Draft:
-                Jul 2005 Ver 1.1 and WS-SecurityPolicy Version 1.2 are unsupported in this release of WSIT:
+                The Following WS-SecurityPolicy Features from specification 
+                are unsupported in this release of WSIT:
                 <br><br>
                 <table border="1" cellpadding="2" cellspacing="3">
                     <tbody>
@@ -440,18 +415,6 @@
                                     Always, AlwaysToRecipient and Never are supported (refer known <a
                                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=19">Issue# 19</a>)<br>
                                 </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p>6.3.1</p>
-                            </td>
-                            <td>
-                                <p>UsernameToken</p>
-                            </td>
-                            <td>
-                                <p>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
-                                    release, &lt;sp:UsernameToken11&gt;</p>
                             </td>
                         </tr>
                         <tr>
@@ -537,9 +500,7 @@
                                 <p>Token Protection</p>
                             </td>
                             <td>
-                                <p>Token Protection in cases where includeTokenPolicy="Never" or
-                                    in cases where the Token is not in the Message, is not handled
-                                    correctly yet (refer known <a
+                                <p>Token Protection in cases where includeTokenPolicy="Never" for a SAML Assertion Token is not handled correctly (refer known <a
                                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue# 76,
                                     206</a>).
                                 </p>
@@ -879,7 +840,7 @@
         <br>
         <hr>
         <h2><a name="securitypolicy"></a>Security Policy Status</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: 2009-12-07</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
