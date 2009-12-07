@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-07 16:49:46 $ by $Author: jdg6688 $</pre>
+        <pre>Last Modified : $Date: 2009-12-07 18:51:24 $ by $Author: ryan_shoemaker $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -639,7 +639,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <br>
         <hr>
         <h2><a name="at-coord"></a>Coordination/Atomic Transactions Status</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: 2009-12-7</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -662,16 +662,47 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
             <tr>
                 <td>
                     <p>
-                        "WSTXServices" is listed as a deployed web service in the NetBeans 5.5.1 SJSAS
-                        admin interface (Runtime -> SJSAS -> Applications -> Web Applications)
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1284">issue 1284</a>:
+                        WS-AT web services are not auto-deployed in GFv3
+                </td>
+                <td>
+                    <p>Workaround: <a href="https://metro.dev.java.net/guide/Deploying_and_Configuring_the_WS_TX_Service_on_GlassFish_V3.html">Manually deploy the services on GFv3</a>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=397">issue 397</a>:
+                        Transaction attribute specified in ejb deployment descriptor is disregarded by mapping of CMT EJB web service to appropriate WS-AT policy assertions
                     </p>
                 </td>
                 <td>
+                    <p>Workaround: Use Java EE 5.0 program annotations on Container Managed Transaction (CMT) EJB Web Services.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <p>
-                        This isn't an issue, per se, just an FYI so users are not confused when they see
-                        the WS-TX system app listed in the NB UI.  It is supposed to be hidden (and it is
-                        in NB 6).  Users can attempt to undeploy the app, but the AS prevents this operation
-                        from happening.
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=471">issue 471</a>:
+                        Detect unsupported invocations of WS-AT webmethods
+                    </p>
+                </td>
+                <td>
+                    <p>Partially fixed.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=539">issue 539</a>:
+                        WS-AT txn registration fails silently, only SEVERE event in server.log
+                    </p>
+                </td>
+                <td>
+                    <p>Check server.log for the following message "SEVERE WSTX-AT-0022: Registration with durable parent failed" if your client isn't working as expected.
                     </p>
                 </td>
             </tr>
@@ -679,7 +710,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                 <td>
                     <p>
                         <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=717">issue 717</a>:
-                        Ejb web service deployment fails on AIX.
+                        Ejb web service deployment fails on AIX
                     </p>
                 </td>
                 <td>
@@ -693,34 +724,12 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
             <tr>
                 <td>
                     <p>
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=718">issue 718</a>:
-                        TX interop S->M on AIX, Error on HTTP request: 500 Internal Error.
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1293">issue 1293</a>:
+                        IllegalStateException: Servlet [CoordinatorPortTypeImpl] and Servlet [CompletionCoordinatorPortTypeImpl] have the same url pattern: [/WSATCoordinator]
                     </p>
                 </td>
                 <td>
-                    <p>
-                        Seeing this error during TX interop S->M on AIX :
-                        <br>
-                        <code><bold> Error on HTTP request: 500 Internal Error</bold></code>.
-                        <br>
-                        Also seeing related problems with TX interop M->S using 1.0.1 on AIX fails, see details here
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=719">issue 719</a>.
-                        <br><br>
-                        There appears to be some other issue besides security certificate serial number mismatch
-                        between two machines for which mutual trust is being established, as certificates have been
-                        verified by RI lead as correct.  Further investigation required.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=723">Issue 723</a>
-                </td>
-                <td>
-                    <p>
-                        There is a regression causing that TX context does not get initialized in certain cases.
-                        The PolicyMap that is parsed second time (from the WSDL) does not contain the same, correct
-                        data. There is a problem in marshalling Policy data into WSDL during WSDL creation.
+                    <p>Waived for 2.0.
                     </p>
                 </td>
             </tr>
