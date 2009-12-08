@@ -183,6 +183,10 @@ public abstract class WSITAuthContextBase  {
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
+
+    protected boolean encRMLifecycleMsg = false;
+    private final QName encRMLifecycleMsgServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptRMLifecycleMessage");
+    private final QName encRMLifecycleMsgClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptRMLifecycleMessage");
     
     protected boolean encHeaderContent = false;
     private final QName encHeaderContentServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent");
@@ -507,6 +511,10 @@ public abstract class WSITAuthContextBase  {
                 } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
                         policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
                     rmVer = RmVersion.WSRM200502;
+                }
+
+                if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
+                    encRMLifecycleMsg = true;
                 }
             }
     }
@@ -932,7 +940,7 @@ public abstract class WSITAuthContextBase  {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, encRMLifecycleMsg);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);

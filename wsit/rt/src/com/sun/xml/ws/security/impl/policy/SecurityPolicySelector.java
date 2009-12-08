@@ -438,6 +438,9 @@ public class SecurityPolicySelector {
         
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent"));
+
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_SERVER_POLICY_NS,"EncryptRMLifecycleMessage"));
+        supportedAssertions.add(new QName(SUN_WSS_SECURITY_CLIENT_POLICY_NS,"EncryptRMLifecycleMessage"));
         
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/server","AllowMissingTimestamp"));
         supportedAssertions.add(new QName("http://schemas.sun.com/2006/03/wss/client","AllowMissingTimestamp"));

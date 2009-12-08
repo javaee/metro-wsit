@@ -195,6 +195,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected boolean securityMUValue = true;
     private final QName unsetSecurityMUValueServer = new QName("http://schemas.sun.com/2006/03/wss/server","UnsetSecurityMUValue");
     private final QName unsetSecurityMUValueClient = new QName("http://schemas.sun.com/2006/03/wss/client","UnsetSecurityMUValue");
+
+    protected boolean encRMLifecycleMsg = false;
+    private final QName encRMLifecycleMsgServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptRMLifecycleMessage");
+    private final QName encRMLifecycleMsgClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptRMLifecycleMessage");
     
     protected static final ArrayList<String> securityPolicyNamespaces ;
     protected static final List<PolicyAssertion> EMPTY_LIST = Collections.emptyList();
@@ -323,6 +327,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.wsTrustVer = that.wsTrustVer;
         this.wsscVer = that.wsscVer;
         this.rmVer = that.rmVer;
+        this.encRMLifecycleMsg = that.encRMLifecycleMsg;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
         inMessagePolicyMap = that.inMessagePolicyMap;
@@ -1196,7 +1201,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, encRMLifecycleMsg);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);
@@ -1691,6 +1696,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 wsscVer = WSSCVersion.WSSC_10;
                 wsTrustVer = WSTrustVersion.WS_TRUST_10;
             }
+            
+            // For RM messages
             if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
                     policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
                 rmVer = RmVersion.WSRM200702;
@@ -1698,7 +1705,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                     policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
                 rmVer = RmVersion.WSRM200502;
             }
+            if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
+                encRMLifecycleMsg = true;
+            }
         }
     }
-
 }
