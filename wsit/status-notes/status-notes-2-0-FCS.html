@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-08 08:28:22 $ by $Author: kumarjayanti $</pre>
+        <pre>Last Modified : $Date: 2009-12-08 10:05:57 $ by $Author: ritzmann $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -50,6 +50,8 @@
             Policy Status</a></li>
             <li><a href="#securitypolicy">
             Security Policy Status</a></li>
+            <li><a href="#cm">
+            Configuration Management</a></li>
             <li><a href="#soaptcp">
             SOAP/TCP Status</a></li>
         </ul>
@@ -822,11 +824,10 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <hr>
         <h2><a name="policy">
         </a>Policy Status</h2>
-        <p><code> Updated: 2009-12-02</code></p>
+        <p><code> Updated: 2009-12-08</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Runtime configuration management</li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1078">Ability to generate a single policy from multiple features starting from java</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1140">Easy way to configure default providers for various policy extension configuration</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1053">Use default prefixes for TypedXmlWriter</a></li>
@@ -849,7 +850,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Not available in the EA but coming up for the final release is dynamic web services configuration.</li>
+            <li>n/a</li>
         </ul>
 
         <!-- ========================================================================================== -->
@@ -920,6 +921,35 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
             <li>RequiredElements</li>
             <li>SoapNormalization10</li>
             <li>Automatic Use of https URL's for endpoints when TransportBinding assertion is present.</li>
+        </ul>
+
+        <!-- ========================================================================================== -->
+        <br>
+        <hr>
+        <h2><a name="cm">
+        </a>Configuration Management Status</h2>
+        <p><code> Updated: 2009-12-08</code></p>
+
+        <p><b>New in this release</b></p>
+        <ul>
+            <li>Runtime configuration management (WS-CM) allows to reconfigure a running web service instance
+                without losing any messages. The web service does not have to be redeployed or restarted.
+                All configuration changes are persisted across application redeployments and server restarts.</li>
+        </ul>
+
+        <p><b>Fixed in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Known issues</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Feature requests not implemented in this release</b></p>
+        <ul>
+            <li>n/a</li>
         </ul>
 
         <!-- ========================================================================================== -->
