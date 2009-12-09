@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-09 17:44:24 $ by $Author: snajper $</pre>
+        <pre>Last Modified : $Date: 2009-12-09 18:10:54 $ by $Author: m_potociar $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -16,14 +16,16 @@
 
         <p>
             This document provides a list of
-            <ul>
-                <li>new features,</li>
-                <li>bugs fixed,</li>
-                <li>known issues,</li>
-                <li>what is not implemented</li>
-            </ul>
-            for each major Metro subsystem.
         </p>
+        <ul>
+            <li>new features,</li>
+            <li>bugs fixed,</li>
+            <li>known issues,</li>
+            <li>what is not implemented</li>
+        </ul>
+        <p>
+        </p>
+            for each major Metro subsystem.
 
         <p>This document covers the following topics:</p>
 
@@ -132,7 +134,7 @@
         <br>
         <hr>
         <h2><a name="databinding"></a>Data Binding Status</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: 2009-12-10</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -158,31 +160,29 @@
         <!-- ========================================================================================== -->
         <br>
         <hr>
-        <h2><a name="rm"></a>Reliable Messaging Status</h2>
-        <p><code> Updated:  ??</code></p>
+        <h2><a name="rm"></a>Reliable Messaging and Make Connection Status</h2>
+        <p><code> Updated:  2009-12-10</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
             <li>Make connection support</li>
             <li>Make connection annonymous URIs support in protocol messages</li>
+            <li>Persistent RM sequences</li>
+            <li>Extended configuration</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>For the list of fixed RX issues kindly consult <a href="https://wsit.dev.java.net/issues/buglist.cgi?component=wsit&subcomponent=makeconnection&subcomponent=rm&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&resolution=WORKSFORME&priority=P1&priority=P2&priority=P3&priority=P4&priority=P5&target_milestone=2.0&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=fulltext&long_desc=&long_desc_type=fulltext&issue_file_loc=&issue_file_loc_type=fulltext&status_whiteboard=&status_whiteboard_type=fulltext&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&order=Reuse+same+sort+as+last+time&Submit+query=Submit+query">this link</a></li>
         </ul>
 
         <p><b>Known issues</b></p>
         <ul>
-            <li>
-                Reliable messaging throws exception due to an issue in bundled JAXB implementation.
-                To workaround this, please install latest JAXB 2.2 bits.
-            </li>
+            <li>n/a</li>
         </ul>
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Persistent RM sequences</li>
             <li>High availability support in RM</li>
         </ul>
 
@@ -722,7 +722,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                     <p>
                         Seeing this error during deployment of some TX SQE functional tests only on AIX:
                         <br>
-                        <code><bold>Could not invoke defineClass!;_RequestID=fe0ba2aa-af5d-474f-88bd-fe8085434899;|EJB5090: Exception in creating EJB container [java.lang.RuntimeException: Could not invoke defineClass!]|#]</bold></code>
+                        <code><b>Could not invoke defineClass!;_RequestID=fe0ba2aa-af5d-474f-88bd-fe8085434899;|EJB5090: Exception in creating EJB container [java.lang.RuntimeException: Could not invoke defineClass!]|#]</b></code>
                     </p>
                 </td>
             </tr>
@@ -799,12 +799,12 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                 <tr>
                     <td>To enable Microsoft WCF <-> Java interoperability, an 'action=operationName' attribute needs to be specified on each operation.</td>
                     <td>The sample code should look like this:<br/>
-                        <code><pre>
+                        <pre>
     @WebMethod(action=myOperation)
     public String myOperation() {
         return "";
     )
-                        </pre></code>
+                        </pre>
                     </td>
                 </tr>
                 <tr>
@@ -903,12 +903,12 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                     <td>
                         <p>
                             The following security policy assertions cause a deploy failure:
-                            <ul>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</li>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPath10</li>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</li>
-                            </ul>
                         </p>
+                        <ul>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</li>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPath10</li>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</li>
+                        </ul>
                     </td>
                 </tr>
             </tbody>
