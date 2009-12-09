@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-08 10:05:57 $ by $Author: ritzmann $</pre>
+        <pre>Last Modified : $Date: 2009-12-09 17:44:24 $ by $Author: snajper $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -769,7 +769,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: December 9th, 2009</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -793,9 +793,8 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                     </th>
                 </tr>
                 <tr>
-                    <td>Security settings are not supported with GlassFish v3</td>
-                    <td>Metro 2.0EA does not yet support Security with JSR109 deployment on GlassFish v3, thus security
-                    settings in QoS dialog are not supported. The fix is targeted to METRO 2.0 FCS release.</td>
+                    <td>STS Security wizard adds incorrect @Session annotation</td>
+                    <td><a href="https://netbeans.org/bugzilla/show_bug.cgi?id=178323">178323</a>. To fix this problem, please remove the @Session annotation.</td>
                 </tr>
                 <tr>
                     <td>To enable Microsoft WCF <-> Java interoperability, an 'action=operationName' attribute needs to be specified on each operation.</td>
