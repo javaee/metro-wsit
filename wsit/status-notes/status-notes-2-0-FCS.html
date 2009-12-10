@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-12-09 18:10:54 $ by $Author: m_potociar $</pre>
+        <pre>Last Modified : $Date: 2009-12-10 00:40:45 $ by $Author: haroldcarr $</pre>
 
         <h5>Updated: ??</h5>
 
@@ -54,6 +54,8 @@
             Security Policy Status</a></li>
             <li><a href="#cm">
             Configuration Management</a></li>
+            <li><a href="#mandm">
+            Monitoring and Management</a></li>
             <li><a href="#soaptcp">
             SOAP/TCP Status</a></li>
         </ul>
@@ -71,7 +73,6 @@
                 know that our reliable messaging and secure conversation
                 implementations have state that is not saved and therefore will not
                 survive a process or machine failure.</li>
-
 
             <li>JDK support: Metro has been tested with Sun's JDK and with IBM's
                 AIX JDK.  Metro should work in any Servlet 2.4 compliant web-container
@@ -931,9 +932,37 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Runtime configuration management (WS-CM) allows to reconfigure a running web service instance
+            <li>Runtime web service configuration management (WS-CM) allows to reconfigure a running web service instance
                 without losing any messages. The web service does not have to be redeployed or restarted.
                 All configuration changes are persisted across application redeployments and server restarts.</li>
+        </ul>
+
+        <p><b>Fixed in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Known issues</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Feature requests not implemented in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <!-- ========================================================================================== -->
+        <br>
+        <hr>
+        <h2><a name="mandm">
+        </a>Monitoring and Management</h2>
+        <p><code> Updated: 2009-12-09</code></p>
+
+        <p><b>New in this release</b></p>
+        <ul>
+            <li>Metro now support JMX monitoring and management.  See
+        the user guide for more information.</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
