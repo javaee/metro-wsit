@@ -40,7 +40,7 @@
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
-    <property name="backup.dir" value="${as.home}/.metro-@release.impl.version@"/>
+    <property name="backup.dir" value="${as.home}/.metro-@release.impl.version@@release.impl.version.suffix@"/>
 
     <condition property="notInstalled">
         <not>
@@ -117,7 +117,7 @@
     </target>
 
     <target name="install" depends="init, backup, check-api" description="Install latest Metro jars">
-        <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
+        <echo message="Installing Metro @release.impl.version@@release.impl.version.suffix@ on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/lib">
@@ -168,7 +168,7 @@
     <target name="uninstall" unless="notInstalled"
             depends="init"
             description="Restore original Metro jars and tool scripts">
-        <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
+        <echo message="Uninstalling Metro @release.impl.version@@release.impl.version.suffix@ from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}" includes="webservices-rt.jar, webservices-tools.jar"/>
@@ -189,10 +189,10 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs Metro @release.impl.version@ @release.impl.version.suffix@ on GlassFish v2"/>
+        <echo message="  Installs Metro @release.impl.version@@release.impl.version.suffix@ on GlassFish v2"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls Metro @release.impl.version@ @release.impl.version.suffix@ from GlassFish v2"/>
+        <echo message="  Uninstalls Metro @release.impl.version@@release.impl.version.suffix@ from GlassFish v2"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v2."/>
         <echo/>

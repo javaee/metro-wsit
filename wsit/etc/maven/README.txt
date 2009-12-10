@@ -24,12 +24,12 @@ Customizing Metro version suffix
 To customize the Metro version suffix that will be pushed to Maven, e.g. for promoted builds,
 build Metro with "release.impl.version.suffix" property set, such as:
 
-> ant -Drelease.impl.version.suffix="b01"
+> ant -Drelease.impl.version.suffix="-b01"
 
 Alternatively, if the Metro build is already finished and you just want to update the POM files,
 run only "create-pom-files" ANT target:
 
-> ant -Drelease.impl.version.suffix="b01" create-pom-files
+> ant -Drelease.impl.version.suffix="-b01" create-pom-files
 
 Customizing JAXB dependency version
 -----------------------------------
@@ -46,6 +46,6 @@ or
 
 Of course, you can customize both Metro and JAXB version at the same time:
 
-> ant -Drelease.impl.version.suffix="b01" -Djaxb.osgi.dependency.version="2.1.10-b02"
+> ant -Drelease.impl.version.suffix="-b01" -Djaxb.osgi.dependency.version="2.1.10-b02"
 or
-> ant -Drelease.impl.version.suffix="b01" -Djaxb.osgi.dependency.version="2.1.10-b02" create-pom-files
+> ant -Drelease.impl.version.suffix="-b01" -Djaxb.osgi.dependency.version="2.1.10-b02" create-pom-files

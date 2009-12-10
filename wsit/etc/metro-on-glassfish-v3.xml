@@ -40,7 +40,7 @@
     <property environment="env"/>
     <property name="as.home" value="${env.AS_HOME}"/>
     <property name="as.lib.home" value="${as.home}/modules"/>
-    <property name="backup.dir" value="${as.home}/.metro-@release.impl.version@"/>
+    <property name="backup.dir" value="${as.home}/.metro-@release.impl.version@@release.impl.version.suffix@"/>
 
     <condition property="notInstalled">
         <not>
@@ -128,7 +128,7 @@
 
     <target name="install" depends="init, backup" description="Install latest Metro jars">
         <antcall target="warning-note" />
-        <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ on ${as.home} ..."/>
+        <echo message="Installing Metro @release.impl.version@@release.impl.version.suffix@ on ${as.home} ..."/>
         <echo />
 
         <copy todir="${as.lib.home}" overwrite="true">
@@ -150,7 +150,7 @@
     <target name="uninstall" unless="notInstalled"
             depends="init"
             description="Restore original Metro jars and tool scripts">
-        <echo message="Uninstalling Metro @release.impl.version@ @release.impl.version.suffix@ from ${as.home} ..."/>
+        <echo message="Uninstalling Metro @release.impl.version@@release.impl.version.suffix@ from ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}">
@@ -175,10 +175,10 @@
 
     <target name="help">
         <echo message="install: "/>
-        <echo message="  Installs Metro @release.impl.version@ @release.impl.version.suffix@ on GlassFish v3"/>
+        <echo message="  Installs Metro @release.impl.version@@release.impl.version.suffix@ on GlassFish v3"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls Metro @release.impl.version@ @release.impl.version.suffix@ from GlassFish v3 and restores the original Metro installation"/>
+        <echo message="  Uninstalls Metro @release.impl.version@@release.impl.version.suffix@ from GlassFish v3 and restores the original Metro installation"/>
         <echo/>
         <echo message="$AS_HOME must be set to the installation directory of GlassFish v3. (e.g. '.../glassfish-v3/glassfish')"/>
         <echo/>

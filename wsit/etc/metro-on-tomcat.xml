@@ -90,7 +90,7 @@
     </target>
     
     <target name="install" depends="init,uninstall,update-catalina-props,check-api,install-api-tomcat" description="Install latest Metro jars">
-        <echo message="Installing Metro @release.impl.version@ @release.impl.version.suffix@ for ${catalina.home} ..."/>
+        <echo message="Installing Metro @release.impl.version@@release.impl.version.suffix@ for ${catalina.home} ..."/>
 
         <mkdir dir="${catalina.lib.home}"/>
         <copy toDir="${catalina.lib.home}" overwrite="true">
@@ -189,10 +189,10 @@
         <echo message="$CATALINA_HOME must be set to the installation directory of Tomcat."/>
         <echo/>
         <echo message="install:"/>
-        <echo message="  Installs Metro @release.impl.version@ @release.impl.version.suffix@ on Tomcat"/>
+        <echo message="  Installs Metro @release.impl.version@@release.impl.version.suffix@ on Tomcat"/>
         <echo/>
         <echo message="uninstall: "/>
-        <echo message="  Uninstalls Metro @release.impl.version@ @release.impl.version.suffix@ from Tomcat"/>
+        <echo message="  Uninstalls Metro @release.impl.version@@release.impl.version.suffix@ from Tomcat"/>
         <echo/>
         <antcall target="jdk6-message"/>
     </target>
