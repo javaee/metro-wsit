@@ -44,7 +44,7 @@ continue_choice () {
 pushd .
 cd `pwd`/`dirname $0`/..
 NEW_PROJECT_ROOT=`pwd`/metro
-EXPORTED_RT_ROOT=`pwd`/_tmp-exported-rt
+EXPORTED_RT_ROOT=`pwd`/\_tmp-exported-rt
 popd
 
 continue_choice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\nContinue? [Y/n]"

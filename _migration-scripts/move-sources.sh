@@ -26,8 +26,12 @@ done
 
 shift `expr $OPTIND - 1`
 
-# access additional parameters through $@ or $* as usual or using this loop:
-# for PARAM; do
-#    echo $PARAM
-# done
+MODULE_ROOT=$1
+SRC_ARTIFACTS=$2
+TEST_ARTIFACTS=$3
+
+if [ ! -n "$MODULE_ROOT" ] || [ ! -n "$SRC_ARTIFACTS" ] && [ ! -n "$TEST_ARTIFACTS" ] ; then
+    echo $USAGE >&2
+    exit 1
+fi
 
