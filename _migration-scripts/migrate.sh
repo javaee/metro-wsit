@@ -3,34 +3,34 @@ USAGE="Usage: `basename $0` [-n] [-h] [-v] [-f]"
 
 # parse command line arguments
 CVS_QUIET="-q"
-while getopts nhv OPT; do
+while getopts 'nhvf' OPT; do
     case "$OPT" in
-	h)	echo $USAGE
-		exit 0
-		;;
-	v)	VERBOSE="-v"
-                CVS_QUIET=""
-		;;
-	n)	NO_EXPORT=1
-		;;
-	f)	FORCE_RM_FLAG="-f"
-		;;
-	?)	# getopts issues an error message
-		echo $USAGE >&2
-		exit 1
-		;;
+	h)  echo $USAGE
+            exit 0
+            ;;
+	v)  VERBOSE="-v"
+            CVS_QUIET=""
+            ;;
+	n)  NO_EXPORT=1
+            ;;
+	f)  FORCE_RM_FLAG="-f"
+            ;;
+	?)  # all other characters - error
+            echo $USAGE >&2
+            exit 1
+            ;;
     esac
+    shift
 done
-
-shift `expr $OPTIND - 1`
+shift
 
 # access additional parameters through $@ or $* as usual or using this loop:
 # for PARAM; do
 #    echo $PARAM
 # done
 
-continue_choice () {
-    printf "$*"
+continueChoice () {
+    printf "$* Continue? [Y/n]"
 
     read -n 1 -rs choice # reading single character
     echo
@@ -47,7 +47,7 @@ NEW_PROJECT_ROOT=`pwd`/metro
 EXPORTED_RT_ROOT=`pwd`/\_tmp-exported-rt
 popd
 
-continue_choice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\nContinue? [Y/n]"
+continueChoice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"
 
 if [ ! -n "$NO_EXPORT" ] ; then
     if [ -e $EXPORTED_RT_ROOT ] ; then
@@ -63,3 +63,5 @@ fi
 if [ ! -e $NEW_PROJECT_ROOT ] ; then
     mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 fi
+
+source ./migrate-core.sh
