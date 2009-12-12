@@ -41,6 +41,12 @@ continueChoice () {
     fi
 }
 
+ensureDir () {
+    if [ ! -d $1 ] ; then
+        mkdir -p $VERBOSE $1
+    fi
+}
+
 pushd .
 cd `pwd`/`dirname $0`/..
 NEW_PROJECT_ROOT=`pwd`/metro
@@ -64,4 +70,12 @@ if [ ! -e $NEW_PROJECT_ROOT ] ; then
     mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 fi
 
+
+ensureDir "$NEW_PROJECT_ROOT/wsit"
 source ./migrate-core.sh
+
+ensureDir "$NEW_PROJECT_ROOT/bundles"
+ensureDir "$NEW_PROJECT_ROOT/hudson"
+ensureDir "$NEW_PROJECT_ROOT/legal"
+ensureDir "$NEW_PROJECT_ROOT/samples"
+
