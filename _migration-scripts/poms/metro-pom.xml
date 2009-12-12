@@ -102,7 +102,7 @@
     <scm>
         <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/metro</connection>
         <tag>HEAD</tag>
-        <url>https://wsit.dev.java.net/source/browse/wsit/</url>
+        <url>https://wsit.dev.java.net/source/browse/wsit/metro</url>
     </scm>
     <organization>
         <name>Sun Microsystems, Inc</name>

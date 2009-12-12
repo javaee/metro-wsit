@@ -105,9 +105,9 @@
     <!--developers></developers-->
     <!--contributors></contributors-->
     <scm>
-        <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/metro</connection>
+        <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/metro/wsit</connection>
         <tag>HEAD</tag>
-        <url>https://wsit.dev.java.net/source/browse/wsit/</url>
+        <url>https://wsit.dev.java.net/source/browse/wsit/metro/wsit</url>
     </scm>
 
     <modules>
