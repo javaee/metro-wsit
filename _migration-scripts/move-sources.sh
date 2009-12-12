@@ -1,8 +1,6 @@
 #!/bin/sh
 USAGE="Usage: move-sources.sh [-hvfn] [<module-root> [<source-artifacts>] [<test-artifacts>]]"
 
-echo "$*"
-
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 0 ]; then
 	echo $USAGE >&2
@@ -11,7 +9,12 @@ fi
 
 # parse command line arguments
 MOVE_COMMAND="mv"
-while getopts 'nhvf' OPT; do
+OPTIND=1
+while getopts 'hvfn' OPT; do
+
+    echo "$OPT"
+    echo "$OPTIND"
+
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -27,11 +30,8 @@ while getopts 'nhvf' OPT; do
             exit 1
             ;;
     esac
-    shift
 done
-shift
-
-echo "$*"
+shift `expr $OPTIND - 1`
 
 moduleRoot="$1"
 srcArtifacts="$2"
@@ -71,7 +71,7 @@ moveArtifacts () {
     artifacts="$3"
 
     #message "Moving artifacts from \"$from\" to \"$to\""
-    message "Moving artifacts \"$artifacts \" from \"$from\" to \"$to\""
+    message "Moving artifacts \"$artifacts\" from \"$from\" to \"$to\""
 
     for a in `echo "$artifacts" | tr "\:" " "`
     do

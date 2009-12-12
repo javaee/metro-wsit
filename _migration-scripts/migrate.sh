@@ -3,7 +3,10 @@ USAGE="Usage: `basename $0` [-n] [-h] [-v] [-f]"
 
 # parse command line arguments
 CVS_QUIET="-q"
+OPTIND=1
 while getopts 'nhvf' OPT; do
+    echo "$OPT"
+
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -20,9 +23,8 @@ while getopts 'nhvf' OPT; do
             exit 1
             ;;
     esac
-    shift
 done
-shift
+shift `expr $OPTIND - 1`
 
 # access additional parameters through $@ or $* as usual or using this loop:
 # for PARAM; do
@@ -70,8 +72,9 @@ if [ ! -e $NEW_PROJECT_ROOT ] ; then
     mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 fi
 
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -n -m $NEW_PROJECT_ROOT -p ./poms/metro-pom.xml
 
-ensureDir "$NEW_PROJECT_ROOT/wsit"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -n -m $NEW_PROJECT_ROOT/wsit -p ./poms/wsit-pom.xml
 source ./migrate-core.sh
 
 ensureDir "$NEW_PROJECT_ROOT/bundles"
