@@ -68,8 +68,7 @@ moveArtifacts () {
     to="$2"
     artifacts="$3"
 
-    #message "Moving artifacts from \"$from\" to \"$to\""
-    message "Moving artifacts \"$artifacts\" from \"$from\" to \"$to\""
+    continueChoice "Moving artifacts: $artifacts\nfrom: $from\nto  : $to\n"
 
     for a in `echo "$artifacts" | tr "\:" " "`
     do
@@ -83,7 +82,6 @@ moveArtifacts () {
         targetDir=`dirname "$to/$a"`
 
         if [ ! -e $targetDir ] ; then
-            continueChoice "Creating \"$targetDir\" for artifact \"$a\""
             mkdir -p $VERBOSE $targetDir
         fi
 
