@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: setup-module.sh [-hvfN] [-m <module-root> -n <module-name> ] [-p <pom-template>]"
+USAGE="Usage: setup-module.sh [-hvfN] [-m <module-root> [-n <module-name>]] [-p <pom-template>]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 1 ]; then
@@ -9,7 +9,7 @@ fi
 
 # parse command line arguments
 OPTIND=1
-while getopts 'hvfNm:np:' OPT; do
+while getopts 'hvfNm:n:p:' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0

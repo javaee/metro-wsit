@@ -66,14 +66,15 @@ if [ ! -n "$NO_EXPORT" ] ; then
     popd
 fi
 
-if [ ! -e $NEW_PROJECT_ROOT ] ; then
-    mkdir -p $VERBOSE $NEW_PROJECT_ROOT
+if [ -e $NEW_PROJECT_ROOT ] ; then
+    rm -rf $NEW_PROJECT_ROOT
 fi
+mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -N -m $NEW_PROJECT_ROOT -p ./poms/metro-pom.xml
-
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -N -m $NEW_PROJECT_ROOT/wsit -p ./poms/wsit-pom.xml
-source ./migrate-core.sh
+
+source ./migrate-wsit-sources.sh
 
 ensureDir "$NEW_PROJECT_ROOT/bundles"
 ensureDir "$NEW_PROJECT_ROOT/hudson"
