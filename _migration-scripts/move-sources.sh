@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: move-sources.sh [-hvfn] [<module-root> [<source-artifacts>] [<test-artifacts>]]"
+USAGE="Usage: move-sources.sh [-hvfn] [<module-root> [<source-artifacts>] [<test-artifacts>] [<test-resources]]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 0 ]; then
@@ -32,8 +32,9 @@ shift `expr $OPTIND - 1`
 moduleRoot="$1"
 srcArtifacts="$2"
 testArtifacts="$3"
+testResources="$4"
 
-if [ ! -n "$moduleRoot" ] || [ ! -n "$srcArtifacts" ] && [ ! -n "$testArtifacts" ] ; then
+if [ ! -n "$moduleRoot" ] || [ ! -n "$srcArtifacts" ] && [ ! -n "$testArtifacts" ] && [ ! -n "$testResources" ] ; then
     echo $USAGE >&2
     exit 1
 fi
@@ -96,4 +97,8 @@ fi
 
 if [ -n "$testArtifacts" ] ; then
     moveArtifacts "$EXPORTED_RT_ROOT/test/unit/src" "$moduleRoot/src/test/java" "$testArtifacts"
+fi
+
+if [ -n "$testResources" ] ; then
+    moveArtifacts "$EXPORTED_RT_ROOT/test/unit/data" "$moduleRoot/src/test/resources" "$testResources"
 fi
