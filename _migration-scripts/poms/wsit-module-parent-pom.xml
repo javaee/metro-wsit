@@ -44,10 +44,14 @@
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <!-- prerequisites -->
 
+    <modules>
+        <!-- module></module-->
+    </modules>
+    
     <!--dependencies></dependencies-->
     <!--properties></properties-->
 </project>

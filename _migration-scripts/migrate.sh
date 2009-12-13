@@ -71,8 +71,8 @@ if [ -e $NEW_PROJECT_ROOT ] ; then
 fi
 mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -N -m $NEW_PROJECT_ROOT -p ./poms/metro-pom.xml
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -N -m $NEW_PROJECT_ROOT/wsit -p ./poms/wsit-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT -p ./poms/metro-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -p ./poms/wsit-pom.xml
 
 source ./migrate-wsit-sources.sh
 

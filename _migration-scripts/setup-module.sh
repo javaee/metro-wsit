@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: setup-module.sh [-hvfN] [-m <module-root> [-n <module-name>]] [-p <pom-template>]"
+USAGE="Usage: setup-module.sh [-hvf] [-m <module-root> [-n <module-name>] [-P <parent-name>]] [-p <pom-template>]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 1 ]; then
@@ -9,7 +9,7 @@ fi
 
 # parse command line arguments
 OPTIND=1
-while getopts 'hvfNm:n:p:' OPT; do
+while getopts 'hvfm:n:P:p:' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -18,11 +18,11 @@ while getopts 'hvfNm:n:p:' OPT; do
             ;;
 	f)  FORCE_RM_FLAG="-f"
             ;;
-	N)  NO_SOURCE_DIR_FLAG="-N"
-            ;;
 	m)  MODULE_ROOT=$OPTARG
             ;;
-	n)  MODULE_NAME=$OPTARG
+	n)  MODULE_ID=$OPTARG
+            ;;
+	P)  PARENT_ID=$OPTARG
             ;;
         p)  POM_TEMPLATE=$OPTARG
             ;;
@@ -50,22 +50,10 @@ if [ ! -e "$MODULE_ROOT" ] ; then
     mkdir -p $VERBOSE $MODULE_ROOT
 fi
 
-if [ -z "$NO_SOURCE_DIR_FLAG" ] ; then
-    echo "here"
-    if [ -d $MODULE_ROOT/src ] ; then
-        rm -ir $FORCE_RM_FLAG $VERBOSE -r $MODULE_ROOT/src
-    fi
-
-    mkdir -p $VERBOSE $MODULE_ROOT/src/main/java
-    mkdir -p $VERBOSE $MODULE_ROOT/src/test/java
-fi
-
-
 if [ -z "$POM_TEMPLATE" ] ; then
     echo "No pom.xml template specified"
-    return 0
 else
-    sed -e "s/@module.name@/$MODULE_NAME/g" < $POM_TEMPLATE > $MODULE_ROOT/pom.xml
+    sed -e "s/@module.id@/$MODULE_ID/g" -e "s/@parent.id@/$PARENT_ID/g" < $POM_TEMPLATE > $MODULE_ROOT/pom.xml
 fi
 
 
