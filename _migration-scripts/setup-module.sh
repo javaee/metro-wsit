@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: setup-module.sh [-hvfn] [-m <module-root>] [-p <pom-template>]"
+USAGE="Usage: setup-module.sh [-hvfN] [-m <module-root> -n <module-name> ] [-p <pom-template>]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 1 ]; then
@@ -9,9 +9,7 @@ fi
 
 # parse command line arguments
 OPTIND=1
-while getopts 'hvfnm:p:' OPT; do
-    echo "$OPT"
-
+while getopts 'hvfNm:np:' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -20,9 +18,11 @@ while getopts 'hvfnm:p:' OPT; do
             ;;
 	f)  FORCE_RM_FLAG="-f"
             ;;
-	n)  NO_SOURCE_DIR_FLAG="-n"
+	N)  NO_SOURCE_DIR_FLAG="-N"
             ;;
 	m)  MODULE_ROOT=$OPTARG
+            ;;
+	n)  MODULE_NAME=$OPTARG
             ;;
         p)  POM_TEMPLATE=$OPTARG
             ;;
@@ -46,6 +46,10 @@ if [ -z "$MODULE_ROOT" ] ; then
     exit 1
 fi
 
+if [ ! -e "$MODULE_ROOT" ] ; then
+    mkdir -p $VERBOSE $MODULE_ROOT
+fi
+
 if [ -z "$NO_SOURCE_DIR_FLAG" ] ; then
     echo "here"
     if [ -d $MODULE_ROOT/src ] ; then
@@ -61,7 +65,7 @@ if [ -z "$POM_TEMPLATE" ] ; then
     echo "No pom.xml template specified"
     return 0
 else
-    cp $VERBOSE $POM_TEMPLATE $MODULE_ROOT/pom.xml
+    sed -e "s/@module.name@/$MODULE_NAME/g" < $POM_TEMPLATE > $MODULE_ROOT/pom.xml
 fi
 
 

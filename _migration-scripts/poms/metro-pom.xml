@@ -42,7 +42,7 @@
     <groupId>com.sun.metro</groupId>
     <artifactId>metro-project</artifactId>
     <packaging>pom</packaging>
-    <name>metro-project</name>
+    <name>Metro Web Services Stack</name>
     <version>2.1-SNAPSHOT</version>
     <description>
         Metro is a high-performance, extensible, easy-to-use web service stack.

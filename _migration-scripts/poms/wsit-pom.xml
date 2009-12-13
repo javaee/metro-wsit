@@ -43,9 +43,10 @@
         <artifactId>metro-project</artifactId>
     </parent>
 
+    <groupId>com.sun.metro.wsit</groupId>
     <artifactId>wsit-project</artifactId>
     <packaging>pom</packaging>
-    <name>wsit-project</name>
+    <name>Web Services Interoperability Technology</name>
     <description>
         Web Services Interoperability Technologies (WSIT) (previously known as
         Project Tango) includes implementations of:

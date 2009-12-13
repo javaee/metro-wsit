@@ -11,10 +11,6 @@ fi
 MOVE_COMMAND="mv"
 OPTIND=1
 while getopts 'hvfn' OPT; do
-
-    echo "$OPT"
-    echo "$OPTIND"
-
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -56,8 +52,9 @@ continueChoice () {
 
 
 message () {
-    #if [ -n "$VERBOSE"]; then; echo "$*"; fi
-    echo "$*"
+    if [ -n "$VERBOSE" ] ; then
+        echo "$*"
+    fi
 }
 
 moveArtifacts () {
@@ -75,13 +72,17 @@ moveArtifacts () {
 
     for a in `echo "$artifacts" | tr "\:" " "`
     do
-        message " - $a"
+        message "  - $a"
 
-        targetDir=$to/${a%"/*"}
+        if [ ! -e $from/$a ] ; then
+            message "    Skipping: Nothing to move - source not available"
+            continue
+        fi
 
-        continueChoice "Creating \"$targetDir\" for artifact \"$a\""
+        targetDir=`dirname "$to/$a"`
 
         if [ ! -e $targetDir ] ; then
+            continueChoice "Creating \"$targetDir\" for artifact \"$a\""
             mkdir -p $VERBOSE $targetDir
         fi
 
