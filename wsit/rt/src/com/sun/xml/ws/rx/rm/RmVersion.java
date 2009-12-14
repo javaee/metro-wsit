@@ -40,7 +40,7 @@ import com.sun.xml.ws.rx.util.JaxbContextRepository;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.policy.assertion.AssertionNamespace;
+import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
@@ -72,7 +72,7 @@ public enum RmVersion {
     WSRM200502(
     "RMAssertion",
     "http://schemas.xmlsoap.org/ws/2005/02/rm",
-    AssertionNamespace.WSRMP_200502.toString(),
+    RmAssertionNamespace.WSRMP_200502.toString(),
     "/LastMessage",
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AckRequestedElement.class,
@@ -100,7 +100,7 @@ public enum RmVersion {
     WSRM200702(
     "RMAssertion",
     "http://docs.oasis-open.org/ws-rx/wsrm/200702",
-    AssertionNamespace.WSRMP_200702.toString(),
+    RmAssertionNamespace.WSRMP_200702.toString(),
     "/CloseSequence",
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AckRequestedElement.class,
