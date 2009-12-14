@@ -36,8 +36,8 @@
  holder.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sun.metro</groupId>
     <artifactId>metro-project</artifactId>
@@ -167,12 +167,12 @@
                     </execution>
                 </executions>
             </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <!--version>2.5</version-->
-        </plugin>
-      </plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
+        </plugins>
         <extensions>
             <extension>
                 <groupId>org.jvnet.wagon-svn</groupId>
@@ -190,16 +190,17 @@
 
     <repositories>
         <repository>
-            <id>m1.dev.java.net</id>
-            <url>http://download.java.net/maven/1</url>
-            <layout>legacy</layout>
-        </repository>
-        <repository>
             <id>m2.dev.java.net</id>
             <url>http://download.java.net/maven/2</url>
             <layout>default</layout>
         </repository>
+        <repository>
+            <id>m1.dev.java.net</id>
+            <url>http://download.java.net/maven/1</url>
+            <layout>legacy</layout>
+        </repository>
     </repositories>
+    
     <pluginRepositories>
         <pluginRepository>
             <id>maven2-repository.dev.java.net</id>
@@ -277,6 +278,13 @@
                 <artifactId></artifactId>
                 <version></version>
             </dependency-->
+            <!-- Testing -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.2</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -288,9 +296,9 @@
             <url>java-net:/maven2-repository/trunk/repository/</url>
         </repository>
     </distributionManagement>
-    
+
     <properties>
         <jaxb.version>2.2</jaxb.version>
-        <jaxws.version>2.2</jaxws.version>
+        <jaxws.version>2.2-SNAPSHOT</jaxws.version>
     </properties>
 </project>

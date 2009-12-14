@@ -68,7 +68,7 @@ moveArtifacts () {
     to="$2"
     artifacts="$3"
 
-    continueChoice "Moving artifacts: $artifacts\nfrom: $from\nto  : $to\n"
+    message "Moving artifacts: $artifacts\nfrom: $from\nto  : $to\n"
 
     for a in `echo "$artifacts" | tr "\:" " "`
     do
