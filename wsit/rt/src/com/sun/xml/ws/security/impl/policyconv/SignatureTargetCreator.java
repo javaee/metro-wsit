@@ -121,4 +121,16 @@ public class SignatureTargetCreator {
         tr.setTransform(transformURI);
         target.addTransform(tr);
     }
+
+    SignatureTarget newURISignatureTargetForSSToken(String uid) {
+          if ( uid != null ) {
+            SignatureTarget target = new SignatureTarget();
+            target.setType(SignatureTarget.TARGET_TYPE_VALUE_URI);
+            target.setDigestAlgorithm(algorithmSuite.getDigestAlgorithm());
+            target.setValue("#"+uid);
+            target.setEnforce(enforce);
+            return target;
+        }
+        return null;
+    }
 }
