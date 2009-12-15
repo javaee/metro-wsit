@@ -34,12 +34,14 @@
  * holder.
  */
 
-package com.sun.xml.ws.xmlfilter;
+package com.sun.xml.ws.runtime;
 
 import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.xmlfilter.EnhancedXmlStreamWriterProxy;
+import com.sun.xml.ws.xmlfilter.InvocationProcessorFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;

@@ -50,10 +50,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
-import com.sun.xml.ws.xmlfilter.AbstractFilteringTestCase;
 
 /**
  *
@@ -89,7 +87,7 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
     }
     
     public void testFilterPolicyExpression() throws Exception {
-        performResourceBasedTest(testPolicyResources, "wsdl_filter/", ".xml", filter);
+        performResourceBasedTest(testPolicyResources, "", ".xml", filter);
     }
     
     public void testFilterWSDL() throws Exception {
@@ -108,7 +106,7 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
         XMLStreamReader reader = null;
         XMLStreamWriter writer = null;
         try {
-            reader = XMLInputFactory.newInstance().createXMLStreamReader(PolicyResourceLoader.getResourceStream("wsdl_filter/" + wsdlName + ".wsdl"));
+            reader = XMLInputFactory.newInstance().createXMLStreamReader(ResourceLoader.getResourceStream(wsdlName + ".wsdl"));
             writer = XMLOutputFactory.newInstance().createXMLStreamWriter(buffer /*, "UTF-8"*/);
             //generate the WSDL with utf-8 encoding and XML version 1.0
             writer.writeStartDocument("UTF-8", "1.0");
