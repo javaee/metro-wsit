@@ -80,7 +80,7 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
         LOGGER.entering(assertionData);
         try {
             final String className = assertionData.getName().getLocalPart();
-            final Class<?> result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
+            final Class<?> result = Class.forName("com.sun.xml.ws.security.addressing.impl.policy." + className);
             LOGGER.exiting();
             return result;
         } catch (ClassNotFoundException ex) {
