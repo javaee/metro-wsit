@@ -8,25 +8,33 @@ if [ $# -le 1 ]; then
 fi
 
 # parse command line arguments
+sm_verbose=
+sm_forceRmFlag=
+sm_moduleRoot=
+sm_moduleName=
+sm_moduleId=
+sm_parentId=
+sm_pomTemplate=
+
 OPTIND=1
 while getopts 'hvfm:n:i:P:p:' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
             ;;
-	v)  VERBOSE="-v"
+	v)  sm_verbose="-v"
             ;;
-	f)  FORCE_RM_FLAG="-f"
+	f)  sm_forceRmFlag="-f"
             ;;
-	m)  MODULE_ROOT=$OPTARG
+	m)  sm_moduleRoot=$OPTARG
             ;;
-	n)  MODULE_NAME=$OPTARG
+	n)  sm_moduleName=$OPTARG
             ;;
-	i)  MODULE_ID=$OPTARG
+	i)  sm_moduleId=$OPTARG
             ;;
-	P)  PARENT_ID=$OPTARG
+	P)  sm_parentId=$OPTARG
             ;;
-        p)  POM_TEMPLATE=$OPTARG
+        p)  sm_pomTemplate=$OPTARG
             ;;
 	?)  # all other characters - error
             echo $USAGE >&2
@@ -42,20 +50,20 @@ shift `expr $OPTIND - 1`
 # done
 
 
-if [ -z "$MODULE_ROOT" ] ; then
+if [ -z "$sm_moduleRoot" ] ; then
     echo "No module root specified" >&2
     echo $USAGE >&2
     exit 1
 fi
 
-if [ ! -e "$MODULE_ROOT" ] ; then
-    mkdir -p $VERBOSE $MODULE_ROOT
+if [ ! -e "$sm_moduleRoot" ] ; then
+    mkdir -p $sm_verbose $sm_moduleRoot
 fi
 
-if [ -z "$POM_TEMPLATE" ] ; then
+if [ -z "$sm_pomTemplate" ] ; then
     echo "No pom.xml template specified"
 else
-    sed -e "s/@module.id@/$MODULE_ID/g" -e "s/@module.name@/$MODULE_NAME/g" -e "s/@parent.id@/$PARENT_ID/g" < $POM_TEMPLATE > $MODULE_ROOT/pom.xml
+    sed -e "s/@module.id@/$sm_moduleId/g" -e "s/@module.name@/$sm_moduleName/g" -e "s/@parent.id@/$sm_parentId/g" < $sm_pomTemplate > $sm_moduleRoot/pom.xml
 fi
 
 

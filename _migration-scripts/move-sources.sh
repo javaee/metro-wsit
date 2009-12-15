@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: move-sources.sh [-hvfn] [<module-root> [<source-artifacts>] [<test-artifacts>] [<test-resources]]"
+USAGE="Usage: move-sources.sh [-hvf] [<module-root> [<source-artifacts>] [<test-artifacts>] [<test-resources]]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 0 ]; then
@@ -8,18 +8,18 @@ if [ $# -le 0 ]; then
 fi
 
 # parse command line arguments
-MOVE_COMMAND="mv"
+ms_verbose=
+ms_forceRmFlag=
+
 OPTIND=1
-while getopts 'hvfn' OPT; do
+while getopts 'hvf' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
             ;;
-	v)  VERBOSE="-v"
+	v)  ms_verbose="-v"
             ;;
-	f)  FORCE_RM_FLAG="-f"
-            ;;
-	n)  MOVE_COMMAND="cp -R"
+	f)  ms_forceRmFlag="-f"
             ;;
 	?)  # all other characters - error
             echo $USAGE >&2
@@ -53,7 +53,7 @@ continueChoice () {
 
 
 message () {
-    if [ -n "$VERBOSE" ] ; then
+    if [ -n "$ms_verbose" ] ; then
         echo "$*"
     fi
 }
@@ -82,16 +82,28 @@ moveArtifacts () {
         targetDir=`dirname "$to/$a"`
 
         if [ ! -e $targetDir ] ; then
-            mkdir -p $VERBOSE $targetDir
+            mkdir -p $ms_verbose $targetDir
         fi
 
-        $MOVE_COMMAND $from/$a $targetDir/
+        mv $ms_verbose $from/$a $targetDir/
     done
 }
 
 if [ -n "$srcArtifacts" ] ; then
     moveArtifacts "$EXPORTED_RT_ROOT/src" "$moduleRoot/src/main/java" "$srcArtifacts"
 fi
+
+for propertyFile in `find "$moduleRoot/src/main/java" -name "*.properties"`
+do
+
+    targetDir=`dirname "$moduleRoot/src/main/resources/"${propertyFile#"$moduleRoot/src/main/java/"}`
+    message "Moving property resource:\n$propertyFile\nTo:\n$targetDir"
+    if [ ! -e "$targetDir" ] ; then
+        mkdir -p $ms_verbose $targetDir
+    fi
+
+    mv $ms_verbose $propertyFile "$targetDir/"
+done
 
 if [ -n "$testArtifacts" ] ; then
     moveArtifacts "$EXPORTED_RT_ROOT/test/unit/src" "$moduleRoot/src/test/java" "$testArtifacts"

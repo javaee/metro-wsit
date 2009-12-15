@@ -31,14 +31,33 @@ POM_TEMPLATE="./poms/wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
 
 #
+# WSIT Xml document filter API
+#
+MODULE_ROOT="$WSIT_MODULE_ROOT/xml-filter-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "XML document filtering API" -i "xml-filter-api" -P "wsit-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/xmlfilter"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES="xmlfilter"
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
 # WSIT Core
 # TODO: split into submodules
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-core"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Core" -i "wsit-core" -P "wsit-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/assembler:com/sun/xml/ws/commons:com/sun/xml/ws/dump:com/sun/xml/ws/runtime"
+SRC_ARTIFACTS="\
+com/sun/xml/ws/assembler:com/sun/xml/ws/commons:\
+com/sun/xml/ws/dump:\
+com/sun/xml/ws/runtime:\
+com/sun/xml/ws/security/SecurityContextTokenInfo.java:\
+com/sun/xml/ws/security/IssuedTokenContext.java:\
+com/sun/xml/ws/security/secconv/SecureConversationInitiator.java"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="assembler:metro-config"
+TEST_RESOURCES="\
+assembler:\
+metro-config:\
+wsdl_filter"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 #
@@ -130,40 +149,31 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 SX_MODULE_ROOT="$WSIT_MODULE_ROOT/wssx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
 #
-# WSIT WS-SecurityPolicy API
+# WSIT WS-Security implementation
 #
-MODULE_ROOT="$SX_MODULE_ROOT/wss-policy-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecurityPolicy API" -i "wss-policy-api" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/api/security/CallbackHandlerFeature.java"
+MODULE_ROOT="$SX_MODULE_ROOT/wss-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Security Implementation" -i "wss-impl" -P "wssx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="\
+com/sun/xml/wss:\
+com/sun/xml/ws/api/security/CallbackHandlerFeature.java:\
+com/sun/xml/ws/security/spi"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES=""
+TEST_RESOURCES="\
+security/keystore:\
+security/policy-binding1.xml:\
+security/policy-binding2.xml"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
 # WSIT WS-SecurityPolicy implementation
 #
 MODULE_ROOT="$SX_MODULE_ROOT/wss-policy-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecurityPolicy Implementation" -i "wss-policy-impl" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/security/impl/policy:com/sun/xml/ws/security/policy"
+SRC_ARTIFACTS="\
+com/sun/xml/ws/security/policy:\
+com/sun/xml/ws/security/impl/policy:\
+com/sun/xml/ws/security/impl/policyconv"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES=""
-source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-#
-# WSIT WS-Security API
-#
-#MODULE_ROOT="$SX_MODULE_ROOT/wss-api"
-#source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Security API" -i "wss-api" -P "wssx-project" -p $POM_TEMPLATE
-#SRC_ARTIFACTS=""
-#TEST_ARTIFACTS="$SRC_ARTIFACTS"
-#TEST_RESOURCES=""
-#source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-#
-# WSIT WS-Security implementation
-#
-MODULE_ROOT="$SX_MODULE_ROOT/wss-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Security Implementation" -i "wss-impl" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/wss"
-TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES=""
+TEST_RESOURCES="security"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
 # WSIT WS-SecureConversation API
@@ -179,7 +189,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 MODULE_ROOT="$SX_MODULE_ROOT/wssc-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecureConversation Implementation" -i "wssc-impl" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/security/secconv:com/sun/xml/ws/security/impl/policyconv"
+SRC_ARTIFACTS="com/sun/xml/ws/security/secconv"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES

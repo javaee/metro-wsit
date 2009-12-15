@@ -50,21 +50,28 @@ ensureDir () {
 pushd .
 cd `pwd`/`dirname $0`/..
 NEW_PROJECT_ROOT=`pwd`/metro
+EXPORTED_RT_MASTER_ROOT=`pwd`/\_tmp-exported-rt-master
 EXPORTED_RT_ROOT=`pwd`/\_tmp-exported-rt
 popd
 
-continueChoice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"
+continueChoice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT MASTER root is set to: $EXPORTED_RT_MASTER_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"
 
 if [ ! -n "$NO_EXPORT" ] ; then
-    if [ -e $EXPORTED_RT_ROOT ] ; then
-        rm -rf $VERBOSE $EXPORTED_RT_ROOT
+    if [ -e $EXPORTED_RT_MASTER_ROOT ] ; then
+        rm -rf $VERBOSE $EXPORTED_RT_MASTER_ROOT
     fi
 
     pushd .
-    cd `dirname $EXPORTED_RT_ROOT`
-    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_RT_ROOT` wsit/wsit/rt
+    cd `dirname $EXPORTED_RT_MASTER_ROOT`
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_RT_MASTER_ROOT` wsit/wsit/rt
     popd
 fi
+
+if [ -e $EXPORTED_RT_ROOT ] ; then
+    rm -rf $VERBOSE $EXPORTED_RT_ROOT
+fi
+cp -R $EXPORTED_RT_MASTER_ROOT $EXPORTED_RT_ROOT
+
 
 if [ -e $NEW_PROJECT_ROOT ] ; then
     rm -rf $NEW_PROJECT_ROOT

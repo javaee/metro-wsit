@@ -123,24 +123,6 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/rsrc-gen</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.sun.istack</groupId>
                 <artifactId>maven-istack-commons-plugin</artifactId>
                 <version>0.1</version>
@@ -155,11 +137,29 @@
                                 </includes>
                             </resources>
                             <destDir>${project.build.directory}/generated-sources/rsrc-gen</destDir>
-                            <localizationUtilitiesPkgName>com.sun.metro.localization</localizationUtilitiesPkgName>
+                            <localizationUtilitiesPkgName>com.sun.xml.ws.util.localization</localizationUtilitiesPkgName>
                         </configuration>
                         <goals>
                             <goal>rs-gen</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/rsrc-gen</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -201,6 +201,50 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <!-- Grizzly -->
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-nio-framework</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-portunif</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-webserver</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-config</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-utils</artifactId>
+            <version>${grizzly.version}</version>
+        </dependency>
+        <!-- FastInfoset -->
+        <dependency>
+            <groupId>com.sun.xml.fastinfoset</groupId>
+            <artifactId>FastInfoset</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+        <!-- JSR173: STAX API -->
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>jsr173</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!-- istack-commons -->
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
         <!-- Other -->
         <!--dependency>
             <groupId></groupId>
@@ -209,5 +253,7 @@
         </dependency-->
     </dependencies>
 
-    <!--properties></properties-->
+    <properties>
+        <grizzly.version>1.9.18-i</grizzly.version>
+    </properties>
 </project>
