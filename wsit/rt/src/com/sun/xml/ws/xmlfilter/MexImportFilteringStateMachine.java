@@ -33,35 +33,39 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
 
-import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.ProcessingStateChange.*;
+import com.sun.istack.logging.Logger;
+
+import static com.sun.xml.ws.xmlfilter.ProcessingStateChange.*;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class PrivateElementFilteringStateMachine implements FilteringStateMachine {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateElementFilteringStateMachine.class);
+public final class MexImportFilteringStateMachine implements FilteringStateMachine {
+    private enum StateMachineMode {
+        INACTIVE,
+        BUFFERING,
+        FILTERING
+    }
+    
+    private static final Logger LOGGER = Logger.getLogger(MexImportFilteringStateMachine.class);
+    
+    private static final String MEX_NAMESPACE = "http://schemas.xmlsoap.org/ws/2004/09/mex";
+    private static final String WSDL_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
+    private static final QName WSDL_IMPORT_ELEMENT = new QName(WSDL_NAMESPACE, "import");
+    private static final QName IMPORT_NAMESPACE_ATTIBUTE = new QName(WSDL_NAMESPACE, "namespace");
     
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
-    private boolean filteringOn; // indicates that currently processed elements will be filtered out.
+    private StateMachineMode currentMode = StateMachineMode.INACTIVE; // indicates that current mode of the filtering state machine
     
-    private final QName[] filteredElements;
-    
-    /** Creates a new instance of PrivateElementFilteringStateMachine */
-    public PrivateElementFilteringStateMachine(final QName... filteredElements) {
-        if (filteredElements == null) {
-            this.filteredElements = new QName[]{};
-        } else {
-            this.filteredElements = new QName[filteredElements.length];
-            System.arraycopy(filteredElements, 0, this.filteredElements, 0, filteredElements.length);
-        }
+    /** Creates a new instance of MexImportFilteringStateMachine */
+    public MexImportFilteringStateMachine() {
+        // nothing to initialize
     }
     
     public ProcessingStateChange getStateChange(final Invocation invocation, final XMLStreamWriter writer) {
@@ -70,31 +74,40 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
         try {
             switch (invocation.getMethodType()) {
                 case WRITE_START_ELEMENT:
-                    if (filteringOn) {
-                        depth++;
-                    } else {
-                        filteringOn = startFiltering(invocation, writer);
-                        if (filteringOn) {
-                            resultingState = START_FILTERING;
+                    if (currentMode == StateMachineMode.INACTIVE) {
+                        if (startBuffering(invocation, writer)) {
+                            resultingState = START_BUFFERING;
+                            currentMode = StateMachineMode.BUFFERING;
                         }
+                    } else {
+                        depth++;
                     }
                     break;
                 case WRITE_END_ELEMENT:
-                    if (filteringOn) {
+                    if (currentMode != StateMachineMode.INACTIVE) {
                         if (depth == 0) {
-                            filteringOn = false;
-                            resultingState = STOP_FILTERING;
-//                            return invocation.executeBatch(mirrorWriter);
+                            resultingState = (currentMode == StateMachineMode.BUFFERING) ? STOP_BUFFERING : STOP_FILTERING;
+                            currentMode = StateMachineMode.INACTIVE;
                         } else {
                             depth--;
                         }
                     }
                     break;
-                case CLOSE:
-                    if (filteringOn) {
-                        filteringOn = false;
-                        resultingState = STOP_FILTERING;
+                case WRITE_ATTRIBUTE:
+                    if (currentMode == StateMachineMode.BUFFERING && startFiltering(invocation, writer)) {
+                        resultingState = START_FILTERING;
+                        currentMode = StateMachineMode.FILTERING;
                     }
+                    break;
+                case CLOSE:
+                    switch (currentMode) {
+                        case BUFFERING:
+                            resultingState = STOP_BUFFERING; break;
+                        case FILTERING:
+                            resultingState = STOP_FILTERING; break;
+                    }
+                    currentMode = StateMachineMode.INACTIVE;
+                    break;
                 default:
                     break;
             }
@@ -107,14 +120,12 @@ public class PrivateElementFilteringStateMachine implements FilteringStateMachin
     }
     
     private boolean startFiltering(final Invocation invocation, final XMLStreamWriter writer) {
+        final XmlFilteringUtils.AttributeInfo attributeInfo = XmlFilteringUtils.getAttributeNameToWrite(invocation, XmlFilteringUtils.getDefaultNamespaceURI(writer));
+        return IMPORT_NAMESPACE_ATTIBUTE.equals(attributeInfo.getName()) && MEX_NAMESPACE.equals(attributeInfo.getValue());
+    }
+    
+    private boolean startBuffering(final Invocation invocation, final XMLStreamWriter writer) {
         final QName elementName = XmlFilteringUtils.getElementNameToWrite(invocation, XmlFilteringUtils.getDefaultNamespaceURI(writer));
-        
-        for (QName filteredElement : filteredElements) {
-            if (filteredElement.equals(elementName)) {
-                return true;
-            }
-        }
-        
-        return false;
+        return WSDL_IMPORT_ELEMENT.equals(elementName);
     }
 }

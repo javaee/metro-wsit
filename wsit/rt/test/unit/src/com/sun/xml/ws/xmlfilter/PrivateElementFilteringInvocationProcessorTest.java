@@ -35,17 +35,16 @@
  */
 
 /*
- * FilteringXmlStreamWriterProxyTest.java
+ * PrivateElementFilteringInvocationProcessorTest.java
  * JUnit based test
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * Created on November 10, 2006, 2:51 PM
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
 import java.io.StringWriter;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -53,18 +52,38 @@ import javax.xml.stream.XMLStreamWriter;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteringTestCase {
-    private String[] testResources = new String[] {
-        "import_element_01"
+public class PrivateElementFilteringInvocationProcessorTest  extends AbstractFilteringTestCase {
+    private static final String[] testResources = new String[] {
+        "element_01",
+        "element_02"
     };
-    
+
     private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new FilteringInvocationProcessor(writer, new MexImportFilteringStateMachine());
+            return new FilteringInvocationProcessor(writer, new PrivateElementFilteringStateMachine(
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "ValidatorConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/server", "DisablePayloadBuffering"),
+                    
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "KeyStore"),
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "TrustStore"),
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "CallbackHandlerConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "ValidatorConfiguration"),
+                    new QName("http://schemas.sun.com/2006/03/wss/client", "DisablePayloadBuffering"),
+                    
+                    new QName("http://schemas.sun.com/ws/2006/05/sc/server", "SCConfiguration"),
+                    
+                    new QName("http://schemas.sun.com/ws/2006/05/sc/client", "SCClientConfiguration"),
+                    
+                    new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
+                    
+                    new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS")));
         }
     };
     
-    public MexImportFilteringXmlStreamWriterTest(String testName) {
+    public PrivateElementFilteringInvocationProcessorTest(String testName) {
         super(testName);
     }
     
@@ -78,6 +97,6 @@ public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteri
     }
     
     public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
-        performResourceBasedTest(testResources, "mex_filtering/", ".xml", factory);
+        performResourceBasedTest(testResources, "element_filtering/", ".xml", factory);
     }
 }

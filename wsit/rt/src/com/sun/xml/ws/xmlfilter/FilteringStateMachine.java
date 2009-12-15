@@ -33,51 +33,28 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.xmlfilter;
 
-/*
- * FilteringXmlStreamWriterProxyTest.java
- * JUnit based test
- *
- * @author Marek Potociar (marek.potociar at sun.com)
- */
-
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
-
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
-import java.io.StringWriter;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PrivateAssertionFilteringXmlStreamWriterTest extends AbstractFilteringTestCase {
-    private static final String[] testResources = new String[] {
-        "policy_0_visible",
-    };
-
-    private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
-        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
-            return new FilteringInvocationProcessor(writer, new PrivateAttributeFilteringStateMachine());
-        }
-    };
-    
-    public PrivateAssertionFilteringXmlStreamWriterTest(String testName) {
-        super(testName);
-    }
+public interface FilteringStateMachine {
     
     /**
-     * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
+     * Based on the current invocation decides whether a processing state change 
+     * is required and returns the result of this decision.
+     * 
+     * @param invocation current invocation executed on the XML stream writer
+     * @param writer mirror writer that records all calls (even the ones filtered out)
+     *        and thus represents the "unfiltered" status of the XML stream. The 
+     *        parameter may be used to query the status. Implementations of the 
+     *        {@link FilteringStateMachine} SHOULD NOT call any methods that may result
+     *        in a modification of the XML stream represented by this {@code writer}
+     *        parameter.
+     * @return processing state change as required.
      */
-    public void testCreateProxy() throws Exception {
-        XMLStreamWriter result = openFilteredWriter(new StringWriter(), factory);
-        
-        assertNotNull(result);
-    }
-    
-    public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
-        performResourceBasedTest(testResources, "visibility/", ".xml", factory);
-    }
+    ProcessingStateChange getStateChange(final Invocation invocation, final XMLStreamWriter writer);        
 }

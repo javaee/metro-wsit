@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,37 +34,48 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
+/*
+ * FilteringXmlStreamWriterProxyTest.java
+ * JUnit based test
+ *
+ * @author Marek Potociar (marek.potociar at sun.com)
+ */
 
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
+import java.io.StringWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class InvocationProcessingException extends RuntimeException {
-    public InvocationProcessingException(final String message) {
-	super(message);
-    }
-
-    public InvocationProcessingException(final String message, final Throwable cause) {
-        super(message, cause);
-    }    
-
-    public InvocationProcessingException(final Throwable cause) {
-        super(cause.getMessage(), cause);
-    }    
-
-    public InvocationProcessingException(final Invocation invocation) {
-	super(assemblyExceptionMessage(invocation));
-    }
-
-    public InvocationProcessingException(final Invocation invocation, final Throwable cause) {
-        super(assemblyExceptionMessage(invocation), cause);
-    }    
+public final class MexImportFilteringXmlStreamWriterTest extends AbstractFilteringTestCase {
+    private String[] testResources = new String[] {
+        "import_element_01"
+    };
     
-    private static String assemblyExceptionMessage(final Invocation invocation) {
-        return LocalizationMessages.WSP_5005_INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
-    }    
+    private static final InvocationProcessorFactory factory = new InvocationProcessorFactory() {
+        public InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException {
+            return new FilteringInvocationProcessor(writer, new MexImportFilteringStateMachine());
+        }
+    };
+    
+    public MexImportFilteringXmlStreamWriterTest(String testName) {
+        super(testName);
+    }
+    
+    /**
+     * Test of createProxy method, of class com.sun.xml.ws.policy.jaxws.documentfilter.FilteringXmlStreamWriterProxy.
+     */
+    public void testCreateProxy() throws Exception {
+        XMLStreamWriter result = openFilteredWriter(new StringWriter(), factory);
+        
+        assertNotNull(result);
+    }
+    
+    public void testFilterPrivateAssertionsFromPolicyExpression() throws Exception {
+        performResourceBasedTest(testResources, "mex_filtering/", ".xml", factory);
+    }
 }

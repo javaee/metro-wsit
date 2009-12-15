@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,29 +33,38 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import javax.xml.stream.XMLStreamWriter;
+package com.sun.xml.ws.xmlfilter;
+
+
+import com.sun.xml.ws.xmlfilter.localization.LocalizationMessages;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface FilteringStateMachine {
+public class InvocationProcessingException extends RuntimeException {
+    public InvocationProcessingException(final String message) {
+	super(message);
+    }
+
+    public InvocationProcessingException(final String message, final Throwable cause) {
+        super(message, cause);
+    }    
+
+    public InvocationProcessingException(final Throwable cause) {
+        super(cause.getMessage(), cause);
+    }    
+
+    public InvocationProcessingException(final Invocation invocation) {
+	super(assemblyExceptionMessage(invocation));
+    }
+
+    public InvocationProcessingException(final Invocation invocation, final Throwable cause) {
+        super(assemblyExceptionMessage(invocation), cause);
+    }    
     
-    /**
-     * Based on the current invocation decides whether a processing state change 
-     * is required and returns the result of this decision.
-     * 
-     * @param invocation current invocation executed on the XML stream writer
-     * @param writer mirror writer that records all calls (even the ones filtered out)
-     *        and thus represents the "unfiltered" status of the XML stream. The 
-     *        parameter may be used to query the status. Implementations of the 
-     *        {@link FilteringStateMachine} SHOULD NOT call any methods that may result
-     *        in a modification of the XML stream represented by this {@code writer}
-     *        parameter.
-     * @return processing state change as required.
-     */
-    ProcessingStateChange getStateChange(final Invocation invocation, final XMLStreamWriter writer);        
+    private static String assemblyExceptionMessage(final Invocation invocation) {
+        return LocalizationMessages.XMLF_5005_INVOCATION_ERROR(invocation.getMethodName(), invocation.argsToString());
+    }    
 }

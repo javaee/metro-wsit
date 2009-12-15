@@ -34,21 +34,26 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.runtime;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import com.sun.istack.logging.Logger;
 
 import com.sun.xml.ws.api.config.management.policy.ManagedClientAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.server.SDDocument;
 import com.sun.xml.ws.api.server.SDDocumentFilter;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.EnhancedXmlStreamWriterProxy;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessorFactory;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import com.sun.xml.ws.transport.tcp.wsit.PortAttributeInvocationTransformer;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import com.sun.xml.ws.xmlfilter.EnhancedXmlStreamWriterProxy;
+import com.sun.xml.ws.xmlfilter.FilteringInvocationProcessor;
+import com.sun.xml.ws.xmlfilter.InvocationProcessor;
+import com.sun.xml.ws.xmlfilter.InvocationProcessorFactory;
+import com.sun.xml.ws.xmlfilter.MexImportFilteringStateMachine;
+import com.sun.xml.ws.xmlfilter.PrivateAttributeFilteringStateMachine;
+import com.sun.xml.ws.xmlfilter.PrivateElementFilteringStateMachine;
 
 /**
  * The class provides an implementaion of JAX-WS {@code SDDocumentFilter} interface.
@@ -56,7 +61,7 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class WsdlDocumentFilter implements SDDocumentFilter {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsdlDocumentFilter.class);
+    private static final Logger LOGGER = Logger.getLogger(WsdlDocumentFilter.class);
     
     private static final InvocationProcessorFactory FILTERING_FACTORY = new InvocationProcessorFactory() {
         public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {

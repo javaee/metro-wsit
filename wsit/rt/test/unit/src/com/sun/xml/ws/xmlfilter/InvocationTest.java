@@ -41,7 +41,7 @@
  * Created on March 2, 2007, 11:44 AM
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
+package com.sun.xml.ws.xmlfilter;
 
 import javax.xml.stream.XMLStreamWriter;
 import java.lang.reflect.Method;

@@ -33,12 +33,8 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessingException;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.InvocationProcessor;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -49,7 +45,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.ProcessingStateChange.START_BUFFERING;
+import com.sun.istack.logging.Logger;
+
+import static com.sun.xml.ws.xmlfilter.ProcessingStateChange.START_BUFFERING;
 
 /**
  *
@@ -57,7 +55,7 @@ import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.Process
  */
 public final class FilteringInvocationProcessor implements InvocationProcessor {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(FilteringInvocationProcessor.class);
+    private static final Logger LOGGER = Logger.getLogger(FilteringInvocationProcessor.class);
     private static final XMLOutputFactory XML_OUTPUT_FACTORY = XMLOutputFactory.newInstance();
 
     private static final class StateMachineContext {

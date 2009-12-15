@@ -41,18 +41,19 @@
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.runtime;
 
-import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import java.io.StringWriter;
-import com.sun.xml.ws.api.server.SDDocumentFilter;
-import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+
+import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
+import com.sun.xml.ws.api.server.SDDocumentFilter;
+import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+import com.sun.xml.ws.xmlfilter.AbstractFilteringTestCase;
 
 /**
  *
@@ -103,7 +104,7 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
         }
     }
     
-    private void readAndWriteWsdl(String wsdlName, StringWriter buffer, boolean filter) throws PolicyException, XMLStreamException {
+    private void readAndWriteWsdl(String wsdlName, StringWriter buffer, boolean filter) throws Exception {
         XMLStreamReader reader = null;
         XMLStreamWriter writer = null;
         try {

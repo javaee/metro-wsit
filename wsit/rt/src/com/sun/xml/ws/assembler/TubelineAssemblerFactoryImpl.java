@@ -46,7 +46,7 @@ import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.assembler.localization.LocalizationMessages;
 import com.sun.xml.ws.dump.LoggingDumpTube;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.WsdlDocumentFilter;
+import com.sun.xml.ws.runtime.WsdlDocumentFilter;
 import java.util.Collection;
 import java.util.logging.Level;
 

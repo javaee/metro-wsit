@@ -33,22 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.stream.XMLStreamWriter;
+
+import com.sun.istack.logging.Logger;
 
 import static com.sun.xml.ws.policy.PolicyConstants.VISIBILITY_ATTRIBUTE;
 import static com.sun.xml.ws.policy.PolicyConstants.VISIBILITY_VALUE_PRIVATE;
-import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.ProcessingStateChange.*;
+import static com.sun.xml.ws.xmlfilter.ProcessingStateChange.*;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class PrivateAttributeFilteringStateMachine implements FilteringStateMachine {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PrivateAttributeFilteringStateMachine.class);
+    private static final Logger LOGGER = Logger.getLogger(PrivateAttributeFilteringStateMachine.class);
     
     private int depth; // indicates the depth in which we are currently nested in the element that should be filtered out
     private boolean filteringOn; // indicates that currently processed elements will be filtered out.

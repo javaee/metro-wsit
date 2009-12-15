@@ -33,15 +33,14 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamWriter;
+
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.xmlfilter.localization.LocalizationMessages;
 
 /**
  *
@@ -66,7 +65,7 @@ public final class XmlFilteringUtils {
         }
     }
     
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(XmlFilteringUtils.class);
+    private static final Logger LOGGER = Logger.getLogger(XmlFilteringUtils.class);
    
     /** 
      * Prevents creation of a new instance of XmlFilteringUtils 
@@ -105,7 +104,7 @@ public final class XmlFilteringUtils {
                 namespaceURI = invocation.getArgument(2).toString();
                 break;
             default:
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.XMLF_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_START_ELEMENT + "(...)", argumentsCount)));
         }
         
         return new QName(namespaceURI, localName);
@@ -139,7 +138,7 @@ public final class XmlFilteringUtils {
                 value = invocation.getArgument(3).toString();
                 break;
             default:
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.XMLF_5003_UNEXPECTED_ARGUMENTS_COUNT(XmlStreamWriterMethodType.WRITE_ATTRIBUTE + "(...)", argumentsCount)));
         }
         
         return new AttributeInfo(new QName(namespaceURI, localName), value);
@@ -147,10 +146,10 @@ public final class XmlFilteringUtils {
     
     private static void checkInvocationParameter(final Invocation invocation, final XmlStreamWriterMethodType expectedType) {
         if (invocation == null) {
-            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5012_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
+            throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.XMLF_5012_METHOD_PARAMETER_CANNOT_BE_NULL("Invocation parameter")));
         } else {
             if (invocation.getMethodType() != expectedType) {
-                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.WSP_5013_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));
+                throw LOGGER.logSevereException(new IllegalArgumentException(LocalizationMessages.XMLF_5013_ILLEGAL_INVOCATION_METHOD_TYPE(invocation.getMethodType(), expectedType)));
             }
         }
     }

@@ -33,19 +33,19 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
+package com.sun.xml.ws.xmlfilter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import java.util.Queue;
-import static com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages.WSP_5019_NO_ARGUMENTS_IN_INVOCATION;
-import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType.WRITE_CHARACTERS;
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.xmlfilter.localization.LocalizationMessages;
+import static com.sun.xml.ws.xmlfilter.XmlStreamWriterMethodType.WRITE_CHARACTERS;
 
 /**
  * The class represents a wrapper around {@code XMLStreamWriter} invocations. 
@@ -54,7 +54,7 @@ import static com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodT
  */
 public final class Invocation {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(Invocation.class);
+    private static final Logger LOGGER = Logger.getLogger(Invocation.class);
     private final Method method;
     private final Object[] arguments;
     private String argsString;
@@ -170,7 +170,7 @@ public final class Invocation {
      */
     public Object getArgument(final int index) throws ArrayIndexOutOfBoundsException {
         if (arguments == null) {
-            throw LOGGER.logSevereException(new ArrayIndexOutOfBoundsException(WSP_5019_NO_ARGUMENTS_IN_INVOCATION(this.toString())));
+            throw LOGGER.logSevereException(new ArrayIndexOutOfBoundsException(LocalizationMessages.XMLF_5019_NO_ARGUMENTS_IN_INVOCATION(this.toString())));
         }
         return arguments[index];
     }

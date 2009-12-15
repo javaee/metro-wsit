@@ -34,10 +34,10 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
+package com.sun.xml.ws.xmlfilter;
 
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.xmlfilter.localization.LocalizationMessages;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -58,7 +58,7 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(EnhancedXmlStreamWriterProxy.class);
+    private static final Logger LOGGER = Logger.getLogger(EnhancedXmlStreamWriterProxy.class);
     
     private static final Class<?>[] PROXIED_INTERFACES = new Class<?>[] {XMLStreamWriter.class};
     
@@ -140,7 +140,7 @@ public final class EnhancedXmlStreamWriterProxy implements InvocationHandler {
         } else if (method.equals(toStringMethod)) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
         } else {
-            throw LOGGER.logSevereException(new InternalError(LocalizationMessages.WSP_5002_UNEXPECTED_OBJECT_METHOD(method)));
+            throw LOGGER.logSevereException(new InternalError(LocalizationMessages.XMLF_5002_UNEXPECTED_OBJECT_METHOD(method)));
         }
     }
 }

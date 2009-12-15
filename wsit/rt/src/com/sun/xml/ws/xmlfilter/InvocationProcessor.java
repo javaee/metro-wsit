@@ -33,30 +33,23 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+package com.sun.xml.ws.xmlfilter;
 
 /**
- * The interface provides API contract for {@link InvocationProcessor} factory 
- * implementations. Implementations of this interface may be passed into {@link EnhancedXmlStreamWriterProxy}
+ * Invocation processor implements processing of {@code XMLStreamWriter} method invocations.
+ * This allows to implement and plug in additional features or enhancements to the standard
+ * {@code XMLStreamWriter} implementations.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface InvocationProcessorFactory {
+public interface InvocationProcessor {
     
     /**
-     * Factory method creates {@link InvocationProcessor} instance that implements
-     * additional {@link XMLStreamWriter} feature or enhancement.
+     * Processes the {@code XMLStreamWriter} invocation.
      *
-     * @param writer underlying {@link XMLStreamWriter} instance that should be enhanced 
-     * with the new feature(s).
+     * @param invocation description of the {@code XMLStreamWriter} invocation to be processed
      *
-     * @return newly created {@link InvocationProcessor} instance.
-     * 
-     * @throws XMLStreamException in case of any problems with creation of
-     *         new {@link InvocationProcessor} instance.
+     * @return {@code XMLStreamWriter} invocation result.
      */
-    InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException;
+    public Object process(Invocation invocation) throws InvocationProcessingException;
 }

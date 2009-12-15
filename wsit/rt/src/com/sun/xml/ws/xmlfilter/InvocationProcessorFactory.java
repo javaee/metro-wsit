@@ -33,66 +33,30 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws.xmlstreamwriter;
+package com.sun.xml.ws.xmlfilter;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
- *
+ * The interface provides API contract for {@link InvocationProcessor} factory 
+ * implementations. Implementations of this interface may be passed into {@link EnhancedXmlStreamWriterProxy}
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public enum XmlStreamWriterMethodType {
-
-    WRITE_START_DOCUMENT("writeStartDocument", true),
-    WRITE_END_DOCUMENT("writeEndDocument", true),
-    WRITE_START_ELEMENT("writeStartElement", true),
-    WRITE_END_ELEMENT("writeEndElement", true),
-    WRITE_EMPTY_ELEMENT("writeEmptyElement", true),
-    WRITE_ATTRIBUTE("writeAttribute", true),
-    WRITE_CHARACTERS("writeCharacters", true),
-    WRITE_PROCESSING_INSTRUCTION("writeProcessingInstruction", true),
-    WRITE_ENTITY_REFERENCE("writeEntityRef", true),
-    WRITE_CDATA("writeCData", true),
-    WRITE_COMMENT("writeComment", true),
-    WRITE_DTD("writeDTD", true),
-    WRITE_DEFAULT_NAMESPACE("writeDefaultNamespace", true),
-    WRITE_NAMESPACE("writeNamespace", true),
-    //
-    GET_NAMESPACE_CONTEXT("getNamespaceContext", false),
-    GET_PREFIX("getPrefix", false),
-    GET_PROPERTY("getProperty", false),
-    //
-    SET_DEFAULT_NAMESPACE("setDefaultNamespace", true),
-    SET_NAMESPACE_CONTEXT("setNamespaceContext", true),
-    SET_PREFIX("setPrefix", true),
-    //
-    CLOSE("close", false),
-    FLUSH("flush", true),
-    //
-    UNKNOWN("", true);
-
-    static XmlStreamWriterMethodType getMethodType(final String methodName) {
-        if (methodName != null && methodName.length() > 0) {
-            for (XmlStreamWriterMethodType type : values()) {
-                if (type.methodName.equals(methodName)) {
-                    return type;
-                }
-            }
-        }
-        return UNKNOWN;
-    }
-    private String methodName;
-    private boolean filterable;
-
-    private XmlStreamWriterMethodType(String methodName, boolean isFilterable) {
-        this.methodName = methodName;
-        this.filterable = isFilterable;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public boolean isFilterable() {
-        return filterable;
-    }
+public interface InvocationProcessorFactory {
+    
+    /**
+     * Factory method creates {@link InvocationProcessor} instance that implements
+     * additional {@link XMLStreamWriter} feature or enhancement.
+     *
+     * @param writer underlying {@link XMLStreamWriter} instance that should be enhanced 
+     * with the new feature(s).
+     *
+     * @return newly created {@link InvocationProcessor} instance.
+     * 
+     * @throws XMLStreamException in case of any problems with creation of
+     *         new {@link InvocationProcessor} instance.
+     */
+    InvocationProcessor createInvocationProcessor(XMLStreamWriter writer) throws XMLStreamException;
 }

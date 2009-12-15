@@ -36,17 +36,16 @@
 
 package com.sun.xml.ws.transport.tcp.wsit;
 
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.Invocation;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.XmlStreamWriterMethodType;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.InvocationTransformer;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.XmlFilteringUtils;
-import com.sun.xml.ws.policy.jaxws.xmlstreamwriter.documentfilter.XmlFilteringUtils.AttributeInfo;
-import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
+import com.sun.xml.ws.xmlfilter.Invocation;
+import com.sun.xml.ws.xmlfilter.XmlStreamWriterMethodType;
+import com.sun.xml.ws.xmlfilter.InvocationTransformer;
+import com.sun.xml.ws.xmlfilter.XmlFilteringUtils;
+import com.sun.xml.ws.xmlfilter.XmlFilteringUtils.AttributeInfo;
 
+import com.sun.xml.ws.transport.tcp.resources.MessagesMessages;
 import com.sun.xml.ws.transport.tcp.server.WSTCPModule;
-import java.lang.reflect.Method;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
