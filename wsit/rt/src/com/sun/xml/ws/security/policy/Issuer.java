@@ -1,5 +1,5 @@
 /*
- * $Id: Issuer.java,v 1.7 2008-05-29 06:58:15 ashutoshshahi Exp $
+ * $Id: Issuer.java,v 1.8 2009-12-15 08:44:45 sm228678 Exp $
  */
 
 /*
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.addressing.policy.Address;
+import com.sun.xml.ws.security.addressing.policy.Address;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import org.w3c.dom.Element;
 

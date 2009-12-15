@@ -43,7 +43,7 @@ import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
-import com.sun.xml.ws.encoding.LazyStreamCodec;
+import com.sun.xml.ws.security.encoding.LazyStreamCodec;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.api.WSBinding;

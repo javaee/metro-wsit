@@ -60,7 +60,7 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.developer.WSBindingProvider;
-import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
+import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;

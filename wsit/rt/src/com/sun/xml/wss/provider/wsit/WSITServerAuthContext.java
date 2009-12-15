@@ -53,7 +53,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.message.stream.LazyStreamBasedMessage;
+import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;

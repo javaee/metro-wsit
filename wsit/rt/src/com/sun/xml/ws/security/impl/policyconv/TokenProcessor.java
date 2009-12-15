@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
-import com.sun.xml.ws.addressing.policy.Address;
+import com.sun.xml.ws.security.addressing.policy.Address;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;

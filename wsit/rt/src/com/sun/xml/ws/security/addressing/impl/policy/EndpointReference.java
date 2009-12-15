@@ -35,65 +35,65 @@
  */
 
 /*
- * Address.java
+ * EndpointReference.java
  *
- * Created on February 17, 2006, 12:48 PM
+ * Created on February 17, 2006, 12:41 PM
  *
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
 
-package com.sun.xml.ws.addressing.impl.policy;
+package com.sun.xml.ws.security.addressing.impl.policy;
 
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import java.util.Collection;
-import java.util.logging.Level;
-import static com.sun.xml.ws.addressing.impl.policy.Constants.logger;
+
+import java.util.Iterator;
+
 /**
  *
  * @author Abhijit Das
  */
-public class Address extends com.sun.xml.ws.policy.PolicyAssertion implements com.sun.xml.ws.addressing.policy.Address {
+public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion  {
     
+    private Address address;
     private boolean populated = false;
-    private URI address;
     
     /**
-     * Creates a new instance of Address
+     * Creates a new instance of EndpointReference
      */
-    public Address() {
-    }
-    
-    public Address(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
+    public EndpointReference(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
         super(name,nestedAssertions,nestedAlternative);
     }
-    private void populate() {
-        if ( !populated ) {
-            try {
-                if(this.getValue() != null){
-                    this.address = new URI(this.getValue().trim());
-                }
-                populated = true;
-            } catch (URISyntaxException ex) {
-                if(logger.getLevel() == Level.SEVERE){
-                    logger.log(Level.SEVERE,LocalizationMessages.WSA_0004_INVALID_EPR_ADDRESS(),ex);
-                }
-            }
-        }
-    }
     
-    public URI getURI() {
+    public Address getAddress() {
         populate();
         return address;
     }
     
-    
-    public String getNamespaceURI() {
-        throw new UnsupportedOperationException();
+       
+    private void populate() {
+        if(populated){
+            return;
+        }
+        synchronized (this.getClass()){
+            if(!populated){
+                if ( this.hasNestedAssertions() ) {
+                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
+                    while ( it.hasNext() ) {
+                        PolicyAssertion assertion = it.next();                        
+                        if ( PolicyUtil.isAddress(assertion)) {
+                            this.address = (Address) assertion;
+                        }
+                    }
+                }
+                populated = true;
+            }
+        }
     }
     
+
 }

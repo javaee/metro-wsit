@@ -34,66 +34,19 @@
  * holder.
  */
 
-/*
- * EndpointReference.java
- *
- * Created on February 17, 2006, 12:41 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
+package com.sun.xml.ws.security.addressing.impl.policy;
 
-package com.sun.xml.ws.addressing.impl.policy;
-
-import com.sun.xml.ws.policy.AssertionSet;
-import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.security.impl.policy.PolicyUtil;
-import java.util.Collection;
-
-import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  *
- * @author Abhijit Das
+ * @author ashutosh.shahi@sun.com
  */
-public class EndpointReference extends com.sun.xml.ws.policy.PolicyAssertion  {
+public class Constants {
     
-    private Address address;
-    private boolean populated = false;
-    
-    /**
-     * Creates a new instance of EndpointReference
-     */
-    public EndpointReference(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
-        super(name,nestedAssertions,nestedAlternative);
-    }
-    
-    public Address getAddress() {
-        populate();
-        return address;
-    }
-    
-       
-    private void populate() {
-        if(populated){
-            return;
-        }
-        synchronized (this.getClass()){
-            if(!populated){
-                if ( this.hasNestedAssertions() ) {
-                    Iterator <PolicyAssertion> it = this.getNestedAssertionsIterator();
-                    while ( it.hasNext() ) {
-                        PolicyAssertion assertion = it.next();                        
-                        if ( PolicyUtil.isAddress(assertion)) {
-                            this.address = (Address) assertion;
-                        }
-                    }
-                }
-                populated = true;
-            }
-        }
-    }
-    
+    public static final String ADDRESSING_POLICY_DOMAIN = "javax.enterprise.resource.xml.webservices.addressing.policy";
+    public static final String ADDRESSING_POLICY_PACKAGE_ROOT = "com.sun.xml.ws.addressing.impl.policy";
+    public static final String ADDRESSING_POLICY_DOMAIN_BUNDLE = ADDRESSING_POLICY_PACKAGE_ROOT + ".Localization";
+    public static final Logger logger = Logger.getLogger(Constants.ADDRESSING_POLICY_DOMAIN,Constants.ADDRESSING_POLICY_DOMAIN_BUNDLE);
 
 }

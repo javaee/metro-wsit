@@ -34,7 +34,8 @@
  * holder.
  */
 
-package com.sun.xml.ws.addressing.impl.policy;
+package com.sun.xml.ws.security.addressing.impl.policy;
+
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.policy.AssertionSet;

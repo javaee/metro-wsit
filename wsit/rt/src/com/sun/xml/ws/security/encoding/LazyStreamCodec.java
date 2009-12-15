@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.encoding;
+package com.sun.xml.ws.security.encoding;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -65,11 +65,11 @@ public class LazyStreamCodec implements StreamSOAPCodec{
     }
     
     public Message decode(XMLStreamReader reader) {
-        return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec);
+        return new com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage(reader,codec);
     }
     
     public  @NotNull Message decode(@NotNull XMLStreamReader reader, AttachmentSet att){
-        return new com.sun.xml.ws.message.stream.LazyStreamBasedMessage(reader,codec, att);
+        return new com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage(reader,codec, att);
     }
     
     public String getMimeType() {

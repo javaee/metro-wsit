@@ -34,8 +34,9 @@
  * holder.
  */
 
-package com.sun.xml.ws.message.stream;
+package com.sun.xml.ws.security.message.stream;
 
+import com.sun.xml.ws.message.stream.*;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;

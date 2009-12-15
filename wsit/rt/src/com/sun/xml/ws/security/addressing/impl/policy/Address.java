@@ -37,23 +37,64 @@
 /*
  * Address.java
  *
- * Created on February 17, 2006, 12:45 PM
+ * Created on February 17, 2006, 12:48 PM
  *
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
 
-package com.sun.xml.ws.addressing.policy;
+package com.sun.xml.ws.security.addressing.impl.policy;
 
+
+import com.sun.xml.ws.policy.AssertionSet;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import java.net.URI;
-
-
-
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.logging.Level;
+import static com.sun.xml.ws.security.addressing.impl.policy.Constants.logger;
 /**
  *
  * @author Abhijit Das
  */
-public interface Address {
-    //extends AttributedURI {
-   URI getURI();
+public class Address extends com.sun.xml.ws.policy.PolicyAssertion implements com.sun.xml.ws.security.addressing.policy.Address {
+    
+    private boolean populated = false;
+    private URI address;
+    
+    /**
+     * Creates a new instance of Address
+     */
+    public Address() {
+    }
+    
+    public Address(AssertionData name,Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative) {
+        super(name,nestedAssertions,nestedAlternative);
+    }
+    private void populate() {
+        if ( !populated ) {
+            try {
+                if(this.getValue() != null){
+                    this.address = new URI(this.getValue().trim());
+                }
+                populated = true;
+            } catch (URISyntaxException ex) {
+                if(logger.getLevel() == Level.SEVERE){
+                    logger.log(Level.SEVERE,LocalizationMessages.WSA_0004_INVALID_EPR_ADDRESS(),ex);
+                }
+            }
+        }
+    }
+    
+    public URI getURI() {
+        populate();
+        return address;
+    }
+    
+    
+    public String getNamespaceURI() {
+        throw new UnsupportedOperationException();
+    }
+    
 }

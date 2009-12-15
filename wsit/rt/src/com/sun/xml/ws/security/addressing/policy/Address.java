@@ -34,19 +34,26 @@
  * holder.
  */
 
-package com.sun.xml.ws.addressing.impl.policy;
+/*
+ * Address.java
+ *
+ * Created on February 17, 2006, 12:45 PM
+ *
+ * To change this template, choose Tools | Template Manager
+ * and open the template in the editor.
+ */
 
-import java.util.logging.Logger;
+package com.sun.xml.ws.security.addressing.policy;
+
+import java.net.URI;
+
+
 
 /**
  *
- * @author ashutosh.shahi@sun.com
+ * @author Abhijit Das
  */
-public class Constants {
-    
-    public static final String ADDRESSING_POLICY_DOMAIN = "javax.enterprise.resource.xml.webservices.addressing.policy";
-    public static final String ADDRESSING_POLICY_PACKAGE_ROOT = "com.sun.xml.ws.addressing.impl.policy";
-    public static final String ADDRESSING_POLICY_DOMAIN_BUNDLE = ADDRESSING_POLICY_PACKAGE_ROOT + ".Localization";
-    public static final Logger logger = Logger.getLogger(Constants.ADDRESSING_POLICY_DOMAIN,Constants.ADDRESSING_POLICY_DOMAIN_BUNDLE);
-
+public interface Address {
+    //extends AttributedURI {
+   URI getURI();
 }

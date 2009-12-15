@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.security.trust.impl.client;
 
-import com.sun.xml.ws.addressing.policy.Address;
+import com.sun.xml.ws.security.addressing.policy.Address;
 import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;

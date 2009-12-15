@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -33,34 +33,46 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.addressing.policy;
+
+package com.sun.xml.ws.security.addressing.policy;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.policy.spi.PrefixMapper;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import javax.xml.namespace.QName;
 
 /**
- * This supplies the prefixes for the namespaces under Addressing domain that are not covered by the default
- * Addressing Policy provider in JAX-WS.
- *
+ * This class validates the wsaw:UsingAddressing assertion.
  * This class exists in WSIT to provide functionality for backwards compatibility with previously generated
  * wsaw:UsingAddressing assertion.
  *
  * @author Rama Pulavarthi
  */
-public class WsawAddressingPrefixMapper implements PrefixMapper {
+public class WsawAddressingPolicyValidator implements PolicyAssertionValidator{
 
-    private static final Map<String, String> prefixMap = new HashMap<String, String>();
+    private static final ArrayList<QName> supportedAssertions = new ArrayList<QName>();
 
     static {
-        prefixMap.put(AddressingVersion.W3C.policyNsUri, "wsapw3c");
-        prefixMap.put(AddressingVersion.W3C.nsUri, "wsaw3c");
+        supportedAssertions.add(new QName(AddressingVersion.W3C.policyNsUri,"UsingAddressing"));
     }
 
-    public Map<String, String> getPrefixMap() {
-        return prefixMap;
+    /**
+     * Creates a new instance of AddressingPolicyValidator
+     */
+    public WsawAddressingPolicyValidator() {
     }
 
+    public Fitness validateClientSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public Fitness validateServerSide(PolicyAssertion assertion) {
+        return supportedAssertions.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return new String[] {AddressingVersion.W3C.policyNsUri};
+    }
 }
