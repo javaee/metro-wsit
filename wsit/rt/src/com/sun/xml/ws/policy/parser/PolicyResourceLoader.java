@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.policy.PolicyResolverFactory;
@@ -43,7 +43,7 @@ import com.sun.xml.ws.api.server.SDDocumentSource;
 import com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver;
 import com.sun.xml.ws.api.wsdl.parser.XMLEntityResolver.Parser;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.streaming.TidyXMLStreamReader;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class PolicyResourceLoader {
      */
     private static class PolicyEntityResolver implements XMLEntityResolver {
 
-        private static final PolicyLogger LOGGER = PolicyLogger.getLogger(PolicyEntityResolver.class);
+        private static final Logger LOGGER = Logger.getLogger(PolicyEntityResolver.class);
         private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         /**

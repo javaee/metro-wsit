@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.xmlfilter;
+package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
@@ -61,9 +61,9 @@ import org.xml.sax.SAXException;
  * @author Marek Potociar
  * @author Fabian Ritzmann
  */
-final class ResourceLoader {
+public final class ResourceLoader {
 
-    public static final String POLICY_UNIT_TEST_RESOURCE_ROOT = "xmlfilter/";
+    public static final String POLICY_UNIT_TEST_RESOURCE_ROOT = "management/";
 
     private static final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 

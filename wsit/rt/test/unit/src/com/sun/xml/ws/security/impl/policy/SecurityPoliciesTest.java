@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.PolicyMerger;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
+import com.sun.xml.ws.policy.parser.PolicyConfigParser;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;

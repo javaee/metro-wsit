@@ -36,10 +36,11 @@
 
 package com.sun.xml.ws.policy;
 
+import com.sun.istack.logging.Logger;
+
 import com.sun.xml.ws.api.policy.AlternativeSelector;
 import com.sun.xml.ws.api.policy.ValidationProcessor;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
+import com.sun.xml.ws.policy.localization.LocalizationMessages;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator.Fitness;
 
 import javax.xml.stream.FactoryConfigurationError;
@@ -52,6 +53,7 @@ import javax.xml.ws.WebServiceException;
  * @author Fabian Ritzmann
  */
 public class WsitPolicyUtil {
+    private static final Logger LOGGER = Logger.getLogger(WsitPolicyUtil.class);
 
      /**
      * Checks if the PolicyMap has only single alternative in the scope.
@@ -161,6 +163,4 @@ public class WsitPolicyUtil {
             return clientPolicyMap;
         }
     }
-
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyUtil.class);
 }

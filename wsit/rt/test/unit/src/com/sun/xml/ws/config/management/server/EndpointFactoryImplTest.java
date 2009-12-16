@@ -53,7 +53,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.server.WSEndpoint.CompletionCallback;
 import com.sun.xml.ws.api.server.WSEndpoint.PipeHead;
 import com.sun.xml.ws.policy.PolicyMap;
-import com.sun.xml.ws.policy.jaxws.PolicyResourceLoader;
+import com.sun.xml.ws.policy.parser.PolicyResourceLoader;
 
 import java.net.URL;
 import java.util.Set;

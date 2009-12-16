@@ -34,8 +34,9 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.policy.PolicyResolver;
 import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.policy.PolicyMap;
@@ -43,8 +44,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyMapMutator;
 import com.sun.xml.ws.policy.WsitPolicyUtil;
-import com.sun.xml.ws.policy.privateutil.PolicyLogger;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.localization.LocalizationMessages;
 
 import java.net.URL;
 import java.util.Collection;
@@ -59,7 +59,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class WsitPolicyResolver implements PolicyResolver {
 
-    private static final PolicyLogger LOGGER = PolicyLogger.getLogger(WsitPolicyResolver.class);
+    private static final Logger LOGGER = Logger.getLogger(WsitPolicyResolver.class);
 
     public PolicyMap resolve(ServerContext context) throws WebServiceException {
         final Class endpointClass = context.getEndpointClass();

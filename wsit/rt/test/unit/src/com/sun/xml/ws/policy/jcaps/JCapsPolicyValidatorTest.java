@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.policy.jcaps;
 
-import com.sun.xml.ws.policy.jaxws.PolicyResourceLoader;
+import com.sun.xml.ws.policy.parser.PolicyResourceLoader;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import java.net.URL;
 import junit.framework.TestCase;

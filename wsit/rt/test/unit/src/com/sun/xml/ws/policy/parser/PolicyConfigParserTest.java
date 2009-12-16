@@ -34,8 +34,9 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
+import com.sun.xml.ws.policy.parser.PolicyConfigParser;
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.Policy;

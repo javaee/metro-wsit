@@ -142,7 +142,7 @@ public final class PolicyResourceLoader {
     public static WSDLModel getWSDLModel(String resourceName, boolean isClient) throws PolicyException {        
         URL resourceUrl = getResourceUrl(resourceName);
         try {
-            return com.sun.xml.ws.policy.jaxws.PolicyResourceLoader.getWsdlModel(resourceUrl, isClient);
+            return com.sun.xml.ws.policy.parser.PolicyResourceLoader.getWsdlModel(resourceUrl, isClient);
         } catch (XMLStreamException ex) {
             throw new PolicyException("Failed to parse document", ex);
         } catch (IOException ex) {

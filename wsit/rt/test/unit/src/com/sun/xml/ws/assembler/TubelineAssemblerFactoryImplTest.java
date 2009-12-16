@@ -50,7 +50,7 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.jaxws.PolicyConfigParser;
+import com.sun.xml.ws.policy.parser.PolicyConfigParser;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.binding.BindingImpl;
 

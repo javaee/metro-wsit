@@ -38,7 +38,6 @@ package com.sun.xml.ws.config.management.server;
 
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.sourcemodel.attach.ExternalAttachmentsUnmarshaller;
-import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -374,7 +373,7 @@ public class ManagementWSDLPatcherTest extends TestCase {
         urnToPolicy.put(ExternalAttachmentsUnmarshaller.BINDING_OPERATION_FAULT_ID, Policy.createEmptyPolicy(null, "fault-policy"));
         final ManagementWSDLPatcher instance = new ManagementWSDLPatcher(urnToPolicy);
 
-        final Reader reader = PolicyResourceLoader.getResourceReader("wsdl_filter/PingService.wsdl");
+        final Reader reader = ResourceLoader.getResourceReader("PingService.wsdl");
 
         final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         final XMLStreamReader xmlReader = inputFactory.createXMLStreamReader(reader);

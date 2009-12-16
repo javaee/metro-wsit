@@ -34,8 +34,9 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
+import com.sun.xml.ws.policy.parser.PolicyConfigParser;
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getPolicyMap;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLModel;
@@ -67,7 +68,7 @@ public class PolicyWSDLParserExtensionTest extends TestCase{
     
     public void testClientParsingWithDifferentlyCreatedSDDocumentSource() throws Exception {
         final URL configFileUrl = PolicyResourceLoader.getResourceUrl("parser/wsit-client.xml");
-        WSDLModel model = com.sun.xml.ws.policy.jaxws.PolicyResourceLoader.getWsdlModel(configFileUrl, true);
+        WSDLModel model = com.sun.xml.ws.policy.parser.PolicyResourceLoader.getWsdlModel(configFileUrl, true);
         assertNotNull(model);
     }
     

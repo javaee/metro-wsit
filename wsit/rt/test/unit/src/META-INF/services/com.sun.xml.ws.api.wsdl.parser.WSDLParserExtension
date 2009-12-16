@@ -1,1 +1,1 @@
-com.sun.xml.ws.policy.jaxws.PolicyWSDLParserExtension
+com.sun.xml.ws.policy.parser.PolicyWSDLParserExtension

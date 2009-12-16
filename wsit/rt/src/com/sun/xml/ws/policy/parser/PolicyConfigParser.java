@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +52,7 @@ import com.sun.xml.ws.policy.PolicyConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapMutator;
-import com.sun.xml.ws.policy.jaxws.privateutil.LocalizationMessages;
+import com.sun.xml.ws.policy.localization.LocalizationMessages;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 
 /**

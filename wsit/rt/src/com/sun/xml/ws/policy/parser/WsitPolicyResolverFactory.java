@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.policy.jaxws;
+package com.sun.xml.ws.policy.parser;
 
 import com.sun.xml.ws.api.policy.PolicyResolverFactory;
 import com.sun.xml.ws.api.policy.PolicyResolver;
