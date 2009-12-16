@@ -303,7 +303,8 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
             AckRequestedElement ackRequestedElement = new AckRequestedElement();
             ackRequestedElement.setId(ackData.getAckReqestedSequenceId());
 
-            ackRequestedElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
+            // MU attribute removed to comply with WS-I RSP R0540 - see WSIT issue #1318
+            // ackRequestedElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
             jaxwsMessage.getHeaders().add(createHeader(ackRequestedElement));
         }
 
@@ -321,7 +322,8 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
 //            ackElement.setBufferRemaining(-1/*calculate remaining quota*/);
 //        }
 
-            ackElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
+            // MU attribute removed to comply with WS-I RSP R0540 - see WSIT issue #1318
+            // ackElement.getOtherAttributes().put(communicator.soapMustUnderstandAttributeName, "true");
             jaxwsMessage.getHeaders().add(createHeader(ackElement));
         }
     }
