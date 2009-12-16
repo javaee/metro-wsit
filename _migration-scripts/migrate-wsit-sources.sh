@@ -106,6 +106,22 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
+echo "com.sun.xml.ws.policy.parser.PolicyWSDLParserExtension" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension
+
+echo "com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+
+echo "com.sun.xml.ws.addressing.policy.AddressingPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
+echo "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
+
+rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
+echo "TODO: Maunally migrate unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
+rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
+echo "TODO: Maunally migrate unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
+
 #
 # WSIT WS-RX Parent project
 # TODO: split rx/policy
@@ -169,6 +185,9 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 MODULE_ROOT="$SX_MODULE_ROOT/wss-policy-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecurityPolicy Implementation" -i "wss-policy-impl" -P "wssx-project" -p $POM_TEMPLATE
 SRC_ARTIFACTS="\
+com/sun/xml/ws/security/addressing:\
+com/sun/xml/ws/security/encoding:\
+com/sun/xml/ws/security/message:\
 com/sun/xml/ws/security/policy:\
 com/sun/xml/ws/security/impl/policy:\
 com/sun/xml/ws/security/impl/policyconv"
@@ -194,20 +213,26 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
-# WSIT WS-Trust API
+# WSIT WS-Trust implementation (must go before API to make sure proper sources are moved)
 #
-MODULE_ROOT="$SX_MODULE_ROOT/wstrust-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust API" -i "wstrust-api" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/api/security/trust"
+MODULE_ROOT="$SX_MODULE_ROOT/wstrust-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust Implementation" -i "wstrust-impl" -P "wssx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="\
+com/sun/xml/ws/security/trust/util:\
+com/sun/xml/ws/security/trust/impl:\
+com/sun/xml/ws/security/trust/sts"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
-# WSIT WS-Trust implementation
+# WSIT WS-Trust API
 #
-MODULE_ROOT="$SX_MODULE_ROOT/wstrust-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust Implementation" -i "wstrust-impl" -P "wssx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/security/trust"
+MODULE_ROOT="$SX_MODULE_ROOT/wstrust-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust API" -i "wstrust-api" -P "wssx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="\
+com/sun/xml/ws/api/security/trust:\
+com/sun/xml/ws/security/trust:\
+com/sun/xml/ws/security/trust/elements"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
