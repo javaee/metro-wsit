@@ -273,7 +273,33 @@
                 <artifactId>jaxws-tools</artifactId>
                 <version>${jaxws.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.sun.xml.ws</groupId>
+                <artifactId>policy</artifactId>
+                <version>${policy.version}</version>
+            </dependency>
+            <!-- istack commons -->
+            <dependency>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>istack-commons-runtime</artifactId>
+                <version>${istack.version}</version>
+            </dependency>
             <!-- Other -->
+            <dependency>
+                <groupId>javax.xml.stream</groupId>
+                <artifactId>stax-api</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.txw2</groupId>
+                <artifactId>txw2</artifactId>
+                <version>20090102</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.stream.buffer</groupId>
+                <artifactId>streambuffer</artifactId>
+                <version>1.0</version>
+            </dependency>
             <!--dependency>
                 <groupId></groupId>
                 <artifactId></artifactId>
@@ -300,7 +326,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <istack.version>1.1-SNAPSHOT</istack.version>
         <jaxb.version>2.2</jaxb.version>
         <jaxws.version>2.2-SNAPSHOT</jaxws.version>
+        <policy.version>2.0-b01</policy.version>
     </properties>
 </project>

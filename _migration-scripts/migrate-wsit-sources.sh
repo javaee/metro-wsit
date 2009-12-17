@@ -100,7 +100,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # TODO: split into submodules
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-config"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p ./poms/wsit-config-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/policy"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="policy"
@@ -117,10 +117,10 @@ echo "com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator" >
 echo "com.sun.xml.ws.addressing.policy.AddressingPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
 echo "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
 
-rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
-echo "TODO: Maunally migrate unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
-rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
-echo "TODO: Maunally migrate unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
+#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
+echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
+#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
+echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
 
 #
 # WSIT WS-RX Parent project
