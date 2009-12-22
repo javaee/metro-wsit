@@ -282,9 +282,11 @@
     <target name="integrate-jaxr" depends="init, maven-tasks"
             description="Integrate the latest JAXR Maven artifacts.">
         <echo message="Remember to update the JAXR version settings before running this target."/>
+        <property name="jaxr.api.version" value="1.0_04"/>
+        <property name="jaxr.impl.version" value="1.0.8"/>
         <dependencies filesetId="jaxr.dependencies">
-            <dependency groupId="javax.xml" artifactId="jaxr-api" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="1.0.7"/>
+            <dependency groupId="javax.xml" artifactId="jaxr-api" version="${jaxr.api.version}"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" version="${jaxr.impl.version}"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
@@ -295,8 +297,8 @@
             </chainedmapper>
         </copy>
         <dependencies filesetId="jaxr.sources.dependencies">
-            <dependency groupId="javax.xml" artifactId="jaxr-api" classifier="sources" version="1.0_03"/>
-            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="1.0.7"/>
+            <dependency groupId="javax.xml" artifactId="jaxr-api" classifier="sources" version="${jaxr.api.version}"/>
+            <dependency groupId="com.sun.xml.registry" artifactId="jaxr-impl" classifier="sources" version="${jaxr.impl.version}"/>
             <remoteRepository id="glassfish.java.net" url="http://download.java.net/maven/glassfish/"/>
         </dependencies>
         <copy todir="lib/runtime">
