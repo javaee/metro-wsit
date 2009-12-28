@@ -130,17 +130,18 @@ public class CertificateRetriever {
                 if (data instanceof Base64Data) {
                     Base64Data binaryData = (Base64Data) data;
                     bstValue = binaryData.getExact();
+                    return bstValue;
                 }
             }
             try {
                 bstValue = Base64.decode(StreamUtil.getCV(reader));
             } catch (Base64DecodingException ex) {
-                log.log(Level.SEVERE, null, ex);
-                throw new RuntimeException(ex);
-            } catch (XMLStreamException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, "error occured while decoding Base64 data", ex);
                 throw new RuntimeException(ex);
             }
+        }else{
+             log.log(Level.SEVERE, "error reading the xml stream");
+             throw new RuntimeException("error reading the xml stream");
         }
         return bstValue;
     }
@@ -152,7 +153,7 @@ public class CertificateRetriever {
             cert = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(bstValue));
             return cert;
         } catch (CertificateException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, "error while generating certificate", ex);
             throw new RuntimeException(ex);
         }
     }
@@ -165,7 +166,7 @@ public class CertificateRetriever {
         }
         getEndpointOROperationalLevelPolicy(wse);
         if (ep == null) {
-            return true;
+            return false;
         }
         for (AssertionSet assertionSet : ep) {
             for (PolicyAssertion pa : assertionSet) {
