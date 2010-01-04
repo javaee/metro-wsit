@@ -129,18 +129,21 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         // Create AssertionID
         final String assertionId = "uuid-" + UUID.randomUUID().toString();
         
-        // Create SAML assertion
+        // Create SAML assertion and the reference to the SAML assertion
         Assertion assertion = null;
-        String valueType = null;
+        SecurityTokenReference samlReference = null;
         if (WSTrustConstants.SAML10_ASSERTION_TOKEN_TYPE.equals(tokenType)||
             WSTrustConstants.SAML11_ASSERTION_TOKEN_TYPE.equals(tokenType)){
             assertion = createSAML11Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType);
-            valueType = MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE;
+            samlReference = WSTrustUtil.createSecurityTokenReference(assertionId, MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE);
         } else if (WSTrustConstants.SAML20_ASSERTION_TOKEN_TYPE.equals(tokenType)||
                    WSTrustConstants.SAML20_WSS_TOKEN_TYPE.equals(tokenType)){
             String authnCtx = (String)ctx.getOtherProperties().get(IssuedTokenContext.AUTHN_CONTEXT);
             assertion = createSAML20Assertion(wstVer, tokenLifeSpan, confirMethod, assertionId, issuer, appliesTo, keyInfo, claimedAttrs, keyType, authnCtx);
-            valueType = MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE;
+            samlReference = WSTrustUtil.createSecurityTokenReference(assertionId, MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE);
+
+            //set TokenType attribute for the STR as required in wss 1.1 saml token profile
+            samlReference.setTokenType(WSTrustConstants.SAML20_WSS_TOKEN_TYPE);
         } else{
             log.log(Level.SEVERE, LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
             throw new WSTrustException(LogStringsMessages.WST_0031_UNSUPPORTED_TOKEN_TYPE(tokenType, appliesTo));
@@ -162,12 +165,9 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             throw new WSTrustException(
                     LogStringsMessages.WST_0032_ERROR_CREATING_SAML_ASSERTION(), ex);
         }
-            
+
+        // put the SAML assertion and the references in the context
         ctx.setSecurityToken(new GenericToken(signedAssertion));
-        
-        final SecurityTokenReference samlReference = WSTrustUtil.createSecurityTokenReference(assertionId, valueType);
-        //final RequestedAttachedReference raRef =  eleFac.createRequestedAttachedReference(samlReference);
-        //final RequestedUnattachedReference ruRef =  eleFac.createRequestedUnattachedReference(samlReference);
         ctx.setAttachedSecurityTokenReference(samlReference);
         ctx.setUnAttachedSecurityTokenReference(samlReference);
     }

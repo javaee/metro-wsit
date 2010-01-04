@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.6 2008-02-26 06:33:28 ofung Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.7 2010-01-04 23:47:15 jdg6688 Exp $
  */
 
 /*
@@ -112,6 +112,14 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
             
         //ToDo
         return null;       
+    }
+
+    public void setTokenType(String tokenType){
+        getOtherAttributes().put(TOKEN_TYPE, tokenType);
+    }
+
+    public String getTokenType(){
+       return getOtherAttributes().get(TOKEN_TYPE);
     }
     
     public String getType() {
