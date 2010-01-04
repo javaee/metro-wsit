@@ -249,16 +249,16 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             notOnOrAfter.add(Calendar.MILLISECOND, lifeSpan);
             
             List<AudienceRestrictionCondition> arc = null;
+            if (appliesTo != null){
+                arc = new ArrayList<AudienceRestrictionCondition>();
+                List<String> au = new ArrayList<String>();
+                au.add(appliesTo);
+                arc.add(samlFac.createAudienceRestrictionCondition(au));
+            }
             final List<String> confirmMethods = new ArrayList<String>();
             Element keyInfoEle = null;
             if (keyType.equals(wstVer.getBearerKeyTypeURI())){
                 confirMethod = SAML_BEARER_1_0;
-                if (appliesTo != null){
-                    arc = new ArrayList<AudienceRestrictionCondition>();
-                    List<String> au = new ArrayList<String>();
-                    au.add(appliesTo);
-                    arc.add(samlFac.createAudienceRestrictionCondition(au));
-                }
             }else{
                 if (confirMethod == null){
                     confirMethod = SAML_HOLDER_OF_KEY_1_0;
@@ -354,15 +354,15 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
             notOnOrAfter.add(Calendar.MILLISECOND, lifeSpan);
             
             List<AudienceRestriction> arc = null;
+            if (appliesTo != null){
+                arc = new ArrayList<AudienceRestriction>();
+                List<String> au = new ArrayList<String>();
+                au.add(appliesTo);
+                arc.add(samlFac.createAudienceRestriction(au));
+            }
             KeyInfoConfirmationData keyInfoConfData = null;
             if (keyType.equals(wstVer.getBearerKeyTypeURI())){
                 confirMethod = SAML_BEARER_2_0;
-                if (appliesTo != null){
-                    arc = new ArrayList<AudienceRestriction>();
-                    List<String> au = new ArrayList<String>();
-                    au.add(appliesTo);
-                    arc.add(samlFac.createAudienceRestriction(au));
-                }
             }else{
                 if (confirMethod == null){
                     confirMethod = SAML_HOLDER_OF_KEY_2_0;
