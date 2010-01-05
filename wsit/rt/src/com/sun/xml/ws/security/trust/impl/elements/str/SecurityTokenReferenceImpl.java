@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.7 2010-01-04 23:47:15 jdg6688 Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.8 2010-01-05 03:05:56 jdg6688 Exp $
  */
 
 /*
@@ -71,6 +71,7 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
     {
         final Reference ref = getReference(strType);
         setReference(ref);
+        this.getOtherAttributes().putAll(strType.getOtherAttributes());
     }
     
     public final void setReference(final Reference ref){
