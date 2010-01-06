@@ -69,6 +69,7 @@ public class ClientPipeCreator extends ClientPipelineHook {
         propBag.put(PipeConstants.ENDPOINT_ADDRESS, ctxt.getAddress());
     	propBag.put(PipeConstants.NEXT_PIPE,tail);
         propBag.put(PipeConstants.CONTAINER,ctxt.getContainer());
+        propBag.put(PipeConstants.ASSEMBLER_CONTEXT, ctxt);
         ClientSecurityPipe ret = new ClientSecurityPipe(propBag, tail);
         return ret;
     }
@@ -86,6 +87,7 @@ public class ClientPipeCreator extends ClientPipelineHook {
         propBag.put(PipeConstants.NEXT_TUBE, context.getTubelineHead());
         propBag.put(PipeConstants.CONTAINER, context.getContainer());
         propBag.put(PipeConstants.WRAPPED_CONTEXT, context.getWrappedContext());
+        propBag.put(PipeConstants.ASSEMBLER_CONTEXT, context);
         ClientSecurityTube ret = new ClientSecurityTube(propBag, context.getTubelineHead());
         return ret;
     }

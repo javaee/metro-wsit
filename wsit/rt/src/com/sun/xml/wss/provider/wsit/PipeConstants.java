@@ -61,5 +61,6 @@ public interface PipeConstants {
     static final String CONTAINER = "CONTAINER";
     static final String AUTH_CONFIG="AUTH_CONFIG";
     static final String WRAPPED_CONTEXT="WRAPPED_CONTEXT";
+    static final String ASSEMBLER_CONTEXT = "ASSEMBLER_CONTEXT";
     static final String SERVER_CERT="SERVER_CERT";
 }
