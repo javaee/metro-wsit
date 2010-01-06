@@ -214,10 +214,17 @@ public abstract class BindingProcessor {
             }
             qName = new QName(MessageConstants.WSSE_NS, MessageConstants.SAML_ASSERTION_LNAME);
         } else if(PolicyTypeUtil.issuedTokenKeyBinding(token)){
-            uid = ((IssuedTokenKeyBinding)token).getSTRID();
+            IssuedTokenKeyBinding itb = ((IssuedTokenKeyBinding)token);
+            uid = itb.getSTRID();
+            if(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE.equals(itb.getTokenType()) ||
+                   MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE.equals(itb.getTokenType())){
+                 uid = generateSAMLSTRID();
+                 itb.setSTRID(uid);
+                 uuid = uid;
+            }
             if(uid == null){
                 uid = pid.generateID();
-                ((IssuedTokenKeyBinding)token).setSTRID(uid);
+                itb.setSTRID(uid);
             }
         }
 
