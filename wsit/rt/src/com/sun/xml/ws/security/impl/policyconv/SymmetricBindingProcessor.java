@@ -168,9 +168,11 @@ public class SymmetricBindingProcessor extends BindingProcessor{
         if(binding.getTokenProtection()){
             WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
             if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
-                protectToken(policy,true,spVersion);
-            }else{
                 protectToken((WSSPolicy) policy.getKeyBinding(),true,spVersion);
+            }else{
+                if ((isServer && isIncoming) || (!isServer && !isIncoming)) {
+                    protectToken(policy, true, spVersion);
+                }
             }
         }
         
