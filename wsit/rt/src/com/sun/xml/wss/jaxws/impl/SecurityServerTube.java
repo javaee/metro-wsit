@@ -278,6 +278,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
         } catch (WssSoapFaultException ex) {
             thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), ex);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
             if (sfe.getCause() == null) {
                 sfe.initCause(ex);
@@ -285,6 +286,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             msg = Messages.create(sfe, soapVersion);
         } catch (XWSSecurityException xwse) {
             thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             if (sfe.getCause() == null) {
                 sfe.initCause(xwse);
@@ -293,6 +295,7 @@ public class SecurityServerTube extends SecurityTubeBase {
 
         } catch (XWSSecurityRuntimeException xwse) {
             thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             if (sfe.getCause() == null) {
                 sfe.initCause(xwse);
@@ -301,6 +304,7 @@ public class SecurityServerTube extends SecurityTubeBase {
 
         } catch (WebServiceException xwse) {
             thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             if (sfe.getCause() == null) {
                 sfe.initCause(xwse);
