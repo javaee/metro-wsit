@@ -209,15 +209,18 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             xmlReader = idExtn.readAsXMLStreamReader();
                             CertificateRetriever cr = new CertificateRetriever();
                             byte[] bstValue = cr.digestBST(xmlReader);
+                            X509Certificate certificate = null;
                             if (bstValue == null) {
-                                throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
+                                //throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
+                                log.log(Level.WARNING, "exception during digesting the server certificate");
+                            }else {
+                                certificate = cr.constructCertificate(bstValue);
                             }
-                            X509Certificate certificate = cr.constructCertificate(bstValue);                            
                             boolean valid = false;
                             try {
                                 valid = secEnv.validateCertificate(certificate, null);
                             } catch (WssSoapFaultException ex) {
-                                log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it  "+certificate);
+                                log.log(Level.WARNING, "exception during validating the server certificate  "+certificate);
                             }
                             if (valid) {
                                  log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
@@ -228,10 +231,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             }
                         }
                     } catch (XMLStreamException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                        throw new RuntimeException(ex);
+                        log.log(Level.WARNING, ex.getMessage());
+                        //throw new RuntimeException(ex);
                     } catch (XWSSecurityException ex) {
-                        log.log(Level.SEVERE, null, ex);
+                        log.log(Level.WARNING,ex.getMessage());
                     }
                 }
             } else {

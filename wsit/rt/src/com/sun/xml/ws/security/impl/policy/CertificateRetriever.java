@@ -136,12 +136,12 @@ public class CertificateRetriever {
             try {
                 bstValue = Base64.decode(StreamUtil.getCV(reader));
             } catch (Base64DecodingException ex) {
-                log.log(Level.SEVERE, "error occured while decoding Base64 data", ex);
-                throw new RuntimeException(ex);
+                log.log(Level.WARNING, "error occured while decoding Base64 data", ex);
+                //throw new RuntimeException(ex);
             }
         }else{
-             log.log(Level.SEVERE, "error reading the xml stream");
-             throw new RuntimeException("error reading the xml stream");
+             log.log(Level.WARNING, "error reading the xml stream");
+             //throw new RuntimeException("error reading the xml stream");
         }
         return bstValue;
     }
