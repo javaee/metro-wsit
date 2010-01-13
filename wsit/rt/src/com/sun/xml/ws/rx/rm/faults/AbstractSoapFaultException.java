@@ -121,16 +121,18 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
             if (faultReasonText != null) {
                 soapFault.setFaultString(faultReasonText, java.util.Locale.ENGLISH);
             }
-
-            soapFault.setFaultCode(getCode().asQName(rc.soapVersion));
             
             // SOAP version-specific SOAP Fault settings
             switch (rc.soapVersion) {
                 case SOAP_11:
+                    soapFault.setFaultCode(getSubcode(rc.rmVersion));
                     break;
                 case SOAP_12:
+                    soapFault.setFaultCode(getCode().asQName(rc.soapVersion));
                     soapFault.appendFaultSubcode(getSubcode(rc.rmVersion));
-                    soapFault.addDetail().setValue(getDetailValue());
+                    if (getDetailValue() != null) {
+                        soapFault.addDetail().setValue(getDetailValue());
+                    }
                     break;
                 default:
                     throw new RxRuntimeException("Unsupported SOAP version: '" + rc.soapVersion.toString() + "'");
