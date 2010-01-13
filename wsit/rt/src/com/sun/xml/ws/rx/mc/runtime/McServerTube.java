@@ -253,6 +253,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
 
             if (clientUID != null && !selectionUID.equals(clientUID)) {
+                // Fixed WSIT issue #1334:
                 // This cannot be an excpetion, because according to the WS=MakeConnection specification,
                 // section 3.2 [ http://docs.oasis-open.org/ws-rx/wsmc/200702/wsmc-1.1-spec-os.html#_Toc162743906 ]:
                 //
