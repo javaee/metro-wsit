@@ -252,9 +252,23 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0108_NULL_SELECTION_ADDRESS()));
             }
 
-            if (!selectionUID.equals(clientUID)) {
-                // TODO return a SOAP fault?
-                throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0109_SELECTION_ADDRESS_NOT_MATCHING_WSA_REPLYTO()));
+            if (clientUID != null && !selectionUID.equals(clientUID)) {
+                // This cannot be an excpetion, because according to the WS=MakeConnection specification,
+                // section 3.2 [ http://docs.oasis-open.org/ws-rx/wsmc/200702/wsmc-1.1-spec-os.html#_Toc162743906 ]:
+                //
+                // ...
+                // Since the message exchange pattern use by MakeConnection is untraditional, the following points
+                // need to be reiterated for clarification:
+                // * The MakeConnection message is logically part of a one-way operation; there is no reply message
+                //   to the MakeConnection itself, and any response flowing on the transport back-channel is a pending message.
+                // * Since there is no reply message to MakeConnection, the WS-Addressing specific rules in
+                //   section 3.4 "Formulating a Reply Message" are not used. Therefore, the value of any wsa:ReplyTo element
+                //   in the MakeConnection message has no effective impact since the WS-Addressing [reply endpoint] property
+                //   that is set by the presence of wsa:ReplyTo is not used.
+                // ...
+                //
+                // Because of the above, we just log a warning message
+                LOGGER.warning(LocalizationMessages.WSMC_0109_SELECTION_ADDRESS_NOT_MATCHING_WSA_REPLYTO(selectionUID, clientUID));
             }
 
             Packet response = null;
