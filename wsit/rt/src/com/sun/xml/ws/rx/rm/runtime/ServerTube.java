@@ -162,11 +162,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         try {
             String wsaAction = rc.communicator.getWsaAction(request);
             if (rc.rmVersion.isRmAction(wsaAction)) { // protocol message
-                if (rc.rmVersion.isRmProtocolRequest(wsaAction)) { // protocol request
-                    return doReturnWith(processProtocolRequest(request, wsaAction));
-                } else { // protocol response
-                    return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
-                }
+                return doReturnWith(processProtocolMessage(request, wsaAction));
             }
 
             // This is an application message
@@ -285,7 +281,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private Packet processProtocolRequest(Packet request, String wsaAction) throws AbstractSoapFaultException {
+    private Packet processProtocolMessage(Packet request, String wsaAction) throws AbstractSoapFaultException {
         if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
         } else if (rc.rmVersion.closeSequenceAction.equals(wsaAction)) {
@@ -296,6 +292,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
             return handleAckRequestedAction(request);
         } else if (rc.rmVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
             return handleSequenceAcknowledgementAction(request);
+        } else if (rc.rmVersion.terminateSequenceResponseAction.equals(wsaAction)) {
+            return handleTerminateSequenceResponseAction(request);
         } else {
             throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(wsaAction)));
         }
@@ -447,6 +445,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 }
             }
         }
+    }
+
+    private Packet handleTerminateSequenceResponseAction(Packet request) {
+        TerminateSequenceResponseData data = rc.protocolHandler.toTerminateSequenceResponseData(request);
+
+        rc.destinationMessageHandler.processAcknowledgements(data.getAcknowledgementData());
+
+        // TODO P1 add more TSR data handling
+
+        request.transportBackChannel.close();
+        return rc.communicator.createNullResponsePacket(request);
     }
 
     private Packet handleSequenceAcknowledgementAction(Packet request) { // TODO move packet creation processing to protocol handler
