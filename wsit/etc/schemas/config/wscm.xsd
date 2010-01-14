@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://java.sun.com/xml/ns/metro/management" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wscm="http://java.sun.com/xml/ns/metro/management">
+    <xs:import namespace="http://www.w3.org/ns/ws-policy" schemaLocation="wsp.xsd"/>
+    <xs:element name="Policies">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="wsp:PolicyAttachment"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

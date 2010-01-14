@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.w3.org/ns/ws-policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://www.w3.org/ns/ws-policy">
+    <xs:import namespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" schemaLocation="wsu.xsd"/>
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+    <xs:element name="PolicyAttachment">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="wsp:AppliesTo"/>
+                <xs:element ref="wsp:Policy"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="AppliesTo" type="wsp:URI"/>
+    <xs:complexType name="URI">
+        <xs:sequence>
+            <xs:element ref="wsp:URI"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="URI" type="xs:anyURI"/>
+    <xs:complexType name="PolicyOperatorType">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="wsp:Policy"/>
+                <xs:element ref="wsp:All"/>
+                <xs:element ref="wsp:ExactlyOne"/>
+                <xs:any namespace="##other" processContents="lax"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Policy">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="wsp:PolicyOperatorType">
+                    <xs:attributeGroup ref="wsp:attlist.Policy"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+    <xs:attributeGroup name="attlist.Policy">
+        <xs:attribute name="Name" type="xs:anyURI"/>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:attributeGroup>
+    <xs:element name="All" type="wsp:PolicyOperatorType"/>
+    <xs:element name="ExactlyOne" type="wsp:PolicyOperatorType"/>
+</xs:schema>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar 
+  xmlns="http://relaxng.org/ns/structure/1.0"
+  xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0"
+  datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+    <define name="Policies">
+        <element name="Policies" ns="http://java.sun.com/xml/ns/metro/management">
+            <ref name="attlist.Policies"/>
+            <oneOrMore>
+                <ref name="PolicyAttachment"/>
+            </oneOrMore>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.Policies">
+        <empty/>
+    </define>
+    <define name="PolicyAttachment">
+        <element name="PolicyAttachment" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="attlist.PolicyAttachment"/>
+            <ref name="AppliesTo"/>
+            <ref name="Policy"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.PolicyAttachment">
+        <empty/>
+    </define>
+    <define name="AppliesTo">
+        <element name="AppliesTo" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="attlist.AppliesTo"/>
+            <ref name="URI"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.AppliesTo">
+        <empty/>
+    </define>
+    <define name="URI">
+        <element name="URI" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="attlist.URI"/>
+            <data type="anyURI"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.URI">
+        <empty/>
+    </define>
+    <define name="PolicyOperatorType">
+        <zeroOrMore>
+            <choice>
+                <ref name="Policy"/>
+                <ref name="All"/>
+                <ref name="ExactlyOne"/>
+                <element>
+                    <anyName/>
+                    <text/>
+                </element>
+            </choice>
+        </zeroOrMore>
+    </define>    
+    <define name="Policy">
+        <element name="Policy" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="PolicyOperatorType"/>
+            <ref name="attlist.Policy"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.Policy">
+        <choice>
+            <attribute name="id" ns="http://www.w3.org/XML/1998/namespace">
+                <data type="ID"/>
+            </attribute>
+            <attribute name="Id" ns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                <data type="ID"/>
+            </attribute>
+            <attribute name="Name" ns="">
+                <data type="anyURI"/>
+            </attribute>
+        </choice>
+    </define>
+    <define name="All">
+        <element name="All" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="PolicyOperatorType"/>
+            <ref name="attlist.All"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.All">
+        <empty/>
+    </define>    
+    <define name="ExactlyOne">
+        <element name="ExactlyOne" ns="http://www.w3.org/ns/ws-policy">
+            <ref name="PolicyOperatorType"/>
+            <ref name="attlist.ExactlyOne"/>
+        </element>
+    </define>
+    <define combine="interleave" name="attlist.ExactlyOne">
+        <empty/>
+    </define>    
+    <start>
+        <ref name="Policies"/>
+    </start>
+</grammar>
