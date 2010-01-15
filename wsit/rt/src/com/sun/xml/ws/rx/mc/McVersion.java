@@ -109,9 +109,28 @@ public enum McVersion {
     }
 
     /**
-     * TODO javadoc
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-MakeConnection protocol message
      *
-     * @return
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-MakeConnection protocol message
+     */
+    public boolean isProtocolAction(String wsaAction) {
+        return (wsaAction != null) && 
+               (wsmcAction.equals(wsaAction) ||
+               isMcFault(wsaAction));
+    }
+
+    /**
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-MakeConnection protocol fault
+     *
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-MakeConnection protocol fault
      */
     public boolean isMcFault(String wsaAction) {
         return wsmcFaultAction.equals(wsaAction);
