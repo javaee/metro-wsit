@@ -127,19 +127,19 @@ public abstract class WsrmProtocolHandler {
     public final boolean containsProtocolMessage(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmAction(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.isProtocolAction(getWsaAction(packet.getMessage()));
     }
 
     public final boolean containsProtocolRequest(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmProtocolRequest(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.isProtocolRequest(getWsaAction(packet.getMessage()));
     }
 
     public final boolean containsProtocolResponse(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmProtocolResponse(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.isProtocolResponse(getWsaAction(packet.getMessage()));
     }
 
     protected WsrmProtocolHandler(@NotNull RmVersion rmVersion, @NotNull RmConfiguration configuration, @NotNull Communicator communicator) {

@@ -136,7 +136,7 @@ public abstract class PacketFilter {
     }
 
     protected final boolean isRmProtocolMessage(Packet packet) {
-        return rc.rmVersion.isRmAction(rc.communicator.getWsaAction(packet));
+        return rc.rmVersion.isProtocolAction(rc.communicator.getWsaAction(packet));
     }
 
     final void configure(RuntimeContext context) {

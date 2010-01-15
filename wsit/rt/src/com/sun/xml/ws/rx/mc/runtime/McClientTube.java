@@ -93,7 +93,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 configuration.getSoapVersion(),
                 configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
 
-        final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
+        final String wsmcAnonymousAddress = configuration.getMcVersion().getAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
         this.wsmcAnnonymousFaultToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().faultToTag);

@@ -168,7 +168,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 headers.remove(configuration.getAddressingVersion().toTag);
                 headers.add(Headers.create(
                         configuration.getAddressingVersion().toTag,
-                        configuration.getMcVersion().getWsmcAnonymousAddress(clientUID)));
+                        configuration.getMcVersion().getAnonymousAddress(clientUID)));
             }
 
             responseStorage.store(response, clientUID);

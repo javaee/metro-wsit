@@ -120,7 +120,7 @@ public enum McVersion {
     public boolean isProtocolAction(String wsaAction) {
         return (wsaAction != null) && 
                (wsmcAction.equals(wsaAction) ||
-               isMcFault(wsaAction));
+               isFault(wsaAction));
     }
 
     /**
@@ -132,7 +132,7 @@ public enum McVersion {
      * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
      *         action header value that belongs to a WS-MakeConnection protocol fault
      */
-    public boolean isMcFault(String wsaAction) {
+    public boolean isFault(String wsaAction) {
         return wsmcFaultAction.equals(wsaAction);
     }
 
@@ -141,7 +141,7 @@ public enum McVersion {
      *
      * @return
      */
-    public String getWsmcAnonymousAddress(String uuid) {
+    public String getAnonymousAddress(String uuid) {
         return namespaceUri + "/anonymous?id=" + uuid;
     }
 

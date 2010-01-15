@@ -161,7 +161,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             String wsaAction = rc.communicator.getWsaAction(request);
-            if (rc.rmVersion.isRmAction(wsaAction)) { // protocol message
+            if (rc.rmVersion.isProtocolAction(wsaAction)) { // protocol message
                 return doReturnWith(processProtocolMessage(request, wsaAction));
             }
 

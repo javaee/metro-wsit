@@ -1168,7 +1168,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return false;
         }
         
-        return rmVer.isRmAction(getAction(packet));
+        return rmVer.isProtocolAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){

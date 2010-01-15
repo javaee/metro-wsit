@@ -263,7 +263,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isRMMessage(){
-        return rmVer.isRmAction(action);
+        return rmVer.isProtocolAction(action);
     }
     
     private String getAction(Message msg){

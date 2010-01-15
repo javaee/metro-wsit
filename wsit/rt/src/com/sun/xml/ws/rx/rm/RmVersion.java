@@ -194,23 +194,31 @@ public enum RmVersion {
     }
 
     /**
-     * TODO javadoc
-     * 
-     * @return
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-ReliableMessaging protocol message
+     *
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-ReliableMessaging protocol message
      */
-    public boolean isRmAction(String wsaAction) {
+    public boolean isProtocolAction(String wsaAction) {
         return (wsaAction != null) &&
-                (isRmProtocolRequest(wsaAction) ||
-                isRmProtocolResponse(wsaAction) ||
-                isRmFault(wsaAction));
+                (isProtocolRequest(wsaAction) ||
+                isProtocolResponse(wsaAction) ||
+                isFault(wsaAction));
     }
 
     /**
-     * TODO javadoc
-     * 
-     * @return
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-ReliableMessaging protocol request message
+     *
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-ReliableMessaging protocol request message
      */
-    public boolean isRmProtocolRequest(String wsaAction) {
+    public boolean isProtocolRequest(String wsaAction) {
         return (wsaAction != null) &&
                 (ackRequestedAction.equals(wsaAction) ||
                 createSequenceAction.equals(wsaAction) ||
@@ -219,11 +227,15 @@ public enum RmVersion {
     }
 
     /**
-     * TODO javadoc
-     * 
-     * @return
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-ReliableMessaging protocol response message
+     *
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-ReliableMessaging protocol response message
      */
-    public boolean isRmProtocolResponse(String wsaAction) {
+    public boolean isProtocolResponse(String wsaAction) {
         return (wsaAction != null) &&
                 (createSequenceResponseAction.equals(wsaAction) ||
                 closeSequenceResponseAction.equals(wsaAction) ||
@@ -232,11 +244,15 @@ public enum RmVersion {
     }
 
     /**
-     * TODO javadoc
-     * 
-     * @return
+     * Determines if the tested string is a valid WS-Addressing action header value
+     * that belongs to a WS-ReliableMessaging protocol fault
+     *
+     * @param WS-Addressing action string
+     *
+     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
+     *         action header value that belongs to a WS-ReliableMessaging protocol fault
      */
-    public boolean isRmFault(String wsaAction) {
+    public boolean isFault(String wsaAction) {
         return wsrmFaultAction.equals(wsaAction);
     }
 
