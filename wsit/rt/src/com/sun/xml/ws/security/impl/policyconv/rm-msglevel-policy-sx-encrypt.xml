@@ -57,6 +57,10 @@
                 Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
                 <sp:Header Name="UsesSequenceSTR" 
                 Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+                <sp:Header Name="SequenceFault"
+                Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+                <sp:Header Name="MessagePending"
+                Namespace="http://docs.oasis-open.org/ws-rx/wsmc/200702"/>
                 <sp:Header Name="To"
                 Namespace="http://www.w3.org/2005/08/addressing"/>
                 <sp:Header Name="From"
