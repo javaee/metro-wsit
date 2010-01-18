@@ -535,7 +535,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             MessagePolicy policy;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
-            } else if (isRMMessage(packet)) {
+            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){

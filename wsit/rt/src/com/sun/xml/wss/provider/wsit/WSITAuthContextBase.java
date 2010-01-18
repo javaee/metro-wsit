@@ -124,6 +124,7 @@ import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.ws.rx.rm.RmVersion;
@@ -151,7 +152,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
-import java.lang.ref.WeakReference;
 import java.security.cert.X509Certificate;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -205,6 +205,7 @@ public abstract class WSITAuthContextBase  {
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
     protected RmVersion rmVer = RmVersion.WSRM200502;
+    protected McVersion mcVer = McVersion.WSMC200702;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -249,6 +250,7 @@ public abstract class WSITAuthContextBase  {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasMakeConnection = false;
     boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     AddressingVersion addVer = null;
@@ -324,7 +326,8 @@ public abstract class WSITAuthContextBase  {
         }                        
         
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
+        hasReliableMessaging = isReliableMessagingEnabled(pipeConfig.getWSDLPort());
+        hasMakeConnection = isMakeConnectionEnabled(pipeConfig.getWSDLPort());
         //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
         //put properties for use by AuthModule init
@@ -909,7 +912,14 @@ public abstract class WSITAuthContextBase  {
 
         return rmVer.isProtocolAction(getAction(packet));
     }
-    
+
+    protected boolean isMakeConnectionMessage(Packet packet) {
+        if (!this.hasMakeConnection) {
+            return false;
+        }
+        return mcVer.isProtocolAction(getAction(packet));
+    }
+
     protected String getAction(Packet packet){
         // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
         //    return (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
@@ -1385,22 +1395,20 @@ public abstract class WSITAuthContextBase  {
     }
     
     //TODO: Duplicate information copied from Pipeline Assembler
-    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-        if (policyMap == null) {
-            return false;
+    private boolean isReliableMessagingEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.ReliableMessagingFeature.class);
+            return enabled;
         }
-        
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                    port.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                        
-            return (policy != null) && policy.contains(rmVer.policyNamespaceUri);
-        } catch (PolicyException e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new WebServiceException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
+        return false;
+    }
+
+     private boolean isMakeConnectionEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature.class);
+            return enabled;
         }
+        return false;
     }
     
     protected boolean bindingHasIssuedTokenPolicy() {
@@ -1482,7 +1490,7 @@ public abstract class WSITAuthContextBase  {
         }
         try {
             MessagePolicy policy = null;
-            if (isRMMessage(packet)) {
+            if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){

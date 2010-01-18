@@ -570,7 +570,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
-            } else if (isRMMessage(packet)) {
+            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){

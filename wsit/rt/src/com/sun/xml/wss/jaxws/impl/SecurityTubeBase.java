@@ -57,6 +57,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -80,6 +81,8 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -167,6 +170,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
     protected RmVersion rmVer = RmVersion.WSRM200502;
+    protected McVersion mcVer = McVersion.WSMC200702;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
 
@@ -248,6 +252,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasMakeConnection = false;
     boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     
@@ -303,7 +308,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         //unmarshaller = jaxbContext.createUnmarshaller();
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, tubeConfig.getWSDLPort());
+        hasReliableMessaging = isReliableMessagingEnabled(tubeConfig.getWSDLPort());
+        hasMakeConnection = isMakeConnectionEnabled(tubeConfig.getWSDLPort());
         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
     }
@@ -327,6 +333,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.wsTrustVer = that.wsTrustVer;
         this.wsscVer = that.wsscVer;
         this.rmVer = that.rmVer;
+        this.mcVer = that.mcVer;
         this.encRMLifecycleMsg = that.encRMLifecycleMsg;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
@@ -338,6 +345,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.hasKerberosToken = that.hasKerberosToken;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
+        this.hasMakeConnection = that.hasMakeConnection;
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
         this.iterationsForPDK = that.iterationsForPDK;
@@ -611,7 +619,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         try {
             MessagePolicy policy  ;
-            if (isRMMessage(packet)) {
+            if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
@@ -1170,6 +1178,13 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         return rmVer.isProtocolAction(getAction(packet));
     }
+
+     protected boolean isMakeConnectionMessage(Packet packet) {
+        if (!this.hasMakeConnection) {
+            return false;
+        }
+        return mcVer.isProtocolAction(getAction(packet));
+    }
     
     protected String getAction(Packet packet){
         // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
@@ -1623,24 +1638,21 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     //TODO: Duplicate information copied from Tubeline Assembler
-    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-        if (policyMap == null) {
-            return false;
+    private boolean isReliableMessagingEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.ReliableMessagingFeature.class);
+            return enabled;
         }
-        
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                    port.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                        
-            return (policy != null) && policy.contains(rmVer.policyNamespaceUri);
-        } catch (PolicyException e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSTUBE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new WebServiceException(LogStringsMessages.WSSTUBE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-        }
+        return false;
     }
-    
+
+     private boolean isMakeConnectionEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature.class);
+            return enabled;
+        }
+        return false;
+    }
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
     protected abstract void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
