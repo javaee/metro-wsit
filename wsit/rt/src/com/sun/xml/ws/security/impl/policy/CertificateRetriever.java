@@ -52,6 +52,7 @@ import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.AliasSelector;
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
@@ -98,24 +99,68 @@ public class CertificateRetriever {
     private String callbackHandler = null;
     private String aliasSelector = null;
 
-
-    public CertificateRetriever(){
-        
+    public CertificateRetriever() {
     }
+
+    public byte[] getBSTFromIdentityExtension(XMLStreamReader reader) throws XMLStreamException {
+        boolean isKeyInfo = false;
+        boolean isBST = false;
+        byte[] bstValue = null;
+        while (reader.hasNext()) {
+            if (reader.getEventType() == XMLStreamReader.START_ELEMENT) {
+                isBST = "BinarySecurityToken".equals(reader.getLocalName()) && MessageConstants.WSSE_NS.equals(reader.getNamespaceURI());
+                isKeyInfo = "KeyInfo".equals(reader.getLocalName()) && MessageConstants.DSIG_NS.equals(reader.getNamespaceURI()) ;
+                if (isBST || isKeyInfo) {
+                    if(isBST){
+                         reader.next();
+                    }else if(isKeyInfo) {
+                       while(reader.hasNext() && !"X509Certificate".equals(reader.getLocalName())){// goes to KeyInfo/X509Data/X509Certificate
+                          reader.next();
+                       }
+                       reader.next();
+                    }
+                    if (reader.getEventType() == XMLStreamReader.CHARACTERS) {
+
+                        if (reader instanceof XMLStreamReaderEx) {
+                            CharSequence data = ((XMLStreamReaderEx) reader).getPCDATA();
+                            if (data instanceof Base64Data) {
+                                Base64Data binaryData = (Base64Data) data;
+                                bstValue = binaryData.getExact();
+                                return bstValue;
+                            }
+                        }
+                        try {
+                            bstValue = Base64.decode(StreamUtil.getCV(reader));
+                        } catch (Base64DecodingException ex) {
+                            log.log(Level.WARNING, "error occured while trying to get certificate from Identity extension");
+                        //throw new RuntimeException(ex);
+                        }
+                    } else {
+                        log.log(Level.WARNING, "error occured while trying to get certificate from Identity extension");
+                    //throw new RuntimeException("error reading the xml stream");
+                    }
+                    return bstValue;
+                }
+            }
+            reader.next();
+        }       
+        return null;
+    }
+
     public Certificate getServerKeyStore(WSEndpoint wse) throws IOException, XWSSecurityException {
 
         QName keyStoreQName = new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore");
         setLocationPasswordAndAlias(keyStoreQName, wse);
-        
+
         if (password == null || location == null) {
-            if (callbackHandler == null) {               
-                    return null;
+            if (callbackHandler == null) {
+                return null;
             } else {
                 cs = getCertificateUsingCallbackHandler(callbackHandler);
                 return cs;
             }
         }
-        if(alias == null){
+        if (alias == null) {
             alias = getAliasUsingAliasSelector();
         }
         KeyStore keyStore = null;
@@ -124,8 +169,8 @@ public class CertificateRetriever {
             fis = new java.io.FileInputStream(location);
             keyStore.load(fis, password.toCharArray());
             cs = keyStore.getCertificate(alias);
-            if(cs == null){
-              log.log(Level.WARNING, "certificate not found corrosponding to the alias = "+ alias);
+            if (cs == null) {
+                log.log(Level.WARNING, "certificate not found corrosponding to the alias = " + alias);
             }
         } catch (FileNotFoundException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
@@ -135,7 +180,7 @@ public class CertificateRetriever {
             return null;
         } catch (NoSuchAlgorithmException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
-           return null;
+            return null;
         } catch (CertificateException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
@@ -148,38 +193,7 @@ public class CertificateRetriever {
         }
         return cs;
 
-    }
-
-    public byte[] digestBST(XMLStreamReader reader) throws XMLStreamException {
-        byte[] bstValue = null;
-        if (reader == null) {
-            throw new RuntimeException("XML stream reader is null");
-        }
-        while (reader.getEventType() != XMLStreamReader.CHARACTERS && reader.getEventType() != reader.END_ELEMENT) {
-            reader.next();
-        }
-        if (reader.getEventType() == XMLStreamReader.CHARACTERS) {
-
-            if (reader instanceof XMLStreamReaderEx) {
-                CharSequence data = ((XMLStreamReaderEx) reader).getPCDATA();
-                if (data instanceof Base64Data) {
-                    Base64Data binaryData = (Base64Data) data;
-                    bstValue = binaryData.getExact();
-                    return bstValue;
-                }
-            }
-            try {
-                bstValue = Base64.decode(StreamUtil.getCV(reader));
-            } catch (Base64DecodingException ex) {
-                log.log(Level.WARNING, "error occured while decoding Base64 data", ex);
-                //throw new RuntimeException(ex);
-            }
-        }else{
-             log.log(Level.WARNING, "error reading the xml stream");
-             //throw new RuntimeException("error reading the xml stream");
-        }
-        return bstValue;
-    }
+    }    
 
     public X509Certificate constructCertificate(byte[] bstValue) {
         try {
@@ -193,7 +207,6 @@ public class CertificateRetriever {
         }
     }
 
-  
     public boolean checkforEPRIdentity(WSEndpoint wse, QName eprQName) {
 
         if (wse.getPort() == null) {
@@ -214,7 +227,7 @@ public class CertificateRetriever {
     }
 
     private String getAliasUsingAliasSelector() {
-        if(aliasSelector == null){
+        if (aliasSelector == null) {
             return null;
         }
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -241,17 +254,17 @@ public class CertificateRetriever {
         try {
             com.sun.xml.wss.AliasSelector as = (AliasSelector) aliasSelectorClass.newInstance();
             String myAlias = as.select(new java.util.HashMap());//passing empty map as runtime properties is not available here;
-            if(myAlias == null){
-               log.log(Level.WARNING, "alias retrieved using the aliasSelector is null");
+            if (myAlias == null) {
+                log.log(Level.WARNING, "alias retrieved using the aliasSelector is null");
             }
             return myAlias;
         } catch (InstantiationException ex) {
             log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
         } catch (IllegalAccessException ex) {
-           log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
             return null;
-        }      
+        }
     }
 
     private X509Certificate getCertificateUsingCallbackHandler(String callbackHandler) {
@@ -285,8 +298,8 @@ public class CertificateRetriever {
             cbh.handle(callbacks);
             X509Certificate cert = null;
             cert = (X509Certificate) ((ksc.getKeystore() != null) ? (ksc.getKeystore().getCertificate(alias)) : null);
-            if(cert == null && alias != null){
-                log.log(Level.WARNING, "certificate not found corrosponding to the alias =  "+ alias);
+            if (cert == null && alias != null) {
+                log.log(Level.WARNING, "certificate not found corrosponding to the alias =  " + alias);
             }
             return cert;
         } catch (IOException ex) {

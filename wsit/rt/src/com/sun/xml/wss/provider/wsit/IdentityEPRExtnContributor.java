@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -110,7 +110,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         if (found == false) {
             return null;
         } else {
-            log.log(Level.INFO, "EnableEPRIdentity assertion is enabled");
+            //log.log(Level.INFO, "EnableEPRIdentity assertion is enabled");
             try {
                 URL url = SecurityUtil.loadFromClasspath("META-INF/ServerCertificate.cert");
                 if (url != null) {
