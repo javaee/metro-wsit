@@ -106,6 +106,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
                 setCorrelationId(wsaRelatesToHeader.getStringContent()); // initializing correlation id for getParentFiber()
                 try {
                     resumeParentFiber(response);
+                    return;
                 } catch (ResumeFiberException ex) {
                     LOGGER.warning(LocalizationMessages.WSMC_0116_RESUME_PARENT_FIBER_ERROR(), ex);
                 }
