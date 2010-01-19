@@ -42,6 +42,7 @@ import com.sun.xml.ws.api.policy.SourceModel;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
+import com.sun.xml.ws.rx.mc.McVersion;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 
@@ -57,22 +58,26 @@ public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
     RmVersion rmVersion;
+    McVersion mcVersion;
     boolean encrypt = false;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
         rmVersion = RmVersion.WSRM200502;
+        mcVersion = McVersion.WSMC200702;
     }
     
     public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
+        mcVersion = McVersion.WSMC200702;
     }
 
-    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, boolean encrypt) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, McVersion mcVersion, boolean encrypt) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
+        this.mcVersion = mcVersion;
         this.encrypt = encrypt;
     }
     
@@ -82,9 +87,9 @@ public class RMPolicyResolver {
             String rmMessagePolicy = encrypt ? "rm-msglevel-policy-encrypt.xml" : "rm-msglevel-policy.xml";
             if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200502 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200702  == rmVersion){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && (RmVersion.WSRM200702  == rmVersion || McVersion.WSMC200702 == mcVersion)){
                 rmMessagePolicy = encrypt ? "rm-msglevel-policy-sx-encrypt.xml" :"rm-msglevel-policy-sx.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && RmVersion.WSRM200702 == rmVersion){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmVersion.WSRM200702 == rmVersion || McVersion.WSMC200702 == mcVersion)){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             

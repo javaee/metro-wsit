@@ -950,7 +950,7 @@ public abstract class WSITAuthContextBase  {
             return;
         }
         try{
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, encRMLifecycleMsg);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, mcVer, encRMLifecycleMsg);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);

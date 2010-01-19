@@ -438,7 +438,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
-                new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer));
+                new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer, mcVer));
         Message msg = req.getMessage();
 
         try {

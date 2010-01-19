@@ -266,7 +266,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer, mcVer));
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         try {
             if (!optimized) {
