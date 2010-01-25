@@ -36,8 +36,11 @@
 package com.sun.xml.ws.rx.util;
 
 import com.sun.istack.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -218,6 +221,32 @@ public class TimestampedCollection<K, V> {
                 ex.initCause(cause);
                 throw ex;
             }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Removes all values from the time-stamped collection and returns them as an ordered FIFO 
+     * list.
+     *
+     * @return ordered FIFO list of the removed values. Returns empty list in case there are no
+     *         values stored in the collection.
+     */
+    public List<V> removeAll() {
+        try {
+            rwLock.writeLock().lock();
+            if (timestampedPriorityQueue.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<V> values = new ArrayList<V>(timestampedPriorityQueue.size());
+
+            while (!timestampedPriorityQueue.isEmpty()) {
+                values.add(removeOldest());
+            }
+
+            return values;
         } finally {
             rwLock.writeLock().unlock();
         }

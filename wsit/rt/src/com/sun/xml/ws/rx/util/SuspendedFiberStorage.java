@@ -93,4 +93,10 @@ public class SuspendedFiberStorage extends TimestampedCollection<String, Fiber> 
 
         fiber.resume(error);
     }
+
+    public void resumeAllFibers(Throwable error) {
+        for (Fiber fiber : removeAll()) {
+            fiber.resume(error);
+        }
+    }
 }

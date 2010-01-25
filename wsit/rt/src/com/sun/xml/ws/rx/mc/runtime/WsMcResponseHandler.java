@@ -136,7 +136,8 @@ class WsMcResponseHandler extends McResponseHandlerBase {
 
     public void onCompletion(Throwable error) {
         try {
-            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0121_FAILED_TO_SEND_WSMC_REQUEST(), error));
+            LOGGER.warning(LocalizationMessages.WSMC_0121_FAILED_TO_SEND_WSMC_REQUEST(), error);
+            suspendedFiberStorage.resumeAllFibers(error);
         } finally {
             mcSenderTask.clearMcRequestPendingFlag();
         }
