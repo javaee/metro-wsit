@@ -1,12 +1,12 @@
 /*
- * $Id: SecurityTokenReferenceImpl.java,v 1.6 2008-02-26 06:33:28 ofung Exp $
+ * $Id: SecurityTokenReferenceImpl.java,v 1.6.18.1 2010-01-26 23:36:31 jdg6688 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -14,7 +14,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -23,9 +23,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -61,20 +61,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * SecurityTokenReference implementation
  */
 public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType implements SecurityTokenReference {
-    
-    
+
+
     public SecurityTokenReferenceImpl(Reference ref){
         setReference(ref);
     }
-    
+
     public SecurityTokenReferenceImpl(SecurityTokenReferenceType strType)
     {
         final Reference ref = getReference(strType);
         setReference(ref);
+        this.getOtherAttributes().putAll(strType.getOtherAttributes());
     }
-    
+
     public final void setReference(final Reference ref){
-        
+
         JAXBElement rElement = null;
         final String type = ref.getType();
         final ObjectFactory objFac = new ObjectFactory();
@@ -86,17 +87,17 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
         }else{
             //ToDo
         }
-        
+
         if (rElement != null){
             getAny().clear();
             getAny().add(rElement);
         }
     }
-    
+
     public Reference getReference (){
         return getReference((SecurityTokenReferenceType)this);
     }
-    
+
     private Reference getReference(final SecurityTokenReferenceType strType){
         final List<Object> list = strType.getAny();
         final JAXBElement obj = (JAXBElement)list.get(0);
@@ -105,34 +106,42 @@ public class SecurityTokenReferenceImpl extends SecurityTokenReferenceType imple
         if (REFERENCE.equals(local)) {
             return new DirectReferenceImpl((ReferenceType)obj.getValue());
         }
-            
+
         if (KEYIDENTIFIER.equalsIgnoreCase(local)) {
             return new KeyIdentifierImpl((KeyIdentifierType)obj.getValue());
         }
-            
+
         //ToDo
-        return null;       
+        return null;
     }
-    
+
+    public void setTokenType(String tokenType){
+        getOtherAttributes().put(TOKEN_TYPE, tokenType);
+    }
+
+    public String getTokenType(){
+       return getOtherAttributes().get(TOKEN_TYPE);
+    }
+
     public String getType() {
         return WSTrustConstants.STR_TYPE;
     }
-    
+
     public Object getTokenValue() {
         try {
             final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document doc = builder.newDocument();
-            
+
             final javax.xml.bind.Marshaller marshaller = WSTrustElementFactory.getContext().createMarshaller();
             final JAXBElement<SecurityTokenReferenceType> rstElement =  (new ObjectFactory()).createSecurityTokenReference((SecurityTokenReferenceType)this);
             marshaller.marshal(rstElement, doc);
             return doc.getDocumentElement();
-            
+
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }
     }
-    
+
 }

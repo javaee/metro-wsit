@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -302,10 +302,15 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
 
         String confirMethod = null;
         
+        Element assertionInRST = (Element)stsConfig.getOtherOptions().get(WSTrustConstants.SAML_ASSERTION_ELEMENT_IN_RST);
+
         // Handle OnBehalfOf token
         OnBehalfOf obo = rst.getOnBehalfOf();
         if (obo != null){
             Object oboToken = obo.getAny();
+            if (assertionInRST != null){
+                oboToken = assertionInRST;
+            }
             if (oboToken != null){
                 subject.getPublicCredentials().add(eleFac.toElement(oboToken));
 
@@ -324,6 +329,9 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         ActAs actAs = rst.getActAs();
         if (actAs != null){
             Object actAsToken = actAs.getAny();
+            if (assertionInRST != null){
+                actAsToken = assertionInRST;
+            }
             if (actAsToken != null){
                 // set ActAs attribute
                 claims.getOtherAttributes().put(new QName("ActAs"), "true");
@@ -556,21 +564,24 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
         context.setTokenType(tokenType.toString());
         
         //Get ValidateTarget
-        Token token = null;
-        if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_10_NS_URI)){
+        Element token = null;
+        Element assertionInRST = (Element)stsConfig.getOtherOptions().get(WSTrustConstants.SAML_ASSERTION_ELEMENT_IN_RST);
+        if (assertionInRST != null){
+            token = assertionInRST;
+        }else if (wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_10_NS_URI)){
             // It is not well defined how to carry the security token 
             // to be validated. ValidateTarget is obly introduced in the 
             // ws-trust 1.3. Here we assume the token is directly child element 
             // of RST
             List<Object> exts = rst.getExtensionElements();
             if (exts.size() > 0){
-                token = new GenericToken((Element)exts.get(0));
+                token = (Element)exts.get(0);
             }  
         }else{
             ValidateTarget vt = rst.getValidateTarget();
-            token = new GenericToken((Element)vt.getAny());
+            token = (Element)vt.getAny();
         }
-        context.setTarget(token);
+        context.setTarget(new GenericToken(token));
         
         // Get STSTokenProvider and validate the token
         STSTokenProvider tokenProvider = WSTrustFactory.getSTSTokenProvider();

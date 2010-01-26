@@ -46,14 +46,19 @@
 package com.sun.xml.ws.security.trust.elements.str;
 
 import com.sun.xml.ws.security.Token;
+import javax.xml.namespace.QName;
 
 public interface SecurityTokenReference extends Token {
     
     public static final String KEYIDENTIFIER = "KeyIdentifier";
     public static final String REFERENCE = "Reference";
+    public static final QName TOKEN_TYPE = new QName("http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd","TokenType");
     
     void setReference(Reference ref);
     
     Reference getReference();
-    
+
+    public void setTokenType(String tokenType);
+
+    public String getTokenType();
 }
