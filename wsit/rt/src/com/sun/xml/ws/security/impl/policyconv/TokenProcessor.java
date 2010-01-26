@@ -357,7 +357,7 @@ public class TokenProcessor {
         if (this.isServer && !isIncoming) {
             if (!spVersion.includeTokenAlways.equals(iTokenType)) {
                 if (iTokenType.endsWith("AlwaysToInitiator")) {
-                    xwssToken.setIncludeToken(spVersion.includeTokenOnce);
+                    xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
                     if (logger.isLoggable(Level.FINEST)) {
                         logger.log(Level.FINEST, "Token Inclusion value of INCLUDE ONCE has been set to Token" + xwssToken);
                     }
@@ -379,7 +379,7 @@ public class TokenProcessor {
                 }
                 return;
             } else if (iTokenType.endsWith("AlwaysToInitiator")) {
-                xwssToken.setIncludeToken(spVersion.includeTokenOnce);
+                xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.log(Level.FINEST, "Token Inclusion value of INCLUDE ONCE has been set to Token" + xwssToken);
                 }
