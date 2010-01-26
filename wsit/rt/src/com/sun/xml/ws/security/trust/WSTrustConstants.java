@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -49,7 +49,9 @@ public class WSTrustConstants {
     public static final String USE_KEY_SIGNATURE_ID = "UseKey-SignatureID";
 
     public static final String STS_CALL_BACK_HANDLER = "stsCallbackHandler";
-    
+
+    public static final String SAML_ASSERTION_ELEMENT_IN_RST = "SamlAssertionElementInRST";
+
     public static final String WST_VERSION = "WSTrustVersion";
     
     public static final String AUTHN_CONTEXT_CLASS = "AuthnContextClass";

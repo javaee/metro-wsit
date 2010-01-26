@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,6 +37,7 @@
 package com.sun.xml.ws.security.trust.sts;
 
 import com.sun.xml.ws.api.security.trust.BaseSTS;
+import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.api.security.trust.WSTrustContract;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
@@ -70,6 +71,13 @@ import javax.xml.ws.handler.MessageContext;
 //import javax.xml.ws.RespectBinding;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * The Base class of an STS implementation. This could be used to implement
@@ -170,7 +178,7 @@ public abstract class BaseSTSImpl implements BaseSTS {
         try{
             // Get RequestSecurityToken
             final WSTrustElementFactory eleFac = WSTrustElementFactory.newInstance(wstVer);
-            final RequestSecurityToken rst = eleFac.createRSTFrom(rstElement);         
+            final RequestSecurityToken rst = parseRST(rstElement, config);
             
             String appliesTo = null;
             final AppliesTo applTo = rst.getAppliesTo();
@@ -322,17 +330,6 @@ public abstract class BaseSTSImpl implements BaseSTS {
 
         final BaseSTSResponse response = contract.issue(rst, context);
         
-    /*    Token samlToken = rstr.getRequestedSecurityToken().getToken();
-        rstr.getRequestedSecurityToken().setAny(null);
-        Element samlEle = (Element)samlToken.getTokenValue();
-        Element rstrEle = eleFac.toElement(rstr);
-        Document doc = rstrEle.getOwnerDocument();
-        samlEle = (Element)doc.importNode(samlEle, true);
-        NodeList list = rstrEle.getElementsByTagNameNS("*", "RequestedSecurityToken");
-        Element rdstEle = (Element)list.item(0);
-        rdstEle.appendChild(samlEle); 
-        
-        return new DOMSource(eleFac.toElement(rstr)); */
         return eleFac.toSource(response);
     }
 
@@ -372,5 +369,35 @@ public abstract class BaseSTSImpl implements BaseSTS {
 
         rstrEle = eleFac.toSource(rstr);
         return rstrEle;
-    }        
+    }
+
+    private RequestSecurityToken parseRST(Source source, STSConfiguration config) throws WSTrustException{
+        Element ele = null;
+        try{
+            DOMResult result = new DOMResult();
+            Transformer tf = TransformerFactory.newInstance().newTransformer();
+            tf.transform(source, result);
+
+            Node node = result.getNode();
+            if (node instanceof Document){
+                ele = ((Document)node).getDocumentElement();
+            } else if (node instanceof Element){
+                ele = (Element)node;
+            }
+        }catch(Exception xe){
+            throw new WSTrustException("Error occurred while trying to parse RST stream", xe);
+        }
+        WSTrustElementFactory fact = WSTrustElementFactory.newInstance(wstVer);
+        RequestSecurityToken rst = fact.createRSTFrom(ele);
+
+        // handling SAML assertion in RST; assume there is one one
+        // in it fro OnBehalfOf, ActAs or ValidateTarget.
+        NodeList list = ele.getElementsByTagNameNS("*", "Assertion");
+        if (list.getLength() > 0){
+            Element assertion = (Element)list.item(0);
+            config.getOtherOptions().put(WSTrustConstants.SAML_ASSERTION_ELEMENT_IN_RST, assertion);
+        }
+
+        return rst;
+    }
 }
