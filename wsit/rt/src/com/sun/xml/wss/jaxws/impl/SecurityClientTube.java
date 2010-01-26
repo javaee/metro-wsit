@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -208,30 +208,39 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         if (idExtn != null) {
                             xmlReader = idExtn.readAsXMLStreamReader();
                             CertificateRetriever cr = new CertificateRetriever();
-                            byte[] bstValue = cr.digestBST(xmlReader);
-                            if (bstValue == null) {
-                                throw new RuntimeException("the binary security token value obtained from XMLStreamReader is null");
+                            //byte[] bstValue = cr.digestBST(xmlReader);
+                            byte[] bstValue = cr.getBSTFromIdentityExtension(xmlReader);
+                            X509Certificate certificate = null;
+                            if (bstValue != null) {
+                                certificate = cr.constructCertificate(bstValue);
                             }
-                            X509Certificate certificate = cr.constructCertificate(bstValue);                            
                             boolean valid = false;
                             try {
-                                valid = secEnv.validateCertificate(certificate, null);
+                                if(certificate != null){
+                                     valid = secEnv.validateCertificate(certificate, null);
+                                }
                             } catch (WssSoapFaultException ex) {
-                                log.log(Level.WARNING, "Could not validate the the server certificate "+certificate);
-                            }                           
+                                //log.log(Level.WARNING, "exception during validating the server certificate");
+                            }
                             if (valid) {
+                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
                                  props.put(PipeConstants.SERVER_CERT, certificate);
                                  this.serverCert = certificate;
-                            } 
+                            }else{
+                                if(bstValue != null){
+                                 log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it");
+                                }
+                            }
                         }
                     } catch (XMLStreamException ex) {
-                        log.log(Level.SEVERE, null, ex);
-                        throw new RuntimeException(ex);
+                        log.log(Level.WARNING, ex.getMessage());
+                        //throw new RuntimeException(ex);
                     } catch (XWSSecurityException ex) {
-                        log.log(Level.SEVERE, null, ex);
+                        log.log(Level.WARNING,ex.getMessage());
                     }
                 }
             } else {
+                log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
                 props.put(PipeConstants.SERVER_CERT, x509Cert);
                 this.serverCert = x509Cert;
             }
