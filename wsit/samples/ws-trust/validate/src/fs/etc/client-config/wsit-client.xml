@@ -81,7 +81,8 @@
       xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
         <wsp:ExactlyOne>
             <wsp:All>
-                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/server-truststore.jks" type="JKS" storepass="changeit" peeralias="wssip"></sc:TrustStore>
+         
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="wssip"></sc:TrustStore>
             </wsp:All>
         </wsp:ExactlyOne>
     </wsp:Policy>
@@ -177,10 +178,10 @@
    
    <wsdl:service name="SecurityTokenService">
                 <wsdl:port name="ISecurityTokenService_Port" binding="tns:ISecurityTokenService_Binding">
-			<soap:address location="http://localhost:8080/jaxws-sts/sts"/>
+			<soap:address location="http://localhost:8080/jaxws-fs-sts/sts"/>
 		</wsdl:port>
 		<wsdl:port name="ISecurityTokenService_Validate_Port" binding="tns:ISecurityTokenService_Validate_Binding">
-			<soap:address location="http://localhost:8080/jaxws-sts/sts/validate"/>
+			<soap:address location="http://localhost:8080/jaxws-fs-sts/sts/validate"/>
 		</wsdl:port>
    </wsdl:service>
    
