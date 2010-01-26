@@ -65,6 +65,10 @@ public class ClientAckRequesterTask implements DelayedTask {
     public void run(DelayedTaskManager manager) {
         LOGGER.entering(outboundSequenceId);
         try {
+            if (rc.communicator.isClosed()) {
+                // Our communication channel has been closed - let the task die
+                return;
+            }
 
             if (rc.sequenceManager().isValid(outboundSequenceId)) {
                 final Sequence sequence = rc.getOutboundSequence(outboundSequenceId);

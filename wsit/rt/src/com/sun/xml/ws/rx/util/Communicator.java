@@ -294,11 +294,18 @@ public final class Communicator {
      * @return response {@link Message} wrapped in a response {@link Packet} received
      */
     public Packet send(Packet request) {
-        request.expectReply = Boolean.TRUE;
+        if (fiberExecutor == null) {
+            LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
+        }
+
         return fiberExecutor.runSync(request);
     }
 
     public void sendAsync(Packet request, Fiber.CompletionCallback completionCallbackHandler) {
+        if (fiberExecutor == null) {
+            LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
+        }
+
         fiberExecutor.start(request, completionCallbackHandler);
     }
 
@@ -324,8 +331,12 @@ public final class Communicator {
     public void close() {
         final FiberExecutor fe = this.fiberExecutor;
         if (fe != null) {
-            this.fiberExecutor.close();
+            fe.close();
             this.fiberExecutor = null;
         }
+    }
+
+    public boolean isClosed() {
+        return this.fiberExecutor == null;
     }
 }
