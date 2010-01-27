@@ -87,9 +87,9 @@ public class RMPolicyResolver {
             String rmMessagePolicy = encrypt ? "rm-msglevel-policy-encrypt.xml" : "rm-msglevel-policy.xml";
             if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200502 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && (RmVersion.WSRM200702  == rmVersion || McVersion.WSMC200702 == mcVersion)){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && (RmVersion.WSRM200702  == rmVersion )){
                 rmMessagePolicy = encrypt ? "rm-msglevel-policy-sx-encrypt.xml" :"rm-msglevel-policy-sx.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmVersion.WSRM200702 == rmVersion || McVersion.WSMC200702 == mcVersion)){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmVersion.WSRM200702 == rmVersion )){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             
