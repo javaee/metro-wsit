@@ -72,6 +72,14 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      */
     public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = -1;
     /**
+     * A constant specifies the default value of maximum number of attempts to send
+     * a reliable messaging session control messgae such as CreateSequence, CloseSequence
+     * and TerminateSequence
+     *
+     * Currently, the default value is set to 3.
+     */
+    public static final long DEFAULT_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS = 3;
+    /**
      * Specifies the duration in milliseconds after which the RM Destination will
      * transmit an acknowledgement.
      * Currently the default value is set to -1 => unspecified.
@@ -302,6 +310,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final BackoffAlgorithm retransmissionBackoffAlgorithm;
     private final long maxMessageRetransmissionCount;
     //
+    private final long maxRmSessionControlMessageResendAttempts;
+    //
     private final long acknowledgementTransmissionInterval;
     private final long ackRequestTransmissionInterval;
     //
@@ -335,6 +345,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_MESSAGE_RETRANSMISSION_INTERVAL, // this.baseRetransmissionInterval
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT,
+                DEFAULT_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS, // this.maxRmSessionControlMessageResendAttempts
                 DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
                 DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
@@ -380,6 +391,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 BackoffAlgorithm.getDefault(), // this.retransmissionBackoffAlgorithm
                 DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT,
 
+                DEFAULT_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS, // this.maxRmSessionControlMessageResendAttempts
+
                 DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL, // this.acknowledgementTransmissionInterval
                 DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL, // this.ackRequestTransmissionInterval
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
@@ -399,6 +412,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long messageRetransmissionInterval,
             BackoffAlgorithm retransmissionBackoffAlgorithm,
             long maxMessageRetransmissionCount,
+            long maxRmSessionControlMessageResendAttempts,
             long acknowledgementTransmissionInterval,
             long ackRequestTransmissionInterval,
             long closeSequenceOperationTimeout,
@@ -416,6 +430,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.messageRetransmissionInterval = messageRetransmissionInterval;
         this.retransmissionBackoffAlgorithm = retransmissionBackoffAlgorithm;
         this.maxMessageRetransmissionCount = maxMessageRetransmissionCount;
+        this.maxRmSessionControlMessageResendAttempts = maxRmSessionControlMessageResendAttempts;
         this.acknowledgementTransmissionInterval = acknowledgementTransmissionInterval;
         this.ackRequestTransmissionInterval = ackRequestTransmissionInterval;
         this.closeSequenceOperationTimeout = closeSequenceOperationTimeout;
@@ -580,6 +595,20 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public long getMaxMessageRetransmissionCount() {
         return maxMessageRetransmissionCount;
+    }
+
+    /**
+     * The infrastructure tries to send each RM session protocol control message
+     * such as CreateSequence, CloseSequence, TerminateSequence at most a
+     * {@link #getMaxRmSessionControlMessageResendAttempts()} number of times. Not receiving
+     * an acknowledgment before this limit is reached is considered a fatal communication
+     * failure, and causes the RM session to fail.
+     *
+     * @return maximum number of reliable messaging session handshake message transmission attempts
+     */
+    @ManagedAttribute
+    public long getMaxRmSessionControlMessageResendAttempts() {
+        return maxRmSessionControlMessageResendAttempts;
     }
 
     /**

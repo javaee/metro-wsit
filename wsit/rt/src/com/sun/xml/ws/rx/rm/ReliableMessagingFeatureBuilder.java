@@ -56,6 +56,8 @@ public final class ReliableMessagingFeatureBuilder {
     private BackoffAlgorithm retransmissionBackoffAlgorithm = BackoffAlgorithm.getDefault();
     private long maxMessageRetransmissionCount = DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT;
     //
+    private long maxRmSessionControlMessageResendAttempts = DEFAULT_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS;
+    //
     private long ackTransmittionInterval = DEFAULT_ACKNOWLEDGEMENT_TRANSMISSION_INTERVAL;
     private long ackRequestTransmissionInterval = DEFAULT_ACK_REQUEST_TRANSMISSION_INTERVAL;
     private long closeSequenceOperationTimeout = DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT;
@@ -79,6 +81,7 @@ public final class ReliableMessagingFeatureBuilder {
                 this.messageRetransmissionInterval,
                 this.retransmissionBackoffAlgorithm,
                 this.maxMessageRetransmissionCount,
+                this.maxRmSessionControlMessageResendAttempts,
                 this.ackTransmittionInterval,
                 this.ackRequestTransmissionInterval,
                 this.closeSequenceOperationTimeout,
@@ -124,6 +127,14 @@ public final class ReliableMessagingFeatureBuilder {
      */
     public ReliableMessagingFeatureBuilder maxMessageRetransmissionCount(long value) {
         this.maxMessageRetransmissionCount = value;
+        return this;
+    }
+
+    /**
+     * @see ReliableMessagingFeature#getMaxInitRmSessionAttempts()
+     */
+    public ReliableMessagingFeatureBuilder maxRmSessionControlMessageResendAttempts(long value) {
+        this.maxRmSessionControlMessageResendAttempts = value;
         return this;
     }
 

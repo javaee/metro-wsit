@@ -38,16 +38,13 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import javax.xml.ws.WebServiceException;
 
 class ClientSourceDeliveryCallback implements Postman.Callback {
 
@@ -78,7 +75,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -124,7 +121,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -172,7 +169,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -227,21 +224,5 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         } finally {
             LOGGER.exiting();
         }
-    }
-
-    private static boolean isResendPossible(Throwable throwable) {
-        if (throwable instanceof IOException) {
-            return true;
-        } else if (throwable instanceof WebServiceException) {
-            if (throwable instanceof ClientTransportException) {
-                return true; // if endpint went down, let's try to resend, as it may come up again
-            }
-            // Unwrap exception and see if it makes sense to retry this request
-            // (no need to check for null - handled by instanceof)
-            if (throwable.getCause() instanceof IOException) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -44,9 +44,7 @@ import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import javax.xml.ws.WebServiceException;
 
 /**
  *
@@ -121,7 +119,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ServerDestinationDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -155,16 +153,4 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback);
     }
 
-    private static boolean isResendPossible(Throwable throwable) {
-        if (throwable instanceof IOException) {
-            return true;
-        } else if (throwable instanceof WebServiceException) {
-            // Unwrap exception and see if it makes sense to retry this request
-            // (no need to check for null - handled by instanceof)
-            if (throwable.getCause() instanceof IOException) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

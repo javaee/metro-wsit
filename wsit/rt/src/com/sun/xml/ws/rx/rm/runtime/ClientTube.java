@@ -317,7 +317,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
         final CreateSequenceData requestData = csBuilder.build();
         final Packet request = rc.protocolHandler.toPacket(requestData, null);
 
-        final CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(rc.communicator.send(request), "CreateSequence", Level.SEVERE));
+        final String messageName = "CreateSequence";
+        final Packet response = sendSessionControlMessage(messageName, request);
+        CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
 
         if (requestData.getOfferedSequenceId() != null) {
             // we offered an inbound sequence
@@ -351,7 +353,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-        final CloseSequenceResponseData responseData = rc.protocolHandler.toCloseSequenceResponseData(verifyResponse(rc.communicator.send(request), "CloseSequence", Level.WARNING));
+
+        final String messageName = "CloseSequence";
+        final Packet response = sendSessionControlMessage(messageName, request);
+        final CloseSequenceResponseData responseData = rc.protocolHandler.toCloseSequenceResponseData(verifyResponse(response, messageName, Level.WARNING));
 
         rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
 
@@ -377,7 +382,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-        final Packet response = verifyResponse(rc.communicator.send(request), "TerminateSequence", Level.FINE);
+
+        final String messageName = "TerminateSequence";
+        final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.FINE);
 
         if (response.getMessage() != null) {
             final String responseAction = rc.communicator.getWsaAction(response);
@@ -410,6 +417,28 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 rc.sequenceManager().terminateSequence(boundSequenceId);
             }
         }
+    }
+
+    private Packet sendSessionControlMessage(String messageName, final Packet request) throws RxRuntimeException {
+        int attempt = 0;
+        Packet response = null;
+        while (true) {
+            if (attempt > rc.configuration.getRmFeature().getMaxRmSessionControlMessageResendAttempts()) {
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1128_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS_REACHED(messageName));
+            }
+            try {
+                response = rc.communicator.send(request);
+                break;
+            } catch (RuntimeException ex) {
+                if (!Utilities.isResendPossible(ex)) {
+                    throw new RxRuntimeException(LocalizationMessages.WSRM_1106_SENDING_RM_SESSION_CONTROL_MESSAGE_FAILED(messageName), ex);
+                } else {
+                    LOGGER.warning(LocalizationMessages.WSRM_1106_SENDING_RM_SESSION_CONTROL_MESSAGE_FAILED(messageName), ex);
+                }
+            }
+            attempt++;
+        }
+        return response;
     }
 
     private boolean areEqual(String s1, String s2) {
