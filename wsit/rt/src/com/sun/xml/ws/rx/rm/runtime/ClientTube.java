@@ -419,7 +419,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private Packet sendSessionControlMessage(String messageName, final Packet request) throws RxRuntimeException {
+    private Packet sendSessionControlMessage(final String messageName, final Packet request) throws RxRuntimeException {
         int attempt = 0;
         Packet response = null;
         while (true) {
@@ -427,7 +427,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1128_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS_REACHED(messageName));
             }
             try {
-                response = rc.communicator.send(request);
+                response = rc.communicator.send(request.copy(true));
                 break;
             } catch (RuntimeException ex) {
                 if (!Utilities.isResendPossible(ex)) {
