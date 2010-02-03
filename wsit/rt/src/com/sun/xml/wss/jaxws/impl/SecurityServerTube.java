@@ -533,11 +533,11 @@ public class SecurityServerTube extends SecurityTubeBase {
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy;
-            if (packet.getMessage().isFault()) {
-                policy =  getOutgoingFaultPolicy(packet);
-            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
+            if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
+            } else if (packet.getMessage().isFault()) {
+                policy =  getOutgoingFaultPolicy(packet);
             } else if(isSCCancel(packet)){
                 SecurityPolicyHolder holder = outProtocolPM.get("SC");
                 if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
