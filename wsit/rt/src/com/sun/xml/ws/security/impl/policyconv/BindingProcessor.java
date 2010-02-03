@@ -164,7 +164,7 @@ public abstract class BindingProcessor {
         }
 
         if (PolicyTypeUtil.UsernameTokenBinding(token)) {
-            uid = ((AuthenticationTokenPolicy.UsernameTokenBinding) token).getSTRID();
+            uid = ((AuthenticationTokenPolicy.UsernameTokenBinding) token).getUUID();
             if (uid == null) {
                 uid = pid.generateID();
                 ((AuthenticationTokenPolicy.UsernameTokenBinding) token).setSTRID(uid);
