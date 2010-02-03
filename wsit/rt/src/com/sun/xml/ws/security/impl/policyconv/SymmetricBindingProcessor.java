@@ -165,17 +165,16 @@ public class SymmetricBindingProcessor extends BindingProcessor{
                 protectTimestamp(tp);
             }
         }
-        if(binding.getTokenProtection()){
-            WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
-            if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
-                protectToken((WSSPolicy) policy.getKeyBinding(),true,spVersion);
-            }else{
-                if ((isServer && isIncoming) || (!isServer && !isIncoming)) {
+        if (binding.getTokenProtection()) {
+            if ((isServer && isIncoming) || (!isServer && !isIncoming)) { //token protection is from client to service only
+                WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
+                if (PolicyTypeUtil.derivedTokenKeyBinding(policy)) {
                     protectToken(policy, true, spVersion);
+                } else {
+                    protectToken((WSSPolicy) policy.getKeyBinding(), true, spVersion);
                 }
             }
         }
-        
     }
     
     protected void addSymmetricKeyBinding(WSSPolicy policy, Token token) throws PolicyException{
