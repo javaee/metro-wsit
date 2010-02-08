@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -166,14 +166,15 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             }
         }
         if(binding.getTokenProtection()){
-            WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
-            if(PolicyTypeUtil.derivedTokenKeyBinding(policy)){
-                protectToken(policy,true,spVersion);
-            }else{
-                protectToken((WSSPolicy) policy.getKeyBinding(),true,spVersion);
+             if ((isServer && isIncoming) || (!isServer && !isIncoming)) { //token protection is from client to service only
+                WSSPolicy policy = (WSSPolicy) primarySP.getKeyBinding();
+                if (PolicyTypeUtil.derivedTokenKeyBinding(policy)) {
+                    protectToken(policy, true, spVersion);
+                } else {
+                    protectToken((WSSPolicy) policy.getKeyBinding(), true, spVersion);
+                }
             }
         }
-        
     }
     
     protected void addSymmetricKeyBinding(WSSPolicy policy, Token token) throws PolicyException{
