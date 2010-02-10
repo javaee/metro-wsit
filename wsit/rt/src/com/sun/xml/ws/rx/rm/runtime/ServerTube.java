@@ -128,6 +128,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration,
                 PostmanPool.INSTANCE.getPostman(),
                 new ServerDestinationDeliveryCallback(rc));
+
         DeliveryQueueBuilder outboundQueueBuilder = null;
         if (configuration.requestResponseOperationsDetected()) {
             outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -303,7 +304,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
         CreateSequenceData requestData = rc.protocolHandler.toCreateSequenceData(request);
 
         EndpointReference requestDestination = null;
-        if (requestData.getOfferedSequenceId() != null) {
+        if (requestData.getOfferedSequenceId() != null && rc.configuration.requestResponseOperationsDetected()) {
+            // there is an offered sequence and this endpoint does contain some 2-way operations
+            // if this is a oneway-only endpoint, we simply ignore the offered sequence (WS-I RSP R0011)
             if (rc.sequenceManager().isValid(requestData.getOfferedSequenceId())) {
                 // we already have such sequence
                 throw new CreateSequenceRefusedFault(
@@ -326,7 +329,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         e);
             }
         }
-
 
         String receivedSctId = null;
         if (requestData.getStrType() != null) { // RM messaging should be bound to a secured session
@@ -354,28 +356,30 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
         }
 
+
         Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                 rc.sequenceManager().generateSequenceUID(),
                 receivedSctId,
                 calculateSequenceExpirationTime(requestData.getDuration()));
 
-        if (requestData.getOfferedSequenceId() != null) {
+        final CreateSequenceResponseData.Builder responseBuilder = CreateSequenceResponseData.getBuilder(inboundSequence.getId());
+        // TODO P2 set expiration time, incomplete sequence behavior
+
+        if (requestData.getOfferedSequenceId() != null && rc.configuration.requestResponseOperationsDetected()) {
+            // there is an offered sequence and this endpoint does contain some 2-way operations
+            // if this is a oneway-only endpoint, we simply ignore the offered sequence (WS-I RSP R0011)
             Sequence outboundSequence = rc.sequenceManager().createOutboundSequence(
                     requestData.getOfferedSequenceId(),
                     receivedSctId,
                     calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()));
             rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequence.getId());
             rc.sequenceManager().bindSequences(outboundSequence.getId(), inboundSequence.getId());
+
+            responseBuilder.acceptedSequenceAcksTo(requestDestination);
         }
 
         if (!hasSession(request)) { // security did not start session - we must do it
             Utilities.startSession(request.endpoint, inboundSequence.getId());
-        }
-
-        final CreateSequenceResponseData.Builder responseBuilder = CreateSequenceResponseData.getBuilder(inboundSequence.getId());
-        // TODO P2 set expiration time, incomplete sequence behavior
-        if (requestData.getOfferedSequenceId() != null) {
-            responseBuilder.acceptedSequenceAcksTo(requestDestination);
         }
 
         return rc.protocolHandler.toPacket(responseBuilder.build(), request);
