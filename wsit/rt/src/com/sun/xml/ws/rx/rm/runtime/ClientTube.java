@@ -314,18 +314,33 @@ final class ClientTube extends AbstractFilterTubeImpl {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration
         }
-        final CreateSequenceData requestData = csBuilder.build();
-        final Packet request = rc.protocolHandler.toPacket(requestData, null);
 
         final String messageName = "CreateSequence";
-        final Packet response = sendSessionControlMessage(messageName, request);
+        
+        CreateSequenceData requestData = csBuilder.build();
+        Packet request = rc.protocolHandler.toPacket(requestData, null);
+
+        Packet response = sendSessionControlMessage(messageName, request);
         CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
 
-        if (requestData.getOfferedSequenceId() != null) {
-            // we offered an inbound sequence
-            if (responseData.getAcceptedSequenceAcksTo() == null) {
-                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, rc.communicator.getDestinationAddress()));
-            } else if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
+        if (requestData.getOfferedSequenceId() != null && responseData.getAcceptedSequenceAcksTo() == null) {
+            // WS-I RSP R0010, R0011 - we must not fail in case of the Offer element has not been accepted by RMD
+            // This behavior was detected when testing with IBM endpoint in a test scenario in which the first
+            // CreateSequenceResponse + Accept was dropped. The IBM endpoint returns only CSR without Accept.
+            // For now, we will do one more round and try to send a completely new offered sequence Id
+
+            csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
+            // TODO P2 add offered sequence expiration configuration
+
+            requestData = csBuilder.build();
+            request = rc.protocolHandler.toPacket(requestData, null);
+
+            response = sendSessionControlMessage(messageName, request);
+            responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
+        }
+
+        if (responseData.getAcceptedSequenceAcksTo() != null) {
+            if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(responseData.getAcceptedSequenceAcksTo().toString(), rc.communicator.getDestinationAddress()));
             }
         }
