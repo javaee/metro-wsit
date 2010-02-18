@@ -77,7 +77,7 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
         // process WS-MC header
         if (responseMessage.hasHeaders()) {
-            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
+            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getFeature().getProtocolVersion().messagePendingHeaderName);
             if (messagePendingHeader != null && messagePendingHeader.isPending()) {
                 mcSenderTask.scheduleMcRequest();
             }
@@ -93,7 +93,7 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
         try {
             @SuppressWarnings("unchecked")
-            T result = (T) header.readAsJAXB(configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
+            T result = (T) header.readAsJAXB(configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion()));
             return result;
         } catch (JAXBException ex) {
             throw LOGGER.logSevereException(new RxRuntimeException(String.format("Error unmarshalling header %s", headerName), ex));

@@ -168,7 +168,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 headers.remove(configuration.getAddressingVersion().toTag);
                 headers.add(Headers.create(
                         configuration.getAddressingVersion().toTag,
-                        configuration.getMcVersion().getAnonymousAddress(clientUID)));
+                        configuration.getFeature().getProtocolVersion().getAnonymousAddress(clientUID)));
             }
 
             responseStorage.store(response, clientUID);
@@ -261,7 +261,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
             MakeConnectionElement mcElement;
             try {
-                mcElement = request.getMessage().readPayloadAsJAXB(configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
+                mcElement = request.getMessage().readPayloadAsJAXB(configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion()));
             } catch (JAXBException ex) {
                 throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0107_ERROR_UNMARSHALLING_PROTOCOL_MESSAGE(), ex));
             }
@@ -273,9 +273,9 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getMcVersion().wsmcFaultAction,
+                        configuration.getFeature().getProtocolVersion().wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getMcVersion().missingSelectionFaultCode,
+                        configuration.getFeature().getProtocolVersion().missingSelectionFaultCode,
                         "The MakeConnection element did not contain any selection criteria.",
                         null));
             }
@@ -288,7 +288,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                     if (element instanceof Node) {
                         Node selectionNode = ((Node) element);
                         unsupportedSelections.add(new SoapFaultDetailEntry(
-                                configuration.getMcVersion().unsupportedSelectionFaultCode,
+                                configuration.getFeature().getProtocolVersion().unsupportedSelectionFaultCode,
                                 new QName(selectionNode.getNamespaceURI(), selectionNode.getLocalName()).toString()));
                     }
                 }
@@ -297,14 +297,14 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getMcVersion().wsmcFaultAction,
+                        configuration.getFeature().getProtocolVersion().wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getMcVersion().unsupportedSelectionFaultCode,
+                        configuration.getFeature().getProtocolVersion().unsupportedSelectionFaultCode,
                         "The extension element used in the message selection is not supported by the MakeConnection receiver.",
                         unsupportedSelections));
             }
 
-            String selectionUID = configuration.getMcVersion().getClientId(mcElement.getAddress().getValue());
+            String selectionUID = configuration.getFeature().getProtocolVersion().getClientId(mcElement.getAddress().getValue());
 
             if (selectionUID == null) {
                 // TODO return a MissingSelection SOAP fault
@@ -345,7 +345,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 if (message != null) {
                     HeaderList headers = message.getHeaders();
                     headers.add(Headers.create(
-                            configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()),
+                            configuration.getFeature().getProtocolVersion().getJaxbContext(configuration.getAddressingVersion()),
                             new MessagePendingElement(Boolean.valueOf(selectionUID != null && responseStorage.hasPendingResponse(selectionUID)))));
                 }
             }
@@ -377,7 +377,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         if (replyToHeader != null) {
             try {
                 String replyToAddress = replyToHeader.readAsEPR(configuration.getAddressingVersion()).getAddress();
-                return configuration.getMcVersion().getClientId(replyToAddress);
+                return configuration.getFeature().getProtocolVersion().getClientId(replyToAddress);
             } catch (XMLStreamException ex) {
                 throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0103_ERROR_RETRIEVING_WSA_REPLYTO_CONTENT(), ex));
             }
@@ -387,7 +387,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
     }
 
     private boolean isMakeConnectionRequest(final Packet request) {
-        return configuration.getMcVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+        return configuration.getFeature().getProtocolVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     private Packet createEmptyResponse(Packet request) {

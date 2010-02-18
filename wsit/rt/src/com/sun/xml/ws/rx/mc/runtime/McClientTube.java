@@ -83,7 +83,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         this.configuration = configuration;
 
-        this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
+        this.unmarshaller = configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion());
         this.communicator = new Communicator(
                 "McClientTubeCommunicator",
                 endpointAddress,
@@ -91,9 +91,9 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
+                configuration.getFeature().getProtocolVersion().getJaxbContext(configuration.getAddressingVersion()));
 
-        final String wsmcAnonymousAddress = configuration.getMcVersion().getAnonymousAddress(UUID.randomUUID().toString());
+        final String wsmcAnonymousAddress = configuration.getFeature().getProtocolVersion().getAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
         this.wsmcAnnonymousFaultToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().faultToTag);
@@ -116,7 +116,7 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         this.configuration = original.configuration;
 
-        this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
+        this.unmarshaller = configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion());
 
         this.wsmcAnnonymousReplyToHeader = original.wsmcAnnonymousReplyToHeader;
         this.wsmcAnnonymousFaultToHeader = original.wsmcAnnonymousFaultToHeader;

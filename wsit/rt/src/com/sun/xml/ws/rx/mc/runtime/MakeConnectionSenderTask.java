@@ -140,7 +140,7 @@ final class MakeConnectionSenderTask implements Runnable {
     }
 
     private void sendMcRequest() {
-        Packet mcRequest = communicator.createRequestPacket(new MakeConnectionElement(wsmcAnonymousAddress), configuration.getMcVersion().wsmcAction, true);
+        Packet mcRequest = communicator.createRequestPacket(new MakeConnectionElement(wsmcAnonymousAddress), configuration.getFeature().getProtocolVersion().wsmcAction, true);
         McClientTube.setMcAnnonymousHeaders(
                 mcRequest.getMessage().getHeaders(),
                 configuration.getAddressingVersion(),

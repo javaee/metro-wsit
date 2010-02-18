@@ -48,6 +48,10 @@ import org.glassfish.gmbal.ManagedData;
 public class MakeConnectionSupportedFeature extends WebServiceFeature {
 
     public static final String ID = "com.sun.xml.ws.rm.MakeConnectionSupportedFeature";
+    /**
+     * Default response retrieval timeout value [milliseconds]
+     */
+    public static final long DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT = 600000;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -70,5 +74,26 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
     @ManagedAttribute
     public String getID() {
         return ID;
+    }
+
+    /**
+     * Specifies which WS-MC version protocol SOAP messages and SOAP message headers should
+     * be used for communication between MC source and MC destination
+     *
+     * @return WS-MC protocol version currently configured for the feature.
+     */
+    public McVersion getProtocolVersion() {
+        return McVersion.WSMC200702;
+    }
+
+    /**
+     * Specifies a timeout for consecutive unsuccessfull response retrievals.
+     *
+     * @return currently configured timeout for consecutive unsuccessfull response 
+     *         retrievals. If not set explicitly, the default value is specified by
+     *         {@link #DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT} constant.
+     */
+    public long getResponseRetrievalTimeout() {
+        return DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT; // TODO: Make configurable
     }
 }
