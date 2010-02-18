@@ -56,7 +56,6 @@ import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.UUID;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -69,7 +68,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
     //
     private final McConfiguration configuration;
-    private final Unmarshaller unmarshaller;
     private final Header wsmcAnnonymousReplyToHeader;
     private final Header wsmcAnnonymousFaultToHeader;
     private final Communicator communicator;
@@ -83,7 +81,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         this.configuration = configuration;
 
-        this.unmarshaller = configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion());
         this.communicator = new Communicator(
                 "McClientTubeCommunicator",
                 endpointAddress,
@@ -115,8 +112,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
         super(original, cloner);
 
         this.configuration = original.configuration;
-
-        this.unmarshaller = configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion());
 
         this.wsmcAnnonymousReplyToHeader = original.wsmcAnnonymousReplyToHeader;
         this.wsmcAnnonymousFaultToHeader = original.wsmcAnnonymousFaultToHeader;
