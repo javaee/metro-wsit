@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
@@ -106,13 +107,23 @@ final class MakeConnectionSenderTask implements Runnable {
     }
 
     private boolean suspendedFibersReadyForResend() {
-        // TODO P2 make configurable
-        return !suspendedFiberStorage.isEmpty() && System.currentTimeMillis() - suspendedFiberStorage.getOldestRegistrationTimestamp() > 2000;
+        // TODO P3 enable exponential backoff algorithm
+        while (!suspendedFiberStorage.isEmpty()) {
+            final long oldestRegistrationAge = System.currentTimeMillis() - suspendedFiberStorage.getOldestRegistrationTimestamp();
+
+            if (oldestRegistrationAge > configuration.getFeature().getResponseRetrievalTimeout()) {
+                suspendedFiberStorage.removeOldest().resume(new RxRuntimeException(LocalizationMessages.WSMC_0123_RESPONSE_RETRIEVAL_TIMED_OUT()));
+            } else {
+                return oldestRegistrationAge > configuration.getFeature().getBaseMakeConnectionRequetsInterval();
+            }
+        }
+
+        return false;
     }
 
     private synchronized boolean resendMakeConnectionIntervalPassed() {
-        // TODO P2 make configurable
-        return System.currentTimeMillis() - lastMcMessageTimestamp > 2000;
+        // TODO P3 enable exponential backoff algorithm
+        return System.currentTimeMillis() - lastMcMessageTimestamp > configuration.getFeature().getBaseMakeConnectionRequetsInterval();
     }
 
     synchronized void register(ProtocolMessageHandler handler) {

@@ -52,12 +52,22 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
      * Default response retrieval timeout value [milliseconds]
      */
     public static final long DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT = 600000;
+    /**
+     * Default base interval between two subsequent MakeConnection requests [milliseconds]
+     */
+    public static final long DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL = 2000;
+
+    private final long responseRetrievalTimeout;
+    private final long mcRequestBaseInterval;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
      */
     public MakeConnectionSupportedFeature() {
-        this(true);
+        this(
+                true,
+                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT,
+                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL);
     }
 
     /**
@@ -67,7 +77,21 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
         "enabled"
     })
     public MakeConnectionSupportedFeature(boolean enabled) {
+        this(
+                enabled,
+                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT,
+                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL);
+    }
+
+    public MakeConnectionSupportedFeature(
+            boolean enabled,
+            long responseRetrievalTimeout,
+            long mcRequestBaseInterval) {
+
         super.enabled = enabled;
+
+        this.responseRetrievalTimeout = responseRetrievalTimeout;
+        this.mcRequestBaseInterval = mcRequestBaseInterval;
     }
 
     @Override
@@ -94,6 +118,18 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
      *         {@link #DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT} constant.
      */
     public long getResponseRetrievalTimeout() {
-        return DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT; // TODO: Make configurable
+        return responseRetrievalTimeout;
+    }
+
+    /**
+     * Specifies a base interval between two consecutive MakeConnection requests
+     *
+     * @return currently configured base interval (in milliseconds) of time that
+     *         must pass between two consecutive MakeConnection request messages.
+     *         If not set explicitly, the default value is specified by
+     *         {@link #DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL} constant.
+     */
+    public long getBaseMakeConnectionRequetsInterval() {
+        return mcRequestBaseInterval;
     }
 }
