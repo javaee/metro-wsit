@@ -43,6 +43,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.api.AdditionalResponses;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -217,11 +218,24 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         return dataBuilder.build();
     }
 
-    public Packet toPacket(TerminateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.terminateSequenceResponseAction);
+    public Packet toPacket(final TerminateSequenceResponseData data, @Nullable final Packet requestPacket) throws RxRuntimeException {
+        final Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.terminateSequenceResponseAction);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
+        }
+
+        // Create additional TerminateSequence "response" message for the outbound sequence if:
+        // - there is a bound outbound sequence and
+        // - AdditionalResponses property set is available in the req/resp packet => we are on the server side and MakeConnection is used
+        //
+        // TODO this will need to be fixed once true support for addressable clients is implemented
+        if (data.getBoundSequenceId() != null) {
+            final AdditionalResponses ar = packet.getSatellite(AdditionalResponses.class);
+            if (ar != null) { // Make connection is available and ready to process multiple response packets
+                final TerminateSequenceData tsData = TerminateSequenceData.getBuilder(data.getBoundSequenceId(), data.getBoundSequenceLastMessageId()).build();
+                ar.getAdditionalResponsePacketQueue().offer(toPacket(tsData, requestPacket));
+            }
         }
 
         return packet;

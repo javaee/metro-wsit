@@ -52,6 +52,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.mc.api.AdditionalResponses;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
@@ -172,6 +173,15 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
 
             responseStorage.store(response, clientUID);
+            final AdditionalResponses additionalResponses = response.getSatellite(AdditionalResponses.class);
+
+            if (additionalResponses != null) {
+                for (Packet additionalResponse : additionalResponses.getAdditionalResponsePacketQueue()) {
+                    responseStorage.store(additionalResponse, clientUID);
+                }
+            } else {
+                LOGGER.fine("Response packet did not contain any AdditionalResponses property set.");
+            }
         }
 
         public void onCompletion(Throwable error) {
@@ -227,8 +237,6 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 // don't bother - this is not a WS-MC enabled request
                 return super.processRequest(request);
             } else {
-                // TODO replace with proper code that replaces only address
-
                 // removing replyTo header and faultTo header to prevent addressing server tube from
                 // treating this request as non-anonymous
                 request.getMessage().getHeaders().remove(configuration.getAddressingVersion().replyToTag);
@@ -236,7 +244,10 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
 
             Packet requestCopy = request.copy(true);
+
+            request.addSatellite(new AdditionalResponses());
             fiberExecutor.start(request, new AppRequestProcessingCallback(responseStorage, clientUID, configuration));
+
             return super.doReturnWith(createEmptyResponse(requestCopy));
         } finally {
             LOGGER.exiting();
@@ -279,7 +290,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         "The MakeConnection element did not contain any selection criteria.",
                         null));
             }
-            
+
             if (!mcElement.getAny().isEmpty()) {
                 // WS-I RSP v1.0: R2103 If a wsmc:MakeConnection request contains a wsrm:Identifier element
                 // (in violation of R2101) the MC-RECEIVER MUST generate a wsmc:UnsupportedSelection fault.

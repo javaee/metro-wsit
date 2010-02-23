@@ -425,9 +425,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
-        // Formulating response:
-        //   If there is an outbound sequence, client expects us to terminate it => sending TerminateSequence back.
-        //   If not, we send TerminateSequenceResponse
         Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
         Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
         try {

@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.util;
 
+import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
@@ -293,7 +295,7 @@ public final class Communicator {
      * @param request {@link Packet} containing the message to be send
      * @return response {@link Message} wrapped in a response {@link Packet} received
      */
-    public Packet send(Packet request) {
+    public Packet send(@NotNull Packet request) {
         if (fiberExecutor == null) {
             LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
         }
@@ -301,12 +303,32 @@ public final class Communicator {
         return fiberExecutor.runSync(request);
     }
 
-    public void sendAsync(Packet request, Fiber.CompletionCallback completionCallbackHandler) {
+    /**
+     * Asynchroneously sends the request {@link Packet}
+     *
+     * @param request {@link Packet} containing the message to be send
+     * @param completionCallbackHandler completion callback handler to process the response.
+     *        May be {@code null}. In such case a generic completion callback handler will be used.
+     */
+    public void sendAsync(@NotNull final Packet request, @Nullable final Fiber.CompletionCallback completionCallbackHandler) {
         if (fiberExecutor == null) {
             LOGGER.fine("Cannot send messages: this Communicator instance has been closed");
         }
 
-        fiberExecutor.start(request, completionCallbackHandler);
+        if (completionCallbackHandler != null) {
+            fiberExecutor.start(request, completionCallbackHandler);
+        } else {
+            fiberExecutor.start(request, new Fiber.CompletionCallback() {
+
+                public void onCompletion(Packet response) {
+                    // do nothing
+                }
+
+                public void onCompletion(Throwable error) {
+                    LOGGER.warning("Unexpected exception occured", error);
+                }
+            });
+        }
     }
 
     /**
