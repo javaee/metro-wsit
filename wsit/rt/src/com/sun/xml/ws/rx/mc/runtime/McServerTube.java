@@ -164,24 +164,25 @@ public class McServerTube extends AbstractFilterTubeImpl {
         public void onCompletion(Packet response) {
             LOGGER.finer(LocalizationMessages.WSMC_0105_STORING_RESPONSE(clientUID));
 
-            if (response.getMessage() != null) {
-                final HeaderList headers = response.getMessage().getHeaders();
-                headers.remove(configuration.getAddressingVersion().toTag);
-                headers.add(Headers.create(
-                        configuration.getAddressingVersion().toTag,
-                        configuration.getFeature().getProtocolVersion().getAnonymousAddress(clientUID)));
-            }
-
-            responseStorage.store(response, clientUID);
+            storeResponse(response);
             final AdditionalResponses additionalResponses = response.getSatellite(AdditionalResponses.class);
 
             if (additionalResponses != null) {
                 for (Packet additionalResponse : additionalResponses.getAdditionalResponsePacketQueue()) {
-                    responseStorage.store(additionalResponse, clientUID);
+                    storeResponse(additionalResponse);                   
                 }
             } else {
                 LOGGER.fine("Response packet did not contain any AdditionalResponses property set.");
             }
+        }
+
+        private void storeResponse(Packet response) {
+            if (response.getMessage() != null) {
+                final HeaderList headers = response.getMessage().getHeaders();
+                headers.remove(configuration.getAddressingVersion().toTag);
+                headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getFeature().getProtocolVersion().getAnonymousAddress(clientUID)));
+            }
+            responseStorage.store(response, clientUID);
         }
 
         public void onCompletion(Throwable error) {
