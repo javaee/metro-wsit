@@ -176,6 +176,10 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
         }
 
+        public void onCompletion(Throwable error) {
+            LOGGER.severe(LocalizationMessages.WSMC_0106_EXCEPTION_IN_REQUEST_PROCESSING(clientUID), error);
+        }
+
         private void storeResponse(Packet response) {
             if (response.getMessage() != null) {
                 final HeaderList headers = response.getMessage().getHeaders();
@@ -183,10 +187,6 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getFeature().getProtocolVersion().getAnonymousAddress(clientUID)));
             }
             responseStorage.store(response, clientUID);
-        }
-
-        public void onCompletion(Throwable error) {
-            LOGGER.severe(LocalizationMessages.WSMC_0106_EXCEPTION_IN_REQUEST_PROCESSING(clientUID), error);
         }
     }
     //
