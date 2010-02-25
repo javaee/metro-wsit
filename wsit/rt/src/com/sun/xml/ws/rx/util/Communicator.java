@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,12 +42,14 @@ import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Header;
+import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
@@ -120,8 +122,22 @@ public final class Communicator {
     }
 
     public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
-        if (originalRequestPacket != null) { // this is actually a request carried in a response packet
-            return createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
+        if (originalRequestPacket != null) { // // server side request transferred as a response
+            Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
+            
+            final HeaderList requestHeaders = request.getMessage().getHeaders();
+            if (expectReply) { // attach wsa:ReplyTo header
+                if (destinationAddress == null) { // TODO remove this workaround once destinationAddress is always available.
+                    requestHeaders.add(new StringHeader(
+                            addressingVersion.replyToTag,
+                            originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion)));
+                } else {
+                    requestHeaders.add(new StringHeader(addressingVersion.replyToTag, destinationAddress.toString()));
+                }
+            }
+            requestHeaders.remove(addressingVersion.relatesToTag);
+
+            return request;
         } else {
             Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
             return createRequestPacket(message, wsaAction, expectReply);
@@ -158,13 +174,13 @@ public final class Communicator {
      * @return
      */
     public Packet createResponsePacket(Packet requestPacket, Object jaxbElement, String responseWsaAction) {
-        if (requestPacket != null) { // normal response
+        if (requestPacket != null) { // server side response
             return requestPacket.createServerResponse(
                     Messages.create(jaxbContext, jaxbElement, soapVersion),
                     addressingVersion,
                     soapVersion,
                     responseWsaAction);
-        } else { // this is actually a response carried on a request
+        } else { // client side response transferred as a request
             return createRequestPacket(jaxbElement, responseWsaAction, false);
         }
     }
@@ -177,13 +193,13 @@ public final class Communicator {
      * @return
      */
     public Packet createResponsePacket(Packet requestPacket, Message message, String responseWsaAction) {
-        if (requestPacket != null) { // normal response
+        if (requestPacket != null) { // server side response
             return requestPacket.createServerResponse(
                     message,
                     addressingVersion,
                     soapVersion,
                     responseWsaAction);
-        } else { // this is actually a response carried on a request
+        } else { // client side response transferred as a request
             return createRequestPacket(message, responseWsaAction, false);
         }
     }

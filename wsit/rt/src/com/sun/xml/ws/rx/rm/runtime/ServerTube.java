@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -116,7 +116,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "rm-server-tube-communicator",
-                null, // TODO P3 can we get the endpoint address?
+                (context.getEndpoint().getPort() != null) ? context.getEndpoint().getPort().getAddress() : null, // TODO P2 can we get the endpoint address in all cases?
                 super.next,
                 null,
                 configuration.getAddressingVersion(),
