@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -63,21 +64,14 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     private static final Logger LOGGER = Logger.getLogger(InOrderDeliveryQueue.class);
     private static final MessageIdComparator MSG_ID_COMPARATOR = new MessageIdComparator();
     //
-    private final 
-    @NotNull
-    Postman postman;
-    private final 
-    @NotNull
-    Postman.Callback deliveryCallback;
-    private final 
-    @NotNull
-    Sequence sequence;
+    private final @NotNull Postman postman;
+    private final @NotNull Postman.Callback deliveryCallback;
+    private final @NotNull Sequence sequence;
     //
     private final long maxMessageBufferSize;
-    private final 
-    @NotNull
-    BlockingQueue<ApplicationMessage> postponedMessageQueue;
+    private final @NotNull BlockingQueue<ApplicationMessage> postponedMessageQueue;
     //
+    private final AtomicBoolean isClosed;
 
     public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize) {
         assert postman != null;
@@ -91,6 +85,8 @@ class InOrderDeliveryQueue implements DeliveryQueue {
 
         this.maxMessageBufferSize = maxMessageBufferSize;
         this.postponedMessageQueue = new PriorityBlockingQueue<ApplicationMessage>(32, MSG_ID_COMPARATOR);
+
+        this.isClosed = new AtomicBoolean(false);
     }
 
     public void put(ApplicationMessage message) {
@@ -107,11 +103,17 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     }
     public void onSequenceAcknowledgement() {
 //        LOGGER.info(Thread.currentThread().getName() + " onSequenceAcknowledgement");
-        tryDelivery();
+        if (!isClosed.get()) {
+            tryDelivery();
+        }
     }
     
     private void tryDelivery() {
 //        LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue.size() = " + postponedMessageQueue.size());
+        if (isClosed.get()) {
+            throw new RxRuntimeException(LocalizationMessages.WSRM_1160_DELIVERY_QUEUE_CLOSED());
+        }
+
         if (!postponedMessageQueue.isEmpty()) {
             for (;;) {
                 ApplicationMessage deliverableMessage = null;
@@ -139,6 +141,11 @@ class InOrderDeliveryQueue implements DeliveryQueue {
 
     public long getRemainingMessageBufferSize() {
         return (maxMessageBufferSize == DeliveryQueue.UNLIMITED_BUFFER_SIZE) ? maxMessageBufferSize : maxMessageBufferSize - postponedMessageQueue.size();
+    }
+
+    public void close() {
+//        LOGGER.info(Thread.currentThread().getName() + " close");
+        isClosed.set(true);
     }
 
     private boolean isDeliverable(ApplicationMessage message) {

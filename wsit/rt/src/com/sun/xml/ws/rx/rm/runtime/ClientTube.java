@@ -223,6 +223,11 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public NextAction processException(Throwable throwable) {
         LOGGER.entering();
         try {
+            if (throwable instanceof RxRuntimeException) {
+                // try to close current RM session in case of an unhandled RX exception
+                closeRmSession();
+            }
+
             return super.processException(throwable);
         } finally {
             LOGGER.exiting();
@@ -233,14 +238,14 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public void preDestroy() {
         LOGGER.entering();
         try {
-            if (outboundSequenceId.value != null) { // RM session has already started
-                closeRmSession();
-            }
-        } catch (RuntimeException ex) {
-            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+            closeRmSession();
         } finally {
-            super.preDestroy();
-            LOGGER.exiting();
+            try {
+                rc.close();
+            } finally {
+                super.preDestroy();
+                LOGGER.exiting();
+            }
         }
     }
 
@@ -311,6 +316,10 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
 
     private void closeRmSession() {
+        if (outboundSequenceId.value == null) { // RM session has not started yet
+            return;
+        }
+        
         try {
             String inboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
             if (inboundSequenceId != null) {
@@ -330,8 +339,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     rc.sequenceManager().terminateSequence(inboundSequenceId);
                 } catch (UnknownSequenceException ignored) { /* ignored - most likely terminated externally in the meanwhile */ }
             }
-        } finally {
-            rc.close();
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         }
     }
 

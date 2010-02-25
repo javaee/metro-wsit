@@ -68,9 +68,9 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * A constant specifies the default value of maximum number of message redelivery
      * attempts.
      *
-     * Currently, the default value is set to infinity (-1).
+     * Currently, the default value is set to infinity (0).
      */
-    public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = -1;
+    public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = 0;
     /**
      * A constant specifies the default value of maximum number of attempts to send
      * a reliable messaging session control messgae such as CreateSequence, CloseSequence
@@ -580,10 +580,12 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *
      * If an acknowledgment has not been received within a certain amount of time
      * for a message that has been transmitted, the infrastructure automatically
-     * retransmits the message. The infrastructure tries to send the message for
-     * at most a {@link #getMaxMessageRetransmissionCount()}  number of times.
-     * Not receiving an acknowledgment before this limit is reached is considered
-     * a fatal communication failure, and causes the RM session to fail.
+     * retransmits the message. By default, the number of retransmissions is not 
+     * limited. This can be checked by a call to {@link #isMessageRetransmissionLimited()}
+     * method. In case the {@link #isMessageRetransmissionLimited()} returns {@code true},
+     * the infrastructure tries to send the message for at most a {@link #getMaxMessageRetransmissionCount()}
+     * number of times. Not receiving an acknowledgment before this limit is reached
+     * is considered to be a fatal communication failure, and causes the RM session to fail.
      *
      * The infrastructure uses a back-off algorithm retrieved via
      * {@link #getRetransmissionBackoffAlgorithm()} to determine when to retransmit,
@@ -595,6 +597,20 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public long getMaxMessageRetransmissionCount() {
         return maxMessageRetransmissionCount;
+    }
+
+    /**
+     * Returns {@code true} if the number of potential message retransmissions is
+     * limited by the infrastructure. In such case the RM runtime uses
+     * {@link #getMaxMessageRetransmissionCount()} to determine whether or not a message
+     * can be resend again.
+     *
+     * @return {@code true} if the number of potential message retransmissions is
+     *         limited by the infrastructure, {@code false} otherwise.
+     */
+    @ManagedAttribute
+    public boolean isMessageRetransmissionLimited() {
+        return maxMessageRetransmissionCount > 0;
     }
 
     /**

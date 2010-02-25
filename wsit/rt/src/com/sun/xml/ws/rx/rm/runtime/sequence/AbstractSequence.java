@@ -156,6 +156,7 @@ public abstract class AbstractSequence implements Sequence {
 
     public void close() {
         data.setState(State.CLOSED);
+        deliveryQueue.close();
     }
 
     public boolean isClosed() {
