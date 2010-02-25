@@ -66,8 +66,8 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
     public MakeConnectionSupportedFeature() {
         this(
                 true,
-                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT,
-                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL);
+                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL,
+                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT);
     }
 
     /**
@@ -79,19 +79,19 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
     public MakeConnectionSupportedFeature(boolean enabled) {
         this(
                 enabled,
-                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT,
-                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL);
+                DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL,
+                DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT);
     }
 
-    public MakeConnectionSupportedFeature(
+    MakeConnectionSupportedFeature(
             boolean enabled,
-            long responseRetrievalTimeout,
-            long mcRequestBaseInterval) {
+            long mcRequestBaseInterval,
+            long responseRetrievalTimeout) {
 
         super.enabled = enabled;
 
-        this.responseRetrievalTimeout = responseRetrievalTimeout;
         this.mcRequestBaseInterval = mcRequestBaseInterval;
+        this.responseRetrievalTimeout = responseRetrievalTimeout;
     }
 
     @Override
