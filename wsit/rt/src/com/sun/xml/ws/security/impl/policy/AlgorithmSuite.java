@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,6 +65,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     private boolean populated = false;
     private boolean isValid = true;
     private SecurityPolicyVersion spVersion;
+    private String signatureAlgo = null;
     /**
      * Creates a new instance of AlgorithmSuite
      */
@@ -225,5 +226,12 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
+    }
+
+    public void setSignatureAlgorithm(String sigAlgo) {
+       this.signatureAlgo = sigAlgo;
+    }
+    public String getSignatureAlgorithm() {
+       return this.signatureAlgo ;
     }
 }

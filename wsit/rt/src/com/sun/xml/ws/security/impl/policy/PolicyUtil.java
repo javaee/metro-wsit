@@ -124,10 +124,10 @@ public class PolicyUtil {
         }
         return false;
     }
-    
+
     public static boolean isAlgorithmAssertion(PolicyAssertion pa, SecurityPolicyVersion spVersion){
         if ( isSecurityPolicyNS(pa, spVersion) ) {
-            if(pa.getName().getLocalPart().equals(AlgorithmSuite)) {
+            if(pa.getName().getLocalPart().equals(AlgorithmSuite)) {                
                 return true;
             }
         }

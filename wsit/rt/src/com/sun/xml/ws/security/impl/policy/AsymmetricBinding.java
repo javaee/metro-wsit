@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -103,6 +103,7 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Level;
+import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 
 
@@ -307,7 +308,9 @@ public class AsymmetricBinding extends com.sun.xml.ws.policy.PolicyAssertion imp
                 }else if(PolicyUtil.isInitiatorEncryptionToken(assertion, spVersion)){
                     this.initiatorEncryptionToken = ((com.sun.xml.ws.security.impl.policy.Token)assertion).getToken();
                 }else if(PolicyUtil.isAlgorithmAssertion(assertion, spVersion)){
-                    this.algSuite = (AlgorithmSuite) assertion;                
+                    this.algSuite = (AlgorithmSuite) assertion;
+                    String sigAlgo = assertion.getAttributeValue(new QName("signatureAlgorithm"));
+                    this.algSuite.setSignatureAlgorithm(sigAlgo);
                 }else if(PolicyUtil.isIncludeTimestamp(assertion, spVersion)){            
                     this.includeTimestamp = true;        
                 }else if(PolicyUtil.isEncryptBeforeSign(assertion, spVersion)){    
