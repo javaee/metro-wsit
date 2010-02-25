@@ -401,7 +401,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 maxConcurrentSessions);
     }
 
-    public ReliableMessagingFeature(
+    ReliableMessagingFeature(
             boolean enabled,
             RmVersion version,
             long inactivityTimeout,
