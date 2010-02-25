@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
 import com.sun.xml.ws.api.message.Packet;
@@ -1383,7 +1382,7 @@ public abstract class WSITAuthContextBase  {
                 suite.getEncryptionAlgorithm(),
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-        als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
+        //als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
         return als;
     }
     

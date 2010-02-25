@@ -346,7 +346,7 @@ public class XWSSPolicyGenerator {
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
 
-        als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
+        // als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
         return als;
     }
     
