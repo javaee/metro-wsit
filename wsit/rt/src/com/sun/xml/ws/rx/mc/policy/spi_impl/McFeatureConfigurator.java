@@ -76,8 +76,7 @@ public class McFeatureConfigurator implements PolicyFeatureConfigurator {
             Policy policy = policyMap.getEndpointEffectivePolicy(key);
             if (policy != null) {
                 for (AssertionSet alternative : policy) {
-                    WebServiceFeature feature;
-                    feature = getMcFeature(alternative);
+                    MakeConnectionSupportedFeature feature = translateIntoMakeConnectionFeature(alternative);
                     if (feature != null) {
                         features.add(feature);
                     }
@@ -88,7 +87,7 @@ public class McFeatureConfigurator implements PolicyFeatureConfigurator {
 
     }
 
-    private WebServiceFeature getMcFeature(AssertionSet alternative) throws PolicyException {
+    private MakeConnectionSupportedFeature translateIntoMakeConnectionFeature(AssertionSet alternative) throws PolicyException {
         if (isPresentAndMandatory(alternative, MakeConnectionSupportedAssertion.NAME)) {
             return new MakeConnectionSupportedFeature();
         } // end-if MC assertion is present and not optional
