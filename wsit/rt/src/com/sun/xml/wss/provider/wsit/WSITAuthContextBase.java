@@ -1382,7 +1382,7 @@ public abstract class WSITAuthContextBase  {
                 suite.getEncryptionAlgorithm(),
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-        //als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
+        als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
         return als;
     }
     

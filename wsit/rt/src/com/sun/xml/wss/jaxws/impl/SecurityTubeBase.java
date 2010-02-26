@@ -1626,7 +1626,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 suite.getEncryptionAlgorithm(),
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-        //als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
+        als.setSignatureAlgorithm(suite.getSignatureAlgorithm());
         return als;
     }
     
