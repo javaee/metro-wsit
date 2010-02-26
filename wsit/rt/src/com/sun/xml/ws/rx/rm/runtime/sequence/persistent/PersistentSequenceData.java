@@ -588,6 +588,29 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
+    private boolean containsUnackedMessageNumberRegistration(Connection con, long messageNumber) throws PersistenceException {
+        PreparedStatement ps = null;
+        try {
+            ps = cm.prepareStatement(con, "SELECT IS_RECEIVED FROM RM_UNACKED_MESSAGES WHERE ENDPOINT_UID=? AND SEQ_ID=? AND MSG_NUMBER=?");
+            ps.setString(1, endpointUid);
+            ps.setString(2, sequenceId);
+            ps.setLong(3, messageNumber);
+
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+        } catch (SQLException ex) {
+            throw LOGGER.logSevereException(
+                    new PersistenceException(String.format(
+                    "Retrieving an unacked message number record for a message number [ %d ] on a sequence with id = [ %s ]  failed: " +
+                    "An unexpected JDBC exception occured",
+                    messageNumber,
+                    sequenceId), ex));
+        } finally {
+            cm.recycle(ps);
+        }
+    }
+
     private void registerSingleUnackedMessageNumber(Connection con, long messageNumber, boolean received) throws PersistenceException, DuplicateMessageRegistrationException {
         PreparedStatement ps = null;
         try {
@@ -664,7 +687,7 @@ final class PersistentSequenceData implements SequenceData {
     /**
      * {@inheritDoc }
      */
-    public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
+    public void registerReceivedUnackedMessageNumber(long messageNumber) throws DuplicateMessageRegistrationException {
         Connection con = cm.getConnection(false);
         try {
             long lastMessageNumber = getFieldData(con, fLastMessageNumber);
@@ -673,8 +696,11 @@ final class PersistentSequenceData implements SequenceData {
                 for (long i = lastMessageNumber + 1; i < messageNumber; i++) {
                     registerSingleUnackedMessageNumber(con, i, false);
                 }
+            } else if (! containsUnackedMessageNumberRegistration(con, messageNumber)) {
+                throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
             }
-            registerSingleUnackedMessageNumber(con, messageNumber, received);
+
+            registerSingleUnackedMessageNumber(con, messageNumber, true);
             setFieldData(con, fLastActivityTime, ts.currentTimeInMillis(), false);
 
             cm.commit(con);

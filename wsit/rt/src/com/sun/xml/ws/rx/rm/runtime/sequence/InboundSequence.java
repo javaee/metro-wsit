@@ -65,7 +65,7 @@ public final class InboundSequence extends AbstractSequence {
                     this.getId())));
         }
 
-        data.registerUnackedMessageNumber(message.getMessageNumber(), true);
+        data.registerReceivedUnackedMessageNumber(message.getMessageNumber());
         if (storeMessageFlag) {
             data.attachMessageToUnackedMessageNumber(message);
         }
