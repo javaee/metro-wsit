@@ -177,7 +177,7 @@ final class InVmSequenceData implements SequenceData {
     /**
      * {@inheritDoc}
      */
-    public void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException {
+    public void registerReceivedUnackedMessageNumber(long messageNumber) throws DuplicateMessageRegistrationException {
         updateLastActivityTime();
 
         try {
@@ -190,13 +190,14 @@ final class InVmSequenceData implements SequenceData {
                     incrementAndGetLastMessageNumber(false);
                 }
 
-                incrementAndGetLastMessageNumber(received);
+                incrementAndGetLastMessageNumber(true);
             } else {
-                if (received && receivedUnackedMessageNumbers.contains(messageNumber) || !received && allUnackedMessageNumbers.contains(messageNumber)) {
+                if (receivedUnackedMessageNumbers.contains(messageNumber) || // we already have such received unacked registration
+                        !allUnackedMessageNumbers.contains(messageNumber)) { // not found among all unacked messages => has been already acknowledged
                     throw new DuplicateMessageRegistrationException(sequenceId, messageNumber);
                 }
 
-                addUnackedMessageNumber(messageNumber, received);
+                addUnackedMessageNumber(messageNumber, true);
             }
         } finally {
             unlockWrite();

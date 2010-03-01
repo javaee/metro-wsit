@@ -66,13 +66,11 @@ public interface SequenceData {
      * and not received.
      *
      * @param messageNumber unacknowledged message number to register
-     * @param received this flag specifies whether the message with such {@code messageNumber} should
-     * be marked as received on the sequence.
      *
      * @return new value of the last message number
      * @exception DuplicateMessageRegistrationException in case such registration already exists
      */
-    void registerUnackedMessageNumber(long messageNumber, boolean received) throws DuplicateMessageRegistrationException;
+    void registerReceivedUnackedMessageNumber(long messageNumber) throws DuplicateMessageRegistrationException;
 
     /**
      * Removes the provided {@code messageNumber} from the collection of unacked message
