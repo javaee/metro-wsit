@@ -31,13 +31,35 @@ POM_TEMPLATE="./poms/wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
 
 #
+# WSIT policy configuration file handling
+# TODO: split into submodules
+#
+MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-config"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p ./poms/wsit-config-pom.xml
+SRC_ARTIFACTS="com/sun/xml/ws/policy"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES="policy"
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
 # WSIT Xml document filter API
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/xml-filter-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "XML document filtering API" -i "xml-filter-api" -P "wsit-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "XML document filtering API" -i "xml-filter-api" -P "wsit-project" -p ./poms/xmlfilterapi-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/xmlfilter"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="xmlfilter"
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
+# WSIT MEX
+# TODO: split into submodules
+#
+MODULE_ROOT="$WSIT_MODULE_ROOT/wsmex"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Project" -i "wsmex" -P "wsit-project" -p ./poms/wsmex-pom.xml
+SRC_ARTIFACTS="com/sun/xml/ws/mex"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 #
@@ -45,7 +67,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # TODO: split into submodules
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-core"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Core" -i "wsit-core" -P "wsit-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Core" -i "wsit-core" -P "wsit-project" -p ./poms/wsit-core-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/assembler:com/sun/xml/ws/commons:\
 com/sun/xml/ws/dump:\
@@ -82,28 +104,6 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Config
 SRC_ARTIFACTS="com/sun/xml/ws/config"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="management"
-source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-
-#
-# WSIT MEX
-# TODO: split into submodules
-#
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsmex"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Project" -i "wsmex" -P "wsit-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/mex"
-TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES=""
-source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-
-#
-# WSIT policy configuration file handling
-# TODO: split into submodules
-#
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-config"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p ./poms/wsit-config-pom.xml
-SRC_ARTIFACTS="com/sun/xml/ws/policy"
-TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services

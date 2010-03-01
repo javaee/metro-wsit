@@ -41,12 +41,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.sun.metro</groupId>
+        <groupId>${metro.group.id}</groupId>
         <artifactId>metro-project</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.sun.metro.wsit</groupId>
+    <groupId>${wsit.group.id}</groupId>
     <artifactId>wsit-project</artifactId>
     <packaging>pom</packaging>
     <name>Web Services Interoperability Technology</name>
@@ -163,6 +163,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkMode>once</forkMode>
+                    <childDelegation>false</childDelegation>
+                    <argLine>
+                        -Djava.awt.headless=true -XX:MaxPermSize=128m -Xmx128m
+                    </argLine>
+                    <!--includes>
+                        <include>**/*Tests.class</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/Abstract*</exclude>
+                    </excludes-->
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -217,5 +235,6 @@
 
     <properties>
         <grizzly.version>1.0.31</grizzly.version>
+        <wsit.group.id>${metro.group.id}.wsit</wsit.group.id>
     </properties>
 </project>

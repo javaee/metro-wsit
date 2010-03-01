@@ -42,13 +42,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>${wsit.group.id}</groupId>
-        <artifactId>@parent.id@</artifactId>
+        <artifactId>wsit-project</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>@module.id@</artifactId>
+    <artifactId>wsmex</artifactId>
     <packaging>jar</packaging>
-    <name>@module.name@</name>
+    <name>WS-MetadataExchange Project</name>
 
     <!-- prerequisites -->
 
@@ -61,6 +61,13 @@
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
+        </dependency>
+
+        <!-- Provided scope -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test scope -->

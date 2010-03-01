@@ -41,7 +41,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.sun.metro.wsit</groupId>
+        <groupId>${wsit.group.id}</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
