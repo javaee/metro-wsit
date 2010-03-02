@@ -52,6 +52,7 @@ cd `pwd`/`dirname $0`/..
 NEW_PROJECT_ROOT=`pwd`/metro
 EXPORTED_RT_MASTER_ROOT=`pwd`/\_tmp-exported-rt-master
 EXPORTED_RT_ROOT=`pwd`/\_tmp-exported-rt
+OLD_METRO_LIB_DIR=`pwd`/wsit/lib
 popd
 
 continueChoice "New project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT MASTER root is set to: $EXPORTED_RT_MASTER_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"

@@ -110,11 +110,11 @@
     </organization>
 
     <build>
+        <!-- pluginManagement></pluginManagement -->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -171,7 +171,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.5</version>
             </plugin>
         </plugins>
         <extensions>
@@ -221,6 +220,12 @@
     <!--reporting></reporting-->
     <dependencyManagement>
         <dependencies>
+            <!-- istack commons -->
+            <dependency>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>istack-commons-runtime</artifactId>
+                <version>${istack.version}</version>
+            </dependency>
             <!-- JAXB -->
             <dependency>
                 <groupId>javax.xml.bind</groupId>
@@ -257,6 +262,12 @@
                 <artifactId>jaxb1-impl</artifactId>
                 <version>${jaxb.version}</version>
             </dependency>
+            <!-- FI -->
+            <dependency>
+                <groupId>com.sun.xml.fastinfoset</groupId>
+                <artifactId>FastInfoset</artifactId>
+                <version>1.2.7</version>
+            </dependency>
             <!-- JAX-WS -->
             <dependency>
                 <groupId>javax.xml.ws</groupId>
@@ -273,16 +284,11 @@
                 <artifactId>jaxws-tools</artifactId>
                 <version>${jaxws.version}</version>
             </dependency>
+            <!-- Policy -->
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>policy</artifactId>
                 <version>${policy.version}</version>
-            </dependency>
-            <!-- istack commons -->
-            <dependency>
-                <groupId>com.sun.istack</groupId>
-                <artifactId>istack-commons-runtime</artifactId>
-                <version>${istack.version}</version>
             </dependency>
             <!-- Other -->
             <dependency>
@@ -296,14 +302,14 @@
                 <version>1.0</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.txw2</groupId>
-                <artifactId>txw2</artifactId>
-                <version>20090102</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.xml.stream.buffer</groupId>
                 <artifactId>streambuffer</artifactId>
                 <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.txw2</groupId>
+                <artifactId>txw2</artifactId>
+                <version>20090102</version>
             </dependency>
             <!--dependency>
                 <groupId></groupId>

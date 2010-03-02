@@ -47,34 +47,16 @@
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>@module.name@</name>
 
     <!-- prerequisites -->
 
-    <dependencies>
-        <!-- Compile scope -->
-        <dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>xml-filter-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Test scope -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>soaptcp-impl</module>
+        <module>legacy-dependencies/gfv2-deployment</module>
+    </modules>
+    
+    <!--dependencies></dependencies-->
     <!--properties></properties-->
 </project>
-

@@ -63,6 +63,28 @@ TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 #
+# WSIT SOAP/TCP Transport
+# TODO: split into submodules
+#
+SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
+
+MODULE_ROOT="$SOAPTCP_MODULE_ROOT/legacy-dependencies/gfv2-deployment"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "soaptcp" -p ./poms/gfv2-deployment-pom.xml
+if [ ! -e "$MODULE_ROOT/lib" ] ; then
+    mkdir -p $VERBOSE "$MODULE_ROOT/lib"
+fi
+cp $VERBOSE "$OLD_METRO_LIB_DIR/compiletime/appserv-deployment.jar" "$MODULE_ROOT/lib/gfv2-deployment.jar"
+
+MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "soaptcp" -p ./poms/soaptcp-impl-pom.xml
+SRC_ARTIFACTS="com/sun/xml/ws/transport"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+echo "TODO: Update Fast infoset version in the main metro pom.xml to 1.2.8"
+
+#
 # WSIT Core
 # TODO: split into submodules
 #
@@ -233,17 +255,6 @@ SRC_ARTIFACTS="\
 com/sun/xml/ws/api/security/trust:\
 com/sun/xml/ws/security/trust:\
 com/sun/xml/ws/security/trust/elements"
-TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES=""
-source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-
-#
-# WSIT SOAP/TCP Transport
-# TODO: split into submodules
-#
-MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/transport"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES

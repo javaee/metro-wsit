@@ -63,10 +63,36 @@
             <artifactId>jaxws-rt</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.sun.xml.fastinfoset</groupId>
+            <artifactId>FastInfoset</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${wsit.group.id}</groupId>
             <artifactId>xml-filter-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Provided scope -->
+        <dependency>
+            <groupId>${wsit.group.id}</groupId>
+            <artifactId>gfv2-deployment</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-framework-http</artifactId>
+            <version>1.0.31</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>coyote</artifactId>
+            <version>6.0.16</version>
+            <scope>provided</scope>
+        </dependency>
+
+
 
         <!-- Test scope -->
         <dependency>
@@ -77,4 +103,3 @@
     </dependencies>
     <!--properties></properties-->
 </project>
-
