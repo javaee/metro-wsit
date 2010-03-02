@@ -54,7 +54,6 @@ import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
-import com.sun.xml.ws.security.trust.impl.bindings.ObjectFactory;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -69,7 +68,6 @@ import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollec
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.trust.impl.bindings.RequestSecurityTokenResponseType;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -100,8 +98,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.security.auth.Subject;
-import javax.security.auth.Subject;
-import javax.xml.bind.JAXBElement;
 import org.w3c.dom.Element;
 import javax.xml.stream.XMLStreamReader;
 import com.sun.xml.wss.saml.util.SAMLUtil;
@@ -316,8 +312,8 @@ public class WSSCContract {
         final RequestedUnattachedReference rur = wsscEleFac.createRequestedUnattachedReference(unattachedRef);
         
         // Create Lifetime
-        long currentTime = WSTrustUtil.getCurrentTimeWithOffset();
-        final Lifetime lifetime = WSTrustUtil.createLifetime(currentTime, this.getSCTokenTimeout(), wsTrustVer);
+        long now = WSTrustUtil.getCurrentTimeWithOffset();
+        final Lifetime lifetime = WSTrustUtil.createLifetime(now, this.getSCTokenTimeout(), wsTrustVer);
         
         BaseSTSResponse response = null;
         try {
@@ -339,7 +335,7 @@ public class WSSCContract {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
-        populateITC(currentTime, session, secret, token, attachedReference, context, unattachedRef);
+        populateITC(now, session, secret, token, attachedReference, context, unattachedRef);
         sm.addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
@@ -462,7 +458,7 @@ public class WSSCContract {
         }
         if (log.isLoggable(Level.FINE)) {
         log.log(Level.FINE,
-                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, this.DEFAULT_KEY_SIZE));
+                LogStringsMessages.WSSC_0011_KEY_SIZE_VALUE(keySize, WSSCContract.DEFAULT_KEY_SIZE));
         }
         
         byte[] secret = WSTrustUtil.generateRandomSecret(keySize/8);
