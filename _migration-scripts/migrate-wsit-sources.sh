@@ -152,22 +152,41 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 
 #
 # WSIT WS-RX Parent project
-# TODO: split rx/policy
 #
 RX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-rx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "wsit-project" -p ./poms/wsrx-project-pom.xml
 #
 # WSIT WS-RX common packages
 #
-MODULE_ROOT="$RX_MODULE_ROOT/commons"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "" -i "wsrx-commons" -P "wsrx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/rx/testing:com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfiguration.java:com/sun/xml/ws/rx/RxConfigurationBase.java:com/sun/xml/ws/rx/RxException.java:com/sun/xml/ws/rx/RxRuntimeException.java"
-TEST_ARTIFACTS="com/sun/xml/ws/rx/testing:com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfigurationTest.java:com/sun/xml/ws/rx/RxConfigurationBaseTest.java:com/sun/xml/ws/rx/RxExceptionTest.java:com/sun/xml/ws/rx/RxRuntimeExceptionTest.java"
+MODULE_ROOT="$RX_MODULE_ROOT/wsrx-commons"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Common Utilities and Classes" -i "wsrx-commons" -P "wsrx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfiguration.java:com/sun/xml/ws/rx/RxConfigurationBase.java:com/sun/xml/ws/rx/RxException.java:com/sun/xml/ws/rx/RxRuntimeException.java"
+TEST_ARTIFACTS="com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfigurationTest.java:com/sun/xml/ws/rx/RxConfigurationBaseTest.java:com/sun/xml/ws/rx/RxExceptionTest.java:com/sun/xml/ws/rx/RxRuntimeExceptionTest.java"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
-# WSIT WS-RM
-# TODO: split into submodules
+# WSIT WS-RX testing support
+#
+MODULE_ROOT="$RX_MODULE_ROOT/wsrx-testing"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Testing Support" -i "wsrx-testing" -P "wsrx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/rx/testing"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+#
+# WSIT WS-RM API
+#
+MODULE_ROOT="$RX_MODULE_ROOT/wsrm-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging API" -i "wsrm-api" -P "wsrx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/rx/rm/ReliableMessaging.java:\
+com/sun/xml/ws/rx/rm/ReliableMessagingFeature.java:\
+com/sun/xml/ws/rx/rm/ReliableMessagingFeatureBuilder.java:\
+com/sun/xml/ws/rx/rm/RmVersion.java"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES="rm"
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+#
+# WSIT WS-RM Impl
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsrm-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging Implementation" -i "wsrm-impl" -P "wsrx-project" -p $POM_TEMPLATE
@@ -176,8 +195,20 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="rm"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
-# WSIT WS-MC
-# TODO: split into submodules
+# WSIT WS-MC API
+#
+MODULE_ROOT="$RX_MODULE_ROOT/wsmc-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MakeConnection API" -i "wsmc-api" -P "wsrx-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/rx/mc/api:\
+com/sun/xml/ws/rx/mc/MakeConnectionSupported.java:\
+com/sun/xml/ws/rx/mc/MakeConnectionSupportedFeature.java:\
+com/sun/xml/ws/rx/mc/MakeConnectionSupportedFeatureBuilder.java:\
+com/sun/xml/ws/rx/mc/McVersion.java"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+#
+# WSIT WS-MC Impl
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsmc-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MakeConnection Implementation" -i "wsmc-impl" -P "wsrx-project" -p $POM_TEMPLATE
