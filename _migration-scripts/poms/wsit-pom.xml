@@ -185,15 +185,16 @@
     </build>
 
     <modules>
+        <module>xml-filter-api</module>
+        <module>wsit-commons</module>
         <module>soaptcp</module>
-        <module>wscm</module>
         <module>wsit-config</module>
-        <module>wsit-core</module>
+        <module>wsit-runtime</module>
+        <module>wscm</module>
         <module>wsmex</module>
         <module>wsrx</module>
         <module>wssx</module>
         <module>wstx</module>
-        <module>xml-filter-api</module>
     </modules>
 
     <dependencies>

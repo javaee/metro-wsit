@@ -26,13 +26,12 @@ shift `expr $OPTIND - 1`
 # done
 
 #COPY_ONLY_FLAG="-n"
-PARENT_MODULE_POM_TEMPLATE="./poms/wsit-module-parent-pom.xml"
-POM_TEMPLATE="./poms/wsit-module-pom.xml"
+PARENT_MODULE_POM_TEMPLATE="./poms/_wsit-module-parent-pom.xml"
+POM_TEMPLATE="./poms/_wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
 
 #
 # WSIT policy configuration file handling
-# TODO: split into submodules
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-config"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p ./poms/wsit-config-pom.xml
@@ -40,6 +39,22 @@ SRC_ARTIFACTS="com/sun/xml/ws/policy"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
+echo "com.sun.xml.ws.policy.parser.PolicyWSDLParserExtension" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension
+
+echo "com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+echo "com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
+
+echo "com.sun.xml.ws.addressing.policy.AddressingPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
+echo "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
+
+#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
+echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
+#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
+echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
 
 #
 # WSIT Xml document filter API
@@ -53,7 +68,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 
 #
 # WSIT MEX
-# TODO: split into submodules
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsmex"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Project" -i "wsmex" -P "wsit-project" -p ./poms/wsmex-pom.xml
@@ -64,7 +78,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 
 #
 # WSIT SOAP/TCP Transport
-# TODO: split into submodules
 #
 SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
@@ -85,13 +98,22 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 echo "TODO: Update Fast infoset version in the main metro pom.xml to 1.2.8"
 
 #
-# WSIT Core
-# TODO: split into submodules
+# WSIT Commons
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-core"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Core" -i "wsit-core" -P "wsit-project" -p ./poms/wsit-core-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-commons"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Common Utilities and Classes" -i "wsit-commons" -P "wsit-project" -p $POM_TEMPLATE
+SRC_ARTIFACTS="com/sun/xml/ws/commons"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
+# WSIT Runtime
+#
+MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-runtime"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime Implementation" -i "wsit-runtime" -P "wsit-project" -p ./poms/wsit-runtime-pom.xml
 SRC_ARTIFACTS="\
-com/sun/xml/ws/assembler:com/sun/xml/ws/commons:\
+com/sun/xml/ws/assembler:\
 com/sun/xml/ws/dump:\
 com/sun/xml/ws/runtime:\
 com/sun/xml/ws/security/SecurityContextTokenInfo.java:\
@@ -108,13 +130,13 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT Configuration management
 #
 WSCM_MODULE_ROOT="$WSIT_MODULE_ROOT/wscm"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-ConfigurationManagement Project" -i "wscm-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-ConfigurationManagement Project" -i "wscm-project" -P "wsit-project" -p ./poms/wscm-project-pom.xml
 #
 # WSIT Configuration management API
 #
 MODULE_ROOT="$WSCM_MODULE_ROOT/wscm-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-ConfigurationManagement API" -i "wscm-api" -P "wscm-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/api/config"
+SRC_ARTIFACTS="com/sun/xml/ws/api/config/management:com/sun/xml/ws/config/management/Management.properties"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
@@ -122,27 +144,11 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT Configuration management Impl
 #
 MODULE_ROOT="$WSCM_MODULE_ROOT/wscm-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-ConfigurationManagement Implementation" -i "wscm-impl" -P "wscm-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/config"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-ConfigurationManagement Implementation" -i "wscm-impl" -P "wscm-project" -p ./poms/wscm-impl-pom.xml
+SRC_ARTIFACTS="com/sun/xml/ws/config/management"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="management"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
-
-mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
-echo "com.sun.xml.ws.policy.parser.PolicyWSDLParserExtension" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension
-
-echo "com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-
-echo "com.sun.xml.ws.addressing.policy.AddressingPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
-echo "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
-
-#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
-echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
-#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
-echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
 
 #
 # WSIT WS-RX Parent project
