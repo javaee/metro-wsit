@@ -36,7 +36,6 @@
 package com.sun.xml.ws.runtime.util;
 
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
-import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
@@ -77,24 +76,10 @@ public class Session {
      * A container for user-defined data that will be exposed in WebServiceContext.
      */
     private Object userData;
+
     private SecurityContextTokenInfo securityInfo;
-    /*
-     * These fields are for internal use
-     */
-    private long creationTime;
-    private long lastAccessedTime;
 
     protected Session(){
-        creationTime = lastAccessedTime =
-                System.currentTimeMillis();
-    }
-
-    public void init(SessionManager manager, String key, Object userData){
-        this.manager = manager;
-        this.userData = userData;
-        this.key = key;
-        creationTime = lastAccessedTime =
-                System.currentTimeMillis();
     }
 
     /**
@@ -106,11 +91,11 @@ public class Session {
      * @param data - Holder for user-defined data.
      */
     public Session(SessionManager manager, String key, Object userData) {
+        this();
+        
         this.manager = manager;
         this.userData = userData;
         this.key = key;
-        creationTime = lastAccessedTime =
-                System.currentTimeMillis();
     }
 
     /**
@@ -144,10 +129,6 @@ public class Session {
         return securityInfo;
     }
 
-    public SecurityContextTokenInfo createSecurityContextInfo(){
-        return new SecurityContextTokenInfoImpl();
-    }
-
     /**
      * Mutator for the <code>securityInfo</code> field.
      * 
@@ -155,36 +136,6 @@ public class Session {
      */
     public void setSecurityInfo(SecurityContextTokenInfo securityInfo) {
         this.securityInfo = securityInfo;
-    }
-
-    /**
-     * Accessor for creation time.
-     *
-     * @returns The creation time.
-     */
-    @ManagedAttribute
-    @Description("Creation time")
-    public long getCreationTime() {
-        return creationTime;
-    }
-
-    /**
-     * Accessor for lastAccessed time, which can be used to invalidate Sessions 
-     * have not been active since a certain time.
-     *
-     * @returns The lastAccessedTime
-     */
-    @ManagedAttribute
-    @Description("Last accessed time")
-    public long getLastAccessedTime() {
-        return lastAccessedTime;
-    }
-
-    /**
-     * Resets the lastAccessedTime to the current time.
-     */
-    public void resetLastAccessedTime() {
-        lastAccessedTime = System.currentTimeMillis();
     }
 
     /**
