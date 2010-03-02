@@ -68,7 +68,7 @@
         </dependency>
         <dependency>
             <groupId>${wsit.group.id}</groupId>
-            <artifactId>xml-filter-api</artifactId>
+            <artifactId>wsit-xmlfilter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

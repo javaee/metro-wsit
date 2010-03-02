@@ -59,8 +59,8 @@ echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensio
 #
 # WSIT Xml document filter API
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/xml-filter-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "XML document filtering API" -i "xml-filter-api" -P "wsit-project" -p ./poms/xmlfilterapi-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-xmlfilter"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT XML Document Filtering Project" -i "wsit-xmlfilter" -P "wsit-project" -p ./poms/wsit-xmlfilter-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/xmlfilter"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="xmlfilter"
@@ -69,7 +69,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT MEX
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsmex"
+MODULE_ROOT="$WSIT_MODULE_ROOT/ws-mex"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Project" -i "wsmex" -P "wsit-project" -p ./poms/wsmex-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/mex"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
@@ -79,18 +79,18 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT SOAP/TCP Transport
 #
-SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
+SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-soaptcp"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "WSIT SOAP over TCP Transport Project" -i "wsit-soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
 
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/legacy-dependencies/gfv2-deployment"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "soaptcp" -p ./poms/gfv2-deployment-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "wsit-soaptcp" -p ./poms/gfv2-deployment-pom.xml
 if [ ! -e "$MODULE_ROOT/lib" ] ; then
     mkdir -p $VERBOSE "$MODULE_ROOT/lib"
 fi
 cp $VERBOSE "$OLD_METRO_LIB_DIR/compiletime/appserv-deployment.jar" "$MODULE_ROOT/lib/gfv2-deployment.jar"
 
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "soaptcp" -p ./poms/soaptcp-impl-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "wsit-soaptcp" -p ./poms/soaptcp-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/transport"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -129,7 +129,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT Configuration management
 #
-WSCM_MODULE_ROOT="$WSIT_MODULE_ROOT/wscm"
+WSCM_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-cm"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-ConfigurationManagement Project" -i "wscm-project" -P "wsit-project" -p ./poms/wscm-project-pom.xml
 #
 # WSIT Configuration management API
@@ -154,7 +154,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-RX Parent project
 # TODO: split rx/policy
 #
-RX_MODULE_ROOT="$WSIT_MODULE_ROOT/wsrx"
+RX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-rx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
 #
 # WSIT WS-RX common packages
@@ -190,7 +190,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-SX Parent project
 # TODO: split into submodules
 #
-SX_MODULE_ROOT="$WSIT_MODULE_ROOT/wssx"
+SX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-sx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
 #
 # WSIT WS-Security implementation
@@ -269,7 +269,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-TX Parent project
 # TODO wstx-services submodule
 #
-TX_MODULE_ROOT="$WSIT_MODULE_ROOT/wstx"
+TX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-tx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
 #
 # WSIT WS-TX API
