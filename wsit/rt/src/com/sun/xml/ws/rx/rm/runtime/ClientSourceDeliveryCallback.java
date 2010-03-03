@@ -111,12 +111,19 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                 rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-                try {
-                    rc.destinationMessageHandler.registerMessage(message);
-                    rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-                    rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
-                } catch (DuplicateMessageRegistrationException ex) {
-                    onCompletion(ex);
+
+                rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+
+                if (message.getSequenceId() != null) {
+                    try {
+                        rc.destinationMessageHandler.registerMessage(message);
+                        rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
+                    } catch (DuplicateMessageRegistrationException ex) {
+                        onCompletion(ex);
+                    }
+                } else {
+                    // if the response message does not contain sequence headers, process it as a normal, non-RM message
+                    resumeParentFiber(response);
                 }
             } else {
                 final int nextResendCount = request.getNextResendCount();
