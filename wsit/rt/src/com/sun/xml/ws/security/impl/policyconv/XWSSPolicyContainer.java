@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,14 +47,103 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
+import com.sun.xml.wss.impl.policy.mls.Target;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
  *
  * @author Abhijit.Das@Sun.COM
  */
 public class XWSSPolicyContainer {
+    private boolean isServer;
+    private boolean isIncoming;
+
+    private boolean encPoliciesContain(QName qName, List<SecurityPolicy> encPolicies) {
+        if (qName.equals(Target.BODY_QNAME)) {
+            return false;
+        }
+        for (SecurityPolicy sp : encPolicies) {
+            if (PolicyTypeUtil.encryptionPolicy(sp)) {
+                EncryptionPolicy.FeatureBinding fb = (EncryptionPolicy.FeatureBinding) ((EncryptionPolicy) sp).getFeatureBinding();
+                ArrayList targets = fb.getTargetBindings();
+                for (int i = 0; i < targets.size(); i++) {
+                    Target t = (Target) targets.get(i);
+                    if (t.getType() == Target.TARGET_TYPE_VALUE_QNAME) {
+                        if (qName.equals(t.getQName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void fixEncryptedTargetsInSignature(MessagePolicy msgPolicy,boolean isWSS11) {
+        boolean encryptBeforeSign = false;        
+        boolean seenEncryptPolicy = false;
+        boolean seenSignPolicy = false;
+        List<SecurityPolicy> encPolicies = new ArrayList<SecurityPolicy>();
+
+        for (Object policy : msgPolicy.getPrimaryPolicies()) {
+
+            if (policy instanceof SecurityPolicy) {
+                SecurityPolicy secPolicy = (SecurityPolicy) policy;
+                if (PolicyTypeUtil.signaturePolicy(secPolicy)) {
+                    seenSignPolicy = true;
+                    if (!seenEncryptPolicy && isIncoming) {
+                        encryptBeforeSign = true;
+                    }
+                } else if (PolicyTypeUtil.encryptionPolicy(secPolicy)) {
+                    seenEncryptPolicy  = true;
+                    if (!seenSignPolicy && !isIncoming) {
+                        encryptBeforeSign = true;
+                    }
+                    encPolicies.add(secPolicy);
+                }
+            }
+        }
+        if (encryptBeforeSign) {
+            for (Object policy : msgPolicy.getPrimaryPolicies()) {
+                boolean containsEncryptedHeader  =false;
+                if (policy instanceof SecurityPolicy) {
+                    SecurityPolicy secPolicy = (SecurityPolicy) policy;
+                    if (PolicyTypeUtil.signaturePolicy(secPolicy)) {
+                        SignaturePolicy.FeatureBinding sfb = (SignaturePolicy.FeatureBinding) ((SignaturePolicy) secPolicy).getFeatureBinding();
+                        ArrayList targets = sfb.getTargetBindings();
+                        for (int i = 0; i < targets.size(); i++) {
+                            Target t = (Target) targets.get(i);
+                            if (t.getType() == Target.TARGET_TYPE_VALUE_QNAME) {
+                                if (encPoliciesContain(t.getQName(), encPolicies)) {                                    
+                                    if(isWSS11){
+                                        if (!containsEncryptedHeader) {
+                                            QName encHeaderQName = new QName("http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", "EncryptedHeader");
+                                            t.setQName(encHeaderQName);
+                                            containsEncryptedHeader = true;
+                                        } else {
+                                            targets.remove(i);
+                                        }
+                                    }else {
+                                        if (!containsEncryptedHeader) {
+                                            QName encDataQName = new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "EncryptedData");
+                                             t.setQName(encDataQName);
+                                            containsEncryptedHeader = true;
+                                        } else {
+                                            targets.remove(i);
+                                        }
+                                    }                                    
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
     private enum Section {
         ClientIncomingPolicy,
         ClientOutgoingPolicy,
@@ -73,11 +162,15 @@ public class XWSSPolicyContainer {
     /** Creates a new instance of PolicyConverter */
     public XWSSPolicyContainer(MessageLayout mode, boolean isServer, boolean isIncoming) {
         this.mode = mode;
+        this.isServer = isServer;
+        this.isIncoming = isIncoming;
         setMessageMode(isServer, isIncoming);
         effectivePolicyList = new ArrayList<SecurityPolicy>();
     }
     public XWSSPolicyContainer(boolean isServer,boolean isIncoming) {
         setMessageMode(isServer, isIncoming);
+        this.isServer = isServer;
+        this.isIncoming = isIncoming;
         effectivePolicyList = new ArrayList<SecurityPolicy>();
     }
     public void setMessageMode(boolean isServer, boolean isIncoming) {
@@ -116,7 +209,7 @@ public class XWSSPolicyContainer {
         modified = true;
         policyList.add(secPolicy);
     }
-    public MessagePolicy getMessagePolicy()throws PolicyGenerationException {
+    public MessagePolicy getMessagePolicy(boolean isWSS11)throws PolicyGenerationException {
         if ( modified ) {
             convert();
             modified = false;
@@ -124,7 +217,8 @@ public class XWSSPolicyContainer {
         MessagePolicy msgPolicy = new MessagePolicy();
         
         msgPolicy.appendAll(effectivePolicyList);
-        removeEmptyPrimaryPolicies(msgPolicy);
+        removeEmptyPrimaryPolicies(msgPolicy);        
+        fixEncryptedTargetsInSignature(msgPolicy,isWSS11);        
         return msgPolicy;
         
     }

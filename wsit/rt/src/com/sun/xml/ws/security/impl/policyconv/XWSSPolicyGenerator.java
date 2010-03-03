@@ -222,7 +222,7 @@ public class XWSSPolicyGenerator {
     public MessagePolicy getXWSSPolicy()throws PolicyException{
         MessagePolicy mp = null;
         try{
-            mp = _policyContainer.getMessagePolicy();
+            mp = _policyContainer.getMessagePolicy(PolicyUtil.isWSS11(wssAssertion, spVersion));
         }catch(PolicyGenerationException ex){
             logger.log(Level.SEVERE,""+effectivePolicy,ex);
             throw new PolicyException("Unable to digest SecurityPolicy ");
