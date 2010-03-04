@@ -835,32 +835,32 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         return retPacket;
     }
     
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
+    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
         inMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
         outMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
         outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
     }
     
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
         inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
     }
     
-    protected void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
+    protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
         SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,false);
         sph.addFaultPolicy(fault,faultPH);
     }
     
-    protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
+    protected void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
         SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,true);
         sph.addFaultPolicy(fault,faultPH);
     }
