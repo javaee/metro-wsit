@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
@@ -346,7 +347,13 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
     private void createSequences(Packet appRequest) throws RxRuntimeException, DuplicateSequenceException {
         final CreateSequenceData.Builder csBuilder = CreateSequenceData.getBuilder(this.rmSourceReference.toSpec());
-        csBuilder.strType(rc.communicator.tryStartSecureConversation(appRequest));
+
+        try {
+            csBuilder.strType(rc.communicator.tryStartSecureConversation(appRequest));
+        } catch (WSTrustException ex) {
+            LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
+        }
+
         if (rc.configuration.requestResponseOperationsDetected()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration

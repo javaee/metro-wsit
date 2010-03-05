@@ -49,10 +49,9 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.message.StringHeader;
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -216,11 +215,11 @@ public final class Communicator {
      */
     public Packet createEmptyResponsePacket(Packet requestPacket, String responseWsaAction) {
         if (requestPacket != null) { // server side response
-        return requestPacket.createServerResponse(
-                Messages.createEmpty(soapVersion),
-                addressingVersion,
-                soapVersion,
-                responseWsaAction);
+            return requestPacket.createServerResponse(
+                    Messages.createEmpty(soapVersion),
+                    addressingVersion,
+                    soapVersion,
+                    responseWsaAction);
         } else { // client side response transferred as a request
             return createEmptyRequestPacket(responseWsaAction, false);
         }
@@ -308,21 +307,17 @@ public final class Communicator {
      * 
      * @return security token reference of the initiated secured conversation, or {@code null} if there is no SC configured
      */
-    public SecurityTokenReferenceType tryStartSecureConversation(Packet request) {
-        SecurityTokenReferenceType strType = null;
-        if (scInitiator != null) {
-            try {
-                Packet emptyPacket = createEmptyRequestPacket(false);
-                emptyPacket.invocationProperties.putAll(request.invocationProperties);
-                @SuppressWarnings("unchecked")
-                JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(emptyPacket);
-
-                strType = (strElement != null) ? strElement.getValue() : null;
-            } catch (WSSecureConversationException ex) {
-                LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
-            }
+    public SecurityTokenReferenceType tryStartSecureConversation(Packet request) throws WSTrustException {
+        if (scInitiator == null) {
+            return null;
         }
-        return strType;
+
+        Packet emptyPacket = createEmptyRequestPacket(false);
+        emptyPacket.invocationProperties.putAll(request.invocationProperties);
+        @SuppressWarnings("unchecked")
+        JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(emptyPacket);
+
+        return (strElement != null) ? strElement.getValue() : null;
     }
 
     /**
@@ -375,7 +370,9 @@ public final class Communicator {
      * @return destination endpoint reference or {@code null} in case the destination address has
      *         not been specified when constructing this {@link Communicator} instance.
      */
-    public @Nullable EndpointAddress getDestinationAddress() {
+    public 
+    @Nullable
+    EndpointAddress getDestinationAddress() {
         return destinationAddress;
     }
 
