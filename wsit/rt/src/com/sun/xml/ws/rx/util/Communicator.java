@@ -72,7 +72,6 @@ import javax.xml.namespace.QName;
 public final class Communicator {
 
     // TODO P2 introduce an inner builder class
-
     private static final Logger LOGGER = Logger.getLogger(Communicator.class);
     public final QName soapMustUnderstandAttributeName;
     //
@@ -108,6 +107,10 @@ public final class Communicator {
     }
 
     public final Packet createRequestPacket(Message message, String wsaAction, boolean expectReply) {
+        if (destinationAddress == null) {
+            throw new IllegalStateException("Destination address is not defined in this communicator instance");
+        }
+
         Packet packet = new Packet(message);
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
@@ -124,16 +127,12 @@ public final class Communicator {
     public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
         if (originalRequestPacket != null) { // // server side request transferred as a response
             Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
-            
+
             final HeaderList requestHeaders = request.getMessage().getHeaders();
-            if (expectReply) { // attach wsa:ReplyTo header
-                if (destinationAddress == null) { // TODO remove this workaround once destinationAddress is always available.
-                    requestHeaders.add(new StringHeader(
-                            addressingVersion.replyToTag,
-                            originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion)));
-                } else {
-                    requestHeaders.add(new StringHeader(addressingVersion.replyToTag, destinationAddress.toString()));
-                }
+            if (expectReply) { // attach wsa:ReplyTo header from the original request
+                requestHeaders.add(new StringHeader(
+                        addressingVersion.replyToTag,
+                        originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion)));
             }
             requestHeaders.remove(addressingVersion.relatesToTag);
 
@@ -150,6 +149,10 @@ public final class Communicator {
      * @return a new empty request packet
      */
     public Packet createEmptyRequestPacket(boolean expectReply) {
+        if (destinationAddress == null) {
+            throw new IllegalStateException("Destination address is not defined in this communicator instance");
+        }
+
         Packet packet = new Packet();
         packet.endpointAddress = destinationAddress;
         packet.expectReply = expectReply;
@@ -212,18 +215,22 @@ public final class Communicator {
      * @return
      */
     public Packet createEmptyResponsePacket(Packet requestPacket, String responseWsaAction) {
+        if (requestPacket != null) { // server side response
         return requestPacket.createServerResponse(
                 Messages.createEmpty(soapVersion),
                 addressingVersion,
                 soapVersion,
                 responseWsaAction);
+        } else { // client side response transferred as a request
+            return createEmptyRequestPacket(responseWsaAction, false);
+        }
     }
 
     public Packet createNullResponsePacket(Packet requestPacket) {
         if (requestPacket.transportBackChannel != null) {
             requestPacket.transportBackChannel.close();
         }
-        
+
         Packet emptyReturnPacket = new Packet();
         emptyReturnPacket.invocationProperties.putAll(requestPacket.invocationProperties);
         return emptyReturnPacket;
@@ -252,27 +259,42 @@ public final class Communicator {
     }
 
     /**
-     * TODO javadoc
+     * Overwrites the {@link Message} of the response packet with a newly created empty {@link Message} instance.
+     * Unlike {@link Packet#setMessage(Message)}, this method fills in the {@link Message}'s WS-Addressing headers
+     * correctly, based on the provided request packet WS-Addressing headers.
      *
      * @param requestAdapter
      * @param wsaAction
      * @return
      */
     public final Packet setEmptyResponseMessage(Packet response, Packet request, String wsaAction) {
-
         Message message = Messages.createEmpty(soapVersion);
         response.setResponseMessage(request, message, addressingVersion, soapVersion, wsaAction);
         return response;
     }
 
+    /**
+     * Returns the value of WS-Addressing {@code Action} header of a message stored
+     * in the {@link Packet}.
+     *
+     * @param packet JAX-WS RI packet
+     * @return Value of WS-Addressing {@code Action} header, {@code null} if the header is not present
+     */
     public String getWsaAction(Packet packet) {
         if (packet == null || packet.getMessage() == null) {
             return null;
         }
-        
+
         return packet.getMessage().getHeaders().getAction(addressingVersion, soapVersion);
     }
 
+    /**
+     * Returns the value of WS-Addressing {@code To} header of a message stored
+     * in the {@link Packet}.
+     *
+     * @param packet JAX-WS RI packet
+     * @return Value of WS-Addressing {@code To} header, {@code null} if the header is not present
+     */
     public String getWsaTo(Packet packet) {
         if (packet == null || packet.getMessage() == null) {
             return null;
@@ -292,7 +314,6 @@ public final class Communicator {
             try {
                 Packet emptyPacket = createEmptyRequestPacket(false);
                 emptyPacket.invocationProperties.putAll(request.invocationProperties);
-
                 @SuppressWarnings("unchecked")
                 JAXBElement<SecurityTokenReferenceType> strElement = scInitiator.startSecureConversation(emptyPacket);
 
@@ -348,20 +369,20 @@ public final class Communicator {
     }
 
     /**
-     * Provides the destination endpoint reference this {@link ProtocolCommunicator} is pointing to. May return {@code null} 
-     * in case the {@link ProtocolCommunicator} instance has not yet been initialized by a call to 
-     * {@link #registerMusterRequestPacket(Packet)} method.
+     * Provides the destination endpoint reference this {@link Communicator} is pointing to. 
+     * May return {@code null} (typically when used on the server side).
      * 
-     * @return destination endpoint reference or {@code null} in case the {@link ProtocolCommunicator} instance has not 
-     *         been initialized yet
+     * @return destination endpoint reference or {@code null} in case the destination address has
+     *         not been specified when constructing this {@link Communicator} instance.
      */
-    public EndpointAddress getDestinationAddress() {
+    public @Nullable EndpointAddress getDestinationAddress() {
         return destinationAddress;
     }
 
     public AddressingVersion getAddressingVersion() {
         return addressingVersion;
     }
+
     public SOAPVersion getSoapVersion() {
         return soapVersion;
     }
