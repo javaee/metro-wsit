@@ -34,52 +34,37 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.mc.runtime;
-
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.RxConfigurationBase;
-import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import org.glassfish.gmbal.ManagedObjectManager;
+package com.sun.xml.ws.rx.mc.api;
 
 /**
  *
- * @author Marek Potociar <marek.potociar at sun.com>
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-class McConfigurationImpl extends RxConfigurationBase implements McConfiguration {
-    private final MakeConnectionSupportedFeature mcSupportedFeature;
-    private final McRuntimeVersion runtimeVersion;
+public class MakeConnectionSupportedFeatureBuilder {
 
-    McConfigurationImpl(
-            ReliableMessagingFeature rmFeature,
-            MakeConnectionSupportedFeature mcSupportedFeature,
-            SOAPVersion soapVersion,
-            AddressingVersion addressingVersion,
-            boolean requestResponseDetected,
-            ManagedObjectManager managedObjectManager) {
-        super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
-
-        this.mcSupportedFeature = mcSupportedFeature;
-        this.runtimeVersion = (mcSupportedFeature != null) ? McRuntimeVersion.forProtocolVersion(mcSupportedFeature.getProtocolVersion()) : null;
+    public static MakeConnectionSupportedFeatureBuilder getBuilder() {
+        return new MakeConnectionSupportedFeatureBuilder();
     }
 
-    public MakeConnectionSupportedFeature getFeature() {
-        checkState();
+    private long mcRequestBaseInterval = MakeConnectionSupportedFeature.DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL;
+    private long responseRetrievalTimeout = MakeConnectionSupportedFeature.DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT;
 
-        return mcSupportedFeature;
+    public MakeConnectionSupportedFeatureBuilder mcRequestBaseInterval(long value) {
+        this.mcRequestBaseInterval = value;
+
+        return this;
     }
 
-    public McRuntimeVersion getRuntimeVersion() {
-        checkState();
+    public MakeConnectionSupportedFeatureBuilder responseRetrievalTimeout(long value) {
+        this.responseRetrievalTimeout = value;
 
-        return runtimeVersion;
+        return this;
     }
 
-
-    private void checkState() {
-        if (mcSupportedFeature == null || !mcSupportedFeature.isEnabled()) {
-            throw new IllegalStateException("MakeConnectionSupportedFeature is not enabled");
-        }
+    public MakeConnectionSupportedFeature build() {
+        return new MakeConnectionSupportedFeature(
+                true,
+                mcRequestBaseInterval,
+                responseRetrievalTimeout);
     }
 }

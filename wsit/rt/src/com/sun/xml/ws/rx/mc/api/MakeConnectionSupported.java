@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,47 +33,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+
 package com.sun.xml.ws.rx.mc.api;
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.PropertySet;
-import com.sun.xml.ws.api.message.Packet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 
 /**
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public final class AdditionalResponses extends PropertySet {
-    public static final String ADDITIONAL_RESPONSE_QUEUE = "com.sun.xml.ws.rx.mc.api.AditionalResponses.ADDITIONAL_RESPONSE_QUEUE";
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = MakeConnectionSupportedFeature.ID, bean = MakeConnectionSupportedFeature.class)
+public @interface MakeConnectionSupported {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
 
-    private final Queue<Packet> additionalResponsePacketQueue;
-
-    public AdditionalResponses() {
-        additionalResponsePacketQueue = new LinkedList<Packet>();
-    }
-
-    public static PropertyMap getMODEL() {
-        return MODEL;
-    }
-
-    @Property(ADDITIONAL_RESPONSE_QUEUE)
-    public @NotNull Queue<Packet> getAdditionalResponsePacketQueue() {
-        return additionalResponsePacketQueue;
-    }
-
-    // The next lines implement the required PropertySet contract as described
-    // in the PropertySet.getPropertyMap() javadoc
-
-    private static final PropertyMap MODEL;
-
-    static {
-        MODEL = parse(AdditionalResponses.class);
-    }
-
-    @Override
-    protected PropertyMap getPropertyMap() {
-        return MODEL;
-    }
 }

@@ -52,7 +52,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.api.AdditionalResponses;
+import com.sun.xml.ws.rx.mc.dev.AdditionalResponses;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
@@ -184,7 +184,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
             if (response.getMessage() != null) {
                 final HeaderList headers = response.getMessage().getHeaders();
                 headers.remove(configuration.getAddressingVersion().toTag);
-                headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getFeature().getProtocolVersion().getAnonymousAddress(clientUID)));
+                headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getRuntimeVersion().getAnonymousAddress(clientUID)));
             }
             responseStorage.store(response, clientUID);
         }
@@ -273,7 +273,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
             MakeConnectionElement mcElement;
             try {
-                mcElement = request.getMessage().readPayloadAsJAXB(configuration.getFeature().getProtocolVersion().getUnmarshaller(configuration.getAddressingVersion()));
+                mcElement = request.getMessage().readPayloadAsJAXB(configuration.getRuntimeVersion().getUnmarshaller(configuration.getAddressingVersion()));
             } catch (JAXBException ex) {
                 throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0107_ERROR_UNMARSHALLING_PROTOCOL_MESSAGE(), ex));
             }
@@ -285,9 +285,9 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getFeature().getProtocolVersion().wsmcFaultAction,
+                        configuration.getRuntimeVersion().wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getFeature().getProtocolVersion().missingSelectionFaultCode,
+                        configuration.getRuntimeVersion().missingSelectionFaultCode,
                         "The MakeConnection element did not contain any selection criteria.",
                         null));
             }
@@ -300,7 +300,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                     if (element instanceof Node) {
                         Node selectionNode = ((Node) element);
                         unsupportedSelections.add(new SoapFaultDetailEntry(
-                                configuration.getFeature().getProtocolVersion().unsupportedSelectionFaultCode,
+                                configuration.getRuntimeVersion().unsupportedSelectionFaultCode,
                                 new QName(selectionNode.getNamespaceURI(), selectionNode.getLocalName()).toString()));
                     }
                 }
@@ -309,14 +309,14 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getFeature().getProtocolVersion().wsmcFaultAction,
+                        configuration.getRuntimeVersion().wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getFeature().getProtocolVersion().unsupportedSelectionFaultCode,
+                        configuration.getRuntimeVersion().unsupportedSelectionFaultCode,
                         "The extension element used in the message selection is not supported by the MakeConnection receiver.",
                         unsupportedSelections));
             }
 
-            String selectionUID = configuration.getFeature().getProtocolVersion().getClientId(mcElement.getAddress().getValue());
+            String selectionUID = configuration.getRuntimeVersion().getClientId(mcElement.getAddress().getValue());
 
             if (selectionUID == null) {
                 // TODO return a MissingSelection SOAP fault
@@ -357,7 +357,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 if (message != null) {
                     HeaderList headers = message.getHeaders();
                     headers.add(Headers.create(
-                            configuration.getFeature().getProtocolVersion().getJaxbContext(configuration.getAddressingVersion()),
+                            configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()),
                             new MessagePendingElement(Boolean.valueOf(selectionUID != null && responseStorage.hasPendingResponse(selectionUID)))));
                 }
             }
@@ -389,7 +389,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         if (replyToHeader != null) {
             try {
                 String replyToAddress = replyToHeader.readAsEPR(configuration.getAddressingVersion()).getAddress();
-                return configuration.getFeature().getProtocolVersion().getClientId(replyToAddress);
+                return configuration.getRuntimeVersion().getClientId(replyToAddress);
             } catch (XMLStreamException ex) {
                 throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0103_ERROR_RETRIEVING_WSA_REPLYTO_CONTENT(), ex));
             }
@@ -399,7 +399,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
     }
 
     private boolean isMakeConnectionRequest(final Packet request) {
-        return configuration.getFeature().getProtocolVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+        return configuration.getRuntimeVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     private Packet createEmptyResponse(Packet request) {

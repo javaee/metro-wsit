@@ -42,7 +42,7 @@ import com.sun.xml.ws.api.policy.SourceModel;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 
@@ -58,23 +58,23 @@ public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
     RmVersion rmVersion;
-    McVersion mcVersion;
+    McRuntimeVersion mcVersion;
     boolean encrypt = false;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
         rmVersion = RmVersion.WSRM200502;
-        mcVersion = McVersion.WSMC200702;
+        mcVersion = McRuntimeVersion.WSMC200702;
     }
     
     public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
-        mcVersion = McVersion.WSMC200702;
+        mcVersion = McRuntimeVersion.WSMC200702;
     }
 
-    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, McVersion mcVersion, boolean encrypt) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, McRuntimeVersion mcVersion, boolean encrypt) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
         this.mcVersion = mcVersion;

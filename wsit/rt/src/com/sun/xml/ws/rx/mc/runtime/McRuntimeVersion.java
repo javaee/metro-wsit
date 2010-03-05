@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,12 +33,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.mc;
+package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.util.JaxbContextRepository;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.rx.mc.api.WsmcProtocolVersion;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
@@ -46,21 +47,31 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum McVersion {
+public enum McRuntimeVersion {
 
     WSMC200702(
-    "http://docs.oasis-open.org/ws-rx/wsmc/200702",
-    "http://docs.oasis-open.org/ws-rx/wsmc/200702",
+        WsmcProtocolVersion.WSMC200702,
 
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement.class,
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement.class,
-    com.sun.xml.ws.rx.mc.protocol.wsmc200702.UnsupportedSelectionType.class);
+        com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement.class,
+        com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement.class,
+        com.sun.xml.ws.rx.mc.protocol.wsmc200702.UnsupportedSelectionType.class);
+
+    public static McRuntimeVersion forProtocolVersion(WsmcProtocolVersion protocolVersion) {
+        for (McRuntimeVersion version : values()) {
+            if (version.protocolVersion == protocolVersion) {
+                return version;
+            }
+        }
+
+        assert false : "Unsupported WS-MakeConnection protocol version definition detected"; // we should never get here
+
+        return null;
+    }
 
     /**
      * General constants
      */
-    public final String namespaceUri;
-    public final String policyNamespaceUri;
+    public final WsmcProtocolVersion protocolVersion;
     /**
      * Action constants
      */
@@ -80,16 +91,15 @@ public enum McVersion {
      */
     private final JaxbContextRepository jaxbContextRepository;
 
-    McVersion(String nsUri, String policyNsUri, Class<?>... protocolClasses) {
-        this.namespaceUri = nsUri;
-        this.policyNamespaceUri = policyNsUri;
-        this.wsmcAction = nsUri + "/MakeConnection";
-        this.wsmcFaultAction = nsUri + "/fault";
+    McRuntimeVersion(WsmcProtocolVersion protocolVersion, Class<?>... protocolClasses) {
+        this.protocolVersion = protocolVersion;
+        this.wsmcAction = protocolVersion.protocolNamespaceUri + "/MakeConnection";
+        this.wsmcFaultAction = protocolVersion.protocolNamespaceUri + "/fault";
 
-        this.messagePendingHeaderName = new QName(namespaceUri, "MessagePending");
+        this.messagePendingHeaderName = new QName(protocolVersion.protocolNamespaceUri, "MessagePending");
 
-        this.unsupportedSelectionFaultCode = new QName(namespaceUri, "UnsupportedSelection");
-        this.missingSelectionFaultCode = new QName(namespaceUri, "MissingSelection");
+        this.unsupportedSelectionFaultCode = new QName(protocolVersion.protocolNamespaceUri, "UnsupportedSelection");
+        this.missingSelectionFaultCode = new QName(protocolVersion.protocolNamespaceUri, "MissingSelection");
 
         this.jaxbContextRepository = new JaxbContextRepository(protocolClasses);
     }
@@ -101,7 +111,7 @@ public enum McVersion {
      * @return
      */
     public String getClientId(String eprAddress) {
-        final String mcAnnonymousAddressPrefix = namespaceUri + "/anonymous?id=";
+        final String mcAnnonymousAddressPrefix = protocolVersion.protocolNamespaceUri + "/anonymous?id=";
         if (eprAddress.startsWith(mcAnnonymousAddressPrefix)) {
             return eprAddress.substring(mcAnnonymousAddressPrefix.length());
         }
@@ -142,7 +152,7 @@ public enum McVersion {
      * @return
      */
     public String getAnonymousAddress(String uuid) {
-        return namespaceUri + "/anonymous?id=" + uuid;
+        return protocolVersion.protocolNamespaceUri + "/anonymous?id=" + uuid;
     }
 
     /**

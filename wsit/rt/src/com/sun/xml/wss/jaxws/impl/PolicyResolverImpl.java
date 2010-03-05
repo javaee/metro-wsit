@@ -64,7 +64,7 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
 import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
@@ -86,7 +86,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
     private RmVersion rmVer = null;
-    private McVersion mcVer = null;
+    private McRuntimeVersion mcVer = null;
     private TubeConfiguration tubeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
@@ -98,7 +98,7 @@ public class PolicyResolverImpl implements PolicyResolver{
      * Creates a new instance of OperationResolverImpl
      */
     
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer, McVersion mcVer) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer, McRuntimeVersion mcVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;

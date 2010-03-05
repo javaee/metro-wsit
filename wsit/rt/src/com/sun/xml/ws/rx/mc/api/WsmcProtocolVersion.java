@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,38 +33,27 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-package com.sun.xml.ws.rx.mc;
+package com.sun.xml.ws.rx.mc.api;
 
 /**
+ * Enumeration holding supported WS-MakeConnection protocol versions
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class MakeConnectionSupportedFeatureBuilder {
+public enum WsmcProtocolVersion {
 
-    public static MakeConnectionSupportedFeatureBuilder getBuilder() {
-        return new MakeConnectionSupportedFeatureBuilder();
+    WSMC200702(
+    "http://docs.oasis-open.org/ws-rx/wsmc/200702",
+    "http://docs.oasis-open.org/ws-rx/wsmc/200702");
+
+    public final String protocolNamespaceUri;
+    public final String policyNamespaceUri;
+
+    private WsmcProtocolVersion(String protocolNamespace, String policyNamespace) {
+        this.protocolNamespaceUri = protocolNamespace;
+        this.policyNamespaceUri = policyNamespace;
     }
 
-    private long mcRequestBaseInterval = MakeConnectionSupportedFeature.DEFAULT_MAKE_CONNECTION_REQUEST_INTERVAL;
-    private long responseRetrievalTimeout = MakeConnectionSupportedFeature.DEFAULT_RESPONSE_RETRIEVAL_TIMEOUT;
 
-    public MakeConnectionSupportedFeatureBuilder mcRequestBaseInterval(long value) {
-        this.mcRequestBaseInterval = value;
 
-        return this;
-    }
-
-    public MakeConnectionSupportedFeatureBuilder responseRetrievalTimeout(long value) {
-        this.responseRetrievalTimeout = value;
-
-        return this;
-    }
-
-    public MakeConnectionSupportedFeature build() {
-        return new MakeConnectionSupportedFeature(
-                true,
-                mcRequestBaseInterval,
-                responseRetrievalTimeout);
-    }
 }

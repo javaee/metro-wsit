@@ -81,8 +81,8 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -170,7 +170,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
     protected RmVersion rmVer = RmVersion.WSRM200502;
-    protected McVersion mcVer = McVersion.WSMC200702;
+    protected McRuntimeVersion mcVer = McRuntimeVersion.WSMC200702;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
 
@@ -1648,7 +1648,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
 
      private boolean isMakeConnectionEnabled(WSDLPort port) {
         if (port != null && port.getBinding() != null) {
-            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature.class);
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature.class);
             return enabled;
         }
         return false;

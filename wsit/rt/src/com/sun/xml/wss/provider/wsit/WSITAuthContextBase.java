@@ -123,7 +123,7 @@ import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.ws.rx.rm.RmVersion;
@@ -204,7 +204,7 @@ public abstract class WSITAuthContextBase  {
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
     protected RmVersion rmVer = RmVersion.WSRM200502;
-    protected McVersion mcVer = McVersion.WSMC200702;
+    protected McRuntimeVersion mcVer = McRuntimeVersion.WSMC200702;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -1404,7 +1404,7 @@ public abstract class WSITAuthContextBase  {
 
      private boolean isMakeConnectionEnabled(WSDLPort port) {
         if (port != null && port.getBinding() != null) {
-            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature.class);
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature.class);
             return enabled;
         }
         return false;
