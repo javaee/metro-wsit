@@ -285,9 +285,9 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getRuntimeVersion().wsmcFaultAction,
+                        configuration.getRuntimeVersion().protocolVersion.wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getRuntimeVersion().missingSelectionFaultCode,
+                        configuration.getRuntimeVersion().protocolVersion.missingSelectionFaultCode,
                         "The MakeConnection element did not contain any selection criteria.",
                         null));
             }
@@ -300,7 +300,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                     if (element instanceof Node) {
                         Node selectionNode = ((Node) element);
                         unsupportedSelections.add(new SoapFaultDetailEntry(
-                                configuration.getRuntimeVersion().unsupportedSelectionFaultCode,
+                                configuration.getRuntimeVersion().protocolVersion.unsupportedSelectionFaultCode,
                                 new QName(selectionNode.getNamespaceURI(), selectionNode.getLocalName()).toString()));
                     }
                 }
@@ -309,9 +309,9 @@ public class McServerTube extends AbstractFilterTubeImpl {
                         request,
                         configuration.getSoapVersion(),
                         configuration.getAddressingVersion(),
-                        configuration.getRuntimeVersion().wsmcFaultAction,
+                        configuration.getRuntimeVersion().protocolVersion.wsmcFaultAction,
                         configuration.getSoapVersion().faultCodeServer,
-                        configuration.getRuntimeVersion().unsupportedSelectionFaultCode,
+                        configuration.getRuntimeVersion().protocolVersion.unsupportedSelectionFaultCode,
                         "The extension element used in the message selection is not supported by the MakeConnection receiver.",
                         unsupportedSelections));
             }
@@ -399,7 +399,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
     }
 
     private boolean isMakeConnectionRequest(final Packet request) {
-        return configuration.getRuntimeVersion().wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
+        return configuration.getRuntimeVersion().protocolVersion.wsmcAction.equals(request.getMessage().getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion()));
     }
 
     private Packet createEmptyResponse(Packet request) {

@@ -106,8 +106,8 @@ public class MakeConnectionSupportedFeature extends WebServiceFeature {
      *
      * @return WS-MC protocol version currently configured for the feature.
      */
-    public WsmcProtocolVersion getProtocolVersion() {
-        return WsmcProtocolVersion.WSMC200702;
+    public McProtocolVersion getProtocolVersion() {
+        return McProtocolVersion.WSMC200702;
     }
 
     /**

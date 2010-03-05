@@ -38,7 +38,7 @@ package com.sun.xml.ws.rx;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**

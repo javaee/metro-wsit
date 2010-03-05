@@ -53,7 +53,7 @@ import com.sun.xml.ws.rx.rm.policy.metro200702.MaxConcurrentSessionsAssertion;
 import com.sun.xml.ws.rx.rm.policy.net200502.RmFlowControlAssertion;
 import com.sun.xml.ws.rx.rm.policy.net200702.AcknowledgementIntervalAssertion;
 import com.sun.xml.ws.rx.rm.policy.net200702.InactivityTimeoutAssertion;
-import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
+import com.sun.xml.ws.rx.rm.api.RmAssertionNamespace;
 
 import com.sun.xml.ws.rx.rm.policy.metro200702.PersistentAssertion;
 import com.sun.xml.ws.rx.rm.policy.metro200702.RetransmissionConfigAssertion;

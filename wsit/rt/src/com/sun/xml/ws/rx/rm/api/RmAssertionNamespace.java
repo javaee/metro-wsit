@@ -33,27 +33,53 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.mc.api;
+package com.sun.xml.ws.rx.rm.api;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.namespace.QName;
 
 /**
- * Enumeration holding supported WS-MakeConnection protocol versions
+ * Class contains constants for policy namespaces used by this RM implementation.
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum WsmcProtocolVersion {
+public enum RmAssertionNamespace {
 
-    WSMC200702(
-    "http://docs.oasis-open.org/ws-rx/wsmc/200702",
-    "http://docs.oasis-open.org/ws-rx/wsmc/200702");
-
-    public final String protocolNamespaceUri;
-    public final String policyNamespaceUri;
-
-    private WsmcProtocolVersion(String protocolNamespace, String policyNamespace) {
-        this.protocolNamespaceUri = protocolNamespace;
-        this.policyNamespaceUri = policyNamespace;
+    WSRMP_200502("http://schemas.xmlsoap.org/ws/2005/02/rm/policy", "wsrmp10"),
+    WSRMP_200702("http://docs.oasis-open.org/ws-rx/wsrmp/200702", "wsrmp"),
+    MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy", "net30rmp"),
+    MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702", "net35rmp"),
+    METRO_200603("http://sun.com/2006/03/rm", "sunrmp"),
+    METRO_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp"),
+    METRO_200702("http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702", "metro");
+    
+    public static List<String> namespacesList() {
+        List<String> retVal = new ArrayList<String>(RmAssertionNamespace.values().length);
+        for (RmAssertionNamespace pns : RmAssertionNamespace.values()) {
+            retVal.add(pns.toString());
+        }
+        return retVal;
     }
 
+    private final String namespace;
+    private final String prefix;
 
+    private RmAssertionNamespace(String namespace, String prefix) {
+        this.namespace = namespace;
+        this.prefix = prefix;
+    }
 
+    public String defaultPrefix() {
+        return prefix;
+    }
+
+    @Override
+    public String toString() {
+        return namespace;
+    }
+
+    public QName getQName(String name) {
+        return new QName(namespace, name);
+    }
 }

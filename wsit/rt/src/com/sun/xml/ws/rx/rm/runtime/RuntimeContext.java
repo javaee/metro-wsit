@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,7 +39,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
@@ -100,7 +99,7 @@ public final class RuntimeContext {
     public final RmConfiguration configuration;
     public final AddressingVersion addressingVersion;
     public final SOAPVersion soapVersion;
-    public final RmVersion rmVersion;
+    public final RmRuntimeVersion rmVersion;
     private volatile SequenceManager sequenceManager;
     public final Communicator communicator;
     public final SuspendedFiberStorage suspendedFiberStorage;
@@ -128,7 +127,7 @@ public final class RuntimeContext {
 
         this.addressingVersion = configuration.getAddressingVersion();
         this.soapVersion = configuration.getSoapVersion();
-        this.rmVersion = configuration.getRmFeature().getVersion();
+        this.rmVersion = configuration.getRuntimeVersion();
 
         this.protocolHandler = WsrmProtocolHandler.getInstance(configuration, communicator, this);
     }

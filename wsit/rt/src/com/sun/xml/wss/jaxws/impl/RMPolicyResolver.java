@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,12 +38,11 @@ package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.policy.ModelTranslator;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
-import com.sun.xml.ws.api.policy.SourceModel;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 
 import java.io.IOException;
@@ -57,24 +56,24 @@ import java.io.Reader;
 public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
-    RmVersion rmVersion;
-    McRuntimeVersion mcVersion;
+    RmProtocolVersion rmVersion;
+    McProtocolVersion mcVersion;
     boolean encrypt = false;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        rmVersion = RmVersion.WSRM200502;
-        mcVersion = McRuntimeVersion.WSMC200702;
+        rmVersion = RmProtocolVersion.WSRM200502;
+        mcVersion = McProtocolVersion.WSMC200702;
     }
     
-    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmProtocolVersion rmVersion) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
-        mcVersion = McRuntimeVersion.WSMC200702;
+        mcVersion = McProtocolVersion.WSMC200702;
     }
 
-    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, McRuntimeVersion mcVersion, boolean encrypt) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmProtocolVersion rmVersion, McProtocolVersion mcVersion, boolean encrypt) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
         this.mcVersion = mcVersion;
@@ -85,11 +84,11 @@ public class RMPolicyResolver {
         PolicySourceModel model;
         try {
             String rmMessagePolicy = encrypt ? "rm-msglevel-policy-encrypt.xml" : "rm-msglevel-policy.xml";
-            if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200502 == rmVersion){
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmProtocolVersion.WSRM200502 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && (RmVersion.WSRM200702  == rmVersion )){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && (RmProtocolVersion.WSRM200702  == rmVersion )){
                 rmMessagePolicy = encrypt ? "rm-msglevel-policy-sx-encrypt.xml" :"rm-msglevel-policy-sx.xml";
-            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmVersion.WSRM200702 == rmVersion )){
+            }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmProtocolVersion.WSRM200702 == rmVersion )){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             

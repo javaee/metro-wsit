@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,16 +33,15 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm;
+package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.util.JaxbContextRepository;
 import com.sun.xml.bind.api.JAXBRIContext;
 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 
 /**
  * This enumeration contains all currently supported WS-ReliableMessaging versions.
@@ -55,7 +54,7 @@ import javax.xml.namespace.QName;
  * @see #WSRM200502
  * @see #WSRM200702
  */
-public enum RmVersion {
+public enum RmRuntimeVersion {
 
     /**
      * <p>
@@ -70,10 +69,7 @@ public enum RmVersion {
      * @see RmVersion
      */
     WSRM200502(
-    "RMAssertion",
-    "http://schemas.xmlsoap.org/ws/2005/02/rm",
-    RmAssertionNamespace.WSRMP_200502.toString(),
-    "/LastMessage",
+    RmProtocolVersion.WSRM200502,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.AckRequestedElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200502.CreateSequenceElement.class,
@@ -98,10 +94,7 @@ public enum RmVersion {
      * @see RmVersion
      */
     WSRM200702(
-    "RMAssertion",
-    "http://docs.oasis-open.org/ws-rx/wsrm/200702",
-    RmAssertionNamespace.WSRMP_200702.toString(),
-    "/CloseSequence",
+    RmProtocolVersion.WSRM200702,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AcceptType.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.AckRequestedElement.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.Address.class,
@@ -122,6 +115,18 @@ public enum RmVersion {
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.UsesSequenceSSL.class,
     com.sun.xml.ws.rx.rm.protocol.wsrm200702.UsesSequenceSTR.class);
 
+    public static RmRuntimeVersion forProtocolVersion(RmProtocolVersion protocolVersion) {
+        for (RmRuntimeVersion version : values()) {
+            if (version.protocolVersion == protocolVersion) {
+                return version;
+            }
+        }
+
+        assert false : "Unsupported WS-ReliableMessaging protocol version definition detected"; // we should never get here
+
+        return null;
+    }
+
     /**
      * Provides a default reliable messaging version value.
      *
@@ -129,131 +134,24 @@ public enum RmVersion {
      *
      * @see RmVersion
      */
-    static RmVersion getDefault() {
-        return RmVersion.WSRM200702; // if changed, update also in ReliableMesaging annotation
+    public static RmRuntimeVersion getDefault() {
+        return forProtocolVersion(RmProtocolVersion.getDefault());
     }
+
+
     /**
      * General constants
      */
-    public final String namespaceUri;
-    public final String policyNamespaceUri;
-    /**
-     * Action constants
-     */
-    public final String ackRequestedAction;
-    public final String createSequenceAction;
-    public final String createSequenceResponseAction;
-    public final String closeSequenceAction; // == lastAction
-    public final String closeSequenceResponseAction;
-    public final String sequenceAcknowledgementAction;
-    public final String wsrmFaultAction;
-    public final String terminateSequenceAction;
-    public final String terminateSequenceResponseAction;
-    /**
-     * Fault codes
-     */
-    public final QName rmAssertionName;
-    public final QName sequenceTerminatedFaultCode;
-    public final QName unknownSequenceFaultCode;
-    public final QName invalidAcknowledgementFaultCode;
-    public final QName messageNumberRolloverFaultCode;
-    public final QName lastMessageNumberExceededFaultCode; // WS-RM 1.0 only
-    public final QName createSequenceRefusedFaultCode;
-    public final QName sequenceClosedFaultCode; // since WS-RM 1.1
-    public final QName wsrmRequiredFaultCode; // since WS-RM 1.1    
+    public final RmProtocolVersion protocolVersion;
+
     /**
      * Private fields
      */
     private final JaxbContextRepository jaxbContextRepository;
 
-    private RmVersion(String rmAssertionLocalName, String nsUri, String policyNsUri, String closeSequenceActionSuffix, Class<?>... rmProtocolClasses) {
-        this.namespaceUri = nsUri;
-        this.policyNamespaceUri = policyNsUri;
-        this.rmAssertionName = new QName(policyNsUri, rmAssertionLocalName);
-
-        this.ackRequestedAction = namespaceUri + "/AckRequested";
-        this.createSequenceAction = namespaceUri + "/CreateSequence";
-        this.createSequenceResponseAction = namespaceUri + "/CreateSequenceResponse";
-        this.closeSequenceAction = namespaceUri + closeSequenceActionSuffix;
-        this.closeSequenceResponseAction = namespaceUri + "/CloseSequenceResponse";
-        this.sequenceAcknowledgementAction = namespaceUri + "/SequenceAcknowledgement";
-        this.wsrmFaultAction = namespaceUri + "/fault";
-        this.terminateSequenceAction = namespaceUri + "/TerminateSequence";
-        this.terminateSequenceResponseAction = namespaceUri + "/TerminateSequenceResponse";
-
-        this.sequenceTerminatedFaultCode = new QName(namespaceUri, "SequenceTerminated");
-        this.unknownSequenceFaultCode = new QName(namespaceUri, "UnknownSequence");
-        this.invalidAcknowledgementFaultCode = new QName(namespaceUri, "InvalidAcknowledgement");
-        this.messageNumberRolloverFaultCode = new QName(namespaceUri, "MessageNumberRollover");
-        this.lastMessageNumberExceededFaultCode = new QName(namespaceUri, "LastMessageNumberExceeded"); // WS-RM 1.0 only
-        this.createSequenceRefusedFaultCode = new QName(namespaceUri, "CreateSequenceRefused");
-        this.sequenceClosedFaultCode = new QName(namespaceUri, "SequenceClosed"); // since WS-RM 1.1
-        this.wsrmRequiredFaultCode = new QName(namespaceUri, "WSRMRequired"); // since WS-RM 1.1
-
+    private RmRuntimeVersion(RmProtocolVersion protocolVersion, Class<?>... rmProtocolClasses) {
+        this.protocolVersion = protocolVersion;
         this.jaxbContextRepository = new JaxbContextRepository(rmProtocolClasses);
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-ReliableMessaging protocol message
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-ReliableMessaging protocol message
-     */
-    public boolean isProtocolAction(String wsaAction) {
-        return (wsaAction != null) &&
-                (isProtocolRequest(wsaAction) ||
-                isProtocolResponse(wsaAction) ||
-                isFault(wsaAction));
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-ReliableMessaging protocol request message
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-ReliableMessaging protocol request message
-     */
-    public boolean isProtocolRequest(String wsaAction) {
-        return (wsaAction != null) &&
-                (ackRequestedAction.equals(wsaAction) ||
-                createSequenceAction.equals(wsaAction) ||
-                closeSequenceAction.equals(wsaAction) ||
-                terminateSequenceAction.equals(wsaAction));
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-ReliableMessaging protocol response message
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-ReliableMessaging protocol response message
-     */
-    public boolean isProtocolResponse(String wsaAction) {
-        return (wsaAction != null) &&
-                (createSequenceResponseAction.equals(wsaAction) ||
-                closeSequenceResponseAction.equals(wsaAction) ||
-                sequenceAcknowledgementAction.equals(wsaAction) ||
-                terminateSequenceResponseAction.equals(wsaAction));
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-ReliableMessaging protocol fault
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-ReliableMessaging protocol fault
-     */
-    public boolean isFault(String wsaAction) {
-        return wsrmFaultAction.equals(wsaAction);
     }
 
     /**

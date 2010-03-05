@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,10 +44,10 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.policy.RmConfigurator;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -92,7 +92,7 @@ public class RmFeatureConfigurator implements PolicyFeatureConfigurator {
 
     private ReliableMessagingFeature getRmFeature(AssertionSet alternative) throws PolicyException {
         ReliableMessagingFeatureBuilder rmFeatureBuilder = null;
-        for (RmVersion rmv : RmVersion.values()) {
+        for (RmProtocolVersion rmv : RmProtocolVersion.values()) {
             if (isPresentAndMandatory(alternative, rmv.rmAssertionName)) {
                 rmFeatureBuilder = new ReliableMessagingFeatureBuilder(rmv);
                 break;
@@ -106,8 +106,8 @@ public class RmFeatureConfigurator implements PolicyFeatureConfigurator {
         for (PolicyAssertion assertion : alternative) {
             if (assertion instanceof RmConfigurator) {
                 final RmConfigurator rmAssertion = RmConfigurator.class.cast(assertion);
-                if (!rmAssertion.isCompatibleWith(rmFeatureBuilder.getVersion())) {
-                    LOGGER.warning(LocalizationMessages.WSRM_1009_INCONSISTENCIES_IN_POLICY(rmAssertion.getName(), rmFeatureBuilder.getVersion()));
+                if (!rmAssertion.isCompatibleWith(rmFeatureBuilder.getProtocolVersion())) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1009_INCONSISTENCIES_IN_POLICY(rmAssertion.getName(), rmFeatureBuilder.getProtocolVersion()));
                     // TODO replace warning with exception in Metro >2.0:
                     // throw new WebServiceException(/*message*/);
                 }

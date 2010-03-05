@@ -123,10 +123,10 @@ import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;
@@ -203,8 +203,8 @@ public abstract class WSITAuthContextBase  {
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
-    protected RmVersion rmVer = RmVersion.WSRM200502;
-    protected McRuntimeVersion mcVer = McRuntimeVersion.WSMC200702;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.WSRM200502;
+    protected McProtocolVersion mcVer = McProtocolVersion.WSMC200702;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -507,12 +507,12 @@ public abstract class WSITAuthContextBase  {
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 }
-                if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                        policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200702;
-                } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                        policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200502;
+                if (policy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                        policy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200702;
+                } else if (policy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                        policy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200502;
                 }
 
                 if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
@@ -1396,7 +1396,7 @@ public abstract class WSITAuthContextBase  {
     //TODO: Duplicate information copied from Pipeline Assembler
     private boolean isReliableMessagingEnabled(WSDLPort port) {
         if (port != null && port.getBinding() != null) {
-            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.ReliableMessagingFeature.class);
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.class);
             return enabled;
         }
         return false;

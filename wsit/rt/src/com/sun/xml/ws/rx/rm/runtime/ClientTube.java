@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,7 +53,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -124,7 +124,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 scInitiator,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
+                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
 
         DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc.configuration,
@@ -251,7 +251,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
     static final ProtocolMessageHandler createRmProtocolMessageHandler(final RuntimeContext rc) {
 
-        final RmVersion rmVersion = rc.configuration.getRmFeature().getVersion();
+        final RmProtocolVersion rmVersion = rc.configuration.getRuntimeVersion().protocolVersion;
 
         return new ProtocolMessageHandler() {
 
@@ -441,7 +441,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         if (response.getMessage() != null) {
             final String responseAction = rc.communicator.getWsaAction(response);
 
-            if (rc.rmVersion.terminateSequenceResponseAction.equals(responseAction)) {
+            if (rc.rmVersion.protocolVersion.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseData responseData = rc.protocolHandler.toTerminateSequenceResponseData(response);
 
                 rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
@@ -450,7 +450,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     LOGGER.warning(LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(responseData.getSequenceId(), outboundSequenceId.value));
                 }
 
-            } else if (rc.rmVersion.terminateSequenceAction.equals(responseAction)) {
+            } else if (rc.rmVersion.protocolVersion.terminateSequenceAction.equals(responseAction)) {
                 TerminateSequenceData responseData = rc.protocolHandler.toTerminateSequenceData(response);
 
                 rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());

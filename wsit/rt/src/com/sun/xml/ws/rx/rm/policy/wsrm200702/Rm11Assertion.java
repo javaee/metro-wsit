@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rx.rm.policy.wsrm200702;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 
@@ -46,12 +46,12 @@ import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.ComplexAssertion;
 import com.sun.xml.ws.rx.policy.AssertionInstantiator;
-import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
+import com.sun.xml.ws.rx.rm.api.RmAssertionNamespace;
 import com.sun.xml.ws.rx.rm.policy.RmConfigurator;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.SecurityBinding;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -80,7 +80,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmConfigura
 
     private static final Logger LOGGER = Logger.getLogger(Rm11Assertion.class);
     //
-    public static final QName NAME = RmVersion.WSRM200702.rmAssertionName;
+    public static final QName NAME = RmProtocolVersion.WSRM200702.rmAssertionName;
     private static final QName SEQUENCE_STR_QNAME = RmAssertionNamespace.WSRMP_200702.getQName("SequenceSTR");
     private static final QName SEQUENCE_TRANSPORT_SECURITY_QNAME = RmAssertionNamespace.WSRMP_200702.getQName("SequenceTransportSecurity");
     private static AssertionInstantiator instantiator = new AssertionInstantiator() {
@@ -147,7 +147,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmConfigura
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        if (builder.getVersion() != RmVersion.WSRM200702) {
+        if (builder.getProtocolVersion() != RmProtocolVersion.WSRM200702) {
             throw new WebServiceException(LocalizationMessages.WSRM_1002_MULTIPLE_WSRM_VERSIONS_IN_POLICY());
         }
 
@@ -158,7 +158,7 @@ public final class Rm11Assertion extends ComplexAssertion implements RmConfigura
         return builder.deliveryAssurance(deliveryAssurance).securityBinding(securityBinding);
     }
     
-    public boolean isCompatibleWith(RmVersion version) {
-        return RmVersion.WSRM200702 == version;
+    public boolean isCompatibleWith(RmProtocolVersion version) {
+        return RmProtocolVersion.WSRM200702 == version;
     }
 }

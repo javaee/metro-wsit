@@ -44,7 +44,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.dev.AdditionalResponses;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceResponseData;
@@ -82,7 +81,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     private final RuntimeContext rc;
 
     Wsrm200702ProtocolHandler(RmConfiguration configuration, RuntimeContext rc, Communicator communicator) {
-        super(RmVersion.WSRM200702, configuration, communicator);
+        super(RmRuntimeVersion.WSRM200702, configuration, communicator);
 
         assert rc != null;
 
@@ -103,7 +102,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(CreateSequenceData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createRequestPacket(requestPacket, new CreateSequenceElement(data), rmVersion.createSequenceAction, true);
+        Packet packet = communicator.createRequestPacket(requestPacket, new CreateSequenceElement(data), rmVersion.protocolVersion.createSequenceAction, true);
 
         if (data.getStrType() != null) {
             UsesSequenceSTR usesSequenceSTR = new UsesSequenceSTR();
@@ -127,7 +126,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.createSequenceResponseAction);
+        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.protocolVersion.createSequenceResponseAction);
     }
 
     public CloseSequenceData toCloseSequenceData(Packet packet) throws RxRuntimeException {
@@ -145,7 +144,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(CloseSequenceData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createRequestPacket(requestPacket, new CloseSequenceElement(data), rmVersion.closeSequenceAction, true);
+        Packet packet = communicator.createRequestPacket(requestPacket, new CloseSequenceElement(data), rmVersion.protocolVersion.closeSequenceAction, true);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
@@ -169,7 +168,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createResponsePacket(requestPacket, new CloseSequenceResponseElement(data), rmVersion.closeSequenceResponseAction);
+        Packet packet = communicator.createResponsePacket(requestPacket, new CloseSequenceResponseElement(data), rmVersion.protocolVersion.closeSequenceResponseAction);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
@@ -193,7 +192,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(TerminateSequenceData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createRequestPacket(requestPacket, new TerminateSequenceElement(data), rmVersion.terminateSequenceAction, true);
+        Packet packet = communicator.createRequestPacket(requestPacket, new TerminateSequenceElement(data), rmVersion.protocolVersion.terminateSequenceAction, true);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
@@ -219,7 +218,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     }
 
     public Packet toPacket(final TerminateSequenceResponseData data, @Nullable final Packet requestPacket) throws RxRuntimeException {
-        final Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.terminateSequenceResponseAction);
+        final Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.protocolVersion.terminateSequenceResponseAction);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
@@ -301,7 +300,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         assert message != null;
         assert message.getSequenceId() == null; // not initialized yet
 
-        SequenceElement sequenceElement = readHeaderAsUnderstood(rmVersion.namespaceUri, "Sequence", jaxwsMessage);
+        SequenceElement sequenceElement = readHeaderAsUnderstood(rmVersion.protocolVersion.protocolNamespaceUri, "Sequence", jaxwsMessage);
         if (sequenceElement != null) {
             message.setSequenceData(sequenceElement.getId(), sequenceElement.getMessageNumber());
         }
@@ -318,11 +317,11 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         assert jaxwsMessage != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
-        AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(rmVersion.namespaceUri, "AckRequested", jaxwsMessage);
+        AckRequestedElement ackRequestedElement = readHeaderAsUnderstood(rmVersion.protocolVersion.protocolNamespaceUri, "AckRequested", jaxwsMessage);
         if (ackRequestedElement != null) {
             ackDataBuilder.ackReqestedSequenceId(ackRequestedElement.getId());
         }
-        SequenceAcknowledgementElement ackElement = readHeaderAsUnderstood(rmVersion.namespaceUri, "SequenceAcknowledgement", jaxwsMessage);
+        SequenceAcknowledgementElement ackElement = readHeaderAsUnderstood(rmVersion.protocolVersion.protocolNamespaceUri, "SequenceAcknowledgement", jaxwsMessage);
         if (ackElement != null) {
             List<Sequence.AckRange> ranges = new LinkedList<Sequence.AckRange>();
             if (ackElement.getNone() == null) {
@@ -366,8 +365,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     public Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException {
         if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
             // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
-            Packet response = rc.communicator.createEmptyResponsePacket(requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
-            response = rc.communicator.setEmptyResponseMessage(response, requestPacket, rc.rmVersion.sequenceAcknowledgementAction);
+            Packet response = rc.communicator.createEmptyResponsePacket(requestPacket, rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
+            response = rc.communicator.setEmptyResponseMessage(response, requestPacket, rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
             appendAcknowledgementHeaders(response, ackData);
             return response;
         } else {

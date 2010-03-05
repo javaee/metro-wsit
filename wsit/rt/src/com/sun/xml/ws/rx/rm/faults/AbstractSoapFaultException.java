@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -87,7 +87,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
 
     public abstract Code getCode();
 
-    public abstract QName getSubcode(RmVersion rv);
+    public abstract QName getSubcode(RmRuntimeVersion rv);
 
     public final String getReason() {
         return faultReasonText;
@@ -156,7 +156,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
      *
      * @return
      */
-    protected static String getProperFaultActionForAddressingVersion(RmVersion rmVersion, AddressingVersion addressingVersion) {
-        return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.wsrmFaultAction;
+    protected static String getProperFaultActionForAddressingVersion(RmRuntimeVersion rmVersion, AddressingVersion addressingVersion) {
+        return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.protocolVersion.wsrmFaultAction;
     }
 }

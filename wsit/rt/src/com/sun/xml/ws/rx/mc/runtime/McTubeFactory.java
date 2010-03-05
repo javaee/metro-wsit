@@ -40,7 +40,7 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.TubeFactory;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import javax.xml.ws.WebServiceException;
 
 /**

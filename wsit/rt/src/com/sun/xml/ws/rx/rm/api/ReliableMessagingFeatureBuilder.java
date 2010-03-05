@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,9 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm;
+package com.sun.xml.ws.rx.rm.api;
 
-import static com.sun.xml.ws.rx.rm.ReliableMessagingFeature.*;
+import static com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.*;
 
 /**
  *
@@ -43,7 +43,7 @@ import static com.sun.xml.ws.rx.rm.ReliableMessagingFeature.*;
  */
 public final class ReliableMessagingFeatureBuilder {
     // General RM config values
-    private final RmVersion version;
+    private final RmProtocolVersion protocolVersion;
     
     private boolean enabled = true;
     private long inactivityTimeout = DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
@@ -65,14 +65,14 @@ public final class ReliableMessagingFeatureBuilder {
     private long sequenceMaintenancePeriod = DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
     private long maxConcurrentSessions = DEFAULT_MAX_CONCURRENT_SESSIONS;
 
-    public ReliableMessagingFeatureBuilder(RmVersion version) {
-        this.version = version;
+    public ReliableMessagingFeatureBuilder(RmProtocolVersion version) {
+        this.protocolVersion = version;
     }
 
     public ReliableMessagingFeature build() {
         return new ReliableMessagingFeature(
                 this.enabled,
-                this.version,
+                this.protocolVersion,
                 this.inactivityTimeout,
                 this.destinationBufferQuota,
                 this.orderedDelivery,
@@ -181,8 +181,8 @@ public final class ReliableMessagingFeatureBuilder {
     /**
      * @see ReliableMessagingFeature#getVersion()
      */
-    public RmVersion getVersion() {
-        return this.version;
+    public RmProtocolVersion getProtocolVersion() {
+        return this.protocolVersion;
     }
 
     /**

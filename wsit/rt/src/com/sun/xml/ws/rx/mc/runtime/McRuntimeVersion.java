@@ -39,9 +39,8 @@ import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.util.JaxbContextRepository;
 import com.sun.xml.bind.api.JAXBRIContext;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.mc.api.WsmcProtocolVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 
 /**
  *
@@ -50,13 +49,13 @@ import javax.xml.namespace.QName;
 public enum McRuntimeVersion {
 
     WSMC200702(
-        WsmcProtocolVersion.WSMC200702,
+        McProtocolVersion.WSMC200702,
 
         com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement.class,
         com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement.class,
         com.sun.xml.ws.rx.mc.protocol.wsmc200702.UnsupportedSelectionType.class);
 
-    public static McRuntimeVersion forProtocolVersion(WsmcProtocolVersion protocolVersion) {
+    public static McRuntimeVersion forProtocolVersion(McProtocolVersion protocolVersion) {
         for (McRuntimeVersion version : values()) {
             if (version.protocolVersion == protocolVersion) {
                 return version;
@@ -71,36 +70,14 @@ public enum McRuntimeVersion {
     /**
      * General constants
      */
-    public final WsmcProtocolVersion protocolVersion;
-    /**
-     * Action constants
-     */
-    public final String wsmcAction;
-    public final String wsmcFaultAction;
-    /**
-     * Header names
-     */
-    public final QName messagePendingHeaderName;
-    /**
-     * Fault codes
-     */
-    public final QName unsupportedSelectionFaultCode;
-    public final QName missingSelectionFaultCode;
+    public final McProtocolVersion protocolVersion;
     /**
      * Private fields
      */
     private final JaxbContextRepository jaxbContextRepository;
 
-    McRuntimeVersion(WsmcProtocolVersion protocolVersion, Class<?>... protocolClasses) {
+    McRuntimeVersion(McProtocolVersion protocolVersion, Class<?>... protocolClasses) {
         this.protocolVersion = protocolVersion;
-        this.wsmcAction = protocolVersion.protocolNamespaceUri + "/MakeConnection";
-        this.wsmcFaultAction = protocolVersion.protocolNamespaceUri + "/fault";
-
-        this.messagePendingHeaderName = new QName(protocolVersion.protocolNamespaceUri, "MessagePending");
-
-        this.unsupportedSelectionFaultCode = new QName(protocolVersion.protocolNamespaceUri, "UnsupportedSelection");
-        this.missingSelectionFaultCode = new QName(protocolVersion.protocolNamespaceUri, "MissingSelection");
-
         this.jaxbContextRepository = new JaxbContextRepository(protocolClasses);
     }
 
@@ -116,34 +93,6 @@ public enum McRuntimeVersion {
             return eprAddress.substring(mcAnnonymousAddressPrefix.length());
         }
         return null;
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-MakeConnection protocol message
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-MakeConnection protocol message
-     */
-    public boolean isProtocolAction(String wsaAction) {
-        return (wsaAction != null) && 
-               (wsmcAction.equals(wsaAction) ||
-               isFault(wsaAction));
-    }
-
-    /**
-     * Determines if the tested string is a valid WS-Addressing action header value
-     * that belongs to a WS-MakeConnection protocol fault
-     *
-     * @param WS-Addressing action string
-     *
-     * @return {@code true} in case the {@code wsaAction} parameter is a valid WS-Addressing
-     *         action header value that belongs to a WS-MakeConnection protocol fault
-     */
-    public boolean isFault(String wsaAction) {
-        return wsmcFaultAction.equals(wsaAction);
     }
 
     /**

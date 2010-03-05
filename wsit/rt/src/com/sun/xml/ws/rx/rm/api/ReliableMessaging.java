@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,53 +33,36 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm.policy;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.namespace.QName;
+package com.sun.xml.ws.rx.rm.api;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
+import static com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.*;
 
 /**
- * Class contains constants for policy namespaces used by this RM implementation.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public enum RmAssertionNamespace {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = ReliableMessagingFeature.ID, bean = ReliableMessagingFeature.class)
+public @interface ReliableMessaging {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
 
-    WSRMP_200502("http://schemas.xmlsoap.org/ws/2005/02/rm/policy", "wsrmp10"),
-    WSRMP_200702("http://docs.oasis-open.org/ws-rx/wsrmp/200702", "wsrmp"),
-    MICROSOFT_200502("http://schemas.microsoft.com/net/2005/02/rm/policy", "net30rmp"),
-    MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702", "net35rmp"),
-    METRO_200603("http://sun.com/2006/03/rm", "sunrmp"),
-    METRO_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp"),
-    METRO_200702("http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702", "metro");
-    
-    public static List<String> namespacesList() {
-        List<String> retVal = new ArrayList<String>(RmAssertionNamespace.values().length);
-        for (RmAssertionNamespace pns : RmAssertionNamespace.values()) {
-            retVal.add(pns.toString());
-        }
-        return retVal;
-    }
-
-    private final String namespace;
-    private final String prefix;
-
-    private RmAssertionNamespace(String namespace, String prefix) {
-        this.namespace = namespace;
-        this.prefix = prefix;
-    }
-
-    public String prefix() {
-        return prefix;
-    }
-
-    @Override
-    public String toString() {
-        return namespace;
-    }
-
-    public QName getQName(String name) {
-        return new QName(namespace, name);
-    }
+    RmProtocolVersion version() default RmProtocolVersion.WSRM200702;
+    long sequenceInactivityTimeout() default DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT;
+    long destinationBufferQuota() default DEFAULT_DESTINATION_BUFFER_QUOTA;
+    boolean orderedDeliveryEnabled() default false;
+    DeliveryAssurance deliveryAssurance() default DeliveryAssurance.EXACTLY_ONCE;
+    SecurityBinding securityBinding() default SecurityBinding.NONE;
+    boolean persistenceEnabled() default false;
+    long sequenceManagerMaintenancePeriod() default DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
+    long maxConcurrentSessions() default DEFAULT_MAX_CONCURRENT_SESSIONS;
 }

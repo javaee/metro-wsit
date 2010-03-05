@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,10 +33,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.rm;
+package com.sun.xml.ws.rx.rm.api;
 
 import com.sun.xml.ws.api.FeatureConstructor;
-import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import javax.xml.ws.WebServiceFeature;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
@@ -96,15 +95,12 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      */
     public static final long DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT = 3000;
     /**
-     * Default period (in milliseconds) of a sequence maintenance task execution.
-     * A sequence maintenance task is executed by invoking a
-     * {@link SequenceManager#onMaintenance()} method on a {@link SequenceManager} 
-     * instance.
+     * Default period (in milliseconds) of a sequence manager maintenance task execution.
      */
     public static final long DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD = 60000;
     /**
      * A constant specifying the default value for how many concurrently active
-     * RM sessions (measured based on inbound RM sequences) the {@link SequenceManager}
+     * RM sessions (measured based on inbound RM sequences) the sequence manager
      * dedicated to the WS Endpoint accepts before starting to refuse new requests
      * for sequence creation.
      *
@@ -299,7 +295,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         public abstract long getDelayInMillis(int resendAttemptNumber, long baseRate);
     }
     //
-    private final RmVersion version;
+    private final RmProtocolVersion version;
     private final long sequenceInactivityTimeout;
     private final long destinationBufferQuota;
     private final boolean orderedDelivery;
@@ -336,7 +332,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     public ReliableMessagingFeature(boolean enabled) {
         this(
                 enabled, // this.enabled
-                RmVersion.getDefault(), // this.rmVersion
+                RmProtocolVersion.getDefault(), // this.rmVersion
                 DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, // this.inactivityTimeout
                 DEFAULT_DESTINATION_BUFFER_QUOTA, // this.bufferQuota
                 false, // this.orderedDelivery
@@ -368,7 +364,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     })
     public ReliableMessagingFeature(
             boolean enabled,
-            RmVersion version,
+            RmProtocolVersion version,
             long inactivityTimeout,
             long bufferQuota,
             boolean orderedDelivery,
@@ -403,7 +399,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
 
     ReliableMessagingFeature(
             boolean enabled,
-            RmVersion version,
+            RmProtocolVersion version,
             long inactivityTimeout,
             long bufferQuota,
             boolean orderedDelivery,
@@ -453,7 +449,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         the default value is specified by a call to {@link RmVersion#getDefault()}.
      */
     @ManagedAttribute
-    public RmVersion getVersion() {
+    public RmProtocolVersion getProtocolVersion() {
         return version;
     }
 
@@ -678,12 +674,9 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
-     * Specifies the period (in milliseconds) of a sequence maintenance task execution.
-     * A sequence maintenance task is executed by invoking a
-     * {@link SequenceManager#onMaintenance()} method on a {@link SequenceManager}
-     * instance.
+     * Specifies the period (in milliseconds) of a sequence manager maintenance task execution.
      *
-     * @return the period (in milliseconds) of a sequence maintenance task execution.
+     * @return the period (in milliseconds) of a sequence manager maintenance task execution.
      */
     @ManagedAttribute
     public long getSequenceManagerMaintenancePeriod() {
@@ -692,7 +685,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
 
     /**
      * Specifies how many concurrently active RM sessions (measured based on
-     * inbound RM sequences) the {@link SequenceManager} dedicated to the WS Endpoint
+     * inbound RM sequences) the sequence manager dedicated to the WS Endpoint
      * accepts before starting to refuse new requests for sequence creation.
      *
      * @return maximum number of concurrent RM sessions

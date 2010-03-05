@@ -1,7 +1,7 @@
 /*
  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- *  Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ *  Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  *  The contents of this file are subject to the terms of either the GNU
  *  General Public License Version 2 only ("GPL") or the Common Development
@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rx.rm.policy.wsrm200502;
 
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;
 
@@ -71,7 +71,8 @@ public class Rm10AssertionTest extends TestCase {
      * Test of getInactivityTimeout method, of class Rm10Assertion.
      */
     public void testGetInactivityTimeout() {
-        assertEquals(ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
+        final Rm10Assertion assertionFromPolicy = ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_DEFAULT_POLICY_RESOURCE_NAME, Rm10Assertion.class);
+        assertEquals(ReliableMessagingFeature.DEFAULT_SEQUENCE_INACTIVITY_TIMEOUT, assertionFromPolicy.getInactivityTimeout());
         assertEquals(1000, ResourceLoader.getAssertionFromPolicy(ResourceLoader.RM_1_0_CUSTOM_POLICY_RESOURCE_NAME, Rm10Assertion.class).getInactivityTimeout());
     }
 

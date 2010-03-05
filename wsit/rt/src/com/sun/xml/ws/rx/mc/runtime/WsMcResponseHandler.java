@@ -88,7 +88,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
             if (responseMessage.isFault()) {
                 // processing WS-MC SOAP faults
                 String faultAction = responseMessage.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion());
-                if (configuration.getRuntimeVersion().isFault(faultAction)) {
+                if (configuration.getRuntimeVersion().protocolVersion.isFault(faultAction)) {
                     SOAPFault fault = null;
                     try {
                         fault = responseMessage.readAsSOAPMessage().getSOAPBody().getFault();

@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -49,6 +49,7 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration {
     private final ReliableMessagingFeature rmFeature;
+    private final RmRuntimeVersion runtimeVersion;
 
     RmConfigurationImpl(
             ReliableMessagingFeature rmFeature,
@@ -60,6 +61,7 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
         super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
 
         this.rmFeature = rmFeature;
+        this.runtimeVersion = (rmFeature != null) ? RmRuntimeVersion.forProtocolVersion(rmFeature.getProtocolVersion()) : null;
     }
 
 
@@ -67,6 +69,12 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
         checkState();
 
         return rmFeature;
+    }
+
+    public RmRuntimeVersion getRuntimeVersion() {
+        checkState();
+
+        return runtimeVersion;
     }
 
     private void checkState() {

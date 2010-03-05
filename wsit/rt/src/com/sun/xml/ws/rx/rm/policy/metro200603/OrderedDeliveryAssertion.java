@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,10 +41,10 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.rx.policy.AssertionInstantiator;
-import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
+import com.sun.xml.ws.rx.rm.api.RmAssertionNamespace;
 import com.sun.xml.ws.rx.rm.policy.RmConfigurator;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import java.util.Collection;
 import javax.xml.namespace.QName;
@@ -91,14 +91,14 @@ public class OrderedDeliveryAssertion extends SimpleAssertion implements RmConfi
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        if (builder.getVersion() != RmVersion.WSRM200502) {
-            throw new WebServiceException(LocalizationMessages.WSRM_1001_ASSERTION_NOT_COMPATIBLE_WITH_RM_VERSION(NAME, builder.getVersion()));
+        if (builder.getProtocolVersion() != RmProtocolVersion.WSRM200502) {
+            throw new WebServiceException(LocalizationMessages.WSRM_1001_ASSERTION_NOT_COMPATIBLE_WITH_RM_VERSION(NAME, builder.getProtocolVersion()));
         }
 
         return builder.enableOrderedDelivery();
     }
 
-    public boolean isCompatibleWith(RmVersion version) {
-        return RmVersion.WSRM200502 == version;
+    public boolean isCompatibleWith(RmProtocolVersion version) {
+        return RmProtocolVersion.WSRM200502 == version;
     }
 }

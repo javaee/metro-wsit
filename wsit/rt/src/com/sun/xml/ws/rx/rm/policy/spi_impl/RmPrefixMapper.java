@@ -36,7 +36,7 @@
 package com.sun.xml.ws.rx.rm.policy.spi_impl;
 
 import com.sun.xml.ws.policy.spi.PrefixMapper;
-import com.sun.xml.ws.rx.rm.policy.RmAssertionNamespace;
+import com.sun.xml.ws.rx.rm.api.RmAssertionNamespace;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class RmPrefixMapper implements PrefixMapper {
     static {
         HashMap<String, String> tempMap = new HashMap<String, String>();
         for (RmAssertionNamespace ns : RmAssertionNamespace.values()) {
-            tempMap.put(ns.toString(), ns.prefix());
+            tempMap.put(ns.toString(), ns.defaultPrefix());
         }
         prefixMap = Collections.unmodifiableMap(tempMap);
     }

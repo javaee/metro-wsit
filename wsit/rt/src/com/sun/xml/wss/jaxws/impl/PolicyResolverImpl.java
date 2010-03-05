@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -64,8 +64,8 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -85,8 +85,8 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
-    private RmVersion rmVer = null;
-    private McRuntimeVersion mcVer = null;
+    private RmProtocolVersion rmVer = null;
+    private McProtocolVersion mcVer = null;
     private TubeConfiguration tubeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
@@ -98,7 +98,7 @@ public class PolicyResolverImpl implements PolicyResolver{
      * Creates a new instance of OperationResolverImpl
      */
     
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer, McRuntimeVersion mcVer) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;

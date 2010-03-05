@@ -57,7 +57,6 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -81,8 +80,8 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.mc.runtime.McRuntimeVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -90,7 +89,6 @@ import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.XWSSecurityException;
@@ -124,7 +122,6 @@ import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
 import java.util.Set;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
@@ -169,8 +166,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected static JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
-    protected RmVersion rmVer = RmVersion.WSRM200502;
-    protected McRuntimeVersion mcVer = McRuntimeVersion.WSMC200702;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.WSRM200502;
+    protected McProtocolVersion mcVer = McProtocolVersion.WSMC200702;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
 
@@ -1640,7 +1637,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     //TODO: Duplicate information copied from Tubeline Assembler
     private boolean isReliableMessagingEnabled(WSDLPort port) {
         if (port != null && port.getBinding() != null) {
-            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.ReliableMessagingFeature.class);
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.class);
             return enabled;
         }
         return false;
@@ -1710,12 +1707,12 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
             
             // For RM messages
-            if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                    policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                rmVer = RmVersion.WSRM200702;
-            } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                    policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                rmVer = RmVersion.WSRM200502;
+            if (policy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                    policy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                rmVer = RmProtocolVersion.WSRM200702;
+            } else if (policy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                    policy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                rmVer = RmProtocolVersion.WSRM200502;
             }
             if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
                 encRMLifecycleMsg = true;

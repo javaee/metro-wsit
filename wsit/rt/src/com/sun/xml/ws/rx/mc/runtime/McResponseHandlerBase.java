@@ -77,7 +77,7 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
         // process WS-MC header
         if (responseMessage.hasHeaders()) {
-            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getRuntimeVersion().messagePendingHeaderName);
+            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getRuntimeVersion().protocolVersion.messagePendingHeaderName);
             if (messagePendingHeader != null && messagePendingHeader.isPending()) {
                 mcSenderTask.scheduleMcRequest();
             }

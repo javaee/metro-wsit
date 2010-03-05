@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,8 +37,8 @@
 package com.sun.xml.ws.rx.rm.policy;
 
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import javax.xml.namespace.QName;
 
 /**
@@ -54,7 +54,7 @@ public interface RmConfigurator {
     /**
      * TODO javadoc
      */
-    public boolean isCompatibleWith(RmVersion version);
+    public boolean isCompatibleWith(RmProtocolVersion version);
     
     /**
      * TODO javadoc

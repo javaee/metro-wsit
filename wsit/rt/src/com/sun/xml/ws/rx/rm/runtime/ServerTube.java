@@ -121,7 +121,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion())));
+                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())));
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -162,7 +162,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             String wsaAction = rc.communicator.getWsaAction(request);
-            if (rc.rmVersion.isProtocolAction(wsaAction)) { // protocol message
+            if (rc.rmVersion.protocolVersion.isProtocolAction(wsaAction)) { // protocol message
                 return doReturnWith(processProtocolMessage(request, wsaAction));
             }
 
@@ -283,17 +283,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private Packet processProtocolMessage(Packet request, String wsaAction) throws AbstractSoapFaultException {
-        if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
+        if (rc.rmVersion.protocolVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
-        } else if (rc.rmVersion.closeSequenceAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.closeSequenceAction.equals(wsaAction)) {
             return handleCloseSequenceAction(request);
-        } else if (rc.rmVersion.terminateSequenceAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.terminateSequenceAction.equals(wsaAction)) {
             return handleTerminateSequenceAction(request);
-        } else if (rc.rmVersion.ackRequestedAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.ackRequestedAction.equals(wsaAction)) {
             return handleAckRequestedAction(request);
-        } else if (rc.rmVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
             return handleSequenceAcknowledgementAction(request);
-        } else if (rc.rmVersion.terminateSequenceResponseAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.terminateSequenceResponseAction.equals(wsaAction)) {
             return handleTerminateSequenceResponseAction(request);
         } else {
             throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(wsaAction)));
