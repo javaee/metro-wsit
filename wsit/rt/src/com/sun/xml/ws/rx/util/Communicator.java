@@ -49,8 +49,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.message.StringHeader;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
@@ -129,9 +129,8 @@ public final class Communicator {
 
             final HeaderList requestHeaders = request.getMessage().getHeaders();
             if (expectReply) { // attach wsa:ReplyTo header from the original request
-                requestHeaders.add(new StringHeader(
-                        addressingVersion.replyToTag,
-                        originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion)));
+                final String endpointAddress = originalRequestPacket.getMessage().getHeaders().getTo(addressingVersion, soapVersion);
+                requestHeaders.add(createReplyToHeader(endpointAddress));
             }
             requestHeaders.remove(addressingVersion.relatesToTag);
 
@@ -140,6 +139,11 @@ public final class Communicator {
             Message message = Messages.create(jaxbContext, jaxbElement, soapVersion);
             return createRequestPacket(message, wsaAction, expectReply);
         }
+    }
+
+    private Header createReplyToHeader(String address) {
+        WSEndpointReference wsepr = new WSEndpointReference(address, addressingVersion);
+        return wsepr.createHeader(addressingVersion.replyToTag);
     }
 
     /**
