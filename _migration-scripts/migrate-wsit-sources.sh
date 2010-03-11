@@ -159,7 +159,7 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX 
 # WSIT WS-RX common packages
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsrx-commons"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Common Utilities and Classes" -i "wsrx-commons" -P "wsrx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Common Utilities and Classes" -i "wsrx-commons" -P "wsrx-project" -p ./poms/wsrx-commons-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfiguration.java:com/sun/xml/ws/rx/RxConfigurationBase.java:com/sun/xml/ws/rx/RxException.java:com/sun/xml/ws/rx/RxRuntimeException.java"
 TEST_ARTIFACTS="com/sun/xml/ws/rx/policy:com/sun/xml/ws/rx/util:com/sun/xml/ws/rx/RxConfigurationTest.java:com/sun/xml/ws/rx/RxConfigurationBaseTest.java:com/sun/xml/ws/rx/RxExceptionTest.java:com/sun/xml/ws/rx/RxRuntimeExceptionTest.java"
 TEST_RESOURCES=""
@@ -178,18 +178,15 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsrm-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging API" -i "wsrm-api" -P "wsrx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/rx/rm/ReliableMessaging.java:\
-com/sun/xml/ws/rx/rm/ReliableMessagingFeature.java:\
-com/sun/xml/ws/rx/rm/ReliableMessagingFeatureBuilder.java:\
-com/sun/xml/ws/rx/rm/RmVersion.java"
+SRC_ARTIFACTS="com/sun/xml/ws/rx/rm/api"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="rm"
+TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
 # WSIT WS-RM Impl
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsrm-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging Implementation" -i "wsrm-impl" -P "wsrx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging Implementation" -i "wsrm-impl" -P "wsrx-project" -p ./poms/wsrm-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/rx/rm"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="rm"
@@ -199,11 +196,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsmc-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MakeConnection API" -i "wsmc-api" -P "wsrx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/rx/mc/api:\
-com/sun/xml/ws/rx/mc/MakeConnectionSupported.java:\
-com/sun/xml/ws/rx/mc/MakeConnectionSupportedFeature.java:\
-com/sun/xml/ws/rx/mc/MakeConnectionSupportedFeatureBuilder.java:\
-com/sun/xml/ws/rx/mc/McVersion.java"
+SRC_ARTIFACTS="com/sun/xml/ws/rx/mc/api:com/sun/xml/ws/rx/mc/dev"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
@@ -211,7 +204,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-MC Impl
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsmc-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MakeConnection Implementation" -i "wsmc-impl" -P "wsrx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MakeConnection Implementation" -i "wsmc-impl" -P "wsrx-project" -p ./poms/wsmc-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/rx/mc"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -222,7 +215,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # TODO: split into submodules
 #
 SX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-sx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p ./poms/wssx-project.xml
 #
 # WSIT WS-Security implementation
 #
@@ -257,7 +250,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-SecureConversation API
 #
 MODULE_ROOT="$SX_MODULE_ROOT/wssc-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecureConversation API" -i "wssc-api" -P "wssx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SecureConversation API" -i "wssc-api" -P "wssx-project" -p ./poms/wssc-api-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/api/security/secconv"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -287,7 +280,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-Trust API
 #
 MODULE_ROOT="$SX_MODULE_ROOT/wstrust-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust API" -i "wstrust-api" -P "wssx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-Trust API" -i "wstrust-api" -P "wssx-project" -p ./poms/wstrust-api-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/api/security/trust:\
 com/sun/xml/ws/security/trust:\
@@ -295,6 +288,9 @@ com/sun/xml/ws/security/trust/elements"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+echo "TODO: remove the need to manually install xmldsig.jar - which is a missing xwss dependency"
+echo "      mvn install:install-file -DgroupId=javax.xml.crypto -DartifactId=xmldsig -Dversion=1.0 -Dpackaging=jar -Dfile=/path/to/file"
+
 
 #
 # WSIT WS-TX Parent project
