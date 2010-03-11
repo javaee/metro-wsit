@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -48,6 +48,7 @@ import com.sun.xml.ws.transport.tcp.util.ChannelContext;
 import com.sun.xml.ws.transport.tcp.util.TCPConstants;
 import com.sun.xml.ws.transport.tcp.util.WSTCPError;
 import com.sun.xml.ws.transport.tcp.util.WSTCPException;
+import com.sun.xml.ws.util.Pool;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -71,13 +72,14 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
     
     public void handle(@NotNull final ChannelContext channelContext) throws IOException, WSTCPException {
         final TCPConnectionImpl connection = new TCPConnectionImpl(channelContext);
-        
-        final TCPToolkit tk = pool.take();
+
+        final Pool<TCPToolkit> currentPool = getPool();
+        final TCPToolkit tk = currentPool.take();
         try {
             tk.handle(connection);
             connection.flush();
         } finally {
-            pool.recycle(tk);
+            currentPool.recycle(tk);
             connection.close();
         }
     }
@@ -113,7 +115,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
             isClosed = false;
             
             final InputStream in = connection.openInput();
-            final Codec codec = getCodec(connection.getChannelContext());
+            final Codec currentCodec = getCodec(connection.getChannelContext());
             
             String ct = connection.getContentType();
             if (logger.isLoggable(Level.FINE)) {
@@ -121,7 +123,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
             }
             
             Packet packet = new Packet();
-            codec.decode(in, ct, packet);
+            currentCodec.decode(in, ct, packet);
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1091_TCP_ADAPTER_DECODED());
             }
@@ -132,7 +134,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
                 return;
             }
             
-            ct = codec.getStaticContentType(packet).getContentType();
+            ct = currentCodec.getStaticContentType(packet).getContentType();
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, MessagesMessages.WSTCP_1092_TCP_ADAPTER_RPL_CONTENT_TYPE(ct));
             }
@@ -146,7 +148,7 @@ public class TCPAdapter extends Adapter<TCPAdapter.TCPToolkit> {
                     }
                     connection.setStatus(TCPConstants.ONE_WAY);
                 } else {
-                    codec.encode(packet, connection.openOutput());
+                    currentCodec.encode(packet, connection.openOutput());
                 }
             }
         }

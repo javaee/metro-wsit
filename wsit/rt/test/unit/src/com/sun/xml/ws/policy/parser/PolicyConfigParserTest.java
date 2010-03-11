@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,8 +36,6 @@
 
 package com.sun.xml.ws.policy.parser;
 
-import com.sun.xml.ws.policy.parser.PolicyConfigParser;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyConstants;
@@ -48,6 +46,7 @@ import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.testutils.PolicyResourceLoader;
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.getResourceUrl;
 import static com.sun.xml.ws.policy.testutils.PolicyResourceLoader.loadPolicy;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -82,7 +81,7 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseContainerNullWithoutConfig() {
         try {
-            PolicyMap result = PolicyConfigParser.parse((String) null, null);
+            PolicyMap result = PolicyConfigParser.parse(null, null);
             fail("Expected PolicyException, got result = " + result);
         } catch (PolicyException e) {
             // Expected exception
@@ -91,8 +90,8 @@ public class PolicyConfigParserTest extends TestCase {
     
     public void testParseContainerWithoutContextWithoutConfig() {
         try {
-            Container container = new MockContainer(null);        
-            PolicyMap result = PolicyConfigParser.parse((String) null, container);
+            Container container = new MockContainer(null);
+            PolicyMap result = PolicyConfigParser.parse(null, container);
             fail("Expected PolicyException, got result = " + result);
         } catch (PolicyException e) {
             // Expected exception
@@ -156,14 +155,11 @@ public class PolicyConfigParserTest extends TestCase {
         testLoadedMap(map);
     }
     
-    /**
-     * Test of parse method, of class com.sun.xml.ws.policy.jaxws.PolicyConfigParser.
-     */
     public void testParseURLNull() throws Exception {
         PolicyMap result = null;
         
         try {
-            result = PolicyConfigParser.parse((URL) null, false);
+            result = PolicyConfigParser.parse(null, false);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException e) {
         }
@@ -188,8 +184,6 @@ public class PolicyConfigParserTest extends TestCase {
     }
     
     public void testParseBufferSingleImport() throws Exception {
-        WSDLModel result = null;
-        
         PolicyMap map = parseConfigFile("config/single-import.wsdl");
         assertNotNull(map);
         
@@ -247,7 +241,7 @@ public class PolicyConfigParserTest extends TestCase {
     public void testParseBufferExternalReference() throws Exception {
         try {
             parseConfigFile("config/service.wsdl");
-            assert false; // should throw "failed to find policy" exception
+            fail("Expected a WebServiceException");
         } catch (WebServiceException wse) {
         }
     }
@@ -339,7 +333,7 @@ public class PolicyConfigParserTest extends TestCase {
                  + "\nexpected policy 1 = " + expectedPolicy1 + "\n expected policy 2 = " + expectedPolicy2);
         }
     }
-    
+
     private PolicyMap parseConfigFile(String configFile) throws Exception {
         URL url = PolicyUtils.ConfigFile.loadFromClasspath(PolicyResourceLoader.POLICY_UNIT_TEST_RESOURCE_ROOT + configFile);
         return PolicyConfigParser.parse(url, true);
@@ -347,8 +341,13 @@ public class PolicyConfigParserTest extends TestCase {
 
     /**
      * Copy a file
+     *
+     * @param sourceName source file name
+     * @param destPath destination path
+     * @param destName destination file name
+     * @throws IOException Thrown if copy failed
      */
-    private static final void copyFile(String sourceName, String destPath, String destName) throws IOException {
+    private static void copyFile(String sourceName, String destPath, String destName) throws IOException {
         FileChannel source = null;
         FileChannel dest = null;
         try {
@@ -400,7 +399,7 @@ public class PolicyConfigParserTest extends TestCase {
     class MockContainer extends Container {
         private final Object spi;
         
-        public <T> MockContainer(T spi) {
+        public MockContainer(Object spi) {
             this.spi = spi;
         }
         
