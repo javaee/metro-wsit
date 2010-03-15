@@ -552,6 +552,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if(isSCRenew(packet)){            
             ctx.isExpired(true);            
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
@@ -603,6 +606,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         ctx.setTimestampTimeout(this.timestampTimeOut);
@@ -622,7 +628,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }else if(isSCCancel(packet)){
                 SecurityPolicyHolder holder = outProtocolPM.get("SC");
                 if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                    holder = outProtocolPM.get("RM");
+                holder = outProtocolPM.get("RM");
                 }
                 policy = holder.getMessagePolicy();
             }else if(isSCRenew(packet)){

@@ -1165,6 +1165,9 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         if(isSCRenew(packet)){            
             ctx.isExpired(true);            
         }
@@ -1475,7 +1478,9 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        
+       if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         

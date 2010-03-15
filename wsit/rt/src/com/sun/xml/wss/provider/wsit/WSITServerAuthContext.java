@@ -563,6 +563,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         //set timestamp timeout
         ctx.setTimestampTimeout(this.timestampTimeOut);
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);

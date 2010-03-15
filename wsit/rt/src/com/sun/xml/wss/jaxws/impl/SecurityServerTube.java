@@ -530,6 +530,9 @@ public class SecurityServerTube extends SecurityTubeBase {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy;
