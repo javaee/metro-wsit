@@ -246,14 +246,14 @@
     <target name="integrate-jaxws-hudson"
             description="integrates latest JAX-WS 2.2 bits in WSIT, meant for internal consumption only">
 
-        <integrate-jaxws jaxws.base.url="http://hudson.sfbay/job/jaxws-ri-2.2/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2/lastSuccessfulBuild"/>
         
     </target>
 
     <target name="integrate-jaxws-bleedingedge-hudson"
             description="integrates latest JAX-WS 2.2 bleedingedge bits in WSIT, meant for internal consumption only">
                 
-        <integrate-jaxws jaxws.base.url="http://hudson.sfbay/job/jaxws-ri-2.2/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2/lastSuccessfulBuild"/>
         
     </target>
     
