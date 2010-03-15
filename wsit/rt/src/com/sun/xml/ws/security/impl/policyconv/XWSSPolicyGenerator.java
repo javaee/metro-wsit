@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -88,9 +88,9 @@ import java.util.logging.Level;
  */
 
 public class XWSSPolicyGenerator {
-    
+
     String _protectionOrder = "";
-    
+
     SignaturePolicy _primarySP  = null;
     EncryptionPolicy _primaryEP = null;
     //current secondary encryption policy
@@ -109,11 +109,11 @@ public class XWSSPolicyGenerator {
     private AlgorithmSuite algSuite = null;
     //true if signed by primary signature
     private boolean signBody = false;
-    
+
     //true if encrypted by primary encryption policy
     private boolean encryptBody = false;
     //private HashSet<Header> signParts  = new HashSet<Header>();
-    
+
     private Vector<SignedParts> signedParts = new Vector<SignedParts>();
     private Vector<EncryptedParts> encryptedParts = new Vector<EncryptedParts>();
     private Vector<SignedElements> signedElements = new Vector<SignedElements>();
@@ -128,7 +128,7 @@ public class XWSSPolicyGenerator {
     private boolean isIssuedTokenAsEncryptedSupportingToken = false;
     /** Creates a new instance of WSPolicyProcessorImpl */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
-    public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming, 
+    public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming,
             SecurityPolicyVersion spVersion){
         this.effectivePolicy = effectivePolicy;
         this._policyContainer = new XWSSPolicyContainer(isServer,isIncoming);
@@ -136,7 +136,7 @@ public class XWSSPolicyGenerator {
         this.isIncoming = isIncoming;
         this.spVersion = spVersion;
     }
-    
+
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming){
         this.effectivePolicy = effectivePolicy;
         this._policyContainer = new XWSSPolicyContainer(isServer,isIncoming);
@@ -144,20 +144,20 @@ public class XWSSPolicyGenerator {
         this.isIncoming = isIncoming;
         this.spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     }
-    
+
     public AlgorithmSuite getBindingLevelAlgSuite(){
         if(_binding != null)
             return _binding.getAlgorithmSuite();
-        else 
+        else
             return new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
     }
-    
+
     public void process(boolean ignoreST) throws PolicyException {
         this.ignoreST = ignoreST;
         process();
     }
-    
-    
+
+
     public void process() throws PolicyException {
         collectPolicies();
         PolicyAssertion binding = (PolicyAssertion)getBinding();
@@ -181,13 +181,13 @@ public class XWSSPolicyGenerator {
             processNonBindingAssertions(tbp);
             transportBinding = true;
         }else{
-            
+
             iAP = new IntegrityAssertionProcessor(_binding.getAlgorithmSuite(),_binding.isSignContent());
             eAP = new EncryptionAssertionProcessor(_binding.getAlgorithmSuite(),false);
-            
+
             _policyContainer.setPolicyContainerMode(_binding.getLayout());
             if(PolicyUtil.isSymmetricBinding(binding.getName(), spVersion)) {
-                
+
                 if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE, "SymmetricBinding was configured in the policy");
                 }
@@ -200,9 +200,9 @@ public class XWSSPolicyGenerator {
                 sbp.process();
                 processNonBindingAssertions(sbp);
                 sbp.close();
-                
+
             }else if(PolicyUtil.isAsymmetricBinding(binding.getName(), spVersion) ){
-                
+
                 if(logger.isLoggable(Level.FINE)){
                     logger.log(Level.FINE, "AsymmetricBinding was configured in the policy");
                 }
@@ -218,11 +218,15 @@ public class XWSSPolicyGenerator {
             }
         }
     }
-    
+
     public MessagePolicy getXWSSPolicy()throws PolicyException{
         MessagePolicy mp = null;
         try{
-            mp = _policyContainer.getMessagePolicy();
+            if (wssAssertion != null) {
+                mp = _policyContainer.getMessagePolicy(PolicyUtil.isWSS11(wssAssertion, spVersion));
+            } else {
+                mp = _policyContainer.getMessagePolicy(false);
+            }
         }catch(PolicyGenerationException ex){
             logger.log(Level.SEVERE,""+effectivePolicy,ex);
             throw new PolicyException("Unable to digest SecurityPolicy ");
@@ -257,7 +261,7 @@ public class XWSSPolicyGenerator {
         }
         return mp;
     }
-    
+
     private void processNonBindingAssertions(BindingProcessor bindingProcessor) throws PolicyException{
         for(AssertionSet assertionSet: effectivePolicy){
             for(PolicyAssertion assertion:assertionSet){
@@ -295,11 +299,11 @@ public class XWSSPolicyGenerator {
             }
         }
     }
-    
+
     private Binding getBinding(){
         return _binding;
     }
-    
+
     private void collectPolicies(){
         for(AssertionSet assertionSet: effectivePolicy){
             for(PolicyAssertion assertion:assertionSet){
@@ -327,38 +331,38 @@ public class XWSSPolicyGenerator {
             }
         }
     }
-    
+
     private boolean shouldAddST(){
         if(isServer && !isIncoming){
             return false;
         }
-        
+
         if(!isServer && isIncoming){
             return false;
         }
         return true;
     }
-    
+
     protected com.sun.xml.wss.impl.AlgorithmSuite getAlgoSuite(AlgorithmSuite suite) {
         com.sun.xml.wss.impl.AlgorithmSuite als = new com.sun.xml.wss.impl.AlgorithmSuite(
                 suite.getDigestAlgorithm(),
                 suite.getEncryptionAlgorithm(),
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-        
+       
         return als;
     }
-    
+
     protected com.sun.xml.wss.impl.WSSAssertion getWssAssertion(WSSAssertion asser) {
         com.sun.xml.wss.impl.WSSAssertion assertion = new com.sun.xml.wss.impl.WSSAssertion(
                 asser.getRequiredProperties(),
                 asser.getType());
         return assertion;
     }
-    
+
     protected com.sun.xml.wss.impl.MessageLayout getLayout(
             com.sun.xml.ws.security.policy.MessageLayout layout) {
-        
+
         switch(layout) {
             case Strict :{
                 if(logger.isLoggable(Level.FINE)){
@@ -391,13 +395,13 @@ public class XWSSPolicyGenerator {
             }
         }
     }
-    
+
     public boolean isIssuedTokenAsEncryptedSupportingToken(){
         return this.isIssuedTokenAsEncryptedSupportingToken;
     }
-    
+
     private void isIssuedTokenAsEncryptedSupportingToken(boolean value){
         this.isIssuedTokenAsEncryptedSupportingToken = value;
     }
-    
+
 }

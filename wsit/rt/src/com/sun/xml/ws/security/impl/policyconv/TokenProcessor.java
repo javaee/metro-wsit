@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -351,26 +351,39 @@ public class TokenProcessor {
         boolean change = false;
         SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
         String iTokenType = token.getIncludeToken();
-        if(this.isServer && !isIncoming){
-            if(!spVersion.includeTokenAlways.equals(iTokenType)){
+        if (this.isServer && !isIncoming) {
+            if (!spVersion.includeTokenAlways.equals(iTokenType)) {
+                if (iTokenType.endsWith("AlwaysToInitiator")) {
+                    xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.log(Level.FINEST, "Token Inclusion value of INCLUDE ONCE has been set to Token" + xwssToken);
+                    }
+                    return;
+                } else {
+                    xwssToken.setIncludeToken(spVersion.includeTokenNever);
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.log(Level.FINEST, "Token Inclusion value of INCLUDE NEVER has been set to Token" + xwssToken);
+                    }
+                    return;
+                }
+            }
+        } else if (!this.isServer && isIncoming) {
+            if (spVersion.includeTokenAlwaysToRecipient.equals(iTokenType) ||
+                    spVersion.includeTokenOnce.equals(iTokenType)) {
                 xwssToken.setIncludeToken(spVersion.includeTokenNever);
-                if(logger.isLoggable(Level.FINEST)){
-                    logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "Token Inclusion value of INCLUDE NEVER has been set to Token" + xwssToken);
                 }
                 return;
-            }
-        }else if(!this.isServer && isIncoming){
-            if(spVersion.includeTokenAlwaysToRecipient.equals(iTokenType) ||
-                    spVersion.includeTokenOnce.equals(iTokenType)){
-                xwssToken.setIncludeToken(spVersion.includeTokenNever);
-                
-                if(logger.isLoggable(Level.FINEST)){
-                    logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
+            } else if (iTokenType.endsWith("AlwaysToInitiator")) {
+                xwssToken.setIncludeToken(spVersion.includeTokenAlwaysToRecipient);
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.log(Level.FINEST, "Token Inclusion value of INCLUDE ONCE has been set to Token" + xwssToken);
                 }
                 return;
             }
         }
-        
+
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST,"Token Inclusion value of"+iTokenType+" has been set to Token"+ xwssToken);
         }
@@ -386,6 +399,8 @@ public class TokenProcessor {
                 xwssToken.setIncludeToken(spVersion.includeTokenNever);
             } else if(spVersion.includeTokenOnce.equals(iTokenType)){
                 xwssToken.setIncludeToken(spVersion.includeTokenOnce);
+            } else if (iTokenType.endsWith("AlwaysToInitiator")) {
+                xwssToken.setIncludeToken(spVersion.includeTokenNever);
             }
         }
     }
