@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -79,7 +79,6 @@ import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.SubjectAccessor;
-import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
@@ -602,10 +601,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             }
             ctx.setSecurityEnvironment(secEnv);
-            ctx.isInboundMessage(false);
-            if (serverCert != null) {
-               ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
-            }
+            ctx.isInboundMessage(false);          
             @SuppressWarnings("unchecked")
             Map<Object, Object> extProps = ctx.getExtraneousProperties();
             extProps.put(WSITServerAuthContext.WSDLPORT,pipeConfig.getWSDLPort());
