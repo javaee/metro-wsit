@@ -135,7 +135,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     private Set wsscConfig = null;
     private Set<PolicyAssertion> configAssertions = null;
     Properties props = new Properties();
-    private ClientTubelineAssemblyContext wsitContext;
+    private ClientTubelineAssemblyContext wsitContext;    
 
     // Creates a new instance of SecurityClientTube
     @SuppressWarnings("unchecked")
@@ -213,33 +213,16 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             if (bstValue != null) {
                                 certificate = cr.constructCertificate(bstValue);                               
                             }
-                            boolean valid = false;
-                            try {
-                                if(certificate != null){
-                                     valid = secEnv.validateCertificate(certificate, null);
-                                }
-                            } catch (WssSoapFaultException ex) {
-                                //log.log(Level.WARNING, "exception during validating the server certificate");
-                            }
-                            if (valid) {
-                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
-                                 props.put(PipeConstants.SERVER_CERT, certificate);
-                                 this.serverCert = certificate;
-                            }else{
-                                if(bstValue != null){
-                                 log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it");
-                                }
-                            }
+                             props.put(PipeConstants.SERVER_CERT, certificate);
+                             this.serverCert = certificate;                            
                         }
                     } catch (XMLStreamException ex) {
                         log.log(Level.WARNING, ex.getMessage());
                         //throw new RuntimeException(ex);
-                    } catch (XWSSecurityException ex) {
-                        log.log(Level.WARNING,ex.getMessage());
-                    }
+                    } 
                 }
             } else {
-                log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
+                //log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
                 props.put(PipeConstants.SERVER_CERT, x509Cert);
                 this.serverCert = x509Cert;
             }
@@ -642,8 +625,16 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     
                     // put the server certificate, if available, in the configuration
                     X509Certificate serverCert = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
-                    if (serverCert != null){
-                        config.getOtherOptions().put("Identity", serverCert);
+                     // and make sure the  validition of the server certificate happens only once
+                    if (serverCert != null) {
+                        if (isCertValidityVerified == false) {
+                            CertificateRetriever cr = new CertificateRetriever();
+                            cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
+                            cr = null;
+                            isCertValidityVerified = true;
+                        }else {
+                            config.getOtherOptions().put("Identity", serverCert);
+                        }
                     }
 
                     // get entries from run time configuration

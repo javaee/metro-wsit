@@ -82,6 +82,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -231,6 +232,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected long timestampTimeOut = 0;
     protected int iterationsForPDK = 0;
     protected boolean isEPREnabled = false;
+    protected boolean isCertValidityVerified = false;
     /**
      * Constants for RM Security Processing
      */
@@ -347,6 +349,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.timestampTimeOut = that.timestampTimeOut;
         this.iterationsForPDK = that.iterationsForPDK;
         this.serverCert = that.serverCert;
+        this.isCertValidityVerified = that.isCertValidityVerified;
         try {            
             this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
             this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
@@ -560,8 +563,16 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setiterationsForPDK(this.iterationsForPDK);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        //set the server certificate in the context ;
         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            }
         }
         // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
@@ -616,10 +627,17 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        //set the server certificate in the context ;
         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            }
         }
-        
         try {
             MessagePolicy policy  ;
             if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
@@ -1725,5 +1743,5 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 encRMLifecycleMsg = true;
             }
         }
-    }
+    }      
 }

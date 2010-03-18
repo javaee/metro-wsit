@@ -167,7 +167,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     WSITClientAuthModule authModule = null;  
     private Hashtable<String, String> scPolicyIDtoSctIdMap = new Hashtable<String, String>();
     protected WeakReference<WSITClientAuthConfig> authConfig;
-    protected WeakReference<Object> tubeOrPipe;
+    protected WeakReference<Object> tubeOrPipe;    
 
 
     
@@ -699,7 +699,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             WSBindingProvider bpr = context.getBindingProvider();
             x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
             if (x509Cert != null) {
-                log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
+                //log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
                 return x509Cert;
             }
         }
@@ -720,29 +720,12 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                             if (bstValue != null) {
                                 certificate = cr.constructCertificate(bstValue);
                             }
-                            boolean valid = false;
-                            try {
-                                if(certificate != null){
-                                     valid = secEnv.validateCertificate(certificate, null);
-                                }
-                            } catch (WssSoapFaultException ex) {
-                                //log.log(Level.WARNING, "exception during validating the server certificate");
-                            }
-                            if (valid) {
-                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
-                                 return certificate;
-                            }else{
-                                if(bstValue != null){
-                                 log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it");
-                                }
-                            }
+                            return certificate;                           
                         }
                 } catch (XMLStreamException ex) {
                     log.log(Level.WARNING, ex.getMessage());
                     //throw new RuntimeException(ex);
-                } catch (XWSSecurityException ex) {
-                    log.log(Level.WARNING, ex.getMessage());
-                }
+                } 
             }
           return null;
         }
@@ -859,10 +842,17 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                     config.getOtherOptions().putAll(packet.invocationProperties);
 
                     // put the server certificate, if available, in the configuration
-                    if (serverCert != null){
-                        config.getOtherOptions().put("Identity", serverCert);
+                    // and make sure the  validition of the server certificate happens only once
+                    if (serverCert != null) {
+                        if (isCertValidityVerified == false) {
+                            CertificateRetriever cr = new CertificateRetriever();
+                            cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
+                            cr = null;
+                            isCertValidityVerified = true;
+                        }else {
+                            config.getOtherOptions().put("Identity", serverCert);
+                        }
                     }
-
                     // get entries from run time configuration
                     if (rtConfig != null){
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);
