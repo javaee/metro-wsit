@@ -91,7 +91,6 @@ public class RMPolicyResolver {
             }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && (RmProtocolVersion.WSRM200702 == rmVersion )){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
-            
             model = unmarshalPolicy("com/sun/xml/ws/security/impl/policyconv/" + rmMessagePolicy);
         }catch (IOException ex) {
             throw new PolicyException(ex);

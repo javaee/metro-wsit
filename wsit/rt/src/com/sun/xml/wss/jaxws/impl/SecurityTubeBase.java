@@ -173,6 +173,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
 
     private final QName EPREnabled = new QName("http://schemas.sun.com/2006/03/wss/server","EnableEPRIdentity");
+    private final QName encSCServerCancel = new QName("http://schemas.sun.com/2006/03/wss/server","EncSCCancel");
+    private final QName encSCClientCancel = new QName("http://schemas.sun.com/2006/03/wss/client","EncSCCancel");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     private final QName disableSPBuffering = new QName("http://schemas.sun.com/2006/03/wss/server","DisablePayloadBuffering");
@@ -264,6 +266,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     //flag used as temporary variable for each run
     //boolean isTrustOrSCMessage = false;
     protected X509Certificate serverCert = null;
+    private boolean encryptCancelPayload = false;
+    private Policy cancelMSP;
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -280,7 +284,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     public SecurityTubeBase(TubeConfiguration config, Tube nextTube) {
-        super(nextTube);        
+        super(nextTube);
         this.tubeConfig = config;
         this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
         this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
@@ -350,6 +354,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.iterationsForPDK = that.iterationsForPDK;
         this.serverCert = that.serverCert;
         this.isCertValidityVerified = that.isCertValidityVerified;
+        this.cancelMSP = that.cancelMSP;
+        this.encryptCancelPayload = that.encryptCancelPayload;
         try {            
             this.marshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createMarshaller();
             this.unmarshaller = WSTrustElementFactory.getContext(this.wsTrustVer).createUnmarshaller();            
@@ -644,10 +650,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
-                //commented the below if() to make IBM RSP test case to pass
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
+                //commented the below if() to make IBM RSP test case to pass               
                 /*if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                holder = outProtocolPM.get("RM");
+                    holder = outProtocolPM.get("RM");
                 }*/
                 policy = holder.getMessagePolicy();
             }else if(isSCRenew(packet)){
@@ -1255,6 +1261,14 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             Policy ep = pm.merge(pList);
             addIncomingProtocolPolicy(ep,"SC");
             addOutgoingProtocolPolicy(ep,"SC");
+            ArrayList<Policy> pList1 = new ArrayList<Policy>(2);
+            pList1.add(endpointPolicy);
+            pList1.add(getSCCancelPolicy(encryptCancelPayload));
+            PolicyMerger pm1 = PolicyMerger.getMerger();
+            //add secure conversation policy.
+            Policy ep1 = pm1.merge(pList1);
+            addIncomingProtocolPolicy(ep1,"SC-CANCEL");
+            addOutgoingProtocolPolicy(ep1,"SC-CANCEL");
         }catch(IOException ie){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSTUBE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
@@ -1699,6 +1713,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             if (policy.contains(EPREnabled)){
                 isEPREnabled = true;
             }
+            if (policy.contains(encSCServerCancel) || policy.contains(encSCClientCancel)) {
+                this.encryptCancelPayload = true;
+            }
             if (policy.contains(disableCPBuffering) || policy.contains(disableSPBuffering)) {
                 disablePayloadBuffer = true;
             }
@@ -1743,5 +1760,19 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 encRMLifecycleMsg = true;
             }
         }
-    }      
+    }
+
+    private Policy getSCCancelPolicy(boolean encryptCancelPayload) throws PolicyException, IOException{
+      if(cancelMSP == null){
+
+            String scCancelMessagePolicy = encryptCancelPayload ? "enc-sccancel-msglevel-policy.xml" :"sccancel-msglevel-policy.xml" ;
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
+                scCancelMessagePolicy = encryptCancelPayload ? "enc-sccancel-msglevel-policy-sx.xml" :"sccancel-msglevel-policy-sx.xml" ;
+            }
+            PolicySourceModel model =  unmarshalPolicy(
+                    "com/sun/xml/ws/security/impl/policyconv/"+ scCancelMessagePolicy);
+            cancelMSP = ModelTranslator.getTranslator().translate(model);
+        }
+        return cancelMSP;
+    }
 }

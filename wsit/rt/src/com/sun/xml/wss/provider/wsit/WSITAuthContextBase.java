@@ -177,6 +177,8 @@ public abstract class WSITAuthContextBase  {
     //protected static QName bsOperationName =
     //        new QName("http://schemas.xmlsoap.org/ws/2005/02/trust","RequestSecurityToken");
     private final QName EPREnabled = new QName("http://schemas.sun.com/2006/03/wss/server","EnableEPRIdentity");
+    private final QName encSCServerCancel = new QName("http://schemas.sun.com/2006/03/wss/server","EncSCCancel");
+    private final QName encSCClientCancel = new QName("http://schemas.sun.com/2006/03/wss/client","EncSCCancel");
     private final QName optServerSecurity = new QName("http://schemas.sun.com/2006/03/wss/server","DisableStreamingSecurity");
     private final QName optClientSecurity = new QName("http://schemas.sun.com/2006/03/wss/client","DisableStreamingSecurity");
     
@@ -272,6 +274,8 @@ public abstract class WSITAuthContextBase  {
     protected static final String WSENDPOINT="WSEndpoint";
     protected X509Certificate serverCert = null;
     protected boolean isCertValidityVerified = false;
+     private boolean encryptCancelPayload = false;
+     private Policy cancelMSP;
     
     static {
         try {
@@ -286,7 +290,7 @@ public abstract class WSITAuthContextBase  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
+    }   
     
     /** Creates a new instance of WSITAuthContextBase */
     public WSITAuthContextBase(Map<Object, Object> map) {
@@ -483,6 +487,9 @@ public abstract class WSITAuthContextBase  {
                 }
                 if (policy.contains(EPREnabled)) {
                     isEPREnabled = true;
+                }
+                if (policy.contains(encSCServerCancel) || policy.contains(encSCClientCancel)) {
+                 this.encryptCancelPayload = true;
                 }
                 if (policy.contains(disableIncPrefixServer) || policy.contains(disableIncPrefixClient)){
                     disableIncPrefix = true;
@@ -968,6 +975,14 @@ public abstract class WSITAuthContextBase  {
             Policy ep = pm.merge(pList);
             addIncomingProtocolPolicy(ep,"SC");
             addOutgoingProtocolPolicy(ep,"SC");
+             ArrayList<Policy> pList1 = new ArrayList<Policy>(2);
+            pList1.add(endpointPolicy);
+            pList1.add(getSCCancelPolicy(encryptCancelPayload));
+            PolicyMerger pm1 = PolicyMerger.getMerger();
+            //add secure conversation policy.
+            Policy ep1 = pm1.merge(pList1);
+            addIncomingProtocolPolicy(ep1,"SC-CANCEL");
+            addOutgoingProtocolPolicy(ep1,"SC-CANCEL");
         }catch(IOException ie){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSITPVD_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
@@ -1516,7 +1531,7 @@ public abstract class WSITAuthContextBase  {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else if(isSCRenew(packet)){
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
@@ -1734,7 +1749,21 @@ public abstract class WSITAuthContextBase  {
     @SuppressWarnings("unchecked")
     protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
         messageInfo.getMap().put(RES_PACKET, ret);
-    }        
+    }
+
+    private Policy getSCCancelPolicy(boolean encryptCancelPayload) throws PolicyException, IOException{
+      if(cancelMSP == null){
+
+            String scCancelMessagePolicy = encryptCancelPayload ? "enc-sccancel-msglevel-policy.xml" :"sccancel-msglevel-policy.xml" ;
+            if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri)){
+                scCancelMessagePolicy = encryptCancelPayload ? "enc-sccancel-msglevel-policy-sx.xml" :"sccancel-msglevel-policy-sx.xml" ;
+            }
+            PolicySourceModel model =  unmarshalPolicy(
+                    "com/sun/xml/ws/security/impl/policyconv/"+ scCancelMessagePolicy);
+            cancelMSP = ModelTranslator.getTranslator().translate(model);
+        }
+        return cancelMSP;
+    }
     
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
