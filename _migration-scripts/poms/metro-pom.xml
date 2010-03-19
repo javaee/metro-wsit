@@ -338,7 +338,7 @@
     <properties>
         <metro.group.id>net.java.metro</metro.group.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <istack.version>1.1-SNAPSHOT</istack.version>
+        <istack.version>2.2</istack.version>
         <jaxb.version>2.2</jaxb.version>
         <jaxws.version>2.2-SNAPSHOT</jaxws.version>
         <policy.version>2.0</policy.version>
