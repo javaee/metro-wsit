@@ -261,10 +261,11 @@
             description="integrate the last successful XWSS 3.0 Hudson build">
         <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
          dest="lib/xws-security.src.zip" / -->
+         <!--commenting so that build won't fail but it should not integrate anymore since XWSS source has moved to WSIT
         <get src="http://hudson.sfbay.sun.com/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
              dest="lib/runtime/xws-security.jar" />
         <get src="http://hudson.sfbay.sun.com/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
-             dest="lib/runtime/xws-security.src.zip" />
+             dest="lib/runtime/xws-security.src.zip" /> -->
     </target>
 
     <target name="integrate-jaxrpc"
