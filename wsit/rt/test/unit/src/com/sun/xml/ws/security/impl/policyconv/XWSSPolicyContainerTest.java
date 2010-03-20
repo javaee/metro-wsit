@@ -118,7 +118,7 @@ public class XWSSPolicyContainerTest extends TestCase {
         container.insert(tp);
         container.insert(atp);
         
-        print(container.getMessagePolicy(false));
+        print(container.getMessagePolicy());
         
         System.out.println("\n\n\n-------------------------\n");
         
@@ -162,7 +162,7 @@ public class XWSSPolicyContainerTest extends TestCase {
         container.insert(tp);
         container.insert(atp);
         
-        print(container.getMessagePolicy(false));
+        print(container.getMessagePolicy());
         
         System.out.println("\n\n\n-------------------------\n");
         
@@ -206,7 +206,7 @@ public class XWSSPolicyContainerTest extends TestCase {
         container.insert(tp);
         container.insert(atp);
         
-        print(container.getMessagePolicy(false));
+        print(container.getMessagePolicy());
         
         System.out.println("\n\n\n-------------------------\n");
         
@@ -250,7 +250,7 @@ public class XWSSPolicyContainerTest extends TestCase {
         container.insert(tp);
         container.insert(atp);
         
-        print(container.getMessagePolicy(false));
+        print(container.getMessagePolicy());
         
         System.out.println("\n\n\n-------------------------\n");
         

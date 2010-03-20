@@ -1,7 +1,7 @@
 /*
  *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- *  Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ *  Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  * 
  *  The contents of this file are subject to the terms of either the GNU
  *  General Public License Version 2 only ("GPL") or the Common Development
@@ -35,8 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.policy.wsrm200702;
 
-import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.DeliveryAssurance;
-import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.SecurityBinding;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.DeliveryAssurance;
+import com.sun.xml.ws.rx.rm.ReliableMessagingFeature.SecurityBinding;
 import com.sun.xml.ws.rx.testutil.ResourceLoader;
 import junit.framework.TestCase;
 

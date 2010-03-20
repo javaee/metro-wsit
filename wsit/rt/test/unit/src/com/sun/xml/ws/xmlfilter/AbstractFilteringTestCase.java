@@ -54,7 +54,7 @@ import junit.framework.TestCase;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-abstract class AbstractFilteringTestCase extends TestCase {
+class AbstractFilteringTestCase extends TestCase { // must not be abstract to avoid JUnit warnings
     private static final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);    
     
     /** Creates a new instance of AbstractFilteringTestCase */

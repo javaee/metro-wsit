@@ -201,10 +201,10 @@ public class SequenceDataTest extends TestCase {
             assertEquals(newLastMessageNumber, instance.getLastMessageNumber());
             assertEquals(expectedLastMessageNumber, newLastMessageNumber);
 
-            instance.registerReceivedUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 1);
+            instance.registerUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 1, true);
 
             try {
-                instance.registerReceivedUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 2);
+                instance.registerUnackedMessageNumber(INITIAL_LAST_MESSAGE_NUMBER + 2, true);
                 fail("DuplicateMessageRegistrationException expected here");
             } catch (DuplicateMessageRegistrationException ex) {
                 // passed test
@@ -222,13 +222,13 @@ public class SequenceDataTest extends TestCase {
         for (SequenceData instance : instances) {
             // Test bumping up last message number if the new number exceeds last message number
             long oldLastMessageNumber = instance.getLastMessageNumber();
-            instance.registerReceivedUnackedMessageNumber(instance.getLastMessageNumber() + 1);
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
             assertEquals(oldLastMessageNumber + 1, instance.getLastMessageNumber());
             assertEquals(1, instance.getUnackedMessageNumbers().size());
 
             // Test filling in gaps
             oldLastMessageNumber = instance.getLastMessageNumber();
-            instance.registerReceivedUnackedMessageNumber(instance.getLastMessageNumber() + 10);
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 10, true);
             assertEquals(oldLastMessageNumber + 10, instance.getLastMessageNumber());
             assertEquals(11, instance.getUnackedMessageNumbers().size());
 
@@ -242,19 +242,19 @@ public class SequenceDataTest extends TestCase {
             }
 
             try {
-                instance.registerReceivedUnackedMessageNumber(unacked.get(0));
+                instance.registerUnackedMessageNumber(unacked.get(0), true);
                 fail("DuplicateMessageRegistrationException expected here");
             } catch (DuplicateMessageRegistrationException ex) {
                 // passed test
             }
             try {
-                instance.registerReceivedUnackedMessageNumber(unacked.get(unacked.size() - 1));
+                instance.registerUnackedMessageNumber(unacked.get(unacked.size() - 1), true);
                 fail("DuplicateMessageRegistrationException expected here");
             } catch (DuplicateMessageRegistrationException ex) {
                 // passed test
             }
             for (int i = 1; i < unacked.size() - 1; i++) {
-                instance.registerReceivedUnackedMessageNumber(unacked.get(i)); // marking the automatically filled in numbers as received should pass
+                instance.registerUnackedMessageNumber(unacked.get(i), true); // marking the automatically filled in numbers as received should pass
             }
 
             int ackedCount = 0;
@@ -323,7 +323,7 @@ public class SequenceDataTest extends TestCase {
 
             oldLastActivityTime = instance.getLastActivityTime();
             Thread.sleep(SLEEP_TIME);
-            instance.registerReceivedUnackedMessageNumber(instance.getLastMessageNumber() + 1);
+            instance.registerUnackedMessageNumber(instance.getLastMessageNumber() + 1, true);
             assertLowerThan(oldLastActivityTime, instance.getLastActivityTime());
 
             oldLastActivityTime = instance.getLastActivityTime();
