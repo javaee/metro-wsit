@@ -310,7 +310,10 @@
                 <include name="jaxr-api.jar"/>
                 <exclude name="gmbal*.jar"/>
                 <exclude name="management-api*.jar"/>
-                <exclude name="jaxb*.jar"/>
+                <!--exclude name="jaxb*.jar"/-->
+                <exclude name="jaxb-api.jar"/>
+                <exclude name="jaxb-impl.jar"/>
+                <exclude name="jaxb1-impl.jar"/>
                 <exclude name="jsr173_api.jar"/>
                 <exclude name="woodstox.jar"/>
                 <exclude name="mimepull.jar"/>
