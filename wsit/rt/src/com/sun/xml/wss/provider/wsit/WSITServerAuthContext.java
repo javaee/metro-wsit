@@ -576,7 +576,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);

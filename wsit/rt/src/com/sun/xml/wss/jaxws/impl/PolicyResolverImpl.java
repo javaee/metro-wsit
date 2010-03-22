@@ -133,10 +133,11 @@ public class PolicyResolverImpl implements PolicyResolver{
         }
         
         if(isSCCancel()){
-            SecurityPolicyHolder holder = inProtocolPM.get("SC");
+            SecurityPolicyHolder holder = inProtocolPM.get("SC-CANCEL");
+            /*SecurityPolicyHolder holder = inProtocolPM.get("SC");
             if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                 holder = inProtocolPM.get("RM");
-            }
+            holder = inProtocolPM.get("RM");
+            }*/
             return holder.getMessagePolicy();
         }
         isSCMessage = isSCMessage();

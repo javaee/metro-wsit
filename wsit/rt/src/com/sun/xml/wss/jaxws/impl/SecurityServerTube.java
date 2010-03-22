@@ -542,10 +542,11 @@ public class SecurityServerTube extends SecurityTubeBase {
             } else if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
+                /*SecurityPolicyHolder holder = outProtocolPM.get("SC");
                 if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                    holder = outProtocolPM.get("RM");
-                }
+                holder = outProtocolPM.get("RM");
+                }*/
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
