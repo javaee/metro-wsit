@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -192,11 +192,18 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
      * @param endpoint The WSEndpoint instance. May not be null.
      */
     synchronized public void swapEndpointDelegate(final WSEndpoint<T> endpoint) {
-        // Plug in code that regenerates WSDL when the endpoint was reconfigured
+        // Plug in code that regenerates WSDL when the endpoint was reconfigured.
         final Set<EndpointComponent> endpointComponents = endpoint.getComponentRegistry();
+        // The Set will make sure that there is only one instance of the publisher.
         endpointComponents.add(new ManagedHttpMetadataPublisher());
 
         this.endpointDelegate = endpoint;
+        for (EndpointComponent component : endpointComponents) {
+            final Reconfigurable reconfigurable = component.getSPI(Reconfigurable.class);
+            if (reconfigurable != null) {
+                reconfigurable.reconfigure();
+            }
+        }
         LOGGER.info(ManagementMessages.WSM_5000_RECONFIGURED_ENDPOINT(this.id));
     }
 
