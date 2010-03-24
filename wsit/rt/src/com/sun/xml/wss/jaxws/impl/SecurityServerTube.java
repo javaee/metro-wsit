@@ -526,6 +526,9 @@ public class SecurityServerTube extends SecurityTubeBase {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy;
@@ -535,10 +538,10 @@ public class SecurityServerTube extends SecurityTubeBase {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
-                if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                    holder = outProtocolPM.get("RM");
-                }
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
+                /*if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
+                holder = outProtocolPM.get("RM");
+                }*/
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);

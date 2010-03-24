@@ -422,9 +422,14 @@ public class WSSCPlugin {
                         LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
                 throw new RuntimeException(LogStringsMessages.WSSC_0018_ERR_JAXB_RSTR(), ex);
             }
-            if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-                rstr = eleFac.createRSTRCollectionFrom(rstrEle);    
-            }else{
+            if (wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())) {
+                try {
+                    rstr = eleFac.createRSTRCollectionFrom(rstrEle);
+                } catch (Exception e) {
+                    rstr = eleFac.createRSTRFrom(rstrEle);
+                }
+
+            } else {
                 rstr = eleFac.createRSTRFrom(rstrEle);
             }
         } else {
@@ -758,9 +763,14 @@ public class WSSCPlugin {
     throws WSSecureConversationException {
         WSSCVersion wsscVer = WSSCVersion.getInstance(sctConfig.getProtocol());
         final WSSCClientContract contract = WSSCFactory.newWSSCClientContract();
-        if(wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())){
-            contract.handleRSTRC((RequestSecurityToken)rst, (RequestSecurityTokenResponseCollection)rstr, context);    
-        }else{
+        if (wsscVer.getNamespaceURI().equals(WSSCVersion.WSSC_13.getNamespaceURI())) {
+            try {
+                contract.handleRSTRC((RequestSecurityToken) rst, (RequestSecurityTokenResponseCollection) rstr, context);
+            } catch (Exception ex) {
+                contract.handleRSTR((RequestSecurityToken) rst, (RequestSecurityTokenResponse) rstr, context);
+            }
+
+        } else {
             contract.handleRSTR((RequestSecurityToken)rst, (RequestSecurityTokenResponse)rstr, context);
         }
     }

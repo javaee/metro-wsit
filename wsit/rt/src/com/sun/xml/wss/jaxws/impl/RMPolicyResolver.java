@@ -57,6 +57,7 @@ public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
     RmVersion rmVersion;
+    boolean encrypt = false;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
@@ -68,15 +69,22 @@ public class RMPolicyResolver {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
     }
+
+     public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion, boolean encrypt) {
+        this.spVersion = spVersion;
+        this.rmVersion = rmVersion;
+        this.encrypt = encrypt;
+    }
+
     
     public Policy getOperationLevelPolicy() throws PolicyException{
         PolicySourceModel model;
-        try {
-            String rmMessagePolicy = "rm-msglevel-policy.xml";            
+        try {           
+            String rmMessagePolicy = encrypt ? "rm-msglevel-policy-encrypt.xml" : "rm-msglevel-policy.xml";
             if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200502 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY12NS == spVersion && RmVersion.WSRM200702  == rmVersion){
-                rmMessagePolicy = "rm-msglevel-policy-sx.xml";
+               rmMessagePolicy = encrypt ? "rm-msglevel-policy-sx-encrypt.xml" :"rm-msglevel-policy-sx.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY200507 == spVersion && RmVersion.WSRM200702 == rmVersion){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }

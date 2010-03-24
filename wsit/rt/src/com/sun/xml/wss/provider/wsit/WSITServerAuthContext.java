@@ -563,6 +563,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        if (addVer != null) {
+            ctx.setAction(getAction(packet));
+        }
         //set timestamp timeout
         ctx.setTimestampTimeout(this.timestampTimeOut);
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
@@ -574,7 +577,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC");
+                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);

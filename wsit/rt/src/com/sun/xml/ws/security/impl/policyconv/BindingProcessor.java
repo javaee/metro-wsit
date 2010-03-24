@@ -330,7 +330,7 @@ public abstract class BindingProcessor {
     }
     
     protected boolean requireSC(){
-        if(wss11 != null){
+        if (wss11 != null && wss11.getRequiredProperties() != null) {
             if(wss11.getRequiredProperties().contains(WSSAssertion.REQUIRE_SIGNATURE_CONFIRMATION)){
                 return true;
             }
