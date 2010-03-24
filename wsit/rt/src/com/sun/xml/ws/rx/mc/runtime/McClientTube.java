@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -56,7 +56,6 @@ import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.UUID;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLStreamException;
 
 /**
@@ -69,7 +68,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
     //
     private final McConfiguration configuration;
-    private final Unmarshaller unmarshaller;
     private final Header wsmcAnnonymousReplyToHeader;
     private final Header wsmcAnnonymousFaultToHeader;
     private final Communicator communicator;
@@ -83,7 +81,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
 
         this.configuration = configuration;
 
-        this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
         this.communicator = new Communicator(
                 "McClientTubeCommunicator",
                 endpointAddress,
@@ -91,9 +88,9 @@ public class McClientTube extends AbstractFilterTubeImpl {
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getMcVersion().getJaxbContext(configuration.getAddressingVersion()));
+                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()));
 
-        final String wsmcAnonymousAddress = configuration.getMcVersion().getWsmcAnonymousAddress(UUID.randomUUID().toString());
+        final String wsmcAnonymousAddress = configuration.getRuntimeVersion().getAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
         this.wsmcAnnonymousFaultToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().faultToTag);
@@ -115,8 +112,6 @@ public class McClientTube extends AbstractFilterTubeImpl {
         super(original, cloner);
 
         this.configuration = original.configuration;
-
-        this.unmarshaller = configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion());
 
         this.wsmcAnnonymousReplyToHeader = original.wsmcAnnonymousReplyToHeader;
         this.wsmcAnnonymousFaultToHeader = original.wsmcAnnonymousFaultToHeader;

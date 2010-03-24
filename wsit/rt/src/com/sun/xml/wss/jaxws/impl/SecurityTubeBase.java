@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -80,6 +80,8 @@ import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -87,7 +89,6 @@ import com.sun.xml.ws.security.policy.CallbackHandlerConfiguration;
 import com.sun.xml.ws.security.policy.Validator;
 import com.sun.xml.ws.security.policy.ValidatorConfiguration;
 import com.sun.xml.ws.security.policy.WSSAssertion;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.XWSSecurityException;
@@ -121,7 +122,6 @@ import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.WebServiceException;
 import java.util.Set;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPFault;
@@ -166,7 +166,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected static JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
-    protected RmVersion rmVer = RmVersion.WSRM200502;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.WSRM200502;
+    protected McProtocolVersion mcVer = McProtocolVersion.WSMC200702;
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
 
@@ -251,6 +252,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasMakeConnection = false;
     boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     
@@ -309,7 +311,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         //unmarshaller = jaxbContext.createUnmarshaller();
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, tubeConfig.getWSDLPort());
+        hasReliableMessaging = isReliableMessagingEnabled(tubeConfig.getWSDLPort());
+        hasMakeConnection = isMakeConnectionEnabled(tubeConfig.getWSDLPort());
         //   opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
     }
@@ -332,8 +335,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.addVer = that.addVer;
         this.wsTrustVer = that.wsTrustVer;
         this.wsscVer = that.wsscVer;
-        this.encRMLifecycleMsg = that.encRMLifecycleMsg;
         this.rmVer = that.rmVer;
+        this.mcVer = that.mcVer;
+        this.encRMLifecycleMsg = that.encRMLifecycleMsg;
         wsPolicyMap = that.wsPolicyMap;
         outMessagePolicyMap = that.outMessagePolicyMap;
         inMessagePolicyMap = that.inMessagePolicyMap;
@@ -344,6 +348,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.hasKerberosToken = that.hasKerberosToken;
         this.hasSecureConversation = that.hasSecureConversation;
         this.hasReliableMessaging = that.hasReliableMessaging;
+        this.hasMakeConnection = that.hasMakeConnection;
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
         this.iterationsForPDK = that.iterationsForPDK;
@@ -627,7 +632,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         try {
             MessagePolicy policy  ;
-            if (isRMMessage(packet)) {
+            if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
@@ -1184,9 +1189,16 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             return false;
         }
         
-        return rmVer.isRmAction(getAction(packet));
+        return rmVer.isProtocolAction(getAction(packet));
     }
     
+     protected boolean isMakeConnectionMessage(Packet packet) {
+        if (!this.hasMakeConnection) {
+            return false;
+        }
+        return mcVer.isProtocolAction(getAction(packet));
+    }
+
     protected String getAction(Packet packet){
         // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
         //    return (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
@@ -1218,7 +1230,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         }
         try{
             //RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, encRMLifecycleMsg);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, mcVer, encRMLifecycleMsg);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);
@@ -1650,24 +1662,22 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     //TODO: Duplicate information copied from Tubeline Assembler
-    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-        if (policyMap == null) {
+    private boolean isReliableMessagingEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.class);
+            return enabled;
+        }
             return false;
         }
         
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                    port.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                        
-            return (policy != null) && policy.contains(rmVer.policyNamespaceUri);
-        } catch (PolicyException e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSTUBE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new WebServiceException(LogStringsMessages.WSSTUBE_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
+     private boolean isMakeConnectionEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature.class);
+            return enabled;
         }
+        return false;
     }
-    
+
     protected abstract void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
     protected abstract void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
@@ -1727,12 +1737,14 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 wsscVer = WSSCVersion.WSSC_10;
                 wsTrustVer = WSTrustVersion.WS_TRUST_10;
             }
-            if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                    policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                rmVer = RmVersion.WSRM200702;
-            } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                    policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                rmVer = RmVersion.WSRM200502;
+
+            // For RM messages
+            if (policy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                    policy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                rmVer = RmProtocolVersion.WSRM200702;
+            } else if (policy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                    policy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                rmVer = RmProtocolVersion.WSRM200502;
             }
              if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
                 encRMLifecycleMsg = true;

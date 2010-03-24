@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Hashtable;
 import javax.xml.namespace.QName;
-import javax.xml.ws.WebServiceException;
 import java.util.Set;
 
 import com.sun.xml.ws.api.message.Packet;
@@ -126,7 +125,8 @@ import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;
@@ -151,7 +151,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
-import java.lang.ref.WeakReference;
 import java.security.cert.X509Certificate;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -189,7 +188,7 @@ public abstract class WSITAuthContextBase  {
     protected boolean disableIncPrefix = false;
     private final QName disableIncPrefixServer = new QName("http://schemas.sun.com/2006/03/wss/server","DisableInclusivePrefixList");
     private final QName disableIncPrefixClient = new QName("http://schemas.sun.com/2006/03/wss/client","DisableInclusivePrefixList");
-    
+
     protected boolean encHeaderContent = false;
     private final QName encHeaderContentServer = new QName("http://schemas.sun.com/2006/03/wss/server","EncryptHeaderContent");
     private final QName encHeaderContentClient = new QName("http://schemas.sun.com/2006/03/wss/client","EncryptHeaderContent");
@@ -206,7 +205,8 @@ public abstract class WSITAuthContextBase  {
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
-    protected RmVersion rmVer = RmVersion.WSRM200502;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.WSRM200502;
+    protected McProtocolVersion mcVer = McProtocolVersion.WSMC200702;
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -251,6 +251,7 @@ public abstract class WSITAuthContextBase  {
     boolean hasIssuedTokens = false;
     boolean hasSecureConversation = false;
     boolean hasReliableMessaging = false;
+    boolean hasMakeConnection = false;
     boolean hasKerberosToken = false;
     //boolean addressingEnabled = false;
     AddressingVersion addVer = null;
@@ -273,7 +274,6 @@ public abstract class WSITAuthContextBase  {
     protected X509Certificate serverCert = null;
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
-
     
     static {
         try {
@@ -288,7 +288,7 @@ public abstract class WSITAuthContextBase  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
+    }   
     
     /** Creates a new instance of WSITAuthContextBase */
     public WSITAuthContextBase(Map<Object, Object> map) {
@@ -329,7 +329,8 @@ public abstract class WSITAuthContextBase  {
         }                        
         
         // check whether Service Port has RM
-        hasReliableMessaging = isReliableMessagingEnabled(wsPolicyMap, pipeConfig.getWSDLPort());
+        hasReliableMessaging = isReliableMessagingEnabled(pipeConfig.getWSDLPort());
+        hasMakeConnection = isMakeConnectionEnabled(pipeConfig.getWSDLPort());
         //opResolver = new OperationResolverImpl(inMessagePolicyMap,pipeConfig.getWSDLModel().getBinding());
         
         //put properties for use by AuthModule init
@@ -510,12 +511,12 @@ public abstract class WSITAuthContextBase  {
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 }
-                if (policy.contains(RmVersion.WSRM200702.namespaceUri) ||
-                        policy.contains(RmVersion.WSRM200702.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200702;
-                } else if (policy.contains(RmVersion.WSRM200502.namespaceUri) ||
-                        policy.contains(RmVersion.WSRM200502.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM200502;
+                if (policy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                        policy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200702;
+                } else if (policy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                        policy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200502;
                 }
                 if (policy.contains(encSCServerCancel) || policy.contains(encSCClientCancel)) {
                    this.encryptCancelPayload = true;
@@ -523,7 +524,6 @@ public abstract class WSITAuthContextBase  {
                 if (policy.contains(this.encRMLifecycleMsgServer) || policy.contains(encRMLifecycleMsgClient)) {
                     encRMLifecycleMsg = true;
                 }
-
         }
     }
     protected RuntimeException generateInternalError(PolicyException ex){
@@ -915,9 +915,16 @@ public abstract class WSITAuthContextBase  {
             return false;
         }
 
-        return rmVer.isRmAction(getAction(packet));
+        return rmVer.isProtocolAction(getAction(packet));
     }
-    
+
+    protected boolean isMakeConnectionMessage(Packet packet) {
+        if (!this.hasMakeConnection) {
+            return false;
+        }
+        return mcVer.isProtocolAction(getAction(packet));
+    }
+
     protected String getAction(Packet packet){
         // if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))){
         //    return (String)packet.invocationProperties.get(WSTrustConstants.REQUEST_SECURITY_TOKEN_ISSUE_ACTION);
@@ -948,8 +955,7 @@ public abstract class WSITAuthContextBase  {
             return;
         }
         try{
-            //RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer);
-            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, encRMLifecycleMsg);
+            RMPolicyResolver rr = new RMPolicyResolver(spVersion, rmVer, mcVer, encRMLifecycleMsg);
             Policy msgLevelPolicy = rr.getOperationLevelPolicy();
             PolicyMerger merger = PolicyMerger.getMerger();
             ArrayList<Policy> pList = new ArrayList<Policy>(2);
@@ -1174,8 +1180,8 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
-        if(isSCRenew(packet)){            
-            ctx.isExpired(true);            
+        if(isSCRenew(packet)){
+            ctx.isExpired(true);
         }
         if (addVer != null) {
             ctx.setAction(getAction(packet));
@@ -1192,7 +1198,7 @@ public abstract class WSITAuthContextBase  {
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
         }
         ctx.isInboundMessage(true);
         if(isTrustMessage(packet)){
@@ -1394,7 +1400,7 @@ public abstract class WSITAuthContextBase  {
                 suite.getEncryptionAlgorithm(),
                 suite.getSymmetricKeyAlgorithm(),
                 suite.getAsymmetricKeyAlgorithm());
-        
+
         return als;
     }
     
@@ -1406,22 +1412,20 @@ public abstract class WSITAuthContextBase  {
     }
     
     //TODO: Duplicate information copied from Pipeline Assembler
-    private boolean isReliableMessagingEnabled(PolicyMap policyMap, WSDLPort port) {
-        if (policyMap == null) {
-            return false;
+    private boolean isReliableMessagingEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature.class);
+            return enabled;
         }
-        
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(port.getOwner().getName(),
-                    port.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-                        
-            return (policy != null) && policy.contains(rmVer.policyNamespaceUri);
-        } catch (PolicyException e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
-            throw new WebServiceException(LogStringsMessages.WSITPVD_0012_PROBLEM_CHECKING_RELIABLE_MESSAGE_ENABLE(), e);
+        return false;
+    }
+
+     private boolean isMakeConnectionEnabled(WSDLPort port) {
+        if (port != null && port.getBinding() != null) {
+            boolean enabled = port.getBinding().getFeatures().isEnabled(com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature.class);
+            return enabled;
         }
+        return false;
     }
     
     protected boolean bindingHasIssuedTokenPolicy() {
@@ -1500,12 +1504,12 @@ public abstract class WSITAuthContextBase  {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
-         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        if (serverCert != null) {
+                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
         }
         try {
             MessagePolicy policy = null;
-            if (isRMMessage(packet)) {
+            if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
@@ -1727,7 +1731,7 @@ public abstract class WSITAuthContextBase  {
     @SuppressWarnings("unchecked")
     protected void setResponsePacket(MessageInfo messageInfo, Packet ret) {
         messageInfo.getMap().put(RES_PACKET, ret);
-    }        
+    }
 
     private Policy getSCCancelPolicy(boolean encryptCancelPayload) throws PolicyException, IOException {
         if (cancelMSP == null) {
@@ -1751,6 +1755,6 @@ public abstract class WSITAuthContextBase  {
     
     protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
     
-    protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
+    protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;    
     
 }

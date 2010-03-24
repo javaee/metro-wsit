@@ -35,7 +35,10 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
+import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -45,13 +48,19 @@ final class SimpleDeliveryQueue implements DeliveryQueue {
 
     private final Postman postman;
     private final Postman.Callback deliveryCallback;
+    private final AtomicBoolean isClosed;
 
     SimpleDeliveryQueue(Postman postman, Postman.Callback deliveryCallback) {
         this.postman = postman;
         this.deliveryCallback = deliveryCallback;
+        this.isClosed = new AtomicBoolean(false);
     }
 
-    public void put(ApplicationMessage message) {
+    public void put(ApplicationMessage message) throws RxRuntimeException {
+        if (isClosed.get()) {
+            throw new RxRuntimeException(LocalizationMessages.WSRM_1160_DELIVERY_QUEUE_CLOSED());
+        }
+
         postman.deliver(message, deliveryCallback);
     }
 
@@ -61,5 +70,9 @@ final class SimpleDeliveryQueue implements DeliveryQueue {
 
     public void onSequenceAcknowledgement() {
         // do nothing
+    }
+
+    public void close() {
+        isClosed.set(true);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -77,7 +77,7 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
         // process WS-MC header
         if (responseMessage.hasHeaders()) {
-            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getMcVersion().messagePendingHeaderName);
+            MessagePendingElement messagePendingHeader = readHeaderAsUnderstood(responseMessage, configuration.getRuntimeVersion().protocolVersion.messagePendingHeaderName);
             if (messagePendingHeader != null && messagePendingHeader.isPending()) {
                 mcSenderTask.scheduleMcRequest();
             }
@@ -93,7 +93,7 @@ abstract class McResponseHandlerBase extends AbstractResponseHandler implements 
 
         try {
             @SuppressWarnings("unchecked")
-            T result = (T) header.readAsJAXB(configuration.getMcVersion().getUnmarshaller(configuration.getAddressingVersion()));
+            T result = (T) header.readAsJAXB(configuration.getRuntimeVersion().getUnmarshaller(configuration.getAddressingVersion()));
             return result;
         } catch (JAXBException ex) {
             throw LOGGER.logSevereException(new RxRuntimeException(String.format("Error unmarshalling header %s", headerName), ex));

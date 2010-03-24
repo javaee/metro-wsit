@@ -38,16 +38,13 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import javax.xml.ws.WebServiceException;
 
 class ClientSourceDeliveryCallback implements Postman.Callback {
 
@@ -78,15 +75,22 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
-                RedeliveryTaskExecutor.INSTANCE.register(
-                        request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                        TimeUnit.MILLISECONDS,
-                        rc.sourceMessageHandler);
-            } else {
+            if (!Utilities.isResendPossible(error)) {
                 resumeParentFiber(error);
+                return;
             }
+
+            final int nextResendCount = request.getNextResendCount();
+            if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+                resumeParentFiber(error);
+                return;
+            }
+
+            RedeliveryTaskExecutor.INSTANCE.register(
+                    request,
+                    rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                    TimeUnit.MILLISECONDS,
+                    rc.sourceMessageHandler);
         }
     }
 
@@ -107,27 +111,46 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                 rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                 rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-                try {
-                    rc.destinationMessageHandler.registerMessage(message);
-                    rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-                    rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
-                } catch (DuplicateMessageRegistrationException ex) {
-                    onCompletion(ex);
+
+                rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+
+                if (message.getSequenceId() != null) {
+                    try {
+                        rc.destinationMessageHandler.registerMessage(message);
+                        rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
+                    } catch (DuplicateMessageRegistrationException ex) {
+                        onCompletion(ex);
+                    }
+                } else {
+                    // if the response message does not contain sequence headers, process it as a normal, non-RM message
+                    resumeParentFiber(response);
                 }
             } else {
+                final int nextResendCount = request.getNextResendCount();
+                if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+                    resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
+                    return;
+                }
+
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
                         rc.sourceMessageHandler);
             }
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
+                final int nextResendCount = request.getNextResendCount();
+                if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+                    resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
+                    return;
+                }
+
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                         TimeUnit.MILLISECONDS,
                         rc.sourceMessageHandler);
             } else {
@@ -172,7 +195,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ClientSourceDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -207,20 +230,13 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
             Packet outboundPacketCopy = message.getPacket().copy(true);
 
-            // TODO: remove the workaround bellow when JAX-WS RI fixes the Packet.copy(boolean) method
-            outboundPacketCopy.expectReply = message.getPacket().expectReply;
-
-            // TODO remove the workaround bellow when JAX-WS RI fixes ignoring server response in HttpTransportPipe.process(Packet) method
-            Boolean isResquestResponseMep = outboundPacketCopy.expectReply; // remembering original value to be able to pick proper CallbackHandler
-            outboundPacketCopy.expectReply = Boolean.TRUE; // setting to true to prevent HttpTransportPipe from ignoring server response (acknowledgement)
-
             rc.protocolHandler.appendSequenceHeader(outboundPacketCopy.getMessage(), message);
             rc.protocolHandler.appendAcknowledgementHeaders(outboundPacketCopy, message.getAcknowledgementData());
 
             Fiber.CompletionCallback responseCallback;
-            if (isResquestResponseMep == null) {
-                responseCallback = new AmbiguousMepCallbackHandler(message, rc);
-            } else if (isResquestResponseMep.booleanValue()) {
+            if (outboundPacketCopy.expectReply == null) {
+                responseCallback = new AmbiguousMepCallbackHandler(message, rc); // should not really happen on the request packet
+            } else if (outboundPacketCopy.expectReply.booleanValue()) {
                 responseCallback = new ReqRespMepCallbackHandler(message, rc);
             } else {
                 responseCallback = new OneWayMepCallbackHandler(message, rc);
@@ -234,21 +250,5 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         } finally {
             LOGGER.exiting();
         }
-    }
-
-    private static boolean isResendPossible(Throwable throwable) {
-        if (throwable instanceof IOException) {
-            return true;
-        } else if (throwable instanceof WebServiceException) {
-            if (throwable instanceof ClientTransportException) {
-                return true; // if endpint went down, let's try to resend, as it may come up again
-            }
-            // Unwrap exception and see if it makes sense to retry this request
-            // (no need to check for null - handled by instanceof)
-            if (throwable.getCause() instanceof IOException) {
-                return true;
-            }
-        }
-        return false;
     }
 }

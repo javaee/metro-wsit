@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,9 +39,8 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.rx.RxConfigurationBase;
-import com.sun.xml.ws.rx.mc.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.mc.McVersion;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -50,14 +49,37 @@ import org.glassfish.gmbal.ManagedObjectManager;
  */
 class McConfigurationImpl extends RxConfigurationBase implements McConfiguration {
     private final MakeConnectionSupportedFeature mcSupportedFeature;
+    private final McRuntimeVersion runtimeVersion;
 
-    McConfigurationImpl(ReliableMessagingFeature rmFeature, MakeConnectionSupportedFeature mcSupportedFeature, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
+    McConfigurationImpl(
+            ReliableMessagingFeature rmFeature,
+            MakeConnectionSupportedFeature mcSupportedFeature,
+            SOAPVersion soapVersion,
+            AddressingVersion addressingVersion,
+            boolean requestResponseDetected,
+            ManagedObjectManager managedObjectManager) {
         super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
 
         this.mcSupportedFeature = mcSupportedFeature;
+        this.runtimeVersion = (mcSupportedFeature != null) ? McRuntimeVersion.forProtocolVersion(mcSupportedFeature.getProtocolVersion()) : null;
     }
 
-    public McVersion getMcVersion() {
-        return (mcSupportedFeature != null) ? McVersion.WSMC200702 : null;
+    public MakeConnectionSupportedFeature getFeature() {
+        checkState();
+
+        return mcSupportedFeature;
+    }
+
+    public McRuntimeVersion getRuntimeVersion() {
+        checkState();
+
+        return runtimeVersion;
+    }
+
+
+    private void checkState() {
+        if (mcSupportedFeature == null || !mcSupportedFeature.isEnabled()) {
+            throw new IllegalStateException("MakeConnectionSupportedFeature is not enabled");
+        }
     }
 }

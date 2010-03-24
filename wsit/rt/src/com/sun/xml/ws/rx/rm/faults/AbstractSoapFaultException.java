@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -87,7 +87,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
 
     public abstract Code getCode();
 
-    public abstract QName getSubcode(RmVersion rv);
+    public abstract QName getSubcode(RmRuntimeVersion rv);
 
     public final String getReason() {
         return faultReasonText;
@@ -115,23 +115,24 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
 
     protected final Message createSoapFaultMessage(RuntimeContext rc, boolean attachSequenceFaultElement) {
         try {
-            // TODO P1 where to set soap fault code?
             SOAPFault soapFault = rc.soapVersion.saajSoapFactory.createFault();
 
             // common SOAP1.1 and SOAP1.2 Fault settings
             if (faultReasonText != null) {
                 soapFault.setFaultString(faultReasonText, java.util.Locale.ENGLISH);
             }
-
-            soapFault.setFaultCode(getCode().asQName(rc.soapVersion));
             
             // SOAP version-specific SOAP Fault settings
             switch (rc.soapVersion) {
                 case SOAP_11:
+                    soapFault.setFaultCode(getSubcode(rc.rmVersion));
                     break;
                 case SOAP_12:
+                    soapFault.setFaultCode(getCode().asQName(rc.soapVersion));
                     soapFault.appendFaultSubcode(getSubcode(rc.rmVersion));
-                    soapFault.addDetail().setValue(getDetailValue());
+                    if (getDetailValue() != null) {
+                        soapFault.addDetail().setValue(getDetailValue());
+                    }
                     break;
                 default:
                     throw new RxRuntimeException("Unsupported SOAP version: '" + rc.soapVersion.toString() + "'");
@@ -155,7 +156,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
      *
      * @return
      */
-    protected static String getProperFaultActionForAddressingVersion(RmVersion rmVersion, AddressingVersion addressingVersion) {
-        return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.wsrmFaultAction;
+    protected static String getProperFaultActionForAddressingVersion(RmRuntimeVersion rmVersion, AddressingVersion addressingVersion) {
+        return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.protocolVersion.wsrmFaultAction;
     }
 }

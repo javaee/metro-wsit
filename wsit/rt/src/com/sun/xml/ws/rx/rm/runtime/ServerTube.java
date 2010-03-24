@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -116,18 +116,19 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "rm-server-tube-communicator",
-                null, // TODO P3 can we get the endpoint address?
+                null, // TODO P2 can we get the endpoint address in all cases?
                 super.next,
                 null,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion())));
+                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())));
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 configuration,
                 PostmanPool.INSTANCE.getPostman(),
                 new ServerDestinationDeliveryCallback(rc));
+
         DeliveryQueueBuilder outboundQueueBuilder = null;
         if (configuration.requestResponseOperationsDetected()) {
             outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -161,12 +162,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
         LOGGER.entering();
         try {
             String wsaAction = rc.communicator.getWsaAction(request);
-            if (rc.rmVersion.isRmAction(wsaAction)) { // protocol message
-                if (rc.rmVersion.isRmProtocolRequest(wsaAction)) { // protocol request
-                    return doReturnWith(processProtocolRequest(request, wsaAction));
-                } else { // protocol response
-                    return doThrow(new RxRuntimeException(LocalizationMessages.WSRM_1128_INVALID_WSA_ACTION_IN_PROTOCOL_REQUEST(wsaAction)));
-                }
+            if (rc.rmVersion.protocolVersion.isProtocolAction(wsaAction)) { // protocol message
+                return doReturnWith(processProtocolMessage(request, wsaAction));
             }
 
             // This is an application message
@@ -285,17 +282,19 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private Packet processProtocolRequest(Packet request, String wsaAction) throws AbstractSoapFaultException {
-        if (rc.rmVersion.createSequenceAction.equals(wsaAction)) {
+    private Packet processProtocolMessage(Packet request, String wsaAction) throws AbstractSoapFaultException {
+        if (rc.rmVersion.protocolVersion.createSequenceAction.equals(wsaAction)) {
             return handleCreateSequenceAction(request);
-        } else if (rc.rmVersion.closeSequenceAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.closeSequenceAction.equals(wsaAction)) {
             return handleCloseSequenceAction(request);
-        } else if (rc.rmVersion.terminateSequenceAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.terminateSequenceAction.equals(wsaAction)) {
             return handleTerminateSequenceAction(request);
-        } else if (rc.rmVersion.ackRequestedAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.ackRequestedAction.equals(wsaAction)) {
             return handleAckRequestedAction(request);
-        } else if (rc.rmVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
+        } else if (rc.rmVersion.protocolVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
             return handleSequenceAcknowledgementAction(request);
+        } else if (rc.rmVersion.protocolVersion.terminateSequenceResponseAction.equals(wsaAction)) {
+            return handleTerminateSequenceResponseAction(request);
         } else {
             throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(wsaAction)));
         }
@@ -305,7 +304,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
         CreateSequenceData requestData = rc.protocolHandler.toCreateSequenceData(request);
 
         EndpointReference requestDestination = null;
-        if (requestData.getOfferedSequenceId() != null) {
+        if (requestData.getOfferedSequenceId() != null && rc.configuration.requestResponseOperationsDetected()) {
+            // there is an offered sequence and this endpoint does contain some 2-way operations
+            // if this is a oneway-only endpoint, we simply ignore the offered sequence (WS-I RSP R0011)
             if (rc.sequenceManager().isValid(requestData.getOfferedSequenceId())) {
                 // we already have such sequence
                 throw new CreateSequenceRefusedFault(
@@ -328,7 +329,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         e);
             }
         }
-
 
         String receivedSctId = null;
         if (requestData.getStrType() != null) { // RM messaging should be bound to a secured session
@@ -356,28 +356,30 @@ public class ServerTube extends AbstractFilterTubeImpl {
             }
         }
 
+
         Sequence inboundSequence = rc.sequenceManager().createInboundSequence(
                 rc.sequenceManager().generateSequenceUID(),
                 receivedSctId,
                 calculateSequenceExpirationTime(requestData.getDuration()));
 
-        if (requestData.getOfferedSequenceId() != null) {
+        final CreateSequenceResponseData.Builder responseBuilder = CreateSequenceResponseData.getBuilder(inboundSequence.getId());
+        // TODO P2 set expiration time, incomplete sequence behavior
+
+        if (requestData.getOfferedSequenceId() != null && rc.configuration.requestResponseOperationsDetected()) {
+            // there is an offered sequence and this endpoint does contain some 2-way operations
+            // if this is a oneway-only endpoint, we simply ignore the offered sequence (WS-I RSP R0011)
             Sequence outboundSequence = rc.sequenceManager().createOutboundSequence(
                     requestData.getOfferedSequenceId(),
                     receivedSctId,
                     calculateSequenceExpirationTime(requestData.getOfferedSequenceExpiry()));
             rc.sequenceManager().bindSequences(inboundSequence.getId(), outboundSequence.getId());
             rc.sequenceManager().bindSequences(outboundSequence.getId(), inboundSequence.getId());
+
+            responseBuilder.acceptedSequenceAcksTo(requestDestination);
         }
 
         if (!hasSession(request)) { // security did not start session - we must do it
             Utilities.startSession(request.endpoint, inboundSequence.getId());
-        }
-
-        final CreateSequenceResponseData.Builder responseBuilder = CreateSequenceResponseData.getBuilder(inboundSequence.getId());
-        // TODO P2 set expiration time, incomplete sequence behavior
-        if (requestData.getOfferedSequenceId() != null) {
-            responseBuilder.acceptedSequenceAcksTo(requestDestination);
         }
 
         return rc.protocolHandler.toPacket(responseBuilder.build(), request);
@@ -423,9 +425,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
-        // Formulating response:
-        //   If there is an outbound sequence, client expects us to terminate it => sending TerminateSequence back.
-        //   If not, we send TerminateSequenceResponse
         Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
         Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
         try {
@@ -447,6 +446,17 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 }
             }
         }
+    }
+
+    private Packet handleTerminateSequenceResponseAction(Packet request) {
+        TerminateSequenceResponseData data = rc.protocolHandler.toTerminateSequenceResponseData(request);
+
+        rc.destinationMessageHandler.processAcknowledgements(data.getAcknowledgementData());
+
+        // TODO P1 add more TSR data handling
+
+        request.transportBackChannel.close();
+        return rc.communicator.createNullResponsePacket(request);
     }
 
     private Packet handleSequenceAcknowledgementAction(Packet request) { // TODO move packet creation processing to protocol handler

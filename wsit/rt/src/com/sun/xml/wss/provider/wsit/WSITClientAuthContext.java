@@ -438,7 +438,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl)ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
-                new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer));
+                new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation(req), pipeConfig, addVer, true, rmVer, mcVer));
         Message msg = req.getMessage();
 
         try {
@@ -698,7 +698,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         if (context != null) {
             WSBindingProvider bpr = context.getBindingProvider();
             x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
-            if (x509Cert == null) {
+            if (x509Cert != null) {
+                log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
                 return x509Cert;
             }
         }

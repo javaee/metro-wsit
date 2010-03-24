@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 //
@@ -46,6 +47,8 @@ import com.sun.xml.ws.security.secext10.ObjectFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
+import java.io.IOException;
+import javax.xml.ws.WebServiceException;
 
 /**
  * The non-instantiable utility class containing various common static utility methods 
@@ -119,5 +122,29 @@ final class Utilities {
         if (manager.getSession(sessionId) != null) {
             manager.terminateSession(sessionId);
         }
+    }
+
+    /**
+     * Based on the parameter, this utility method determines whether or not
+     * it makes sense to try resending the message.
+     *
+     * @param throwable
+     * @return {@code true} if this exception seems to be related to a connection
+     *         problem.
+     */
+    static boolean isResendPossible(Throwable throwable) {
+        if (throwable instanceof IOException) {
+            return true;
+        } else if (throwable instanceof WebServiceException) {
+            if (throwable instanceof ClientTransportException) {
+                return true; // if endpint went down, let's try to resend, as it may come up again
+            }
+            // Unwrap exception and see if it makes sense to retry this request
+            // (no need to check for null - handled by instanceof)
+            if (throwable.getCause() instanceof IOException) {
+                return true;
+            }
+        }
+        return false;
     }
 }

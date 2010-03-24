@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,9 +44,7 @@ import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.util.AbstractResponseHandler;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import javax.xml.ws.WebServiceException;
 
 /**
  *
@@ -103,7 +101,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
                     if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
                         // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
-                        response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.sequenceAcknowledgementAction);
+                        response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
                         rc.protocolHandler.appendAcknowledgementHeaders(response,ackData);
                     }
 
@@ -121,7 +119,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Throwable error) {
-            if (ServerDestinationDeliveryCallback.isResendPossible(error)) {
+            if (Utilities.isResendPossible(error)) {
                 RedeliveryTaskExecutor.INSTANCE.register(
                         request,
                         rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
@@ -155,16 +153,4 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback);
     }
 
-    private static boolean isResendPossible(Throwable throwable) {
-        if (throwable instanceof IOException) {
-            return true;
-        } else if (throwable instanceof WebServiceException) {
-            // Unwrap exception and see if it makes sense to retry this request
-            // (no need to check for null - handled by instanceof)
-            if (throwable.getCause() instanceof IOException) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

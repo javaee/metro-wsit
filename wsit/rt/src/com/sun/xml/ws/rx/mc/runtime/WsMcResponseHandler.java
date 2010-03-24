@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -88,7 +88,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
             if (responseMessage.isFault()) {
                 // processing WS-MC SOAP faults
                 String faultAction = responseMessage.getHeaders().getAction(configuration.getAddressingVersion(), configuration.getSoapVersion());
-                if (configuration.getMcVersion().isMcFault(faultAction)) {
+                if (configuration.getRuntimeVersion().protocolVersion.isFault(faultAction)) {
                     SOAPFault fault = null;
                     try {
                         fault = responseMessage.readAsSOAPMessage().getSOAPBody().getFault();
@@ -106,6 +106,7 @@ class WsMcResponseHandler extends McResponseHandlerBase {
                 setCorrelationId(wsaRelatesToHeader.getStringContent()); // initializing correlation id for getParentFiber()
                 try {
                     resumeParentFiber(response);
+                    return;
                 } catch (ResumeFiberException ex) {
                     LOGGER.warning(LocalizationMessages.WSMC_0116_RESUME_PARENT_FIBER_ERROR(), ex);
                 }
@@ -135,7 +136,8 @@ class WsMcResponseHandler extends McResponseHandlerBase {
 
     public void onCompletion(Throwable error) {
         try {
-            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0121_FAILED_TO_SEND_WSMC_REQUEST(), error));
+            LOGGER.warning(LocalizationMessages.WSMC_0121_FAILED_TO_SEND_WSMC_REQUEST(), error);
+            suspendedFiberStorage.resumeAllFibers(error);
         } finally {
             mcSenderTask.clearMcRequestPendingFlag();
         }

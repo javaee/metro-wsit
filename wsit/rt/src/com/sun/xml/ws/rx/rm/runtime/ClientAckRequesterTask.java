@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,6 +65,10 @@ public class ClientAckRequesterTask implements DelayedTask {
     public void run(DelayedTaskManager manager) {
         LOGGER.entering(outboundSequenceId);
         try {
+            if (rc.communicator.isClosed()) {
+                // Our communication channel has been closed - let the task die
+                return;
+            }
 
             if (rc.sequenceManager().isValid(outboundSequenceId)) {
                 final Sequence sequence = rc.getOutboundSequence(outboundSequenceId);
@@ -87,7 +91,7 @@ public class ClientAckRequesterTask implements DelayedTask {
     }
 
     private final void requestAcknowledgement() {
-        Packet request = rc.communicator.createEmptyRequestPacket(rc.rmVersion.ackRequestedAction, true);
+        Packet request = rc.communicator.createEmptyRequestPacket(rc.rmVersion.protocolVersion.ackRequestedAction, true);
         JaxwsApplicationMessage requestMessage = new JaxwsApplicationMessage(
                 request,
                 request.getMessage().getID(rc.addressingVersion, rc.soapVersion));

@@ -325,7 +325,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //update the client subject passed to the AuthModule itself.
         ctx.setExtraneousProperty(MessageConstants.AUTH_SUBJECT, clientSubject);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
-                new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false, rmVer));
+                new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false, rmVer, mcVer));
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         try{
             if(!optimized) {
@@ -573,7 +573,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             MessagePolicy policy = null;
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
-            } else if (isRMMessage(packet)) {
+            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){

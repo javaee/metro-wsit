@@ -1,6 +1,7 @@
 com.sun.xml.ws.addressing.policy.WsawAddressingPolicyValidator
 com.sun.xml.ws.security.impl.policy.SecurityPolicyValidator
-com.sun.xml.ws.rx.policy.spi_impl.RxAssertionValidator
+com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionValidator
+com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionValidator
 com.sun.xml.ws.tx.common.TxPolicyValidator
 com.sun.xml.ws.transport.tcp.wsit.TCPTransportPolicyValidator
 com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator

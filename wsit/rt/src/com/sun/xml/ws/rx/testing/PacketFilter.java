@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,7 +37,7 @@ package com.sun.xml.ws.rx.testing;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 
@@ -131,12 +131,12 @@ public abstract class PacketFilter {
      * 
      * @return RM version configured on the current WS port or {@code null} if RM is not enabled.
      */
-    protected final RmVersion getRmVersion() {
+    protected final RmRuntimeVersion getRmVersion() {
         return rc.rmVersion;
     }
 
     protected final boolean isRmProtocolMessage(Packet packet) {
-        return rc.rmVersion.isRmAction(rc.communicator.getWsaAction(packet));
+        return rc.rmVersion.protocolVersion.isProtocolAction(rc.communicator.getWsaAction(packet));
     }
 
     final void configure(RuntimeContext context) {

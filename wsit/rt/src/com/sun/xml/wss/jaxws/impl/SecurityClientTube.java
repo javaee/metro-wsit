@@ -69,7 +69,6 @@ import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
-import java.util.logging.Logger;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
@@ -394,7 +393,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl) ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, tubeConfig, addVer, true, rmVer));
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, tubeConfig, addVer, true, rmVer, mcVer));
 
         Message msg = null;
         try {

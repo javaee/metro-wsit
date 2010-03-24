@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,7 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 
 /**
  *
@@ -45,4 +45,6 @@ import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
  */
 public interface RmConfiguration extends RxConfiguration {
     public ReliableMessagingFeature getRmFeature();
+
+    public RmRuntimeVersion getRuntimeVersion();
 }

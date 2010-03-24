@@ -37,7 +37,7 @@
 package wspolicy.provider.base.client;
 
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.testing.PacketFilter;
 import com.sun.xml.ws.rx.testing.PacketFilteringFeature;
 import junit.framework.TestCase;
@@ -50,7 +50,7 @@ public class ClientTest extends TestCase {
 
     public static class TestFilter extends PacketFilter {
 
-        private static volatile RmVersion version;
+        private static volatile RmRuntimeVersion version;
 
         public Packet filterClientRequest(Packet request) throws Exception {
             if (version == null) {
@@ -72,7 +72,7 @@ public class ClientTest extends TestCase {
             return response;
         }
 
-        public static RmVersion getVersion() {
+        public static RmRuntimeVersion getVersion() {
             return version;
         }
     }
@@ -84,7 +84,7 @@ public class ClientTest extends TestCase {
         String result = echo.echo("Hello");
         assertEquals("Helloellolloloo", result);
         // Make sure that the message exchange actually used the policy configuration
-        RmVersion version = TestFilter.getVersion();
-        assertEquals(RmVersion.WSRM200702, version);
+        RmRuntimeVersion version = TestFilter.getVersion();
+        assertEquals(RmRuntimeVersion.WSRM200702, version);
     }
 }

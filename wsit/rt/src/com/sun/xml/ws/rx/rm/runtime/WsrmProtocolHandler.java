@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,7 +47,6 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.rm.RmVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -70,7 +69,7 @@ public abstract class WsrmProtocolHandler {
     private static final Logger LOGGER = Logger.getLogger(WsrmProtocolHandler.class);
 
     public static WsrmProtocolHandler getInstance(RmConfiguration configuration, Communicator communicator, RuntimeContext rc) {
-        switch (configuration.getRmFeature().getVersion()) {
+        switch (configuration.getRuntimeVersion()) {
             case WSRM200502:
                 return new Wsrm200502ProtocolHandler(configuration, rc, communicator);
             case WSRM200702:
@@ -80,7 +79,7 @@ public abstract class WsrmProtocolHandler {
         }
     }
 
-    protected final RmVersion rmVersion;
+    protected final RmRuntimeVersion rmVersion;
     protected final Communicator communicator;
 
     protected final AddressingVersion addressingVersion;
@@ -127,24 +126,24 @@ public abstract class WsrmProtocolHandler {
     public final boolean containsProtocolMessage(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmAction(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.protocolVersion.isProtocolAction(getWsaAction(packet.getMessage()));
     }
 
     public final boolean containsProtocolRequest(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmProtocolRequest(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.protocolVersion.isProtocolRequest(getWsaAction(packet.getMessage()));
     }
 
     public final boolean containsProtocolResponse(@NotNull Packet packet) {
         assert packet != null;
 
-        return (packet.getMessage() == null) ? false : rmVersion.isRmProtocolResponse(getWsaAction(packet.getMessage()));
+        return (packet.getMessage() == null) ? false : rmVersion.protocolVersion.isProtocolResponse(getWsaAction(packet.getMessage()));
     }
 
-    protected WsrmProtocolHandler(@NotNull RmVersion rmVersion, @NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
+    protected WsrmProtocolHandler(@NotNull RmRuntimeVersion rmVersion, @NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
         assert rmVersion != null;
-        assert rmVersion == configuration.getRmFeature().getVersion();
+        assert rmVersion == configuration.getRuntimeVersion();
         assert configuration != null;
         assert communicator != null;
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,10 +50,11 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.runtime.McClientTube;
 import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.protocol.CloseSequenceData;
@@ -87,6 +88,7 @@ import java.util.logging.Level;
  */
 final class ClientTube extends AbstractFilterTubeImpl {
     //
+
     private static final Logger LOGGER = Logger.getLogger(ClientTube.class);
     private static final Lock INIT_LOCK = new ReentrantLock();
     //
@@ -123,7 +125,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 scInitiator,
                 configuration.getAddressingVersion(),
                 configuration.getSoapVersion(),
-                configuration.getRmFeature().getVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
+                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
 
         DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc.configuration,
@@ -152,10 +154,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             assert mcClientTube != null;
 
             this.rmSourceReference = mcClientTube.getWsmcAnonymousEndpointReference();
-            mcClientTube.registerProtocolMessageHandler(createRmProtocolMessageHandler(
-                    rc.configuration,
-                    rc.protocolHandler,
-                    rc.destinationMessageHandler));
+            mcClientTube.registerProtocolMessageHandler(createRmProtocolMessageHandler(rc));
         } else {
             this.rmSourceReference = configuration.getAddressingVersion().anonymousEpr;
         }
@@ -225,6 +224,11 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public NextAction processException(Throwable throwable) {
         LOGGER.entering();
         try {
+            if (throwable instanceof RxRuntimeException) {
+                // try to close current RM session in case of an unhandled RX exception
+                closeRmSession();
+            }
+
             return super.processException(throwable);
         } finally {
             LOGGER.exiting();
@@ -235,23 +239,20 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public void preDestroy() {
         LOGGER.entering();
         try {
-            if (outboundSequenceId.value != null) { // RM session has already started
-                closeRmSession();
-            }
-        } catch (RuntimeException ex) {
-            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+            closeRmSession();
         } finally {
-            super.preDestroy();
-            LOGGER.exiting();
+            try {
+                rc.close();
+            } finally {
+                super.preDestroy();
+                LOGGER.exiting();
+            }
         }
     }
 
-    static final ProtocolMessageHandler createRmProtocolMessageHandler(
-            final RmConfiguration configuration,
-            final WsrmProtocolHandler protocolHandler,
-            final DestinationMessageHandler dstMsgHandler) {
+    static final ProtocolMessageHandler createRmProtocolMessageHandler(final RuntimeContext rc) {
 
-        final RmVersion rmVersion = configuration.getRmFeature().getVersion();
+        final RmProtocolVersion rmVersion = rc.configuration.getRuntimeVersion().protocolVersion;
 
         return new ProtocolMessageHandler() {
 
@@ -262,9 +263,9 @@ final class ClientTube extends AbstractFilterTubeImpl {
                         // rmVersion.createSequenceAction,
                         // rmVersion.createSequenceResponseAction,
                         // rmVersion.lastAction,
-                        rmVersion.sequenceAcknowledgementAction, // rmVersion.terminateSequenceAction,
-                        // rmVersion.terminateSequenceResponseAction,
-                        // rmVersion.wsrmFaultAction
+                        rmVersion.sequenceAcknowledgementAction,
+                        rmVersion.terminateSequenceAction, // rmVersion.terminateSequenceResponseAction,
+                    // rmVersion.wsrmFaultAction
                     }));
 
             public Collection<String> getSuportedWsaActions() {
@@ -272,12 +273,37 @@ final class ClientTube extends AbstractFilterTubeImpl {
             }
 
             public void processProtocolMessage(Packet protocolMessagePacket) {
-                if (protocolHandler.containsProtocolMessage(protocolMessagePacket)) {
+                if (rc.protocolHandler.containsProtocolMessage(protocolMessagePacket)) {
                     LOGGER.finer("Processing RM protocol response message.");
-                    AcknowledgementData ackData = protocolHandler.getAcknowledgementData(protocolMessagePacket.getMessage());
-                    dstMsgHandler.processAcknowledgements(ackData);
+
+                    final String wsaAction = rc.communicator.getWsaAction(protocolMessagePacket);
+                    if (rmVersion.ackRequestedAction.equals(wsaAction) || rmVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
+                        AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(protocolMessagePacket.getMessage());
+                        rc.destinationMessageHandler.processAcknowledgements(ackData);
+                    } else if (rmVersion.terminateSequenceAction.equals(wsaAction)) {
+                        handleTerminateSequenceAction(protocolMessagePacket);
+                    } else {
+                        throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1134_UNSUPPORTED_PROTOCOL_MESSAGE(wsaAction)));
+                    }
                 } else {
                     LOGGER.severe(LocalizationMessages.WSRM_1120_RESPONSE_NOT_IDENTIFIED_AS_PROTOCOL_MESSAGE());
+                }
+            }
+
+            private void handleTerminateSequenceAction(Packet protocolMessagePacket) {
+                TerminateSequenceData tsData = rc.protocolHandler.toTerminateSequenceData(protocolMessagePacket);
+                rc.destinationMessageHandler.processAcknowledgements(tsData.getAcknowledgementData());
+
+                try {
+                    // TODO P2 pass last message id into terminateSequence method
+                    rc.sequenceManager().terminateSequence(tsData.getSequenceId());
+
+                    TerminateSequenceResponseData tsrData = TerminateSequenceResponseData.getBuilder(tsData.getSequenceId()).build();
+                    Packet tsrPacket = rc.protocolHandler.toPacket(tsrData, null);
+                    rc.communicator.sendAsync(tsrPacket, null);
+                } catch (UnknownSequenceException ex) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(tsData.getSequenceId()), ex);
+                    rc.communicator.sendAsync(ex.toRequest(rc), null);
                 }
             }
         };
@@ -291,39 +317,95 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
 
     private void closeRmSession() {
+        if (outboundSequenceId.value == null || !rc.sequenceManager().isValid(outboundSequenceId.value)) { // RM session is not valid (e.g. has not been started yet
+            return;
+        }
+
+        final String inboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
         try {
-            String inboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
             if (inboundSequenceId != null) {
-                waitForMissingAcknowledgements(inboundSequenceId,rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
+                waitForMissingAcknowledgements(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
             }
-
-            closeSequence();
-
-            waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
-
-            terminateSequence();
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+        }
+        
+        try {
+            sendCloseSequenceRequest();
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         } finally {
-            rc.close();
+            closeSequences();
+        }
+        
+        try {
+            waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+        }
+
+        try {
+            terminateOutboundSequence();
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+        } finally {
+            // TODO P2 pass last message id into terminateSequence method
+            rc.sequenceManager().terminateSequence(outboundSequenceId.value);
+        }
+
+        try {
+            waitForInboundSequenceTermination(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
+        } catch (RuntimeException ex) {
+            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+        } finally {
+            if (rc.sequenceManager().isValid(inboundSequenceId)) {
+                try {
+                    rc.sequenceManager().terminateSequence(inboundSequenceId);
+                } catch (UnknownSequenceException ignored) { /* ignored - most likely terminated externally in the meanwhile */ }
+            }
         }
     }
 
     private void createSequences(Packet appRequest) throws RxRuntimeException, DuplicateSequenceException {
         final CreateSequenceData.Builder csBuilder = CreateSequenceData.getBuilder(this.rmSourceReference.toSpec());
-        csBuilder.strType(rc.communicator.tryStartSecureConversation(appRequest));
+
+        try {
+            csBuilder.strType(rc.communicator.tryStartSecureConversation(appRequest));
+        } catch (WSTrustException ex) {
+            LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
+        }
+
         if (rc.configuration.requestResponseOperationsDetected()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration
         }
-        final CreateSequenceData requestData = csBuilder.build();
-        final Packet request = rc.protocolHandler.toPacket(requestData, null);
 
-        final CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(rc.communicator.send(request), "CreateSequence", Level.SEVERE));
+        final String messageName = "CreateSequence";
 
-        if (requestData.getOfferedSequenceId() != null) {
-            // we offered an inbound sequence
-            if (responseData.getAcceptedSequenceAcksTo() == null) {
-                throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(null, rc.communicator.getDestinationAddress()));
-            } else if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
+        CreateSequenceData requestData = csBuilder.build();
+        Packet request = rc.protocolHandler.toPacket(requestData, null);
+
+        Packet response = sendSessionControlMessage(messageName, request);
+        CreateSequenceResponseData responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
+
+        if (requestData.getOfferedSequenceId() != null && responseData.getAcceptedSequenceAcksTo() == null) {
+            // WS-I RSP R0010, R0011 - we must not fail in case of the Offer element has not been accepted by RMD
+            // This behavior was detected when testing with IBM endpoint in a test scenario in which the first
+            // CreateSequenceResponse + Accept was dropped. The IBM endpoint returns only CSR without Accept.
+            // For now, we will do one more round and try to send a completely new offered sequence Id
+
+            csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
+            // TODO P2 add offered sequence expiration configuration
+
+            requestData = csBuilder.build();
+            request = rc.protocolHandler.toPacket(requestData, null);
+
+            response = sendSessionControlMessage(messageName, request);
+            responseData = rc.protocolHandler.toCreateSequenceResponseData(verifyResponse(response, messageName, Level.SEVERE));
+        }
+
+        if (responseData.getAcceptedSequenceAcksTo() != null) {
+            if (!rc.communicator.getDestinationAddress().getURI().toString().equals(new WSEndpointReference(responseData.getAcceptedSequenceAcksTo()).getAddress())) {
                 throw new RxRuntimeException(LocalizationMessages.WSRM_1116_ACKS_TO_NOT_EQUAL_TO_ENDPOINT_DESTINATION(responseData.getAcceptedSequenceAcksTo().toString(), rc.communicator.getDestinationAddress()));
             }
         }
@@ -344,21 +426,32 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private void closeSequence() {
+    private boolean sendCloseSequenceRequest() {
         CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(
                 outboundSequenceId.value,
                 rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-        final CloseSequenceResponseData responseData = rc.protocolHandler.toCloseSequenceResponseData(verifyResponse(rc.communicator.send(request), "CloseSequence", Level.WARNING));
 
-        rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
+        final String messageName = "CloseSequence";
+        final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.WARNING);
 
-        if (!outboundSequenceId.value.equals(responseData.getSequenceId())) {
-            LOGGER.warning(LocalizationMessages.WSRM_1119_UNEXPECTED_SEQUENCE_ID_IN_CLOSE_SR(responseData.getSequenceId(), outboundSequenceId));
+        final String responseAction = rc.communicator.getWsaAction(response);
+        if (rc.rmVersion.protocolVersion.closeSequenceResponseAction.equals(responseAction)) {
+            final CloseSequenceResponseData responseData = rc.protocolHandler.toCloseSequenceResponseData(response);
+            rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
+            if (!outboundSequenceId.value.equals(responseData.getSequenceId())) {
+                LOGGER.warning(LocalizationMessages.WSRM_1119_UNEXPECTED_SEQUENCE_ID_IN_CLOSE_SR(responseData.getSequenceId(), outboundSequenceId));
+            }
+
+            return true;
         }
 
+        return false;
+    }
+
+    private void closeSequences() {
         String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
         try {
             rc.sequenceManager().closeSequence(outboundSequenceId.value);
@@ -369,28 +462,21 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private void terminateSequence() {
-
+    private void terminateOutboundSequence() {
         TerminateSequenceData.Builder dataBuilder = TerminateSequenceData.getBuilder(
                 outboundSequenceId.value,
                 rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
-        final Packet response = verifyResponse(rc.communicator.send(request), "TerminateSequence", Level.FINE);
+
+        final String messageName = "TerminateSequence";
+        final Packet response = verifyResponse(sendSessionControlMessage(messageName, request), messageName, Level.FINE);
 
         if (response.getMessage() != null) {
             final String responseAction = rc.communicator.getWsaAction(response);
-            if (rc.rmVersion.terminateSequenceAction.equals(responseAction)) {
-                TerminateSequenceData responseData = rc.protocolHandler.toTerminateSequenceData(response);
 
-                rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
-
-                final String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
-                if (!areEqual(boundSequenceId, responseData.getSequenceId())) {
-                    LOGGER.warning(LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(responseData.getSequenceId(), boundSequenceId));
-                }
-            } else if (rc.rmVersion.terminateSequenceResponseAction.equals(responseAction)) {
+            if (rc.rmVersion.protocolVersion.terminateSequenceResponseAction.equals(responseAction)) {
                 TerminateSequenceResponseData responseData = rc.protocolHandler.toTerminateSequenceResponseData(response);
 
                 rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
@@ -398,21 +484,52 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 if (!outboundSequenceId.value.equals(responseData.getSequenceId())) {
                     LOGGER.warning(LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(responseData.getSequenceId(), outboundSequenceId.value));
                 }
-            }
-        }
 
-        // TODO P2 pass last message id into terminateSequence method
-        final String boundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
-        try {
-            rc.sequenceManager().terminateSequence(outboundSequenceId.value);
-        } finally {
-            if (boundSequenceId != null) {
-                rc.sequenceManager().terminateSequence(boundSequenceId);
+            } else if (rc.rmVersion.protocolVersion.terminateSequenceAction.equals(responseAction)) {
+                TerminateSequenceData responseData = rc.protocolHandler.toTerminateSequenceData(response);
+
+                rc.destinationMessageHandler.processAcknowledgements(responseData.getAcknowledgementData());
+
+                if (responseData.getSequenceId() != null) {
+                    final String expectedInboundSequenceId = rc.getBoundSequenceId(outboundSequenceId.value);
+                    if (!areEqual(expectedInboundSequenceId, responseData.getSequenceId())) {
+                        LOGGER.warning(LocalizationMessages.WSRM_1117_UNEXPECTED_SEQUENCE_ID_IN_TERMINATE_SR(responseData.getSequenceId(), expectedInboundSequenceId));
+                    }
+                    try {
+                        // TODO P2 pass last message id into terminateSequence method
+                        rc.sequenceManager().terminateSequence(responseData.getSequenceId());
+                    } catch (UnknownSequenceException ex) {
+                        LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(responseData.getSequenceId()), ex);
+                        rc.communicator.sendAsync(ex.toRequest(rc), null);
+                    }
+                }
             }
         }
     }
 
-    private boolean areEqual(String s1, String s2) {
+    private Packet sendSessionControlMessage(final String messageName, final Packet request) throws RxRuntimeException {
+        int attempt = 0;
+        Packet response = null;
+        while (true) {
+            if (attempt > rc.configuration.getRmFeature().getMaxRmSessionControlMessageResendAttempts()) {
+                throw new RxRuntimeException(LocalizationMessages.WSRM_1128_MAX_RM_SESSION_CONTROL_MESSAGE_RESEND_ATTEMPTS_REACHED(messageName));
+            }
+            try {
+                response = rc.communicator.send(request.copy(true));
+                break;
+            } catch (RuntimeException ex) {
+                if (!Utilities.isResendPossible(ex)) {
+                    throw new RxRuntimeException(LocalizationMessages.WSRM_1106_SENDING_RM_SESSION_CONTROL_MESSAGE_FAILED(messageName), ex);
+                } else {
+                    LOGGER.warning(LocalizationMessages.WSRM_1106_SENDING_RM_SESSION_CONTROL_MESSAGE_FAILED(messageName), ex);
+                }
+            }
+            attempt++;
+        }
+        return response;
+    }
+
+    private static boolean areEqual(String s1, String s2) {
         if (s1 == null) {
             return s2 == null;
         } else {
@@ -428,7 +545,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 try {
                     if (!rc.sequenceManager().getSequence(sequenceId).hasUnacknowledgedMessages()) {
                         doneSignal.countDown();
-                    } 
+                    }
                 } catch (UnknownSequenceException ex) {
                     LOGGER.severe(LocalizationMessages.WSRM_1111_WAITING_FOR_SEQ_ACKS_UNEXPECTED_EXCEPTION(sequenceId), ex);
                     doneSignal.countDown();
@@ -452,17 +569,50 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private Packet verifyResponse(final Packet response, final String requestId, Level logLevel) throws RxRuntimeException {
-        if (response == null || response.getMessage() == null) {
-            final String logMessage = LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST(requestId);
-            if (logLevel == Level.SEVERE) {
-                throw LOGGER.logSevereException(new RxRuntimeException(logMessage));
-            } else {
-                LOGGER.log(logLevel, logMessage);
+    private void waitForInboundSequenceTermination(final String sequenceId, final long timeoutInMillis) {
+        final CountDownLatch doneSignal = new CountDownLatch(1);
+        ScheduledFuture<?> taskHandle = rc.scheduledTaskManager.startTask(new Runnable() {
+
+            public void run() {
+                try {
+                    if (rc.sequenceManager().getSequence(sequenceId).getState() == Sequence.State.TERMINATING) {
+                        doneSignal.countDown();
+                    }
+                } catch (UnknownSequenceException ex) {
+                    doneSignal.countDown();
+                }
             }
-        } else if (response.getMessage().isFault()) {
-            final String logMessage = LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED(requestId);
-            // FIXME P2 pass fault data into exception
+        }, 10, 10);
+
+        try {
+            if (timeoutInMillis > 0) {
+                boolean waitResult = doneSignal.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+                if (!waitResult) {
+                    LOGGER.info(LocalizationMessages.WSRM_1157_WAITING_FOR_SEQ_TERMINATION_TIMED_OUT(sequenceId, timeoutInMillis));
+                }
+            } else {
+                doneSignal.await();
+            }
+        } catch (InterruptedException ex) {
+            LOGGER.fine(LocalizationMessages.WSRM_1158_WAITING_FOR_SEQ_TERMINATION_INTERRUPTED(sequenceId), ex);
+        } finally {
+            taskHandle.cancel(true);
+        }
+    }
+
+    private Packet verifyResponse(final Packet response, final String requestId, Level logLevel) throws RxRuntimeException {
+        String logMessage = null;
+        if (response == null || response.getMessage() == null) {
+            logMessage = LocalizationMessages.WSRM_1114_NULL_RESPONSE_ON_PROTOCOL_MESSAGE_REQUEST(requestId);
+        } else {
+            final String responseAction = rc.communicator.getWsaAction(response);
+            if (response.getMessage().isFault() || rc.rmVersion.protocolVersion.isFault(responseAction)) {
+                logMessage = LocalizationMessages.WSRM_1115_PROTOCOL_MESSAGE_REQUEST_REFUSED(requestId);
+                // FIXME P2 pass fault data into exception
+            }
+        }
+
+        if (logMessage != null) {
             if (logLevel == Level.SEVERE) {
                 throw LOGGER.logSevereException(new RxRuntimeException(logMessage));
             } else {

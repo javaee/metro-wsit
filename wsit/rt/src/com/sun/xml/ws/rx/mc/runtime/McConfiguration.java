@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,21 +37,16 @@
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.RxConfiguration;
-import com.sun.xml.ws.rx.mc.McVersion;
+import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public interface McConfiguration extends RxConfiguration {
-    /**
-     * Specifies which WS-MC version SOAP messages and SOAP message headers should
-     * be used for communication between MC initiator and MC receiver
-     *
-     * @return MC version currently configured. If not set explicitly,
-     *         the default value is specified by a call to {@link McVersion#getDefault()}.
-     */
-    public McVersion getMcVersion();
 
+    public MakeConnectionSupportedFeature getFeature();
+
+    public McRuntimeVersion getRuntimeVersion();
 
 }

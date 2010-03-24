@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,9 +37,10 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeature;
-import com.sun.xml.ws.rx.rm.ReliableMessagingFeatureBuilder;
-import com.sun.xml.ws.rx.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
+import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
@@ -57,7 +58,7 @@ final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
     static final RmConfiguration getConfiguration() {
-        final ReliableMessagingFeature rmf = new ReliableMessagingFeatureBuilder(RmVersion.WSRM200702).build();
+        final ReliableMessagingFeature rmf = new ReliableMessagingFeatureBuilder(RmProtocolVersion.WSRM200702).build();
 
         return new RmConfiguration() {
 
@@ -86,6 +87,10 @@ final class SequenceTestUtils  {
             }
             public ManagedObjectManager getManagedObjectManager() {
                 return null;
+            }
+
+            public RmRuntimeVersion getRuntimeVersion() {
+                return RmRuntimeVersion.WSRM200702;
             }
        };
     }
