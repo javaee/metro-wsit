@@ -43,7 +43,10 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
+import java.util.List;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFault;
 
@@ -93,7 +96,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
         return faultReasonText;
     }
 
-    public abstract String getDetailValue();
+    public abstract Detail getDetail(RuntimeContext rc);
 
     public boolean mustTryToDeliver() {
         return mustTryTodeliver;
@@ -121,7 +124,8 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
             if (faultReasonText != null) {
                 soapFault.setFaultString(faultReasonText, java.util.Locale.ENGLISH);
             }
-            
+
+            final Detail detail = getDetail(rc);
             // SOAP version-specific SOAP Fault settings
             switch (rc.soapVersion) {
                 case SOAP_11:
@@ -130,8 +134,8 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
                 case SOAP_12:
                     soapFault.setFaultCode(getCode().asQName(rc.soapVersion));
                     soapFault.appendFaultSubcode(getSubcode(rc.rmVersion));
-                    if (getDetailValue() != null) {
-                        soapFault.addDetail().setValue(getDetailValue());
+                    if (detail != null) {
+                        soapFault.addChildElement(detail);
                     }
                     break;
                 default:
@@ -141,7 +145,7 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
             Message soapFaultMessage = Messages.create(soapFault);
 
             if (attachSequenceFaultElement && rc.soapVersion == SOAPVersion.SOAP_11) {
-                soapFaultMessage.getHeaders().add(rc.protocolHandler.createSequenceFaultElementHeader(getSubcode(rc.rmVersion), getDetailValue()));
+                soapFaultMessage.getHeaders().add(rc.protocolHandler.createSequenceFaultElementHeader(getSubcode(rc.rmVersion), detail));
             }
 
             return soapFaultMessage;
@@ -158,5 +162,51 @@ public abstract class AbstractSoapFaultException extends RxRuntimeException {
      */
     protected static String getProperFaultActionForAddressingVersion(RmRuntimeVersion rmVersion, AddressingVersion addressingVersion) {
         return (addressingVersion == AddressingVersion.MEMBER) ? addressingVersion.getDefaultFaultAction() : rmVersion.protocolVersion.wsrmFaultAction;
+    }
+
+    protected static final class DetailBuilder {
+        private final RuntimeContext rc;
+
+        private final Detail detail;
+
+        public DetailBuilder(RuntimeContext rc) {
+            this.rc = rc;
+            
+            try {
+                this.detail = rc.soapVersion.saajSoapFactory.createDetail();
+            } catch (SOAPException ex) {
+                throw new RxRuntimeException("Error creating a SOAP fault detail", ex);
+            }
+        }
+
+        public Detail build() {
+            return detail;
+        }
+
+        public DetailBuilder addSequenceIdentifier(String sequenceId) {
+            try {
+                detail.addDetailEntry(new QName(rc.rmVersion.protocolVersion.protocolNamespaceUri, "Identifier")).setValue(sequenceId);
+            } catch (SOAPException ex) {
+                throw new RxRuntimeException("Error creating a SOAP fault detail", ex);
+            }
+
+            return this;
+        }
+
+        public DetailBuilder addMaxMessageNumber(long number) {
+            try {
+                detail.addDetailEntry(new QName(rc.rmVersion.protocolVersion.protocolNamespaceUri, "MaxMessageNumber")).setValue(Long.toString(number));
+            } catch (SOAPException ex) {
+                throw new RxRuntimeException("Error creating a SOAP fault detail", ex);
+            }
+
+            return this;
+        }
+
+        public DetailBuilder addSequenceAcknowledgement(List<Sequence.AckRange> ackedRanges) {
+            // TODO P3 implement adding SequenceAcknowledgement SOAPFault detail entry
+
+            return this;
+        }
     }
 }
