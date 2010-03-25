@@ -125,8 +125,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         return csrElement.toDataBuilder().build();
     }
 
-    public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.protocolVersion.createSequenceResponseAction);
+    public Packet toPacket(CreateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
+        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.protocolVersion.createSequenceResponseAction, clientSideResponse);
     }
 
     public CloseSequenceData toCloseSequenceData(Packet packet) throws RxRuntimeException {
@@ -167,8 +167,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         return dataBuilder.build();
     }
 
-    public Packet toPacket(CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        Packet packet = communicator.createResponsePacket(requestPacket, new CloseSequenceResponseElement(data), rmVersion.protocolVersion.closeSequenceResponseAction);
+    public Packet toPacket(CloseSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
+        Packet packet = communicator.createResponsePacket(requestPacket, new CloseSequenceResponseElement(data), rmVersion.protocolVersion.closeSequenceResponseAction, clientSideResponse);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());
@@ -217,8 +217,8 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         return dataBuilder.build();
     }
 
-    public Packet toPacket(final TerminateSequenceResponseData data, @Nullable final Packet requestPacket) throws RxRuntimeException {
-        final Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.protocolVersion.terminateSequenceResponseAction);
+    public Packet toPacket(final TerminateSequenceResponseData data, @NotNull final Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
+        final Packet packet = communicator.createResponsePacket(requestPacket, new TerminateSequenceResponseElement(data), rmVersion.protocolVersion.terminateSequenceResponseAction, clientSideResponse);
 
         if (data.getAcknowledgementData() != null) {
             appendAcknowledgementHeaders(packet, data.getAcknowledgementData());

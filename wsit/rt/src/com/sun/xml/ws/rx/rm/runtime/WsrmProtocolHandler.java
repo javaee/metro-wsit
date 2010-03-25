@@ -101,7 +101,7 @@ public abstract class WsrmProtocolHandler {
 
     public abstract CreateSequenceResponseData toCreateSequenceResponseData(@NotNull Packet packet) throws RxRuntimeException;
 
-    public abstract Packet toPacket(@NotNull CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException;
+    public abstract Packet toPacket(@NotNull CreateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException;
 
     public abstract CloseSequenceData toCloseSequenceData(@NotNull Packet packet) throws RxRuntimeException;
 
@@ -109,7 +109,7 @@ public abstract class WsrmProtocolHandler {
 
     public abstract CloseSequenceResponseData toCloseSequenceResponseData(@NotNull Packet packet) throws RxRuntimeException;
 
-    public abstract Packet toPacket(@NotNull CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException;
+    public abstract Packet toPacket(@NotNull CloseSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException;
 
     public abstract TerminateSequenceData toTerminateSequenceData(@NotNull Packet packet) throws RxRuntimeException;
 
@@ -117,7 +117,7 @@ public abstract class WsrmProtocolHandler {
 
     public abstract TerminateSequenceResponseData toTerminateSequenceResponseData(@NotNull Packet packet) throws RxRuntimeException;
 
-    public abstract Packet toPacket(@NotNull TerminateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException;
+    public abstract Packet toPacket(@NotNull TerminateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException;
 
     public abstract Header createSequenceFaultElementHeader(QName subcode, Object detail);
 

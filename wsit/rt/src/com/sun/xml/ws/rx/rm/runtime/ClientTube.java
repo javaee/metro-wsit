@@ -299,7 +299,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     rc.sequenceManager().terminateSequence(tsData.getSequenceId());
 
                     TerminateSequenceResponseData tsrData = TerminateSequenceResponseData.getBuilder(tsData.getSequenceId()).build();
-                    Packet tsrPacket = rc.protocolHandler.toPacket(tsrData, null);
+                    Packet tsrPacket = rc.protocolHandler.toPacket(tsrData, protocolMessagePacket, true);
                     rc.communicator.sendAsync(tsrPacket, null);
                 } catch (UnknownSequenceException ex) {
                     LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(tsData.getSequenceId()), ex);

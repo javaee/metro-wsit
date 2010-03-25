@@ -116,8 +116,8 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         return csrElement.toDataBuilder().build();
     }
 
-    public Packet toPacket(CreateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
-        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.protocolVersion.createSequenceResponseAction);
+    public Packet toPacket(CreateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
+        return communicator.createResponsePacket(requestPacket, new CreateSequenceResponseElement(data), rmVersion.protocolVersion.createSequenceResponseAction, clientSideResponse);
     }
 
     public CloseSequenceData toCloseSequenceData(Packet packet) throws RxRuntimeException {
@@ -201,7 +201,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         }
     }
 
-    public Packet toPacket(CloseSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
+    public Packet toPacket(CloseSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
         /**
          * Server-side Replay model (https://www.wso2.org/library/2792#Server) requirements:
          * 
@@ -264,7 +264,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         }
     }
 
-    public Packet toPacket(TerminateSequenceResponseData data, @Nullable Packet requestPacket) throws RxRuntimeException {
+    public Packet toPacket(TerminateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException {
         if (data.getBoundSequenceId() != null) { // send back terminate sequence
             TerminateSequenceData tsData = TerminateSequenceData
                     .getBuilder(data.getBoundSequenceId(), data.getBoundSequenceLastMessageId())

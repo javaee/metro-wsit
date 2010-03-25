@@ -51,6 +51,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
+import com.sun.xml.ws.message.RelatesToHeader;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import javax.xml.bind.JAXBElement;
@@ -125,7 +126,7 @@ public final class Communicator {
 
     public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
         if (originalRequestPacket != null) { // // server side request transferred as a response
-            Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction);
+            Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction, false);
 
             final HeaderList requestHeaders = request.getMessage().getHeaders();
             if (expectReply) { // attach wsa:ReplyTo header from the original request
@@ -179,15 +180,20 @@ public final class Communicator {
      * @param responseWsaAction
      * @return
      */
-    public Packet createResponsePacket(Packet requestPacket, Object jaxbElement, String responseWsaAction) {
-        if (requestPacket != null) { // server side response
+    public Packet createResponsePacket(@NotNull Packet requestPacket, Object jaxbElement, String responseWsaAction, boolean isClientResponse) {
+        assert requestPacket != null: "Request packet must not be 'null' when creating a response";
+        if (!isClientResponse) { // server side response
             return requestPacket.createServerResponse(
                     Messages.create(jaxbContext, jaxbElement, soapVersion),
                     addressingVersion,
                     soapVersion,
                     responseWsaAction);
         } else { // client side response transferred as a request
-            return createRequestPacket(jaxbElement, responseWsaAction, false);
+            Packet response = createRequestPacket(jaxbElement, responseWsaAction, false);
+            response.getMessage().getHeaders().add(new RelatesToHeader(
+                    addressingVersion.relatesToTag,
+                    requestPacket.getMessage().getHeaders().getMessageID(addressingVersion, soapVersion)));
+            return response;
         }
     }
 
