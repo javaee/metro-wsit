@@ -68,6 +68,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  *
@@ -386,7 +387,7 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
     }
 
     @Override
-    public Header createSequenceFaultElementHeader(QName subcode, Object detail) {
+    public Header createSequenceFaultElementHeader(QName subcode, Detail detail) {
         return Headers.create(rmVersion.getJaxbContext(addressingVersion),
                 new com.sun.xml.ws.rx.rm.protocol.wsrm200502.SequenceFaultElement(subcode));
     }

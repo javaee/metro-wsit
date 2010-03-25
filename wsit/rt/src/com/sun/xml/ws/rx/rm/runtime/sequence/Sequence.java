@@ -80,36 +80,36 @@ public interface Sequence {
 
             @Override
             void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceClosedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
+                throw new SequenceClosedException(sequenceId, LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
             }
 
             @Override
             void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceClosedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
+                throw new SequenceClosedException(sequenceId, LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
             }
         },
         CLOSED(25) {
 
             @Override
             void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceClosedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
+                throw new SequenceClosedException(sequenceId, LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this));
             }
 
             @Override
             void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceClosedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
+                throw new SequenceClosedException(sequenceId, LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this));
             }
         },
         TERMINATING(30) {
 
             @Override
             void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceTerminatedException(LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this), code);
+                throw new SequenceTerminatedException(sequenceId, LocalizationMessages.WSRM_1135_WRONG_SEQUENCE_STATE_ACKNOWLEDGEMENT_REJECTED(sequenceId, this), code);
             }
 
             @Override
             void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code) throws AbstractSoapFaultException {
-                throw new SequenceTerminatedException(LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this), code);
+                throw new SequenceTerminatedException(sequenceId, LocalizationMessages.WSRM_1136_WRONG_SEQUENCE_STATE_MESSAGE_REGISTRATION(sequenceId, this), code);
             }
         };
         private int value;

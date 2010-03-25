@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.protocol.wsrm200702;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -47,6 +48,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  * <p>Java class for SequenceFaultType complex type.
@@ -95,12 +97,16 @@ public class SequenceFaultElement {
         this.faultCode = faultCode;
     }
 
-    public SequenceFaultElement(QName faultCode, List<Object> detail) {
+    public SequenceFaultElement(QName faultCode, Detail soapFaultDetail) {
         this.faultCode = faultCode;
 
-        if (detail != null && !detail.isEmpty()) {
-            this.detail = new DetailType();            
-            this.detail.getAny().addAll(detail);
+        if (soapFaultDetail != null && soapFaultDetail.hasChildNodes()) {
+            this.detail = new DetailType();
+
+            Iterator detailEntries = soapFaultDetail.getDetailEntries();
+            while (detailEntries.hasNext()) {
+                this.detail.getAny().add(detailEntries.next());
+            }
         }
     }
   

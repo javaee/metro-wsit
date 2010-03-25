@@ -59,6 +59,7 @@ import com.sun.xml.ws.rx.util.Communicator;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  *
@@ -119,7 +120,7 @@ public abstract class WsrmProtocolHandler {
 
     public abstract Packet toPacket(@NotNull TerminateSequenceResponseData data, @NotNull Packet requestPacket, boolean clientSideResponse) throws RxRuntimeException;
 
-    public abstract Header createSequenceFaultElementHeader(QName subcode, Object detail);
+    public abstract Header createSequenceFaultElementHeader(QName subcode, Detail detail);
 
     public abstract Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException;
 

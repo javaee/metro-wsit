@@ -37,7 +37,9 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  *
@@ -61,11 +63,13 @@ public class SequenceTerminatedException extends AbstractSoapFaultException {
     private static final long serialVersionUID = -4689338956255310299L;
     //
     private final Code code;
+    private final String sequenceId;
 
-    public SequenceTerminatedException(String message, Code code) {
+    public SequenceTerminatedException(String sequenceId, String message, Code code) {
         super(message, "The Sequence has been terminated due to an unrecoverable error.", true);
 
         this.code = code;
+        this.sequenceId = sequenceId;
     }
 
     @Override
@@ -79,7 +83,7 @@ public class SequenceTerminatedException extends AbstractSoapFaultException {
     }
 
     @Override
-    public String getDetailValue() {
-        return ""; // TODO P2 implement
+    public Detail getDetail(RuntimeContext rc) {
+        return new DetailBuilder(rc).addSequenceIdentifier(sequenceId).build();
     }
 }

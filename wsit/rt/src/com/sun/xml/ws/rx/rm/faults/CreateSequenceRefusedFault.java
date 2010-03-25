@@ -40,6 +40,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  * Properties:
@@ -83,8 +84,8 @@ public class CreateSequenceRefusedFault extends AbstractSoapFaultException {
     }
 
     @Override
-    public String getDetailValue() {
-        return getMessage();
+    public Detail getDetail(RuntimeContext rc) {
+        return null;
     }
 
     @Override

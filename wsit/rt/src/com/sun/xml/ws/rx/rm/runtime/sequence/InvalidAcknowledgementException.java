@@ -39,8 +39,10 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import java.util.List;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  * An example of when this fault is generated is when a message is Received by 
@@ -88,8 +90,9 @@ public final class InvalidAcknowledgementException extends AbstractSoapFaultExce
     }
 
     @Override
-    public String getDetailValue() {
-        return ""; // TODO P2 implement
+    public Detail getDetail(RuntimeContext rc) {
+//        return new DetailBuilder(rc).addSequenceAcknowledgement(ackedRanges).build();
+        return null;
     }
 
 

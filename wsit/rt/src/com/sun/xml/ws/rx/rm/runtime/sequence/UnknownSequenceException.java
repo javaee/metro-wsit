@@ -39,7 +39,9 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 import com.sun.xml.ws.rx.rm.runtime.RmRuntimeVersion;
 import com.sun.xml.ws.rx.rm.faults.AbstractSoapFaultException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Detail;
 
 /**
  * Inicates that the sequence with given sequence identifier is not available.
@@ -76,7 +78,7 @@ public final class UnknownSequenceException extends AbstractSoapFaultException {
     public UnknownSequenceException(String sequenceId) {
         super(
                 LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(sequenceId),
-                "",
+                "The value of wsrm:Identifier is not a known Sequence identifier.",
                 true);
 
         this.sequenceId = sequenceId;
@@ -100,8 +102,7 @@ public final class UnknownSequenceException extends AbstractSoapFaultException {
     }
 
     @Override
-    public String getDetailValue() {
-        // TODO P2 implement
-        return "";
+    public Detail getDetail(RuntimeContext rc) {
+        return new DetailBuilder(rc).addSequenceIdentifier(sequenceId).build();
     }
 }
