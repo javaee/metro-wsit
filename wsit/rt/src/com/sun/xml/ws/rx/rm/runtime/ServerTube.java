@@ -382,7 +382,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             Utilities.startSession(request.endpoint, inboundSequence.getId());
         }
 
-        return rc.protocolHandler.toPacket(responseBuilder.build(), request);
+        return rc.protocolHandler.toPacket(responseBuilder.build(), request, false);
     }
 
     private Packet handleCloseSequenceAction(Packet request) {
@@ -408,7 +408,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
             responseBuilder.acknowledgementData(ackDataBuilder.build());
 
-            return rc.protocolHandler.toPacket(responseBuilder.build(), request);
+            return rc.protocolHandler.toPacket(responseBuilder.build(), request, false);
         } finally {
             try {
                 rc.sequenceManager().closeSequence(inboundSequence.getId());
@@ -435,7 +435,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 responseBuilder.boundSequenceData(outboundSeqence.getId(), outboundSeqence.getLastMessageNumber());
             }
 
-            return rc.protocolHandler.toPacket(responseBuilder.build(), request);
+            return rc.protocolHandler.toPacket(responseBuilder.build(), request, false);
         } finally {
             Utilities.endSessionIfExists(request.endpoint, inboundSequence.getId());
             try {
