@@ -258,7 +258,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
 
             Collection<String> SUPPORTED_WSA_ACTIONS = Collections.unmodifiableCollection(Arrays.asList(new String[]{
                         rmVersion.ackRequestedAction,
-                        // rmVersion.closeSequenceAction,
+                        rmVersion.closeSequenceAction,
                         // rmVersion.closeSequenceResponseAction,
                         // rmVersion.createSequenceAction,
                         // rmVersion.createSequenceResponseAction,
@@ -280,6 +280,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
                     if (rmVersion.ackRequestedAction.equals(wsaAction) || rmVersion.sequenceAcknowledgementAction.equals(wsaAction)) {
                         AcknowledgementData ackData = rc.protocolHandler.getAcknowledgementData(protocolMessagePacket.getMessage());
                         rc.destinationMessageHandler.processAcknowledgements(ackData);
+                    } else if (rmVersion.closeSequenceAction.equals(wsaAction)) {
+                        handleCloseSequenceAction(protocolMessagePacket);
                     } else if (rmVersion.terminateSequenceAction.equals(wsaAction)) {
                         handleTerminateSequenceAction(protocolMessagePacket);
                     } else {
@@ -290,19 +292,40 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 }
             }
 
-            private void handleTerminateSequenceAction(Packet protocolMessagePacket) {
-                TerminateSequenceData tsData = rc.protocolHandler.toTerminateSequenceData(protocolMessagePacket);
-                rc.destinationMessageHandler.processAcknowledgements(tsData.getAcknowledgementData());
+            private void handleCloseSequenceAction(Packet protocolMessagePacket) {
+                CloseSequenceData requestData = rc.protocolHandler.toCloseSequenceData(protocolMessagePacket);
+                rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
                 try {
-                    // TODO P2 pass last message id into terminateSequence method
-                    rc.sequenceManager().terminateSequence(tsData.getSequenceId());
+                    // TODO P2 pass last message id into closeSequence method, so that sequence can allocate new unacked messages if necessary
+                    Sequence closedSequence = rc.sequenceManager().closeSequence(requestData.getSequenceId());
 
-                    TerminateSequenceResponseData tsrData = TerminateSequenceResponseData.getBuilder(tsData.getSequenceId()).build();
+                    final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(closedSequence.getId());
+                    responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(closedSequence.getId()));
+                    closedSequence.clearAckRequestedFlag();
+
+                    CloseSequenceResponseData responseData = responseBuilder.build();
+                    Packet responsePacket = rc.protocolHandler.toPacket(responseData, protocolMessagePacket, true);
+                    rc.communicator.sendAsync(responsePacket, null);
+                } catch (UnknownSequenceException ex) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(requestData.getSequenceId()), ex);
+                    rc.communicator.sendAsync(ex.toRequest(rc), null);
+                }
+            }
+
+            private void handleTerminateSequenceAction(Packet protocolMessagePacket) {
+                TerminateSequenceData requestData = rc.protocolHandler.toTerminateSequenceData(protocolMessagePacket);
+                rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
+
+                try {
+                    // TODO P2 pass last message id into terminateSequence method - so that it can implement proper incomplete sequence behavior
+                    rc.sequenceManager().terminateSequence(requestData.getSequenceId());
+
+                    TerminateSequenceResponseData tsrData = TerminateSequenceResponseData.getBuilder(requestData.getSequenceId()).build();
                     Packet tsrPacket = rc.protocolHandler.toPacket(tsrData, protocolMessagePacket, true);
                     rc.communicator.sendAsync(tsrPacket, null);
                 } catch (UnknownSequenceException ex) {
-                    LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(tsData.getSequenceId()), ex);
+                    LOGGER.warning(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(requestData.getSequenceId()), ex);
                     rc.communicator.sendAsync(ex.toRequest(rc), null);
                 }
             }
@@ -329,7 +352,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         } catch (RuntimeException ex) {
             LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         }
-        
+
         try {
             sendCloseSequenceRequest();
         } catch (RuntimeException ex) {
@@ -337,7 +360,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         } finally {
             closeSequences();
         }
-        
+
         try {
             waitForMissingAcknowledgements(outboundSequenceId.value, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
         } catch (RuntimeException ex) {
@@ -354,7 +377,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
 
         try {
-            waitForInboundSequenceTermination(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout());
+            waitForInboundSequenceStateChange(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout(), Sequence.State.TERMINATING);
         } catch (RuntimeException ex) {
             LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
         } finally {
@@ -457,7 +480,17 @@ final class ClientTube extends AbstractFilterTubeImpl {
             rc.sequenceManager().closeSequence(outboundSequenceId.value);
         } finally {
             if (boundSequenceId != null) {
-                rc.sequenceManager().closeSequence(boundSequenceId);
+                try {
+                    waitForInboundSequenceStateChange(boundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout(), Sequence.State.CLOSED);
+                } catch (RuntimeException ex) {
+                    LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+                } finally {
+                    if (rc.sequenceManager().isValid(boundSequenceId)) {
+                        try {
+                            rc.sequenceManager().closeSequence(boundSequenceId);
+                        } catch (UnknownSequenceException ignored) { /* ignored - most likely terminated externally in the meanwhile */ }
+                    }
+                }
             }
         }
     }
@@ -569,32 +602,33 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private void waitForInboundSequenceTermination(final String sequenceId, final long timeoutInMillis) {
-        final CountDownLatch doneSignal = new CountDownLatch(1);
+    private void waitForInboundSequenceStateChange(final String sequenceId, final long timeoutInMillis, final Sequence.State waitForState) {
+        final CountDownLatch stateChangedSignal = new CountDownLatch(1);
         ScheduledFuture<?> taskHandle = rc.scheduledTaskManager.startTask(new Runnable() {
 
             public void run() {
                 try {
-                    if (rc.sequenceManager().getSequence(sequenceId).getState() == Sequence.State.TERMINATING) {
-                        doneSignal.countDown();
+                    if (rc.sequenceManager().getSequence(sequenceId).getState() == waitForState) {
+                        stateChangedSignal.countDown();
                     }
                 } catch (UnknownSequenceException ex) {
-                    doneSignal.countDown();
+                    LOGGER.fine(LocalizationMessages.WSRM_1124_NO_SUCH_SEQUENCE_ID_REGISTERED(sequenceId), ex);
+                    stateChangedSignal.countDown();
                 }
             }
         }, 10, 10);
 
         try {
             if (timeoutInMillis > 0) {
-                boolean waitResult = doneSignal.await(timeoutInMillis, TimeUnit.MILLISECONDS);
+                boolean waitResult = stateChangedSignal.await(timeoutInMillis, TimeUnit.MILLISECONDS);
                 if (!waitResult) {
-                    LOGGER.info(LocalizationMessages.WSRM_1157_WAITING_FOR_SEQ_TERMINATION_TIMED_OUT(sequenceId, timeoutInMillis));
+                    LOGGER.info(LocalizationMessages.WSRM_1157_WAITING_FOR_SEQ_STATE_CHANGE_TIMED_OUT(sequenceId, waitForState, timeoutInMillis));
                 }
             } else {
-                doneSignal.await();
+                stateChangedSignal.await();
             }
         } catch (InterruptedException ex) {
-            LOGGER.fine(LocalizationMessages.WSRM_1158_WAITING_FOR_SEQ_TERMINATION_INTERRUPTED(sequenceId), ex);
+            LOGGER.fine(LocalizationMessages.WSRM_1158_WAITING_FOR_SEQ_STATE_CHANGE_INTERRUPTED(sequenceId, waitForState), ex);
         } finally {
             taskHandle.cancel(true);
         }
