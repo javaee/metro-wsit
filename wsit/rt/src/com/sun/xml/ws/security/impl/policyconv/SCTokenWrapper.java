@@ -232,10 +232,12 @@ public class SCTokenWrapper extends PolicyAssertion implements SecureConversatio
     }
     
     private void addToken(Token token){
-        if(PolicyUtil.isIssuedToken((PolicyAssertion)token, spVersion)){
-            issuedTokenList.add((PolicyAssertion)token);
-        } else if(PolicyUtil.isKerberosToken((PolicyAssertion)token, spVersion)){
-            kerberosTokenList.add((PolicyAssertion)token);
+        if (token != null) {
+            if (PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion)) {
+                issuedTokenList.add((PolicyAssertion) token);
+            } else if (PolicyUtil.isKerberosToken((PolicyAssertion) token, spVersion)) {
+                kerberosTokenList.add((PolicyAssertion) token);
+            }
         }
     }
     
