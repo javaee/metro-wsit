@@ -113,8 +113,10 @@ public class KerberosTokenBuilder extends TokenBuilder {
             return;
         }
         String itVersion = binding.getIncludeToken();
-        if(binding.INCLUDE_ALWAYS.equals(itVersion) ||
-                binding.INCLUDE_ALWAYS_TO_RECIPIENT.equals(itVersion) ){
+        if(binding.INCLUDE_ALWAYS.equals(itVersion) 
+                || binding.INCLUDE_ALWAYS_TO_RECIPIENT.equals(itVersion)
+                || binding.INCLUDE_ALWAYS_VER2.equals(itVersion)
+                || binding.INCLUDE_ALWAYS_TO_RECIPIENT_VER2.equals(itVersion)){
             // This should never happen as Always and AlwaysToRecipient 
             // are not allowed for Kerberos Tokens
             logger.log(Level.SEVERE, LogStringsMessages.WSS_1822_KERBEROS_ALWAYS_NOTALLOWED());
@@ -122,7 +124,8 @@ public class KerberosTokenBuilder extends TokenBuilder {
         } else if(binding.INCLUDE_NEVER.equals(itVersion) ||
                binding.INCLUDE_NEVER_VER2.equals(itVersion) ){
             binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-        } else if(binding.INCLUDE_ONCE.equals(itVersion)){
+        } else if(binding.INCLUDE_ONCE.equals(itVersion)
+                || binding.INCLUDE_ONCE_VER2.equals(itVersion)){
             binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
         }
     }
