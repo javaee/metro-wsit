@@ -327,6 +327,39 @@ public class TokenProcessor {
             setTokenInclusion(sct,(Token) tokenAssertion);
             //sct.setPolicyToken((Token)tokenAssertion);
             sct.setUUID(((Token)tokenAssertion).getTokenId());
+
+        } else if (PolicyUtil.isKerberosToken(tokenAssertion, spVersion)) {
+            AuthenticationTokenPolicy.KerberosTokenBinding kerbBinding =new AuthenticationTokenPolicy.KerberosTokenBinding();
+            KerberosToken kerbToken = (KerberosToken)tokenAssertion;
+            kerbBinding.setUUID(token.getTokenId());
+            setTokenInclusion(kerbBinding,(Token) tokenAssertion);
+            setTokenValueType(kerbBinding, tokenAssertion);
+            kerbBinding.isOptional(tokenAssertion.isOptional());
+
+            if(kerbToken.getIssuer() != null){
+                Address addr = kerbToken.getIssuer().getAddress();
+                if(addr != null)
+                    kerbBinding.setIssuer(addr.getURI().toString());
+            } else if(kerbToken.getIssuerName() != null){
+                kerbBinding.setIssuer(kerbToken.getIssuerName().getIssuerName());
+            }
+
+            if(kerbToken.getClaims() != null){
+                kerbBinding.setClaims(kerbToken.getClaims().getClaimsAsBytes());
+            }
+
+
+            //x509CB.setPolicyToken(token);
+            if(!ignoreDK && kerbToken.isRequireDerivedKeys()){
+                DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
+                dtKB.setOriginalKeyBinding(kerbBinding);
+                policy.setKeyBinding(dtKB);
+                dtKB.setUUID(pid.generateID());
+
+            }else{
+                policy.setKeyBinding(kerbBinding);
+            }
+
         }else if(PolicyUtil.isRsaToken((PolicyAssertion) token, spVersion)){
             AuthenticationTokenPolicy.KeyValueTokenBinding rsaTB =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
             RsaToken rsaToken = (RsaToken)tokenAssertion;
