@@ -94,9 +94,6 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
     
     //private static final int DEFAULT_KEY_SIZE = 256;
     
-    private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());
-    
     /**
      * Creates a new instance of WSTrustClientContractImpl
      */
@@ -210,26 +207,16 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         throw new UnsupportedOperationException("Unsupported operation: getComputedKeyAlgorithmFromProofToken");
     }
     
-    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSTrustException {
+    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context){
         
-        // Get Created and Expires from Lifetime
-        try{
-            final Lifetime lifetime = rstr.getLifetime();
-            if (lifetime != null){
-                final AttributedDateTime created = lifetime.getCreated();
-                final AttributedDateTime expires = lifetime.getExpires();
-                synchronized (calendarFormatter){
-                    final Date dateCreated = calendarFormatter.parse(created.getValue());
-                    final Date dateExpires = calendarFormatter.parse(expires.getValue());
-                
-                    // populate the IssuedTokenContext
-                    context.setCreationTime(dateCreated);
-                    context.setExpirationTime(dateExpires);
-                }
-            }
-        }catch(ParseException ex){
-            throw new WSTrustException(ex.getMessage(), ex);
-        }
+         // Get Created and Expires from Lifetime
+        final Lifetime lifetime = rstr.getLifetime();
+        final AttributedDateTime created = lifetime.getCreated();
+        final AttributedDateTime expires = lifetime.getExpires();
+
+        // populate the IssuedTokenContext
+        context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
+        context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
     }
     
     private byte[] getKey(final WSTrustVersion wstVer, final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst, final String appliesTo)

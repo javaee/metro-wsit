@@ -113,8 +113,6 @@ public abstract class IssueSamlTokenContract implements com.sun.xml.ws.api.secur
     protected String authnCtxClass;
     protected WSTrustElementFactory eleFac = 
             WSTrustElementFactory.newInstance(WSTrustVersion.WS_TRUST_10);
-   // protected static final SimpleDateFormat calendarFormatter
-     //       = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
 

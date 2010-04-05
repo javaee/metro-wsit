@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -378,23 +378,34 @@ public class WSTrustUtil {
     }
 
     public static long getLifeSpan(Lifetime lifetime){
+        final AttributedDateTime created = lifetime.getCreated();
+        final AttributedDateTime expires = lifetime.getExpires();
+    
+        return parseAttributedDateTime(expires).getTime() - parseAttributedDateTime(created).getTime();
+    }
+
+    public static Date parseAttributedDateTime(AttributedDateTime time){
         final SimpleDateFormat calendarFormatter
             = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
 
-        long timeout = 0;
-        try{
-            final AttributedDateTime created = lifetime.getCreated();
-            final AttributedDateTime expires = lifetime.getExpires();
-            synchronized (calendarFormatter){
-                final Date dateCreated = calendarFormatter.parse(created.getValue());
-                final Date dateExpires = calendarFormatter.parse(expires.getValue());
+        Date date = null;
+        synchronized (calendarFormatter){
+            try {
+                date = calendarFormatter.parse(time.getValue());
+            }catch(Exception ex){
+                // try a different format
+                try{
+                    SimpleDateFormat calendarFormatter1
+                            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'",Locale.getDefault());
 
-                timeout = dateExpires.getTime() - dateCreated.getTime();
+                    date = calendarFormatter1.parse(time.getValue());
+                }catch(ParseException pex){
+                    throw new RuntimeException(pex);
+                }
             }
-        }catch(ParseException ex){
-            throw new RuntimeException(ex);
         }
-        return timeout;
+
+        return date;
     }
     
     public static EncryptedKey encryptKey(final Document doc, final byte[] encryptedKey, final X509Certificate cert, final String keyWrapAlgorithm) throws Exception{
