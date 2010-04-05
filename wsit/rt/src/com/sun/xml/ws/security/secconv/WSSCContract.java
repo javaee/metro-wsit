@@ -289,7 +289,7 @@ public class WSSCContract {
         Lifetime lifetime = (Lifetime)((RequestSecurityToken)request).getLifetime();
         
         if(lifetime != null){
-            long timeout = getTimeoutFromRequest(lifetime);
+            long timeout = WSTrustUtil.getLifeSpan(lifetime);
             if(timeout > 0){
                 setSCTokenTimeout(timeout);
             }
@@ -493,7 +493,8 @@ public class WSSCContract {
         Lifetime lifetime = (Lifetime)((RequestSecurityToken)request).getLifetime();
         
         if(lifetime != null){
-            long timeout = getTimeoutFromRequest(lifetime);
+            //long timeout = getTimeoutFromRequest(lifetime);
+            long timeout = WSTrustUtil.getLifeSpan(lifetime);
             if(timeout > 0){
                 setSCTokenTimeout(timeout);
             }
@@ -680,25 +681,6 @@ public class WSSCContract {
 
             return lifetime;
         }
-    }
-    
-    private long getTimeoutFromRequest(Lifetime lifetime)  throws WSSecureConversationException {
-        long timeout = 0;
-        try{            
-            final AttributedDateTime created = lifetime.getCreated();
-            final AttributedDateTime expires = lifetime.getExpires();
-            synchronized (calendarFormatter){
-                final Date dateCreated = calendarFormatter.parse(created.getValue());
-                final Date dateExpires = calendarFormatter.parse(expires.getValue());
-                
-                timeout = dateExpires.getTime() - dateCreated.getTime();          
-            }
-        }catch(ParseException ex){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
-        }
-        return timeout;
     }
     
     private SecurityPolicyVersion getSPVersion(PolicyAssertion pa){

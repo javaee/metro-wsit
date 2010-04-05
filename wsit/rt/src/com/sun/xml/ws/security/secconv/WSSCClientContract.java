@@ -57,7 +57,6 @@ import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -78,9 +77,6 @@ public class WSSCClientContract {
             Logger.getLogger(
             LogDomainConstants.WSSC_IMPL_DOMAIN,
             LogDomainConstants.WSSC_IMPL_DOMAIN_BUNDLE);
-    
-    private static final SimpleDateFormat calendarFormatter
-            = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'",Locale.getDefault());
     
     private static final int DEFAULT_KEY_SIZE = 256;
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
@@ -222,26 +218,16 @@ public class WSSCClientContract {
         return key;
     }
     
-    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context) throws WSSecureConversationException {
+    private void setLifetime(final RequestSecurityTokenResponse rstr, final IssuedTokenContext context){
         
         // Get Created and Expires from Lifetime
-        try{
-            final Lifetime lifetime = rstr.getLifetime();
-            final AttributedDateTime created = lifetime.getCreated();
-            final AttributedDateTime expires = lifetime.getExpires();
-            synchronized (calendarFormatter){
-                final Date dateCreated = calendarFormatter.parse(created.getValue());
-                final Date dateExpires = calendarFormatter.parse(expires.getValue());
-                
-                // populate the IssuedTokenContext
-                context.setCreationTime(dateCreated);
-                context.setExpirationTime(dateExpires);
-            }
-        }catch(ParseException ex){
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
-            throw new WSSecureConversationException(LogStringsMessages.WSSC_0004_PARSE_EXCEPTION(), ex);
-        }
+        final Lifetime lifetime = rstr.getLifetime();
+        final AttributedDateTime created = lifetime.getCreated();
+        final AttributedDateTime expires = lifetime.getExpires();
+
+        // populate the IssuedTokenContext
+        context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
+        context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
     }
     
     private byte[] computeKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSSecureConversationException, UnsupportedOperationException {
