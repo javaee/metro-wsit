@@ -278,6 +278,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
 
         if (isSCRenew(packet)) {
+            // To append the policy for using with renew message;
+            // Need to refactor to make it logical more clean
             SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
             config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
             IssuedTokenContext itc = itm.createIssuedTokenContext(config, packet.endpointAddress.toString());
@@ -313,7 +315,10 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     LogStringsMessages.WSSTUBE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
         }
         packet.setMessage(msg);
+
         if (isSCRenew(packet)) {
+            // To remove the appended policy for using with renew message;
+            // Need to refactor to make it logical more clean
             Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
             SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI(), false);
             config.getOtherOptions().put("MessagePolicy", getOutgoingXWSBootstrapPolicy(scToken));
