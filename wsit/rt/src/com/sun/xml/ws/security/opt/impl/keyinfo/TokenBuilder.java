@@ -198,10 +198,12 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             ((SecurityElement) str).setId(strId);
         }
         if (context.getWSSAssertion() != null) {
-            if ((ref instanceof DirectReference) &&
-                    context.getWSSAssertion().getType().equals("1.1") &&
-                    MessageConstants.USERNAME_STR_REFERENCE_NS.equals(((DirectReference) ref).getValueType())) {
-                str.setTokenType(MessageConstants.USERNAME_STR_REFERENCE_NS);
+            if ((ref instanceof DirectReference) && context.getWSSAssertion().getType().equals("1.1")) {
+                if (MessageConstants.USERNAME_STR_REFERENCE_NS.equals(((DirectReference) ref).getValueType())) {
+                    str.setTokenType(MessageConstants.USERNAME_STR_REFERENCE_NS);
+                } else if (MessageConstants.EncryptedKey_NS.equals(((DirectReference) ref).getValueType())) {
+                    str.setTokenType(MessageConstants.EncryptedKey_NS);
+                }
             }
         }
         Data data = new SSEData((SecurityElement)str,false,context.getNamespaceContext());
