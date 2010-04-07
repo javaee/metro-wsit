@@ -101,7 +101,7 @@
     <target name="create-pom-files" depends="init" description="Copies the maven POM files into dist and replaces all placeholders">
         <delete dir="${dist.dir}/maven"/>
         
-        <filter token="metro.version" value="${release.impl.version}-${release.impl.version.suffix}"/>
+        <filter token="metro.version" value="${release.impl.version}${release.mvn.version.suffix}"/>
         <filter token="jaxb.version" value="${jaxb.osgi.dependency.version}"/>
         <copy todir="${dist.dir}/maven" filtering="true">
             <fileset dir="${etc.dir}/maven" includes="**/pom*.xml" />
