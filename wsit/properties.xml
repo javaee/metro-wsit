@@ -73,11 +73,12 @@
     <property name="release.impl.version" value="2.1"/>
     <property name="release.underscore.version" value="2_1"/>
     <property name="release.dash.version" value="2-1"/>
-    <property name="release.impl.version.suffix" value="-SNAPSHOT"/>
+    <property name="release.impl.version.suffix" value="SNAPSHOT"/>
+    <property name="release.mvn.version.suffix" value="-SNAPSHOT"/>
     <property name="release.context.url" value="2.1"/>
 
     <tstamp>
-        <format property="release.build.date" pattern="MMMM dd, yyyy" unit="day" locale="en_US"/>
+        <format property="release.build.date" pattern="MMMM dd, yyyy" locale="en_US"/>
     </tstamp>
 
     <property name="product.name" value="Metro ${release.impl.version}" />
@@ -94,7 +95,7 @@
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
     </tstamp>
     <property name="build.id" value="${now}(${user.name})" />
-    <property name="build.version" value="${ant.project.name} ${release.impl.version}-${build.id}${release.impl.version.suffix}" />
+    <property name="build.version" value="${ant.project.name} ${release.impl.version}-${build.id}-${release.impl.version.suffix}" />
     
     <property name="tmpdir" value="${basedir}/build/tmp"/>
     <property name="apijar-tmpdir" value="${tmpdir}/apijars"/>
