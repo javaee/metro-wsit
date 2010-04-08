@@ -341,6 +341,6 @@
         <istack.version>2.2</istack.version>
         <jaxb.version>2.2</jaxb.version>
         <jaxws.version>2.2-SNAPSHOT</jaxws.version>
-        <policy.version>2.0</policy.version>
+        <policy.version>2.2</policy.version>
     </properties>
 </project>
