@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticationTokenPolicy.java,v 1.3 2010-03-20 12:32:27 kumarjayanti Exp $
+ * $Id: AuthenticationTokenPolicy.java,v 1.4 2010-04-09 08:11:48 sm228678 Exp $
  */
 
 /*
@@ -482,6 +482,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
             //utBinding.setPolicyToken(this.getPolicyToken());
             utBinding.setIncludeToken(this.getIncludeToken());
             utBinding.setPolicyTokenFlag(this.policyTokenWasSet());
+            utBinding.isOptional(_isOptional);
            } catch (Exception e){
                e.printStackTrace();
            }
@@ -565,7 +566,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
             
             this._valueType = valueType;
         }
-        
+
         /**
          * set the EncodingType
          * @param encodingType encoding type like base64
@@ -765,6 +766,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
                 //x509Binding.setPolicyToken(this.getPolicyToken());
                 x509Binding.setIncludeToken(this.getIncludeToken());
                 x509Binding.setPolicyTokenFlag(this.policyTokenWasSet());
+                x509Binding.isOptional(_isOptional);
             } catch (Exception e) {
             }
             
@@ -1325,6 +1327,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
                 //samlBinding.setPolicyToken(this.getPolicyToken());
                 samlBinding.setIncludeToken(this.getIncludeToken());
                 samlBinding.setPolicyTokenFlag(this.policyTokenWasSet());
+                samlBinding.isOptional(_isOptional);
             } catch (Exception e) {
             }
             

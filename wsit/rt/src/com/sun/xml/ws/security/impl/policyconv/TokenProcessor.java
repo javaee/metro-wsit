@@ -453,6 +453,7 @@ public class TokenProcessor {
                 throw new PolicyException(ex);
             }
             key.setUUID(token.getTokenId());
+            key.isOptional(((PolicyAssertion) token).isOptional());
             setTokenInclusion(key,token);
             UserNameToken ut = (UserNameToken)token;
             if(!ut.hasPassword()){
@@ -484,7 +485,7 @@ public class TokenProcessor {
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             key.setSTRID(token.getTokenId());
-            
+            key.isOptional(((PolicyAssertion) token).isOptional());
             SamlToken samlToken = (SamlToken)token;
             if(samlToken.getIssuer() != null){
                 Address addr = samlToken.getIssuer().getAddress();
@@ -525,7 +526,7 @@ public class TokenProcessor {
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
-            
+            key.isOptional(((PolicyAssertion) token).isOptional());
             SecureConversationToken sct = (SecureConversationToken)token;
             if(sct.getIssuer() != null){
                 Address addr = sct.getIssuer().getAddress();
@@ -546,7 +547,7 @@ public class TokenProcessor {
             //xt.setPolicyToken(token);
             setTokenInclusion(xt,token);
             setX509TokenRefType(xt, (X509Token) token);
-            
+            xt.isOptional(((PolicyAssertion) token).isOptional());
             X509Token x509Token = (X509Token)token;
             if(x509Token.getIssuer() != null){
                 Address addr = x509Token.getIssuer().getAddress();

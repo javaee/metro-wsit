@@ -54,6 +54,7 @@ import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.wss.impl.WSSAssertion;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
+import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.SAMLAssertionBinding;
@@ -193,8 +194,10 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                     }
                 }
                 if(!found){
-                    throw new XWSSecurityException("Policy Verification error:"
+                    if(!((WSSPolicy)actualPol.getFeatureBinding()).isOptional()){
+                       throw new XWSSecurityException("Policy Verification error:"
                             + "UsernameToken not found in message but occurs in configured policy");
+                    }                    
                 }
             } else if (PolicyTypeUtil.samlTokenPolicy(actualPol.getFeatureBinding())) {
                 boolean found = false;
@@ -211,7 +214,10 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                     }
                 }
                 if (!found) {
-                    throw new XWSSecurityException("Policy Verification error:" + "SAML token  not found in message but occurs in configured policy");
+                    if(!((WSSPolicy)actualPol.getFeatureBinding()).isOptional()){
+                       throw new XWSSecurityException("Policy Verification error:"
+                            + "SAML Token not found in message but occurs in configured policy");
+                    }
                 }
             }else if (PolicyTypeUtil.issuedTokenKeyBinding(actualPol.getFeatureBinding())) {
                 boolean found = false;
@@ -254,14 +260,14 @@ public class MessagePolicyVerifier implements PolicyVerifier{
             boolean isPrimary = ((SignaturePolicy.FeatureBinding)actualSignPolicy.getFeatureBinding()).isPrimarySignature();
             int nth = 0;
             WSSPolicy pol = getFirstPrimaryPolicy(inferredSecurityPolicy, isEndorsing, nth++);
-            if(pol == null && ((WSSPolicy)actualSignPolicy.getKeyBinding()).isOptional() == true){
-                return;
+            if(pol == null && isOptionalPolicy(actualSignPolicy) == true){
+                    return;
             }
             if(pol == null){
-                log.log(Level.SEVERE, "WSS0268.error.policy.verification");
+                    log.log(Level.SEVERE, "WSS0268.error.policy.verification");
                 throw new XWSSecurityException("Policy verification error:" +
                         "Missing Signature Element");
-            }
+                }
             
             if(PolicyTypeUtil.signaturePolicy(pol)){
                 SignaturePolicy inferredPol = (SignaturePolicy)pol;
@@ -269,7 +275,10 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 boolean isKBTrue = verifyKeyBinding(actualSignPolicy.getKeyBinding(), inferredPol.getKeyBinding(),
                         false);                
                 while(!isKBTrue && !isPrimary){
-                    pol = getFirstPrimaryPolicy(inferredSecurityPolicy, isEndorsing, nth++);
+                    pol = getFirstPrimaryPolicy(inferredSecurityPolicy, isEndorsing, nth++);                    
+                    if (pol == null && isOptionalPolicy(actualSignPolicy) == true) {
+                        return;
+                    }
                     if(pol == null){
                         log.log(Level.SEVERE, "WSS0268.error.policy.verification");
                         throw new XWSSecurityException("Policy verification error:" +
@@ -803,6 +812,21 @@ public class MessagePolicyVerifier implements PolicyVerifier{
         if (pol instanceof TimestampPolicy) {
             return true;
         }
+        return false;
+    }
+
+    private boolean isOptionalPolicy(SignaturePolicy actualSignPolicy) {
+        if (((WSSPolicy) actualSignPolicy.getKeyBinding()).isOptional() == true) {
+            return true;
+        }
+        try {
+            if (((WSSPolicy) actualSignPolicy.getKeyBinding().getKeyBinding()) != null && ((WSSPolicy) actualSignPolicy.getKeyBinding().getKeyBinding()).isOptional() == true) {
+                return true;
+            }
+        } catch (PolicyGenerationException ex) {
+            log.log(Level.SEVERE, null, ex);
+        }
+
         return false;
     }
 }

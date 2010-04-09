@@ -275,6 +275,7 @@ public class SupportingTokensProcessor {
             }
             policyContainer.insert(sp);
         }
+        spList.clear();
     }
     
     protected void populateEncryptionPolicy(){
