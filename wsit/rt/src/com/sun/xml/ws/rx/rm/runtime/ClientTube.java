@@ -398,7 +398,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             LOGGER.severe(LocalizationMessages.WSRM_1121_SECURE_CONVERSATION_INIT_FAILED(), ex);
         }
 
-        if (rc.configuration.requestResponseOperationsDetected()) {
+        if (rc.configuration.requestResponseOperationsDetected() && !rc.configuration.getRmFeature().isOfferElementGenerationDisabled()) {
             csBuilder.offeredInboundSequenceId(rc.sequenceManager().generateSequenceUID());
             // TODO P2 add offered sequence expiration configuration
         }

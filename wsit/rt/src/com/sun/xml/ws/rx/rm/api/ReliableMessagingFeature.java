@@ -107,6 +107,11 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * Currently, the default value is set to infinity (-1).
      */
     public static final long DEFAULT_MAX_CONCURRENT_SESSIONS = -1;
+    /**
+     * A constant specifying the default value for disabling the generation of the {@code Offer}
+     * element as part of the {@code CreateSequence} message.
+     */
+    public static final boolean DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED = false;
 
     /**
      * Defines the enumeration of possible security binding mechanism options that
@@ -318,6 +323,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     private final long sequenceManagerMaintenancePeriod;
     //
     private final long maxConcurrentSessions;
+    //
+    private final boolean offerElementGenerationDisabled;
 
     /**
      * This constructor is here to satisfy JAX-WS specification requirements
@@ -347,7 +354,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 false, // this.persistenceEnabled
                 DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD,
-                DEFAULT_MAX_CONCURRENT_SESSIONS);
+                DEFAULT_MAX_CONCURRENT_SESSIONS,
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
     }
 
     @FeatureConstructor({
@@ -394,7 +402,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
                 DEFAULT_CLOSE_SEQUENCE_OPERATION_TIMEOUT, // this.closeSequenceOperationTimeout
                 persistenceEnabled, // this.persistenceEnabled
                 sequenceManagerMaintenancePeriod,
-                maxConcurrentSessions);
+                maxConcurrentSessions,
+                DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED);
     }
 
     ReliableMessagingFeature(
@@ -414,7 +423,8 @@ public class ReliableMessagingFeature extends WebServiceFeature {
             long closeSequenceOperationTimeout,
             boolean persistenceEnabled,
             long sequenceManagerMaintenancePeriod,
-            long maxConcurrentRmSessions) {
+            long maxConcurrentRmSessions,
+            boolean offerElementGenerationDisabled) {
 
         super.enabled = enabled;
         this.version = version;
@@ -433,6 +443,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         this.persistenceEnabled = persistenceEnabled;
         this.sequenceManagerMaintenancePeriod = sequenceManagerMaintenancePeriod;
         this.maxConcurrentSessions = maxConcurrentRmSessions;
+        this.offerElementGenerationDisabled = offerElementGenerationDisabled;
     }
 
     @Override
@@ -693,5 +704,16 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     @ManagedAttribute
     public long getMaxConcurrentSessions() {
         return maxConcurrentSessions;
+    }
+
+    /**
+     * Specifies whether the generation of the {@code Offer} element as part of
+     * the {@code CreateSequence} message is forced-disabled or not.
+     *
+     * @return {@code true} if the generation of the {@code Offer} element as part of
+     *         the {@code CreateSequence} message is forced-disabled, {@code false} otherwise.
+     */
+    public boolean isOfferElementGenerationDisabled() {
+        return offerElementGenerationDisabled;
     }
 }

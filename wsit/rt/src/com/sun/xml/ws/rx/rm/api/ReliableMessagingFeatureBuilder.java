@@ -64,6 +64,8 @@ public final class ReliableMessagingFeatureBuilder {
     private boolean persistenceEnabled = false;
     private long sequenceMaintenancePeriod = DEFAULT_SEQUENCE_MANAGER_MAINTENANCE_PERIOD;
     private long maxConcurrentSessions = DEFAULT_MAX_CONCURRENT_SESSIONS;
+    //
+    private boolean offerElementGenerationDisabled = DEFAULT_OFFER_ELEMENT_GENERATION_DISABLED;
 
     public ReliableMessagingFeatureBuilder(RmProtocolVersion version) {
         this.protocolVersion = version;
@@ -87,7 +89,8 @@ public final class ReliableMessagingFeatureBuilder {
                 this.closeSequenceOperationTimeout,
                 this.persistenceEnabled,
                 this.sequenceMaintenancePeriod,
-                this.maxConcurrentSessions);
+                this.maxConcurrentSessions,
+                this.offerElementGenerationDisabled);
     }
 
     /**
@@ -222,6 +225,15 @@ public final class ReliableMessagingFeatureBuilder {
      */
     public ReliableMessagingFeatureBuilder maxConcurrentSessions(long value) {
         this.maxConcurrentSessions = value;
+
+        return this;
+    }
+
+    /**
+     * @see ReliableMessagingFeature#isOfferElementGenerationDisabled()
+     */
+    public ReliableMessagingFeatureBuilder disableOfferElementGeneration() {
+        this.offerElementGenerationDisabled = true;
 
         return this;
     }
