@@ -1,0 +1,9 @@
+
+   * What are all the artifacts that to be pushed?
+      * JSR 105 API: 
+         * group id: javax.xml.crypto
+         * artifact id: jsr105-api.jar
+      * JSR 105 impl. + apache XML security extensions: 
+         * group id: com.sun.xml.security
+
+         * artifact id: xml-security-impl.jar
