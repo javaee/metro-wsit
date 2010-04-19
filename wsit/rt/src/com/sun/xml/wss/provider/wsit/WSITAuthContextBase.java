@@ -274,8 +274,9 @@ public abstract class WSITAuthContextBase  {
     protected static final String WSENDPOINT="WSEndpoint";
     protected X509Certificate serverCert = null;
     protected boolean isCertValidityVerified = false;
-     private boolean encryptCancelPayload = false;
-     private Policy cancelMSP;
+    private boolean encryptCancelPayload = false;
+    private Policy cancelMSP;
+    protected boolean isCertValid;
     
     static {
         try {
@@ -1203,11 +1204,13 @@ public abstract class WSITAuthContextBase  {
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
                 CertificateRetriever cr = new CertificateRetriever();
-                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
                 cr = null;
                 isCertValidityVerified = true;
             }else {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
             }
         }
         ctx.isInboundMessage(true);
@@ -1518,11 +1521,13 @@ public abstract class WSITAuthContextBase  {
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
                 CertificateRetriever cr = new CertificateRetriever();
-                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
                 cr = null;
                 isCertValidityVerified = true;
             }else {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                 if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
             }
         }
         try {

@@ -389,7 +389,7 @@ public class CertificateRetriever {
         }
     }
     @SuppressWarnings("unchecked")
-    public void setServerCertInTheContext(ProcessingContextImpl ctx, SecurityEnvironment secEnv, X509Certificate serverCert) {
+    public boolean setServerCertInTheContext(ProcessingContextImpl ctx, SecurityEnvironment secEnv, X509Certificate serverCert) {
         boolean valid = false;
         try {
             valid = secEnv.validateCertificate(serverCert, ctx.getExtraneousProperties());
@@ -404,9 +404,10 @@ public class CertificateRetriever {
         } else {
             log.log(Level.WARNING, "Could not validate the server certificate, so not using it");
         }
+        return valid;
     }
 
-    public void setServerCertInTheSTSConfig(STSIssuedTokenConfiguration config, SecurityEnvironment secEnv, X509Certificate serverCert) {
+    public boolean setServerCertInTheSTSConfig(STSIssuedTokenConfiguration config, SecurityEnvironment secEnv, X509Certificate serverCert) {
         boolean valid = false;
         try {
             valid = secEnv.validateCertificate(serverCert, config.getOtherOptions());
@@ -421,5 +422,6 @@ public class CertificateRetriever {
         } else {
             log.log(Level.WARNING, "Could not validate the server certificate, not using it");
         }
+        return valid;
     }
 }

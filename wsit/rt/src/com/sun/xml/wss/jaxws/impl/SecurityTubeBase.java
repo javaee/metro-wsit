@@ -268,6 +268,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected X509Certificate serverCert = null;
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
+    protected boolean isCertValid;
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -281,7 +282,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
+    }    
     
     public SecurityTubeBase(TubeConfiguration config, Tube nextTube) {
         super(nextTube);
@@ -573,11 +574,13 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
                 CertificateRetriever cr = new CertificateRetriever();
-                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
                 cr = null;
                 isCertValidityVerified = true;
             }else {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
             }
         }
         // setting a flag if issued tokens present
@@ -637,11 +640,13 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
                 CertificateRetriever cr = new CertificateRetriever();
-                cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
                 cr = null;
                 isCertValidityVerified = true;
             }else {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                 if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
             }
         }
         try {

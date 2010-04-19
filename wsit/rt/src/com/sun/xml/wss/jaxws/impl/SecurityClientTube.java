@@ -634,11 +634,13 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     if (serverCert != null) {
                         if (isCertValidityVerified == false) {
                             CertificateRetriever cr = new CertificateRetriever();
-                            cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
+                            isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
                             cr = null;
                             isCertValidityVerified = true;
                         }else {
-                            config.getOtherOptions().put("Identity", serverCert);
+                            if(isCertValid == true){
+                                 config.getOtherOptions().put("Identity", serverCert);
+                            }
                         }
                     }
 
