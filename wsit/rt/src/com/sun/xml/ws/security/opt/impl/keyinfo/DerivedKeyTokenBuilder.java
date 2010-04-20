@@ -223,7 +223,9 @@ public class DerivedKeyTokenBuilder extends TokenBuilder {
         }else{
             str = (SecurityTokenReferenceType)strObj;
         }
-        str = elementFactory.createSecurityTokenReference(((SecurityTokenReference)str).getReference());
+        if(str instanceof SecurityTokenReference){
+           str = elementFactory.createSecurityTokenReference(((SecurityTokenReference)str).getReference());
+        }
         DerivedKey dk = null;
         if(dpTokenID.length() == 0){
             dk = elementFactory.createDerivedKey(dtk.getUUID(),algorithm,dkt.getNonce(),dkt.getOffset(),dkt.getLength(),dkt.getLabel(),str, context.getSecurityPolicyVersion());
