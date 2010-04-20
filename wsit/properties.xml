@@ -63,7 +63,7 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
     
-    <property name="release.impl.version" value="1.1.7"/>
+    <property name="release.impl.version" value="1.1.13"/>
     <property name="release.impl.version.suffix" value="FCS"/>
     <tstamp>
         <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
