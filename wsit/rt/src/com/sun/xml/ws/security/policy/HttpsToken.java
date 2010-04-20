@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.security.policy;
 
+import com.sun.xml.ws.api.security.policy.Token;
+
 /**
  *
  * @author K.Venugopal@sun.com

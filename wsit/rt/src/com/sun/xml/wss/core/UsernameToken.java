@@ -1,5 +1,5 @@
 /*
- * $Id: UsernameToken.java,v 1.3 2010-03-20 13:02:59 kumarjayanti Exp $
+ * $Id: UsernameToken.java,v 1.4 2010-04-20 17:32:38 m_potociar Exp $
  */
 
 /*
@@ -64,7 +64,7 @@ import com.sun.xml.wss.impl.XMLUtil;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 
 /*
 <xsd:complexType name="UsernameTokenType">

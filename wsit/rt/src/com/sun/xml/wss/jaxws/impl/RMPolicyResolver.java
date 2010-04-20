@@ -43,7 +43,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

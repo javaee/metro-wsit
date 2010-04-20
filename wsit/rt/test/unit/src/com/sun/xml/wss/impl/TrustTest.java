@@ -35,6 +35,7 @@
  */
 package com.sun.xml.wss.impl;
 
+import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
 import java.util.*;
 import java.io.*;
 

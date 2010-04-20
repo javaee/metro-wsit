@@ -46,7 +46,7 @@ package com.sun.xml.ws.security.trust.util;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCElementFactory13;

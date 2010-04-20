@@ -41,8 +41,8 @@ import com.sun.xml.ws.client.ClientTransportException;
 import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 //
-import com.sun.xml.ws.runtime.util.Session;
-import com.sun.xml.ws.runtime.util.SessionManager;
+import com.sun.xml.ws.runtime.dev.Session;
+import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.secext10.ObjectFactory;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.trust.elements.str.DirectReference;

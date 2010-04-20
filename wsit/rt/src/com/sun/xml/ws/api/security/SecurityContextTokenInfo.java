@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,39 +34,68 @@
  * holder.
  */
 
-package com.sun.xml.ws.security;
+package com.sun.xml.ws.api.security;
 
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.Set;
 
 /**
- * DerivedKeyToken Interface
- * TODO: This defintion is incomplete. Currently it has only those members which are required
- * for the Trust Interop Scenarios
+ * The </code>SecurityContextTokenInfo</code> class represents security parameters
+ * which will be saved in the <code>Session</code> object so that whenever the endpoint
+ * crashes the security negotiations can be resumed from its original state and no new 
+ * negotiations need to be done.
+ *
  */
-public interface DerivedKeyToken extends Token {
+@ManagedData(name="SecurityContextTokenInfo")
+@Description("Security parameters")
+public interface SecurityContextTokenInfo {
 
-    public static final String DERIVED_KEY_TOKEN_TYPE="http://schemas.xmlsoap.org/ws/2005/02/sc/dk";
+    @ManagedAttribute
+    @Description("Identifier")
+    String getIdentifier();
 
-    public static final String DEFAULT_DERIVED_KEY_TOKEN_ALGORITHM="http://schemas.xmlsoap.org/ws/2005/02/sc/dk/p_sha1";
+    void setIdentifier(String identifier);
+
+    @ManagedAttribute
+    @Description("External identifier")
+    String getExternalId();
+
+    void setExternalId(String externalId);
     
-    public static final String DEFAULT_DERIVEDKEYTOKEN_LABEL = "WS-SecureConversationWS-SecureConversation"; 
+    String getInstance();
 
-    URI getAlgorithm();
+    void setInstance(String instance);
 
-    byte[] getNonce();
+    @ManagedAttribute    
+    @Description("Secret")
+    byte[] getSecret();
 
-    long  getLength();
+    byte[] getInstanceSecret(String instance);
 
-    long  getOffset();
+    void addInstance(String instance, byte[] key);
+
+    @ManagedAttribute
+    @Description("Creation time")
+    Date getCreationTime();
+
+    void setCreationTime(Date creationTime);
+
+    @ManagedAttribute
+    @Description("Expiration time")
+    Date getExpirationTime();
+
+    void setExpirationTime(Date expirationTime);
     
-    long getGeneration();
-    
-    String getLabel();
-    
-    SecretKey generateSymmetricKey(String algorithm) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException;
+    Set getInstanceKeys();
+
+    @ManagedAttribute
+    @Description("Issued token context")
+    IssuedTokenContext getIssuedTokenContext();
+
+    IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference);
+        
 }

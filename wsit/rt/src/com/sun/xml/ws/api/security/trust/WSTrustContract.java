@@ -38,7 +38,7 @@
 package com.sun.xml.ws.api.security.trust;
 
 import com.sun.xml.ws.api.security.trust.config.STSConfiguration;
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 
 import java.util.Map;
 

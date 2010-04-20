@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.security.trust.Claims;
 import com.sun.xml.ws.api.security.trust.client.SecondaryIssuedTokenParameters;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Issuer;
 import com.sun.xml.ws.security.policy.IssuedToken;

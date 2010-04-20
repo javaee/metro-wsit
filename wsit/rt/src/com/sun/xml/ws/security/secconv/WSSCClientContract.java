@@ -39,8 +39,8 @@ package com.sun.xml.ws.security.secconv;
 
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.SecurityContextToken;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
@@ -68,7 +68,7 @@ import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.util.Iterator;
 import java.util.List;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 
 public class WSSCClientContract {

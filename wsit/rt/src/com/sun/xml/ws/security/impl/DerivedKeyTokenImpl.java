@@ -42,7 +42,7 @@
 
 package com.sun.xml.ws.security.impl;
 
-import com.sun.xml.ws.security.DerivedKeyToken;
+import com.sun.xml.ws.api.security.DerivedKeyToken;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

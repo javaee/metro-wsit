@@ -38,8 +38,8 @@ package com.sun.xml.ws.security.opt.impl.incoming.processor;
 
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.api.TokenValidator;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;

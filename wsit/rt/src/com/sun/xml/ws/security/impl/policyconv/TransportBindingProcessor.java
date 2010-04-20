@@ -46,7 +46,7 @@ import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedParts;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.SupportingTokens;
-import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.api.security.policy.Token;
 import com.sun.xml.ws.security.policy.TransportBinding;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;

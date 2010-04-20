@@ -46,7 +46,7 @@
 
 package com.sun.xml.ws.security.secconv;
 
-import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.impl.wssx.elements.SecurityContextTokenImpl;
 import com.sun.xml.ws.security.trust.impl.wssx.WSTrustElementFactoryImpl;
 

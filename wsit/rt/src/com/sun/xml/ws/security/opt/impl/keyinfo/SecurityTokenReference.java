@@ -44,7 +44,7 @@ package com.sun.xml.ws.security.opt.impl.keyinfo;
 
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.opt.api.SecurityElementWriter;
 import com.sun.xml.ws.security.opt.api.reference.Reference;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;

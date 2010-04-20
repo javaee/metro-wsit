@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.ws.security.trust.elements.ValidateTarget;

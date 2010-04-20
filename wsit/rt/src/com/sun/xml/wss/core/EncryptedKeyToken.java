@@ -41,7 +41,7 @@ import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
 import com.sun.org.apache.xml.internal.security.keys.KeyInfo;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 import java.security.Key;

@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.PolicyMerger;
 import com.sun.xml.ws.policy.parser.PolicyConfigParser;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;

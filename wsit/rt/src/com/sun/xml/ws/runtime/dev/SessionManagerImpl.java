@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,11 +39,11 @@
  *
  */
 
-package com.sun.xml.ws.runtime.util;
+package com.sun.xml.ws.runtime.dev;
 
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.SecurityContextToken;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
 
 import java.util.Calendar;
 import java.util.Collection;

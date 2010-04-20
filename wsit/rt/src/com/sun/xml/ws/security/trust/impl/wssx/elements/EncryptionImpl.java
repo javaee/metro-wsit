@@ -1,5 +1,5 @@
 /*
- * $Id: EncryptionImpl.java,v 1.2 2008-02-26 06:33:29 ofung Exp $
+ * $Id: EncryptionImpl.java,v 1.3 2010-04-20 17:32:10 m_potociar Exp $
  */
 
 /*
@@ -43,7 +43,7 @@ package com.sun.xml.ws.security.trust.impl.wssx.elements;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.Encryption;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EncryptionType;

@@ -67,7 +67,7 @@ import com.sun.xml.ws.api.SOAPVersion;
  * @author Manveen Kaur manveen.kaur@sun.com
  * @author K.Venugopal@sun.com
  */
-public class SecurityContextToken extends SecurityContextTokenType implements SecurityHeaderElement, SecurityElementWriter, com.sun.xml.ws.security.SecurityContextToken {
+public class SecurityContextToken extends SecurityContextTokenType implements SecurityHeaderElement, SecurityElementWriter, com.sun.xml.ws.api.security.SecurityContextToken {
     
     public final String SECURITY_CONTEXT_TOKEN = "SecurityContextToken";
     

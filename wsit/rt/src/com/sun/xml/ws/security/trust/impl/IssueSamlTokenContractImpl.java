@@ -69,10 +69,10 @@ import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionExceptio
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;

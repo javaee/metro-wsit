@@ -45,7 +45,7 @@
 
 package com.sun.xml.ws.security.trust.elements.str;
 
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import javax.xml.namespace.QName;
 
 public interface SecurityTokenReference extends Token {

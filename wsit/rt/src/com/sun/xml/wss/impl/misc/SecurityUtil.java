@@ -36,7 +36,7 @@
 
 package com.sun.xml.wss.impl.misc;
 
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.core.reference.SamlKeyIdentifier;
@@ -80,13 +80,13 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 
 
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 
-import com.sun.xml.ws.security.SecurityTokenReference;
+import com.sun.xml.ws.api.security.SecurityTokenReference;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
@@ -95,13 +95,13 @@ import org.w3c.dom.Document;
 
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 
-import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.SecurityContextToken;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.cert.X509Certificate;
 import javax.security.auth.Subject;
-import com.sun.xml.ws.runtime.util.SessionManager;
+import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.opt.impl.keyinfo.SecurityContextToken13;
 import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;

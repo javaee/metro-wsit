@@ -45,7 +45,7 @@ import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.security.policy.AlgorithmSuiteValue;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

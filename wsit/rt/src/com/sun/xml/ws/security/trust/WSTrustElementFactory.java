@@ -69,11 +69,11 @@ import java.net.URI;
 
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 
-import com.sun.xml.ws.security.EncryptedKey;
+import com.sun.xml.ws.api.security.EncryptedKey;
 import com.sun.xml.ws.security.trust.elements.str.Reference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.Token;
-import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.api.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import java.util.List;

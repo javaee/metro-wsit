@@ -38,8 +38,8 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.api.reference.DirectReference;
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
@@ -78,9 +78,9 @@ public class SCTBuilder extends TokenBuilder{
                                 sctBinding.INCLUDE_ALWAYS_VER2.equals( sctVersion) ||
                                 sctBinding.INCLUDE_ALWAYS_TO_RECIPIENT_VER2.equals( sctVersion)
                                 );
-        com.sun.xml.ws.security.SecurityContextToken sct1 = null;
+        com.sun.xml.ws.api.security.SecurityContextToken sct1 = null;
         if (sct == null) {
-            sct1 =(com.sun.xml.ws.security.SecurityContextToken)ictx.getSecurityToken();
+            sct1 =(com.sun.xml.ws.api.security.SecurityContextToken)ictx.getSecurityToken();
             if (sct1 == null) {
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1809_SCT_NOT_FOUND());
                 throw new XWSSecurityException("SecureConversation Token not Found");

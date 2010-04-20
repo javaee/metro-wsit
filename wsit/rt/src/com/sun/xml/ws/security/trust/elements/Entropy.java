@@ -1,5 +1,5 @@
 /*
- * $Id: Entropy.java,v 1.3 2008-02-26 06:33:19 ofung Exp $
+ * $Id: Entropy.java,v 1.4 2010-04-20 17:32:31 m_potociar Exp $
  */
 
 /*
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.namespace.QName;
 
-import com.sun.xml.ws.security.EncryptedKey;
+import com.sun.xml.ws.api.security.EncryptedKey;
 
 /**
  *

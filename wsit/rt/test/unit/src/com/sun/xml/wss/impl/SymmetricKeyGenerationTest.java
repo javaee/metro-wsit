@@ -45,7 +45,7 @@
 package com.sun.xml.wss.impl;
 
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
-import com.sun.xml.ws.security.DerivedKeyToken;
+import com.sun.xml.ws.api.security.DerivedKeyToken;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import javax.crypto.SecretKey;

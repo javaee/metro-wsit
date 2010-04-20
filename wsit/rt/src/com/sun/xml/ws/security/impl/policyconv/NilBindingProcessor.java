@@ -42,7 +42,7 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.MessageLayout;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;

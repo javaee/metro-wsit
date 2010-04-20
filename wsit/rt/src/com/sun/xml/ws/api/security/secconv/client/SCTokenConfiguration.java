@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,15 +36,16 @@
 
 package com.sun.xml.ws.api.security.secconv.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenConfiguration;
-import com.sun.xml.ws.security.policy.Token;
-import java.util.HashMap;
-import java.util.Map;
+import com.sun.xml.ws.api.security.policy.Token;
 
 /**
  *

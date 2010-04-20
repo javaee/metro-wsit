@@ -57,8 +57,8 @@ import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.runtime.util.Session;
-import com.sun.xml.ws.runtime.util.SessionManager;
+import com.sun.xml.ws.runtime.dev.Session;
+import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
@@ -72,9 +72,9 @@ import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.SecurityContextToken;
-import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
@@ -97,7 +97,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import java.net.URI;
-import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.api.security.policy.Token;
 
 import com.sun.xml.ws.security.secconv.WSSCContract;
 import com.sun.xml.ws.security.secconv.WSSCFactory;

@@ -36,7 +36,7 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.server.Container;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;

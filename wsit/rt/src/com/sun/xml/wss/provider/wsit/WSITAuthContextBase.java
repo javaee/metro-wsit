@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyGenerator;
 import com.sun.xml.ws.security.policy.CertStoreConfig;
 import com.sun.xml.ws.security.policy.KerberosConfig;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import java.io.IOException;
@@ -84,7 +84,7 @@ import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 
@@ -100,7 +100,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 
 
-import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.ws.api.security.policy.Token;
 
 
 import javax.xml.bind.JAXBContext;

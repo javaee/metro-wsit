@@ -36,7 +36,7 @@
  */
 package com.sun.xml.wss.impl.filter;
 
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.TokenBuilder;

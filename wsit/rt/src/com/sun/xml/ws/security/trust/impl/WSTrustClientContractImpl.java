@@ -49,7 +49,7 @@ package com.sun.xml.ws.security.trust.impl;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustVersion;

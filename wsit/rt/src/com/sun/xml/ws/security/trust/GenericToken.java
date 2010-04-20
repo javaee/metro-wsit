@@ -45,7 +45,7 @@ package com.sun.xml.ws.security.trust;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import java.util.UUID;
 
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 
 import org.w3c.dom.Element;
 

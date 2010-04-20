@@ -1,5 +1,5 @@
 /*
- * $Id: CancelTarget.java,v 1.3 2008-02-26 06:33:19 ofung Exp $
+ * $Id: CancelTarget.java,v 1.4 2010-04-20 17:32:32 m_potociar Exp $
  */
 
 /*
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.security.trust.elements;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.Token;
+import com.sun.xml.ws.api.security.Token;
 
 /**
  * Defines Binding for requesting security tokens to be cancelled.

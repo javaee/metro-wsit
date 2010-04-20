@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,19 +34,18 @@
  * holder.
  */
 
-package com.sun.xml.ws.runtime.util;
+package com.sun.xml.ws.runtime.dev;
 
 import com.sun.istack.logging.Logger;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import org.glassfish.gmbal.AMXMetadata;
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedObject;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 import java.util.Collection;
 import java.util.HashMap;

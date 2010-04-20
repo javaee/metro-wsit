@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,27 +33,16 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-/*
- * IssuedTokenContextImpl.java
- *
- * Created on December 14, 2005, 3:44 PM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
-package com.sun.xml.ws.security.impl;
+package com.sun.xml.ws.api.security;
 
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
-import com.sun.xml.ws.security.*;
+import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.xml.wss.XWSSecurityException;
 import java.net.URI;
 import java.security.Key;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import java.security.KeyPair;
 
 import java.util.Date;
