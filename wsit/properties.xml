@@ -83,11 +83,11 @@
 
     <property name="product.name" value="Metro ${release.impl.version}" />
 
-    <property name="jaxws.release.version" value="2.2"/>
-    <property name="jaxws.release.context.url" value="2.2"/>
+    <property name="jaxws.release.version" value="2.2.1"/>
+    <property name="jaxws.release.context.url" value="2.2.1"/>
 
-    <property name="jaxb.release.version" value="2.2"/>
-    <property name="jaxb.release.context.url" value="2.2"/>
+    <property name="jaxb.release.version" value="2.2.1"/>
+    <property name="jaxb.release.context.url" value="2.2.1"/>
 
     <!-- END: RELEASE SECTION -->
 
