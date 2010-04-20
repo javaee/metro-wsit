@@ -42,6 +42,7 @@ import com.sun.xml.ws.security.DerivedKeyToken;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
+import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.impl.AlgorithmSuite;
 import com.sun.xml.wss.XWSSecurityException;
@@ -222,7 +223,7 @@ public class DerivedKeyTokenBuilder extends TokenBuilder {
         }else{
             str = (SecurityTokenReferenceType)strObj;
         }
-        
+        str = elementFactory.createSecurityTokenReference(((SecurityTokenReference)str).getReference());
         DerivedKey dk = null;
         if(dpTokenID.length() == 0){
             dk = elementFactory.createDerivedKey(dtk.getUUID(),algorithm,dkt.getNonce(),dkt.getOffset(),dkt.getLength(),dkt.getLabel(),str, context.getSecurityPolicyVersion());

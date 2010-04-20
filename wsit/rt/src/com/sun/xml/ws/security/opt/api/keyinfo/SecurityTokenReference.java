@@ -51,8 +51,9 @@ import com.sun.xml.ws.security.opt.api.reference.Reference;
 public interface SecurityTokenReference extends Token{
     
     public static final String KEYIDENTIFIER = "Identifier";
-    public static final String REFERENCE = "Direct";
+    public static final String REFERENCE = "Direct";//TODO: This looks incorrect
     public static final String X509DATA_ISSUERSERIAL = "X509Data";
+    public static final String DIRECT_REFERENCE = "Reference";
     
     /**
      * Sets the appropriate reference type for STR - like EkyIndentifier, Direct reference etc

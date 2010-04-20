@@ -103,7 +103,7 @@ public class SecurityTokenReference extends SecurityTokenReferenceType
         ObjectFactory objFac = new ObjectFactory();
         if (KEYIDENTIFIER.equals(type)){
             refElem = objFac.createKeyIdentifier((KeyIdentifier)ref);
-        } else if (REFERENCE.equals(type)){
+        } else if (REFERENCE.equals(type) || DIRECT_REFERENCE.equals(type)){
             refElem = objFac.createReference((DirectReference)ref);
         } else if(X509DATA_ISSUERSERIAL.equals(type)){
             refElem = new com.sun.xml.security.core.dsig.ObjectFactory().createX509Data((X509Data)ref);
@@ -123,7 +123,7 @@ public class SecurityTokenReference extends SecurityTokenReferenceType
         List<Object> list = this.getAny();
         JAXBElement obj = (JAXBElement)list.get(0);
         String local = obj.getName().getLocalPart();
-        if (REFERENCE.equals(local)) {
+        if (REFERENCE.equals(local) || DIRECT_REFERENCE.equals(local)) {
             return (DirectReference)obj.getValue();
         } else if("KeyIdentifier".equalsIgnoreCase(local)) {
             return (KeyIdentifier)obj.getValue();
