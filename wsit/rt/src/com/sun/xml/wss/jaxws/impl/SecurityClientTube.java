@@ -63,9 +63,9 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.security.CallbackHandlerFeature;
+import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
@@ -135,7 +135,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     private Set wsscConfig = null;
     private Set<PolicyAssertion> configAssertions = null;
     Properties props = new Properties();
-    private ClientTubelineAssemblyContext wsitContext;    
+    private ClientTubelineAssemblyContext wsitContext;
 
     // Creates a new instance of SecurityClientTube
     @SuppressWarnings("unchecked")
@@ -563,6 +563,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
     }
 
+    @Override
     public void preDestroy() {
         cancelSecurityContextToken();
         if (super.next != null) {
@@ -629,17 +630,17 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     config.getOtherOptions().putAll(packet.invocationProperties);
                     
                     // put the server certificate, if available, in the configuration
-                    X509Certificate serverCert = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
+                    X509Certificate x509ServerCertificate = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
                      // and make sure the  validition of the server certificate happens only once
-                    if (serverCert != null) {
+                    if (x509ServerCertificate != null) {
                         if (isCertValidityVerified == false) {
                             CertificateRetriever cr = new CertificateRetriever();
-                            isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
+                            isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, x509ServerCertificate);
                             cr = null;
                             isCertValidityVerified = true;
                         }else {
                             if(isCertValid == true){
-                                 config.getOtherOptions().put("Identity", serverCert);
+                                 config.getOtherOptions().put("Identity", x509ServerCertificate);
                             }
                         }
                     }

@@ -1,11 +1,9 @@
 package com.sun.xml.ws.api.security;
 
-import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.istack.NotNull;
 
 import javax.xml.ws.WebServiceFeature;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.Callback;
 import java.security.cert.CertStore;
 import java.security.KeyStore;
 
@@ -22,9 +20,9 @@ import org.glassfish.gmbal.ManagedData;
  * a higher level features for common configurations, this feature works as an catch-all escape hatch.
  *
  * <p>
- * See {@link DefaultCallbackHandler#handle(Callback[])} implementation as an example of what callback
- * {@link CallbackHandler} receives (note that this default implementation class itself is not a committed part
- * of Metro.)
+ * See {@link com.sun.xml.wss.impl.misc.DefaultCallbackHandler#handle(javax.security.auth.callback.Callback[])}
+ * implementation as an example of what callback {@link CallbackHandler} receives (note that this default
+ * implementation class itself is not a committed part of Metro.)
  *
  * <p>
  * This feature allows you to pass in an instance of {@link CallbackHandler} unlike

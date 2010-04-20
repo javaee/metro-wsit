@@ -49,7 +49,7 @@ public interface Token{
     public static final String REQUIRE_EMBEDDED_TOKEN_REFERENCE="RequireEmbeddedTokenReference";
     public static final String REQUIRE_THUMBPRINT_REFERENCE="RequireThumbprintReference";
     public static final String REQUIRE_EXTERNAL_URI_REFERENCE = "RequireExternalUriReference";
-    public final static String REQUIRE_EXTERNAL_REFERENCE = "RequireExternalReference";
+    public static final String REQUIRE_EXTERNAL_REFERENCE = "RequireExternalReference";
     public static final String REQUIRE_INTERNAL_REFERENCE  = "RequireInternalReference";
     public static final String WSSX509V1TOKEN10 ="WssX509V1Token10";
     public static final String WSSX509V3TOKEN10="WssX509V3Token10";

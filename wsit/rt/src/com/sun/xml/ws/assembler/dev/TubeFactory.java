@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,55 +33,31 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.pipe.Pipe;
+package com.sun.xml.ws.assembler.dev;
+
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
-import java.util.LinkedList;
-import java.util.List;
+import javax.xml.ws.WebServiceException;
 
 /**
- * A base tubeline assembly context class providing common methods for both
- * client and server assembly context classes.
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class TubelineAssemblyContext {
+public interface TubeFactory {
+    /**
+     * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
+     *
+     * @param context wsit client tubeline assembler context
+     * @return new tail of the client-side tubeline
+     */
+    Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException;
 
-    private Tube head;
-    private Pipe adaptedHead;
-    private List<Tube> tubes = new LinkedList<Tube>();
+    /**
+     * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
+     *
+     * @param context wsit service tubeline assembler context
+     * @return new head of the service-side tubeline
+     */
+    Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException;
 
-    public Tube getTubelineHead() {
-        return head;
-    }
-
-    public Pipe getAdaptedTubelineHead() {
-        if (adaptedHead == null) {
-            adaptedHead = PipeAdapter.adapt(head);
-        }
-        return adaptedHead;
-    }
-
-    boolean setTubelineHead(Tube newHead) {
-        if (newHead != head || newHead != adaptedHead) {
-            head = newHead;
-            tubes.add(head);
-            adaptedHead = null;
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public <T> T getImplementation(Class<T> type) {
-        for (Tube tube : tubes) {
-            if (type.isInstance(tube)) {
-                return type.cast(tube);
-            }
-        }
-        return null;
-    }
 }

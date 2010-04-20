@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.assembler.dev.TubelineAssemblyContextUpdater;
+import com.sun.xml.ws.assembler.dev.TubeFactory;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.localization.LocalizationMessages;
@@ -72,23 +74,23 @@ final class TubeCreator {
         }
     }
 
-    Tube createTube(ClientTubelineAssemblyContext context) {
+    Tube createTube(ClientTubelineAssemblyContextImpl context) {
         // TODO implement passing init parameters (if any) to the factory
         return factory.createTube(context);
     }
 
-    Tube createTube(ServerTubelineAssemblyContext context) {
+    Tube createTube(ServerTubelineAssemblyContextImpl context) {
         // TODO implement passing init parameters (if any) to the factory
         return factory.createTube(context);
     }
 
-    void updateContext(ClientTubelineAssemblyContext context) {
+    void updateContext(ClientTubelineAssemblyContextImpl context) {
         if (factory instanceof TubelineAssemblyContextUpdater) {
             ((TubelineAssemblyContextUpdater) factory).prepareContext(context);
         }
     }
 
-    void updateContext(ServerTubelineAssemblyContext context) {
+    void updateContext(ServerTubelineAssemblyContextImpl context) {
         if (factory instanceof TubelineAssemblyContextUpdater) {
             ((TubelineAssemblyContextUpdater) factory).prepareContext(context);
         }

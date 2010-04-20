@@ -36,9 +36,9 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.TubeFactory;
-import com.sun.xml.ws.assembler.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.TubeFactory;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import javax.xml.ws.WebServiceException;
 

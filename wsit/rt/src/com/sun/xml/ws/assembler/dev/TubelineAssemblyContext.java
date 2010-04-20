@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,28 +34,21 @@
  * holder.
  */
 
-package com.sun.xml.ws.assembler;
+package com.sun.xml.ws.assembler.dev;
 
-import javax.xml.ws.WebServiceException;
+import com.sun.xml.ws.api.pipe.Pipe;
+import com.sun.xml.ws.api.pipe.Tube;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface TubelineAssemblyContextUpdater {
-    /**
-     * TODO javadoc
-     * 
-     * @param context
-     * @throws javax.xml.ws.WebServiceException
-     */
-    void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException;
-    
-    /**
-     * TODO javadoc
-     * 
-     * @param context
-     * @throws javax.xml.ws.WebServiceException
-     */
-    void prepareContext(ServerTubelineAssemblyContext context) throws WebServiceException;
+public interface TubelineAssemblyContext {
+
+    Pipe getAdaptedTubelineHead();
+
+    <T> T getImplementation(Class<T> type);
+
+    Tube getTubelineHead();
+
 }

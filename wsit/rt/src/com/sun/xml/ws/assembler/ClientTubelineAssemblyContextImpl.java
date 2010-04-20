@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,6 +40,7 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.EndpointAddress;
@@ -59,7 +60,7 @@ import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
+final class ClientTubelineAssemblyContextImpl extends TubelineAssemblyContextImpl implements ClientTubelineAssemblyContext {
 
     private final @NotNull ClientTubeAssemblerContext wrappedContext;
     private final PolicyMap policyMap;
@@ -68,7 +69,7 @@ public class ClientTubelineAssemblyContext extends TubelineAssemblyContext {
     private SecureConversationInitiator scInitiator;
     // TODO: replace the PipeConfiguration
 
-    public ClientTubelineAssemblyContext(@NotNull ClientTubeAssemblerContext context) {
+    public ClientTubelineAssemblyContextImpl(@NotNull ClientTubeAssemblerContext context) {
         this.wrappedContext = context;
         this.wsdlPort = context.getWsdlModel();
         this.portInfo = context.getPortInfo();

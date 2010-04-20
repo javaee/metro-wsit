@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,7 +51,7 @@ import javax.xml.namespace.QName;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class TubelineAssemblyController {
+final class TubelineAssemblyController {
 
     /**
      * Provides a ordered collection of WSIT/Metro client-side tube creators that are be used to
@@ -70,7 +70,7 @@ public class TubelineAssemblyController {
      *
      * @return collection of WSIT/Metro client-side tube creators
      */
-    Collection<TubeCreator> getTubeCreators(ClientTubelineAssemblyContext context) {
+    Collection<TubeCreator> getTubeCreators(ClientTubelineAssemblyContextImpl context) {
         URI endpointUri;
         if (context.getPortInfo() != null) {
             endpointUri = createEndpointComponentUri(context.getPortInfo().getServiceName(), context.getPortInfo().getPortName());
@@ -99,7 +99,7 @@ public class TubelineAssemblyController {
      *
      * @return collection of WSIT/Metro server-side tube creators
      */
-    Collection<TubeCreator> getTubeCreators(ServerTubelineAssemblyContext context) {
+    Collection<TubeCreator> getTubeCreators(ServerTubelineAssemblyContextImpl context) {
         URI endpointUri;
         if (context.getEndpoint() != null) {
             endpointUri = createEndpointComponentUri(context.getEndpoint().getServiceName(), context.getEndpoint().getPortName());

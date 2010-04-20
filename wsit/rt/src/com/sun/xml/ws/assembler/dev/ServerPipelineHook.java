@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,36 +34,36 @@
  * holder.
  */
 
-package com.sun.xml.ws.assembler;
+package com.sun.xml.ws.assembler.dev;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
+import com.sun.xml.ws.api.model.SEIModel;
+import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 
 /**
  * @author Arun Gupta
  */
-public class ClientPipelineHook extends com.sun.xml.ws.api.client.ClientPipelineHook {
+public class ServerPipelineHook extends com.sun.xml.ws.api.server.ServerPipelineHook {
     /**
-     * Called during the client-side pipeline construction process once to allow a
-     * container to register a pipe for security.
+     * Called during the server-side pipeline construction process once to allow a
+     * container to register a pipe for security on the service endpoint.
      *
      * This pipe will be injected to a point very close to the transport, allowing
      * it to do some security operations.
      *
      * @param policyMap {@link PolicyMap} holding policies for a scope
-     *
-     * @param ctxt
-     *      Represents abstraction of SEI, WSDL abstraction etc. Context can be used
-     *      whether add a new pipe to the head or not.
-     *
+     * @param seiModel abstraction of server-side SEI
+     * @param wsdlModel abstraction of wsdl:port
+     * @param owner instance of deployed service
      * @param tail
      *      Head of the partially constructed pipeline. If the implementation
      *      wishes to add new pipes, it should do so by extending
-     *      {@link com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl} and making sure that this {@link com.sun.xml.ws.api.pipe.Pipe}
+     *      {@link com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl} and making sure that this {@link Pipe}
      *      eventually processes messages.
      *
      * @return
@@ -71,14 +71,13 @@ public class ClientPipelineHook extends com.sun.xml.ws.api.client.ClientPipeline
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
      */
-    public @NotNull
-    Pipe createSecurityPipe(@Nullable PolicyMap policyMap, ClientPipeAssemblerContext ctxt, @NotNull Pipe tail) {
+    public @NotNull Pipe createSecurityPipe(@Nullable PolicyMap policyMap, @Nullable SEIModel seiModel, @Nullable WSDLPort wsdlModel, @NotNull WSEndpoint owner, @NotNull Pipe tail) {
         return tail;
     }
-   
+
     /**
-     * Called during the client-side tubeline construction process once to allow a
-     * container to register a tube for security.
+     * Called during the server-side tubeline construction process once to allow a
+     * container to register a tube for security on the service endpoint.
      *
      * This tube will be injected to a point very close to the transport, allowing
      * it to do some security operations.
@@ -88,15 +87,15 @@ public class ClientPipelineHook extends com.sun.xml.ws.api.client.ClientPipeline
      * eventually processes messages.
      *
      * @param context
-     *      Represents abstraction of PolicyMap, SEI, WSDL abstraction etc. Context can be used
-     *      whether add a new tube to the head or not.
+     *      Represents abstraction of policy map, tubeline head, SEI, WSDL abstraction etc. Context can be used
+     *      whether add a new tube to the head or not.     
      *
      * @return
      *      The default implementation just returns <tt>tail</tt>, which means
      *      no additional tube is inserted. If the implementation adds
      *      new tubes, return the new head tube.
      */
-    public @NotNull
-    Tube createSecurityTube(ClientTubelineAssemblyContext context) {
+    public @NotNull Tube createSecurityTube(ServerTubelineAssemblyContext context) {
         return context.getTubelineHead();
-    }}
+    }    
+}

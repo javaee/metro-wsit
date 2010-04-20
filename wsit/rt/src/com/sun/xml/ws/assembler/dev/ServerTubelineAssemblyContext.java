@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,11 +34,7 @@
  * holder.
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.sun.xml.ws.assembler;
+package com.sun.xml.ws.assembler.dev;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
@@ -51,60 +47,43 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.policy.PolicyMap;
 
 /**
- * The context is a wrapper around the existing JAX-WS {@link ServerTubeAssemblerContext} with additional features
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
-
-    private final @NotNull ServerTubeAssemblerContext wrappedContext;
-    private final PolicyMap policyMap;
-    // TODO: add next tube getter/package-private setter
-    // TODO: replace the PipeConfiguration
-
-    public ServerTubelineAssemblyContext(@NotNull ServerTubeAssemblerContext context) {
-        this.wrappedContext = context;
-        this.policyMap = context.getEndpoint().getPolicyMap();
-    }
-    
-    public PolicyMap getPolicyMap() {
-        return policyMap;
-    }
-    
-    public boolean isPolicyAvailable() {
-        return policyMap != null && !policyMap.isEmpty();
-    }
+public interface ServerTubelineAssemblyContext extends TubelineAssemblyContext {
 
     /**
-     * The created pipeline will use seiModel to get java concepts for the endpoint
+     * Gets the {@link Codec} that is set by {@link #setCodec} or the default codec
+     * based on the binding. The codec is a full codec that is responsible for
+     * encoding/decoding entire protocol message(for e.g: it is responsible to
+     * encode/decode entire MIME messages in SOAP binding)
      *
-     * @return Null if the service doesn't have SEI model e.g. Provider endpoints,
-     *         and otherwise non-null.
+     * @return codec to be used for web service requests
+     * @see {@link com.sun.xml.ws.api.pipe.Codecs}
      */
-    public @Nullable SEIModel getSEIModel() {
-        return wrappedContext.getSEIModel();
-    }
-
-    /**
-     * The created pipeline will be used to serve this port.
-     *
-     * @return Null if the service isn't associated with any port definition in WSDL,
-     *         and otherwise non-null.
-     */
-    public @Nullable WSDLPort getWsdlPort() {
-        return wrappedContext.getWsdlModel();
-    }
+    @NotNull
+    Codec getCodec();
 
     /**
      *
      * The created pipeline is used to serve this {@link com.sun.xml.ws.api.server.WSEndpoint}.
      * Specifically, its {@link com.sun.xml.ws.api.WSBinding} should be of interest to  many
      * {@link com.sun.xml.ws.api.pipe.Pipe}s.
-     *  @return Always non-null.
+     * @return Always non-null.
      */
-    public @NotNull WSEndpoint getEndpoint() {
-        return wrappedContext.getEndpoint();
-    }
+    @NotNull
+    WSEndpoint getEndpoint();
+
+    PolicyMap getPolicyMap();
+
+    /**
+     * The created pipeline will use seiModel to get java concepts for the endpoint
+     *
+     * @return Null if the service doesn't have SEI model e.g. Provider endpoints,
+     * and otherwise non-null.
+     */
+    @Nullable
+    SEIModel getSEIModel();
 
     /**
      * The last {@link com.sun.xml.ws.api.pipe.Pipe} in the pipeline. The assembler is expected to put
@@ -116,9 +95,21 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
      *
      * @return always non-null terminal pipe
      */
-     public @NotNull Tube getTerminalTube() {
-         return wrappedContext.getTerminalTube();
-    }
+    @NotNull
+    Tube getTerminalTube();
+
+    ServerTubeAssemblerContext getWrappedContext();
+
+    /**
+     * The created pipeline will be used to serve this port.
+     *
+     * @return Null if the service isn't associated with any port definition in WSDL,
+     * and otherwise non-null.
+     */
+    @Nullable
+    WSDLPort getWsdlPort();
+
+    boolean isPolicyAvailable();
 
     /**
      * If this server pipeline is known to be used for serving synchronous transport,
@@ -126,22 +117,7 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
      * hint, since often synchronous versions are cheaper to execute than asycnhronous
      * versions.
      */
-    public boolean isSynchronous() {
-        return wrappedContext.isSynchronous();
-    }
-
-    /**
-     * Gets the {@link Codec} that is set by {@link #setCodec} or the default codec
-     * based on the binding. The codec is a full codec that is responsible for
-     * encoding/decoding entire protocol message(for e.g: it is responsible to
-     * encode/decode entire MIME messages in SOAP binding)
-     *
-     * @return codec to be used for web service requests
-     * @see {@link com.sun.xml.ws.api.pipe.Codecs}
-     */
-    public @NotNull Codec getCodec() {
-        return wrappedContext.getCodec();
-    }
+    boolean isSynchronous();
 
     /**
      * Interception point to change {@link Codec} during {@link Tube}line assembly. The
@@ -161,11 +137,7 @@ public class ServerTubelineAssemblyContext extends TubelineAssemblyContext  {
      * @param codec codec to be used for web service requests
      * @see {@link com.sun.xml.ws.api.pipe.Codecs}
      */
-    public void setCodec(@NotNull Codec codec) {
-        wrappedContext.setCodec(codec);
-    }
-        
-    public ServerTubeAssemblerContext getWrappedContext() {
-        return wrappedContext;
-    }    
+    void setCodec(@NotNull
+    Codec codec);
+
 }
