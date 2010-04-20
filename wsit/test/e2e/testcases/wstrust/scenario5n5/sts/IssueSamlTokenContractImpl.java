@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -66,13 +66,13 @@ import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 
 
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.Token;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
-import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.str.KeyIdentifier;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
