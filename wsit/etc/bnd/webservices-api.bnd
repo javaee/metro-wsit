@@ -3,8 +3,11 @@ Bundle-Name: metro
 Export-Package: \
   javax.jws;version=@RELEASE_VERSION@, \
   javax.jws.soap;version=@RELEASE_VERSION@, \
-  javax.xml.ws;version=2.2.1, \
-  javax.xml.ws.*;version=2.2.1, \
+  javax.xml.ws;version=@JAX-WS_RELEASE_VERSION@, \
+  javax.xml.ws.*;version=@JAX-WS_RELEASE_VERSION@, \
   *
-Import-Package: *
+Import-Package: \
+  javax.xml.bind;version=@JAXB_RELEASE_VERSION@, \
+  javax.xml.bind.*;version=@JAXB_RELEASE_VERSION@, \
+  *
 Private-Package: *
