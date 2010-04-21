@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,9 +55,9 @@ import com.sun.xml.ws.policy.PolicyConstants;
 
 import java.io.Reader;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -267,18 +267,17 @@ public class JdbcConfigReader<T> implements ConfigReader<T> {
         }
 
         private void pollData(final Connection connection, final JdbcTableNames tableNames, final String endpointId) {
-            PreparedStatement statement = null;
+            Statement statement = null;
             try {
                 final String query = "SELECT " + tableNames.getVersionName() + ", " +
                         tableNames.getConfigName() + " FROM " + tableNames.getTableName() +
-                        " WHERE " + tableNames.getIdName() + " = ? AND " + tableNames.getVersionName() + " > ?";
+                        " WHERE " + tableNames.getIdName() + " = '" + endpointId + "' AND " +
+                        tableNames.getVersionName() + " > " + this.version;
                 if (LOGGER.isLoggable(Level.FINER)) {
                     LOGGER.finer(ManagementMessages.WSM_5023_EXECUTE_SQL(query));
                 }
-                statement = connection.prepareStatement(query);
-                statement.setString(1, endpointId);
-                statement.setLong(2, this.version);
-                final ResultSet result = statement.executeQuery();
+                statement = connection.createStatement();
+                final ResultSet result = statement.executeQuery(query);
                 if (result.next()) {
                     if (LOGGER.isLoggable(Level.FINE)) {
                         LOGGER.fine(ManagementMessages.WSM_5029_FOUND_UPDATED_CONFIG());
