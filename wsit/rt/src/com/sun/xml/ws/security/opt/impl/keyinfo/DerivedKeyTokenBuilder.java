@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,11 +38,10 @@ package com.sun.xml.ws.security.opt.impl.keyinfo;
 
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.api.reference.DirectReference;
-import com.sun.xml.ws.security.DerivedKeyToken;
-import com.sun.xml.ws.security.IssuedTokenContext;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.api.security.DerivedKeyToken;
+import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
-import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.impl.AlgorithmSuite;
 import com.sun.xml.wss.XWSSecurityException;
@@ -162,7 +161,7 @@ public class DerivedKeyTokenBuilder extends TokenBuilder {
             SCTBuilder builder = new SCTBuilder(context, (SecureConversationTokenKeyBinding) originalKeyBinding);
             result = builder.process();
             IssuedTokenContext ictx = context.getSecureConversationContext();
-            com.sun.xml.ws.security.SecurityContextToken sct =(com.sun.xml.ws.security.SecurityContextToken)ictx.getSecurityToken();            
+            com.sun.xml.ws.api.security.SecurityContextToken sct =(com.sun.xml.ws.api.security.SecurityContextToken)ictx.getSecurityToken();
             if(sct.getInstance() != null){
                 if(context.isExpired()){
                     secret = ictx.getProofKey();
