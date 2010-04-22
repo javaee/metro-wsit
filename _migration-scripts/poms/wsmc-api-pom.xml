@@ -41,27 +41,35 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>${wsit.group.id}</groupId>
+        <groupId>net.java.metro.wsit</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
+        <!--relativePath>../../pom.xml</relativePath-->
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>@module.name@</name>
 
     <!-- prerequisites -->
 
-    <modules>
-        <module>wssx-commons</module>
-        <module>wss-impl</module>
-        <module>wss-policy-impl</module>
-        <module>wstrust-api</module>
-        <module>wstrust-impl</module>
-        <module>wssc-api</module>
-        <module>wssc-impl</module>
-    </modules>
-    
-    <!--dependencies></dependencies-->
+    <dependencies>
+        <!-- Compile scope -->
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+        </dependency>
+
+        <!-- Test scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <!--properties></properties-->
 </project>

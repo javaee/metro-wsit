@@ -41,7 +41,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>${wsit.group.id}</groupId>
+        <groupId>net.java.metro.wsit</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
@@ -64,13 +64,18 @@
         </dependency>
 
         <dependency>
-            <groupId>${wsit.group.id}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>wsmc-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${wsit.group.id}</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>wsrx-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-rt-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

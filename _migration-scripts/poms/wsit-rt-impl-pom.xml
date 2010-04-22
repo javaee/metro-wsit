@@ -62,6 +62,22 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-xmlfilter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-rt-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test scope -->
         <dependency>
@@ -72,3 +88,4 @@
     </dependencies>
     <!--properties></properties-->
 </project>
+

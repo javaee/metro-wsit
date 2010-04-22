@@ -41,7 +41,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>${wsit.group.id}</groupId>
+        <groupId>net.java.metro.wsit</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
@@ -54,6 +54,13 @@
 
     <dependencies>
         <!-- Compile scope -->
+        <!-- Compile scope -->
+        <dependency>
+            <groupId>javax.security.auth.message</groupId>
+            <artifactId>jmac</artifactId>
+            <version>1.0-rev-1</version>
+        </dependency>
+        
         <dependency>
             <groupId>com.sun.istack</groupId>
             <artifactId>istack-commons-runtime</artifactId>
@@ -62,11 +69,57 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb1-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>jaxrpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.rpc</groupId>
+            <artifactId>jaxrpc-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.rpc</groupId>
+            <artifactId>jaxrpc-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.crypto</groupId>
+            <artifactId>jsr105-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>xml-security-impl</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>saml-jaxb10-bindings</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-xmlfilter</artifactId>
+            <artifactId>wssx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsmc-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsrm-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 
         <!-- Test scope -->
         <dependency>
@@ -77,4 +130,3 @@
     </dependencies>
     <!--properties></properties-->
 </project>
-

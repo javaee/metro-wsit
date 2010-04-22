@@ -41,12 +41,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>${metro.group.id}</groupId>
+        <groupId>net.java.metro</groupId>
         <artifactId>metro-project</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>${wsit.group.id}</groupId>
+    <groupId>net.java.metro.wsit</groupId>
     <artifactId>wsit-project</artifactId>
     <packaging>pom</packaging>
     <name>Web Services Interoperability Technology</name>
@@ -180,7 +180,6 @@
                     </excludes-->
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
@@ -189,12 +188,13 @@
         <module>wsit-commons</module>
         <module>wsit-soaptcp</module>
         <module>wsit-config</module>
-        <module>wsit-runtime</module>
+        <module>wsit-rt-api</module>
+        <!--module>wsit-rt-impl</module-->
         <module>ws-cm</module>
-        <module>ws-mex</module>
+        <!--module>ws-mex</module-->
         <module>ws-rx</module>
         <module>ws-sx</module>
-        <module>ws-tx</module>
+        <!--module>ws-tx</module-->
     </modules>
 
     <dependencies>
@@ -236,6 +236,5 @@
 
     <properties>
         <grizzly.version>1.0.31</grizzly.version>
-        <wsit.group.id>${metro.group.id}.wsit</wsit.group.id>
     </properties>
 </project>

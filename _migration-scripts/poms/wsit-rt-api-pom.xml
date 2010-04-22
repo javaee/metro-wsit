@@ -41,7 +41,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>${wsit.group.id}</groupId>
+        <groupId>net.java.metro.wsit</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
@@ -63,28 +63,11 @@
             <artifactId>jaxws-rt</artifactId>
         </dependency>
 
-
         <dependency>
-            <groupId>${wsit.group.id}</groupId>
-            <artifactId>wsit-commons</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wssx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${wsit.group.id}</groupId>
-            <artifactId>wsrm-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${wsit.group.id}</groupId>
-            <artifactId>wsmc-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${wsit.group.id}</groupId>
-            <artifactId>wstrust-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
 
         <!-- Test scope -->
         <dependency>

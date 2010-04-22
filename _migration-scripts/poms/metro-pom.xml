@@ -39,7 +39,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>${metro.group.id}</groupId>
+    <groupId>net.java.metro</groupId>
     <artifactId>metro-project</artifactId>
     <packaging>pom</packaging>
     <name>Metro Web Services Stack</name>
@@ -110,8 +110,16 @@
     </organization>
 
     <build>
-        <!-- pluginManagement></pluginManagement -->
+        <!--pluginManagement></pluginManagement-->
         <plugins>
+            <!--plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.4-SNAPSHOT</version>
+                    <configuration>
+                        <filteringEnabled>true</filteringEnabled>
+                    </configuration>
+            </plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -124,6 +132,16 @@
                             <Build-Id>${project.version} ${buildNumber}</Build-Id>
                         </manifestEntries>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -144,16 +162,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -190,6 +198,11 @@
 
     <repositories>
         <repository>
+            <id>glassfish.dev.java.net</id>
+            <url>http://download.java.net/maven/glassfish</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
             <id>m2.dev.java.net</id>
             <url>http://download.java.net/maven/2</url>
             <layout>default</layout>
@@ -200,7 +213,7 @@
             <layout>legacy</layout>
         </repository>
     </repositories>
-    
+
     <pluginRepositories>
         <pluginRepository>
             <id>maven2-repository.dev.java.net</id>
@@ -213,6 +226,16 @@
             <name>Java.net Maven 1 Repository (legacy)</name>
             <url>http://download.java.net/maven/1</url>
             <layout>legacy</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>glassfish.dev.java.net</id>
+            <name>GlassFish Maven Repository</name>
+            <url>http://download.java.net/maven/glassfish</url>
+            <layout>default</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>apache.snapshots</id>
+            <url>http://repository.apache.org/snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -266,7 +289,23 @@
             <dependency>
                 <groupId>com.sun.xml.fastinfoset</groupId>
                 <artifactId>FastInfoset</artifactId>
-                <version>1.2.7</version>
+                <version>1.2.8</version>
+            </dependency>
+            <!-- JAX-RPC -->
+            <dependency>
+                <groupId>javax.xml</groupId>
+                <artifactId>jaxrpc-api</artifactId>
+                <version>1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.rpc</groupId>
+                <artifactId>jaxrpc-spi</artifactId>
+                <version>1.1.3_01</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.rpc</groupId>
+                <artifactId>jaxrpc-impl</artifactId>
+                <version>1.1.3_01</version>
             </dependency>
             <!-- JAX-WS -->
             <dependency>
@@ -307,6 +346,11 @@
                 <version>1.0</version>
             </dependency>
             <dependency>
+                <groupId>woodstox</groupId>
+                <artifactId>wstx-asl</artifactId>
+                <version>3.2.3</version>
+            </dependency>
+            <dependency>
                 <groupId>com.sun.xml.txw2</groupId>
                 <artifactId>txw2</artifactId>
                 <version>20090102</version>
@@ -336,7 +380,6 @@
     </distributionManagement>
 
     <properties>
-        <metro.group.id>net.java.metro</metro.group.id>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <istack.version>2.2</istack.version>
         <jaxb.version>2.2</jaxb.version>
