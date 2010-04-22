@@ -43,6 +43,7 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -51,8 +52,12 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.AliasSelector;
+import com.sun.xml.wss.SecurityEnvironment;
+import com.sun.xml.wss.XWSSConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
@@ -382,5 +387,42 @@ public class CertificateRetriever {
                 }
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean setServerCertInTheContext(ProcessingContextImpl ctx, SecurityEnvironment secEnv, X509Certificate serverCert) {
+        boolean valid = false;
+        try {
+            valid = secEnv.validateCertificate(serverCert, ctx.getExtraneousProperties());
+        } catch (WssSoapFaultException ex) {
+            //log.log(Level.WARNING, "exception during validating the server certificate");
+        } catch (XWSSecurityException ex) {
+            log.log(Level.SEVERE, "exception during validating the server certificate", ex);
+        }
+        if (valid) {
+            log.log(Level.INFO, "The certificate found in the server wsdl or by server cert property is valid, so using it");
+            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+        } else {
+            log.log(Level.WARNING, "Could not validate the server certificate, so not using it");
+        }
+        return valid;
+    }
+
+    public boolean setServerCertInTheSTSConfig(STSIssuedTokenConfiguration config, SecurityEnvironment secEnv, X509Certificate serverCert) {
+        boolean valid = false;
+        try {
+            valid = secEnv.validateCertificate(serverCert, config.getOtherOptions());
+        } catch (WssSoapFaultException ex) {
+            //log.log(Level.WARNING, "exception during validating the server certificate");
+        } catch (XWSSecurityException ex) {
+            log.log(Level.SEVERE, "exception during the validation of the server certificate", ex);
+        }
+        if (valid) {
+            log.log(Level.INFO, "The certificate found in the server wsdl or by server cert property is valid, so using it");
+            config.getOtherOptions().put("Identity", serverCert);
+        } else {
+            log.log(Level.WARNING, "Could not validate the server certificate, not using it");
+        }
+        return valid;
     }
 }

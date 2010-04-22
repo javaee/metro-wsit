@@ -197,7 +197,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
             WSEndpointReference epr = bpr.getWSEndpointReference();
             X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
-            if (x509Cert == null) {
+             if (x509Cert == null) {
                 if (epr != null) {
                     WSEndpointReference.EPRExtension idExtn = null;
                     XMLStreamReader xmlReader = null;
@@ -213,29 +213,14 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                             if (bstValue != null) {
                                 certificate = cr.constructCertificate(bstValue);
                             }
-                            boolean valid = false;
-                            try {
-                                if(certificate != null){
-                                     valid = secEnv.validateCertificate(certificate, null);
-                                }
-                            } catch (WssSoapFaultException ex) {
-                                //log.log(Level.WARNING, "exception during validating the server certificate");
-                            }
-                            if (valid) {
-                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
-                                 props.put(PipeConstants.SERVER_CERT, certificate);
-                                 this.serverCert = certificate;
-                            }else{
-                                if(bstValue != null){
-                                 log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it");
-                                }
+                            if (certificate != null) {
+                                props.put(PipeConstants.SERVER_CERT, certificate);
+                                this.serverCert = certificate;
                             }
                         }
                     } catch (XMLStreamException ex) {
                         log.log(Level.WARNING, ex.getMessage());
                         //throw new RuntimeException(ex);
-                    } catch (XWSSecurityException ex) {
-                        log.log(Level.WARNING,ex.getMessage());
                     }
                 }
             } else {
@@ -641,9 +626,19 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     config.getOtherOptions().putAll(packet.invocationProperties);
                     
                     // put the server certificate, if available, in the configuration
-                    X509Certificate serverCert = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
-                    if (serverCert != null){
-                        config.getOtherOptions().put("Identity", serverCert);
+                    X509Certificate x509ServerCertificate = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
+                     // and make sure the  validition of the server certificate happens only once
+                    if (x509ServerCertificate != null) {
+                        if (isCertValidityVerified == false) {
+                            CertificateRetriever cr = new CertificateRetriever();
+                            isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, x509ServerCertificate);
+                            cr = null;
+                            isCertValidityVerified = true;
+                        }else {
+                            if(isCertValid == true){
+                                 config.getOtherOptions().put("Identity", x509ServerCertificate);
+                            }
+                        }
                     }
 
                     // get entries from run time configuration

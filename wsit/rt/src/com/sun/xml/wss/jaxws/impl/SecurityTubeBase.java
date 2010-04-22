@@ -82,6 +82,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;
@@ -267,6 +268,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected X509Certificate serverCert = null;
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
+    protected boolean isCertValidityVerified;
+    protected boolean isCertValid;
 
     static {
         try {
@@ -352,6 +355,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         //this.opResolver = that.opResolver;
         this.timestampTimeOut = that.timestampTimeOut;
         this.iterationsForPDK = that.iterationsForPDK;
+        this.isCertValidityVerified = that.isCertValidityVerified;
+        this.isCertValid = that.isCertValid;
         this.serverCert = that.serverCert;
         this.cancelMSP = that.cancelMSP;
         this.encryptCancelPayload = that.encryptCancelPayload;
@@ -570,8 +575,18 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setiterationsForPDK(this.iterationsForPDK);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+         //set the server certificate in the context ;
         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
+            }
         }
         // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
@@ -626,8 +641,18 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+         //set the server certificate in the context ;
         if (serverCert != null) {
-            ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
+            }
         }
         
         try {

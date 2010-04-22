@@ -127,6 +127,7 @@ import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
+import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;
@@ -274,7 +275,8 @@ public abstract class WSITAuthContextBase  {
     protected X509Certificate serverCert = null;
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
-    
+    protected boolean isCertValidityVerified;
+    protected boolean isCertValid;
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -288,7 +290,7 @@ public abstract class WSITAuthContextBase  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }   
+    }
     
     /** Creates a new instance of WSITAuthContextBase */
     public WSITAuthContextBase(Map<Object, Object> map) {
@@ -1197,8 +1199,17 @@ public abstract class WSITAuthContextBase  {
         
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
-        if (serverCert != null) {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+         if (serverCert != null) {
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
+            }
         }
         ctx.isInboundMessage(true);
         if(isTrustMessage(packet)){
@@ -1504,8 +1515,18 @@ public abstract class WSITAuthContextBase  {
         // set the policy, issued-token-map, and extraneous properties
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+         //set the server certificate in the context ;
         if (serverCert != null) {
-                 ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+            if (isCertValidityVerified == false) {
+                CertificateRetriever cr = new CertificateRetriever();
+                isCertValid = cr.setServerCertInTheContext(ctx, secEnv, serverCert);
+                cr = null;
+                isCertValidityVerified = true;
+            }else {
+                 if(isCertValid == true){
+                    ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
+                }
+            }
         }
         try {
             MessagePolicy policy = null;

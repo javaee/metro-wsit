@@ -703,7 +703,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 return x509Cert;
             }
         }
-        if (wpi != null) {
+       if (wpi != null) {
             WSEndpointReference epr = wpi.getEPR();
             if (epr != null) {
                 WSEndpointReference.EPRExtension idExtn = null;
@@ -720,28 +720,11 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                             if (bstValue != null) {
                                 certificate = cr.constructCertificate(bstValue);
                             }
-                            boolean valid = false;
-                            try {
-                                if(certificate != null){
-                                     valid = secEnv.validateCertificate(certificate, null);
-                                }
-                            } catch (WssSoapFaultException ex) {
-                                //log.log(Level.WARNING, "exception during validating the server certificate");
-                            }
-                            if (valid) {
-                                 log.log(Level.INFO, "validation of certificate found in the server wsdl is successful,so using it");
-                                 return certificate;
-                            }else{
-                                if(bstValue != null){
-                                 log.log(Level.WARNING, "Could not validate the server certificate found in the wsdl, so not using it");
-                                }
-                            }
+                            return certificate;
                         }
                 } catch (XMLStreamException ex) {
                     log.log(Level.WARNING, ex.getMessage());
                     //throw new RuntimeException(ex);
-                } catch (XWSSecurityException ex) {
-                    log.log(Level.WARNING, ex.getMessage());
                 }
             }
           return null;
@@ -858,11 +841,20 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
                     config.getOtherOptions().putAll(packet.invocationProperties);
 
-                    // put the server certificate, if available, in the configuration
-                    if (serverCert != null){
-                        config.getOtherOptions().put("Identity", serverCert);
+                   // put the server certificate, if available, in the configuration
+                    // and make sure the  validition of the server certificate happens only once
+                    if (serverCert != null) {
+                        if (isCertValidityVerified == false) {
+                            CertificateRetriever cr = new CertificateRetriever();
+                            isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, serverCert);
+                            cr = null;
+                            isCertValidityVerified = true;
+                        }else {
+                             if(isCertValid == true){
+                                 config.getOtherOptions().put("Identity", serverCert);
+                            }
+                        }
                     }
-
                     // get entries from run time configuration
                     if (rtConfig != null){
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);

@@ -602,10 +602,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             }
             ctx.setSecurityEnvironment(secEnv);
-            ctx.isInboundMessage(false);
-            if (serverCert != null) {
-               ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
-            }
+            ctx.isInboundMessage(false);            
             @SuppressWarnings("unchecked")
             Map<Object, Object> extProps = ctx.getExtraneousProperties();
             extProps.put(WSITServerAuthContext.WSDLPORT,pipeConfig.getWSDLPort());
