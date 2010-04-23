@@ -18,10 +18,10 @@ Export-Package: \
   org.jvnet.staxex;version=@RELEASE_VERSION@, \
   *
 Import-Package: \
-  javax.xml.ws;version=@JAX-WS_RELEASE_VERSION@, \
-  javax.xml.ws.*;version=@JAX-WS_RELEASE_VERSION@, \
-  javax.xml.bind;version=@JAXB_RELEASE_VERSION@, \
-  javax.xml.bind.*;version=@JAXB_RELEASE_VERSION@, \
+  javax.xml.ws;version=@JAX-WS_SPEC_VERSION@, \
+  javax.xml.ws.*;version=@JAX-WS_SPEC_VERSION@, \
+  javax.xml.bind;version=@JAXB_SPEC_VERSION@, \
+  javax.xml.bind.*;version=@JAXB_SPEC_VERSION@, \
   com.sun.enterprise.security.*;resolution:=optional, \
   com.sun.enterprise.transaction.*;resolution:=optional, \
   com.sun.enterprise.web.*;resolution:=optional, \

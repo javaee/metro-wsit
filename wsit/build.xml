@@ -64,7 +64,9 @@
         <copy file="${basedir}/etc/bnd/webservices.bnd" todir="${build.dir}/bnd">
             <filterset>
                 <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
+                <filter token="JAX-WS_SPEC_VERSION" value="${jaxws.spec.version}"/>
                 <filter token="JAX-WS_RELEASE_VERSION" value="${jaxws.release.version}"/>
+                <filter token="JAXB_SPEC_VERSION" value="${jaxb.spec.version}"/>
                 <filter token="JAXB_RELEASE_VERSION" value="${jaxb.release.version}"/>
             </filterset>
         </copy>
@@ -72,7 +74,9 @@
         <copy file="${basedir}/etc/bnd/webservices-api.bnd" todir="${build.dir}/bnd">
             <filterset>
                 <filter token="RELEASE_VERSION" value="${release.impl.version}"/>
+                <filter token="JAX-WS_SPEC_VERSION" value="${jaxws.spec.version}"/>
                 <filter token="JAX-WS_RELEASE_VERSION" value="${jaxws.release.version}"/>
+                <filter token="JAXB_SPEC_VERSION" value="${jaxb.spec.version}"/>
                 <filter token="JAXB_RELEASE_VERSION" value="${jaxb.release.version}"/>
             </filterset>
         </copy>
