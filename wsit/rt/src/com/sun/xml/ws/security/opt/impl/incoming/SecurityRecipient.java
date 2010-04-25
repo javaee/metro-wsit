@@ -874,8 +874,8 @@ public final class SecurityRecipient {
         }
         context.setMessage(streamMsg);
         boolean scCancel = false;
-        /*if(streamMsg.isFault())
-        return streamMsg;*/
+        if(streamMsg.isFault())
+        return streamMsg;
         if(context.getAddressingVersion() != null){
             String action = streamMsg.getHeaders().getAction(context.getAddressingVersion(),context.getSOAPVersion());
             

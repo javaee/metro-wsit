@@ -355,6 +355,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.iterationsForPDK = that.iterationsForPDK;
         this.serverCert = that.serverCert;
         this.isCertValidityVerified = that.isCertValidityVerified;
+        this.isCertValid = that.isCertValid;
         this.cancelMSP = that.cancelMSP;
         this.encryptCancelPayload = that.encryptCancelPayload;
         try {            

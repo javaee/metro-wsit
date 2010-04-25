@@ -55,6 +55,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
+import com.sun.xml.wss.impl.policy.mls.KeyBindingBase;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
@@ -297,12 +298,19 @@ public class SupportingTokensProcessor {
     
     protected void protectToken(WSSPolicy token,SignaturePolicy sp){
         String uid = token.getUUID();
+        boolean strIgnore = false;
+        String includeToken = ((KeyBindingBase) token).getIncludeToken();
+        if(includeToken.endsWith("AlwaysToRecipient") ||includeToken.endsWith("Always")){
+           strIgnore = true;
+        }
         if ( uid != null ) {
             SignatureTargetCreator stc = iAP.getTargetCreator();
             SignatureTarget st = stc.newURISignatureTarget(uid);
             stc.addTransform(st);
             SecurityPolicyUtil.setName(st, token);
-            stc.addSTRTransform(st);
+            if(!strIgnore){
+                stc.addSTRTransform(st);
+            }
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(st);
         }
