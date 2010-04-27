@@ -43,7 +43,7 @@
 
 package com.sun.xml.wss.saml;
 
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.wss.XWSSecurityException;
 import java.math.BigInteger;
 import java.security.PrivateKey;

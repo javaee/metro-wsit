@@ -51,7 +51,7 @@ import com.sun.xml.wss.impl.SecurityTokenException;
 import com.sun.xml.wss.impl.XMLUtil;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import java.util.Iterator;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;

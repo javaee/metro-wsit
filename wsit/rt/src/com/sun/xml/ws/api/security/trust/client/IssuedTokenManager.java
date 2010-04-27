@@ -37,8 +37,8 @@
 package com.sun.xml.ws.api.security.trust.client;
 
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 

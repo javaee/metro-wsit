@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityTokenReference.java,v 1.4 2010-04-20 17:32:39 m_potociar Exp $
+ * $Id: SecurityTokenReference.java,v 1.5 2010-04-27 14:20:31 m_potociar Exp $
  */
 
 /*
@@ -73,7 +73,7 @@ import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 /**
  * @author Vishal Mahajan
  */
-public class SecurityTokenReference extends SecurityHeaderBlockImpl implements com.sun.xml.ws.api.security.SecurityTokenReference {
+public class SecurityTokenReference extends SecurityHeaderBlockImpl implements com.sun.xml.ws.security.SecurityTokenReference {
         //implements com.sun.xml.ws.security.SecurityTokenReference {
     
     protected static final Logger log =

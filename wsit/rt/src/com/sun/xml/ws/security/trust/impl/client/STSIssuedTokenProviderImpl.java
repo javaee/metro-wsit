@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.security.trust.impl.client;
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.TrustPlugin;
 import com.sun.xml.ws.security.trust.WSTrustFactory;
 import com.sun.xml.ws.api.security.trust.WSTrustException;

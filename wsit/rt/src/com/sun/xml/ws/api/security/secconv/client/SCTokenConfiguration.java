@@ -45,7 +45,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenConfiguration;
-import com.sun.xml.ws.api.security.policy.Token;
+import com.sun.xml.ws.security.policy.Token;
 
 /**
  *

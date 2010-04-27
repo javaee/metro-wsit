@@ -41,8 +41,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 
 
 public interface IssueSamlTokenContract<K, V> extends WSTrustContract<K, V> {

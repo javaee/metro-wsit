@@ -1,5 +1,5 @@
 /*
- * $Id: DelegateToImpl.java,v 1.6 2010-04-20 17:32:28 m_potociar Exp $
+ * $Id: DelegateToImpl.java,v 1.7 2010-04-27 14:20:29 m_potociar Exp $
  */
 
 /*
@@ -43,7 +43,7 @@ package com.sun.xml.ws.security.trust.impl.elements;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.DelegateTo;
 import com.sun.xml.ws.security.trust.impl.bindings.DelegateToType;

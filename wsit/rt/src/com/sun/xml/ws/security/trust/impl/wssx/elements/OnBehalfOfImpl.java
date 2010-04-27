@@ -1,5 +1,5 @@
 /*
- * $Id: OnBehalfOfImpl.java,v 1.6 2010-04-20 17:32:12 m_potociar Exp $
+ * $Id: OnBehalfOfImpl.java,v 1.7 2010-04-27 14:20:27 m_potociar Exp $
  */
 
 /*
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.trust.impl.wssx.elements;
 
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import javax.xml.ws.EndpointReference;
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;

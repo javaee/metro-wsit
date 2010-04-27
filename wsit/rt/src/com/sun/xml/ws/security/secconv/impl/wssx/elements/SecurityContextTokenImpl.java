@@ -1,5 +1,5 @@
 /*
- * $Id: SecurityContextTokenImpl.java,v 1.3 2010-04-20 17:31:36 m_potociar Exp $
+ * $Id: SecurityContextTokenImpl.java,v 1.4 2010-04-27 14:20:22 m_potociar Exp $
  */
 
 /*
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.secconv.impl.wssx.elements;
 
-import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
 import com.sun.xml.ws.security.secconv.impl.wssx.bindings.ObjectFactory;
 import com.sun.xml.ws.security.secconv.impl.wssx.bindings.SecurityContextTokenType;

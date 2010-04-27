@@ -38,11 +38,11 @@ package com.sun.xml.ws.security.secconv.impl;
 
 import com.sun.xml.ws.runtime.dev.Session;
 import com.sun.xml.ws.runtime.dev.SessionManager;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.SecurityContextToken;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.WSSCConstants;
-import com.sun.xml.ws.api.security.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 
@@ -181,7 +181,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     }
     
     //public static IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference) {
-    public IssuedTokenContext getIssuedTokenContext(final com.sun.xml.ws.api.security.SecurityTokenReference reference) {
+    public IssuedTokenContext getIssuedTokenContext(final com.sun.xml.ws.security.SecurityTokenReference reference) {
         // get str id -> get Session corresponding to id
         // from session get corresponding SCTInfo ->
         // return sctinfo's IssuedTokenContext.

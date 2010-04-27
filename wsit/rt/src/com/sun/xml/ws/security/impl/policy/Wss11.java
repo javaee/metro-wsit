@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.security.impl.policy;
 
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

@@ -41,7 +41,7 @@
  *
  */
 
-package com.sun.xml.ws.api.security;
+package com.sun.xml.ws.security;
 
 import com.sun.xml.wss.XWSSecurityException;
 

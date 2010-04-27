@@ -1,5 +1,5 @@
 /*
- * $Id: EntropyImpl.java,v 1.3 2010-04-20 17:32:13 m_potociar Exp $
+ * $Id: EntropyImpl.java,v 1.4 2010-04-27 14:20:27 m_potociar Exp $
  */
 
 /*
@@ -48,7 +48,7 @@ import javax.xml.namespace.QName;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
-import com.sun.xml.ws.api.security.EncryptedKey;
+import com.sun.xml.ws.security.EncryptedKey;
 
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.impl.wssx.bindings.EntropyType;

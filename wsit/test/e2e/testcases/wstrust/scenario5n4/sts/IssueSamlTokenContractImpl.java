@@ -65,8 +65,8 @@ import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLEncryptionException;
 
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;

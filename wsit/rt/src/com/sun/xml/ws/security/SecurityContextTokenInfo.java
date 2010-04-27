@@ -34,31 +34,68 @@
  * holder.
  */
 
-/*
- * Token.java
- *
- * Created on October 24, 2005, 7:10 AM
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
+package com.sun.xml.ws.security;
 
-package com.sun.xml.ws.api.security;
+import org.glassfish.gmbal.Description;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
+
+import java.util.Date;
+import java.util.Set;
 
 /**
- * Base Interface for all Tokens
- * Question: Can we adapt all tokens to implement this interface
+ * The </code>SecurityContextTokenInfo</code> class represents security parameters
+ * which will be saved in the <code>Session</code> object so that whenever the endpoint
+ * crashes the security negotiations can be resumed from its original state and no new 
+ * negotiations need to be done.
+ *
  */
-public interface Token {
+@ManagedData(name="SecurityContextTokenInfo")
+@Description("Security parameters")
+public interface SecurityContextTokenInfo {
+
+    @ManagedAttribute
+    @Description("Identifier")
+    String getIdentifier();
+
+    void setIdentifier(String identifier);
+
+    @ManagedAttribute
+    @Description("External identifier")
+    String getExternalId();
+
+    void setExternalId(String externalId);
     
-    /**
-     * The type of the Token
-     */
-    String getType();
+    String getInstance();
+
+    void setInstance(String instance);
+
+    @ManagedAttribute    
+    @Description("Secret")
+    byte[] getSecret();
+
+    byte[] getInstanceSecret(String instance);
+
+    void addInstance(String instance, byte[] key);
+
+    @ManagedAttribute
+    @Description("Creation time")
+    Date getCreationTime();
+
+    void setCreationTime(Date creationTime);
+
+    @ManagedAttribute
+    @Description("Expiration time")
+    Date getExpirationTime();
+
+    void setExpirationTime(Date expirationTime);
     
-    /**
-     * The token Value
-     */
-    Object getTokenValue();
-    
+    Set getInstanceKeys();
+
+    @ManagedAttribute
+    @Description("Issued token context")
+    IssuedTokenContext getIssuedTokenContext();
+
+    IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference);
+        
 }

@@ -1,6 +1,6 @@
 
 /*
- * $Id: SignatureProcessor.java,v 1.14 2010-04-20 17:32:45 m_potociar Exp $
+ * $Id: SignatureProcessor.java,v 1.15 2010-04-27 14:20:32 m_potociar Exp $
  */
 
 /*
@@ -47,9 +47,9 @@ import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.wss.core.reference.KeyIdentifier;
 import com.sun.xml.wss.impl.misc.Base64;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
-import com.sun.xml.ws.api.security.DerivedKeyToken;
+import com.sun.xml.ws.security.DerivedKeyToken;
 import com.sun.xml.wss.core.DerivedKeyTokenHeaderBlock;
 import com.sun.xml.wss.core.reference.X509ThumbPrintIdentifier;
 import com.sun.xml.wss.impl.WssSoapFaultException;
@@ -87,7 +87,7 @@ import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 import com.sun.xml.wss.impl.keyinfo.KeyIdentifierStrategy;
 import com.sun.xml.wss.impl.keyinfo.KeyInfoStrategy;
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
-import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.AlgorithmSuite;
 

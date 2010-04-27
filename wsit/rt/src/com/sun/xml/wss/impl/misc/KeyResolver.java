@@ -98,15 +98,15 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 import com.sun.xml.wss.core.SecurityContextTokenImpl;
-import com.sun.xml.ws.api.security.SecurityContextToken;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
-import com.sun.xml.ws.api.security.DerivedKeyToken;
+import com.sun.xml.ws.security.DerivedKeyToken;
 
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import javax.security.auth.Subject;
 import com.sun.xml.ws.runtime.dev.SessionManager;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
@@ -1086,7 +1086,7 @@ public class KeyResolver {
         }
         
         byte[] proofKey = null;
-        com.sun.xml.ws.api.security.SecurityContextToken scToken = (com.sun.xml.ws.api.security.SecurityContextToken)ctx.getSecurityToken();
+        com.sun.xml.ws.security.SecurityContextToken scToken = (com.sun.xml.ws.security.SecurityContextToken)ctx.getSecurityToken();
         if(scToken.getInstance() != null){
             if(context.isExpired()){
                 proofKey = ctx.getProofKey();

@@ -37,8 +37,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.api.security.policy.Token;
-
 /**
  * Represents Asymmetric Token information to be used for Signature and Encryption
  * by the client and the service. If the message pattern requires multiple messages,

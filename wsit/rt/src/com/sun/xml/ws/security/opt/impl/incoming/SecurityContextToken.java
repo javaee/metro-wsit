@@ -57,7 +57,7 @@ import javax.xml.stream.XMLStreamException;
  * @author Ashutosh.Shahi@sun.com
  */
 public class SecurityContextToken implements SecurityHeaderElement, NamespaceContextInfo,
-        SecurityElementWriter, com.sun.xml.ws.api.security.SecurityContextToken {
+        SecurityElementWriter, com.sun.xml.ws.security.SecurityContextToken {
     
     private static final String IDENTIFIER = "Identifier".intern();
     private static final String INSTANCE = "Instance".intern();

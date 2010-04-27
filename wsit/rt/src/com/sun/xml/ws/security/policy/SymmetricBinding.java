@@ -37,8 +37,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.api.security.policy.Token;
-
 
 /**
  * Binding defines SignatureToken and Encryption Token used from initiator to recipient and from recipient to initiator.

@@ -39,7 +39,7 @@ package com.sun.xml.ws.runtime.dev;
 import com.sun.istack.logging.Logger;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.util.ServiceFinder;
 
 import org.glassfish.gmbal.AMXMetadata;

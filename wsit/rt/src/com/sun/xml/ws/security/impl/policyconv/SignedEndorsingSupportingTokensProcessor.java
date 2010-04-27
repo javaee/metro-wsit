@@ -41,12 +41,12 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.SupportingTokens;
-import com.sun.xml.ws.api.security.policy.Token;
+import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 /**
  *
  * @author K.Venugopal@sun.com

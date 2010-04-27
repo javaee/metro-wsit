@@ -39,8 +39,8 @@ package com.sun.xml.ws.security.opt.impl.incoming;
 
 
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
@@ -1188,7 +1188,7 @@ public class KeySelectorImpl extends KeySelector {
         }else{
             //Retrive the context from Session Manager's cache
             ctx = ((SessionManager)wssContext.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !wssContext.isExpired());
-            com.sun.xml.ws.api.security.SecurityContextToken sct = (com.sun.xml.ws.api.security.SecurityContextToken)ctx.getSecurityToken();
+            com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken)ctx.getSecurityToken();
             ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sct.getIdentifier(), sct.getInstance(), sct.getWsuId()));
         }                                
         

@@ -1,5 +1,5 @@
 /*
- * $Id: X509SecurityToken.java,v 1.4 2010-04-20 17:32:40 m_potociar Exp $
+ * $Id: X509SecurityToken.java,v 1.5 2010-04-27 14:20:31 m_potociar Exp $
  */
 
 /*
@@ -59,7 +59,7 @@ import com.sun.xml.wss.impl.XMLUtil;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 
 /**
  * An  X509 v3 certificate BinarySecurityToken.

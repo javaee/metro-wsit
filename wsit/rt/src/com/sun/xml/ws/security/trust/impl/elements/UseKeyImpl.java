@@ -1,5 +1,5 @@
 /*
- * $Id: UseKeyImpl.java,v 1.13 2010-04-20 17:32:29 m_potociar Exp $
+ * $Id: UseKeyImpl.java,v 1.14 2010-04-27 14:20:29 m_potociar Exp $
  */
 
 /*
@@ -45,7 +45,7 @@ import java.net.URI;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.impl.elements.str.SecurityTokenReferenceImpl;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.elements.UseKey;
 import com.sun.xml.ws.security.trust.impl.bindings.UseKeyType;

@@ -38,7 +38,7 @@ package com.sun.xml.ws.security.trust.impl.ic;
 
 import com.sun.xml.ws.api.security.trust.STSAttributeProvider;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;

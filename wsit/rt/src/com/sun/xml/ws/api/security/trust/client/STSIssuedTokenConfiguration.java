@@ -37,7 +37,7 @@
 package com.sun.xml.ws.api.security.trust.client;
 
 import com.sun.xml.ws.api.security.trust.Claims;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import java.util.HashMap;
 import java.util.Map;
 

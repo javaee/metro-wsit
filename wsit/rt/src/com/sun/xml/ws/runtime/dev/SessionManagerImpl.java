@@ -41,9 +41,9 @@
 
 package com.sun.xml.ws.runtime.dev;
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.SecurityContextToken;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 
 import java.util.Calendar;
 import java.util.Collection;

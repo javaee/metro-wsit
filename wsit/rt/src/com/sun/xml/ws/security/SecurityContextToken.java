@@ -33,69 +33,21 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package com.sun.xml.ws.security;
 
-package com.sun.xml.ws.api.security;
-
-import org.glassfish.gmbal.Description;
-import org.glassfish.gmbal.ManagedAttribute;
-import org.glassfish.gmbal.ManagedData;
-
-import java.util.Date;
-import java.util.Set;
+import java.net.URI;
+import java.util.List;
 
 /**
- * The </code>SecurityContextTokenInfo</code> class represents security parameters
- * which will be saved in the <code>Session</code> object so that whenever the endpoint
- * crashes the security negotiations can be resumed from its original state and no new 
- * negotiations need to be done.
- *
+ * SecurityContextToken Interface
  */
-@ManagedData(name="SecurityContextTokenInfo")
-@Description("Security parameters")
-public interface SecurityContextTokenInfo {
+public interface SecurityContextToken extends Token {
 
-    @ManagedAttribute
-    @Description("Identifier")
-    String getIdentifier();
+    URI getIdentifier();
 
-    void setIdentifier(String identifier);
-
-    @ManagedAttribute
-    @Description("External identifier")
-    String getExternalId();
-
-    void setExternalId(String externalId);
-    
     String getInstance();
-
-    void setInstance(String instance);
-
-    @ManagedAttribute    
-    @Description("Secret")
-    byte[] getSecret();
-
-    byte[] getInstanceSecret(String instance);
-
-    void addInstance(String instance, byte[] key);
-
-    @ManagedAttribute
-    @Description("Creation time")
-    Date getCreationTime();
-
-    void setCreationTime(Date creationTime);
-
-    @ManagedAttribute
-    @Description("Expiration time")
-    Date getExpirationTime();
-
-    void setExpirationTime(Date expirationTime);
     
-    Set getInstanceKeys();
-
-    @ManagedAttribute
-    @Description("Issued token context")
-    IssuedTokenContext getIssuedTokenContext();
-
-    IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference);
-        
+    String getWsuId();
+    
+    List getExtElements();
 }

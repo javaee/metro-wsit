@@ -51,7 +51,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

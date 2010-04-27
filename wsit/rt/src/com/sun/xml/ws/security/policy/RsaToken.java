@@ -36,8 +36,6 @@
 
 package com.sun.xml.ws.security.policy;
 
-import com.sun.xml.ws.api.security.policy.Token;
-
 /**
  * RsaToken should be used with SecurityPolicy submission namespace (2005/07) and a namespace of
  * http://schemas.microsoft.com/ws/2005/07/securitypolicy. It should be replaced with KeyValueToken

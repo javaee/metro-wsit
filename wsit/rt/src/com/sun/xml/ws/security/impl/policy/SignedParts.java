@@ -40,7 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.Header;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.MessageConstants;
 import java.util.Collection;
 import java.util.Collections;

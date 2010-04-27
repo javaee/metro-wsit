@@ -35,7 +35,7 @@
  */
 package com.sun.xml.ws.runtime.dev;
 
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 
 import org.glassfish.gmbal.Description;
 import org.glassfish.gmbal.ManagedAttribute;

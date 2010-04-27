@@ -1,5 +1,5 @@
 /*
- * $Id: TrustPlugin.java,v 1.10 2010-04-20 17:32:19 m_potociar Exp $
+ * $Id: TrustPlugin.java,v 1.11 2010-04-27 14:20:28 m_potociar Exp $
  */
 
 /*
@@ -40,7 +40,7 @@
 
 package com.sun.xml.ws.security.trust;
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 

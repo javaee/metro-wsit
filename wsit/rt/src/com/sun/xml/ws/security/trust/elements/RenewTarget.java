@@ -1,5 +1,5 @@
 /*
- * $Id: RenewTarget.java,v 1.4 2010-04-20 17:32:30 m_potociar Exp $
+ * $Id: RenewTarget.java,v 1.5 2010-04-27 14:20:29 m_potociar Exp $
  */
 
 /*
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.security.trust.elements;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 
 /**
  * Target specifying the Security token to be renewed.

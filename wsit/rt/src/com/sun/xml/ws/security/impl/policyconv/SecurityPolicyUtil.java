@@ -45,12 +45,12 @@ import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.SignedParts;
-import com.sun.xml.ws.api.security.policy.Token;
+import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.ws.security.impl.policy.Constants;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 
 /**
  *

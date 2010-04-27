@@ -1,5 +1,5 @@
 /*
- * $Id: RequestedSecurityTokenImpl.java,v 1.12 2010-04-20 17:32:30 m_potociar Exp $
+ * $Id: RequestedSecurityTokenImpl.java,v 1.13 2010-04-27 14:20:29 m_potociar Exp $
  */
 
 /*
@@ -47,7 +47,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;

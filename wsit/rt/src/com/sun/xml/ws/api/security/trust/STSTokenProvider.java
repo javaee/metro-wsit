@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.api.security.trust;
 
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 /**
  *
  * @author Jiandong Guo

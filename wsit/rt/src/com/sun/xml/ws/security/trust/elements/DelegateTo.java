@@ -1,5 +1,5 @@
 /*
- * $Id: DelegateTo.java,v 1.4 2010-04-20 17:32:31 m_potociar Exp $
+ * $Id: DelegateTo.java,v 1.5 2010-04-27 14:20:29 m_potociar Exp $
  */
 
 /*
@@ -41,7 +41,7 @@
 package com.sun.xml.ws.security.trust.elements;
 
 import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 
 /**
  * Indicates that the requested or issued token be delegated to another

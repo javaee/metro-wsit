@@ -45,7 +45,7 @@
 
 package com.sun.xml.wss.core;
 
-import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.SecurityTokenException;

@@ -39,7 +39,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
@@ -53,11 +53,11 @@ import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
  * @author K.Venugopal@sun.com
  */
 
-public class Token extends PolicyAssertion implements  com.sun.xml.ws.api.security.policy.Token, SecurityAssertionValidator{
+public class Token extends PolicyAssertion implements  com.sun.xml.ws.security.policy.Token, SecurityAssertionValidator{
     
     private String _id;
     private boolean populated= false;
-    private com.sun.xml.ws.api.security.policy.Token _token;
+    private com.sun.xml.ws.security.policy.Token _token;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private final QName itQname;
@@ -87,7 +87,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.api.securi
         _id= PolicyUtil.randomUUID();
     }
     
-    public com.sun.xml.ws.api.security.policy.Token getToken() {
+    public com.sun.xml.ws.security.policy.Token getToken() {
         populate();
         return _token;
     }
@@ -100,7 +100,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.api.securi
     public void setIncludeToken(String type) {
     }
     
-    public void setToken(com.sun.xml.ws.api.security.policy.Token token) {
+    public void setToken(com.sun.xml.ws.security.policy.Token token) {
         //TODO
     }
     
@@ -135,7 +135,7 @@ public class Token extends PolicyAssertion implements  com.sun.xml.ws.api.securi
             while(ast.hasNext()){
                 PolicyAssertion assertion = ast.next();
                 if(PolicyUtil.isToken(assertion, spVersion)){
-                    _token = (com.sun.xml.ws.api.security.policy.Token)assertion;
+                    _token = (com.sun.xml.ws.security.policy.Token)assertion;
                 }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,"Token");

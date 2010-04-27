@@ -36,7 +36,7 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.api.security;
+package com.sun.xml.ws.security;
 
 import java.util.List;
 

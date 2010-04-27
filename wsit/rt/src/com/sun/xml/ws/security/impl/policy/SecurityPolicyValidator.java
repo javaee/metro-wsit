@@ -40,7 +40,7 @@ import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
 import javax.xml.namespace.QName;
 /**

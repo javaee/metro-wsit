@@ -37,7 +37,7 @@
 package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.api.security.policy.SecurityPolicyVersion;
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import java.util.ArrayList;
 import java.util.Collections;

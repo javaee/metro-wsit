@@ -134,7 +134,7 @@ public class DerivedKeyToken implements SecurityHeaderElement, NamespaceContextI
 
         try {
             byte[] secret = originalKey.getEncoded();
-            com.sun.xml.ws.api.security.DerivedKeyToken dkt = new DerivedKeyTokenImpl(offset, length, secret, decodedNonce, label);
+            com.sun.xml.ws.security.DerivedKeyToken dkt = new DerivedKeyTokenImpl(offset, length, secret, decodedNonce, label);
             String jceAlgo = SecurityUtil.getSecretKeyAlgorithm(dataEncAlgo);
 
             return dkt.generateSymmetricKey(jceAlgo);

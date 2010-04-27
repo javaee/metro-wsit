@@ -37,11 +37,11 @@
 package com.sun.xml.ws.security.secconv.impl.client;
 
 import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenProvider;
-import com.sun.xml.ws.api.security.SecurityContextToken;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.policyconv.IntegrityAssertionProcessor;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyUtil;
 import com.sun.xml.ws.security.impl.policyconv.SignatureTargetCreator;

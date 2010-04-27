@@ -33,21 +33,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.api.security;
 
-import java.net.URI;
-import java.util.List;
+package com.sun.xml.ws.security;
 
 /**
- * SecurityContextToken Interface
+ * 
+ * @author root
  */
-public interface SecurityContextToken extends Token {
-
-    URI getIdentifier();
-
-    String getInstance();
+public interface EncryptedKey extends Token {
     
-    String getWsuId();
-    
-    List getExtElements();
 }

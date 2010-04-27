@@ -34,12 +34,31 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.security;
+/*
+ * Token.java
+ *
+ * Created on October 24, 2005, 7:10 AM
+ *
+ * To change this template, choose Tools | Template Manager
+ * and open the template in the editor.
+ */
+
+package com.sun.xml.ws.security;
 
 /**
- * 
- * @author root
+ * Base Interface for all Tokens
+ * Question: Can we adapt all tokens to implement this interface
  */
-public interface EncryptedKey extends Token {
+public interface Token {
+    
+    /**
+     * The type of the Token
+     */
+    String getType();
+    
+    /**
+     * The token Value
+     */
+    Object getTokenValue();
     
 }

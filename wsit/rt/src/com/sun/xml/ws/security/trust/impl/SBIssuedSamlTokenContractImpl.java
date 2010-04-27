@@ -44,7 +44,7 @@ import com.sun.xml.security.core.xenc.CipherDataType;
 import com.sun.xml.security.core.xenc.EncryptedDataType;
 import com.sun.xml.security.core.xenc.EncryptionMethodType;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
+import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.SecurityTokenReference;
@@ -109,7 +109,7 @@ import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.config.TrustSPMetadata;
-import com.sun.xml.ws.api.security.Token;
+import com.sun.xml.ws.security.Token;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;

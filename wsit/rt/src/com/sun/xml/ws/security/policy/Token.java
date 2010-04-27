@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.security.policy;
+package com.sun.xml.ws.security.policy;
 
 
 /**

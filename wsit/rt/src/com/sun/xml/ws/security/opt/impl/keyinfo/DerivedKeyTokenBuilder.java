@@ -38,9 +38,9 @@ package com.sun.xml.ws.security.opt.impl.keyinfo;
 
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.api.reference.DirectReference;
-import com.sun.xml.ws.api.security.DerivedKeyToken;
-import com.sun.xml.ws.api.security.IssuedTokenContext;
-import com.sun.xml.ws.api.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.DerivedKeyToken;
+import com.sun.xml.ws.security.IssuedTokenContext;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
 import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.impl.AlgorithmSuite;
@@ -161,7 +161,7 @@ public class DerivedKeyTokenBuilder extends TokenBuilder {
             SCTBuilder builder = new SCTBuilder(context, (SecureConversationTokenKeyBinding) originalKeyBinding);
             result = builder.process();
             IssuedTokenContext ictx = context.getSecureConversationContext();
-            com.sun.xml.ws.api.security.SecurityContextToken sct =(com.sun.xml.ws.api.security.SecurityContextToken)ictx.getSecurityToken();
+            com.sun.xml.ws.security.SecurityContextToken sct =(com.sun.xml.ws.security.SecurityContextToken)ictx.getSecurityToken();
             if(sct.getInstance() != null){
                 if(context.isExpired()){
                     secret = ictx.getProofKey();

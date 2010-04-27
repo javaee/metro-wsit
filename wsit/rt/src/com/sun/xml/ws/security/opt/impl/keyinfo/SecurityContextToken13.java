@@ -61,7 +61,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextToken;
 
 /**
  * SecurityContextToken Implementation
