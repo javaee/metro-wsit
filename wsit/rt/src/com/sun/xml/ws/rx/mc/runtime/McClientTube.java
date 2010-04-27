@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.mc.runtime;
 
+import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -52,7 +53,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.UUID;
@@ -62,7 +63,7 @@ import javax.xml.stream.XMLStreamException;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public class McClientTube extends AbstractFilterTubeImpl {
+public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeProvider {
     //
 
     private static final Logger LOGGER = Logger.getLogger(McClientTube.class);
@@ -184,12 +185,15 @@ public class McClientTube extends AbstractFilterTubeImpl {
     }
 
     /**
-     *  Used by RM client tube
+     *  @see WsmcRuntimeProvider#getWsmcAnonymousEndpointReference()
      */
     public final WSEndpointReference getWsmcAnonymousEndpointReference() {
         return wsmcAnonymousEndpointReference;
     }
 
+    /**
+     *  @see WsmcRuntimeProvider#registerProtocolMessageHandler(com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler) 
+     */
     public final void registerProtocolMessageHandler(ProtocolMessageHandler handler) {
         mcSenderTask.register(handler);
     }

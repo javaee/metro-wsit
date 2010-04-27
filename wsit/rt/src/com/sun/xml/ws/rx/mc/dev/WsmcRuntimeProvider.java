@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,45 +34,25 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.mc.runtime.spi;
+package com.sun.xml.ws.rx.mc.dev;
 
-import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.message.Packet;
-import java.util.Collection;
+import com.sun.xml.ws.api.addressing.WSEndpointReference;
 
 /**
- * Implementations of this interface that are registered with 
- * {@link com.sun.xml.ws.rx.mc.runtime.WsMcResponseHandler#processResponse(Packet)}
- * are invoked to handle protocol response messages that don't correlate with any 
- * client request.
+ * This internal API interface provides access to the basic WS-MC runtime features.
  *
- * @author Marek Potociar <marek.potociar at sun.com>
+ * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface ProtocolMessageHandler {
+public interface WsmcRuntimeProvider {
 
     /**
-     * Provides information about all WS-Addressing actions that this handler understands and can process.
-     *
-     * @return collection of all WS-Addressing actions that this handler understands and can process.
-     *         Must not return {@code null}.
+     * Provides the current endpoint's WS-MC annonymous URI
      */
-    public @NotNull Collection<String> getSuportedWsaActions();
+    WSEndpointReference getWsmcAnonymousEndpointReference();
 
     /**
-     * <p>
-     * This method is invoked from {@link com.sun.xml.ws.rx.mc.runtime.WsMcResponseHandler#processResponse(Packet)}
-     * in case it is not possible to resolve WS-A {@code RelatesTo} header from the response message to an existing
-     * suspended fiber. In such case it is assumed that the response may contain some general WS-* protocol message
-     * and collection of registered {@link ProtocolMessageHandler}s is consulted.
-     * </p>
-     *
-     * <p>
-     * In case the WS-Addressing {@code wsa:Action} header matches one of the supported WS-Addressing actions returned 
-     * from {@link #getSuportedWsaActions()} method, the {@link #processProtocolMessage(com.sun.xml.ws.api.message.Packet)}
-     * is invoked on {@link ProtocolMessageHandler} instance to process the protocol message.
-     * </p>
-     *
-     * @param protocolMessage a protocol message to be handled
+     * This method may be used by other WS-* client-side implementations to register handlers for the
+     * one-way protocol messages that may be received from the server side.
      */
-    public void processProtocolMessage(Packet protocolMessage);
+    void registerProtocolMessageHandler(ProtocolMessageHandler handler);
 }

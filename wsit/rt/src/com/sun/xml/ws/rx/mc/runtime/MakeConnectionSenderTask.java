@@ -41,7 +41,7 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
-import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.HashMap;
@@ -160,7 +160,7 @@ final class MakeConnectionSenderTask implements Runnable {
 
         isMcRequestPending.set(true);
         try {
-            communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage, mapOfRegisteredProtocolMessageHandlers));
+            communicator.sendAsync(mcRequest, new WsmcResponseHandler(configuration, this, suspendedFiberStorage, mapOfRegisteredProtocolMessageHandlers));
         } finally {
             lastMcMessageTimestamp = System.currentTimeMillis();
             if (--scheduledMcRequestCounter < 0) {

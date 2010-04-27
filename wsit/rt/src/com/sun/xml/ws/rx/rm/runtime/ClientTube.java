@@ -52,8 +52,8 @@ import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.mc.runtime.McClientTube;
-import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
+import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -149,12 +149,12 @@ final class ClientTube extends AbstractFilterTubeImpl {
         rc.setSequenceManager(sequenceManager);
 
         // TODO P3 we should also take into account addressable clients
-        final McClientTube mcClientTube = context.getImplementation(McClientTube.class);
+        final WsmcRuntimeProvider wsmcRuntimeProvider = context.getImplementation(WsmcRuntimeProvider.class);
         if (configuration.isMakeConnectionSupportEnabled()) {
-            assert mcClientTube != null;
+            assert wsmcRuntimeProvider != null;
 
-            this.rmSourceReference = mcClientTube.getWsmcAnonymousEndpointReference();
-            mcClientTube.registerProtocolMessageHandler(createRmProtocolMessageHandler(rc));
+            this.rmSourceReference = wsmcRuntimeProvider.getWsmcAnonymousEndpointReference();
+            wsmcRuntimeProvider.registerProtocolMessageHandler(createRmProtocolMessageHandler(rc));
         } else {
             this.rmSourceReference = configuration.getAddressingVersion().anonymousEpr;
         }
