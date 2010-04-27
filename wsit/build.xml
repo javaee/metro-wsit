@@ -168,9 +168,9 @@
             description="integrate the last successful XWSS 3.0 for Metro 1.1 Branch Hudson build">
         <!-- get src="http://hudson.sfbay/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
          dest="lib/xws-security.src.zip" / -->
-        <get src="http://kohsuke.sfbay.sun.com/hudson/job/XWSS30-METRO-1_1-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
+        <get src="http://hudson.sfbay.sun.com/job/XWSS30-METRO-1_1-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
              dest="lib/runtime/xws-security.jar" />
-        <get src="http://kohsuke.sfbay.sun.com/hudson/job/XWSS30-METRO-1_1-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
+        <get src="http://hudson.sfbay.sun.com/job/XWSS30-METRO-1_1-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
              dest="lib/runtime/xws-security.src.zip" />
     </target>
 
@@ -251,7 +251,7 @@
     <target name="integrate-htmlmacro-hudson"
             description="integrate the last successful htmlmacro Hudson build">
       <get
-          src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
+          src="http://hudson.sfbay.sun.com/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
           dest="${lib.releasenotes.dir}/htmlmacro.zip"/>
       <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
       <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
