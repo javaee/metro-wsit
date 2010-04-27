@@ -160,7 +160,7 @@ final class MakeConnectionSenderTask implements Runnable {
 
         isMcRequestPending.set(true);
         try {
-            communicator.sendAsync(mcRequest, new WsmcResponseHandler(configuration, this, suspendedFiberStorage, mapOfRegisteredProtocolMessageHandlers));
+            communicator.sendAsync(mcRequest, new WsMcResponseHandler(configuration, this, suspendedFiberStorage, mapOfRegisteredProtocolMessageHandlers));
         } finally {
             lastMcMessageTimestamp = System.currentTimeMillis();
             if (--scheduledMcRequestCounter < 0) {

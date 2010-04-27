@@ -41,7 +41,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
-import com.sun.xml.ws.rx.mc.runtime.spi.ProtocolMessageHandler;
+import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
 import com.sun.xml.ws.rx.util.ResumeFiberException;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
 import java.util.Map;
