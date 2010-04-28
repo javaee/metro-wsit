@@ -1,8 +1,8 @@
 Bundle-SymbolicName: javax.xml
 Bundle-Name: metro
 Export-Package: \
-  javax.jws;version=@RELEASE_VERSION@, \
-  javax.jws.soap;version=@RELEASE_VERSION@, \
+  javax.jws;version=2.0, \
+  javax.jws.soap;version=2.0, \
   javax.xml.ws;version=@JAX-WS_SPEC_VERSION@, \
   javax.xml.ws.*;version=@JAX-WS_SPEC_VERSION@, \
   *
