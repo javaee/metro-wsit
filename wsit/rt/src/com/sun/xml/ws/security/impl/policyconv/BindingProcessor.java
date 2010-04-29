@@ -230,12 +230,12 @@ public abstract class BindingProcessor {
                 WSSPolicy kbd = ((DerivedTokenKeyBinding) token).getOriginalKeyBinding();
                 if (PolicyTypeUtil.symmetricKeyBinding(kbd)) {
                     WSSPolicy sbd = (KeyBindingBase) kbd.getKeyBinding();
-                    st = stc.newURISignatureTarget(token.getUUID());
+                    st = stc.newURISignatureTarget(uuid);
                 } else {
-                    st = stc.newURISignatureTarget(token.getUUID());
+                    st = stc.newURISignatureTarget(uuid);
                 }
             } else {
-                st = stc.newURISignatureTarget(token.getUUID());
+                st = stc.newURISignatureTarget(uuid);
             }
             if (st != null) {  //when st is null, request simply goes with out signing the token;
                 stc.addTransform(st);

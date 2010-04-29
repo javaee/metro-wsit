@@ -36,6 +36,8 @@
 
 package com.sun.xml.ws.security.opt.impl.keyinfo;
 
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BinarySecurityToken;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.api.reference.DirectReference;
@@ -48,6 +50,8 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
+import com.sun.xml.ws.security.opt.impl.crypto.SSEData;
+import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
@@ -110,8 +114,9 @@ public class X509TokenBuilder extends TokenBuilder{
             KeyIdentifier ki = buildKeyInfoWithKI(binding,MessageConstants.ThumbPrintIdentifier_NS);
             try{
                 if(binding.getSTRID() != null){
-                    OctectStreamData osd = new OctectStreamData(new String(binding.getX509Certificate().getEncoded()));
-                    context.getElementCache().put(binding.getSTRID(),osd);
+                    SecurityElement bsToken = elementFactory.createBinarySecurityToken(null, binding.getX509Certificate().getEncoded());
+                    SSEData data = new SSEData(bsToken,false,context.getNamespaceContext());
+                    context.getSTRTransformCache().put(binding.getSTRID(),data);
                 }
             }catch(CertificateEncodingException ce){
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1814_ERROR_ENCODING_CERTIFICATE(),ce);

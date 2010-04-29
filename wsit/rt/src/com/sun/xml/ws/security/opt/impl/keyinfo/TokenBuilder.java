@@ -207,7 +207,9 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             }
         }
         Data data = new SSEData((SecurityElement)str,false,context.getNamespaceContext());
-        context.getElementCache().put(strId,data);
+        if (strId != null) {
+            context.getElementCache().put(strId, data);
+        }
         return str;
     }
     /**

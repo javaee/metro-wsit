@@ -121,6 +121,9 @@ public class URIResolver implements URIDereferencer{
         }
         
         Data data = null;
+        data = (Data)pc.getSTRTransformCache().get(id);
+        if(data != null)
+            return data;
         data = (Data)pc.getElementCache().get(id);
         return data;
     }

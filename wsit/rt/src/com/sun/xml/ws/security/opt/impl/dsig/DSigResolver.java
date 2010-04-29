@@ -264,6 +264,9 @@ public class DSigResolver implements URIDereferencer{
             }
         }
         Data data = null;
+        data = (Data)context.getSTRTransformCache().get(uri);
+        if(data != null)
+            return data;
         data = (Data)context.getElementCache().get(uri);
         return data;
     }

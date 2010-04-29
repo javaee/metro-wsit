@@ -118,6 +118,7 @@ import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.security.impl.PasswordDerivedKey;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
+import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.secext10.AttributedString;
@@ -385,15 +386,24 @@ public class KeySelectorImpl extends KeySelector {
 //                        wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
                 X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
                         wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
-                returnKey = cert.getPublicKey();
-                if(strId != null){
-                    byte [] encodedCert = cert.getEncoded();
-                    wssContext.getElementCache().put(strId,new OctectStreamData(new String(encodedCert)));
-                }
-                
+                returnKey = cert.getPublicKey(); 
             } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
                 returnKey = wssContext.getSecurityEnvironment().getPrivateKey(
                         wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
+            }
+            if (strId != null) {
+                try {
+                    X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
+                            wssContext.getExtraneousProperties(), serialNumber, normalizedIssuerName);
+                    WSSElementFactory elementFactory = new WSSElementFactory(wssContext.getSOAPVersion());
+                    SecurityElement bst = elementFactory.createBinarySecurityToken(null, cert.getEncoded());
+                    SSEData data = new SSEData(bst, false, wssContext.getNamespaceContext());
+                    wssContext.getSTRTransformCache().put(strId, data);
+                } catch (XWSSecurityException ex) {
+                } catch (CertificateEncodingException ex) {
+                } catch (Exception ex) {
+                    // ignore the exception
+                }
             }
         } catch(Exception ex){
             logger.log(Level.FINEST,"Error occurred while resolving" +
@@ -695,17 +705,14 @@ public class KeySelectorImpl extends KeySelector {
                     }
                 }
                 // get the key
-                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {
-                    byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
+                 byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
+                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {                   
                     context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
                     //returnKey = context.getSecurityEnvironment().getPublicKey(
                     //      context.getExtraneousProperties(),keyIdBytes);
                     X509Certificate cert = context.getSecurityEnvironment().getCertificate(
                             context.getExtraneousProperties(),keyIdBytes);
-                    if(strId != null){
-                        byte [] encodedCert = cert.getEncoded();
-                        context.getElementCache().put(strId,new OctectStreamData(new String(encodedCert)));
-                    }
+                    
                     if (!isSymmetric && !context.isSamlSignatureKey()) {
                         context.getSecurityEnvironment().updateOtherPartySubject(
                                 DefaultSecurityEnvironmentImpl.getSubject(context), cert);
@@ -714,7 +721,21 @@ public class KeySelectorImpl extends KeySelector {
                 } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
                     returnKey = context.getSecurityEnvironment().getPrivateKey(
                             context.getExtraneousProperties(),
-                            XMLUtil.getDecodedBase64EncodedData(referenceValue));
+                            keyIdBytes);
+                }
+                if (strId != null) {
+                    try {
+                        X509Certificate cert = context.getSecurityEnvironment().getCertificate(
+                                context.getExtraneousProperties(), keyIdBytes, MessageConstants.KEY_INDETIFIER_TYPE);
+                        WSSElementFactory elementFactory = new WSSElementFactory(context.getSOAPVersion());
+                        SecurityElement bst = elementFactory.createBinarySecurityToken(null, cert.getEncoded());
+                        SSEData data = new SSEData(bst, false, context.getNamespaceContext());
+                        context.getSTRTransformCache().put(strId, data);
+                    } catch (XWSSecurityException ex) {
+                    } catch (CertificateEncodingException ex) {
+                    } catch (Exception ex) {
+                        //ignore the exception
+                    }
                 }
             }  else if (MessageConstants.ThumbPrintIdentifier_NS.equals(valueType)) {
                 //for policy verification
@@ -736,27 +757,35 @@ public class KeySelectorImpl extends KeySelector {
                     }
                 }
                 // get the key
-                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {
-                    byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
-                    context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
-                    
+                 byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
+                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {                   
+                    context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));                    
                     X509Certificate cert = context.getSecurityEnvironment().getCertificate(
                             context.getExtraneousProperties(),keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
                     if (!isSymmetric) {
                         context.getSecurityEnvironment().updateOtherPartySubject(
                                 DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                     }
-                    returnKey = cert.getPublicKey();
-                    
-                    if(strId != null){
-                        byte [] encodedCert = cert.getEncoded();
-                        context.getElementCache().put(strId,new OctectStreamData(new String(encodedCert)));
-                    }
+                    returnKey = cert.getPublicKey(); 
                     
                 } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
                     returnKey =context.getSecurityEnvironment().getPrivateKey(
                             context.getExtraneousProperties(),
-                            XMLUtil.getDecodedBase64EncodedData(referenceValue), MessageConstants.THUMB_PRINT_TYPE);
+                            keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
+                }
+                if(strId != null){  
+                    try {
+                        X509Certificate cert = context.getSecurityEnvironment().getCertificate(
+                                context.getExtraneousProperties(), keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
+                        WSSElementFactory elementFactory = new WSSElementFactory(context.getSOAPVersion());
+                        SecurityElement bst = elementFactory.createBinarySecurityToken(null, cert.getEncoded());
+                        SSEData data = new SSEData(bst, false, context.getNamespaceContext());
+                        context.getSTRTransformCache().put(strId, data);
+                    } catch (XWSSecurityException ex) {
+                    } catch (CertificateEncodingException ex) {
+                    } catch( Exception ex){
+                        //ignore the exception
+                    }
                 }
             } else if(MessageConstants.KERBEROS_v5_APREQ_IDENTIFIER.equals(valueType)){
                 //for policy verification
@@ -862,10 +891,7 @@ public class KeySelectorImpl extends KeySelector {
         } catch (URIReferenceException ex) {
             logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo" ,ex);
             throw new KeySelectorException(ex);
-        } catch (CertificateEncodingException ex) {
-            logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo" ,ex);
-            throw new KeySelectorException(ex);
-        }
+        } 
         return returnKey;
         
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: FilterProcessingContext.java,v 1.4 2010-03-20 12:33:44 kumarjayanti Exp $
+ * $Id: FilterProcessingContext.java,v 1.5 2010-04-29 10:07:31 sm228678 Exp $
  */
 
 /*
@@ -183,6 +183,7 @@ public class FilterProcessingContext extends ProcessingContextImpl {
     private static Logger log = Logger.getLogger (
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
+    private HashMap strTransformCache = new HashMap ();
     
     public FilterProcessingContext () {}
     
@@ -347,6 +348,10 @@ public class FilterProcessingContext extends ProcessingContextImpl {
     
     public HashMap getElementCache (){
         return elementCache;
+    }
+
+    public HashMap getSTRTransformCache (){
+        return strTransformCache;
     }
     
     public void setX509CertificateBinding (

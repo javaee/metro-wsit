@@ -101,7 +101,9 @@ public class TargetResolverImpl implements TargetResolver{
                 if (!containsSTRTransform(actualTarget,inferredTargets)) {
                    throw new XWSSecurityException("Policy verification error:" +
                             "Missing target " + targetInPolicy + " for " + policyType);
-                }                
+                }else {
+                    break;
+                }
             }
             if (!found && targetInPolicy != null) {
                 //check if message has the target

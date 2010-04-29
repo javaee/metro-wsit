@@ -43,7 +43,7 @@ import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.model.SEIModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.server.WSEndpoint;
-import com.sun.xml.ws.assembler.dev.ServerPipelineHook;
+import com.sun.xml.ws.assembler.ServerPipelineHook;
 import com.sun.xml.ws.policy.PolicyMap;
 
 import com.sun.istack.NotNull;

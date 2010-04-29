@@ -55,7 +55,7 @@ import com.sun.xml.ws.api.pipe.StreamSOAPCodec;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import com.sun.xml.ws.assembler.dev.ClientPipelineHook;
-import com.sun.xml.ws.assembler.dev.ServerPipelineHook;
+import com.sun.xml.ws.assembler.ServerPipelineHook;
 import com.sun.xml.ws.assembler.dev.TubeFactory;
 import com.sun.xml.ws.assembler.dev.TubelineAssemblyContextUpdater;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
