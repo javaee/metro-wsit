@@ -154,7 +154,7 @@ public class MEXEndpoint implements Provider<Message> {
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
                 wsdlRetriever.addDocuments(writer, null, address);
-                writer.writeEndDocument();
+                writeEndEnvelope(writer);
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
                 
@@ -246,7 +246,15 @@ public class MEXEndpoint implements Provider<Message> {
         writer.writeStartElement(soapPrefix, "Body", soapVersion.nsUri);
         writer.writeStartElement(MetadataConstants.MEX_PREFIX, "Metadata", MetadataConstants.MEX_NAMESPACE);
     }
-    
+
+    private void writeEndEnvelope(final XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndDocument();
+
+    }
     private Message createFaultMessage(@NotNull final String faultText, @NotNull final String unsupportedAction,
             @NotNull final AddressingVersion av, @NotNull final SOAPVersion sv) {
         final QName subcode = av.actionNotSupportedTag;
