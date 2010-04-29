@@ -43,10 +43,6 @@ import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 //
 import com.sun.xml.ws.runtime.dev.Session;
 import com.sun.xml.ws.runtime.dev.SessionManager;
-import com.sun.xml.ws.security.secext10.ObjectFactory;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.elements.str.DirectReference;
-import com.sun.xml.ws.security.trust.elements.str.Reference;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
 
@@ -82,13 +78,13 @@ final class Utilities {
     }
 
     static String extractSecurityContextTokenId(com.sun.xml.ws.security.secext10.SecurityTokenReferenceType strType) throws RxException {
-        Reference strReference = WSTrustElementFactory.newInstance().createSecurityTokenReference(
-                new ObjectFactory().createSecurityTokenReference(strType)).getReference();
-        if (!(strReference instanceof DirectReference)) {
+        com.sun.xml.ws.security.trust.elements.str.Reference strReference = com.sun.xml.ws.security.trust.WSTrustElementFactory.newInstance().createSecurityTokenReference(
+                new com.sun.xml.ws.security.secext10.ObjectFactory().createSecurityTokenReference(strType)).getReference();
+        if (!(strReference instanceof com.sun.xml.ws.security.trust.elements.str.DirectReference)) {
             throw LOGGER.logSevereException(
                     new RxException(LocalizationMessages.WSRM_1132_SECURITY_REFERENCE_ERROR(strReference.getClass().getName())));
         }
-        return ((DirectReference) strReference).getURIAttr().toString();
+        return ((com.sun.xml.ws.security.trust.elements.str.DirectReference) strReference).getURIAttr().toString();
     }
 
     /**
