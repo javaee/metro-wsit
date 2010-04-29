@@ -33,8 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
-
 package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.message.HeaderList;
@@ -71,18 +69,15 @@ import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 
-
 /**
  *
  * @author Ashutosh.Shahi@sun.com
  */
+public class PolicyResolverImpl implements PolicyResolver {
 
-public class PolicyResolverImpl implements PolicyResolver{
-    
     private WSDLBoundOperation cachedOperation = null;
-    private HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
-    private HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
-    
+    private HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap = null;
+    private HashMap<String, SecurityPolicyHolder> inProtocolPM = null;
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
     private RmProtocolVersion rmVer = null;
@@ -91,14 +86,14 @@ public class PolicyResolverImpl implements PolicyResolver{
     private boolean isClient = false;
     private boolean isSCMessage = false;
     //private boolean isTrustOrSCMessage = false;
-    private String action =  "";
+    private String action = "";
     private WSTrustVersion wstVer = WSTrustVersion.WS_TRUST_10;
-    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;    
+    private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+
     /**
      * Creates a new instance of OperationResolverImpl
      */
-    
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,TubeConfiguration tubeConfig,AddressingVersion addVer,boolean isClient, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap, HashMap<String, SecurityPolicyHolder> ip, WSDLBoundOperation cachedOperation, TubeConfiguration tubeConfig, AddressingVersion addVer, boolean isClient, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;
@@ -108,31 +103,31 @@ public class PolicyResolverImpl implements PolicyResolver{
         this.rmVer = rmVer;
         this.mcVer = mcVer;
     }
-    
-    public MessagePolicy resolvePolicy(ProcessingContext ctx){
+
+    public MessagePolicy resolvePolicy(ProcessingContext ctx) {
         Message msg = null;
         SOAPMessage soapMsg = null;
-        if(ctx instanceof JAXBFilterProcessingContext){
-            msg = ((JAXBFilterProcessingContext)ctx).getJAXWSMessage();
-        } else{
+        if (ctx instanceof JAXBFilterProcessingContext) {
+            msg = ((JAXBFilterProcessingContext) ctx).getJAXWSMessage();
+        } else {
             soapMsg = ctx.getSOAPMessage();
             msg = Messages.create(soapMsg);
         }
-        if(((ProcessingContextImpl)ctx).getSecurityPolicyVersion().equals(
-                SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)){
+        if (((ProcessingContextImpl) ctx).getSecurityPolicyVersion().equals(
+                SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri)) {
             wstVer = WSTrustVersion.WS_TRUST_13;
             wsscVer = WSSCVersion.WSSC_13;
         }
-        
+
         MessagePolicy mp = null;
 
         action = getAction(msg);
         if (isRMMessage() || isMCMessage()) {
             SecurityPolicyHolder holder = inProtocolPM.get("RM");
-            return holder.getMessagePolicy();            
+            return holder.getMessagePolicy();
         }
-        
-        if(isSCCancel()){
+
+        if (isSCCancel()) {
             SecurityPolicyHolder holder = inProtocolPM.get("SC-CANCEL");
             /*SecurityPolicyHolder holder = inProtocolPM.get("SC");
             if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
@@ -141,13 +136,13 @@ public class PolicyResolverImpl implements PolicyResolver{
             return holder.getMessagePolicy();
         }
         isSCMessage = isSCMessage();
-        if (isSCMessage ) {
-            Token scToken = (Token)getInBoundSCP();
+        if (isSCMessage) {
+            Token scToken = (Token) getInBoundSCP();
             return getInboundXWSBootstrapPolicy(scToken);
         }
-        
+
         if (msg.isFault()) {
-            if(soapMsg == null){
+            if (soapMsg == null) {
                 try {
                     soapMsg = msg.readAsSOAPMessage();
                 } catch (SOAPException ex) {
@@ -155,91 +150,90 @@ public class PolicyResolverImpl implements PolicyResolver{
                 }
             }
             mp = getInboundFaultPolicy(soapMsg);
-        }  else{
-            mp =  getInboundXWSSecurityPolicy(msg);
+        } else {
+            mp = getInboundXWSSecurityPolicy(msg);
         }
-        
-        if(mp == null){
+
+        if (mp == null) {
             return new MessagePolicy();
         }
         return mp;
     }
-    
-    
-    protected PolicyAssertion getInBoundSCP(){
-        
+
+    protected PolicyAssertion getInBoundSCP() {
+
         SecurityPolicyHolder sph = null;
         Collection coll = inMessagePolicyMap.values();
         Iterator itr = coll.iterator();
-        
-        while(itr.hasNext()){
+
+        while (itr.hasNext()) {
             SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
-            if(ph != null){
+            if (ph != null) {
                 sph = ph;
                 break;
             }
         }
-        if(sph == null){
+        if (sph == null) {
             return null;
         }
         List<PolicyAssertion> policies = sph.getSecureConversationTokens();
-        if(!policies.isEmpty()) {
-            return (PolicyAssertion)policies.get(0);
+        if (!policies.isEmpty()) {
+            return (PolicyAssertion) policies.get(0);
         }
         return null;
     }
-    
+
     private MessagePolicy getInboundXWSSecurityPolicy(Message msg) {
         MessagePolicy mp = null;
-        
-        
-        
+
+
+
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
         WSDLBoundOperation operation = null;
-        if(cachedOperation != null){
+        if (cachedOperation != null) {
             operation = cachedOperation;
-        }else{
+        } else {
             operation = msg.getOperation(tubeConfig.getWSDLPort());
-            if(operation == null)
+            if (operation == null) {
                 operation = getWSDLOpFromAction();
+            }
         }
-        
+
         SecurityPolicyHolder sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
         //TODO: pass isTrustMessage Flag to this method later
         if (sph == null && (isTrustMessage() || isSCMessage)) {
             operation = getWSDLOpFromAction();
             sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
         }
-        if(sph == null){
+        if (sph == null) {
             return null;
         }
-        
+
         mp = sph.getMessagePolicy();
-        
+
         return mp;
     }
-    
-    
+
     private MessagePolicy getInboundFaultPolicy(SOAPMessage msg) {
-        if(cachedOperation != null){
+        if (cachedOperation != null) {
             WSDLOperation operation = cachedOperation.getOperation();
-            try{
+            try {
                 SOAPBody body = msg.getSOAPBody();
                 NodeList nodes = body.getElementsByTagName("detail");
-                if(nodes.getLength() == 0){
-                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
+                if (nodes.getLength() == 0) {
+                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Detail");
                 }
-                if(nodes.getLength() >0){
+                if (nodes.getLength() > 0) {
                     Node node = nodes.item(0);
                     Node faultNode = node.getFirstChild();
-                    if(faultNode == null){
+                    if (faultNode == null) {
                         return new MessagePolicy();
                     }
                     final String uri = faultNode.getNamespaceURI();
                     final QName faultDetail;
-                    if(uri != null && uri.length() >0){
-                        faultDetail = new QName(uri,faultNode.getLocalName());
-                    }else{
+                    if (uri != null && uri.length() > 0) {
+                        faultDetail = new QName(uri, faultNode.getLocalName());
+                    } else {
                         faultDetail = new QName(faultNode.getLocalName());
                     }
                     WSDLFault fault = operation.getFault(faultDetail);
@@ -248,85 +242,84 @@ public class PolicyResolverImpl implements PolicyResolver{
                     MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
                     return faultPolicy;
                 }
-            }catch(SOAPException sx){
+            } catch (SOAPException sx) {
                 //sx.printStackTrace();
                 //log error
             }
         }
         return new MessagePolicy();
-        
+
     }
-    
-    private boolean isTrustMessage(){
-        if(wstVer.getIssueRequestAction().equals(action) ||
-                wstVer.getIssueResponseAction().equals(action)){
+
+    private boolean isTrustMessage() {
+        if (wstVer.getIssueRequestAction().equals(action) ||
+                wstVer.getIssueResponseAction().equals(action)) {
             return true;
         }
         return false;
-        
+
     }
-    
-    private boolean isRMMessage(){
+
+    private boolean isRMMessage() {
         return rmVer.isProtocolAction(action);
     }
 
     private boolean isMCMessage() {
         return mcVer.isProtocolAction(action);
     }
-    
-    private String getAction(Message msg){
-        if(addVer != null){
+
+    private String getAction(Message msg) {
+        if (addVer != null) {
             HeaderList hl = msg.getHeaders();
-            String retVal =  hl.getAction(addVer, tubeConfig.getBinding().getSOAPVersion());
+            String retVal = hl.getAction(addVer, tubeConfig.getBinding().getSOAPVersion());
             return retVal;
         }
         return "";
-        
+
     }
-    
+
     private MessagePolicy getInboundXWSBootstrapPolicy(Token scAssertion) {
-        return ((SCTokenWrapper)scAssertion).getMessagePolicy();
+        return ((SCTokenWrapper) scAssertion).getMessagePolicy();
     }
-    
-    private boolean isSCMessage(){
-        if (wsscVer.getSCTRequestAction().equals(action) || 
-              wsscVer.getSCTResponseAction().equals(action) ||
-                wsscVer.getSCTRenewRequestAction().equals(action) || 
-                  wsscVer.getSCTRenewResponseAction().equals(action)){
+
+    private boolean isSCMessage() {
+        if (wsscVer.getSCTRequestAction().equals(action) ||
+                wsscVer.getSCTResponseAction().equals(action) ||
+                wsscVer.getSCTRenewRequestAction().equals(action) ||
+                wsscVer.getSCTRenewResponseAction().equals(action)) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSCCancel(){
-        
-        if(wsscVer.getSCTCancelResponseAction().equals(action) ||
+
+    private boolean isSCCancel() {
+
+        if (wsscVer.getSCTCancelResponseAction().equals(action) ||
                 wsscVer.getSCTCancelRequestAction().equals(action)) {
             return true;
         }
         return false;
     }
-    
-    private String getAction(WSDLOperation operation){
-        if(!isClient){
+
+    private String getAction(WSDLOperation operation) {
+        if (!isClient) {
             return operation.getInput().getAction();
-        }else{
+        } else {
             return operation.getOutput().getAction();
         }
     }
-    
-    private WSDLBoundOperation getWSDLOpFromAction(){
-        Set <WSDLBoundOperation>keys = inMessagePolicyMap.keySet();
-        for(WSDLBoundOperation wbo : keys){
+
+    private WSDLBoundOperation getWSDLOpFromAction() {
+        Set<WSDLBoundOperation> keys = inMessagePolicyMap.keySet();
+        for (WSDLBoundOperation wbo : keys) {
             WSDLOperation wo = wbo.getOperation();
             // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
             String confAction = getAction(wo);
-            if(confAction != null && confAction.equals(action)){
+            if (confAction != null && confAction.equals(action)) {
                 return wbo;
             }
         }
         return null;
     }
-    
 }
 
