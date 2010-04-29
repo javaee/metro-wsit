@@ -1,11 +1,11 @@
 /*
- * $Id: FilterProcessingContext.java,v 1.5 2010-04-29 10:07:31 sm228678 Exp $
+ * $Id: FilterProcessingContext.java,v 1.6 2010-04-29 19:28:58 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.wss.impl;
 
 import java.util.HashMap;
@@ -61,7 +60,7 @@ import java.security.Key;
 import org.w3c.dom.Node;
 
 public class FilterProcessingContext extends ProcessingContextImpl {
-    
+
     /**
      * Processing modes indicate if policy resolution happened
      * that can be applied on the message.
@@ -85,22 +84,16 @@ public class FilterProcessingContext extends ProcessingContextImpl {
      * is currently not known due to Encrypted Body
      *
      */
-    public static final int ADHOC   = 0;
-    
+    public static final int ADHOC = 0;
     public static final int POSTHOC = 1;
-    
     public static final int DEFAULT = 2;
-
     public static final int WSDL_POLICY = 3;
-
-    private byte [] digestValue= null;
-    private byte [] canonicalizedData = null;
-    
+    private byte[] digestValue = null;
+    private byte[] canonicalizedData = null;
     /**
      * Default mode
      */
     private int mode = DEFAULT;
-    
     /**
      * Filters would not throw exceptions for primary or optional
      * policy violations and rather would set the Throwable instance,
@@ -112,16 +105,12 @@ public class FilterProcessingContext extends ProcessingContextImpl {
      * elements and optional policies.
      */
     private boolean primaryPolicyViolation = false;
-    
     private boolean optionalPolicyViolation = false;
-    
     private Throwable _PolicyViolation = null;
-    
     /**
      * If DynamicPolicyCallback handling should be enabled
      */
     private boolean enableDynamicPolicyCallback = false;
-    
     /**
      * Cache of BinarySecurityToken(s)
      *
@@ -134,69 +123,56 @@ public class FilterProcessingContext extends ProcessingContextImpl {
      * the token to a single occasion per message, the Cache would require
      * more dimensions (>2).
      */
-    private HashMap tokenCache = new HashMap ();
-    
+    private HashMap tokenCache = new HashMap();
     /**
      * Cache for looking up EncryptedKey ids against X509 id
      */
     private HashMap encryptedKeyCache = new HashMap();
-    
     /**
      * Cache for storing all the X509 tokens that are inserted into the Security Header
      */
     private HashMap insertedX509Cache = new HashMap();
-    
     /**
      * List of processed SOAP Attachment wsu:Id(s)
      *
      * TODO: Not required. Use SecurityHeader.setCurrentHeaderElement rather
      * private ArrayList processedAttachments = new ArrayList();
      */
-    
     //hack to allow only a single timestamp to be exported
     // TODO : revisit
     private boolean timestampExported = false;
-    
     //Cache to maintain a list of elements vs id attributes
     //
-    private HashMap elementCache = new HashMap ();
-
-    
+    private HashMap elementCache = new HashMap();
     //x509 key binding
     private AuthenticationTokenPolicy.X509CertificateBinding x509CertificateBinding;
-    
     private AuthenticationTokenPolicy.KerberosTokenBinding kerberosTokenBinding;
-    
     private AuthenticationTokenPolicy.UsernameTokenBinding usernameTokenBinding;
-    
     private WSSPolicy inferredPolicy = null;
     //symmetric key binding
     private SymmetricKeyBinding symmetricKeyBinding;
-    
     private String dataEncAlgo = null;
-    
     private SecretKey currentSecret = null;
-    
     //added to handle Encrypt Before Signing
     private Node currentRefList = null;
-    
-    private static Logger log = Logger.getLogger (
+    private static Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
-    private HashMap strTransformCache = new HashMap ();
-    
-    public FilterProcessingContext () {}
-    
+    private HashMap strTransformCache = new HashMap();
+
+    public FilterProcessingContext() {
+    }
+
     /**
      * @param context ProcessingContext
      *
      * @throws XWSSecurityException
      */
-    public FilterProcessingContext (ProcessingContext context)
-    throws XWSSecurityException {
-        copy (this, context);
+    public FilterProcessingContext(ProcessingContext context)
+            throws XWSSecurityException {
+        copy(this, context);
     }
-    
+
     /**
      * @param filterMode boolean
      * @param messageIdentifier String
@@ -205,18 +181,18 @@ public class FilterProcessingContext extends ProcessingContextImpl {
      *
      * @throws XWSSecurityException
      */
-    public FilterProcessingContext (int filterMode,
+    public FilterProcessingContext(int filterMode,
             String messageIdentifier,
             SecurityPolicy securityPolicy,
             SOAPMessage message)
             throws XWSSecurityException {
-        
+
         this.mode = filterMode;
-        setSecurityPolicy (securityPolicy);
-        setMessageIdentifier (messageIdentifier);
-        setSOAPMessage (message);
+        setSecurityPolicy(securityPolicy);
+        setMessageIdentifier(messageIdentifier);
+        setSOAPMessage(message);
     }
-    
+
     /**
      * Overrides setSecurityPolicy in PC - allows only WSSPolicy
      * instances to be set. Resets internal state of FPC.
@@ -225,169 +201,170 @@ public class FilterProcessingContext extends ProcessingContextImpl {
      *
      * @throws XWSSecurityException
      */
-    public void setSecurityPolicy (SecurityPolicy policy)
-    throws XWSSecurityException {
-        primaryPolicyViolation  = false;
+    @Override
+    public void setSecurityPolicy(SecurityPolicy policy)
+            throws XWSSecurityException {
+        primaryPolicyViolation = false;
         optionalPolicyViolation = false;
-        
+
         _PolicyViolation = null;
-        
-        if (!(policy instanceof WSSPolicy) && !(PolicyTypeUtil.messagePolicy (policy))
-        && !(PolicyTypeUtil.applicationSecurityConfiguration (policy)) &&
-                !(PolicyTypeUtil.dynamicSecurityPolicy (policy))) {
-            log.log (Level.SEVERE, "WSS0801.illegal.securitypolicy");
-            throw new XWSSecurityException (
+
+        if (!(policy instanceof WSSPolicy) && !(PolicyTypeUtil.messagePolicy(policy)) && !(PolicyTypeUtil.applicationSecurityConfiguration(policy)) &&
+                !(PolicyTypeUtil.dynamicSecurityPolicy(policy))) {
+            log.log(Level.SEVERE, "WSS0801.illegal.securitypolicy");
+            throw new XWSSecurityException(
                     "Illegal SecurityPolicy Type: required one of " +
                     " WSSPolicy/MessagePolicy/ApplicationSecurityConfiguration");
         }
-        
-        super.setSecurityPolicy (policy);
+
+        super.setSecurityPolicy(policy);
     }
-    
+
     /**
      * @param exception Throwable representing exception for policy violation
      */
-    public void setPVE (Throwable exception) {
+    public void setPVE(Throwable exception) {
         _PolicyViolation = exception;
     }
-    
+
     /**
      * @return _policyViolation
      */
-    public Throwable getPVE () {
+    public Throwable getPVE() {
         return _PolicyViolation;
     }
-    
+
     /**
      * @param mode set filter processing mode
      */
-    public void setMode (int mode) {
+    public void setMode(int mode) {
         this.mode = mode;
     }
-    
+
     /**
      * @return mode
      */
-    public int getMode () {
+    public int getMode() {
         return this.mode;
     }
-    
+
     /**
      * @param enable boolean
      */
-    public void enableDynamicPolicyCallback (boolean enable) {
+    public void enableDynamicPolicyCallback(boolean enable) {
         this.enableDynamicPolicyCallback = enable;
     }
-    
+
     /**
      * @return enableDynamicPolicyCallback
      */
-    public boolean makeDynamicPolicyCallback () {
+    public boolean makeDynamicPolicyCallback() {
         return this.enableDynamicPolicyCallback;
     }
-    
+
     /**
      * @param assrt
      */
-    public void isPrimaryPolicyViolation (boolean assrt) {
+    public void isPrimaryPolicyViolation(boolean assrt) {
         this.primaryPolicyViolation = assrt;
     }
-    
+
     /**
      * @return primaryPolicyViolation
      */
-    public boolean isPrimaryPolicyViolation () {
+    public boolean isPrimaryPolicyViolation() {
         return primaryPolicyViolation;
     }
-    
+
     /**
      * @param assrt
      */
-    public void isOptionalPolicyViolation (boolean assrt) {
+    public void isOptionalPolicyViolation(boolean assrt) {
         this.optionalPolicyViolation = assrt;
     }
-    
+
     /**
      * @return optionalPolicyViolation
      */
-    public boolean isOptionalPolicyViolation () {
+    public boolean isOptionalPolicyViolation() {
         return optionalPolicyViolation;
     }
-    
+
     /**
      * return the token cache.
      */
-    public HashMap getTokenCache (){
+    public HashMap getTokenCache() {
         return tokenCache;
     }
-    
+
     /**
      * return the encryptedKey Cache
      */
-    public HashMap getEncryptedKeyCache (){
+    public HashMap getEncryptedKeyCache() {
         return encryptedKeyCache;
     }
-    
-    public HashMap getInsertedX509Cache(){
+
+    public HashMap getInsertedX509Cache() {
         return insertedX509Cache;
     }
-    
+
     /*
      *Set if a Timestamp was exported
      */
-    public void timestampExported (boolean flag) {
+    public void timestampExported(boolean flag) {
         timestampExported = flag;
     }
-    
+
     /*
      *@return true if a Timestamp was exported
      */
-    public boolean timestampExported () {
+    public boolean timestampExported() {
         return timestampExported;
     }
-    
-    public HashMap getElementCache (){
+
+    public HashMap getElementCache() {
         return elementCache;
     }
 
-    public HashMap getSTRTransformCache (){
+    public HashMap getSTRTransformCache() {
         return strTransformCache;
     }
-    
-    public void setX509CertificateBinding (
+
+    public void setX509CertificateBinding(
             AuthenticationTokenPolicy.X509CertificateBinding x509CertificateBinding) {
         this.x509CertificateBinding = x509CertificateBinding;
     }
-    
-    public AuthenticationTokenPolicy.X509CertificateBinding getX509CertificateBinding () {
+
+    public AuthenticationTokenPolicy.X509CertificateBinding getX509CertificateBinding() {
         return x509CertificateBinding;
     }
-    
+
     public void setUsernameTokenBinding(
-            AuthenticationTokenPolicy.UsernameTokenBinding untBinding){
+            AuthenticationTokenPolicy.UsernameTokenBinding untBinding) {
         this.usernameTokenBinding = untBinding;
     }
-    
-    public AuthenticationTokenPolicy.UsernameTokenBinding getusernameTokenBinding(){
+
+    public AuthenticationTokenPolicy.UsernameTokenBinding getusernameTokenBinding() {
         return usernameTokenBinding;
     }
+
     public void setKerberosTokenBinding(
-            AuthenticationTokenPolicy.KerberosTokenBinding kerberosTokenBinding){
+            AuthenticationTokenPolicy.KerberosTokenBinding kerberosTokenBinding) {
         this.kerberosTokenBinding = kerberosTokenBinding;
     }
-    
-    public AuthenticationTokenPolicy.KerberosTokenBinding getKerberosTokenBinding(){
+
+    public AuthenticationTokenPolicy.KerberosTokenBinding getKerberosTokenBinding() {
         return kerberosTokenBinding;
     }
-    
-    public void setSymmetricKeyBinding (SymmetricKeyBinding symmetricKeyBinding) {
+
+    public void setSymmetricKeyBinding(SymmetricKeyBinding symmetricKeyBinding) {
         this.symmetricKeyBinding = symmetricKeyBinding;
     }
-    
-    public SymmetricKeyBinding getSymmetricKeyBinding () {
+
+    public SymmetricKeyBinding getSymmetricKeyBinding() {
         return symmetricKeyBinding;
     }
-    
+
     public void setDataEncryptionAlgorithm(String alg) {
         this.dataEncAlgo = alg;
     }
@@ -396,52 +373,54 @@ public class FilterProcessingContext extends ProcessingContextImpl {
         return this.dataEncAlgo;
     }
 
+    @Override
     public SecurableSoapMessage getSecurableSoapMessage() {
         return secureMessage;
     }
 
-    public void reset (){
-        elementCache.clear ();
-        tokenCache.clear ();
+    @Override
+    public void reset() {
+        elementCache.clear();
+        tokenCache.clear();
     }
-    
-    public WSSPolicy getInferredPolicy (){
+
+    public WSSPolicy getInferredPolicy() {
         return inferredPolicy;
     }
-    
-    public void setInferredPolicy (WSSPolicy policy){
+
+    public void setInferredPolicy(WSSPolicy policy) {
         this.inferredPolicy = policy;
     }
-    
-    public byte[] getDigestValue () {
+
+    public byte[] getDigestValue() {
         return digestValue;
     }
-    
-    public void setDigestValue (byte[] digestValue) {
+
+    public void setDigestValue(byte[] digestValue) {
         this.digestValue = digestValue;
     }
 
-    public byte[] getCanonicalizedData () {
+    public byte[] getCanonicalizedData() {
         return canonicalizedData;
     }
 
-    public void setCanonicalizedData (byte[] canonicalizedData) {
+    public void setCanonicalizedData(byte[] canonicalizedData) {
         this.canonicalizedData = canonicalizedData;
     }
-    
-    public void setCurrentSecret(Key secret){
-        this.currentSecret = (SecretKey)secret;
+
+    public void setCurrentSecret(Key secret) {
+        this.currentSecret = (SecretKey) secret;
     }
-    
-    public SecretKey getCurrentSecret(){
+
+    public SecretKey getCurrentSecret() {
         return this.currentSecret;
     }
 
     public Node getCurrentRefList() {
         return currentRefList;
     }
-    public void setCurrentReferenceList(Node blk){
+
+    public void setCurrentReferenceList(Node blk) {
         currentRefList = blk;
     }
-        
 }

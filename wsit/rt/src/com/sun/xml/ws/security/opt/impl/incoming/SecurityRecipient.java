@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.ws.api.SOAPVersion;
@@ -99,51 +98,45 @@ import static com.sun.xml.wss.BasicSecurityProfile.*;
 import com.sun.xml.ws.security.opt.impl.util.VerifiedMessageXMLStreamReader;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 
-
 /**
  *
  * @author K.Venugopal@sun.com
  */
-
 public final class SecurityRecipient {
-    
+
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN,
             LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);
-    
-    
     //TODO Move static block to SecurityPipeBase .
-    static{
+    
+
+    static {
         com.sun.org.apache.xml.internal.security.Init.init();
     }
-    
-    private static final  int TIMESTAMP_ELEMENT = 1;
-    private static final  int USERNAME_TOKEN_ELEMENT = 2;
-    private static final  int BINARYSECURITY_TOKEN_ELEMENT = 3;
-    private static final  int ENCRYPTED_DATA_ELEMENT = 4;
-    private static final  int ENCRYPTED_KEY_ELEMENT = 5;
-    private static final  int SIGNATURE_ELEMENT = 6;
-    private static final  int REFERENCE_LIST_ELEMENT = 7;
-    private static final  int DERIVED_KEY_ELEMENT = 8;
-    private static final  int SIGNATURE_CONFIRMATION_ELEMENT = 9;
-    private static final  int SECURITY_CONTEXT_TOKEN = 10;
-    private static final  int SAML_ASSERTION_ELEMENT = 11;
-    private static final  int ENCRYPTED_HEADER_ELEMENT = 12;
-    private static final  int STR_ELEMENT = 13;
+    private static final int TIMESTAMP_ELEMENT = 1;
+    private static final int USERNAME_TOKEN_ELEMENT = 2;
+    private static final int BINARYSECURITY_TOKEN_ELEMENT = 3;
+    private static final int ENCRYPTED_DATA_ELEMENT = 4;
+    private static final int ENCRYPTED_KEY_ELEMENT = 5;
+    private static final int SIGNATURE_ELEMENT = 6;
+    private static final int REFERENCE_LIST_ELEMENT = 7;
+    private static final int DERIVED_KEY_ELEMENT = 8;
+    private static final int SIGNATURE_CONFIRMATION_ELEMENT = 9;
+    private static final int SECURITY_CONTEXT_TOKEN = 10;
+    private static final int SAML_ASSERTION_ELEMENT = 11;
+    private static final int ENCRYPTED_HEADER_ELEMENT = 12;
+    private static final int STR_ELEMENT = 13;
     private static final String SOAP_ENVELOPE = "Envelope";
     private static final String SOAP_HEADER = "Header";
     private static final String SOAP_BODY = "Body";
-    
     private final String SOAP_NAMESPACE_URI;
     private final SOAPVersion soapVersion;
-    
-    
     private XMLStreamReader message = null;
     private StreamReaderBufferCreator creator = null;
-    private HashMap<String,String> parentNS = new HashMap<String,String>();
-    private HashMap<String,String> parentNSOnEnvelope = new HashMap<String,String>();
-    private HashMap<String,String> securityHeaderNS = new HashMap<String,String>();
-    private HashMap<String,String> bodyENVNS = new HashMap<String,String>();
-    private HashMap<String,String> envshNS = null;
+    private HashMap<String, String> parentNS = new HashMap<String, String>();
+    private HashMap<String, String> parentNSOnEnvelope = new HashMap<String, String>();
+    private HashMap<String, String> securityHeaderNS = new HashMap<String, String>();
+    private HashMap<String, String> bodyENVNS = new HashMap<String, String>();
+    private HashMap<String, String> envshNS = null;
     // for future use
     private XMLInputFactory staxIF = null;
     private JAXBFilterProcessingContext context = null;
@@ -164,116 +157,115 @@ public final class SecurityRecipient {
     //used for bsp checks
     private BasicSecurityProfile bspContext = new BasicSecurityProfile();
     //private boolean isBSP = false;
-    public SecurityRecipient(XMLStreamReader reader,SOAPVersion soapVersion) {
-        
+
+    public SecurityRecipient(XMLStreamReader reader, SOAPVersion soapVersion) {
+
         this.message = reader;
         this.soapVersion = soapVersion;
         this.SOAP_NAMESPACE_URI = soapVersion.nsUri;
         securityContext = new SecurityContext();
     }
-    
-    public SecurityRecipient(XMLStreamReader reader,SOAPVersion soapVersion, AttachmentSet attachSet){
+
+    public SecurityRecipient(XMLStreamReader reader, SOAPVersion soapVersion, AttachmentSet attachSet) {
         this(reader, soapVersion);
         securityContext.setAttachmentSet(attachSet);
     }
-    
-    public Message validateMessage(JAXBFilterProcessingContext ctx)throws XWSSecurityException{
-        try{
+
+    public Message validateMessage(JAXBFilterProcessingContext ctx) throws XWSSecurityException {
+        try {
             this.context = ctx;
             context.setSecurityContext(securityContext);
             // Move to soap:Envelope and verify
-            
+
             //unconditionally set these since the policy is unknown
-            context.setExtraneousProperty("EnableWSS11PolicyReceiver","true");
+            context.setExtraneousProperty("EnableWSS11PolicyReceiver", "true");
             List scList = new ArrayList();
             context.setExtraneousProperty("receivedSignValues", scList);
-            
-            if(message.getEventType()!=XMLStreamConstants.START_ELEMENT){
+
+            if (message.getEventType() != XMLStreamConstants.START_ELEMENT) {
                 XMLStreamReaderUtil.nextElementContent(message);
             }
-            XMLStreamReaderUtil.verifyReaderState(message,XMLStreamConstants.START_ELEMENT);
+            XMLStreamReaderUtil.verifyReaderState(message, XMLStreamConstants.START_ELEMENT);
             if (SOAP_ENVELOPE.equals(message.getLocalName()) && !SOAP_NAMESPACE_URI.equals(message.getNamespaceURI())) {
                 throw new VersionMismatchException(soapVersion, SOAP_NAMESPACE_URI, message.getNamespaceURI());
             }
             XMLStreamReaderUtil.verifyTag(message, SOAP_NAMESPACE_URI, SOAP_ENVELOPE);
-            
+
             envelopeTag = new TagInfoset(message);
-            for(int i=0; i< message.getNamespaceCount();i++){
+            for (int i = 0; i < message.getNamespaceCount(); i++) {
                 parentNS.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
                 parentNSOnEnvelope.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
             }
             // Move to next element
             XMLStreamReaderUtil.nextElementContent(message);
-            XMLStreamReaderUtil.verifyReaderState(message,javax.xml.stream.XMLStreamConstants.START_ELEMENT);
-            
-            
-            if (message.getLocalName().equals(SOAP_HEADER)
-            && message.getNamespaceURI().equals(SOAP_NAMESPACE_URI)) {
+            XMLStreamReaderUtil.verifyReaderState(message, javax.xml.stream.XMLStreamConstants.START_ELEMENT);
+
+
+            if (message.getLocalName().equals(SOAP_HEADER) && message.getNamespaceURI().equals(SOAP_NAMESPACE_URI)) {
                 headerTag = new TagInfoset(message);
-                
+
                 // Collect namespaces on soap:Header
-                for(int i=0; i< message.getNamespaceCount();i++){
+                for (int i = 0; i < message.getNamespaceCount(); i++) {
                     parentNS.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
                 }
                 // skip <soap:Header>
                 XMLStreamReaderUtil.nextElementContent(message);
-                
+
                 // If SOAP header blocks are present (i.e. not <soap:Header/>)
                 if (message.getEventType() == XMLStreamConstants.START_ELEMENT) {
                     this.headers = new HeaderList();
                     // Cache SOAP header blocks
                     cacheHeaders(message, parentNS);
-                    
+
                 }
                 // Move to soap:Body
                 XMLStreamReaderUtil.nextElementContent(message);
             }
-            
+
             return createMessage();
         } catch (WssSoapFaultException ex) {
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw ex;
-        } catch(WebServiceException te){
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+        } catch (WebServiceException te) {
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw te;
-        }  catch (XMLStreamException e) {
+        } catch (XMLStreamException e) {
             // TODO need to throw more meaningful exception
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw new WebServiceException(e);
-        }catch(XWSSecurityException xe){
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+        } catch (XWSSecurityException xe) {
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw xe;
         } catch (XWSSecurityRuntimeException re) {
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw re;
         } catch (Exception e) {
-            Message msg =  new StreamMessage(envelopeTag,headerTag,new AttachmentSetImpl(),headers,bodyTag, getEmptyBodyNoException(),soapVersion);
+            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
             ctx.setPVMessage(msg);
             throw new XWSSecurityRuntimeException(e);
         }
     }
-    
-    
-    private void cacheHeaders(XMLStreamReader reader,Map<String, String> namespaces) throws XMLStreamException, XWSSecurityException {
-        
+
+    private void cacheHeaders(XMLStreamReader reader, Map<String, String> namespaces) throws XMLStreamException, XWSSecurityException {
+
         creator = new StreamReaderBufferCreator();
         MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
         creator.setXMLStreamBuffer(buffer);
         // Reader is positioned at the first header block
-        while(reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
-            Map<String,String> headerBlockNamespaces = namespaces;
-            
+        while (reader.getEventType() == javax.xml.stream.XMLStreamConstants.START_ELEMENT) {
+            Map<String, String> headerBlockNamespaces = namespaces;
+
             // Create Header
-            if(reader.getLocalName() == MessageConstants.WSSE_SECURITY_LNAME &&
-                    reader.getNamespaceURI() == MessageConstants.WSSE_NS){
+            if (MessageConstants.WSSE_SECURITY_LNAME.equals(reader.getLocalName()) &&
+                    MessageConstants.WSSE_NS.equals(reader.getNamespaceURI())) {
                 // Collect namespaces on SOAP header block
                 if (reader.getNamespaceCount() > 0) {
-                    headerBlockNamespaces = new HashMap<String,String>(namespaces);
+                    headerBlockNamespaces = new HashMap<String, String>(namespaces);
                     for (int i = 0; i < reader.getNamespaceCount(); i++) {
                         headerBlockNamespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
                     }
@@ -281,48 +273,48 @@ public final class SecurityRecipient {
                 // Mark
                 XMLStreamBuffer mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
                 handleSecurityHeader();
-            }else{
-                try{
+            } else {
+                try {
                     // Collect namespaces on SOAP header block
                     if (reader.getNamespaceCount() > 0) {
-                        headerBlockNamespaces = new HashMap<String,String>(namespaces);
+                        headerBlockNamespaces = new HashMap<String, String>(namespaces);
                         for (int i = 0; i < reader.getNamespaceCount(); i++) {
                             headerBlockNamespaces.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
                         }
                     }
                     // Mark
                     XMLStreamBuffer mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
-                    GenericSecuredHeader gsh = new GenericSecuredHeader(reader,soapVersion,creator, (HashMap) namespaces,staxIF, context.getEncHeaderContent());
+                    GenericSecuredHeader gsh = new GenericSecuredHeader(reader, soapVersion, creator, (HashMap) namespaces, staxIF, context.getEncHeaderContent());
                     headers.add(gsh);
-                    
-                }catch(XMLStreamBufferException ex){
-                    throw new XWSSecurityException("Error occurred while reading SOAP Header"+ex);
+
+                } catch (XMLStreamBufferException ex) {
+                    throw new XWSSecurityException("Error occurred while reading SOAP Header" + ex);
                 }
             }
-            while(reader.isWhiteSpace()){
+            while (reader.isWhiteSpace()) {
                 reader.next();
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void handleSecurityHeader() throws XWSSecurityException{
+    private void handleSecurityHeader() throws XWSSecurityException {
         // MutableXMLStreamBuffer buffer = new MutableXMLStreamBuffer();
         try {
-            if(message.getEventType() == XMLStreamReader.START_ELEMENT){
-                if(message.getLocalName() == MessageConstants.WSSE_SECURITY_LNAME &&
-                        message.getNamespaceURI() == MessageConstants.WSSE_NS){
-                    for(int i=0; i< message.getNamespaceCount();i++){
+            if (message.getEventType() == XMLStreamReader.START_ELEMENT) {
+                if (MessageConstants.WSSE_SECURITY_LNAME.equals(message.getLocalName()) &&
+                        MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
+                    for (int i = 0; i < message.getNamespaceCount(); i++) {
                         securityHeaderNS.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
                     }
                     StreamUtil.moveToNextStartOREndElement(message);
                 }
             }
-            
-            HashMap<String,String> currentParentNS = new HashMap<String,String>();
+
+            HashMap<String, String> currentParentNS = new HashMap<String, String>();
             currentParentNS.putAll(parentNS);
             currentParentNS.putAll(securityHeaderNS);
-            envshNS =currentParentNS;
+            envshNS = currentParentNS;
             int eventType = getSecurityElementType();
             securityContext.setSOAPEnvelopeNSDecls(parentNSOnEnvelope);
             securityContext.setSecurityHdrNSDecls(securityHeaderNS);
@@ -330,41 +322,41 @@ public final class SecurityRecipient {
             securityContext.setProcessedSecurityHeaders(processedHeaders);
             securityContext.setBufferedSecurityHeaders(bufferedHeaders);
             context.setSecurityContext(securityContext);
-            while(message.getEventType() != message.END_DOCUMENT){
-                switch (eventType){
-                    case TIMESTAMP_ELEMENT : {
-                        if(context.isBSP() && bspContext.isTimeStampFound()){
+            while (message.getEventType() != message.END_DOCUMENT) {
+                switch (eventType) {
+                    case TIMESTAMP_ELEMENT: {
+                        if (context.isBSP() && bspContext.isTimeStampFound()) {
                             log_bsp_3203();
                         }
                         bspContext.setTimeStampFound(true);
-                        TimestampHeader timestamp = new TimestampHeader(message,creator,(HashMap) currentParentNS, context);
+                        TimestampHeader timestamp = new TimestampHeader(message, creator, (HashMap) currentParentNS, context);
                         WSSPolicy policy = timestamp.getPolicy();
-                        ((TokenValidator)timestamp).validate(context);
+                        ((TokenValidator) timestamp).validate(context);
                         processedHeaders.add(timestamp);
                         context.getInferredSecurityPolicy().append(timestamp.getPolicy());
                         break;
                     }
-                    case USERNAME_TOKEN_ELEMENT :{
-                        UsernameTokenHeader ut = new UsernameTokenHeader(message,creator,(HashMap) currentParentNS, staxIF);
+                    case USERNAME_TOKEN_ELEMENT: {
+                        UsernameTokenHeader ut = new UsernameTokenHeader(message, creator, (HashMap) currentParentNS, staxIF);
                         ut.validate(context);
                         context.getSecurityContext().getProcessedSecurityHeaders().add(ut);
                         context.getInferredSecurityPolicy().append(ut.getPolicy());
-                        if(context.isTrustMessage() && !context.isClient()){
-                            IssuedTokenContext ctx = null;                            
-                            if(context.getTrustContext() == null){
+                        if (context.isTrustMessage() && !context.isClient()) {
+                            IssuedTokenContext ctx = null;
+                            if (context.getTrustContext() == null) {
                                 ctx = new IssuedTokenContextImpl();
-                                if(context.isSecure()){
-                                    ctx.setAuthnContextClass(MessageConstants.PASSWORD_PROTECTED_TRANSPORT_AUTHTYPE);    
-                                }else{
+                                if (context.isSecure()) {
+                                    ctx.setAuthnContextClass(MessageConstants.PASSWORD_PROTECTED_TRANSPORT_AUTHTYPE);
+                                } else {
                                     ctx.setAuthnContextClass(MessageConstants.PASSWORD_AUTH_TYPE);
                                 }
                                 context.setTrustContext(ctx);
-                            }else{
+                            } else {
                                 ctx = context.getTrustContext();
-                                if(ctx.getAuthnContextClass() != null){
-                                    if(context.isSecure()){
+                                if (ctx.getAuthnContextClass() != null) {
+                                    if (context.isSecure()) {
                                         ctx.setAuthnContextClass(MessageConstants.PASSWORD_PROTECTED_TRANSPORT_AUTHTYPE);
-                                    }else{
+                                    } else {
                                         ctx.setAuthnContextClass(MessageConstants.PASSWORD_AUTH_TYPE);
                                     }
                                     context.setTrustContext(ctx);
@@ -373,140 +365,140 @@ public final class SecurityRecipient {
                         }
                         break;
                     }
-                    case BINARYSECURITY_TOKEN_ELEMENT : {
+                    case BINARYSECURITY_TOKEN_ELEMENT: {
                         String valueType = message.getAttributeValue(null, MessageConstants.WSE_VALUE_TYPE);
-                        if(MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType) ||
-                                MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)){
-                            KerberosBinarySecurityToken kbst = new KerberosBinarySecurityToken(message,creator,(HashMap) currentParentNS, staxIF);
+                        if (MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType) ||
+                                MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)) {
+                            KerberosBinarySecurityToken kbst = new KerberosBinarySecurityToken(message, creator, (HashMap) currentParentNS, staxIF);
                             WSSPolicy policy = kbst.getPolicy();
-                            ((TokenValidator)kbst).validate(context);
+                            ((TokenValidator) kbst).validate(context);
                             processedHeaders.add(kbst);
                             context.getInferredSecurityPolicy().append(kbst.getPolicy());
-                            if(context.isTrustMessage() && !context.isClient()){
+                            if (context.isTrustMessage() && !context.isClient()) {
                                 IssuedTokenContext ctx = null;
-                                if(context.getTrustContext() == null){
+                                if (context.getTrustContext() == null) {
                                     ctx = new IssuedTokenContextImpl();
                                     ctx.setAuthnContextClass(MessageConstants.KERBEROS_AUTH_TYPE);
                                     context.setTrustContext(ctx);
-                                }else{
+                                } else {
                                     ctx = context.getTrustContext();
-                                    if(ctx.getAuthnContextClass() != null){
+                                    if (ctx.getAuthnContextClass() != null) {
                                         ctx.setAuthnContextClass(MessageConstants.KERBEROS_AUTH_TYPE);
                                         context.setTrustContext(ctx);
                                     }
                                 }
                             }
-                        } else if (MessageConstants.X509v3_NS.equals(valueType) || 
+                        } else if (MessageConstants.X509v3_NS.equals(valueType) ||
                                 MessageConstants.X509v1_NS.equals(valueType) ||
-                                valueType == null) /*null takes as X509 BST */{
-                            X509BinarySecurityToken bst = new X509BinarySecurityToken(message,creator,(HashMap) currentParentNS, staxIF);
+                                valueType == null) /*null takes as X509 BST */ {
+                            X509BinarySecurityToken bst = new X509BinarySecurityToken(message, creator, (HashMap) currentParentNS, staxIF);
                             WSSPolicy policy = bst.getPolicy();
-                            ((TokenValidator)bst).validate(context);
+                            ((TokenValidator) bst).validate(context);
                             processedHeaders.add(bst);
                             context.getInferredSecurityPolicy().append(bst.getPolicy());
-                            if(context.isTrustMessage() && !context.isClient()){
+                            if (context.isTrustMessage() && !context.isClient()) {
                                 IssuedTokenContext ctx = null;
-                                if(context.getTrustContext() == null){
+                                if (context.getTrustContext() == null) {
                                     ctx = new IssuedTokenContextImpl();
                                     ctx.setAuthnContextClass(MessageConstants.X509_AUTH_TYPE);
                                     context.setTrustContext(ctx);
-                                }else{
+                                } else {
                                     ctx = context.getTrustContext();
-                                    if(ctx.getAuthnContextClass() != null){
+                                    if (ctx.getAuthnContextClass() != null) {
                                         ctx.setAuthnContextClass(MessageConstants.X509_AUTH_TYPE);
                                         context.setTrustContext(ctx);
                                     }
                                 }
                             }
                         }
-                        
+
                         break;
                     }
-                    case ENCRYPTED_KEY_ELEMENT:{
-                        EncryptedKey ek = new EncryptedKey(message,context,(HashMap) currentParentNS);
+                    case ENCRYPTED_KEY_ELEMENT: {
+                        EncryptedKey ek = new EncryptedKey(message, context, (HashMap) currentParentNS);
                         ArrayList<String> list = (ArrayList) ek.getPendingReferenceList();
-                        if(list != null){
-                            findAndReplaceED(list,ek);
-                            if(ek.getPendingReferenceList().size() > 0){
-                                if(pendingElement == null){
+                        if (list != null) {
+                            findAndReplaceED(list, ek);
+                            if (ek.getPendingReferenceList().size() > 0) {
+                                if (pendingElement == null) {
                                     pendingElement = ek;
                                 }//else{
                                 addSecurityHeader(ek);
-                                //}
+                            //}
                             }
-                        }else{
+                        } else {
                             addSecurityHeader(ek);
                         }
-                        if(ek.getPolicy() != null){
+                        if (ek.getPolicy() != null) {
                             context.getInferredSecurityPolicy().append(ek.getPolicy());
                         }
                         break;
                     }
-                    case ENCRYPTED_DATA_ELEMENT :{
-                        EncryptedData ed = new EncryptedData(message,context,currentParentNS);
+                    case ENCRYPTED_DATA_ELEMENT: {
+                        EncryptedData ed = new EncryptedData(message, context, currentParentNS);
                         handleEncryptedData(ed, currentParentNS);
                         break;
                     }
-                    
-                    case ENCRYPTED_HEADER_ELEMENT :{
+
+                    case ENCRYPTED_HEADER_ELEMENT: {
                         throw new XWSSecurityException("wsse11:EncryptedHeader not allowed inside SecurityHeader");
-                        //break;
+                    //break;
                     }
-                    
-                    case REFERENCE_LIST_ELEMENT :{
+
+                    case REFERENCE_LIST_ELEMENT: {
                         ReferenceListHeader refList = new ReferenceListHeader(message, context);
-                        if(pendingElement == null){
+                        if (pendingElement == null) {
                             pendingElement = refList;
-                        }else{
+                        } else {
                             addSecurityHeader(refList);
                         }
-                        
+
                         context.getInferredSecurityPolicy().append(refList.getPolicy());
                         break;
                     }
-                    case SIGNATURE_ELEMENT:{
-                        Signature sig = new Signature(context,currentParentNS,creator);
+                    case SIGNATURE_ELEMENT: {
+                        Signature sig = new Signature(context, currentParentNS, creator);
                         sig.process(message);
-                        if(!sig.isValidated()){
-                            if(pendingElement == null){
+                        if (!sig.isValidated()) {
+                            if (pendingElement == null) {
                                 pendingElement = sig;
-                            }else{
+                            } else {
                                 addSecurityHeader(sig);
                             }
-                        }else{
-                            if(!processedHeaders.contains(sig)){
-                                 processedHeaders.add(sig);
+                        } else {
+                            if (!processedHeaders.contains(sig)) {
+                                processedHeaders.add(sig);
                             }
                         }
                         context.getInferredSecurityPolicy().append(sig.getPolicy());
                         break;
                     }
-                    case DERIVED_KEY_ELEMENT:{
+                    case DERIVED_KEY_ELEMENT: {
                         DerivedKeyToken dkt = new DerivedKeyToken(message, context, (HashMap) currentParentNS);
                         processedHeaders.add(dkt);
                         break;
                     }
-                    case SIGNATURE_CONFIRMATION_ELEMENT:{
-                        SignatureConfirmation signConfirm = new SignatureConfirmation(message,creator,(HashMap) currentParentNS, staxIF);
+                    case SIGNATURE_CONFIRMATION_ELEMENT: {
+                        SignatureConfirmation signConfirm = new SignatureConfirmation(message, creator, (HashMap) currentParentNS, staxIF);
                         WSSPolicy policy = signConfirm.getPolicy();
                         signConfirm.validate(context);
                         processedHeaders.add(signConfirm);
                         context.getInferredSecurityPolicy().append(signConfirm.getPolicy());
                         break;
                     }
-                    case SECURITY_CONTEXT_TOKEN:{
+                    case SECURITY_CONTEXT_TOKEN: {
                         SecurityContextToken sct = new SecurityContextToken(message, context, (HashMap) currentParentNS);
                         processedHeaders.add(sct);
                         break;
                     }
-                    case SAML_ASSERTION_ELEMENT :{
-                        SAMLAssertion samlAssertion = new SAMLAssertion(message,context,null,(HashMap) currentParentNS);
+                    case SAML_ASSERTION_ELEMENT: {
+                        SAMLAssertion samlAssertion = new SAMLAssertion(message, context, null, (HashMap) currentParentNS);
                         processedHeaders.add(samlAssertion);
-                        if(samlAssertion.isHOK()){
-                            if (!samlAssertion.validateSignature()) { 
+                        if (samlAssertion.isHOK()) {
+                            if (!samlAssertion.validateSignature()) {
                                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1614_SAML_SIGNATURE_INVALID());
-                                throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_FAILED_AUTHENTICATION, 
-                                        LogStringsMessages.WSS_1614_SAML_SIGNATURE_INVALID(), 
+                                throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_FAILED_AUTHENTICATION,
+                                        LogStringsMessages.WSS_1614_SAML_SIGNATURE_INVALID(),
                                         new Exception(LogStringsMessages.WSS_1614_SAML_SIGNATURE_INVALID()));
                             }
                         }
@@ -514,26 +506,26 @@ public final class SecurityRecipient {
                         samlAssertion.getKey();
                         // Set in the extraneous property only if not already set
                         // workaround in the case where there are two HOK assertions in the request
-                        if(context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION) == null && samlAssertion.isHOK()){
-                            context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION,samlAssertion);
+                        if (context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION) == null && samlAssertion.isHOK()) {
+                            context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION, samlAssertion);
                         }
-                        if(context.isTrustMessage() && !context.isClient()){
+                        if (context.isTrustMessage() && !context.isClient()) {
                             IssuedTokenContext ctx = null;
-                            if(context.getTrustContext() == null){
+                            if (context.getTrustContext() == null) {
                                 ctx = new IssuedTokenContextImpl();
                                 ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
                                 context.setTrustContext(ctx);
-                            }else{
+                            } else {
                                 ctx = context.getTrustContext();
-                                if(ctx.getAuthnContextClass() != null){
+                                if (ctx.getAuthnContextClass() != null) {
                                     ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
                                     context.setTrustContext(ctx);
                                 }
-                            }                            
-                        } else if(!context.isTrustMessage()){
+                            }
+                        } else if (!context.isTrustMessage()) {
                             context.getInferredSecurityPolicy().append(samlAssertion.getPolicy());
                         }
-                        
+
                         break;
                     }
                     case STR_ELEMENT: {
@@ -541,7 +533,7 @@ public final class SecurityRecipient {
                         str.resolveReference(message);
                         break;
                     }
-                    default:{
+                    default: {
                         // Throw Exception if an unrecognized Security Header is present
                         if (message.getEventType() == message.START_ELEMENT &&
                                 getSecurityElementType() == -1) {
@@ -550,14 +542,14 @@ public final class SecurityRecipient {
                         }
                     }
                 }
-                if(StreamUtil._break(message,MessageConstants.WSSE_SECURITY_LNAME,MessageConstants.WSSE_NS)){
+                if (StreamUtil._break(message, MessageConstants.WSSE_SECURITY_LNAME, MessageConstants.WSSE_NS)) {
                     break;
                 }
                 eventType = getSecurityElementType();
-                if(eventType == -1 && !StreamUtil.isStartElement(message)){
-                    if(StreamUtil._break(message,MessageConstants.WSSE_SECURITY_LNAME,MessageConstants.WSSE_NS)){
+                if (eventType == -1 && !StreamUtil.isStartElement(message)) {
+                    if (StreamUtil._break(message, MessageConstants.WSSE_SECURITY_LNAME, MessageConstants.WSSE_NS)) {
                         break;
-                    }else{
+                    } else {
                         message.next();
                     }
                 }
@@ -565,113 +557,119 @@ public final class SecurityRecipient {
             message.next();
         } catch (XMLStreamException ex) {
             //ex.printStackTrace();
-            logger.log(Level.FINE,"Error occurred while reading SOAP Headers",ex);
+            logger.log(Level.FINE, "Error occurred while reading SOAP Headers", ex);
             throw new XWSSecurityException(ex);
-        } catch(XMLStreamBufferException ex){
+        } catch (XMLStreamBufferException ex) {
             //  ex.printStackTrace();
-            logger.log(Level.FINE,"Error occurred while reading SOAP Headers",ex);
+            logger.log(Level.FINE, "Error occurred while reading SOAP Headers", ex);
             throw new XWSSecurityException(ex);
         }
     }
-    
-    private void handleEncryptedData(EncryptedData ed, HashMap<String,String> currentParentNS) throws XMLStreamException, XWSSecurityException{
-        if(pendingElement != null && pendingElement instanceof EncryptedKey){
-            EncryptedKey ek = ((EncryptedKey)pendingElement);
-            if(ek.getPendingReferenceList() != null && ek.getPendingReferenceList().contains(ed.getId())){
+
+    private void handleEncryptedData(EncryptedData ed, HashMap<String, String> currentParentNS) throws XMLStreamException, XWSSecurityException {
+        if (pendingElement != null && pendingElement instanceof EncryptedKey) {
+            EncryptedKey ek = ((EncryptedKey) pendingElement);
+            if (ek.getPendingReferenceList() != null && ek.getPendingReferenceList().contains(ed.getId())) {
                 //for policy verification
-                if(ek.getPolicy() != null){
+                if (ek.getPolicy() != null) {
                     ek.getPolicy().setKeyBinding(ek.getInferredKB());
                 }
                 //
-                
-                if(!ed.hasCipherReference()){
+
+                if (!ed.hasCipherReference()) {
                     XMLStreamReader decryptedData = ed.getDecryptedData(ek.getKey(ed.getEncryptionAlgorithm()));
-                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,currentParentNS, staxIF, creator);
-                    if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, currentParentNS, staxIF, creator);
+                    if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                         StreamUtil.moveToNextElement(decryptedData);
+                    }
                     SecurityHeaderElement she = shp.createHeader(decryptedData);
                     encIds.put(ed.getId(), she.getId());
                     edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                     ek.getPendingReferenceList().remove(ed.getId());
-                    if(ek.getPendingReferenceList().size() == 0){
+                    if (ek.getPendingReferenceList().size() == 0) {
                         pendingElement = null;
                         bufferedHeaders.remove(ek);
                         addSecurityHeader(ek);
                     }
                     checkDecryptedData(she, ek.getPolicy());
-                } else{
+                } else {
                     // Handle Encrypted Attachment here 
                     byte[] decryptedMimeData = ed.getDecryptedMimeData(ek.getKey(ed.getEncryptionAlgorithm()));
                     Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
                     securityContext.getDecryptedAttachmentSet().add(as);
                     ek.getPendingReferenceList().remove(ed.getId());
-                    if(ek.getPendingReferenceList().size() == 0){
+                    if (ek.getPendingReferenceList().size() == 0) {
                         pendingElement = null;
                         bufferedHeaders.remove(ek);
                         addSecurityHeader(ek);
                     }
-                }            
-            }else{
-                if(!lookInBufferedHeaders(ed, currentParentNS))
+                }
+            } else {
+                if (!lookInBufferedHeaders(ed, currentParentNS)) {
                     addSecurityHeader(ed);
+                }
             }
-        } else if(pendingElement != null && pendingElement instanceof ReferenceListHeader){
-            ReferenceListHeader refList = (ReferenceListHeader)pendingElement;
-            if(refList.getPendingReferenceList().contains(ed.getId())){
+        } else if (pendingElement != null && pendingElement instanceof ReferenceListHeader) {
+            ReferenceListHeader refList = (ReferenceListHeader) pendingElement;
+            if (refList.getPendingReferenceList().contains(ed.getId())) {
                 //for policy verification
                 refList.getPolicy().setKeyBinding(ed.getInferredKB());
                 //
-                
-                if(!ed.hasCipherReference()){
-                    XMLStreamReader decryptedData= ed.getDecryptedData();
-                    if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+
+                if (!ed.hasCipherReference()) {
+                    XMLStreamReader decryptedData = ed.getDecryptedData();
+                    if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                         StreamUtil.moveToNextElement(decryptedData);
-                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,currentParentNS, staxIF, creator);
+                    }
+                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, currentParentNS, staxIF, creator);
                     SecurityHeaderElement she = shp.createHeader(decryptedData);
                     encIds.put(ed.getId(), she.getId());
                     edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                     refList.getPendingReferenceList().remove(ed.getId());
-                    if(refList.getPendingReferenceList().size() == 0){
+                    if (refList.getPendingReferenceList().size() == 0) {
                         pendingElement = null;
                     }
-                    checkDecryptedData(she,refList.getPolicy());
+                    checkDecryptedData(she, refList.getPolicy());
                 } else {
                     // Handle Encrypted Attachment here 
                     byte[] decryptedMimeData = ed.getDecryptedMimeData();
                     Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
                     securityContext.getDecryptedAttachmentSet().add(as);
                     refList.getPendingReferenceList().remove(ed.getId());
-                    if(refList.getPendingReferenceList().size() == 0){
+                    if (refList.getPendingReferenceList().size() == 0) {
                         pendingElement = null;
                     }
-                }         
-            }else{
-                if(!lookInBufferedHeaders(ed, currentParentNS))
-                    decryptStandaloneED(ed, currentParentNS,refList.getPolicy());
+                }
+            } else {
+                if (!lookInBufferedHeaders(ed, currentParentNS)) {
+                    decryptStandaloneED(ed, currentParentNS, refList.getPolicy());
+                }
             }
-        }else{
-            if(!lookInBufferedHeaders(ed, currentParentNS))
+        } else {
+            if (!lookInBufferedHeaders(ed, currentParentNS)) {
                 decryptStandaloneED(ed, currentParentNS, null);
+            }
         }
     }
-    
-    private boolean lookInBufferedHeaders(EncryptedData ed, HashMap<String,String> currentParentNS) throws XWSSecurityException, XMLStreamException{
-        if(bufferedHeaders.size() >0){
-            for(int i=0;i<bufferedHeaders.size();i++){
+
+    private boolean lookInBufferedHeaders(EncryptedData ed, HashMap<String, String> currentParentNS) throws XWSSecurityException, XMLStreamException {
+        if (bufferedHeaders.size() > 0) {
+            for (int i = 0; i < bufferedHeaders.size(); i++) {
                 SecurityHeaderElement bufShe = (SecurityHeaderElement) bufferedHeaders.get(i);
-                if(bufShe.getLocalPart()== MessageConstants.ENCRYPTEDKEY_LNAME &&
-                        bufShe.getNamespaceURI() == MessageConstants.XENC_NS){
-                    EncryptedKey ek = ((EncryptedKey)bufShe);
-                    if(ek.getPendingReferenceList() != null && ek.getPendingReferenceList().contains(ed.getId())){
+                if (MessageConstants.ENCRYPTEDKEY_LNAME.equals(bufShe.getLocalPart()) &&
+                        MessageConstants.XENC_NS.equals(bufShe.getNamespaceURI())) {
+                    EncryptedKey ek = ((EncryptedKey) bufShe);
+                    if (ek.getPendingReferenceList() != null && ek.getPendingReferenceList().contains(ed.getId())) {
                         //for policy verification
-                        if(ek.getPolicy() != null){
+                        if (ek.getPolicy() != null) {
                             ek.getPolicy().setKeyBinding(ek.getInferredKB());
                         }
-                        if(!ed.hasCipherReference()){
+                        if (!ed.hasCipherReference()) {
                             XMLStreamReader decryptedData = ed.getDecryptedData(ek.getKey(ed.getEncryptionAlgorithm()));
-                            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,currentParentNS, staxIF, creator);
-                            if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+                            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, currentParentNS, staxIF, creator);
+                            if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                                 StreamUtil.moveToNextElement(decryptedData);
+                            }
                             SecurityHeaderElement she = shp.createHeader(decryptedData);
                             encIds.put(ed.getId(), she.getId());
                             edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
@@ -687,20 +685,21 @@ public final class SecurityRecipient {
                         }
                         return true;
                     }
-                    
-                } else if(bufShe.getLocalPart() == MessageConstants.XENC_REFERENCE_LIST_LNAME &&
-                        bufShe.getNamespaceURI() == MessageConstants.XENC_NS){
-                    ReferenceListHeader refList = (ReferenceListHeader)bufShe;
-                    if(refList.getPendingReferenceList().contains(ed.getId())){
+
+                } else if (MessageConstants.XENC_REFERENCE_LIST_LNAME.equals(bufShe.getLocalPart()) &&
+                        MessageConstants.XENC_NS.equals(bufShe.getNamespaceURI())) {
+                    ReferenceListHeader refList = (ReferenceListHeader) bufShe;
+                    if (refList.getPendingReferenceList().contains(ed.getId())) {
                         //for policy verification
                         refList.getPolicy().setKeyBinding(ed.getInferredKB());
                         //
-                        
-                        if(!ed.hasCipherReference()){
-                            XMLStreamReader decryptedData= ed.getDecryptedData();
-                            if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+
+                        if (!ed.hasCipherReference()) {
+                            XMLStreamReader decryptedData = ed.getDecryptedData();
+                            if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                                 StreamUtil.moveToNextElement(decryptedData);
-                            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,currentParentNS, staxIF, creator);
+                            }
+                            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, currentParentNS, staxIF, creator);
                             SecurityHeaderElement she = shp.createHeader(decryptedData);
                             encIds.put(ed.getId(), she.getId());
                             edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
@@ -723,87 +722,89 @@ public final class SecurityRecipient {
     }
 
     @SuppressWarnings("unchecked")
-    private void decryptStandaloneED(EncryptedData ed, HashMap<String,String> currentParentNS, WSSPolicy policy) throws XMLStreamException, XWSSecurityException{
-        if(ed.getKey() == null){ //can't decrypt now
+    private void decryptStandaloneED(EncryptedData ed, HashMap<String, String> currentParentNS, WSSPolicy policy) throws XMLStreamException, XWSSecurityException {
+        if (ed.getKey() == null) { //can't decrypt now
             bufferedHeaders.add(ed);
             return;
         }
-        if(!ed.hasCipherReference()){
-            XMLStreamReader decryptedData= ed.getDecryptedData();
-            if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+        if (!ed.hasCipherReference()) {
+            XMLStreamReader decryptedData = ed.getDecryptedData();
+            if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                 StreamUtil.moveToNextElement(decryptedData);
-            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,currentParentNS, staxIF, creator);
+            }
+            SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, currentParentNS, staxIF, creator);
             SecurityHeaderElement she = shp.createHeader(decryptedData);
             encIds.put(ed.getId(), she.getId());
             edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
             checkDecryptedData(she, policy);
-            if(!handleSAMLAssertion(she)){
+            if (!handleSAMLAssertion(she)) {
                 addSecurityHeader(she);
             }
         } else {
             // handle encrypted attachment here
             byte[] decryptedMimeData = ed.getDecryptedMimeData();
             Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
-            securityContext.getDecryptedAttachmentSet().add(as);        
+            securityContext.getDecryptedAttachmentSet().add(as);
         }
     }
+
     @SuppressWarnings("unchecked")
-    private void checkDecryptedData(SecurityHeaderElement she, WSSPolicy pol) throws XWSSecurityException{
-        if(she.getLocalPart() == MessageConstants.SIGNATURE_LNAME ){
+    private void checkDecryptedData(SecurityHeaderElement she, WSSPolicy pol) throws XWSSecurityException {
+        if (MessageConstants.SIGNATURE_LNAME.equals(she.getLocalPart())) {
             if (PolicyTypeUtil.encryptionPolicy(pol)) {
-                EncryptionPolicy ep = (EncryptionPolicy)pol;
-                EncryptionPolicy.FeatureBinding fb = 
-                        (EncryptionPolicy.FeatureBinding)ep.getFeatureBinding();
+                EncryptionPolicy ep = (EncryptionPolicy) pol;
+                EncryptionPolicy.FeatureBinding fb =
+                        (EncryptionPolicy.FeatureBinding) ep.getFeatureBinding();
                 fb.encryptsSignature(true);
             }
-            Signature sig = (Signature)she;
-            if(sig.getReferences().size() != 0 && isPending()){
-                if(pendingElement == null){
+            Signature sig = (Signature) she;
+            if (sig.getReferences().size() != 0 && isPending()) {
+                if (pendingElement == null) {
                     pendingElement = she;
-                } else{
+                } else {
                     bufferedHeaders.add(sig);
                 }
             }
         }
     }
-    
-    @SuppressWarnings("unchecked")
-    private Message createMessage() throws XWSSecurityException{
+
+    @SuppressWarnings({"unchecked", "static-access"})
+    private Message createMessage() throws XWSSecurityException {
         // Verify that <soap:Body> is present
         XMLStreamReaderUtil.verifyTag(message, SOAP_NAMESPACE_URI, SOAP_BODY);
         bodyTag = new TagInfoset(message);
         bodyENVNS.putAll(parentNSOnEnvelope);
-        for(int i=0; i< message.getNamespaceCount();i++){
+        for (int i = 0; i < message.getNamespaceCount(); i++) {
             bodyENVNS.put(message.getNamespacePrefix(i), message.getNamespaceURI(i));
         }
         bodyWsuId = StreamUtil.getWsuId(message);
-        if(bodyWsuId == null){
+        if (bodyWsuId == null) {
             bodyWsuId = "";
         }
         XMLStreamReaderUtil.nextElementContent(message);
         cachePayLoadId();
-        if(pendingElement != null){
+        if (pendingElement != null) {
             //String id = StreamUtil.getWsuId(message);
-            try{
-                if(pendingElement instanceof EncryptedKey && StreamUtil.isStartElement(message) && isEncryptedData()){
+            try {
+                if (pendingElement instanceof EncryptedKey && StreamUtil.isStartElement(message) && isEncryptedData()) {
                     XMLStreamReader reader = message;
-                    EncryptedData ed = new EncryptedData(message,context, bodyENVNS);
+                    EncryptedData ed = new EncryptedData(message, context, bodyENVNS);
                     payLoadWsuId = ed.getId();
                     handlePayLoadED(ed);
                     payLoadEncId = ed.getId();
                     XMLStreamReaderUtil.close(reader);
                     XMLStreamReaderFactory.recycle(reader);
-                }else if(pendingElement instanceof Signature){
-                    Signature sig = (Signature)pendingElement;
+                } else if (pendingElement instanceof Signature) {
+                    Signature sig = (Signature) pendingElement;
                     handleSignature(sig);
-                    
+
                     processedHeaders.add(pendingElement);
                     pendingElement = null;
-                }else if(pendingElement instanceof ReferenceListHeader){
-                    ReferenceListHeader refList = (ReferenceListHeader)pendingElement;
-                    if(refList.getPendingReferenceList().contains(payLoadWsuId)){
+                } else if (pendingElement instanceof ReferenceListHeader) {
+                    ReferenceListHeader refList = (ReferenceListHeader) pendingElement;
+                    if (refList.getPendingReferenceList().contains(payLoadWsuId)) {
                         XMLStreamReader reader = message;
-                        EncryptedData ed = new EncryptedData(message,context, bodyENVNS);
+                        EncryptedData ed = new EncryptedData(message, context, bodyENVNS);
                         //for policy verification
                         refList.getPolicy().setKeyBinding(ed.getInferredKB());
                         payLoadWsuId = ed.getId();
@@ -814,184 +815,185 @@ public final class SecurityRecipient {
                         XMLStreamReaderUtil.close(reader);
                         XMLStreamReaderFactory.recycle(reader);
                     }
-                    if(refList.getPendingReferenceList().size() > 0){
+                    if (refList.getPendingReferenceList().size() > 0) {
                         findAndReplaceED((ArrayList<String>) refList.getPendingReferenceList(), refList);
                     }
-                    if(refList.getPendingReferenceList().size() == 0){
+                    if (refList.getPendingReferenceList().size() == 0) {
                         pendingElement = null;
-                    }else{
+                    } else {
                         String uri = refList.getPendingReferenceList().get(0);
-                        throw new XWSSecurityException("Reference with ID "+uri+" was not found in the message");
+                        throw new XWSSecurityException("Reference with ID " + uri + " was not found in the message");
                     }
-                    
+
                 }
             } catch (XMLStreamException e) {
                 // TODO need to throw more meaningful exception
                 throw new WebServiceException(e);
-            } catch(XWSSecurityException xse){
+            } catch (XWSSecurityException xse) {
                 throw new WebServiceException(xse);
             }
         }
-        
+
         ArrayList clonedBufferedHeaders = (ArrayList) bufferedHeaders.clone();
-        if(clonedBufferedHeaders.size() >0){
-            for(int i=0;i<clonedBufferedHeaders.size();i++){
+        if (clonedBufferedHeaders.size() > 0) {
+            for (int i = 0; i < clonedBufferedHeaders.size(); i++) {
                 SecurityHeaderElement she = (SecurityHeaderElement) clonedBufferedHeaders.get(i);
                 processSecurityHeader(she);
             }
         }
-        if(processedHeaders.size() > 0){
-            for(int i = 0; i < processedHeaders.size(); i++){
-                SecurityHeaderElement she = (SecurityHeaderElement)processedHeaders.get(i);
+        if (processedHeaders.size() > 0) {
+            for (int i = 0; i < processedHeaders.size(); i++) {
+                SecurityHeaderElement she = (SecurityHeaderElement) processedHeaders.get(i);
                 processProcessedHeaders(she);
             }
         }
-        
-        try{
-            if(message == null){
+
+        try {
+            if (message == null) {
                 message = getEmptyBody();
             }
-        } catch(XMLStreamException xse){
+        } catch (XMLStreamException xse) {
             throw new XWSSecurityException(xse);
         }
-        
+
         Message streamMsg = null;
         AttachmentSet as = securityContext.getDecryptedAttachmentSet();
-        if(as == null || as.isEmpty()){
+        if (as == null || as.isEmpty()) {
             as = securityContext.getAttachmentSet();
         }
-        if(!context.getDisablePayloadBuffering() && !context.isSecure() ){
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"Buffering Payload from incomming message");
+        if (!context.getDisablePayloadBuffering() && !context.isSecure()) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Buffering Payload from incomming message");
             }
-            VerifiedMessageXMLStreamReader verifiedReader = new VerifiedMessageXMLStreamReader(message,bodyENVNS);
-            streamMsg = new VerifiedStreamMessage(envelopeTag,headerTag,as,headers,bodyTag,verifiedReader,soapVersion, this.bodyENVNS);
-        }else{
-            if(logger.isLoggable(Level.FINE)){
-                logger.log(Level.FINE,"Not Buffering Payload from incomming message");
+            VerifiedMessageXMLStreamReader verifiedReader = new VerifiedMessageXMLStreamReader(message, bodyENVNS);
+            streamMsg = new VerifiedStreamMessage(envelopeTag, headerTag, as, headers, bodyTag, verifiedReader, soapVersion, this.bodyENVNS);
+        } else {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Not Buffering Payload from incomming message");
             }
-            streamMsg = new StreamMessage(envelopeTag,headerTag,as,headers,bodyTag,message,soapVersion);
+            streamMsg = new StreamMessage(envelopeTag, headerTag, as, headers, bodyTag, message, soapVersion);
         }
         context.setMessage(streamMsg);
         boolean scCancel = false;
         /*if(streamMsg.isFault())
         return streamMsg;*/
-        if(context.getAddressingVersion() != null){
-            String action = streamMsg.getHeaders().getAction(context.getAddressingVersion(),context.getSOAPVersion());
-            
-            if(MessageConstants.MEX_GET.equals(action)){
+        if (context.getAddressingVersion() != null) {
+            String action = streamMsg.getHeaders().getAction(context.getAddressingVersion(), context.getSOAPVersion());
+
+            if (MessageConstants.MEX_GET.equals(action)) {
                 return streamMsg;
             }
-            if(MessageConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action)||
-                    MessageConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action)){
+            if (MessageConstants.CANCEL_SECURITY_CONTEXT_TOKEN_ACTION.equals(action) ||
+                    MessageConstants.CANCEL_SECURITY_CONTEXT_TOKEN_RESPONSE_ACTION.equals(action)) {
                 scCancel = true;
             }
         }
         MessagePolicy msgPolicy = (MessagePolicy) context.getSecurityPolicy();
-        boolean isTrust = context.isTrustMessage();
-        if(msgPolicy == null || msgPolicy.size() <= 0){
+        //boolean isTrust = context.isTrustMessage();
+        if (msgPolicy == null || msgPolicy.size() <= 0) {
             PolicyResolver opResolver =
-                    (PolicyResolver)context.getExtraneousProperty(context.OPERATION_RESOLVER);
-            if(opResolver != null)
+                    (PolicyResolver) context.getExtraneousProperty(context.OPERATION_RESOLVER);
+            if (opResolver != null) {
                 msgPolicy = opResolver.resolvePolicy(context);
+            }
         }
-        if(context.isSecure() &&  context.getInferredSecurityPolicy().size()==0 ){
-            if( msgPolicy == null || msgPolicy.size() == 0 || context.isMissingTimestampAllowed()){
+        if (context.isSecure() && context.getInferredSecurityPolicy().size() == 0) {
+            if (msgPolicy == null || msgPolicy.size() == 0 || context.isMissingTimestampAllowed()) {
                 return streamMsg;
-            } else{
+            } else {
                 throw new XWSSecurityException("Security Requirements not met - No Security header in message");
             }
         }
-        
+
         // for policy verification, replace target uris with qnames for signature and encryption targets
-        try{
+        try {
             MessagePolicy inferredMessagePolicy = context.getInferredSecurityPolicy();
-            for(int i = 0; i < inferredMessagePolicy.size(); i++){
+            for (int i = 0; i < inferredMessagePolicy.size(); i++) {
                 WSSPolicy wssPolicy = (WSSPolicy) inferredMessagePolicy.get(i);
-                if(PolicyTypeUtil.signaturePolicy(wssPolicy)){
+                if (PolicyTypeUtil.signaturePolicy(wssPolicy)) {
                     SignaturePolicy.FeatureBinding fb = (SignaturePolicy.FeatureBinding) wssPolicy.getFeatureBinding();
                     ArrayList targets = fb.getTargetBindings();
                     // replace uri target types with qname target types
                     modifyTargets(targets);
-                } else if(PolicyTypeUtil.encryptionPolicy(wssPolicy)){
+                } else if (PolicyTypeUtil.encryptionPolicy(wssPolicy)) {
                     EncryptionPolicy.FeatureBinding fb = (EncryptionPolicy.FeatureBinding) wssPolicy.getFeatureBinding();
                     ArrayList targets = fb.getTargetBindings();
                     // replace uri target types with qname target types
                     modifyTargets(targets);
                 }
             }
-            
-        } catch(Exception ex){
+
+        } catch (Exception ex) {
             throw new XWSSecurityException(ex);
         }
-        
-        if(scCancel){
+
+        if (scCancel) {
             boolean securedBody = false;
             boolean allHeaders = false;
-            try{
+            try {
                 MessagePolicy mp = context.getInferredSecurityPolicy();
-                for(int i=0;i<mp.size();i++){
-                    WSSPolicy wp = (WSSPolicy)mp.get(i);
-                    if(PolicyTypeUtil.encryptionPolicy(wp)){
-                        EncryptionPolicy ep = (EncryptionPolicy)wp;
-                        ArrayList list = ((EncryptionPolicy.FeatureBinding)ep.getFeatureBinding()).getTargetBindings();
-                        for(int ei=0;ei<list.size();ei++){
-                            EncryptionTarget et = (EncryptionTarget)list.get(ei);
-                            if(et.getValue().equals(Target.BODY)){
+                for (int i = 0; i < mp.size(); i++) {
+                    WSSPolicy wp = (WSSPolicy) mp.get(i);
+                    if (PolicyTypeUtil.encryptionPolicy(wp)) {
+                        EncryptionPolicy ep = (EncryptionPolicy) wp;
+                        ArrayList list = ((EncryptionPolicy.FeatureBinding) ep.getFeatureBinding()).getTargetBindings();
+                        for (int ei = 0; ei < list.size(); ei++) {
+                            EncryptionTarget et = (EncryptionTarget) list.get(ei);
+                            if (et.getValue().equals(Target.BODY)) {
                                 securedBody = true;
                             }
                         }
-                    }else if(PolicyTypeUtil.signaturePolicy(wp)){
-                        SignaturePolicy sp = (SignaturePolicy)wp;
-                        ArrayList list = ((SignaturePolicy.FeatureBinding)sp.getFeatureBinding()).getTargetBindings();
-                        for(int ei=0;ei<list.size();ei++){
-                            SignatureTarget st = (SignatureTarget)list.get(ei);
+                    } else if (PolicyTypeUtil.signaturePolicy(wp)) {
+                        SignaturePolicy sp = (SignaturePolicy) wp;
+                        ArrayList list = ((SignaturePolicy.FeatureBinding) sp.getFeatureBinding()).getTargetBindings();
+                        for (int ei = 0; ei < list.size(); ei++) {
+                            SignatureTarget st = (SignatureTarget) list.get(ei);
                             //if(st.getValue() == Target.BODY){
-                            if(st.getValue().equals(Target.BODY)){
+                            if (st.getValue().equals(Target.BODY)) {
                                 securedBody = true;
                             }
                         }
-                        if(!allHeaders){
+                        if (!allHeaders) {
                             allHeaders = areHeadersSecured(sp);
                         }
                     }
                 }
-            }catch(Exception ex){
+            } catch (Exception ex) {
                 throw new XWSSecurityException(ex);
             }
-            
-            if(!context.isSecure() && (!securedBody || !allHeaders)){
+
+            if (!context.isSecure() && (!securedBody || !allHeaders)) {
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1602_SCCANCEL_SECURITY_UNCONFIGURED());
                 throw new XWSSecurityException("Security Requirements not met");
             }
             return streamMsg;
         }
-        
+
         // for policy verification
         TargetResolver targetResolver = new TargetResolverImpl(context);
         MessagePolicyVerifier mpv = new MessagePolicyVerifier(context, targetResolver);
-        
-        if(msgPolicy !=null){
-            if( msgPolicy.isSSL() && !context.isSecure() ){
+
+        if (msgPolicy != null) {
+            if (msgPolicy.isSSL() && !context.isSecure()) {
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
                 throw new XWSSecurityException(LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
             }
         }
         //if(!isTrust){
-        if(context.getInferredSecurityPolicy() == null || context.getInferredSecurityPolicy().isEmpty()){
-            if(context.isClient() && MessageConstants.RSTR_CANCEL_ACTION.equals(context.getAction())){
+        if (context.getInferredSecurityPolicy() == null || context.getInferredSecurityPolicy().isEmpty()) {
+            if (context.isClient() && MessageConstants.RSTR_CANCEL_ACTION.equals(context.getAction())) {
                 return streamMsg;
             }
         }
         mpv.verifyPolicy(context.getInferredSecurityPolicy(), msgPolicy);
         //}
-        
+
         return streamMsg;
     }
-    
-    private XMLStreamReader getEmptyBody() throws XMLStreamException{
+
+    private XMLStreamReader getEmptyBody() throws XMLStreamException {
         // create an empty body and create xmlstream reader out of it
-        String emptyBody = "<S:Body xmlns:S=\""+ soapVersion.nsUri +"\""+"></S:Body>";
+        String emptyBody = "<S:Body xmlns:S=\"" + soapVersion.nsUri + "\"" + "></S:Body>";
         InputStream in = new ByteArrayInputStream(emptyBody.getBytes());
         XMLInputFactory xif = XMLInputFactory.newInstance();
         XMLStreamReader empBody = xif.createXMLStreamReader(in);
@@ -1008,89 +1010,90 @@ public final class SecurityRecipient {
         }
         return null;
     }
-    
+
     // replace uri target types with qname target types
-     @SuppressWarnings("unchecked")
-    private void modifyTargets(ArrayList targets){
-        for(int i = 0; i < targets.size(); i++){
+    @SuppressWarnings("unchecked")
+    private void modifyTargets(ArrayList targets) {
+        for (int i = 0; i < targets.size(); i++) {
             Target target = (Target) targets.get(i);
-            if(target.getType() == Target.TARGET_TYPE_VALUE_URI){
+            if (Target.TARGET_TYPE_VALUE_URI.equals(target.getType())) {
                 findAndReplaceTargets(target);
             }
         }
     }
-     @SuppressWarnings("unchecked")
-    private boolean handleSAMLAssertion(SecurityHeaderElement she)throws XWSSecurityException{
-        if(she.getLocalPart() == MessageConstants.SAML_ASSERTION_LNAME){
-            SAMLAssertion samlAssertion = (SAMLAssertion)she;
+
+    @SuppressWarnings("unchecked")
+    private boolean handleSAMLAssertion(SecurityHeaderElement she) throws XWSSecurityException {
+        if (MessageConstants.SAML_ASSERTION_LNAME.equals(she.getLocalPart())) {
+            SAMLAssertion samlAssertion = (SAMLAssertion) she;
             processedHeaders.add(samlAssertion);
-            if(samlAssertion.isHOK()){
+            if (samlAssertion.isHOK()) {
                 samlAssertion.validateSignature();
             }
             samlAssertion.validate(context);
             samlAssertion.getKey();
-            context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION,samlAssertion);
-            if(context.isTrustMessage() && !context.isClient()){
+            context.getExtraneousProperties().put(MessageConstants.INCOMING_SAML_ASSERTION, samlAssertion);
+            if (context.isTrustMessage() && !context.isClient()) {
                 IssuedTokenContext ctx = null;
-                if(context.getTrustContext() == null){
+                if (context.getTrustContext() == null) {
                     ctx = new IssuedTokenContextImpl();
                     ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
                     context.setTrustContext(ctx);
-                }else{
+                } else {
                     ctx = context.getTrustContext();
-                    if(ctx.getAuthnContextClass() != null){
+                    if (ctx.getAuthnContextClass() != null) {
                         ctx.setAuthnContextClass(MessageConstants.PREVIOUS_SESSION_AUTH_TYPE);
                         context.setTrustContext(ctx);
                     }
-                }                            
+                }
             }
             return true;
         }
         return false;
     }
-    
-    private void findAndReplaceTargets(Target target){
+
+    private void findAndReplaceTargets(Target target) {
         String uri = target.getValue();
         int index = uri.indexOf("#");
         QName qname = null;
-        if( index >=0){
-            uri = uri.substring(index+1);
+        if (index >= 0) {
+            uri = uri.substring(index + 1);
         }
-        if(target instanceof EncryptionTarget){
+        if (target instanceof EncryptionTarget) {
             String temp = encIds.get(uri);
             String edAlgo = edAlgos.get(uri);
-            ((EncryptionTarget)target).setDataEncryptionAlgorithm(edAlgo);
-            if(temp != null){
+            ((EncryptionTarget) target).setDataEncryptionAlgorithm(edAlgo);
+            if (temp != null) {
                 uri = temp;
-            }else{
+            } else {
                 qname = encQNames.get(uri);
             }
         }
         // look if uri is body
-        if(uri.equals(bodyWsuId)){
+        if (uri.equals(bodyWsuId)) {
             target.setType(Target.TARGET_TYPE_VALUE_QNAME);
             target.setValue("SOAP-BODY");
             target.setContentOnly(false);
             return;
         }
-        if(uri.equals(payLoadWsuId) || uri.equals(payLoadEncId)){
+        if (uri.equals(payLoadWsuId) || uri.equals(payLoadEncId)) {
             target.setType(Target.TARGET_TYPE_VALUE_QNAME);
             target.setValue("SOAP-BODY");
             target.setContentOnly(true);
             return;
         }
-        
+
         // look in non-security headers
-        if(headers != null && headers.size() >0){
+        if (headers != null && headers.size() > 0) {
             Iterator<Header> listItr = headers.listIterator();
-            while(listItr.hasNext()){
-                GenericSecuredHeader header = (GenericSecuredHeader)listItr.next();
-                if(header.hasID(uri)){
+            while (listItr.hasNext()) {
+                GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
+                if (header.hasID(uri)) {
                     qname = new QName(header.getNamespaceURI(), header.getLocalPart());
                     target.setQName(qname);
                     target.setContentOnly(false);
                     return;
-                } else if(qname != null){
+                } else if (qname != null) {
                     target.setQName(qname);
                     target.setContentOnly(false);
                     return;
@@ -1098,9 +1101,9 @@ public final class SecurityRecipient {
             }
         }
         // look in processed headers
-        for(int j= 0; j < processedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) processedHeaders.get(j);
-            if(uri.equals(header.getId())){
+        for (int j = 0; j < processedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) processedHeaders.get(j);
+            if (uri.equals(header.getId())) {
                 qname = new QName(header.getNamespaceURI(), header.getLocalPart());
                 target.setQName(qname);
                 target.setContentOnly(false);
@@ -1108,9 +1111,9 @@ public final class SecurityRecipient {
             }
         }
         // look in buffered headers
-        for(int j = 0; j < bufferedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) bufferedHeaders.get(j);
-            if(uri.equals(header.getId())){
+        for (int j = 0; j < bufferedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) bufferedHeaders.get(j);
+            if (uri.equals(header.getId())) {
                 qname = new QName(header.getNamespaceURI(), header.getLocalPart());
                 target.setQName(qname);
                 target.setContentOnly(false);
@@ -1118,63 +1121,67 @@ public final class SecurityRecipient {
             }
         }
     }
-     @SuppressWarnings("unchecked")
-    private void processProcessedHeaders(SecurityHeaderElement she)throws XWSSecurityException{
-        if(she instanceof EncryptedData){
+
+    @SuppressWarnings("unchecked")
+    private void processProcessedHeaders(SecurityHeaderElement she) throws XWSSecurityException {
+        if (she instanceof EncryptedData) {
             throw new XWSSecurityException("Error in Processing, EncryptedData inside procesesdHeaders, should never happen");
-        } else if(she instanceof EncryptedKey){
-            EncryptedKey ek = (EncryptedKey)she;
+        } else if (she instanceof EncryptedKey) {
+            EncryptedKey ek = (EncryptedKey) she;
             ArrayList<String> list = (ArrayList) ek.getPendingReferenceList();
-            if(list != null && list.size() > 0){
+            if (list != null && list.size() > 0) {
                 throw new XWSSecurityException("Error in processing, ReferenceList inside EK should have been processed");
             }
-        } else if(she instanceof ReferenceListHeader){
-            ReferenceListHeader refList = (ReferenceListHeader)she;
-            if(refList.getPendingReferenceList() != null && refList.getPendingReferenceList().size() > 0){
+        } else if (she instanceof ReferenceListHeader) {
+            ReferenceListHeader refList = (ReferenceListHeader) she;
+            if (refList.getPendingReferenceList() != null && refList.getPendingReferenceList().size() > 0) {
                 throw new XWSSecurityException("Error in processing, references in ReferenceList not processed");
             }
-        } else if(she instanceof Signature){
-            Signature sig = (Signature)she;
-            if(sig.getReferences() != null && sig.getReferences().size() > 0){
+        } else if (she instanceof Signature) {
+            Signature sig = (Signature) she;
+            if (sig.getReferences() != null && sig.getReferences().size() > 0) {
                 throw new XWSSecurityException("Error in processing, references in Signature not processed");
             }
         }
     }
-    
-    private boolean isPending() throws XWSSecurityException{
-        for(int i=0;i<bufferedHeaders.size();i++){
+
+    private boolean isPending() throws XWSSecurityException {
+        for (int i = 0; i < bufferedHeaders.size(); i++) {
             SecurityHeaderElement she = (SecurityHeaderElement) bufferedHeaders.get(i);
-            if(isPrimary(she)){
+            if (isPrimary(she)) {
                 return false;
             }
         }
         return true;
     }
-     @SuppressWarnings("unchecked")
-    private boolean isPrimary(SecurityHeaderElement she){
-        if(she.getLocalPart() == MessageConstants.SIGNATURE_LNAME){
+
+    @SuppressWarnings("unchecked")
+    private boolean isPrimary(SecurityHeaderElement she) {
+        if (MessageConstants.SIGNATURE_LNAME.equals(she.getLocalPart())) {
             return true;
-        }else if(she.getLocalPart() == MessageConstants.ENCRYPTEDKEY_LNAME){
+        } else if (MessageConstants.ENCRYPTEDKEY_LNAME.equals(she.getLocalPart())) {
             return true;
-        }else if(she.getLocalPart() == MessageConstants.XENC_REFERENCE_LIST_LNAME){
+        } else if (MessageConstants.XENC_REFERENCE_LIST_LNAME.equals(she.getLocalPart())) {
             return true;
         }
         return false;
     }
-     @SuppressWarnings("unchecked")
-    private void processSecurityHeader(SecurityHeaderElement she) throws XWSSecurityException{
-        if(she instanceof Signature ){
-            handleSignature((Signature)she);
+
+    @SuppressWarnings("unchecked")
+    private void processSecurityHeader(SecurityHeaderElement she) throws XWSSecurityException {
+        if (she instanceof Signature) {
+            handleSignature((Signature) she);
             processedHeaders.add(she);
-        }else if(she instanceof EncryptedData){
-            EncryptedData ed = (EncryptedData)she;
+        } else if (she instanceof EncryptedData) {
+            EncryptedData ed = (EncryptedData) she;
             XMLStreamReader decryptedData;
             try {
-                if(!ed.hasCipherReference()){
+                if (!ed.hasCipherReference()) {
                     decryptedData = ed.getDecryptedData();
-                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,envshNS, staxIF, creator);
-                    if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+                    SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, envshNS, staxIF, creator);
+                    if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                         StreamUtil.moveToNextElement(decryptedData);
+                    }
                     SecurityHeaderElement newHeader = shp.createHeader(decryptedData);
                     encIds.put(ed.getId(), newHeader.getId());
                     edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
@@ -1188,21 +1195,21 @@ public final class SecurityRecipient {
                 }
             } catch (XMLStreamException ex) {
                 ex.printStackTrace();
-                throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID "+ed.getId(),ex);
+                throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
             }
-        }else if(she instanceof EncryptedKey){
-            EncryptedKey ek = (EncryptedKey)she;
-            if(pendingElement == null){
+        } else if (she instanceof EncryptedKey) {
+            EncryptedKey ek = (EncryptedKey) she;
+            if (pendingElement == null) {
                 pendingElement = ek;
             }
             addSecurityHeader(ek);
             ArrayList<String> list = (ArrayList) ek.getPendingReferenceList();
-            if(list != null){
-                findAndReplaceED(list,ek);
-                
-                if(ek.getPendingReferenceList().size() > 0 && payLoadWsuId.length() >0){
-                    if(ek.getPendingReferenceList().contains(payLoadWsuId)){
-                        
+            if (list != null) {
+                findAndReplaceED(list, ek);
+
+                if (ek.getPendingReferenceList().size() > 0 && payLoadWsuId.length() > 0) {
+                    if (ek.getPendingReferenceList().contains(payLoadWsuId)) {
+
                         EncryptedData ed;
                         try {
                             ed = new EncryptedData(message, context, bodyENVNS);
@@ -1210,25 +1217,25 @@ public final class SecurityRecipient {
                             handlePayLoadED(ed);
                         } catch (XMLStreamException ex) {
                             ex.printStackTrace();
-                            throw new XWSSecurityException("Error occurred while parsing EncryptedData"+ex);
+                            throw new XWSSecurityException("Error occurred while parsing EncryptedData" + ex);
                         }
                         ek.getPendingReferenceList().remove(payLoadWsuId);
                     }
                 }
-                if(ek.getPendingReferenceList().size()!= 0) {
-                    throw new XWSSecurityException("Data  Reference under EncryptedKey with ID "+ek.getId()+ " is not found");
-                } else{
+                if (ek.getPendingReferenceList().size() != 0) {
+                    throw new XWSSecurityException("Data  Reference under EncryptedKey with ID " + ek.getId() + " is not found");
+                } else {
                     pendingElement = null;
                     bufferedHeaders.remove(ek);
                     addSecurityHeader(ek);
                 }
             }
-        }else if(she instanceof ReferenceListHeader){
-            ReferenceListHeader refList = (ReferenceListHeader)she;
-            if(refList.getPendingReferenceList().contains(payLoadWsuId)){
-                try{
-                    EncryptedData ed = new EncryptedData(message,context, bodyENVNS);
-                    
+        } else if (she instanceof ReferenceListHeader) {
+            ReferenceListHeader refList = (ReferenceListHeader) she;
+            if (refList.getPendingReferenceList().contains(payLoadWsuId)) {
+                try {
+                    EncryptedData ed = new EncryptedData(message, context, bodyENVNS);
+
                     //for policy verification
                     refList.getPolicy().setKeyBinding(ed.getInferredKB());
                     //
@@ -1237,354 +1244,354 @@ public final class SecurityRecipient {
                     refList.getPendingReferenceList().remove(payLoadWsuId);
                     cachePayLoadId();
                     payLoadEncId = ed.getId();
-                }catch(XMLStreamException ex){
-                    throw new XWSSecurityException("Error occurred while processing EncryptedData",ex);
+                } catch (XMLStreamException ex) {
+                    throw new XWSSecurityException("Error occurred while processing EncryptedData", ex);
                 }
             }
-            if(refList.getPendingReferenceList().size() > 0){
+            if (refList.getPendingReferenceList().size() > 0) {
                 findAndReplaceED((ArrayList<String>) refList.getPendingReferenceList(), refList);
             }
-            if(refList.getPendingReferenceList().size() > 0){
+            if (refList.getPendingReferenceList().size() > 0) {
                 String uri = refList.getPendingReferenceList().get(0);
-                throw new XWSSecurityException("Reference with ID "+uri+" was not found in the message");
+                throw new XWSSecurityException("Reference with ID " + uri + " was not found in the message");
             }
-        }else{
-            throw new XWSSecurityException("Need to support this header, please file a bug."+she);
+        } else {
+            throw new XWSSecurityException("Need to support this header, please file a bug." + she);
         }
     }
-    
-    
-    private void handleSignature(Signature sig) throws XWSSecurityException{
+
+    private void handleSignature(Signature sig) throws XWSSecurityException {
         com.sun.xml.ws.security.opt.crypto.dsig.Reference bodyRef = null;
         com.sun.xml.ws.security.opt.crypto.dsig.Reference payLoadRef = null;
-        if(bodyWsuId.length() >0){
-            bodyRef = sig.removeReferenceWithID("#"+bodyWsuId);
+        if (bodyWsuId.length() > 0) {
+            bodyRef = sig.removeReferenceWithID("#" + bodyWsuId);
         }
-        if(payLoadWsuId.length() >0){
-            payLoadRef = sig.removeReferenceWithID("#"+payLoadWsuId);
+        if (payLoadWsuId.length() > 0) {
+            payLoadRef = sig.removeReferenceWithID("#" + payLoadWsuId);
         }
-        if(bodyRef != null && payLoadRef !=null ){
+        if (bodyRef != null && payLoadRef != null) {
             throw new XWSSecurityException("Does not support signing of Body and PayLoad together");
         }
-        
+
         boolean validated = false;
-        try{
+        try {
             validated = sig.validate();
-        }catch(XWSSecurityException xe){
+        } catch (XWSSecurityException xe) {
             throw new WebServiceException(xe);
         }
-        if(!validated){
+        if (!validated) {
             ArrayList<com.sun.xml.ws.security.opt.crypto.dsig.Reference> refs = sig.getReferences();
-            if(refs != null && refs.size() >0 ){
-                throw new WebServiceException("Could not find Reference "+refs.get(0).getURI()+ " under Signature with ID"+sig.getId());
-            }else{
-                throw new XWSSecurityException("Verification of Signature with ID  "+sig.getId() +" failed, possible cause : proper canonicalized" +
+            if (refs != null && refs.size() > 0) {
+                throw new WebServiceException("Could not find Reference " + refs.get(0).getURI() + " under Signature with ID" + sig.getId());
+            } else {
+                throw new XWSSecurityException("Verification of Signature with ID  " + sig.getId() + " failed, possible cause : proper canonicalized" +
                         "signedinfo was not produced.");
             }
-        }else{
-            if(bodyRef != null){
-                message = sig.wrapWithDigester(bodyRef,message,bodyTag,parentNSOnEnvelope,false);
-            }else if(payLoadRef != null){
-                message = sig.wrapWithDigester(payLoadRef,message,bodyTag,bodyENVNS,true);
+        } else {
+            if (bodyRef != null) {
+                message = sig.wrapWithDigester(bodyRef, message, bodyTag, parentNSOnEnvelope, false);
+            } else if (payLoadRef != null) {
+                message = sig.wrapWithDigester(payLoadRef, message, bodyTag, bodyENVNS, true);
             }
         }
     }
-    
-    
-    private void handlePayLoadED(EncryptedData ed) throws XWSSecurityException, XMLStreamException{
-        if(pendingElement != null && pendingElement instanceof EncryptedKey){
-            EncryptedKey ek = ((EncryptedKey)pendingElement);
-            if(ek.getPendingReferenceList().contains(((SecurityHeaderElement)ed).getId())){
+
+    private void handlePayLoadED(EncryptedData ed) throws XWSSecurityException, XMLStreamException {
+        if (pendingElement != null && pendingElement instanceof EncryptedKey) {
+            EncryptedKey ek = ((EncryptedKey) pendingElement);
+            if (ek.getPendingReferenceList().contains(((SecurityHeaderElement) ed).getId())) {
                 //for policy verification
-                if(ek.getPolicy() != null){
+                if (ek.getPolicy() != null) {
                     ek.getPolicy().setKeyBinding(ek.getInferredKB());
                 }
-                
+
                 message = ed.getDecryptedData(ek.getKey(ed.getEncryptionAlgorithm()));
                 payLoadEncId = payLoadWsuId;
-                if(message != null && message.hasNext()){
+                if (message != null && message.hasNext()) {
                     message.next();
                 }
-                if(message == null){
+                if (message == null) {
                     message = getEmptyBody();
                 }
                 cachePayLoadId();
-                ek.getPendingReferenceList().remove(((SecurityHeaderElement)ed).getId());
+                ek.getPendingReferenceList().remove(((SecurityHeaderElement) ed).getId());
                 findAndReplaceED((ArrayList<String>) ek.getPendingReferenceList(), ek);
-                if(ek.getPendingReferenceList().size() == 0){
+                if (ek.getPendingReferenceList().size() == 0) {
                     pendingElement = null;
-                }else{
+                } else {
                     String uri = ek.getPendingReferenceList().get(0);
-                    throw new XWSSecurityException("Could not find Reference "+uri+ " under EncryptedKey with ID"+ek.getId());
+                    throw new XWSSecurityException("Could not find Reference " + uri + " under EncryptedKey with ID" + ek.getId());
                 }
             }
-        }else{
+        } else {
             message = ed.getDecryptedData();
-            if(message != null && message.hasNext()){
+            if (message != null && message.hasNext()) {
                 message.next();
             }
-            if(message == null){
+            if (message == null) {
                 message = getEmptyBody();
             }
         }
         edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
     }
-    
-    private void moveToNextElement() throws XMLStreamException{
+
+    private void moveToNextElement() throws XMLStreamException {
         message.next();
-        while(message.getEventType() != XMLStreamReader.START_ELEMENT){
+        while (message.getEventType() != XMLStreamReader.START_ELEMENT) {
             message.next();
         }
     }
-    
-    private boolean isTimeStamp(){
-        if(message.getLocalName() == MessageConstants.TIMESTAMP_LNAME && message.getNamespaceURI() == MessageConstants.WSU_NS){
+
+    private boolean isTimeStamp() {
+        if (MessageConstants.TIMESTAMP_LNAME.equals(message.getLocalName()) && MessageConstants.WSU_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isBST(){
-        if(message.getLocalName() == MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME && message.getNamespaceURI() == MessageConstants.WSSE_NS){
+
+    private boolean isBST() {
+        if (MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME.equals(message.getLocalName()) && MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isUsernameToken(){
-        if(message.getLocalName() == MessageConstants.USERNAME_TOKEN_LNAME && message.getNamespaceURI() == MessageConstants.WSSE_NS){
+
+    private boolean isUsernameToken() {
+        if (MessageConstants.USERNAME_TOKEN_LNAME.equals(message.getLocalName()) && MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSignature(){
-        if(message.getLocalName() == MessageConstants.SIGNATURE_LNAME && message.getNamespaceURI() == MessageConstants.DSIG_NS){
+
+    private boolean isSignature() {
+        if (MessageConstants.SIGNATURE_LNAME.equals(message.getLocalName()) && MessageConstants.DSIG_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isEncryptedKey(){
-        if(message.getLocalName() == MessageConstants.ENCRYPTEDKEY_LNAME && message.getNamespaceURI() == MessageConstants.XENC_NS){
+
+    private boolean isEncryptedKey() {
+        if (MessageConstants.ENCRYPTEDKEY_LNAME.equals(message.getLocalName()) && MessageConstants.XENC_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isReferenceList(){
-        if(message.getLocalName() == MessageConstants.XENC_REFERENCE_LIST_LNAME && message.getNamespaceURI() == MessageConstants.XENC_NS){
+
+    private boolean isReferenceList() {
+        if (MessageConstants.XENC_REFERENCE_LIST_LNAME.equals(message.getLocalName()) && MessageConstants.XENC_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isEncryptedData(){
-        if(message.getLocalName() == MessageConstants.ENCRYPTED_DATA_LNAME && message.getNamespaceURI() == MessageConstants.XENC_NS){
+
+    private boolean isEncryptedData() {
+        if (MessageConstants.ENCRYPTED_DATA_LNAME.equals(message.getLocalName()) && MessageConstants.XENC_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isDerivedKey(){
-        if(message.getLocalName() == MessageConstants.DERIVEDKEY_TOKEN_LNAME && 
-                (message.getNamespaceURI() == MessageConstants.WSSC_NS || message.getNamespaceURI() == MessageConstants.WSSC_13NS)){
+
+    private boolean isDerivedKey() {
+        if (MessageConstants.DERIVEDKEY_TOKEN_LNAME.equals(message.getLocalName()) &&
+                (MessageConstants.WSSC_NS.equals(message.getNamespaceURI()) || MessageConstants.WSSC_13NS.equals(message.getNamespaceURI()))) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSignatureConfirmation(){
-        if(message.getLocalName() == MessageConstants.SIGNATURE_CONFIRMATION_LNAME && message.getNamespaceURI() == MessageConstants.WSSE11_NS){
+
+    private boolean isSignatureConfirmation() {
+        if (MessageConstants.SIGNATURE_CONFIRMATION_LNAME.equals(message.getLocalName()) && MessageConstants.WSSE11_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSCT(){
-        if(message.getLocalName() == MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME && 
-                (message.getNamespaceURI() == MessageConstants.WSSC_NS || message.getNamespaceURI() == MessageConstants.WSSC_13NS)){
+
+    private boolean isSCT() {
+        if (MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME.equals(message.getLocalName()) &&
+                (MessageConstants.WSSC_NS.equals(message.getNamespaceURI()) || MessageConstants.WSSC_13NS.equals(message.getNamespaceURI()))) {
             return true;
         }
         return false;
     }
-    
-    private boolean isEncryptedHeader(){
-        if(message.getLocalName() == MessageConstants.ENCRYPTED_HEADER_LNAME && message.getNamespaceURI() == MessageConstants.WSSE11_NS){
+
+    private boolean isEncryptedHeader() {
+        if (MessageConstants.ENCRYPTED_HEADER_LNAME.equals(message.getLocalName()) && MessageConstants.WSSE11_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSTR(){
-        if(message.getLocalName() == MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME && message.getNamespaceURI() == MessageConstants.WSSE_NS){
+
+    private boolean isSTR() {
+        if (MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME.equals(message.getLocalName()) && MessageConstants.WSSE_NS.equals(message.getNamespaceURI())) {
             return true;
         }
         return false;
     }
-    
-    private boolean isSAML(){
-        if(message.getLocalName() == MessageConstants.SAML_ASSERTION_LNAME ){
+
+    private boolean isSAML() {
+        if (MessageConstants.SAML_ASSERTION_LNAME.equals(message.getLocalName())) {
             String uri = message.getNamespaceURI();
-            if( uri == MessageConstants.SAML_v2_0_NS || uri ==MessageConstants.SAML_v1_0_NS || uri == MessageConstants.SAML_v1_1_NS ){
+            if (MessageConstants.SAML_v2_0_NS.equals(uri) || MessageConstants.SAML_v1_0_NS.equals(uri) || MessageConstants.SAML_v1_1_NS.equals(uri)) {
                 return true;
             }
         }
         return false;
     }
-    
-    private int getSecurityElementType(){
-        if(message.getEventType() == XMLStreamReader.START_ELEMENT){
-            if(isTimeStamp()){
+
+    private int getSecurityElementType() {
+        if (message.getEventType() == XMLStreamReader.START_ELEMENT) {
+            if (isTimeStamp()) {
                 return TIMESTAMP_ELEMENT;
             }
-            
-            if(isUsernameToken()){
+
+            if (isUsernameToken()) {
                 return USERNAME_TOKEN_ELEMENT;
             }
-            
-            if(isBST()){
+
+            if (isBST()) {
                 return BINARYSECURITY_TOKEN_ELEMENT;
             }
-            
-            if(isSignature()){
+
+            if (isSignature()) {
                 return SIGNATURE_ELEMENT;
             }
-            
-            if(isEncryptedKey()){
+
+            if (isEncryptedKey()) {
                 return ENCRYPTED_KEY_ELEMENT;
             }
-            
-            if(isEncryptedData()){
+
+            if (isEncryptedData()) {
                 return ENCRYPTED_DATA_ELEMENT;
             }
-            
-            if(isEncryptedHeader()){
+
+            if (isEncryptedHeader()) {
                 return ENCRYPTED_HEADER_ELEMENT;
             }
-            
-            if(isReferenceList()){
+
+            if (isReferenceList()) {
                 return REFERENCE_LIST_ELEMENT;
             }
-            
-            if(isSignatureConfirmation()){
+
+            if (isSignatureConfirmation()) {
                 return SIGNATURE_CONFIRMATION_ELEMENT;
             }
-            
-            if(isDerivedKey()){
-                return this.DERIVED_KEY_ELEMENT;
+
+            if (isDerivedKey()) {
+                return DERIVED_KEY_ELEMENT;
             }
-            
-            if(isSCT()){
-                return this.SECURITY_CONTEXT_TOKEN;
+
+            if (isSCT()) {
+                return SECURITY_CONTEXT_TOKEN;
             }
-            
-            if(isSAML()){
+
+            if (isSAML()) {
                 return SAML_ASSERTION_ELEMENT;
             }
-            
-            if(isSTR()){
+
+            if (isSTR()) {
                 return STR_ELEMENT;
             }
         }
         return -1;
     }
-     @SuppressWarnings("unchecked")
-    private void findAndReplaceED(ArrayList<String> edList,SecurityHeaderElement ekOrRlh) throws XWSSecurityException{
+
+    @SuppressWarnings("unchecked")
+    private void findAndReplaceED(ArrayList<String> edList, SecurityHeaderElement ekOrRlh) throws XWSSecurityException {
         EncryptedKey ek = null;
         ReferenceListHeader rlh = null;
-        if(ekOrRlh instanceof EncryptedKey)
-            ek = (EncryptedKey)ekOrRlh;
-        else if(ekOrRlh instanceof ReferenceListHeader)
-            rlh = (ReferenceListHeader)ekOrRlh;
-        else{
+        if (ekOrRlh instanceof EncryptedKey) {
+            ek = (EncryptedKey) ekOrRlh;
+        } else if (ekOrRlh instanceof ReferenceListHeader) {
+            rlh = (ReferenceListHeader) ekOrRlh;
+        } else {
             // should never happen
             return;
         }
-        ArrayList<String> refList =  (ArrayList) edList.clone();
-       
-        for(int i=0; i< refList.size(); i++){
+        ArrayList<String> refList = (ArrayList) edList.clone();
+
+        for (int i = 0; i < refList.size(); i++) {
             String id = refList.get(i);
             boolean found = false;
-            
+
             Iterator<Header> listItr = headers.listIterator();
-            while(listItr.hasNext()){
-                GenericSecuredHeader header = (GenericSecuredHeader)listItr.next();
+            while (listItr.hasNext()) {
+                GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
                 String localPart = (header != null) ? (header.getLocalPart()) : null;
                 boolean isEncHeader = "EncryptedHeader".equals(localPart);
                 GenericSecuredHeader processedHeader = null;
-                if(isEncHeader){
-                     processedHeader = processEncryptedSOAPHeader(header, ekOrRlh);
+                if (isEncHeader) {
+                    processedHeader = processEncryptedSOAPHeader(header, ekOrRlh);
                 }
-                if(header.hasID(id) || id.equals(context.getEdIdforEh())){
-                    if(processedHeader == null){
+                if (header.hasID(id) || id.equals(context.getEdIdforEh())) {
+                    if (processedHeader == null) {
                         processedHeader = processEncryptedSOAPHeader(header, ekOrRlh);
                     }
                     edList.remove(id);
                     context.setEdIdforEh(null);
                     int index = headers.indexOf(header);
-                    headers.set(index,processedHeader);
+                    headers.set(index, processedHeader);
                     found = true;
                     break;
                 }
             }
-            if(found){
+            if (found) {
                 continue;
             }
-            for(int j=0; j< processedHeaders.size() ; j++){
-                SecurityHeaderElement  header = (SecurityHeaderElement) processedHeaders.get(j);
-                if(id.equals(header.getId())){
-                    if(header instanceof EncryptedData){
+            for (int j = 0; j < processedHeaders.size(); j++) {
+                SecurityHeaderElement header = (SecurityHeaderElement) processedHeaders.get(j);
+                if (id.equals(header.getId())) {
+                    if (header instanceof EncryptedData) {
                         found = true;
-                        throw new XWSSecurityException("EncryptedKey or ReferenceList must appear before EncryptedData element with ID"+header.getId());
+                        throw new XWSSecurityException("EncryptedKey or ReferenceList must appear before EncryptedData element with ID" + header.getId());
                     }
                 }
             }
-            if(found){
+            if (found) {
                 continue;
             }
-            for(int j=0;j<bufferedHeaders.size();j++){
-                SecurityHeaderElement  header = (SecurityHeaderElement) bufferedHeaders.get(j);
-                if(id.equals(header.getId())){
-                    if(header instanceof EncryptedData){
-                        EncryptedData ed = (EncryptedData)header;
-                        if(!ed.hasCipherReference()){
+            for (int j = 0; j < bufferedHeaders.size(); j++) {
+                SecurityHeaderElement header = (SecurityHeaderElement) bufferedHeaders.get(j);
+                if (id.equals(header.getId())) {
+                    if (header instanceof EncryptedData) {
+                        EncryptedData ed = (EncryptedData) header;
+                        if (!ed.hasCipherReference()) {
                             XMLStreamReader decryptedData = null;
                             try {
-                                if(ek != null){
-                                    if(ek.getPolicy() != null){
+                                if (ek != null) {
+                                    if (ek.getPolicy() != null) {
                                         //for policy verification
                                         ek.getPolicy().setKeyBinding(ek.getInferredKB());
                                     }
                                     decryptedData = ed.getDecryptedData(ek.getKey(ed.getEncryptionAlgorithm()));
-                                } else if(rlh != null){
+                                } else if (rlh != null) {
                                     rlh.getPolicy().setKeyBinding(ed.getInferredKB());
                                     decryptedData = ed.getDecryptedData();
-                                } else{
+                                } else {
                                     throw new XWSSecurityException("Internal Error: Both EncryptedKey and ReferenceList are set to null");
                                 }
 
 
-                                SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context,envshNS, staxIF, creator);
-                                if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+                                SecurityHeaderProcessor shp = new SecurityHeaderProcessor(context, envshNS, staxIF, creator);
+                                if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                                     StreamUtil.moveToNextElement(decryptedData);
+                                }
                                 SecurityHeaderElement she = shp.createHeader(decryptedData);
                                 edList.remove(ed.getId());
                                 encIds.put(ed.getId(), she.getId());
                                 edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
-                                bufferedHeaders.set(i,she);
+                                bufferedHeaders.set(i, she);
                             } catch (XMLStreamException ex) {
                                 ex.printStackTrace();
-                                throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID "+ed.getId(),ex);
+                                throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
                             }
                         } else {
                             // handle encrypted attachment here
                             byte[] decryptedMimeData = null;
-                            if(ek != null){
+                            if (ek != null) {
                                 decryptedMimeData = ed.getDecryptedMimeData(ek.getKey(ed.getEncryptionAlgorithm()));
-                            } else if(rlh != null){
+                            } else if (rlh != null) {
                                 decryptedMimeData = ed.getDecryptedMimeData();
-                            } else{
+                            } else {
                                 throw new XWSSecurityException("Internal Error: Both EncryptedKey and ReferenceList are set to null");
                             }
                             Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
@@ -1596,173 +1603,181 @@ public final class SecurityRecipient {
             }
         }
     }
-     @SuppressWarnings("unchecked")
+
+    @SuppressWarnings("unchecked")
     private GenericSecuredHeader processEncryptedSOAPHeader(GenericSecuredHeader header,
-            SecurityHeaderElement ekOrRlh) throws XWSSecurityException{
+            SecurityHeaderElement ekOrRlh) throws XWSSecurityException {
         EncryptedKey ek = null;
         ReferenceListHeader rlh = null;
-        if(ekOrRlh instanceof EncryptedKey)
-            ek = (EncryptedKey)ekOrRlh;
-        else if(ekOrRlh instanceof ReferenceListHeader)
-            rlh = (ReferenceListHeader)ekOrRlh;
-        
-        try{
+        if (ekOrRlh instanceof EncryptedKey) {
+            ek = (EncryptedKey) ekOrRlh;
+        } else if (ekOrRlh instanceof ReferenceListHeader) {
+            rlh = (ReferenceListHeader) ekOrRlh;
+        }
+
+        try {
             XMLStreamReader reader = header.readHeader();
-            if(reader.getEventType() == XMLStreamReader.START_DOCUMENT)
+            if (reader.getEventType() == XMLStreamReader.START_DOCUMENT) {
                 reader.next();
-            if(reader.getEventType() != XMLStreamReader.START_ELEMENT)
+            }
+            if (reader.getEventType() != XMLStreamReader.START_ELEMENT) {
                 StreamUtil.moveToNextElement(reader);
+            }
             XMLStreamReader decryptedData = null;
             InputStream decryptedIS = null;
             EncryptedData ed = null;
             EncryptedHeader eh = null;
             boolean encContent = false;
             EncryptedContentHeaderParser encContentparser = null;
-            if(MessageConstants.ENCRYPTED_DATA_LNAME.equals(reader.getLocalName()) && MessageConstants.XENC_NS.equals(reader.getNamespaceURI())){
-                ed = new EncryptedData(reader,context, parentNS);
-            } else if(MessageConstants.ENCRYPTED_HEADER_LNAME.equals(reader.getLocalName()) && MessageConstants.WSSE11_NS.equals(reader.getNamespaceURI())){
+            if (MessageConstants.ENCRYPTED_DATA_LNAME.equals(reader.getLocalName()) && MessageConstants.XENC_NS.equals(reader.getNamespaceURI())) {
+                ed = new EncryptedData(reader, context, parentNS);
+            } else if (MessageConstants.ENCRYPTED_HEADER_LNAME.equals(reader.getLocalName()) && MessageConstants.WSSE11_NS.equals(reader.getNamespaceURI())) {
                 eh = new EncryptedHeader(reader, context, parentNS);
                 ed = eh.getEncryptedData();
-            } else if(context.getEncHeaderContent()){
+            } else if (context.getEncHeaderContent()) {
                 // the content of header is encrypted
                 encContent = true;
-                
+
                 encContentparser = new EncryptedContentHeaderParser(reader, parentNS, context);
                 ed = encContentparser.getEncryptedData();
-            } else{
+            } else {
                 throw new XWSSecurityException("Wrong Encrypted SOAP Header");
             }
-            if(ed != null){
+            if (ed != null) {
                 context.setEdIdforEh(ed.getId());
             }
-            
+
             //for policy verification
-            if(!encContent){
-                if(ek != null){
-                    if(ek.getPolicy() != null){
+            if (!encContent) {
+                if (ek != null) {
+                    if (ek.getPolicy() != null) {
                         ek.getPolicy().setKeyBinding(ek.getInferredKB());
                     }
                     decryptedData = ed.getDecryptedData(ek.getKey(ed.getEncryptionAlgorithm()));
-                } else if(rlh != null){
+                } else if (rlh != null) {
                     rlh.getPolicy().setKeyBinding(ed.getInferredKB());
                     decryptedData = ed.getDecryptedData();
-                } else{
+                } else {
                     throw new XWSSecurityException("Internal Error: Both EncryptedKey and ReferenceList set to null");
                 }
                 //
-                
-                if(decryptedData.getEventType() == XMLStreamReader.START_DOCUMENT)
+
+                if (decryptedData.getEventType() == XMLStreamReader.START_DOCUMENT) {
                     decryptedData.next();
-                if(decryptedData.getEventType() != XMLStreamReader.START_ELEMENT)
+                }
+                if (decryptedData.getEventType() != XMLStreamReader.START_ELEMENT) {
                     StreamUtil.moveToNextElement(decryptedData);
-            } else{
-                if(ek != null){
-                    if(ek.getPolicy() != null){
+                }
+            } else {
+                if (ek != null) {
+                    if (ek.getPolicy() != null) {
                         ek.getPolicy().setKeyBinding(ek.getInferredKB());
                     }
                     decryptedIS = ed.getCipherInputStream(ek.getKey(ed.getEncryptionAlgorithm()));
-                } else if(rlh != null){
+                } else if (rlh != null) {
                     rlh.getPolicy().setKeyBinding(ed.getInferredKB());
                     decryptedIS = ed.getCipherInputStream();
                 }
             }
-            
+
             GenericSecuredHeader gsh = null;
-            if(!encContent){
-                Map<String,String> headerBlockNamespaces = parentNS;
+            if (!encContent) {
+                Map<String, String> headerBlockNamespaces = parentNS;
                 // Collect namespaces on SOAP header block
                 if (decryptedData.getNamespaceCount() > 0) {
-                    headerBlockNamespaces = new HashMap<String,String>(parentNS);
+                    headerBlockNamespaces = new HashMap<String, String>(parentNS);
                     for (int k = 0; k < decryptedData.getNamespaceCount(); k++) {
                         headerBlockNamespaces.put(decryptedData.getNamespacePrefix(k), decryptedData.getNamespaceURI(k));
                     }
                 }
                 // Mark
                 //XMLStreamBuffer mark = new XMLStreamBufferMark(headerBlockNamespaces, creator);
-                gsh = new GenericSecuredHeader(decryptedData,soapVersion,creator, (HashMap) headerBlockNamespaces,staxIF, context.getEncHeaderContent());
-            } else{
-                
+                gsh = new GenericSecuredHeader(decryptedData, soapVersion, creator, (HashMap) headerBlockNamespaces, staxIF, context.getEncHeaderContent());
+            } else {
+
                 XMLStreamReader decryptedHeader = encContentparser.getDecryptedElement(decryptedIS);
-                
-                if(decryptedHeader.getEventType() == XMLStreamReader.START_DOCUMENT)
+
+                if (decryptedHeader.getEventType() == XMLStreamReader.START_DOCUMENT) {
                     decryptedHeader.next();
-                if(decryptedHeader.getEventType() != XMLStreamReader.START_ELEMENT)
+                }
+                if (decryptedHeader.getEventType() != XMLStreamReader.START_ELEMENT) {
                     StreamUtil.moveToNextElement(decryptedHeader);
-                Map<String,String> headerBlockNamespaces = parentNS;
+                }
+                Map<String, String> headerBlockNamespaces = parentNS;
                 // Collect namespaces on SOAP header block
                 if (decryptedHeader.getNamespaceCount() > 0) {
-                    headerBlockNamespaces = new HashMap<String,String>(parentNS);
+                    headerBlockNamespaces = new HashMap<String, String>(parentNS);
                     for (int k = 0; k < decryptedHeader.getNamespaceCount(); k++) {
                         String prefix = decryptedHeader.getNamespacePrefix(k);
-                        if(prefix == null)prefix = "";
+                        if (prefix == null) {
+                            prefix = "";
+                        }
                         headerBlockNamespaces.put(prefix, decryptedHeader.getNamespaceURI(k));
                     }
                 }
-                gsh = new GenericSecuredHeader(decryptedHeader,soapVersion,creator, (HashMap) headerBlockNamespaces,staxIF, context.getEncHeaderContent());
+                gsh = new GenericSecuredHeader(decryptedHeader, soapVersion, creator, (HashMap) headerBlockNamespaces, staxIF, context.getEncHeaderContent());
             }
             QName gshQName = new QName(gsh.getNamespaceURI(), gsh.getLocalPart());
-            if(eh != null){
+            if (eh != null) {
                 encQNames.put(eh.getId(), gshQName);
                 edAlgos.put(eh.getId(), ed.getEncryptionAlgorithm());
-            }else{
+            } else {
                 encQNames.put(ed.getId(), gshQName);
                 edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
             }
-            
+
             return gsh;
-        }catch (XMLStreamException ex) {
+        } catch (XMLStreamException ex) {
             ex.printStackTrace();
-            throw new XWSSecurityException("Error occurred while decrypting EncryptedData ",ex);
-        }catch(XMLStreamBufferException ex){
-            throw new XWSSecurityException("Error occurred while decrypting EncryptedData",ex);
+            throw new XWSSecurityException("Error occurred while decrypting EncryptedData ", ex);
+        } catch (XMLStreamBufferException ex) {
+            throw new XWSSecurityException("Error occurred while decrypting EncryptedData", ex);
         }
     }
-    
-    
-     @SuppressWarnings("unchecked")
-    private void addSecurityHeader(SecurityHeaderElement sh){
-        if(pendingElement == null || (sh instanceof TokenValidator)){
+
+    @SuppressWarnings("unchecked")
+    private void addSecurityHeader(SecurityHeaderElement sh) {
+        if (pendingElement == null || (sh instanceof TokenValidator)) {
             processedHeaders.add(sh);
-        }else{
+        } else {
             bufferedHeaders.add(sh);
         }
     }
-    
+
     private void cachePayLoadId() {
-        if(message != null && message.getEventType() == XMLStreamReader.START_ELEMENT){
+        if (message != null && message.getEventType() == XMLStreamReader.START_ELEMENT) {
             payLoadWsuId = StreamUtil.getWsuId(message);
-            if(payLoadWsuId == null){
+            if (payLoadWsuId == null) {
                 payLoadWsuId = StreamUtil.getId(message);
             }
-            if(payLoadWsuId == null){
+            if (payLoadWsuId == null) {
                 payLoadWsuId = "";
             }
         }
     }
-    
-    private boolean areHeadersSecured(SignaturePolicy sp){
+
+    private boolean areHeadersSecured(SignaturePolicy sp) {
         ArrayList list = ((SignaturePolicy.FeatureBinding) sp.getFeatureBinding()).getTargetBindings();
         List headerList = headers;
-        for(int hl=0;hl<headerList.size();hl++){
-            Header hdr = (Header)headerList.get(hl);
+        for (int hl = 0; hl < headerList.size(); hl++) {
+            Header hdr = (Header) headerList.get(hl);
             String localName = hdr.getLocalPart();
             String uri = hdr.getNamespaceURI();
             boolean found = false;
-            if(MessageConstants.ADDRESSING_W3C_NAMESPACE.equals(uri) || MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE.equals(uri)){
-                for(int i=0;i<list.size();i++){
-                    SignatureTarget st = (SignatureTarget)list.get(i);
+            if (MessageConstants.ADDRESSING_W3C_NAMESPACE.equals(uri) || MessageConstants.ADDRESSING_MEMBER_SUBMISSION_NAMESPACE.equals(uri)) {
+                for (int i = 0; i < list.size(); i++) {
+                    SignatureTarget st = (SignatureTarget) list.get(i);
                     QName value = st.getQName();
-                    if(value.getLocalPart().equals(localName) && value.getNamespaceURI().equals(uri)){
+                    if (value.getLocalPart().equals(localName) && value.getNamespaceURI().equals(uri)) {
                         found = true;
                         break;
                     }
                 }
-                if(!found){
+                if (!found) {
                     return found;
                 }
             }
         }
         return true;
     }
-    
 }

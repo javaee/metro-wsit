@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.ws.api.message.Header;
@@ -61,9 +60,9 @@ import java.util.logging.Logger;
  *
  * @author Ashutosh.Shahi@sun.com
  */
-public class TargetResolverImpl implements TargetResolver{
+public class TargetResolverImpl implements TargetResolver {
+
     private ProcessingContext ctx = null;
-    
     private static Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
@@ -76,50 +75,49 @@ public class TargetResolverImpl implements TargetResolver{
     public void resolveAndVerifyTargets(
             List<Target> actualTargets, List<Target> inferredTargets, WSSPolicy actualPolicy)
             throws XWSSecurityException {
-        
+
         String policyType = PolicyTypeUtil.signaturePolicy(actualPolicy) ? "Signature" : "Encryption";
         boolean isEndorsing = false;
-        
-        if ( PolicyTypeUtil.signaturePolicy(actualPolicy)) {
-            SignaturePolicy.FeatureBinding fp = (SignaturePolicy.FeatureBinding)actualPolicy.getFeatureBinding();
+
+        if (PolicyTypeUtil.signaturePolicy(actualPolicy)) {
+            SignaturePolicy.FeatureBinding fp = (SignaturePolicy.FeatureBinding) actualPolicy.getFeatureBinding();
             if (fp.isEndorsingSignature()) {
-                isEndorsing = true;        
-            }    
+                isEndorsing = true;
+            }
         }
-        
-        for(Target actualTarget : actualTargets){
+
+        for (Target actualTarget : actualTargets) {
             boolean found = false;
             String targetInPolicy = getTargetValue(actualTarget);
-            for(Target inferredTarget : inferredTargets){
+            for (Target inferredTarget : inferredTargets) {
                 String targetInMessage = getTargetValue(inferredTarget);
-                if(targetInPolicy != null && targetInPolicy.equals(targetInMessage)){
+                if (targetInPolicy != null && targetInPolicy.equals(targetInMessage)) {
                     found = true;
                     break;
                 }
             }
             if (targetInPolicy != null && targetInPolicy.equals("BinarySecurityToken") && !found) {
-                if (!containsSTRTransform(actualTarget,inferredTargets)) {
-                   throw new XWSSecurityException("Policy verification error:" +
+                if (!containsSTRTransform(actualTarget, inferredTargets)) {
+                    throw new XWSSecurityException("Policy verification error:" +
                             "Missing target " + targetInPolicy + " for " + policyType);
-                }else {
-                    break;
                 }
+                break;
             }
             if (!found && targetInPolicy != null) {
                 //check if message has the target
                 //check if the message has the element
-                
-                if(presentInMessage(targetInPolicy)){
+
+                if (presentInMessage(targetInPolicy)) {
                     log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
-                    log.log(Level.SEVERE,"Missing target : " + targetInPolicy + " for " + policyType);
+                    log.log(Level.SEVERE, "Missing target : " + targetInPolicy + " for " + policyType);
                     if (isEndorsing) {
                         throw new XWSSecurityException("Policy verification error:" +
-                            "Missing target " + targetInPolicy + " for Endorsing " + policyType);
+                                "Missing target " + targetInPolicy + " for Endorsing " + policyType);
                     } else {
-                    throw new XWSSecurityException("Policy verification error:" +
-                            "Missing target " + targetInPolicy + " for " + policyType);
+                        throw new XWSSecurityException("Policy verification error:" +
+                                "Missing target " + targetInPolicy + " for " + policyType);
                     }
-                     
+
                 }
             }
         }
@@ -134,8 +132,8 @@ public class TargetResolverImpl implements TargetResolver{
                 SignatureTarget.Transform str = (Transform) it.next();
                 if (str.getTransform().equals(MessageConstants.STR_TRANSFORM_URI)) {
                     //if(actualTarget.getValue().equals(st.getValue())){
-                         return true;
-                    //}
+                    return true;
+                //}
                 }
             }
         }
@@ -144,9 +142,9 @@ public class TargetResolverImpl implements TargetResolver{
 
     private String getTargetValue(Target target) {
         String targetInPolicy = null;
-        if (target.getType() == Target.TARGET_TYPE_VALUE_QNAME) {
+        if (Target.TARGET_TYPE_VALUE_QNAME.equals(target.getType())) {
             targetInPolicy = target.getQName().getLocalPart();
-        } else if (target.getType() == Target.TARGET_TYPE_VALUE_URI) {
+        } else if (Target.TARGET_TYPE_VALUE_URI.equals(target.getType())) {
             if (target.getPolicyQName() != null) {
                 targetInPolicy = target.getPolicyQName().getLocalPart();
             } else {
@@ -157,7 +155,7 @@ public class TargetResolverImpl implements TargetResolver{
                 } else {
                     id = val;
                 }
-                targetInPolicy = getElementById(id);                
+                targetInPolicy = getElementById(id);
                 if (targetInPolicy == null && id.startsWith("SAML")) {
                     return "Assertion";
                 }
@@ -166,36 +164,36 @@ public class TargetResolverImpl implements TargetResolver{
 
         return targetInPolicy;
     }
-    
-    private String getElementById(String id){
-        SecurityContext sc = ((JAXBFilterProcessingContext)ctx).getSecurityContext();     
-        
+
+    private String getElementById(String id) {
+        SecurityContext sc = ((JAXBFilterProcessingContext) ctx).getSecurityContext();
+
         HeaderList headers = sc.getNonSecurityHeaders();
         // look in non-security headers
-        if(headers != null && headers.size() >0){
+        if (headers != null && headers.size() > 0) {
             Iterator<Header> listItr = headers.listIterator();
-            while(listItr.hasNext()){
-                GenericSecuredHeader header = (GenericSecuredHeader)listItr.next();
-                if(header.hasID(id)){
+            while (listItr.hasNext()) {
+                GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
+                if (header.hasID(id)) {
                     return header.getLocalPart();
                 }
             }
         }
-        
+
         // look in processed headers
         ArrayList processedHeaders = sc.getProcessedSecurityHeaders();
-        for(int j= 0; j < processedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) processedHeaders.get(j);
-            if(id.equals(header.getId())){
+        for (int j = 0; j < processedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) processedHeaders.get(j);
+            if (id.equals(header.getId())) {
                 return header.getLocalPart();
             }
         }
-        
+
         // look in buffered headers
         ArrayList bufferedHeaders = sc.getBufferedSecurityHeaders();
-        for(int j = 0; j < bufferedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) bufferedHeaders.get(j);
-            if(id.equals(header.getId())){
+        for (int j = 0; j < bufferedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) bufferedHeaders.get(j);
+            if (id.equals(header.getId())) {
                 return header.getLocalPart();
             }
         }
@@ -203,49 +201,50 @@ public class TargetResolverImpl implements TargetResolver{
     }
 
     private boolean presentInMessage(String targetInPolicy) {
-        
-        if(MessageConstants.SOAP_BODY_LNAME.equals(targetInPolicy))
+
+        if (MessageConstants.SOAP_BODY_LNAME.equals(targetInPolicy)) {
             return true;
-        
-        SecurityContext sc = ((JAXBFilterProcessingContext)ctx).getSecurityContext();     
-        
+        }
+
+        SecurityContext sc = ((JAXBFilterProcessingContext) ctx).getSecurityContext();
+
         HeaderList headers = sc.getNonSecurityHeaders();
         // look in non-security headers
-        if(headers != null && headers.size() >0){
+        if (headers != null && headers.size() > 0) {
             Iterator<Header> listItr = headers.listIterator();
-            while(listItr.hasNext()){
-                GenericSecuredHeader header = (GenericSecuredHeader)listItr.next();
-                if(header != null && header.getLocalPart().equals(targetInPolicy)){
+            while (listItr.hasNext()) {
+                GenericSecuredHeader header = (GenericSecuredHeader) listItr.next();
+                if (header != null && header.getLocalPart().equals(targetInPolicy)) {
                     return true;
                 }
             }
         }
-        
+
         // look in processed headers
         ArrayList processedHeaders = sc.getProcessedSecurityHeaders();
-        for(int j= 0; j < processedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) processedHeaders.get(j);
-            if(header != null && header.getLocalPart().equals(targetInPolicy)){
+        for (int j = 0; j < processedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) processedHeaders.get(j);
+            if (header != null && header.getLocalPart().equals(targetInPolicy)) {
                 return true;
             }
         }
-        
+
         // look in buffered headers
         ArrayList bufferedHeaders = sc.getBufferedSecurityHeaders();
-        for(int j = 0; j < bufferedHeaders.size(); j++){
-            SecurityHeaderElement  header = (SecurityHeaderElement) bufferedHeaders.get(j);
-            if(header != null && header.getLocalPart().equals(targetInPolicy)){
+        for (int j = 0; j < bufferedHeaders.size(); j++) {
+            SecurityHeaderElement header = (SecurityHeaderElement) bufferedHeaders.get(j);
+            if (header != null && header.getLocalPart().equals(targetInPolicy)) {
                 return true;
             }
         }
         return false;
     }
-    
-    public boolean isTargetPresent(List<Target> actualTargets) throws XWSSecurityException{
-        
-        for(Target actualTarget : actualTargets){
+
+    public boolean isTargetPresent(List<Target> actualTargets) throws XWSSecurityException {
+
+        for (Target actualTarget : actualTargets) {
             String targetInPolicy = getTargetValue(actualTarget);
-            if(presentInMessage(targetInPolicy)){
+            if (presentInMessage(targetInPolicy)) {
                 return true;
             }
         }

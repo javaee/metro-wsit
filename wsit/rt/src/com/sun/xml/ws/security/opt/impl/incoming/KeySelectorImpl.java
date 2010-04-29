@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,9 +34,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.security.opt.impl.incoming;
-
 
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.security.IssuedTokenContext;
@@ -45,7 +43,6 @@ import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BinarySecurityToken;
-import com.sun.xml.ws.security.opt.impl.crypto.OctectStreamData;
 import com.sun.xml.ws.security.opt.impl.crypto.SSEData;
 import com.sun.xml.wss.impl.misc.Base64;
 
@@ -119,47 +116,41 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.security.impl.PasswordDerivedKey;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
-import com.sun.xml.ws.security.secext10.AttributedString;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
-import java.lang.NullPointerException;
 import java.security.cert.CertificateEncodingException;
 import javax.crypto.SecretKey;
 import javax.security.auth.Subject;
 import org.ietf.jgss.GSSException;
-
-
 
 /**
  *
  * @author Ashutosh.Shahi@Sun.Com
  */
 public class KeySelectorImpl extends KeySelector {
-    
+
     private static KeySelectorImpl keyResolver = null;
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_SIGNATURE_DOMAIN,
             LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE);
-    
-    
     /** Creates a new instance of KeySelectorImpl */
-    static{
+    
+
+    static {
         keyResolver = new KeySelectorImpl();
     }
-    
+
     /** Creates a new instance of KeySelectorImpl */
     private KeySelectorImpl() {
     }
-    
+
     /**
      *
      * @return
      */
-    public static KeySelector getInstance(){
+    public static KeySelector getInstance() {
         return keyResolver;
     }
-    
+
     /**
      *
      * @param keyInfo
@@ -171,67 +162,68 @@ public class KeySelectorImpl extends KeySelector {
      */
     public KeySelectorResult select(KeyInfo keyInfo, Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
         if (keyInfo == null) {
-            if(logger.getLevel() == Level.SEVERE){
-                logger.log(Level.SEVERE,"WSS1317.keyinfo.null");
+            if (logger.getLevel() == Level.SEVERE) {
+                logger.log(Level.SEVERE, "WSS1317.keyinfo.null");
             }
             throw new KeySelectorException("Null KeyInfo object!");
         }
-        
-        if(MessageConstants.debug){
-            logger.log(Level.FINEST, "KeySelectorResult::select Purpose =  "+purpose);
-            logger.log(Level.FINEST, "KeySelectorResult::select Algorithm is "+method.getAlgorithm());
-            logger.log(Level.FINEST, "KeySelectorResult::select ParameterSpec is "+method.getParameterSpec());
+
+        if (MessageConstants.debug) {
+            logger.log(Level.FINEST, "KeySelectorResult::select Purpose =  " + purpose);
+            logger.log(Level.FINEST, "KeySelectorResult::select Algorithm is " + method.getAlgorithm());
+            logger.log(Level.FINEST, "KeySelectorResult::select ParameterSpec is " + method.getParameterSpec());
         }
         try {
-            
+
             SignatureMethod sm = (SignatureMethod) method;
             List list = keyInfo.getContent();
-            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext)context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
-            
+            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+
             SecurityPolicy securityPolicy = wssContext.getSecurityPolicy();
             boolean isBSP = false;
-            if(securityPolicy != null) {
+            if (securityPolicy != null) {
                 if (PolicyTypeUtil.messagePolicy(securityPolicy)) {
-                    isBSP = ((MessagePolicy)securityPolicy).isBSP();
+                    isBSP = ((MessagePolicy) securityPolicy).isBSP();
                 } else {
-                    isBSP = ((WSSPolicy)securityPolicy).isBSP();
+                    isBSP = ((WSSPolicy) securityPolicy).isBSP();
                 }
             }
-            
+
             if (isBSP && list.size() > 1) {
                 logger.log(Level.SEVERE, "BSP Violation of R5402: KeyInfo MUST have exactly one child");
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "BSP Violation of R5402: KeyInfo MUST have exactly one child", null);
             }
-            
+
             boolean isStr = false;
-            
+
             for (int i = 0; i < list.size(); i++) {
                 XMLStructure xmlStructure = (XMLStructure) list.get(i);
                 if (xmlStructure instanceof KeyValue) {
                     PublicKey pk = null;
                     try {
-                        pk = ((KeyValue)xmlStructure).getPublicKey();
+                        pk = ((KeyValue) xmlStructure).getPublicKey();
                     } catch (KeyException ke) {
                         throw new KeySelectorException(ke);
                     }
                     //if the purpose is signature verification, we need to make sure we
                     //trust the certificate. in case of HOK SAML this can be the cert of the IP
                     if (purpose == Purpose.VERIFY) {
-                        X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(wssContext.getExtraneousProperties(),pk,false);
-                        wssContext.getSecurityEnvironment().validateCertificate(cert,wssContext.getExtraneousProperties());
+                        X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(wssContext.getExtraneousProperties(), pk, false);
+                        wssContext.getSecurityEnvironment().validateCertificate(cert, wssContext.getExtraneousProperties());
                     }
                     // make sure algorithm is compatible with method
                     if (algEquals(sm.getAlgorithm(), pk.getAlgorithm())) {
                         return new SimpleKeySelectorResult(pk);
                     }
-                } else if(xmlStructure instanceof JAXBStructure){
-                    JAXBElement reference = ((JAXBStructure)xmlStructure).getJAXBElement();
-                    if(isSecurityTokenReference(reference)){
+                } else if (xmlStructure instanceof JAXBStructure) {
+                    JAXBElement reference = ((JAXBStructure) xmlStructure).getJAXBElement();
+                    if (isSecurityTokenReference(reference)) {
                         isStr = true;
                         final Key key = resolve(reference, context, purpose);
-                        return new KeySelectorResult(){
-                            public Key getKey(){
+                        return new KeySelectorResult() {
+
+                            public Key getKey() {
                                 return key;
                             }
                         };
@@ -239,99 +231,103 @@ public class KeySelectorImpl extends KeySelector {
                 } else if (xmlStructure instanceof KeyName) {
                     KeyName keyName = (KeyName) xmlStructure;
                     Key returnKey = wssContext.getSecurityEnvironment().getSecretKey(
-                            wssContext.getExtraneousProperties(),keyName.getName(),false);
-                    if(returnKey == null){
+                            wssContext.getExtraneousProperties(), keyName.getName(), false);
+                    if (returnKey == null) {
                         X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
-                                wssContext.getExtraneousProperties(),keyName.getName(), false);
-                        if (cert != null && algEquals(sm.getAlgorithm(),cert.getPublicKey().getAlgorithm())) {
+                                wssContext.getExtraneousProperties(), keyName.getName(), false);
+                        if (cert != null && algEquals(sm.getAlgorithm(), cert.getPublicKey().getAlgorithm())) {
                             return new SimpleKeySelectorResult(cert.getPublicKey());
                         }
-                    }else{
+                    } else {
                         return new SimpleKeySelectorResult(returnKey);
                     }
-                } else if (xmlStructure instanceof X509Data){
-                    Key key = resolveX509Data(wssContext, (X509Data)xmlStructure, purpose);
+                } else if (xmlStructure instanceof X509Data) {
+                    Key key = resolveX509Data(wssContext, (X509Data) xmlStructure, purpose);
                     return new SimpleKeySelectorResult(key);
                 }
             }
-            
-        } catch(KeySelectorException kse){
+
+        } catch (KeySelectorException kse) {
             throw kse;
-        } catch(Exception ex){
-            logger.log(Level.FINEST,"Error occurred while resolving keyinformation" +
+        } catch (Exception ex) {
+            logger.log(Level.FINEST, "Error occurred while resolving keyinformation" +
                     ex.getMessage());
             throw new KeySelectorException(ex);
         }
         throw new KeySelectorException("No KeyValue element found!");
     }
-    
+
     private static class SimpleKeySelectorResult implements KeySelectorResult {
+
         private Key pk;
+
         SimpleKeySelectorResult(Key pk) {
             this.pk = pk;
         }
-        public Key getKey() { return pk; }
+
+        public Key getKey() {
+            return pk;
+        }
     }
-    
-    private static Key resolve(JAXBElement securityTokenReference,XMLCryptoContext context, Purpose purpose)throws KeySelectorException {
-        try{
-            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext)context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
-            boolean isPolicyRecipient = (wssContext.getMode()== JAXBFilterProcessingContext.WSDL_POLICY);
-            
+
+    private static Key resolve(JAXBElement securityTokenReference, XMLCryptoContext context, Purpose purpose) throws KeySelectorException {
+        try {
+            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+            boolean isPolicyRecipient = (wssContext.getMode() == JAXBFilterProcessingContext.WSDL_POLICY);
+
             SecurityPolicy securityPolicy = wssContext.getSecurityPolicy();
             boolean isBSP = false;
-            if(securityPolicy != null) {
+            if (securityPolicy != null) {
                 if (PolicyTypeUtil.messagePolicy(securityPolicy)) {
-                    isBSP = ((MessagePolicy)securityPolicy).isBSP();
+                    isBSP = ((MessagePolicy) securityPolicy).isBSP();
                 } else {
-                    isBSP = ((WSSPolicy)securityPolicy).isBSP();
+                    isBSP = ((WSSPolicy) securityPolicy).isBSP();
                 }
             }
-            
+
             //SecurityTokenReference str = new com.sun.xml.ws.opt.security.impl.keyinfo.SecurityTokenReference(
             //        (SecurityTokenReferenceType)securityTokenReference.getValue());
-            SecurityTokenReference str = (SecurityTokenReference)securityTokenReference.getValue();
+            SecurityTokenReference str = (SecurityTokenReference) securityTokenReference.getValue();
             Reference reference = str.getReference();
             //HashMap tokenCache = wssContext.getTokenCache();
             //HashMap insertedX509Cache = wssContext.getInsertedX509Cache();
-            
+
             Key returnKey = null;
-            if(reference instanceof KeyIdentifier){
-                KeyIdentifier keyId = (KeyIdentifier)reference;
-                
+            if (reference instanceof KeyIdentifier) {
+                KeyIdentifier keyId = (KeyIdentifier) reference;
+
                 returnKey = resolveKeyIdentifier(context, keyId.getValueType(),
-                        keyId.getReferenceValue(),null, purpose);
-                
-                
+                        keyId.getReferenceValue(), null, purpose);
+
+
             } else if (reference instanceof DirectReference) {
                 //WSSElementFactory elementFactory = new WSSElementFactory(wssContext.getSOAPVersion());
                 //DirectReference directRef = elementFactory.createDirectReference();
                 //DirectReference dReference = (DirectReference) reference;
-                DirectReference dReference = (DirectReference)reference;
-                String wscInstance = ((com.sun.xml.ws.security.opt.impl.reference.DirectReference)dReference).getAttribute(
+                DirectReference dReference = (DirectReference) reference;
+                String wscInstance = ((com.sun.xml.ws.security.opt.impl.reference.DirectReference) dReference).getAttribute(
                         wssContext.getWSSCVersion(wssContext.getSecurityPolicyVersion()), "Instance");
                 String uri = dReference.getURI();
                 if (isBSP && !uri.startsWith("#")) {
-                    throw new XWSSecurityException("Violation of BSP R5204 "
-                            + ": When a SECURITY_TOKEN_REFERENCE uses a Direct Reference to an INTERNAL_SECURITY_TOKEN, it MUST use a Shorthand XPointer Reference");
+                    throw new XWSSecurityException("Violation of BSP R5204 " + ": When a SECURITY_TOKEN_REFERENCE uses a Direct Reference to an INTERNAL_SECURITY_TOKEN, it MUST use a Shorthand XPointer Reference");
                 }
-                
+
                 String valueType = dReference.getValueType();
                 if (MessageConstants.DKT_VALUETYPE.equals(valueType) ||
-                        MessageConstants.DKT_13_VALUETYPE.equals(valueType)){
+                        MessageConstants.DKT_13_VALUETYPE.equals(valueType)) {
                     //TODO: this will work for now but need to handle this case here later
                     valueType = null;
                 }
-                
+
                 returnKey = resolveDirectReference(context, valueType, uri, purpose);
-                
-                
-            } else if(reference instanceof com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial){
+
+
+            } else if (reference instanceof com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial) {
                 com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial xis =
-                        (com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial)reference;
+                        (com.sun.xml.ws.security.opt.impl.reference.X509IssuerSerial) reference;
                 BigInteger serialNumber = xis.getX509SerialNumber();
                 String issuerName = xis.getX509IssuerName();
-                
+
                 resolveIssuerSerial(context, issuerName, serialNumber, xis.getId(), purpose);
             } else {
                 logger.log(Level.SEVERE, "WSS1308.unsupported.reference.mechanism");
@@ -339,57 +335,58 @@ public class KeySelectorImpl extends KeySelector {
                         "Key reference mechanism not supported");
                 //throw xwsse;
                 throw SOAPUtil.newSOAPFaultException(
-                        MessageConstants.WSSE_UNSUPPORTED_SECURITY_TOKEN,xwsse.getMessage(),xwsse);
+                        MessageConstants.WSSE_UNSUPPORTED_SECURITY_TOKEN, xwsse.getMessage(), xwsse);
             }
             return returnKey;
-        } catch(XWSSecurityException xwsExp){
-            logger.log(Level.FINEST,"Error occurred while resolving" +
-                    "key information",xwsExp);
+        } catch (XWSSecurityException xwsExp) {
+            logger.log(Level.FINEST, "Error occurred while resolving" +
+                    "key information", xwsExp);
             throw new KeySelectorException(xwsExp);
-        } catch(Exception ex){
-            logger.log(Level.FINEST,"Error occurred while resolving" +
-                    "key information",ex);
+        } catch (Exception ex) {
+            logger.log(Level.FINEST, "Error occurred while resolving" +
+                    "key information", ex);
             throw new KeySelectorException(ex);
         }
-        
+
     }
+
     @SuppressWarnings("unchecked")
     public static Key resolveIssuerSerial(XMLCryptoContext context, String issuerName,
             BigInteger serialNumber, String strId, Purpose purpose) throws KeySelectorException {
         Key returnKey = null;
         String normalizedIssuerName = RFC2253Parser.normalize(issuerName);
-        try{
-            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext)context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+        try {
+            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
             MLSPolicy inferredKB = wssContext.getSecurityContext().getInferredKB();
-            
+
             // for policy verification
             AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
             x509Binding.setReferenceType(MessageConstants.X509_ISSUER_TYPE);
-            if(inferredKB == null){
+            if (inferredKB == null) {
                 wssContext.getSecurityContext().setInferredKB(x509Binding);
-            } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
-                ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
-            } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                if(dktBind.getOriginalKeyBinding() == null) {
+            } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
+                ((SymmetricKeyBinding) inferredKB).setKeyBinding(x509Binding);
+            } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                if (dktBind.getOriginalKeyBinding() == null) {
                     dktBind.setOriginalKeyBinding(x509Binding);
-                } else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                     dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                 }
             }
-            
-            if (purpose ==  Purpose.VERIFY) {
+
+            if (purpose == Purpose.VERIFY) {
                 wssContext.setExtraneousProperty(MessageConstants.REQUESTER_SERIAL, serialNumber);
                 wssContext.setExtraneousProperty(MessageConstants.REQUESTER_ISSUERNAME, normalizedIssuerName);
-                
+
 //                returnKey = wssContext.getSecurityEnvironment().getPublicKey(
 //                        wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
                 X509Certificate cert = wssContext.getSecurityEnvironment().getCertificate(
-                        wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
-                returnKey = cert.getPublicKey(); 
-            } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
+                        wssContext.getExtraneousProperties(), serialNumber, normalizedIssuerName);
+                returnKey = cert.getPublicKey();
+            } else if (purpose == Purpose.SIGN || purpose == Purpose.DECRYPT) {
                 returnKey = wssContext.getSecurityEnvironment().getPrivateKey(
-                        wssContext.getExtraneousProperties(),serialNumber, normalizedIssuerName);
+                        wssContext.getExtraneousProperties(), serialNumber, normalizedIssuerName);
             }
             if (strId != null) {
                 try {
@@ -405,23 +402,23 @@ public class KeySelectorImpl extends KeySelector {
                     // ignore the exception
                 }
             }
-        } catch(Exception ex){
-            logger.log(Level.FINEST,"Error occurred while resolving" +
-                    "key information",ex);
+        } catch (Exception ex) {
+            logger.log(Level.FINEST, "Error occurred while resolving" +
+                    "key information", ex);
             throw new KeySelectorException(ex);
         }
         return returnKey;
     }
-    
-    public static Key resolveDirectReference(XMLCryptoContext context , String valueType,
+
+    public static Key resolveDirectReference(XMLCryptoContext context, String valueType,
             String uri, Purpose purpose) throws KeySelectorException {
-        
+
         Key returnKey = null;
-        try{
-            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext)context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+        try {
+            JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
             MLSPolicy inferredKB = wssContext.getSecurityContext().getInferredKB();
             String wsuId = SOAPUtil.getIdFromFragmentRef(uri);
-            boolean isSymmetric = false;            
+            boolean isSymmetric = false;
             if (MessageConstants.USERNAME_TOKEN_NS.equals(valueType) || MessageConstants.USERNAME_STR_REFERENCE_NS.equals(valueType)) {
                 UsernameTokenHeader token = null;
                 token = (UsernameTokenHeader) resolveToken(wsuId, context);
@@ -434,8 +431,8 @@ public class KeySelectorImpl extends KeySelector {
                 if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(untBinding);
                     if (wssContext.getExtraneousProperty("EncryptedKey") != null) {
-                      isSymmetric = true;
-                    } 
+                        isSymmetric = true;
+                    }
                 } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
                     ((SymmetricKeyBinding) inferredKB).setKeyBinding(untBinding);
                     isSymmetric = true;
@@ -453,35 +450,35 @@ public class KeySelectorImpl extends KeySelector {
             } else if (MessageConstants.X509v3_NS.equals(valueType) || MessageConstants.X509v1_NS.equals(valueType)) {
                 // its an X509 Token
                 X509BinarySecurityToken token = null;
-                token = (X509BinarySecurityToken)resolveToken(wsuId,context);
-                if(token == null){
-                    throw new KeySelectorException("Token with Id "+wsuId+ "not found");
+                token = (X509BinarySecurityToken) resolveToken(wsuId, context);
+                if (token == null) {
+                    throw new KeySelectorException("Token with Id " + wsuId + "not found");
                 }
                 // for policy verification
                 AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                 x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
                 x509Binding.setValueType(valueType);
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(x509Binding);
-                } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
-                    ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
+                } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
+                    ((SymmetricKeyBinding) inferredKB).setKeyBinding(x509Binding);
                     isSymmetric = true;
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                    if(dktBind.getOriginalKeyBinding() == null) {
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                    if (dktBind.getOriginalKeyBinding() == null) {
                         dktBind.setOriginalKeyBinding(x509Binding);
-                    } else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                    } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                         dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                         isSymmetric = true;
                     }
                 }
-                
-                returnKey = resolveX509Token(wssContext,  token, purpose, isSymmetric);
-            } else if(MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType) ||
-                    MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)){
-                KerberosBinarySecurityToken token = (KerberosBinarySecurityToken)resolveToken(wsuId,context);
-                if(token == null){
-                    throw new KeySelectorException("Token with Id "+wsuId+ "not found");
+
+                returnKey = resolveX509Token(wssContext, token, purpose, isSymmetric);
+            } else if (MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(valueType) ||
+                    MessageConstants.KERBEROS_V5_GSS_APREQ.equals(valueType)) {
+                KerberosBinarySecurityToken token = (KerberosBinarySecurityToken) resolveToken(wsuId, context);
+                if (token == null) {
+                    throw new KeySelectorException("Token with Id " + wsuId + "not found");
                 }
                 // for policy verification
                 SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
@@ -489,32 +486,32 @@ public class KeySelectorImpl extends KeySelector {
                 ktBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
                 ktBinding.setValueType(valueType);
                 skBinding.setKeyBinding(ktBinding);
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(skBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                    if(dktBind.getOriginalKeyBinding() == null) {
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                    if (dktBind.getOriginalKeyBinding() == null) {
                         dktBind.setOriginalKeyBinding(skBinding);
-                    } else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                    } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                         dktBind.getOriginalKeyBinding().setKeyBinding(ktBinding);
                         isSymmetric = true;
                     }
                 }
-                
+
                 returnKey = resolveKerberosToken(wssContext, token);
-            } else if(MessageConstants.EncryptedKey_NS.equals(valueType)) {
-                EncryptedKey token = (EncryptedKey)resolveToken(wsuId, context);
-                if(token == null){
-                    throw new KeySelectorException("Token with Id "+wsuId+ "not found");
+            } else if (MessageConstants.EncryptedKey_NS.equals(valueType)) {
+                EncryptedKey token = (EncryptedKey) resolveToken(wsuId, context);
+                if (token == null) {
+                    throw new KeySelectorException("Token with Id " + wsuId + "not found");
                 }
                 // for policy verification
                 WSSPolicy skBinding = null;
                 boolean saml = wssContext.getSecurityContext().getIsSAMLKeyBinding();
                 if (saml) {
                     skBinding = new AuthenticationTokenPolicy.SAMLAssertionBinding();
-                    //reset the property, but why ?. Currently Policy is being inferred for
-                    // every ED, so reset here will screw up again
-                    //wssContext.getSecurityContext().setIsSAMLKeyBinding(false);
+                //reset the property, but why ?. Currently Policy is being inferred for
+                // every ED, so reset here will screw up again
+                //wssContext.getSecurityContext().setIsSAMLKeyBinding(false);
                 } else {
                     // for policy verification
                     SymmetricKeyBinding symkBinding = new SymmetricKeyBinding();
@@ -523,202 +520,205 @@ public class KeySelectorImpl extends KeySelector {
                     skBinding = symkBinding;
                 }
                 //TODO: ReferenceType and ValueType not set on X509Binding
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(skBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
-                    
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(skBinding);
+                    }
+
                 }
                 // TODO: where are EKSHA1 and and SECRET_KEY values being set
                 String algo = wssContext.getAlgorithmSuite().getEncryptionAlgorithm();
                 returnKey = token.getKey(algo);
                 skBinding.setKeyBinding(token.getInferredKB());
-            } else if (MessageConstants.SCT_VALUETYPE.equals(valueType) || MessageConstants.SCT_13_VALUETYPE.equals(valueType)) {                                
+            } else if (MessageConstants.SCT_VALUETYPE.equals(valueType) || MessageConstants.SCT_13_VALUETYPE.equals(valueType)) {
                 // wsuId here could be wsuId or SCT Session Id
-                if(wssContext.isClient()){
+                if (wssContext.isClient()) {
                     returnKey = resolveSCT(wssContext, wsuId, purpose);
                 }
-                if(returnKey == null){
-                    SecurityContextToken scToken = (SecurityContextToken)resolveToken(wsuId, context);
+                if (returnKey == null) {
+                    SecurityContextToken scToken = (SecurityContextToken) resolveToken(wsuId, context);
                     //wssContext.setExtraneousProperty(MessageConstants.INCOMING_SCT, scToken);
-                    if(scToken == null){
-                        if(!wssContext.isClient()){
+                    if (scToken == null) {
+                        if (!wssContext.isClient()) {
                             // It will be executed on server-side when IncludeToken=Never
                             returnKey = resolveSCT(wssContext, wsuId, purpose);
-                        }else{
-                            throw new KeySelectorException("Token with Id "+wsuId+ "not found");
+                        } else {
+                            throw new KeySelectorException("Token with Id " + wsuId + "not found");
                         }
-                    }else{
+                    } else {
                         returnKey = resolveSCT(wssContext, scToken.getSCId(), purpose);
                     }
                 }
-                
+
                 SecureConversationTokenKeyBinding sctBinding = new SecureConversationTokenKeyBinding();
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(sctBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(sctBinding);
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(sctBinding);
                 }
                 return returnKey;
-            } else if(MessageConstants.DKT_VALUETYPE.equals(valueType) || 
-                        MessageConstants.DKT_13_VALUETYPE.equals(valueType)){
-                DerivedKeyToken token = (DerivedKeyToken)resolveToken(wsuId, context);
-                if(token == null){
-                    throw new KeySelectorException("Token with Id "+wsuId+ "not found");
+            } else if (MessageConstants.DKT_VALUETYPE.equals(valueType) ||
+                    MessageConstants.DKT_13_VALUETYPE.equals(valueType)) {
+                DerivedKeyToken token = (DerivedKeyToken) resolveToken(wsuId, context);
+                if (token == null) {
+                    throw new KeySelectorException("Token with Id " + wsuId + "not found");
                 }
-                returnKey = ((DerivedKeyToken)token).getKey();
+                returnKey = ((DerivedKeyToken) token).getKey();
                 DerivedTokenKeyBinding dtkBinding = new DerivedTokenKeyBinding();
                 dtkBinding.setOriginalKeyBinding(token.getInferredKB());
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(dtkBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
                     //already set - do nothing
-                } else{
+                } else {
                     //throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                 }
-                
-                //returnKey = ((DerivedKeyToken)token).getKey();
+
+            //returnKey = ((DerivedKeyToken)token).getKey();
             } else if (null == valueType) {
-                
+
                 SecurityHeaderElement token = resolveToken(wsuId, context);
-                if(token == null){
-                    throw new KeySelectorException("Token with Id "+wsuId+ " not found");
+                if (token == null) {
+                    throw new KeySelectorException("Token with Id " + wsuId + " not found");
                 }
-                if(token instanceof X509BinarySecurityToken){
+                if (token instanceof X509BinarySecurityToken) {
                     // for policy verification
                     AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                     x509Binding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-                    if(inferredKB == null){
+                    if (inferredKB == null) {
                         wssContext.getSecurityContext().setInferredKB(x509Binding);
-                    } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
-                        ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
-                    } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                        if(dktBind.getOriginalKeyBinding() == null)
+                    } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
+                        ((SymmetricKeyBinding) inferredKB).setKeyBinding(x509Binding);
+                    } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                        DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                        if (dktBind.getOriginalKeyBinding() == null) {
                             dktBind.setOriginalKeyBinding(x509Binding);
-                        else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                        } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                             dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                         }
                     }
                     //
-                    
-                    returnKey = resolveX509Token(wssContext, (X509BinarySecurityToken)token, purpose, isSymmetric);
-                } else if(token instanceof EncryptedKey){
+
+                    returnKey = resolveX509Token(wssContext, (X509BinarySecurityToken) token, purpose, isSymmetric);
+                } else if (token instanceof EncryptedKey) {
                     // for policy verification
                     SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                     AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                     skBinding.setKeyBinding(x509Binding);
                     //TODO: ReferenceType and ValueType not set on X509Binding
-                    if(inferredKB == null){
+                    if (inferredKB == null) {
                         wssContext.getSecurityContext().setInferredKB(skBinding);
-                    } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                            ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
-                    }
-                    //
-                    
-                    String algo = wssContext.getAlgorithmSuite().getEncryptionAlgorithm();
-                    returnKey = ((EncryptedKey)token).getKey(algo);
-                } else if(token instanceof DerivedKeyToken){
-                    // for policy verification
-                    returnKey = ((DerivedKeyToken)token).getKey();
-                    inferredKB = wssContext.getSecurityContext().getInferredKB();
-                    DerivedTokenKeyBinding dtkBinding = new DerivedTokenKeyBinding();
-                    dtkBinding.setOriginalKeyBinding(((DerivedKeyToken)token).getInferredKB());
-                    if(inferredKB == null){
-                        wssContext.getSecurityContext().setInferredKB(dtkBinding);
-                    } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
-                        //already set - do nothing
-                    } else{
-                        //throw new XWSSecurityException("A derived Key Token should be a top level key binding");
-                    }
-                    //                    
-                    //returnKey = ((DerivedKeyToken)token).getKey();
-                } else if(token instanceof SecurityContextToken){
-                    // for policy verification
-                    SecureConversationTokenKeyBinding sctBinding = new SecureConversationTokenKeyBinding();
-                    if(inferredKB == null){
-                        wssContext.getSecurityContext().setInferredKB(sctBinding);
-                    } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(sctBinding);
-                    }
-                    //wssContext.setExtraneousProperty(MessageConstants.INCOMING_SCT, token);
-                    returnKey = resolveSCT(wssContext, ((SecurityContextToken)token).getSCId(), purpose);
-                } else if (token instanceof UsernameToken){
-                    AuthenticationTokenPolicy.UsernameTokenBinding untBinding = new AuthenticationTokenPolicy.UsernameTokenBinding();
-                    untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
-                    if(inferredKB == null){
-                        wssContext.getSecurityContext().setInferredKB(untBinding);
-                    }else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                        if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null){
-                           ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(untBinding);
+                    } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                        if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                            ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(skBinding);
                         }
                     }
-                     //TODO:suresh fix this
-                   returnKey = resolveUsernameToken(wssContext, (UsernameTokenHeader)token, purpose, isSymmetric);
-                    
+                    //
+
+                    String algo = wssContext.getAlgorithmSuite().getEncryptionAlgorithm();
+                    returnKey = ((EncryptedKey) token).getKey(algo);
+                } else if (token instanceof DerivedKeyToken) {
+                    // for policy verification
+                    returnKey = ((DerivedKeyToken) token).getKey();
+                    inferredKB = wssContext.getSecurityContext().getInferredKB();
+                    DerivedTokenKeyBinding dtkBinding = new DerivedTokenKeyBinding();
+                    dtkBinding.setOriginalKeyBinding(((DerivedKeyToken) token).getInferredKB());
+                    if (inferredKB == null) {
+                        wssContext.getSecurityContext().setInferredKB(dtkBinding);
+                    } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                        //already set - do nothing
+                    } else {
+                        //throw new XWSSecurityException("A derived Key Token should be a top level key binding");
+                    }
+                //
+                //returnKey = ((DerivedKeyToken)token).getKey();
+                } else if (token instanceof SecurityContextToken) {
+                    // for policy verification
+                    SecureConversationTokenKeyBinding sctBinding = new SecureConversationTokenKeyBinding();
+                    if (inferredKB == null) {
+                        wssContext.getSecurityContext().setInferredKB(sctBinding);
+                    } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(sctBinding);
+                    }
+                    //wssContext.setExtraneousProperty(MessageConstants.INCOMING_SCT, token);
+                    returnKey = resolveSCT(wssContext, ((SecurityContextToken) token).getSCId(), purpose);
+                } else if (token instanceof UsernameToken) {
+                    AuthenticationTokenPolicy.UsernameTokenBinding untBinding = new AuthenticationTokenPolicy.UsernameTokenBinding();
+                    untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+                    if (inferredKB == null) {
+                        wssContext.getSecurityContext().setInferredKB(untBinding);
+                    } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                        if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                            ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(untBinding);
+                        }
+                    }
+                    //TODO:suresh fix this
+                    returnKey = resolveUsernameToken(wssContext, (UsernameTokenHeader) token, purpose, isSymmetric);
+
                 }
-                
+
             } else {
-                logger.log(Level.SEVERE,"WSS1307.unsupported.directref.mechanism",
-                        new Object[] {valueType});
+                logger.log(Level.SEVERE, "WSS1307.unsupported.directref.mechanism",
+                        new Object[]{valueType});
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-                        "unsupported directreference ValueType "+ valueType,null);
+                        "unsupported directreference ValueType " + valueType, null);
             }
         } catch (XWSSecurityException ex) {
-            logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo",ex);
+            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
             throw new KeySelectorException(ex);
         } catch (URIReferenceException ex) {
-            logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo" ,ex);
+            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
             throw new KeySelectorException(ex);
         }
-        
+
         return returnKey;
     }
+
     @SuppressWarnings("unchecked")
     public static Key resolveKeyIdentifier(XMLCryptoContext xc, String valueType,
-            String referenceValue,String strId, Purpose purpose) throws KeySelectorException {
-        JAXBFilterProcessingContext context = (JAXBFilterProcessingContext)xc.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+            String referenceValue, String strId, Purpose purpose) throws KeySelectorException {
+        JAXBFilterProcessingContext context = (JAXBFilterProcessingContext) xc.get(MessageConstants.WSS_PROCESSING_CONTEXT);
         Key returnKey = null;
         MLSPolicy inferredKB = context.getSecurityContext().getInferredKB();
         boolean isSymmetric = false;
-        try{
+        try {
             if (MessageConstants.X509SubjectKeyIdentifier_NS.equals(valueType) ||
                     MessageConstants.X509v3SubjectKeyIdentifier_NS.equals(valueType)) {
                 //for policy verification
                 AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                 x509Binding.setValueType(MessageConstants.X509SubjectKeyIdentifier_NS);
                 x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     context.getSecurityContext().setInferredKB(x509Binding);
-                } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
-                    ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
+                } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
+                    ((SymmetricKeyBinding) inferredKB).setKeyBinding(x509Binding);
                     isSymmetric = true;
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                    if(dktBind.getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
-                    else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                    if (dktBind.getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(x509Binding);
+                    } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                         dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                         isSymmetric = true;
                     }
                 }
                 // get the key
-                 byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
-                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {                   
+                byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
+                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {
                     context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
                     //returnKey = context.getSecurityEnvironment().getPublicKey(
                     //      context.getExtraneousProperties(),keyIdBytes);
                     X509Certificate cert = context.getSecurityEnvironment().getCertificate(
-                            context.getExtraneousProperties(),keyIdBytes);
-                    
+                            context.getExtraneousProperties(), keyIdBytes);
+
                     if (!isSymmetric && !context.isSamlSignatureKey()) {
                         context.getSecurityEnvironment().updateOtherPartySubject(
                                 DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                     }
                     returnKey = cert.getPublicKey();
-                } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
+                } else if (purpose == Purpose.SIGN || purpose == Purpose.DECRYPT) {
                     returnKey = context.getSecurityEnvironment().getPrivateKey(
                             context.getExtraneousProperties(),
                             keyIdBytes);
@@ -737,43 +737,43 @@ public class KeySelectorImpl extends KeySelector {
                         //ignore the exception
                     }
                 }
-            }  else if (MessageConstants.ThumbPrintIdentifier_NS.equals(valueType)) {
+            } else if (MessageConstants.ThumbPrintIdentifier_NS.equals(valueType)) {
                 //for policy verification
                 AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                 x509Binding.setValueType(MessageConstants.ThumbPrintIdentifier_NS);
                 x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     context.getSecurityContext().setInferredKB(x509Binding);
-                } else if(PolicyTypeUtil.symmetricKeyBinding(inferredKB)){
-                    ((SymmetricKeyBinding)inferredKB).setKeyBinding(x509Binding);
+                } else if (PolicyTypeUtil.symmetricKeyBinding(inferredKB)) {
+                    ((SymmetricKeyBinding) inferredKB).setKeyBinding(x509Binding);
                     isSymmetric = true;
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding)inferredKB;
-                    if(dktBind.getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(x509Binding);
-                    else if(PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())){
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    DerivedTokenKeyBinding dktBind = (DerivedTokenKeyBinding) inferredKB;
+                    if (dktBind.getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(x509Binding);
+                    } else if (PolicyTypeUtil.symmetricKeyBinding(dktBind.getOriginalKeyBinding())) {
                         dktBind.getOriginalKeyBinding().setKeyBinding(x509Binding);
                         isSymmetric = true;
                     }
                 }
                 // get the key
-                 byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
-                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {                   
-                    context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));                    
+                byte[] keyIdBytes = XMLUtil.getDecodedBase64EncodedData(referenceValue);
+                if (purpose == Purpose.VERIFY || purpose == Purpose.ENCRYPT) {
+                    context.setExtraneousProperty(MessageConstants.REQUESTER_KEYID, new String(keyIdBytes));
                     X509Certificate cert = context.getSecurityEnvironment().getCertificate(
-                            context.getExtraneousProperties(),keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
+                            context.getExtraneousProperties(), keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
                     if (!isSymmetric) {
                         context.getSecurityEnvironment().updateOtherPartySubject(
                                 DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                     }
-                    returnKey = cert.getPublicKey(); 
-                    
-                } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT){
-                    returnKey =context.getSecurityEnvironment().getPrivateKey(
+                    returnKey = cert.getPublicKey();
+
+                } else if (purpose == Purpose.SIGN || purpose == Purpose.DECRYPT) {
+                    returnKey = context.getSecurityEnvironment().getPrivateKey(
                             context.getExtraneousProperties(),
                             keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
                 }
-                if(strId != null){  
+                if (strId != null) {
                     try {
                         X509Certificate cert = context.getSecurityEnvironment().getCertificate(
                                 context.getExtraneousProperties(), keyIdBytes, MessageConstants.THUMB_PRINT_TYPE);
@@ -783,96 +783,99 @@ public class KeySelectorImpl extends KeySelector {
                         context.getSTRTransformCache().put(strId, data);
                     } catch (XWSSecurityException ex) {
                     } catch (CertificateEncodingException ex) {
-                    } catch( Exception ex){
+                    } catch (Exception ex) {
                         //ignore the exception
                     }
                 }
-            } else if(MessageConstants.KERBEROS_v5_APREQ_IDENTIFIER.equals(valueType)){
+            } else if (MessageConstants.KERBEROS_v5_APREQ_IDENTIFIER.equals(valueType)) {
                 //for policy verification
                 SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                 AuthenticationTokenPolicy.KerberosTokenBinding ktBinding = new AuthenticationTokenPolicy.KerberosTokenBinding();
                 ktBinding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                 skBinding.setKeyBinding(ktBinding);
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     context.getSecurityContext().setInferredKB(skBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(skBinding);
+                    }
                 }
                 // now get the key
                 String algo = SecurityUtil.getSecretKeyAlgorithm(context.getAlgorithmSuite().getEncryptionAlgorithm());
                 KerberosContext krbContext = context.getKerberosContext();
-                if(krbContext != null){
-                    String encodedRef = (String)context.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
-                    if(!referenceValue.equals(encodedRef)){
+                if (krbContext != null) {
+                    String encodedRef = (String) context.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
+                    if (!referenceValue.equals(encodedRef)) {
                         throw new XWSSecurityException("SecretKey could not be obtained, Incorrect Kerberos Context found");
                     }
                     returnKey = krbContext.getSecretKey(algo);
-                } else{
+                } else {
                     throw new XWSSecurityException("SecretKey could not be obtained, Kerberos Context not set");
                 }
-            } else if (MessageConstants.EncryptedKeyIdentifier_NS.equals(valueType)){
+            } else if (MessageConstants.EncryptedKeyIdentifier_NS.equals(valueType)) {
                 //for policy verification
                 SymmetricKeyBinding skBinding = new SymmetricKeyBinding();
                 AuthenticationTokenPolicy.X509CertificateBinding x509Binding = new AuthenticationTokenPolicy.X509CertificateBinding();
                 x509Binding.setReferenceType(MessageConstants.KEY_INDETIFIER_TYPE);
                 skBinding.setKeyBinding(x509Binding);
                 //TODO: ValueType not set on X509Binding
-                if(inferredKB == null){
+                if (inferredKB == null) {
                     context.getSecurityContext().setInferredKB(skBinding);
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(skBinding);
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(skBinding);
+                    }
                 }
                 // get the key
-                String ekSha1RefValue = (String)context.getExtraneousProperty("EncryptedKeySHA1");
-                Key secretKey = (Key)context.getExtraneousProperty("SecretKey");
+                String ekSha1RefValue = (String) context.getExtraneousProperty("EncryptedKeySHA1");
+                Key secretKey = (Key) context.getExtraneousProperty("SecretKey");
                 String keyRefValue = referenceValue;
-                if(ekSha1RefValue != null && secretKey != null){
+                if (ekSha1RefValue != null && secretKey != null) {
                     if (ekSha1RefValue.equals(keyRefValue)) {
                         returnKey = secretKey;
                         //Cannot determine whether the original key was X509 or PasswordDerivedKey
                         skBinding.usesEKSHA1KeyBinding(true);
                     }
-                }else{
+                } else {
                     String message = "EncryptedKeySHA1 reference not correct";
-                    logger.log(Level.SEVERE,"WSS1306:unsupported.KeyIdentifier.Reference.Type.encountered", new Object[] {message});
+                    logger.log(Level.SEVERE, "WSS1306:unsupported.KeyIdentifier.Reference.Type.encountered", new Object[]{message});
                     throw new KeySelectorException(message);
                 }
             } else if (MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE.equals(valueType) ||
                     MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE.equals(valueType)) {
                 //for policy verification
                 IssuedTokenKeyBinding itkBinding = new IssuedTokenKeyBinding();
-                if(inferredKB == null){
-                    if (context.hasIssuedToken()){
+                if (inferredKB == null) {
+                    if (context.hasIssuedToken()) {
                         context.getSecurityContext().setInferredKB(itkBinding);
-                    } else{
+                    } else {
                         context.getSecurityContext().setInferredKB(new AuthenticationTokenPolicy.SAMLAssertionBinding());
                     }
-                } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)){
-                    if(((DerivedTokenKeyBinding)inferredKB).getOriginalKeyBinding() == null)
-                        ((DerivedTokenKeyBinding)inferredKB).setOriginalKeyBinding(itkBinding);
-                    
+                } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
+                    if (((DerivedTokenKeyBinding) inferredKB).getOriginalKeyBinding() == null) {
+                        ((DerivedTokenKeyBinding) inferredKB).setOriginalKeyBinding(itkBinding);
+                    }
+
                 }
                 // TODO:
-                SecurityHeaderElement she = resolveToken(referenceValue,xc);
-                if(she != null && she instanceof SAMLAssertion){
-                    SAMLAssertion samlAssertion = (SAMLAssertion)she;
+                SecurityHeaderElement she = resolveToken(referenceValue, xc);
+                if (she != null && she instanceof SAMLAssertion) {
+                    SAMLAssertion samlAssertion = (SAMLAssertion) she;
                     returnKey = samlAssertion.getKey();
-                    if(strId != null && strId.length() >0){
-                        Data data = new SSEData((SecurityElement)samlAssertion,false,context.getNamespaceContext());
-                        context.getElementCache().put(strId,data);
+                    if (strId != null && strId.length() > 0) {
+                        Data data = new SSEData((SecurityElement) samlAssertion, false, context.getNamespaceContext());
+                        context.getElementCache().put(strId, data);
                     }
-                } else{
+                } else {
                     HashMap sentSamlKeys = (HashMap) context.getExtraneousProperty(MessageConstants.STORED_SAML_KEYS);
-                    if(sentSamlKeys != null){
+                    if (sentSamlKeys != null) {
                         // for policy verification
                         context.getSecurityContext().setIsSAMLKeyBinding(true);
                         returnKey = (Key) sentSamlKeys.get(referenceValue);
                     }
                 }
-                
-                if (context.hasIssuedToken() && returnKey != null){
+
+                if (context.hasIssuedToken() && returnKey != null) {
                     SecurityTokenReference str = new SecurityTokenReference(context.getSOAPVersion());
                     com.sun.xml.ws.security.opt.impl.reference.KeyIdentifier ki = new com.sun.xml.ws.security.opt.impl.reference.KeyIdentifier(context.getSOAPVersion());
                     ki.setValueType(valueType);
@@ -886,16 +889,16 @@ public class KeySelectorImpl extends KeySelector {
                 returnKey = null;
             }
         } catch (XWSSecurityException ex) {
-            logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo",ex);
+            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
             throw new KeySelectorException(ex);
         } catch (URIReferenceException ex) {
-            logger.log(Level.SEVERE,"WSS1377.error.in.resolving.keyinfo" ,ex);
+            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
             throw new KeySelectorException(ex);
-        } 
+        }
         return returnKey;
-        
+
     }
-    
+
     //@@@FIXME: this should also work for key types other than DSA/RSA
     /**
      *
@@ -914,12 +917,13 @@ public class KeySelectorImpl extends KeySelector {
             return false;
         }
     }
+
     private static Key resolveUsernameToken(JAXBFilterProcessingContext wssContext, UsernameTokenHeader token, Purpose purpose, boolean isSymmetric)
-        throws XWSSecurityException {
+            throws XWSSecurityException {
         String algo = wssContext.getAlgorithmSuite().getSymmetricKeyAlgorithm();
         AuthenticationTokenPolicy.UsernameTokenBinding untBinding = new AuthenticationTokenPolicy.UsernameTokenBinding();
         String decodedSalt = token.getSalt();
-        if(decodedSalt == null){
+        if (decodedSalt == null) {
             throw new XWSSecurityException("Salt retrieved from UsernameToken is null");
         }
         byte[] salt = null;
@@ -927,18 +931,18 @@ public class KeySelectorImpl extends KeySelector {
             salt = Base64.decode(decodedSalt);
         } catch (Base64DecodingException ex) {
             logger.log(Level.SEVERE, null, ex);
-        }        
+        }
         String password = null;
         try {
             password = wssContext.getSecurityEnvironment().authenticateUser(wssContext.getExtraneousProperties(), token.getUsernameValue());
         } catch (XWSSecurityException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        if(password == null){
+        if (password == null) {
             throw new XWSSecurityException("Password retrieved from UsernameToken is null");
         }
         String iterate = token.getIterations();
-        if(iterate == null){
+        if (iterate == null) {
             throw new XWSSecurityException("Value of Iterations  retrieved from UsernameToken is null");
         }
         int iterations = Integer.parseInt(iterate);
@@ -974,7 +978,7 @@ public class KeySelectorImpl extends KeySelector {
                 untBinding.setSecretKey(keyof128Bits);
                 sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));
                 untBinding.setSecretKey(sKey);
-            }            
+            }
         } else if (purpose == Purpose.VERIFY) {
             salt[0] = MessageConstants.VALUE_FOR_SIGNATURE;
             try {
@@ -985,54 +989,56 @@ public class KeySelectorImpl extends KeySelector {
             untBinding.setSecretKey(verifySignature);
             sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));
             untBinding.setSecretKey(sKey);
-            //return sKey;
-           } else {
+        //return sKey;
+        } else {
             //handles RequiredDerivedKeys case
-              salt[0] = MessageConstants.VALUE_FOR_ENCRYPTION;
-              byte[] key = null;
+            salt[0] = MessageConstants.VALUE_FOR_ENCRYPTION;
+            byte[] key = null;
             try {
                 key = pdk.generate160BitKey(password, iterations, salt);
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(KeySelectorImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
-              byte[] sKeyof16ByteLength = new byte[16];
-              for(int i=0;i<16;i++){
-                  sKeyof16ByteLength[i] = key[i];
-              }
-              untBinding.setSecretKey(sKeyof16ByteLength);
-              sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));    
-          }
+            byte[] sKeyof16ByteLength = new byte[16];
+            for (int i = 0; i < 16; i++) {
+                sKeyof16ByteLength[i] = key[i];
+            }
+            untBinding.setSecretKey(sKeyof16ByteLength);
+            sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));
+        }
         return sKey;
-}
+    }
+
     private static Key resolveX509Token(JAXBFilterProcessingContext context,
             X509BinarySecurityToken token, Purpose purpose, boolean isSymmetric) throws XWSSecurityException {
         X509Certificate cert = token.getCertificate();
-        if(cert == null)
+        if (cert == null) {
             cert = SOAPUtil.getCertificateFromToken(token);
+        }
         if (purpose == Purpose.VERIFY) {
             if (!isSymmetric) {
                 context.getSecurityEnvironment().updateOtherPartySubject(
                         DefaultSecurityEnvironmentImpl.getSubject(context), cert);
             }
             return cert.getPublicKey();
-        } else if(purpose == Purpose.SIGN || purpose == Purpose.DECRYPT) {
+        } else if (purpose == Purpose.SIGN || purpose == Purpose.DECRYPT) {
             return context.getSecurityEnvironment().getPrivateKey(
                     context.getExtraneousProperties(), cert);
         }
         return null;
     }
-    
-    private static Key resolveX509Data(JAXBFilterProcessingContext context,X509Data  x509Data,  Purpose purpose) throws KeySelectorException {
-        
-        X509Certificate cert =  null;
+
+    private static Key resolveX509Data(JAXBFilterProcessingContext context, X509Data x509Data, Purpose purpose) throws KeySelectorException {
+
+        X509Certificate cert = null;
         try {
             List data = x509Data.getContent();
             Iterator iterator = data.iterator();
-            while(iterator.hasNext()){//will break for in single loop;
+            while (iterator.hasNext()) {//will break for in single loop;
                 Object content = iterator.next();
                 if (content instanceof X509Certificate) {
-                    cert = (X509Certificate)content;
-                } else if(content instanceof byte[]) {  
+                    cert = (X509Certificate) content;
+                } else if (content instanceof byte[]) {
                     byte[] ski = (byte[]) content;
                     if (purpose == Purpose.VERIFY) {
                         //return context.getSecurityEnvironment().getPublicKey(
@@ -1043,7 +1049,7 @@ public class KeySelectorImpl extends KeySelector {
                         context.getSecurityEnvironment().updateOtherPartySubject(
                                 DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                         return cert.getPublicKey();
-                    } else if(purpose == Purpose.SIGN){
+                    } else if (purpose == Purpose.SIGN) {
                         return context.getSecurityEnvironment().getPrivateKey(
                                 context.getExtraneousProperties(), ski);
                     }
@@ -1059,139 +1065,140 @@ public class KeySelectorImpl extends KeySelector {
                         cert = context.getSecurityEnvironment().getCertificate(
                                 context.getExtraneousProperties(), xis.getSerialNumber(), xis.getIssuerName());
                         context.getSecurityEnvironment().updateOtherPartySubject(
-                                DefaultSecurityEnvironmentImpl.getSubject(context),cert);
+                                DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                         return cert.getPublicKey();
-                    } else if(purpose == Purpose.SIGN){
+                    } else if (purpose == Purpose.SIGN) {
                         return context.getSecurityEnvironment().getPrivateKey(
                                 context.getExtraneousProperties(), xis.getSerialNumber(), xis.getIssuerName());
                     }
-                    
+
                 } else {
                     logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
                     throw new KeySelectorException(
                             "Unsupported child element of X509Data encountered");
                 }
-                
+
                 if (purpose == Purpose.VERIFY) {
                     context.getSecurityEnvironment().updateOtherPartySubject(
-                            DefaultSecurityEnvironmentImpl.getSubject(context),cert);
+                            DefaultSecurityEnvironmentImpl.getSubject(context), cert);
                     return cert.getPublicKey();
-                } else if(purpose == Purpose.SIGN){
+                } else if (purpose == Purpose.SIGN) {
                     return context.getSecurityEnvironment().getPrivateKey(
                             context.getExtraneousProperties(), cert);
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE,"WSS1314.illegal.x509.data", e.getMessage());
+            logger.log(Level.SEVERE, "WSS1314.illegal.x509.data", e.getMessage());
             throw new KeySelectorException(e);
         }
         return null;//Should never come here.
     }
-    
+
     protected static SecurityHeaderElement resolveToken(final String uri, XMLCryptoContext context) throws
-            URIReferenceException, XWSSecurityException{
+            URIReferenceException, XWSSecurityException {
         URIDereferencer resolver = context.getURIDereferencer();
-        
-        URIReference uriRef = new URIReference(){
-            public String getURI(){
+
+        URIReference uriRef = new URIReference() {
+
+            public String getURI() {
                 return uri;
             }
-            
-            public String getType(){
+
+            public String getType() {
                 return null;
             }
         };
-        
-        JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext)context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
 
-        try{
-            StreamWriterData data = (StreamWriterData)resolver.dereference(uriRef,context);
+        JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+
+        try {
+            StreamWriterData data = (StreamWriterData) resolver.dereference(uriRef, context);
             //JAXBElement element = data.getJAXBElement();
-            if(data == null){
+            if (data == null) {
                 return null;
             }
             Object derefData = data.getDereferencedObject();
             SecurityHeaderElement she = null;
-            if(derefData instanceof SecurityHeaderElement){
-                she = (SecurityHeaderElement)derefData;
+            if (derefData instanceof SecurityHeaderElement) {
+                she = (SecurityHeaderElement) derefData;
             }
-            
-            if(she == null){
-                logger.log(Level.SEVERE,"WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE");
+
+            if (she == null) {
+                logger.log(Level.SEVERE, "WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE");
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                         "Referenced Security Token could not be retrieved",
                         null);
             }
-            
-            if(MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME.equals(she.getLocalPart())){
-                BinarySecurityToken token = (BinarySecurityToken)she;
-                if(MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(token.getValueType()) ||
-                        MessageConstants.KERBEROS_V5_GSS_APREQ.equals(token.getValueType())){
-                    return (KerberosBinarySecurityToken)token;
-                } else{
-                    X509BinarySecurityToken x509bst = (X509BinarySecurityToken)token;
+
+            if (MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME.equals(she.getLocalPart())) {
+                BinarySecurityToken token = (BinarySecurityToken) she;
+                if (MessageConstants.KERBEROS_V5_GSS_APREQ_1510.equals(token.getValueType()) ||
+                        MessageConstants.KERBEROS_V5_GSS_APREQ.equals(token.getValueType())) {
+                    return (KerberosBinarySecurityToken) token;
+                } else {
+                    X509BinarySecurityToken x509bst = (X509BinarySecurityToken) token;
                     X509Certificate cert = null;
                     cert = x509bst.getCertificate();
-                     // this one is directly from Message, since we  validate the X509BinarySecurityToken separately
-                     // so this should not be done here
+                    // this one is directly from Message, since we  validate the X509BinarySecurityToken separately
+                    // so this should not be done here
 //                    if(!wssContext.getSecurityEnvironment().validateCertificate(cert, wssContext.getExtraneousProperties())){
 //                        throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
 //                                "Certificate validation failed", null);
 //                    }
                     return x509bst;
                 }
-            } else if(MessageConstants.ENCRYPTEDKEY_LNAME.equals(she.getLocalPart())){
-                return (EncryptedKey)she;
-            } else if (MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME.equals(she.getLocalPart())){
-                return (SecurityContextToken)she;
-            }  else if (MessageConstants.DERIVEDKEY_TOKEN_LNAME.equals(she.getLocalPart())){
-                return (DerivedKeyToken)she;
-            }else if(MessageConstants.SAML_ASSERTION_LNAME.equals(she.getLocalPart())){
+            } else if (MessageConstants.ENCRYPTEDKEY_LNAME.equals(she.getLocalPart())) {
+                return (EncryptedKey) she;
+            } else if (MessageConstants.SECURITY_CONTEXT_TOKEN_LNAME.equals(she.getLocalPart())) {
+                return (SecurityContextToken) she;
+            } else if (MessageConstants.DERIVEDKEY_TOKEN_LNAME.equals(she.getLocalPart())) {
+                return (DerivedKeyToken) she;
+            } else if (MessageConstants.SAML_ASSERTION_LNAME.equals(she.getLocalPart())) {
                 //TODO : update other party subject
                 return she;
-            }else if(MessageConstants.USERNAME_TOKEN_LNAME.equals(she.getLocalPart())){
+            } else if (MessageConstants.USERNAME_TOKEN_LNAME.equals(she.getLocalPart())) {
                 return she;
             }
-        } catch(URIReferenceException ure){
-            logger.log(Level.SEVERE,"WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE",ure);
+        } catch (URIReferenceException ure) {
+            logger.log(Level.SEVERE, "WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE", ure);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                     "Referenced Security Token could not be retrieved",
                     ure);
         }
-        
-        if(logger.isLoggable(Level.SEVERE)){
-            logger.log(Level.SEVERE,"WSS1305.UnSupported.security.token");
+
+        if (logger.isLoggable(Level.SEVERE)) {
+            logger.log(Level.SEVERE, "WSS1305.UnSupported.security.token");
         }
         throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_UNSUPPORTED_SECURITY_TOKEN, "A Unsupported token was provided ", null);
     }
-    
-    private static  boolean isSecurityTokenReference(JAXBElement reference){
+
+    private static boolean isSecurityTokenReference(JAXBElement reference) {
         String local = reference.getName().getLocalPart();
         String uri = reference.getName().getNamespaceURI();
-        if(MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME.equals(local) &&
-                MessageConstants.WSSE_NS.equals(uri))
+        if (MessageConstants.WSSE_SECURITY_TOKEN_REFERENCE_LNAME.equals(local) &&
+                MessageConstants.WSSE_NS.equals(uri)) {
             return true;
+        }
         return false;
     }
-    
-   
+
     @SuppressWarnings("unchecked")
     private static Key resolveSCT(JAXBFilterProcessingContext wssContext, String scId, KeySelector.Purpose purpose) throws XWSSecurityException {
-        
+
         IssuedTokenContext ctx = null;
         //String protocol = null;
         String protocol = wssContext.getWSSCVersion(wssContext.getSecurityPolicyVersion());
-        if(wssContext.isClient()){
+        if (wssContext.isClient()) {
             SCTokenConfiguration config = new DefaultSCTokenConfiguration(protocol, scId, !wssContext.isExpired(), !wssContext.isInboundMessage());
-            ctx =IssuedTokenManager.getInstance().createIssuedTokenContext(config, null);
-            try{
+            ctx = IssuedTokenManager.getInstance().createIssuedTokenContext(config, null);
+            try {
                 IssuedTokenManager.getInstance().getIssuedToken(ctx);
-            }catch(WSTrustException e){
+            } catch (WSTrustException e) {
                 throw new XWSSecurityException(e);
             }
-            
+
             //Retrive the context from issuedTokenContextMap
 //            Enumeration elements = wssContext.getIssuedTokenContextMap().elements();
 //            while (elements.hasMoreElements()) {
@@ -1211,13 +1218,13 @@ public class KeySelectorImpl extends KeySelector {
                 // Return null as scId still needs to be resolved
                 return null;
             }
-        }else{
+        } else {
             //Retrive the context from Session Manager's cache
-            ctx = ((SessionManager)wssContext.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !wssContext.isExpired());
-            com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken)ctx.getSecurityToken();
+            ctx = ((SessionManager) wssContext.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !wssContext.isExpired());
+            com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) ctx.getSecurityToken();
             ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sct.getIdentifier(), sct.getInstance(), sct.getWsuId()));
-        }                                
-        
+        }
+
         //update otherparty subject with bootstrap credentials.
         Subject subj = ctx.getRequestorSubject();
         if (subj != null) {
@@ -1225,31 +1232,31 @@ public class KeySelectorImpl extends KeySelector {
             if (wssContext.getExtraneousProperty(MessageConstants.SCBOOTSTRAP_CRED_IN_SUBJ) == null) {
                 //do it only once
                 wssContext.getSecurityEnvironment().updateOtherPartySubject(
-                        SecurityUtil.getSubject(wssContext.getExtraneousProperties()),subj);
+                        SecurityUtil.getSubject(wssContext.getExtraneousProperties()), subj);
                 wssContext.getExtraneousProperties().put(MessageConstants.SCBOOTSTRAP_CRED_IN_SUBJ, "true");
             }
         }
-        
-        
+
+
         byte[] proofKey = null;
         //com.sun.xml.ws.security.SecurityContextToken scToken = (com.sun.xml.ws.security.SecurityContextToken)ctx.getSecurityToken();
-        if(wssContext.getWSCInstance() != null){
-            if(wssContext.isExpired()){
-                proofKey = ctx.getProofKey();                
-            }else{
+        if (wssContext.getWSCInstance() != null) {
+            if (wssContext.isExpired()) {
+                proofKey = ctx.getProofKey();
+            } else {
                 SecurityContextTokenInfo sctInstanceInfo = ctx.getSecurityContextTokenInfo();
                 proofKey = sctInstanceInfo.getInstanceSecret(wssContext.getWSCInstance());
             }
-        }else{
+        } else {
             proofKey = ctx.getProofKey();
         }
         wssContext.setExtraneousProperty(MessageConstants.INCOMING_SCT, ctx.getSecurityToken());
-        
-        
+
+
         if (proofKey == null) {
             throw new XWSSecurityException("Could not locate SecureConversation session for Id:" + scId);
         }
-        
+
         String algo = "AES"; // hardcoding for now
         if (wssContext.getAlgorithmSuite() != null) {
             algo = SecurityUtil.getSecretKeyAlgorithm(wssContext.getAlgorithmSuite().getEncryptionAlgorithm());
@@ -1257,12 +1264,12 @@ public class KeySelectorImpl extends KeySelector {
         SecretKeySpec key = new SecretKeySpec(proofKey, algo);
         return key;
     }
-    
+
     private static Key resolveKerberosToken(JAXBFilterProcessingContext wssContext, KerberosBinarySecurityToken token) throws XWSSecurityException {
-        
-        String encodedRef = (String)wssContext.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
-        
-        if(encodedRef == null){
+
+        String encodedRef = (String) wssContext.getExtraneousProperty(MessageConstants.KERBEROS_SHA1_VALUE);
+
+        if (encodedRef == null) {
             try {
                 byte[] krbSha1 = MessageDigest.getInstance("SHA-1").digest(token.getTokenValue());
                 encodedRef = Base64.encode(krbSha1);
@@ -1272,14 +1279,14 @@ public class KeySelectorImpl extends KeySelector {
         }
         String algo = SecurityUtil.getSecretKeyAlgorithm(wssContext.getAlgorithmSuite().getEncryptionAlgorithm());
         KerberosContext krbContext = wssContext.getKerberosContext();
-        
-        if(krbContext == null){
+
+        if (krbContext == null) {
             krbContext = wssContext.getSecurityEnvironment().doKerberosLogin(token.getTokenValue());
             wssContext.setKerberosContext(krbContext);
-            try{
-            wssContext.getSecurityEnvironment().updateOtherPartySubject(DefaultSecurityEnvironmentImpl.getSubject(wssContext), 
-                    krbContext.getGSSContext().getSrcName(), krbContext.getDelegatedCredentials());
-            } catch(GSSException gsse){
+            try {
+                wssContext.getSecurityEnvironment().updateOtherPartySubject(DefaultSecurityEnvironmentImpl.getSubject(wssContext),
+                        krbContext.getGSSContext().getSrcName(), krbContext.getDelegatedCredentials());
+            } catch (GSSException gsse) {
                 throw new XWSSecurityException(gsse);
             }
         }

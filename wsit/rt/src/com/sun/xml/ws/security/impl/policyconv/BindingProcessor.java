@@ -53,7 +53,6 @@ import com.sun.xml.ws.security.policy.SupportingTokens;
 import com.sun.xml.ws.security.policy.WSSAssertion;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
-import com.sun.xml.wss.impl.policy.MLSPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.DerivedTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
@@ -111,7 +110,7 @@ public abstract class BindingProcessor {
             return;
         }
         boolean encryptSignConfirm = (isServer && !isIncoming) || (!isServer && isIncoming);
-        if (protectionOrder == Binding.ENCRYPT_SIGN) {
+        if (Binding.ENCRYPT_SIGN.equals(protectionOrder)) {
             EncryptionPolicy ep = getSecondaryEncryptionPolicy();
             EncryptionPolicy.FeatureBinding epFB = (EncryptionPolicy.FeatureBinding) ep.getFeatureBinding();
             EncryptionTarget et = eAP.getTargetCreator().newURIEncryptionTarget(primarySP.getUUID());
@@ -229,7 +228,6 @@ public abstract class BindingProcessor {
             if (PolicyTypeUtil.derivedTokenKeyBinding(token)) {
                 WSSPolicy kbd = ((DerivedTokenKeyBinding) token).getOriginalKeyBinding();
                 if (PolicyTypeUtil.symmetricKeyBinding(kbd)) {
-                    WSSPolicy sbd = (KeyBindingBase) kbd.getKeyBinding();
                     st = stc.newURISignatureTarget(uuid);
                 } else {
                     st = stc.newURISignatureTarget(uuid);
@@ -380,7 +378,7 @@ public abstract class BindingProcessor {
     }
 
     protected SignaturePolicy getSignaturePolicy() {
-        if (getBinding().getProtectionOrder() == Binding.SIGN_ENCRYPT) {
+        if (Binding.SIGN_ENCRYPT.equals(getBinding().getProtectionOrder())) {
             return primarySP;
         } else {
             return sSigPolicy;
@@ -388,7 +386,7 @@ public abstract class BindingProcessor {
     }
 
     private EncryptionPolicy getEncryptionPolicy() throws PolicyException {
-        if (getBinding().getProtectionOrder() == Binding.SIGN_ENCRYPT) {
+        if (Binding.SIGN_ENCRYPT.equals(getBinding().getProtectionOrder())) {
             return primaryEP;
         } else {
             return getSecondaryEncryptionPolicy();

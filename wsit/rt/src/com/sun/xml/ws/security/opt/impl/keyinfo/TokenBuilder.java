@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -80,12 +80,14 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
     protected SecurityHeader securityHeader = null;
     protected WSSElementFactory elementFactory = null;
     protected KeyInfo keyInfo = null;
+
     /** Creates a new instance of TokenBuilder */
     public TokenBuilder(JAXBFilterProcessingContext context) {
         this.context = context;
         this.securityHeader = context.getSecurityHeader();
         this.elementFactory = new WSSElementFactory(context.getSOAPVersion());
     }
+
     /**
      * if a BinarySecurityToken already exists in the security header with the id of the binding
      * returns it else creates a BinarySecurityToken with the X509 certificate provided
@@ -95,20 +97,22 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
      * @return BinarySecurityToken
      * @throws com.sun.xml.wss.XWSSecurityException
      */
-    protected BinarySecurityToken createBinarySecurityToken(AuthenticationTokenPolicy.X509CertificateBinding binding,X509Certificate x509Cert) throws XWSSecurityException{
-        if(binding.INCLUDE_NEVER.equals(binding.getIncludeToken()) ||
-                binding.INCLUDE_NEVER_VER2.equals(binding.getIncludeToken()))
-            return null;        
+    @SuppressWarnings("static-access")
+    protected BinarySecurityToken createBinarySecurityToken(AuthenticationTokenPolicy.X509CertificateBinding binding, X509Certificate x509Cert) throws XWSSecurityException {
+        if (binding.INCLUDE_NEVER.equals(binding.getIncludeToken()) ||
+                binding.INCLUDE_NEVER_VER2.equals(binding.getIncludeToken())) {
+            return null;
+        }
         String id = getID(binding);
 
-        if(logger.isLoggable(Level.FINEST)){
-            logger.log(Level.FINEST, "X509 Token id: "+id);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "X509 Token id: " + id);
         }
 
-        Token token = (Token)securityHeader.getChildElement(id);
-        if(token != null){
-            if(token instanceof BinarySecurityToken){
-                return (BinarySecurityToken)token;
+        Token token = (Token) securityHeader.getChildElement(id);
+        if (token != null) {
+            if (token instanceof BinarySecurityToken) {
+                return (BinarySecurityToken) token;
             }
             logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
             throw new XWSSecurityException("Found two tokens with same Id attribute");
@@ -118,11 +122,12 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             bst = elementFactory.createBinarySecurityToken(id, x509Cert.getEncoded());
         } catch (CertificateEncodingException ex) {
             logger.log(Level.SEVERE, LogStringsMessages.WSS_1801_BST_CREATION_FAILED());
-            throw new XWSSecurityException("Error occured while constructing BinarySecurityToken",ex);
+            throw new XWSSecurityException("Error occured while constructing BinarySecurityToken", ex);
         }
-        context.getSecurityHeader().add((SecurityHeaderElement)bst);
+        context.getSecurityHeader().add((SecurityHeaderElement) bst);
         return bst;
     }
+
     /**
      * if an UsernameToken already exists in the security header with the id of the binding
      * returns it else sets the id of the binding in the usernametoken provided and returns it
@@ -138,18 +143,19 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Username Token id: " + id);
         }
-        SecurityHeaderElement token = ( SecurityHeaderElement) securityHeader.getChildElement(id);
+        SecurityHeaderElement token = (SecurityHeaderElement) securityHeader.getChildElement(id);
         if (token != null) {
             if (token instanceof UsernameToken) {
                 return (UsernameToken) token;
             }
-           logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
+            logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
             throw new XWSSecurityException("Found two tokens with same Id attribute");
         }
         unToken.setId(id);
         context.getSecurityHeader().add((SecurityHeaderElement) unToken);
         return unToken;
     }
+
     /**
      * if an BinarySecurityToken already exists in the security header with the id of the binding
      * returns it else creates a new BinarySecurityToken with the kerboros token  provided
@@ -159,6 +165,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
      * @return  BinarySecurityToken
      * @throws com.sun.xml.wss.XWSSecurityException
      */
+    @SuppressWarnings("static-access")
     protected BinarySecurityToken createKerberosBST(AuthenticationTokenPolicy.KerberosTokenBinding binding,
             byte[] kerbToken) throws XWSSecurityException {
         if (binding.INCLUDE_NEVER.equals(binding.getIncludeToken()) ||
@@ -184,6 +191,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         context.getSecurityHeader().add((SecurityHeaderElement) bst);
         return bst;
     }
+
     /**
      * creates a new  SecurityTokenReference with the reference element provided
      * sets the id provided in the  SecurityTokenReference if the security policy is a SignaturePolicy
@@ -192,7 +200,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
      * @return SecurityTokenReference
      */
     @SuppressWarnings("unchecked")
-    protected SecurityTokenReference buildSTR(String strId, Reference ref){
+    protected SecurityTokenReference buildSTR(String strId, Reference ref) {
         SecurityTokenReference str = elementFactory.createSecurityTokenReference(ref);
         if (context.getSecurityPolicy() instanceof SignaturePolicy) {
             ((SecurityElement) str).setId(strId);
@@ -206,21 +214,23 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
                 }
             }
         }
-        Data data = new SSEData((SecurityElement)str,false,context.getNamespaceContext());
+        Data data = new SSEData((SecurityElement) str, false, context.getNamespaceContext());
         if (strId != null) {
             context.getElementCache().put(strId, data);
         }
         return str;
     }
+
     /**
      * creates a new  SecurityTokenReference with the reference element provided
      * @param ref Reference
      * @return SecurityTokenReference
      */
-    protected SecurityTokenReference buildSTR(Reference ref){
+    protected SecurityTokenReference buildSTR(Reference ref) {
         SecurityTokenReference str = elementFactory.createSecurityTokenReference(ref);
         return str;
     }
+
     /**
      * builds SecurityTokenReference with the reference element provided and with the id.
      * creates key info with this  SecurityTokenReference
@@ -228,34 +238,37 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
      * @param strId String
      * @return KeyInfo
      */
-    protected KeyInfo buildKeyInfo(Reference ref,String strId){
-        keyInfo = elementFactory.createKeyInfo(buildSTR(strId,ref));
+    protected KeyInfo buildKeyInfo(Reference ref, String strId) {
+        keyInfo = elementFactory.createKeyInfo(buildSTR(strId, ref));
         return keyInfo;
     }
+
     /**
      * creates key info with the SecurityTokenReference provided
      * @param str SecurityTokenReference
      * @return KeyInfo
      */
-    protected KeyInfo buildKeyInfo(com.sun.xml.ws.security.opt.impl.keyinfo.SecurityTokenReference str){
+    protected KeyInfo buildKeyInfo(com.sun.xml.ws.security.opt.impl.keyinfo.SecurityTokenReference str) {
         keyInfo = elementFactory.createKeyInfo(str);
         return keyInfo;
     }
+
     /**
      * builds key value  with the public key provided
      * Uses thid key value to construct key info
      * @param pubKey PublicKey
      * @return KeyInfo
      */
-    protected KeyInfo buildKeyInfo(PublicKey pubKey){
+    protected KeyInfo buildKeyInfo(PublicKey pubKey) {
         keyInfo = elementFactory.createKeyInfo(buildKeyValue(pubKey));
         return keyInfo;
     }
-   /**
-    * builds RSA key value  with the public key provided
-    * @param pubKey PublicKey
-    * @return  KeyValue
-    */
+
+    /**
+     * builds RSA key value  with the public key provided
+     * @param pubKey PublicKey
+     * @return  KeyValue
+     */
     @SuppressWarnings("unchecked")
     protected KeyValue buildKeyValue(PublicKey pubKey) {
         KeyValue kv = new KeyValue();
@@ -272,6 +285,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         keyInfo = elementFactory.createKeyInfo(kn);
         return keyInfo;
     }
+
     /**
      * builds the direct reference and sets the id and valueType in it
      * @param id String
@@ -286,6 +300,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         }
         return dr;
     }
+
     /**
      * builds keyInfo with the given X509 certificate binding
      * @param binding X509CertificateBinding
@@ -306,6 +321,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         buildKeyInfo(keyIdentifier, binding.getSTRID());
         return keyIdentifier;
     }
+
     /**
      * builds keyInfo with the given kerberos token binding
      * @param binding KerberosTokenBinding
@@ -325,6 +341,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         buildKeyInfo(keyIdentifier, binding.getSTRID());
         return keyIdentifier;
     }
+
     /**
      * builds keyInfo with the given encrypted key sha1 reference
      * @param ekSHA1Ref String
@@ -346,6 +363,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
         }
         return id;
     }
+
     /**
      *
      * @return javax.xml.crypto.dsig.keyinfo.KeyInfo
@@ -353,5 +371,4 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
     public javax.xml.crypto.dsig.keyinfo.KeyInfo getKeyInfo() {
         return keyInfo;
     }
-    
 }
