@@ -234,12 +234,12 @@ public class PolicyResolverImpl implements PolicyResolver{
                     if(faultNode == null){
                         return new MessagePolicy();
                     }
-                    String uri = faultNode.getNamespaceURI();
-                    QName faultDetail = null;
+                    final String uri = faultNode.getNamespaceURI();
+                    final QName faultDetail ;
                     if(uri != null && uri.length() >0){
-                        faultDetail = new QName(faultNode.getNamespaceURI(),faultNode.getNodeName());
+                        faultDetail = new QName(uri,faultNode.getLocalName());
                     }else{
-                        faultDetail = new QName(faultNode.getNodeName());
+                        faultDetail = new QName(faultNode.getLocalName());
                     }
                     WSDLFault fault = operation.getFault(faultDetail);
                     SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);

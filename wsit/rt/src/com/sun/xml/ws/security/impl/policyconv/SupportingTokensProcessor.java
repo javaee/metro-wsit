@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,7 +38,6 @@ package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.UserNameToken;
@@ -240,7 +239,7 @@ public class SupportingTokensProcessor {
     }
     
     protected void addTargets(){
-        if(binding != null && binding.getProtectionOrder() == Binding.SIGN_ENCRYPT){
+        if(binding != null && Binding.SIGN_ENCRYPT.equals(binding.getProtectionOrder())){
             if(spList != null){
                 populateSignaturePolicy();
             }
@@ -276,6 +275,7 @@ public class SupportingTokensProcessor {
             }
             policyContainer.insert(sp);
         }
+        spList.clear();
     }
     
     protected void populateEncryptionPolicy(){
@@ -303,15 +303,15 @@ public class SupportingTokensProcessor {
            strIgnore = true;
         }
         if ( uid != null ) {
-            SignatureTargetCreator stc = iAP.getTargetCreator();
-            SignatureTarget st = stc.newURISignatureTarget(uid);
-            stc.addTransform(st);
-            SecurityPolicyUtil.setName(st, token);
+            SignatureTargetCreator stcr = iAP.getTargetCreator();
+            SignatureTarget stg = stcr.newURISignatureTarget(uid);
+            stcr.addTransform(stg);
+            SecurityPolicyUtil.setName(stg, token);
             if(!strIgnore){
-                stc.addSTRTransform(st);
+                stcr.addSTRTransform(stg);
             }
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
-            fb.addTargetBinding(st);
+            fb.addTargetBinding(stg);
         }
     }
     
