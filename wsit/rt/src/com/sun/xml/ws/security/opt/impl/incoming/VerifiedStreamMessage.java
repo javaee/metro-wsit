@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,7 +39,6 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.istack.XMLStreamReaderToContentHandler;
 import com.sun.xml.bind.api.Bridge;
-import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.message.AttachmentSet;
@@ -56,7 +55,6 @@ import com.sun.xml.ws.util.xml.StAXSource;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
 import java.security.PrivilegedActionException;
 import java.util.Map;
-import javax.xml.ws.WebServiceException;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -73,6 +71,7 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.ws.WebServiceException;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.ws.message.stream.StreamMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,6 +80,8 @@ import com.sun.xml.ws.security.opt.impl.util.VerifiedMessageXMLStreamReader;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 
 /**
  * {@link Message} implementation backed by {@link XMLStreamReader}.
@@ -256,6 +257,16 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
                         unmarshaller.setAttachmentUnmarshaller(new AttachmentUnmarshallerImpl(getAttachments()));
                     }
                     try {
+                        if (reader.END_DOCUMENT == reader.getEventType() && buffer != null) {
+                            try {
+                                reader = buffer.readAsXMLStreamReader();
+                                reader = new VerifiedMessageXMLStreamReader(reader, bodyEnvNs);
+                                reader.next();
+                            } catch (XMLStreamException ex) {
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1612_ERROR_READING_BUFFER(), ex);
+                                throw new com.sun.xml.wss.impl.XWSSecurityRuntimeException(ex);
+                            }
+                        }
                         return unmarshaller.unmarshal(reader);
                     } finally {
                         unmarshaller.setAttachmentUnmarshaller(null);
@@ -271,6 +282,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
     }
     
 
+    @Override
     public <T> T readPayloadAsJAXB(Bridge<T> bridge) throws JAXBException {
         cacheMessage();
         if (!hasPayload()) {
@@ -329,6 +341,7 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
         XMLStreamReaderFactory.recycle(reader);
     }
 
+    @Override
     public void writeTo(XMLStreamWriter sw) throws XMLStreamException {
         writeEnvelope(sw);
     }
@@ -456,17 +469,24 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
         assert xsr.getEventType() == START_ELEMENT;
     }
 
+    @Override
+    public SOAPMessage readAsSOAPMessage() throws SOAPException {
+    cacheMessage();
+    return super.readAsSOAPMessage();
+    }
+
+    @Override
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         contentHandler.setDocumentLocator(NULL_LOCATOR);
         contentHandler.startDocument();
         envelopeTag.writeStart(contentHandler);
         headerTag.writeStart(contentHandler);
         if (hasHeaders()) {
-            HeaderList headers = getHeaders();
-            int len = headers.size();
+            HeaderList headerList = getHeaders();
+            int len = headerList.size();
             for (int i = 0; i < len; i++) {
                 // shouldn't JDK be smart enough to use array-style indexing for this foreach!?
-                headers.get(i).writeTo(contentHandler, errorHandler);
+                headerList.get(i).writeTo(contentHandler, errorHandler);
             }
         }
         headerTag.writeEnd(contentHandler);
@@ -541,7 +561,6 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
                 throw new com.sun.xml.wss.impl.XWSSecurityRuntimeException(ex);
             }
         }
-
 
     }
 }
