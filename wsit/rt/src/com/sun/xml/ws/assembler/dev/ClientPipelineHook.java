@@ -36,11 +36,8 @@
 
 package com.sun.xml.ws.assembler.dev;
 
-import com.sun.xml.ws.assembler.dev.*;
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
-import com.sun.xml.ws.api.pipe.Pipe;
-import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.policy.PolicyMap;
 
@@ -71,9 +68,11 @@ public class ClientPipelineHook extends com.sun.xml.ws.api.client.ClientPipeline
      *      The default implementation just returns <tt>tail</tt>, which means
      *      no additional pipe is inserted. If the implementation adds
      *      new pipes, return the new head pipe.
+     * @deprecated Use {@link #createSecurityTube(com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext)}.
      */
     public @NotNull
-    Pipe createSecurityPipe(@Nullable PolicyMap policyMap, ClientPipeAssemblerContext ctxt, @NotNull Pipe tail) {
+    @Deprecated
+    com.sun.xml.ws.api.pipe.Pipe createSecurityPipe(@Nullable PolicyMap policyMap, com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext ctxt, @NotNull com.sun.xml.ws.api.pipe.Pipe tail) {
         return tail;
     }
    
