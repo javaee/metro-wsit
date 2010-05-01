@@ -276,7 +276,9 @@ public class TokenProcessor {
             itkb.setSTRID(token.getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
             itkb.isOptional(tokenAssertion.isOptional());
-            
+            if (it.getRequestSecurityTokenTemplate() != null) {
+                itkb.setTokenType(it.getRequestSecurityTokenTemplate().getTokenType());
+            }
             if(it.getIssuer() != null){
                 Address addr = it.getIssuer().getAddress();
                 if(addr != null)

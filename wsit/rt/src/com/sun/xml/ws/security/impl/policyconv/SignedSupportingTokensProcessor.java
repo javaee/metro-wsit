@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -68,7 +68,8 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
         String includeToken = token.getIncludeToken();
         if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
-           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken))|| PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)){
+           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken))|| PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)
+           || PolicyUtil.isIssuedToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
