@@ -121,6 +121,7 @@ public class X509TokenBuilder extends TokenBuilder {
                 throw new XWSSecurityException(LogStringsMessages.WSS_1814_ERROR_ENCODING_CERTIFICATE(), ce);
             }
         } else if (referenceType.equals(MessageConstants.X509_ISSUER_TYPE)) {
+            BinarySecurityToken bst = createBinarySecurityToken(binding, binding.getX509Certificate());
             X509Certificate xCert = binding.getX509Certificate();
             X509IssuerSerial xis = elementFactory.createX509IssuerSerial(xCert.getIssuerDN().getName(), xCert.getSerialNumber());
             X509Data x509Data = elementFactory.createX509DataWithIssuerSerial(xis);
