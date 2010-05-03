@@ -15,7 +15,10 @@ class DummyAppMessage extends ApplicationMessageBase {
         if (ackReqestedFlag) {
             ackDataBuilder.ackReqestedSequenceId(sequenceId);
         }
-        ackDataBuilder.acknowledgements(ackSequenceId, ackRanges, false);
+
+        if (ackSequenceId != null) {
+            ackDataBuilder.acknowledgements(ackSequenceId, ackRanges, false);
+        }
 
         setAcknowledgementData(ackDataBuilder.build());
     }
