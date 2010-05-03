@@ -47,16 +47,49 @@
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>@module.name@</name>
 
     <!-- prerequisites -->
 
-    <modules>
-        <module>wssx-api</module>
-        <module>wssx-impl</module>
-    </modules>
-    
-    <!--dependencies></dependencies-->
+    <dependencies>
+        <!-- Compile scope -->
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsrm-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsmc-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsrx-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsrm-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <!--properties></properties-->
 </project>

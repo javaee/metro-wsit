@@ -52,13 +52,45 @@
 
     <!-- prerequisites -->
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                    <meminitial>128m</meminitial>
+                    <maxmem>512m</maxmem>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
-        <!-- Compile scope -->
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.security</groupId>
+            <artifactId>security</artifactId>
+            <version>3.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Compile scope -->
         <dependency>
             <groupId>javax.security.auth.message</groupId>
             <artifactId>jmac</artifactId>
             <version>1.0-rev-1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.3</version>
         </dependency>
         
         <dependency>
@@ -119,7 +151,11 @@
             <artifactId>wsrm-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-rt-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test scope -->
         <dependency>

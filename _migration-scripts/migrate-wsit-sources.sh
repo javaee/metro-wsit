@@ -106,7 +106,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-commons"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Common Utilities and Classes" -i "wsit-commons" -P "wsit-project" -p ./poms/wsit-commons-pom.xml
-SRC_ARTIFACTS="com/sun/xml/ws/commons:com/sun/xml/ws/runtime/dev"
+SRC_ARTIFACTS="com/sun/xml/ws/commons"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
@@ -117,7 +117,9 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-rt-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime API" -i "wsit-rt-api" -P "wsit-project" -p ./poms/wsit-rt-api-pom.xml
 SRC_ARTIFACTS="\
-com/sun/xml/ws/assembler/dev"
+com/sun/xml/ws/assembler/dev:\
+com/sun/xml/ws/assembler/ServerPipelineHook.java:\
+com/sun/xml/ws/runtime/dev"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="\
 assembler:\
@@ -169,7 +171,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 RX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-rx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "wsit-project" -p ./poms/wsrx-project-pom.xml
-echo "TODO: Uncomment all RX modules"
 #
 # WSIT WS-RX common packages
 #
@@ -189,7 +190,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-RX testing support
 #
 MODULE_ROOT="$RX_MODULE_ROOT/wsrx-testing"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Testing Support" -i "wsrx-testing" -P "wsrx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RX Testing Support" -i "wsrx-testing" -P "wsrx-project" -p ./poms/wsrx-testing-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/rx/testing"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -209,9 +210,12 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 MODULE_ROOT="$RX_MODULE_ROOT/wsrm-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-RealiableMessaging Implementation" -i "wsrm-impl" -P "wsrx-project" -p ./poms/wsrm-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/rx/rm"
-TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/rx/testutil"
 TEST_RESOURCES="rm"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
+echo "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionCreator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionCreator
 #
 # WSIT WS-MC API
 #
@@ -237,7 +241,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 SX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-sx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p ./poms/wssx-project-pom.xml
-echo "TODO: Uncomment all SX modules"
 #
 # WSIT WS-SX API
 #
@@ -245,10 +248,31 @@ MODULE_ROOT="$SX_MODULE_ROOT/wssx-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-SX API" -i "wssx-api" -P "wssx-project" -p ./poms/wssx-api-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/api/security:\
-com/sun/xml/wss/XWSSecurityException.java:\
+com/sun/xml/ws/policy/impl/bindings:\
+com/sun/xml/ws/security/EncryptedKey.java:\
+com/sun/xml/ws/security/SecurityContextToken.java:\
+com/sun/xml/ws/security/SecurityTokenReference.java:\
+com/sun/xml/ws/security/DerivedKeyToken.java:\
+com/sun/xml/ws/security/IssuedTokenContext.java:\
+com/sun/xml/ws/security/Token.java:\
+com/sun/xml/ws/security/SecurityContextTokenInfo.java:\
+com/sun/xml/ws/security/policy/SecurityPolicyVersion.java:\
+com/sun/xml/ws/security/policy/Token.java:\
+com/sun/xml/ws/security/impl/IssuedTokenContextImpl.java:\
 com/sun/xml/ws/security/secconv/SecureConversationInitiator.java:\
-com/sun/xml/ws/security/secext10/SecurityTokenReferenceType.java:\
-com/sun/xml/ws/security/secconv/WSSecureConversationException.java"
+com/sun/xml/ws/security/secconv/WSSecureConversationException.java:\
+com/sun/xml/ws/security/secconv/WSSCVersion.java:\
+com/sun/xml/ws/security/secconv/impl/WSSCVersion10.java:\
+com/sun/xml/ws/security/secconv/impl/wssx/WSSCVersion13.java:\
+com/sun/xml/ws/security/secext10:\
+com/sun/xml/ws/security/trust/WSTrustConstants.java:\
+com/sun/xml/ws/security/trust/WSTrustElementFactory.java:\
+com/sun/xml/ws/security/trust/WSTrustVersion.java:\
+com/sun/xml/ws/security/trust/elements:\
+com/sun/xml/ws/security/trust/impl/WSTrustVersion10.java:\
+com/sun/xml/ws/security/trust/impl/wssx/WSTrustVersion13.java:\
+com/sun/xml/ws/security/wsu10:\
+com/sun/xml/wss/XWSSecurityException.java"
 
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="security"
@@ -274,6 +298,14 @@ security/keystore:\
 security/policy-binding1.xml:\
 security/policy-binding2.xml"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+mkdir -p "$MODULE_ROOT/src/com/sun/xml/ws/security/jgss"
+unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/jgss/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/jgss/"
+
+mkdir -p "$MODULE_ROOT/src/com/sun/xml/ws/security/kerb"
+unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/kerb/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/kerb/"
+
+echo "TODO: Make sure that KerbLibrary sources expansion is the right thing to do"
 
 #
 # WSIT WS-TX Parent project

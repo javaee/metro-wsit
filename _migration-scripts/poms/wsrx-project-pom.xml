@@ -56,9 +56,9 @@
         <module>wsmc-api</module>
         <module>wsrm-api</module>
         <module>wsrx-commons</module>
-        <!--module>wsmc-impl</module>
+        <module>wsmc-impl</module>
         <module>wsrm-impl</module>
-        <module>wsrx-testing</module-->
+        <module>wsrx-testing</module>
     </modules>
     
     <!--dependencies></dependencies-->
