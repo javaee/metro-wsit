@@ -158,8 +158,7 @@ public abstract class BindingProcessor {
         QName qName = null;
 
         //dont compute STR Transform when the include token type is always or always to recipient
-        if (spVersion.includeTokenAlways.equals(includeToken) || spVersion.includeTokenAlwaysToRecipient.equals(includeToken)
-                || spVersion.SECURITYPOLICY200507.includeTokenAlways.equals(includeToken) || spVersion.SECURITYPOLICY200507.includeTokenAlwaysToRecipient.equals(includeToken)) {
+       if (includeToken.endsWith("Always") || includeToken.endsWith("AlwaysToRecipient") || includeToken.endsWith("Once")) {
             strIgnore = true;
         }
 
@@ -207,7 +206,7 @@ public abstract class BindingProcessor {
 
         //when the include token is Never , the sig. reference should refer to the security token reference of KeyInfo
         // also in case of saml token we have to use the id #_SAML, so ,
-        if (spVersion.includeTokenNever.equals(includeToken) || PolicyTypeUtil.samlTokenPolicy(token) || PolicyTypeUtil.issuedTokenKeyBinding(token)) {
+        if (includeToken.endsWith("Never") || PolicyTypeUtil.samlTokenPolicy(token) || PolicyTypeUtil.issuedTokenKeyBinding(token)) {
             uuid = uid;
         }
         //TODO:: Handle DTK and IssuedToken.
