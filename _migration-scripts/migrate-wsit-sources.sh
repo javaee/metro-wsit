@@ -29,7 +29,6 @@ shift `expr $OPTIND - 1`
 PARENT_MODULE_POM_TEMPLATE="./poms/_wsit-module-parent-pom.xml"
 POM_TEMPLATE="./poms/_wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
-echo "TODO: Uncomment all WSIT project modules"
 
 #
 # WSIT policy configuration file handling
@@ -46,6 +45,7 @@ TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.parser.WsitPolicyResolverFactory" "com.sun.xml.ws.api.policy.PolicyResolverFactory"
 
 #rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
 echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
@@ -72,6 +72,8 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.mex.client.MetadataResolverFactoryImpl" "com.sun.xml.ws.api.wsdl.parser.MetadataResolverFactory"
+
 #
 # WSIT SOAP/TCP Transport
 #
@@ -92,7 +94,10 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.policy.TCPTransportFeatureConfigurator:com.sun.xml.ws.transport.tcp.policy.OptimalTransportFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.policy.TCPTransportPolicyMapConfigurator:com.sun.xml.ws.transport.tcp.policy.OptimalTransportPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.wsit.TCPTransportPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.wsit.TCPTransportPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
 
 #
 # WSIT Commons
@@ -135,6 +140,10 @@ metro-config:\
 wsdl_filter"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.assembler.TubelineAssemblerFactoryImpl" "com.sun.xml.ws.api.pipe.TubelineAssemblerFactory"
+
+echo "TODO: Uncomment wsit-rt-impl module in the WSIT project"
+
 #
 # WSIT Configuration management
 #
@@ -158,6 +167,8 @@ SRC_ARTIFACTS="com/sun/xml/ws/config/management"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="management"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.config.management.server.EndpointFactoryImpl" "com.sun.xml.ws.api.config.management.ManagedEndpointFactory"
 
 #
 # WSIT WS-RX Parent project
@@ -207,8 +218,11 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/rx/testutil"
 TEST_RESOURCES="rm"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionCreator" "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
 
 #
 # WSIT WS-MC API
@@ -229,8 +243,12 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionCreator" "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
+
 
 #
 # WSIT WS-SX Parent project
@@ -297,6 +315,10 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/kerb/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/kerb/"
 #echo "TODO: Make sure that KerbLibrary sources expansion is the right thing to do"
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.wss.provider.wsit.IdentityEPRExtnContributor" "com.sun.xml.ws.api.server.EndpointReferenceExtensionContributor"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.security.addressing.policy.WsawAddressingFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
+
 PROVIDERS="\
 com.sun.xml.ws.security.addressing.impl.policy.AddressingPolicyAssertionCreator:\
 com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator:\
@@ -308,10 +330,16 @@ com.sun.xml.ws.security.impl.policy.TrustServerConfigAssertionCreator:\
 com.sun.xml.ws.security.impl.policy.SCClientConfigAssertionCreator:\
 com.sun.xml.ws.security.impl.policy.SCServerConfigAssertionCreator"
 ./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
+
 PROVIDERS="\
 com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyValidator:\
 com.sun.xml.ws.security.impl.policy.SecurityPolicyValidator"
 ./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+
+PROVIDERS="\
+com.sun.xml.ws.security.addressing.policy.WsawAddressingPrefixMapper:\
+com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper"
+./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.spi.PrefixMapper"
 
 #
 # WSIT WS-TX Parent project
@@ -319,6 +347,9 @@ com.sun.xml.ws.security.impl.policy.SecurityPolicyValidator"
 #
 TX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-tx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
+
+echo "TODO: Uncomment ws-tx module in the WSIT project (?)"
+
 #
 # WSIT WS-TX API
 #
@@ -338,4 +369,15 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
+
+echo "TODO: create WS-TX WAR module (?)"
+
+
+echo "TODO: turn on Woodstox for Metro/WSIT (via service providers)"
+echo "TODO: Migrate ToolPlugin.xml"
+echo "TODO: Migrate metro-default.xml"
+echo "TODO: Migrate metro XSD schemas"
+echo "TODO: Migrate metro durable RM SQL script"

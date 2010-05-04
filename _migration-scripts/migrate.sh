@@ -86,7 +86,17 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -p ./
 source ./migrate-wsit-sources.sh
 
 ensureDir "$NEW_PROJECT_ROOT/bundles"
-ensureDir "$NEW_PROJECT_ROOT/hudson"
-ensureDir "$NEW_PROJECT_ROOT/legal"
-ensureDir "$NEW_PROJECT_ROOT/samples"
+echo "TODO: create Metro bundle modules"
+echo "TODO: migrate installer"
+echo "TODO: migrate E2E tests"
 
+ensureDir "$NEW_PROJECT_ROOT/hudson"
+echo "TODO: create hudson job scripts"
+
+ensureDir "$NEW_PROJECT_ROOT/legal"
+echo "TODO: create licence update scripts"
+
+ensureDir "$NEW_PROJECT_ROOT/samples"
+echo "TODO: migrate samples"
+
+echo "TODO: migrate status notes"
