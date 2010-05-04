@@ -860,8 +860,8 @@ public final class SecurityRecipient {
         AttachmentSet as = securityContext.getDecryptedAttachmentSet();
         if (as == null || as.isEmpty()) {
             as = securityContext.getAttachmentSet();
-        }
-        if (!context.getDisablePayloadBuffering() && !context.isSecure()) {
+        }        
+        if (!context.getDisablePayloadBuffering() && (!context.isSecure() || "Fault".equals(message.getLocalName()))) {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Buffering Payload from incomming message");
             }
