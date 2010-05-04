@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,7 +34,7 @@
  * holder.
  */
 /*
- * $Id: PolicyCallbackHandler1.java,v 1.8 2010-05-04 14:34:15 m_potociar Exp $
+ * $Id: PolicyCallbackHandler1.java,v 1.9 2010-05-04 14:41:33 m_potociar Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
