@@ -1,5 +1,5 @@
 #!/bin/sh
-USAGE="Usage: move-sources.sh [-hvf] [<module-root> [<source-artifacts>] [<test-artifacts>] [<test-resources]]"
+USAGE="Usage: move-sources.sh [-hvf] <module-root> [<source-artifacts>] [<test-artifacts>] [<test-resources]]"
 
 # we want at least one parameter (it may be a flag or an argument)
 if [ $# -le 0 ]; then

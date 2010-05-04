@@ -36,8 +36,8 @@
  holder.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -92,7 +92,7 @@
             <artifactId>mail</artifactId>
             <version>1.4.3</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.sun.istack</groupId>
             <artifactId>istack-commons-runtime</artifactId>
@@ -135,6 +135,11 @@
             <artifactId>saml-jaxb10-bindings</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws.security.kerb</groupId>
+            <artifactId>kerberos-wss-extension</artifactId>
+            <version>1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -154,6 +159,16 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wsit-rt-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ws-mex</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-config</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -191,7 +191,7 @@
         <module>wsit-rt-api</module>
         <!--module>wsit-rt-impl</module-->
         <module>ws-cm</module>
-        <!--module>ws-mex</module-->
+        <module>ws-mex</module>
         <module>ws-rx</module>
         <module>ws-sx</module>
         <!--module>ws-tx</module-->

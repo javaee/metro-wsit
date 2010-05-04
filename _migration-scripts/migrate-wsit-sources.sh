@@ -45,16 +45,7 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/policy/testutils"
 TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
-mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
-echo "com.sun.xml.ws.policy.parser.PolicyWSDLParserExtension" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.api.wsdl.parser.WSDLParserExtension
-
-echo "com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-echo "com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator
-
-echo "com.sun.xml.ws.addressing.policy.AddressingPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
-echo "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionValidator
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 
 #rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
 echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
@@ -75,7 +66,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT MEX
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/ws-mex"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Project" -i "wsmex" -P "wsit-project" -p ./poms/wsmex-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Service Implementation" -i "ws-mex" -P "wsit-project" -p ./poms/wsmex-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/mex"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -100,6 +91,8 @@ SRC_ARTIFACTS="com/sun/xml/ws/transport"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.wsit.TCPTransportPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 
 #
 # WSIT Commons
@@ -214,8 +207,9 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/rx/testutil"
 TEST_RESOURCES="rm"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
-mkdir -p $VERBOSE $MODULE_ROOT/src/test/resources/META-INF/services
-echo "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionCreator" >> $MODULE_ROOT/src/test/resources/META-INF/services/com.sun.xml.ws.policy.spi.PolicyAssertionCreator
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionCreator" "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+
 #
 # WSIT WS-MC API
 #
@@ -234,6 +228,9 @@ SRC_ARTIFACTS="com/sun/xml/ws/rx/mc"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionCreator" "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 
 #
 # WSIT WS-SX Parent project
@@ -275,7 +272,7 @@ com/sun/xml/ws/security/wsu10:\
 com/sun/xml/wss/XWSSecurityException.java"
 
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="security"
+TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
 # WSIT WS-SX implementation
@@ -293,19 +290,28 @@ com/sun/xml/ws/security:\
 com/sun/xml/wss:\
 com/sun/xml/xwss"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="\
-security/keystore:\
-security/policy-binding1.xml:\
-security/policy-binding2.xml"
+TEST_RESOURCES="security"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
-mkdir -p "$MODULE_ROOT/src/com/sun/xml/ws/security/jgss"
-unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/jgss/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/jgss/"
+#unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/jgss/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/jgss/"
+#unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/kerb/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/kerb/"
+#echo "TODO: Make sure that KerbLibrary sources expansion is the right thing to do"
 
-mkdir -p "$MODULE_ROOT/src/com/sun/xml/ws/security/kerb"
-unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/kerb/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/kerb/"
-
-echo "TODO: Make sure that KerbLibrary sources expansion is the right thing to do"
+PROVIDERS="\
+com.sun.xml.ws.security.addressing.impl.policy.AddressingPolicyAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.TrustPolicyAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.WSSClientConfigAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.WSSServerConfigAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.TrustClientConfigAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.TrustServerConfigAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.SCClientConfigAssertionCreator:\
+com.sun.xml.ws.security.impl.policy.SCServerConfigAssertionCreator"
+./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
+PROVIDERS="\
+com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyValidator:\
+com.sun.xml.ws.security.impl.policy.SecurityPolicyValidator"
+./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 
 #
 # WSIT WS-TX Parent project
@@ -332,3 +338,4 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
