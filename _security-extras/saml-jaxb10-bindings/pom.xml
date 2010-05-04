@@ -46,21 +46,6 @@
     <packaging>jar</packaging>
 
     <name>SAML JAXB 1.0 Bindings</name>
-    <url>https://metro.dev.java.net/</url>
-    <organization>
-        <name>Sun Microsystems, Inc</name>
-        <url>http://www.sun.com/</url>
-    </organization>
-    <licenses>
-        <license>
-            <name>Dual License: CDDL 1.0 and GPL V2 with Classpath Exception</name>
-            <url>https://glassfish.dev.java.net/public/CDDL+GPL.html</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <description>
-        TBD.
-    </description>
 
     <build>
         <extensions>
