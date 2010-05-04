@@ -860,7 +860,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                     if(fPolicy != null){
                         faultPL.add(fPolicy);
                     }else{
-                        continue;
+                        //continue;
                     }
                     Policy ep = policyMerge.merge(faultPL);
                     if(inPH != null){
