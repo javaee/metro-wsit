@@ -34,7 +34,7 @@
  * holder.
  */
 /*
- * $Id: PolicyCallbackHandler1.java,v 1.7 2008-02-26 06:34:52 ofung Exp $
+ * $Id: PolicyCallbackHandler1.java,v 1.8 2010-05-04 14:34:15 m_potociar Exp $
  *
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -117,13 +117,13 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
         Properties properties = new Properties();
 
         if (side.equals("server")) {
-       String serverPropsFile ="./test/unit/data/security/keystore/server-security-env.properties";                
-        properties.load(new FileInputStream(serverPropsFile));
+       String serverPropsFile ="security/keystore/server-security-env.properties";                
+        properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(serverPropsFile));
 
         } else {
             // we are on the client side
-        String clientPropsFile = "./test/unit/data/security/keystore/client-security-env.properties";
-            properties.load(new FileInputStream(clientPropsFile));
+        String clientPropsFile = "security/keystore/client-security-env.properties";
+            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(clientPropsFile));
        }
 
         this.keyStoreURL =  properties.getProperty("keystore.url");
@@ -373,7 +373,7 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
     private void initTrustStore() throws IOException {
         try {
             trustStore = KeyStore.getInstance(trustStoreType);
-            trustStore.load(new FileInputStream(trustStoreURL), trustStorePassword.toCharArray());
+            trustStore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(trustStoreURL), trustStorePassword.toCharArray());
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
@@ -382,7 +382,7 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
     private void initKeyStore() throws IOException {
         try {
             keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(new FileInputStream(keyStoreURL), keyStorePassword.toCharArray());
+            keyStore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(keyStoreURL), keyStorePassword.toCharArray());
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
@@ -391,7 +391,7 @@ public  class PolicyCallbackHandler1 implements CallbackHandler {
     private void initSymmKeyStore() throws IOException {
         try {
             symmKeyStore = KeyStore.getInstance(symmKeyStoreType);
-            symmKeyStore.load(new FileInputStream(symmKeyStoreURL), symmKeyStorePassword.toCharArray());
+            symmKeyStore.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(symmKeyStoreURL), symmKeyStorePassword.toCharArray());
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
