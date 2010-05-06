@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -35,14 +35,10 @@
  */
 package com.sun.xml.ws.assembler;
 
-import com.sun.xml.ws.api.ResourceLoader;
-import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.runtime.config.TubeFactoryConfig;
 import com.sun.xml.ws.runtime.config.TubeFactoryList;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import junit.framework.TestCase;
 
 /**
@@ -61,25 +57,6 @@ public class MetroConfigLoaderTest extends TestCase {
             this.expectedTubes = expectedTubes;
         }
     }
-
-    private static class TestDataLoader extends ResourceLoader {
-
-        private final String resourceName;
-
-        public TestDataLoader(String resourceName) {
-            this.resourceName = UNIT_TEST_RESOURCE_ROOT + resourceName;
-        }
-
-        @Override
-        public URL getResource(String resource) throws MalformedURLException {
-            if ("metro.xml".equals(resource)) {
-                return Thread.currentThread().getContextClassLoader().getResource(resourceName);
-            } else {
-                return Thread.currentThread().getContextClassLoader().getResource(resource);
-            }
-        }
-    }
-    private static final String UNIT_TEST_RESOURCE_ROOT = "metro-config/";
     private static final TestDataInfo[] APP_METRO_CONFIGS = new TestDataInfo[]{
         new TestDataInfo("metro.xml", 12),
         new TestDataInfo("metro-no-default.xml", 13),
@@ -100,26 +77,12 @@ public class MetroConfigLoaderTest extends TestCase {
         super.tearDown();
     }
 
-    private Container createMockupContainer(final ResourceLoader loader) {
-        return new Container() {
-
-            @Override
-            public <T> T getSPI(Class<T> spiType) {
-                if (ResourceLoader.class.isAssignableFrom(spiType)) {
-                    return spiType.cast(loader);
-                } else {
-                    return null;
-                }
-            }
-        };
-    }
-
     /**
      * Test of getTubelineForEndpoint method, of class MetroConfigLoader.
      */
     public void testGetEndpointSideTubeFactoriesTest() throws URISyntaxException {
         TestDataInfo tdi = APP_METRO_CONFIGS[0];
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
+        MetroConfigLoader configLoader = new MetroConfigLoader(MockupMetroConfigLoader.createMockupContainer(tdi.appConfigFileName));
 
         TubeFactoryList result;
         result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -140,7 +103,7 @@ public class MetroConfigLoaderTest extends TestCase {
      */
     public void testGetClientSideTubeFactoriesTest() throws URISyntaxException {
         TestDataInfo tdi = APP_METRO_CONFIGS[0];
-        MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
+        MetroConfigLoader configLoader = new MetroConfigLoader(MockupMetroConfigLoader.createMockupContainer(tdi.appConfigFileName));
 
         TubeFactoryList result;
         result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -163,7 +126,7 @@ public class MetroConfigLoaderTest extends TestCase {
         for (int i = 1; i < APP_METRO_CONFIGS.length; i++) {
             TestDataInfo tdi = APP_METRO_CONFIGS[i];
 
-            MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
+            MetroConfigLoader configLoader = new MetroConfigLoader(MockupMetroConfigLoader.createMockupContainer(tdi.appConfigFileName));
 
             TubeFactoryList result;
             result = configLoader.getEndpointSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));
@@ -187,7 +150,7 @@ public class MetroConfigLoaderTest extends TestCase {
         for (int i = 1; i < APP_METRO_CONFIGS.length; i++) {
             TestDataInfo tdi = APP_METRO_CONFIGS[i];
 
-            MetroConfigLoader configLoader = new MetroConfigLoader(createMockupContainer(new TestDataLoader(tdi.appConfigFileName)));
+            MetroConfigLoader configLoader = new MetroConfigLoader(MockupMetroConfigLoader.createMockupContainer(tdi.appConfigFileName));
 
             TubeFactoryList result;
             result = configLoader.getClientSideTubeFactories(new URI("http://org.sample#wsdl11.port(PingService/HttpPingPort)"));

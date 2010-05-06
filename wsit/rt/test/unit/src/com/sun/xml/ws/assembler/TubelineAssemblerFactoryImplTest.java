@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,7 +42,6 @@ import com.sun.xml.ws.api.WSService;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.model.wsdl.WSDLModel;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
@@ -50,8 +49,6 @@ import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.server.Container;
 import com.sun.xml.ws.client.WSServiceDelegate;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.policy.parser.PolicyConfigParser;
-import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.binding.BindingImpl;
 
 import com.sun.xml.ws.developer.WSBindingProvider;
@@ -122,7 +119,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
         // Corresponds to Service.addPort(portName, bindingId, address)
         service.addPort(portName, bindingId.toString(), ADDRESS_URL.toString());
         final WSPortInfo portInfo = ((WSServiceDelegate) service).safeGetPort(portName);
-        final Container container = Container.NONE;
+        final Container container = MockupMetroConfigLoader.createMockupContainer("metro-default.xml");
 
         WSBindingProvider wsbp = new WSBindingProvider() {
 
@@ -242,10 +239,9 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
         final EndpointAddress address = new EndpointAddress(ADDRESS_URL);
         final WSDLPort port = null;
-        final WSDLModel clientModel = parseConfigFile(configFileName);
         final WSPortInfo portInfo = serviceDelegate.safeGetPort(portName);
         final WSBinding binding = bindingId.createBinding(new AddressingFeature(true));
-        final Container container = Container.NONE;
+        final Container container = MockupMetroConfigLoader.createMockupContainer("metro-default.xml");
 
         WSBindingProvider wsbp = new WSBindingProvider() {
 
@@ -316,11 +312,6 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
                 null);
 
         return getAssembler(bindingId).createClient(context);
-    }
-
-    private WSDLModel parseConfigFile(String configFile) throws PolicyException {
-        URL url = PolicyUtils.ConfigFile.loadFromClasspath("assembler/" + configFile);
-        return PolicyConfigParser.parseModel(url, true);
     }
 
     private TubelineAssembler getAssembler(BindingID bindingId) {
