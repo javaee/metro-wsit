@@ -51,13 +51,25 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import com.sun.xml.ws.api.server.SDDocumentFilter;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelMarshaller;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 import com.sun.xml.ws.util.xml.XMLStreamReaderToXMLStreamWriter;
+import com.sun.xml.ws.xmlfilter.EnhancedXmlStreamWriterProxy;
+import com.sun.xml.ws.xmlfilter.InvocationProcessorFactory;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
+import javax.xml.stream.XMLStreamException;
+import junit.framework.TestCase;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
+public class WsdlDocumentFilterTest extends TestCase {
+    private static final PolicyModelMarshaller marshaller = PolicyModelMarshaller.getXmlMarshaller(true);
+
     private static final String[] testPolicyResources = new String[] {
         "policy_0",
         "policy_1",
@@ -125,112 +137,50 @@ public class WsdlDocumentFilterTest extends AbstractFilteringTestCase {
         
     }
     
-//    public void testPerformanceImpact() throws Exception {
-//        SDDocumentFilter oldFilter = new SDDocumentFilter() {
-//            InvocationProcessorFactory PRIVATE_ASSERTION_FILTER_FACTORY = new InvocationProcessorFactory() {
-//                public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-//                    return new PrivateAssertionFilteringInvocationProcessor(writer);
-//                }
-//            };
-//
-//            InvocationProcessorFactory MEX_IMPORT_FILTER_FACTORY = new InvocationProcessorFactory() {
-//                public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-//                    return new MexImportFilteringInvocationProcessor(writer);
-//                }
-//            };
-//
-//            InvocationProcessorFactory PRIVATE_ELEMENTS_FILTER_FACTORY = new InvocationProcessorFactory() {
-//                public InvocationProcessor createInvocationProcessor(final XMLStreamWriter writer) throws XMLStreamException {
-//                    return new PrivateElementFilteringInvocationProcessor(
-//                            writer,
-//                            new QName("http://schemas.sun.com/2006/03/wss/server", "KeyStore"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/server", "TrustStore"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/server", "CallbackHandlerConfiguration"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/server", "ValidatorConfiguration"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/server", "DisablePayloadBuffering"),
-//
-//                            new QName("http://schemas.sun.com/2006/03/wss/client", "KeyStore"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/client", "TrustStore"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/client", "CallbackHandlerConfiguration"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/client", "ValidatorConfiguration"),
-//                            new QName("http://schemas.sun.com/2006/03/wss/client", "DisablePayloadBuffering"),
-//
-//                            new QName("http://schemas.sun.com/ws/2006/05/sc/server", "SCConfiguration"),
-//
-//                            new QName("http://schemas.sun.com/ws/2006/05/sc/client", "SCClientConfiguration"),
-//
-//                            new QName("http://schemas.sun.com/ws/2006/05/trust/server", "STSConfiguration"),
-//
-//                            new QName("http://schemas.sun.com/ws/2006/05/trust/client", "PreconfiguredSTS")
-//                            );
-//                }
-//            };
-//
-//            public XMLStreamWriter filter(SDDocument sdDocument, XMLStreamWriter xmlStreamWriter) throws XMLStreamException,IOException {
-//                XMLStreamWriter result = EnhancedXmlStreamWriterProxy.createProxy(xmlStreamWriter, PRIVATE_ASSERTION_FILTER_FACTORY);
-//                result = EnhancedXmlStreamWriterProxy.createProxy(result, MEX_IMPORT_FILTER_FACTORY);
-//                result = EnhancedXmlStreamWriterProxy.createProxy(result, PRIVATE_ELEMENTS_FILTER_FACTORY);
-//                return result;
-//            }
-//        };
-//
-//        final int CYCLE_COUNT = 50;
-//        long start = 0, end = 0;
-//        double oldResult = 0, newResult = 0;
-//        int oldCyclesRun = 0, newCyclesRun = 0;
-//
-//        for (int i = 0; i < 10; i++) {
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            i++;
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//        }
-//        System.out.println("Old: " + oldResult + "ms, new: " + newResult + "ms, improvement: " + (oldResult - newResult) + "ms, which is: " + (oldResult - newResult) / oldResult * 100 + "%");
-//        for (int i = 0; i < 10; i++) {
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            i++;
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//        }
-//        System.out.println("Old: " + oldResult + "ms, new: " + newResult + "ms, improvement: " + (oldResult - newResult) + "ms, which is: " + (oldResult - newResult) / oldResult * 100 + "%");
-//        for (int i = 0; i < 10; i++) {
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            i++;
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//        }
-//        System.out.println("Old: " + oldResult + "ms, new: " + newResult + "ms, improvement: " + (oldResult - newResult) + "ms, which is: " + (oldResult - newResult) / oldResult * 100 + "%");
-//        for (int i = 0; i < 10; i++) {
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//            i++;
-//            oldResult = runTest(oldResult, i, CYCLE_COUNT, oldFilter);
-//            newResult = runTest(newResult, i, CYCLE_COUNT, filter);
-//        }
-//        System.out.println("Old: " + oldResult + "ms, new: " + newResult + "ms, improvement: " + (oldResult - newResult) + "ms, which is: " + (oldResult - newResult) / oldResult * 100 + "%");
-//    }
-//
-//    private double calculateNewAverage(double oldCycleAverage, int cycleCount, int runNumber, long startTimeOfRun, long endTimeOfRun) {
-//        double cycleAverageForRun = (double)(endTimeOfRun - startTimeOfRun) / cycleCount;
-//        if (runNumber > 1) {
-//            double newCycleAverage = (double) (runNumber - 1) / runNumber * oldCycleAverage + cycleAverageForRun / runNumber;
-//            return newCycleAverage;
-//        } else {
-//            return cycleAverageForRun;
-//        }
-//    }
-//
-//    private double runTest(double oldAverage, int runNumber, final int CYCLE_COUNT, SDDocumentFilter filter) throws Exception {
-//        long start = 0, end = 0;
-//
-//        start = System.currentTimeMillis();
-//        for (int i = 0; i < CYCLE_COUNT; i++) {
-//            performResourceBasedTest(testResources, "wsdl_filter/", ".xml", filter);
-//        }
-//        end = System.currentTimeMillis();
-//        return calculateNewAverage(oldAverage, CYCLE_COUNT, runNumber, start, end);
-//    }
+    private final XMLStreamWriter openFilteredWriter(Writer outputStream, InvocationProcessorFactory factory) throws XMLStreamException {
+        XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream);
+        return EnhancedXmlStreamWriterProxy.createProxy(writer, factory);
+    }
+
+    private final XMLStreamWriter openFilteredWriter(Writer outputStream, SDDocumentFilter filter) throws XMLStreamException, IOException {
+        return filter.filter(null, XMLOutputFactory.newInstance().createXMLStreamWriter(outputStream));
+    }
+
+    private final void performResourceBasedTest(String[] resourceNames, String resourcePrefix, String resourceSuffix, InvocationProcessorFactory factory) throws PolicyException, IOException, XMLStreamException {
+        for (String testResourceName : resourceNames) {
+            PolicySourceModel model = ResourceLoader.unmarshallModel(resourcePrefix + testResourceName + resourceSuffix);
+            PolicySourceModel expected = ResourceLoader.unmarshallModel(resourcePrefix + testResourceName + "_expected" + resourceSuffix);
+
+            StringWriter buffer = new StringWriter();
+            XMLStreamWriter writer = openFilteredWriter(buffer, factory);
+            marshaller.marshal(model, writer);
+            writer.close();
+
+            String marshalledData = buffer.toString();
+
+            PolicySourceModel result = ResourceLoader.unmarshallModel(new StringReader(marshalledData));
+            assertEquals("Result is not as expected for '" + testResourceName + "' test resource.", expected, result);
+        }
+    }
+
+    private final void performResourceBasedTest(String[] resourceNames, String resourcePrefix, String resourceSuffix, SDDocumentFilter filter) throws PolicyException, IOException, XMLStreamException {
+        for (String testResourceName : resourceNames) {
+            PolicySourceModel model = ResourceLoader.unmarshallModel(resourcePrefix + testResourceName + resourceSuffix);
+            PolicySourceModel expected = ResourceLoader.unmarshallModel(resourcePrefix + testResourceName + "_expected" + resourceSuffix);
+
+            StringWriter buffer = new StringWriter();
+            XMLStreamWriter writer = openFilteredWriter(buffer, filter);
+            marshaller.marshal(model, writer);
+            writer.close();
+
+            String marshalledData = buffer.toString();
+
+            PolicySourceModel result = ResourceLoader.unmarshallModel(new StringReader(marshalledData));
+            assertEquals("Result is not as expected for '" + testResourceName + "' test resource.", expected, result);
+        }
+    }
+
+    private final PolicyModelMarshaller getPolicyModelMarshaller() {
+        return marshaller;
+    }
 }
