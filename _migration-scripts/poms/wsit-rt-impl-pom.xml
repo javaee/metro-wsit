@@ -78,6 +78,16 @@
             <artifactId>wsit-rt-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>soaptcp-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>soaptcp-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test scope -->
         <dependency>

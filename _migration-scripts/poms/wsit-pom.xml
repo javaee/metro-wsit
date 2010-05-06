@@ -189,7 +189,7 @@
         <module>wsit-soaptcp</module>
         <module>wsit-config</module>
         <module>wsit-rt-api</module>
-        <!--module>wsit-rt-impl</module-->
+        <module>wsit-rt-impl</module>
         <module>ws-cm</module>
         <module>ws-mex</module>
         <module>ws-rx</module>

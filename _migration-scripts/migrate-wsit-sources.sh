@@ -47,11 +47,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.parser.WsitPolicyResolverFactory" "com.sun.xml.ws.api.policy.PolicyResolverFactory"
 
-#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
-echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyConfigParserTest.java"
-#rm $VERBOSE $MODULE_ROOT/src/test/java/com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
-echo "TODO: Fix unit test: com.sun.xml.ws.policy.parser.PolicyWSDLParserExtensionTest.java"
-
 #
 # WSIT Xml document filter API
 #
@@ -87,6 +82,22 @@ if [ ! -e "$MODULE_ROOT/lib" ] ; then
 fi
 cp $VERBOSE "$OLD_METRO_LIB_DIR/compiletime/appserv-deployment.jar" "$MODULE_ROOT/lib/gfv2-deployment.jar"
 
+#
+# WSIT SOAP/TCP Transport API
+#
+MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport API" -i "soaptcp-api" -P "wsit-soaptcp" -p ./poms/soaptcp-api-pom.xml
+SRC_ARTIFACTS="\
+com/sun/xml/ws/transport/SelectOptimalTransportFeature.java:\
+com/sun/xml/ws/transport/TcpTransportFeature.java:\
+com/sun/xml/ws/transport/tcp/util/TCPConstants.java"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
+# WSIT SOAP/TCP Transport Implementation
+#
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-impl"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "wsit-soaptcp" -p ./poms/soaptcp-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/transport"
@@ -119,10 +130,7 @@ com/sun/xml/ws/assembler/dev:\
 com/sun/xml/ws/assembler/ServerPipelineHook.java:\
 com/sun/xml/ws/runtime/dev"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
-TEST_RESOURCES="\
-assembler:\
-metro-config:\
-wsdl_filter"
+TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
 # WSIT Runtime Implementation
@@ -141,8 +149,6 @@ wsdl_filter"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.assembler.TubelineAssemblerFactoryImpl" "com.sun.xml.ws.api.pipe.TubelineAssemblerFactory"
-
-echo "TODO: Uncomment wsit-rt-impl module in the WSIT project"
 
 #
 # WSIT Configuration management
@@ -252,7 +258,6 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 
 #
 # WSIT WS-SX Parent project
-# TODO: split into submodules
 #
 SX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-sx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p ./poms/wssx-project-pom.xml
@@ -311,10 +316,6 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="security"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
-#unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/jgss/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/jgss/"
-#unzip -jq "$SECURITY_EXTRAS_ROOT/kerb-lib/KerbLibrary-src.zip" "KerbLibrary/src/com/sun/xml/ws/security/kerb/*" -d "$MODULE_ROOT/src/main/java/com/sun/xml/ws/security/kerb/"
-#echo "TODO: Make sure that KerbLibrary sources expansion is the right thing to do"
-
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.wss.provider.wsit.IdentityEPRExtnContributor" "com.sun.xml.ws.api.server.EndpointReferenceExtensionContributor"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.security.addressing.policy.WsawAddressingFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
@@ -343,7 +344,6 @@ com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper"
 
 #
 # WSIT WS-TX Parent project
-# TODO wstx-services submodule
 #
 TX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-tx"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE

@@ -58,6 +58,8 @@ popd
 
 continueChoice "Security extras root is set to: $SECURITY_EXTRAS_ROOT\nNew project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT MASTER root is set to: $EXPORTED_RT_MASTER_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"
 
+echo "\n===============[ Starting migration ]===============\n"
+
 if [ ! -n "$NO_EXPORT" ] ; then
     if [ -e $EXPORTED_RT_MASTER_ROOT ] ; then
         rm -rf $VERBOSE $EXPORTED_RT_MASTER_ROOT

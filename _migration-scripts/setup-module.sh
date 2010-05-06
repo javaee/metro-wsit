@@ -56,6 +56,8 @@ if [ -z "$sm_moduleRoot" ] ; then
     exit 1
 fi
 
+echo " --> Creating module $sm_moduleName"
+
 if [ ! -e "$sm_moduleRoot" ] ; then
     mkdir -p $sm_verbose $sm_moduleRoot
 fi
