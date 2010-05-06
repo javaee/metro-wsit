@@ -1,10 +1,10 @@
 #!/bin/sh
-USAGE="Usage: `basename $0` [-n] [-h] [-v] [-f]"
+USAGE="Usage: `basename $0` [-n] [-h] [-v] [-f] [-c]"
 
 # parse command line arguments
 CVS_QUIET="-q"
 OPTIND=1
-while getopts 'nhvf' OPT; do
+while getopts 'nhvfc' OPT; do
     case "$OPT" in
 	h)  echo $USAGE
             exit 0
@@ -15,6 +15,8 @@ while getopts 'nhvf' OPT; do
 	n)  NO_EXPORT=1
             ;;
 	f)  FORCE_RM_FLAG="-f"
+            ;;
+	c)  autoContinueFlag="-c"
             ;;
 	?)  # all other characters - error
             echo $USAGE >&2
@@ -30,6 +32,10 @@ shift `expr $OPTIND - 1`
 # done
 
 continueChoice () {
+    if [ -n "$autoContinueFlag" ] ; then
+        return
+    fi
+
     printf "$* Continue? [Y/n]"
 
     read -n 1 -rs choice # reading single character

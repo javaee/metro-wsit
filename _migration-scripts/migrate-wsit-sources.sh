@@ -376,6 +376,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 echo "TODO: create WS-TX WAR module (?)"
 
 
+echo "TODO: Clean-up WSIT module dependencies"
 echo "TODO: turn on Woodstox for Metro/WSIT (via service providers)"
 echo "TODO: Migrate ToolPlugin.xml"
 echo "TODO: Migrate metro-default.xml"
