@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 USAGE="Usage: migrate-core.sh [-hvf]"
 
 # parse command line arguments
