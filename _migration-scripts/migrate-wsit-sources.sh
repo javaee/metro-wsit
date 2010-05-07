@@ -25,7 +25,6 @@ shift `expr $OPTIND - 1`
 #    echo $PARAM
 # done
 
-#COPY_ONLY_FLAG="-n"
 PARENT_MODULE_POM_TEMPLATE="./poms/_wsit-module-parent-pom.xml"
 POM_TEMPLATE="./poms/_wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
