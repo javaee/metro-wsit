@@ -2,7 +2,7 @@
 USAGE="Usage: `basename $0` [-n] [-h] [-v] [-f] [-c]"
 
 # parse command line arguments
-CVS_QUIET="-q"
+CVS_QUIET="-Q"
 OPTIND=1
 while getopts 'nhvfc' OPT; do
     case "$OPT" in
@@ -93,18 +93,37 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -p ./
 
 source ./migrate-wsit-sources.sh
 
+# Exporting license & adding license maintenance tools
+echo "Exporting license & adding license maintenance tools..."
+pushd .
+cd `dirname $NEW_PROJECT_ROOT`
+cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $NEW_PROJECT_ROOT` wsit/wsit/LICENSE.txt
+
+cd $NEW_PROJECT_ROOT
+cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d legal wsit/_migration-scripts/metro-legal
+popd
+
+# Creating Metro bundle projects
+echo "Creating Metro bundle projects"
+
 ensureDir "$NEW_PROJECT_ROOT/bundles"
 echo "TODO: create Metro bundle modules"
 echo "TODO: migrate installer"
 echo "TODO: migrate E2E tests"
 
+# Adding Metro hudson job scripts
+echo "Adding Metro hudson job scripts"
+
 ensureDir "$NEW_PROJECT_ROOT/hudson"
 echo "TODO: create hudson job scripts"
 
-ensureDir "$NEW_PROJECT_ROOT/legal"
-echo "TODO: create licence update scripts"
+# Migrating Metro samples
+echo "Migrating Metro samples"
 
 ensureDir "$NEW_PROJECT_ROOT/samples"
 echo "TODO: migrate samples"
+
+# Migrating Metro release notes
+echo "Migrating Metro release notes"
 
 echo "TODO: migrate status notes"
