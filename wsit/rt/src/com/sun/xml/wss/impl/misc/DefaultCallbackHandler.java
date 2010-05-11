@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.8 2010-03-20 12:32:41 kumarjayanti Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.9 2010-05-11 11:06:15 m_potociar Exp $
  *
  */
 /*
@@ -122,7 +122,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CollectionCertStoreParameters;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -283,12 +282,12 @@ public class DefaultCallbackHandler implements CallbackHandler {
         //this.stsAlias =  properties.getProperty(STS_ALIAS);
         //this.serviceAlias = properties.getProperty(SERVICE_ALIAS);
 
-        this.certStoreCBHClassName = properties.getProperty(this.CERTSTORE_CBH);
-        this.certSelectorClassName = properties.getProperty(this.CERTSTORE_CERTSELECTOR);
-        this.crlSelectorClassName = properties.getProperty(this.CERTSTORE_CRLSELECTOR);
+        this.certStoreCBHClassName = properties.getProperty(CERTSTORE_CBH);
+        this.certSelectorClassName = properties.getProperty(CERTSTORE_CERTSELECTOR);
+        this.crlSelectorClassName = properties.getProperty(CERTSTORE_CRLSELECTOR);
 
-        this.keystoreCertSelectorClassName = properties.getProperty(this.KEYSTORE_CERTSELECTOR);
-        this.truststoreCertSelectorClassName = properties.getProperty(this.TRUSTSTORE_CERTSELECTOR);
+        this.keystoreCertSelectorClassName = properties.getProperty(KEYSTORE_CERTSELECTOR);
+        this.truststoreCertSelectorClassName = properties.getProperty(TRUSTSTORE_CERTSELECTOR);
 
         String uCBH = properties.getProperty(USERNAME_CBH);
         String pCBH = properties.getProperty(PASSWORD_CBH);
@@ -327,7 +326,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             this.revocationEnabled = Boolean.parseBoolean(revocationEnabledAttr);
         }
 
-        useXWSSCallbacksStr = properties.getProperty(this.USE_XWSS_CALLBACKS);
+        useXWSSCallbacksStr = properties.getProperty(USE_XWSS_CALLBACKS);
         if (useXWSSCallbacksStr != null) {
             this.useXWSSCallbacks = Boolean.parseBoolean(useXWSSCallbacksStr);
         }
@@ -711,13 +710,13 @@ public class DefaultCallbackHandler implements CallbackHandler {
     private void populateAssertion(AuthenticationTokenPolicy.SAMLAssertionBinding samlBinding, DynamicPolicyCallback dp)
             throws IOException, UnsupportedCallbackException {
 
-        if (samlBinding.getAssertionType() == AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION) {
+        if (AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION.equals(samlBinding.getAssertionType())) {
 
             if (samlHandler != null) {
 
                 SAMLCallback sc = new SAMLCallback();
                 SecurityUtil.copy(sc.getRuntimeProperties(), dp.getRuntimeProperties());
-                sc.setConfirmationMethod(sc.SV_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.SV_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
@@ -736,7 +735,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
                 SAMLCallback sc = new SAMLCallback();
                 SecurityUtil.copy(sc.getRuntimeProperties(), dp.getRuntimeProperties());
-                sc.setConfirmationMethod(sc.HOK_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.HOK_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
@@ -806,10 +805,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
         String assertionId = samlBinding.getAssertionId();
         // use the above information to locate the assertion
         // this simple impl will just set the assertion
-        if (samlBinding.getAssertionType() == AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION) {
+        if (AuthenticationTokenPolicy.SAMLAssertionBinding.SV_ASSERTION.equals(samlBinding.getAssertionType())) {
             if (samlHandler != null) {
                 SAMLCallback sc = new SAMLCallback();
-                sc.setConfirmationMethod(sc.SV_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.SV_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 sc.setAssertionId(assertionId);
                 sc.setAuthorityBindingElement(binding);
@@ -825,7 +824,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
             if (samlHandler != null) {
                 SAMLCallback sc = new SAMLCallback();
-                sc.setConfirmationMethod(sc.HOK_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.HOK_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 sc.setAssertionId(assertionId);
                 sc.setAuthorityBindingElement(binding);
