@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultCallbackHandler.java,v 1.9 2010-05-11 11:06:15 m_potociar Exp $
+ * $Id: DefaultCallbackHandler.java,v 1.10 2010-05-11 11:06:45 m_potociar Exp $
  *
  */
 /*
@@ -350,6 +350,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             defRealmAuthenticator = RealmAuthenticationAdapter.newInstance(null);
         }
     }
+
     /**
      *
      * @param cb
@@ -385,6 +386,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      *
      * @param cb
@@ -421,6 +423,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      *
      * @param cb
@@ -445,10 +448,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 ((PasswordValidationCallback.WsitDigestPasswordValidator) pwValidator).setPassword(request);
                 cb.setValidator(pwValidator);
             }
-        } else if ( cb.getRequest() instanceof PasswordValidationCallback.DerivedKeyPasswordRequest) {
+        } else if (cb.getRequest() instanceof PasswordValidationCallback.DerivedKeyPasswordRequest) {
             PasswordValidationCallback.DerivedKeyPasswordRequest request =
                     (PasswordValidationCallback.DerivedKeyPasswordRequest) cb.getRequest();
-             if (pwValidator != null && pwValidator instanceof PasswordValidationCallback.DerivedKeyPasswordValidator) {
+            if (pwValidator != null && pwValidator instanceof PasswordValidationCallback.DerivedKeyPasswordValidator) {
                 ((PasswordValidationCallback.DerivedKeyPasswordValidator) pwValidator).setPassword(request);
                 cb.setValidator(pwValidator);
             }
@@ -466,6 +469,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             cb.setValidator(defaultTSValidator);
         }
     }
+
     /**
      *
      * @param callbacks
@@ -680,6 +684,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      *
      * @param certificate
@@ -700,6 +705,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return false;
     }
+
     /**
      *
      * @param samlBinding
@@ -756,6 +762,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      *
      * @param samlBinding
@@ -791,6 +798,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      * 
      * @param samlBinding
@@ -844,6 +852,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
         }
     }
+
     /**
      *
      * @throws com.sun.xml.wss.XWSSecurityException
@@ -899,6 +908,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throw new RuntimeException(e);
         }
     }
+
     /**
      *
      * @throws com.sun.xml.wss.XWSSecurityException
@@ -961,6 +971,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throw new RuntimeException(e);
         }
     }
+
     /**
      *
      * @param ski
@@ -1008,11 +1019,11 @@ public class DefaultCallbackHandler implements CallbackHandler {
         //now search in CertStore if present
         if (this.certStore != null) {
             CertSelector selector = null;
-           /* if (this.certSelectorClass != null) {
-                HashMap props = new HashMap();
-                props.putAll(runtimeProps);
-                props.put(XWSSConstants.SUBJECTKEYIDENTIFIER, ski);
-                selector = XWSSUtil.getCertSelector(certSelectorClass, props);
+            /* if (this.certSelectorClass != null) {
+            HashMap props = new HashMap();
+            props.putAll(runtimeProps);
+            props.put(XWSSConstants.SUBJECTKEYIDENTIFIER, ski);
+            selector = XWSSUtil.getCertSelector(certSelectorClass, props);
             }*/
             if (selector == null) {
                 selector = new KeyIdentifierCertSelector(ski);
@@ -1030,6 +1041,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return null;
     }
+
     /**
      *
      * @param issuerName
@@ -1057,13 +1069,13 @@ public class DefaultCallbackHandler implements CallbackHandler {
             }
             //now search in CertStore if present
             if (this.certStore != null) {
-                CertSelector selector  = null;
+                CertSelector selector = null;
                 /*if (this.certSelectorClass != null) {
-                    Map props = new HashMap();
-                    props.putAll(runtimeProps);
-                    props.put(XWSSConstants.ISSUERNAME, issuerName);
-                    props.put(XWSSConstants.ISSUERSERIAL, serialNumber);
-                    selector = XWSSUtil.getCertSelector(certSelectorClass, props);
+                Map props = new HashMap();
+                props.putAll(runtimeProps);
+                props.put(XWSSConstants.ISSUERNAME, issuerName);
+                props.put(XWSSConstants.ISSUERSERIAL, serialNumber);
+                selector = XWSSUtil.getCertSelector(certSelectorClass, props);
                 }*/
                 if (selector == null) {
                     selector = new IssuerNameAndSerialCertSelector(serialNumber, issuerName);
@@ -1091,8 +1103,8 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     String thisIssuerName =
                             RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
                     BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                    if (thisIssuerName.equals(issuerName) &&
-                            thisSerialNumber.equals(serialNumber)) {
+                    if (thisIssuerName.equals(issuerName)
+                            && thisSerialNumber.equals(serialNumber)) {
                         return x509Cert;
                     }
                 }
@@ -1104,6 +1116,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
         return null;
     }
+
     /**
      *
      * @param ski
@@ -1152,6 +1165,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return null;
     }
+
     /**
      *
      * @param issuerName
@@ -1190,8 +1204,8 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 String thisIssuerName =
                         RFC2253Parser.normalize(x509Cert.getIssuerDN().getName());
                 BigInteger thisSerialNumber = x509Cert.getSerialNumber();
-                if (thisIssuerName.equals(issuerName) &&
-                        thisSerialNumber.equals(serialNumber)) {
+                if (thisIssuerName.equals(issuerName)
+                        && thisSerialNumber.equals(serialNumber)) {
                     //return (PrivateKey) keyStore.getKey(alias, this.keyPassword);
                     return getPrivateKey(runtimeProps, alias);
                 }
@@ -1202,6 +1216,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return null;
     }
+
     /**
      *
      * @param certificate
@@ -1240,6 +1255,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return null;
     }
+
     /**
      *
      * @param context
@@ -1353,6 +1369,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throw new RuntimeException("An Error occurred while locating PEER Entity certificate in TrustStore");
         }
     }
+
     /**
      * 
      * @param request
@@ -1440,6 +1457,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throw new RuntimeException(e);
         }
     }
+
     /**
      *
      */
@@ -1472,7 +1490,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         expired = calendarFormatter2.parse(utcTimestampRequest.getExpired());
                     }
                 } catch (java.text.ParseException ipe) {
-                    log.log(Level.SEVERE, "WSS1513.exception.validate.timestamp",ipe);
+                    log.log(Level.SEVERE, "WSS1513.exception.validate.timestamp", ipe);
                     throw new TimestampValidationCallback.TimestampValidationException(ipe.getMessage());
                 }
             }
@@ -1524,8 +1542,8 @@ public class DefaultCallbackHandler implements CallbackHandler {
             log.log(Level.SEVERE, "Creation time:" + created);
             log.log(Level.SEVERE, "Current time:" + current);
             throw new TimestampValidationCallback.TimestampValidationException(
-                    "The creation time is older than " +
-                    " currenttime - timestamp-freshness-limit - max-clock-skew");
+                    "The creation time is older than "
+                    + " currenttime - timestamp-freshness-limit - max-clock-skew");
         }
 
         Date currentTime =
@@ -1571,14 +1589,15 @@ public class DefaultCallbackHandler implements CallbackHandler {
         c.setTimeInMillis(currentTime);
         return c.getTime();
     }
+
     /**
      *
      */
     public class X509CertificateValidatorImpl implements CertificateValidationCallback.CertificateValidator, ValidatorExtension {
 
         private Map runtimeProps = null;
-        public  X509CertificateValidatorImpl(){
 
+        public X509CertificateValidatorImpl() {
         }
 
         public boolean validate(X509Certificate certificate)
@@ -1596,7 +1615,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
             // for self-signed certificate
             if (certificate.getIssuerX500Principal().equals(certificate.getSubjectX500Principal())) {
-                if (isTrustedSelfSigned(certificate,getTrustStore(this.runtimeProps))) {
+                if (isTrustedSelfSigned(certificate, getTrustStore(this.runtimeProps))) {
                     return true;
                 } else {
                     log.log(Level.SEVERE, "WSS1533.X509.SelfSignedCertificate.notValid");
@@ -1693,7 +1712,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             return true;
         }
 
-        private boolean isTrustedSelfSigned(X509Certificate cert,KeyStore trustStore)
+        private boolean isTrustedSelfSigned(X509Certificate cert, KeyStore trustStore)
                 throws CertificateValidationCallback.CertificateValidationException {
             if (trustStore == null) {
                 return false;
@@ -1721,7 +1740,6 @@ public class DefaultCallbackHandler implements CallbackHandler {
         public void setRuntimeProperties(Map props) {
             this.runtimeProps = props;
         }
-
 //        private boolean isSelfCert(X509Certificate cert)
 //                throws CertificateValidationCallback.CertificateValidationException {
 //            if (keyStore == null) {
@@ -1748,6 +1766,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 //            }
 //        }
     }
+
     /**
      *
      * @param ski
@@ -1795,10 +1814,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
         if (this.certStore != null) {
             CertSelector selector = null;
             /*if (this.certSelectorClass != null) {
-                Map props = new HashMap();
-                props.putAll(runtimeProps);
-                props.put(XWSSConstants.THUMBPRINT, ski);
-                selector = XWSSUtil.getCertSelector(certSelectorClass, props);
+            Map props = new HashMap();
+            props.putAll(runtimeProps);
+            props.put(XWSSConstants.THUMBPRINT, ski);
+            selector = XWSSUtil.getCertSelector(certSelectorClass, props);
             }*/
             if (selector == null) {
                 selector = new DigestCertSelector(ski, MessageConstants.SHA_1);
@@ -1817,7 +1836,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
         return null;
     }
-   
+
     /**
      *
      * @param ski
@@ -1941,7 +1960,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         try {
             ret = Long.valueOf(lng);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1522.error.getting.longValue",e);
+            log.log(Level.SEVERE, "WSS1522.error.getting.longValue", e);
             throw new XWSSecurityException(e);
         }
         return ret;
@@ -2022,6 +2041,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 //        }
 
     }
+
     /**
      *
      * @param pk
@@ -2063,10 +2083,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
         if (certStore != null) {
             CertSelector selector = null;
             /*if (this.certSelectorClass != null) {
-                Map props = new HashMap();
-                props.putAll(runtimeProps);
-                props.put(XWSSConstants.PUBLICKEY, pk);
-                selector = XWSSUtil.getCertSelector(certSelectorClass, props);
+            Map props = new HashMap();
+            props.putAll(runtimeProps);
+            props.put(XWSSConstants.PUBLICKEY, pk);
+            selector = XWSSUtil.getCertSelector(certSelectorClass, props);
             }*/
             if (selector == null) {
                 selector = new PublicKeyCertSelector(pk);
@@ -2085,6 +2105,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return null;
     }
+
     /**
      *
      * @param pk
@@ -2165,6 +2186,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             throw new RuntimeException(ue);
         }
     }
+
     /**
      *
      * @param context
@@ -2228,6 +2250,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         otherPartySubject = (Subject) AccessController.doPrivileged(
                 new PrivilegedAction<Object>() {
+
                     @SuppressWarnings("unchecked")
                     public Object run() {
                         Subject otherPartySubj = new Subject();
@@ -2294,7 +2317,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     }
 
     private synchronized CertStore getCertStoreUsingCallback(Map runtimeProps) {
-         if (this.certstoreHandler != null) {
+        if (this.certstoreHandler != null) {
             //keep the certstore handy...
             CertStoreCallback cb = new CertStoreCallback();
             SecurityUtil.copy(cb.getRuntimeProperties(), runtimeProps);
@@ -2312,6 +2335,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return certStore;
     }
+
     /**
      *
      * @param runtimeProps
@@ -2340,6 +2364,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         }
         return trustStore;
     }
+
     /**
      * 
      * @param runtimeProps
