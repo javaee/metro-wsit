@@ -157,9 +157,11 @@ public class SupportingTokensProcessor {
             }
             
             //TODO:: Add token to MessagePolicy;
-            AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
-            atp.setFeatureBinding(policy);
-            policyContainer.insert(atp);
+            if (!(this instanceof EndorsingSupportingTokensProcessor)) {
+                AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
+                atp.setFeatureBinding(policy);
+                policyContainer.insert(atp);
+            }
             //TODO: Take care of targets.
             addTargets();
         }
@@ -305,10 +307,11 @@ public class SupportingTokensProcessor {
         if ( uid != null ) {
             SignatureTargetCreator stcr = iAP.getTargetCreator();
             SignatureTarget stg = stcr.newURISignatureTarget(uid);
-            stcr.addTransform(stg);
             SecurityPolicyUtil.setName(stg, token);
             if(!strIgnore){
                 stcr.addSTRTransform(stg);
+            } else  {
+               stcr.addTransform(stg);
             }
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(stg);

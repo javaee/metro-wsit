@@ -214,9 +214,10 @@ public abstract class BindingProcessor {
             if (uuid != null) {
                 SignatureTargetCreator stc = iAP.getTargetCreator();
                 SignatureTarget st = stc.newURISignatureTarget(uuid);
-                stc.addTransform(st);
                 if (strIgnore != true) {
                     stc.addSTRTransform(st);
+                }else {
+                    stc.addTransform(st);
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
                 st.setPolicyName(qName);
@@ -236,9 +237,10 @@ public abstract class BindingProcessor {
                 st = stc.newURISignatureTarget(uuid);
             }
             if (st != null) {  //when st is null, request simply goes with out signing the token;
-                stc.addTransform(st);
                 if (strIgnore != true) {
                     stc.addSTRTransform(st);
+                } else {
+                    stc.addTransform(st);
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
                 st.setPolicyName(qName);

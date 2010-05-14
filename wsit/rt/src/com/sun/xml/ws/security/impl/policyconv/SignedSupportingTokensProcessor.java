@@ -57,20 +57,20 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
             XWSSPolicyContainer container,SignaturePolicy sp,EncryptionPolicy ep,PolicyID pid) {
         super(st,tokenProcessor,binding,container,sp,ep,pid);
     }
-    
+
+    @Override
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
-        SignatureTarget target = stc.newURISignatureTarget(policy.getUUID());
-        stc.addTransform(target);
+        SignatureTarget target = stc.newURISignatureTargetForSSToken(policy.getUUID());
         SecurityPolicyUtil.setName(target, policy);
-
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
-
         String includeToken = token.getIncludeToken();
         if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
            !spVersion.includeTokenAlwaysToRecipient.equals(includeToken))|| PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)
            || PolicyUtil.isIssuedToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
+        }else {
+           stc.addTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
         spFB.addTargetBinding(target);
