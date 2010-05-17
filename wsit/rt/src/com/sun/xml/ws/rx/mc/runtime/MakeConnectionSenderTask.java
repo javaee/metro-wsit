@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.commons.ScheduledTaskManager;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
@@ -67,6 +68,10 @@ final class MakeConnectionSenderTask implements Runnable {
     private final Communicator communicator;
     private final SuspendedFiberStorage suspendedFiberStorage;
     private final Map<String, ProtocolMessageHandler> mapOfRegisteredProtocolMessageHandlers;
+    //
+    private final ScheduledTaskManager scheduler;
+    private final AtomicBoolean isRunning;
+    private final AtomicBoolean wasShutdown;
 
     MakeConnectionSenderTask(
             final Communicator communicator,
@@ -86,6 +91,38 @@ final class MakeConnectionSenderTask implements Runnable {
         this.lastMcMessageTimestamp = System.currentTimeMillis();
         this.isMcRequestPending = new AtomicBoolean(false);
         this.scheduledMcRequestCounter = 0;
+
+        this.scheduler = new ScheduledTaskManager("MakeConnectionSenderTask");
+        this.isRunning = new AtomicBoolean(false);
+        this.wasShutdown = new AtomicBoolean(false);
+    }
+
+    /**
+     * This task can only be started once and then shut down. It cannot be stopped. Once it has been shut down, it cannot be restarted.
+     */
+    public void start() {
+        if (wasShutdown.get()) {
+            throw new IllegalStateException("This task instance has already been shut down in the past.");
+        }
+
+        if (isRunning.compareAndSet(false, true)) {
+            // TODO P2 make it configurable
+            this.scheduler.startTask(this, 2000, 500);
+        }
+    }
+
+    public boolean isRunning() {
+        return isRunning.get();
+    }
+
+    public boolean wasShutdown() {
+        return wasShutdown.get();
+    }
+
+    public void shutdown() {
+        if (isRunning.compareAndSet(true, false) && wasShutdown.compareAndSet(false, true)) {
+            this.scheduler.shutdown();
+        }
     }
 
     /**

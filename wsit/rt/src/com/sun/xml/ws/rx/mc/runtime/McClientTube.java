@@ -36,8 +36,6 @@
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
-import com.sun.xml.ws.commons.ScheduledTaskManager;
-import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Header;
@@ -72,19 +70,17 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
     private final Header wsmcAnnonymousReplyToHeader;
     private final Header wsmcAnnonymousFaultToHeader;
     private final Communicator communicator;
-    private final ScheduledTaskManager scheduler;
     private final SuspendedFiberStorage suspendedFiberStorage;
     private final MakeConnectionSenderTask mcSenderTask;
     private final WSEndpointReference wsmcAnonymousEndpointReference;
 
-    McClientTube(McConfiguration configuration, Tube tubelineHead, EndpointAddress endpointAddress) throws RxRuntimeException {
+    McClientTube(McConfiguration configuration, Tube tubelineHead) throws RxRuntimeException {
         super(tubelineHead);
 
         this.configuration = configuration;
 
         this.communicator = new Communicator(
                 "McClientTubeCommunicator",
-                endpointAddress,
                 tubelineHead,
                 null,
                 configuration.getAddressingVersion(),
@@ -104,9 +100,6 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
                 wsmcAnnonymousReplyToHeader,
                 wsmcAnnonymousFaultToHeader,
                 configuration);
-        this.scheduler = new ScheduledTaskManager("MC Client Tube");
-        // TODO P2 make it configurable
-        this.scheduler.startTask(mcSenderTask, 2000, 500);
     }
 
     McClientTube(McClientTube original, TubeCloner cloner) {
@@ -118,7 +111,6 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
         this.wsmcAnnonymousFaultToHeader = original.wsmcAnnonymousFaultToHeader;
         this.communicator = original.communicator;
         this.suspendedFiberStorage = original.suspendedFiberStorage;
-        this.scheduler = original.scheduler;
         this.mcSenderTask = original.mcSenderTask;
 
         this.wsmcAnonymousEndpointReference = original.wsmcAnonymousEndpointReference;
@@ -136,6 +128,11 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
 
     @Override
     public NextAction processRequest(Packet request) {
+        if (!mcSenderTask.isRunning() && !mcSenderTask.wasShutdown()) { // first packet
+            communicator.setDestinationAddressFrom(request);  // setting actual destination endpoint
+            mcSenderTask.start(); // starting the McSenderTask
+        }
+
         final Message message = request.getMessage();
         if (!message.hasHeaders()) {
             throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSMC_0102_NO_SOAP_HEADERS()));
@@ -178,7 +175,7 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
 
     @Override
     public void preDestroy() {
-        scheduler.shutdown();
+        mcSenderTask.shutdown();
         communicator.close();
 
         super.preDestroy();

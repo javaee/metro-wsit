@@ -76,7 +76,6 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "packet-filtering-tube-communicator",
-                context.getAddress(),
                 super.next,
                 null,
                 configuration.getAddressingVersion(),
@@ -96,7 +95,6 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "packet-filtering-tube-communicator",
-                null, // TODO P3 can we get the endpoint address?
                 super.next,
                 null,
                 configuration.getAddressingVersion(),

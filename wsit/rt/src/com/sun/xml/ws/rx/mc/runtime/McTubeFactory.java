@@ -63,7 +63,7 @@ public final class McTubeFactory implements TubeFactory {
         McConfiguration configuration = McConfigurationFactory.INSTANCE.createInstance(context.getWsdlPort(), context.getBinding(), null);
 
         if (configuration.isMakeConnectionSupportEnabled()) {
-            return new McClientTube(configuration, context.getTubelineHead(), context.getAddress());
+            return new McClientTube(configuration, context.getTubelineHead());
         }
 
         return context.getTubelineHead();

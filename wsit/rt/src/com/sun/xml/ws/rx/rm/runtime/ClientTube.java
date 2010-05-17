@@ -120,7 +120,6 @@ final class ClientTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "rm-client-tube-communicator",
-                context.getAddress(),
                 super.next,
                 scInitiator,
                 configuration.getAddressingVersion(),
@@ -333,6 +332,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
     }
 
     private void openRmSession(Packet request) {
+        rc.communicator.setDestinationAddressFrom(request); // set the actual destination endpoint from the first packed
+        
         createSequences(request);
 
         ClientAckRequesterTask cart = new ClientAckRequesterTask(rc, outboundSequenceId.value);

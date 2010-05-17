@@ -116,7 +116,6 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 configuration,
                 new Communicator(
                 "rm-server-tube-communicator",
-                null, // TODO P2 can we get the endpoint address in all cases?
                 super.next,
                 null,
                 configuration.getAddressingVersion(),

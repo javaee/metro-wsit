@@ -76,22 +76,22 @@ public final class Communicator {
     public final QName soapMustUnderstandAttributeName;
     //
     private final SecureConversationInitiator scInitiator;
-    private FiberExecutor fiberExecutor;
-    private final EndpointAddress destinationAddress;
     //
     private final AddressingVersion addressingVersion;
     private final SOAPVersion soapVersion;
     private final JAXBRIContext jaxbContext;
+    //
+    private FiberExecutor fiberExecutor;
+    private volatile EndpointAddress destinationAddress;
 
     public Communicator(
             String name,
-            EndpointAddress destinationAddress,
             Tube tubeline,
             SecureConversationInitiator scInitiator,
             AddressingVersion addressingVersion,
             SOAPVersion soapVersion,
             JAXBRIContext jaxbContext) {
-        this.destinationAddress = destinationAddress;
+        this.destinationAddress = null;
         this.fiberExecutor = new FiberExecutor(name, tubeline);
         this.scInitiator = scInitiator;
         this.addressingVersion = addressingVersion;
@@ -125,7 +125,7 @@ public final class Communicator {
     }
 
     public final Packet createRequestPacket(Packet originalRequestPacket, Object jaxbElement, String wsaAction, boolean expectReply) {
-        if (originalRequestPacket != null) { // // server side request transferred as a response
+        if (originalRequestPacket != null) { // server side request transferred as a response
             Packet request = createResponsePacket(originalRequestPacket, jaxbElement, wsaAction, false);
 
             final HeaderList requestHeaders = request.getMessage().getHeaders();
@@ -384,6 +384,14 @@ public final class Communicator {
     @Nullable
     EndpointAddress getDestinationAddress() {
         return destinationAddress;
+    }
+
+    public void setDestinationAddress(EndpointAddress newValue) {
+        this.destinationAddress = newValue;
+    }
+
+    public void setDestinationAddressFrom(Packet packet) {
+        this.destinationAddress = packet.endpointAddress;
     }
 
     public AddressingVersion getAddressingVersion() {
