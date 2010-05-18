@@ -74,7 +74,7 @@
     <property name="release.underscore.version" value="2_0_1"/>
     <property name="release.dash.version" value="2-0-1"/>
     <property name="release.impl.version.suffix" value="FCS"/>
-    <property name="release.mvn.version.suffix" value=""/>
+    <property name="release.mvn.version.suffix" value="-SNAPSHOT"/>
     <property name="release.context.url" value="2.0.1"/>
 
     <tstamp>
