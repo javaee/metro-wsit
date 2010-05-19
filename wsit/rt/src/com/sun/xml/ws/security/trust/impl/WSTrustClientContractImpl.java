@@ -46,12 +46,12 @@
 
 package com.sun.xml.ws.security.trust.impl;
 
+import com.sun.xml.ws.api.security.trust.Status;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.trust.WSTrustClientContract;
-import com.sun.xml.ws.security.trust.WSTrustConstants;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
 import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
@@ -65,21 +65,17 @@ import com.sun.xml.ws.security.trust.elements.RequestedUnattachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
-import com.sun.xml.ws.api.security.trust.Status;
+import com.sun.xml.ws.security.trust.elements.SecondaryParameters;
+import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 import com.sun.xml.ws.security.trust.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.xml.ws.security.trust.logging.LogDomainConstants;
 
 /**
  *
@@ -276,6 +272,12 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         int keySize = (int)rstr.getKeySize()/8;
         if (keySize == 0){
             keySize = (int)rst.getKeySize()/8;
+            if (keySize == 0 && wstVer.getNamespaceURI().equals(WSTrustVersion.WS_TRUST_13_NS_URI)){
+                SecondaryParameters secPara = rst.getSecondaryParameters();
+                if (secPara != null){
+                    keySize = (int)secPara.getKeySize()/8;
+                }
+            }
         }
         byte[] key = null;
         if(computedKey.toString().equals(wstVer.getCKPSHA1algorithmURI())){
