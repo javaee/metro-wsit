@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -84,9 +84,11 @@ public class SecurityPoliciesTest extends TestCase {
         super(testName);
     }
     
+    @Override
     protected void setUp() throws Exception {
     }
     
+    @Override
     protected void tearDown() throws Exception {
     }
     
@@ -327,7 +329,7 @@ public class SecurityPoliciesTest extends TestCase {
         }
         
         for ( int i = 0 ; i<policy1.size() ; i++ ) {
-            if ( policy1.get(i).getType() != policy2.get(i).getType()  ) {
+            if ( !(policy1.get(i).getType().equals(policy2.get(i).getType()))  ) {
                 return false;
             }
             
@@ -683,7 +685,7 @@ public class SecurityPoliciesTest extends TestCase {
     
     //Comparing two message policies
     public boolean compileMessagePolicies(MessagePolicy pol1, MessagePolicy pol2)throws Exception {
-        if ( pol1.getType() != pol2.getType() ) {
+        if ( !(pol1.getType().equals(pol2.getType()))) {
             return false;
         }
         boolean asrt = true;
@@ -697,7 +699,7 @@ public class SecurityPoliciesTest extends TestCase {
         for(int i=0; i<p1.size(); i++ ) {
             WSSPolicy wp1 = (WSSPolicy)p1.get(i);
             WSSPolicy wp2 = (WSSPolicy)p2.get(i);
-            if ( wp1.getType() != wp2.getType() ) {
+            if ( !(wp1.getType().equals(wp2.getType()))) {
                 return false;
             } else {
                 if ( PolicyTypeUtil.signaturePolicy(wp1)) {
@@ -715,7 +717,7 @@ public class SecurityPoliciesTest extends TestCase {
     public boolean compareSignaturePolicy(WSSPolicy wp1, WSSPolicy wp2) throws Exception{
         SignaturePolicy sp1 = (SignaturePolicy)wp1;
         SignaturePolicy sp2 = (SignaturePolicy)wp2;
-        if ( sp1.getKeyBinding().getType() != sp2.getKeyBinding().getType() ) {
+        if ( !(sp1.getKeyBinding().getType().equals(sp2.getKeyBinding().getType())) ) {
             return false;
         }
         
@@ -736,7 +738,7 @@ public class SecurityPoliciesTest extends TestCase {
         for (int i=0; i<t1.size(); i++) {
             Target s1 = (Target)t1.get(i);
             Target s2 = (Target)t2.get(i);
-            if ( s1.getType() != s2.getType() ) {
+            if ( !(s1.getType().equals(s2.getType()))) {
                 System.err.println("Expected Target Type"+s1.getType()+" Got "+s2.getType());
                 throw new Exception("Target type in signature policy did not match");
             }
@@ -753,7 +755,7 @@ public class SecurityPoliciesTest extends TestCase {
     public boolean compareEncryptionPolicy(WSSPolicy wp1, WSSPolicy wp2) throws Exception{
         EncryptionPolicy sp1 = (EncryptionPolicy)wp1;
         EncryptionPolicy sp2 = (EncryptionPolicy)wp2;
-        if ( sp1.getKeyBinding().getType() != sp2.getKeyBinding().getType() ) {
+        if (!(sp1.getKeyBinding().getType().equals(sp2.getKeyBinding().getType())) ) {
             return false;
         }
         
@@ -774,12 +776,12 @@ public class SecurityPoliciesTest extends TestCase {
         for (int i=0; i<t1.size(); i++) {
             Target s1 = (Target)t1.get(i);
             Target s2 = (Target)t2.get(i);
-            if ( s1.getType() != s2.getType() ) {
+            if ( !(s1.getType().equals(s2.getType()))) {
                 System.err.println("Expected Target Type"+s1.getType()+" Got "+s2.getType());
                 throw new Exception("Target type in encryption policy did not match");
             }
             
-            if ( s1.getValue() != s2.getValue() ) {
+            if ( !(s1.getType().equals(s2.getType()))) {
                 System.err.println("Expected Target Value"+s1.getValue()+" Got "+s2.getValue());
                 throw new Exception("Target Value in encryption policy did not match");
             }
