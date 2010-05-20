@@ -200,15 +200,15 @@
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
 
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
              dest="wsit-image/metro.zip"/>
         <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
 
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
              dest="wsit-image/webservices-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
              dest="wsit-image/webservices-tools-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
              dest="wsit-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
@@ -216,21 +216,21 @@
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
 
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
              dest="wsit-image/metro.zip"/>
         <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
 
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
              dest="wsit-image/webservices-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
              dest="wsit-image/webservices-tools-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
              dest="wsit-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
     <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
         <mkdir dir="tmp/test-harness"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+        <get src="http://hudson.sfbay/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
              dest="tmp/test-harness.zip"/>
         <unzip src="tmp/test-harness.zip" dest="tmp"/>
         <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
