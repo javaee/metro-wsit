@@ -65,7 +65,7 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
-    <property name="jaxb.osgi.dependency.version" value="2.2-promoted-b50"/>
+    <property name="jaxb.osgi.dependency.version" value="2.2.2-promoted-b83"/>
 
     <!-- BEGIN: RELEASE SECTION -->
     <!-- This section needs to be updated with each new release -->
@@ -87,9 +87,9 @@
     <property name="jaxws.release.version" value="2.2.1"/>
     <property name="jaxws.release.context.url" value="2.2.1"/>
 
-    <property name="jaxb.spec.version" value="2.2.1"/>
-    <property name="jaxb.release.version" value="2.2.1"/>
-    <property name="jaxb.release.context.url" value="2.2.1"/>
+    <property name="jaxb.spec.version" value="2.2.2"/>
+    <property name="jaxb.release.version" value="2.2.2"/>
+    <property name="jaxb.release.context.url" value="2.2.2"/>
 
     <!-- END: RELEASE SECTION -->
 
