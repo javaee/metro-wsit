@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -38,7 +38,6 @@ package com.sun.xml.ws.security.impl.policyconv;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
-import com.sun.xml.ws.security.impl.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.UserNameToken;
@@ -72,22 +71,22 @@ public class SupportingTokensProcessor {
     protected EncryptionTargetCreator etc = null;
     protected Binding binding = null;
     protected XWSSPolicyContainer policyContainer = null;
-    
+
     protected SignaturePolicy signaturePolicy = null;
     protected EncryptionPolicy encryptionPolicy = null;
     protected SupportingTokens st = null;
     protected IntegrityAssertionProcessor iAP = null;
     protected EncryptionAssertionProcessor eAP = null;
-    
+
     protected ArrayList<SignaturePolicy> spList =null;
     protected ArrayList<EncryptionPolicy> epList =null;
     protected SignedParts emptySP  = null;
     protected boolean buildSP = false;
     protected boolean buildEP = false;
     protected PolicyID pid = null;
-    
+
     protected SupportingTokensProcessor(){
-        
+
     }
     /** Creates a new instance of SupportingTokensProcessor */
     public SupportingTokensProcessor(SupportingTokens st,TokenProcessor tokenProcessor,Binding binding,XWSSPolicyContainer container,SignaturePolicy sp,
@@ -113,17 +112,17 @@ public class SupportingTokensProcessor {
         this.etc = eAP.getTargetCreator();
         this.emptySP = getEmptySignedParts(st.getSignedParts());
     }
-    
+
     public void process() throws PolicyException{
         Iterator tokens = st.getTokens();
-        
+
         if(st.getEncryptedParts().hasNext() || st.getEncryptedElements().hasNext()){
             buildEP = true;
         }
         if(st.getSignedElements().hasNext() || st.getSignedParts().hasNext()){
             buildSP = true;
         }
-        
+
         while(tokens.hasNext()){
             Token token = (Token) tokens.next();
             SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
@@ -135,20 +134,20 @@ public class SupportingTokensProcessor {
                     utb.isEndorsing(true);
                 }
             }
-            if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion) && 
-                    this instanceof EndorsingSupportingTokensProcessor){                
+            if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion) &&
+                    this instanceof EndorsingSupportingTokensProcessor){
                 ((IssuedTokenKeyBinding)policy).setSTRID(null);
             }
             if ( policy.getUUID() != null ) {
-                
+
                 addToPrimarySignature(policy,token);
-                
+
                 encryptToken(token, spVersion);
-                
+
                 if(PolicyUtil.isSamlToken((PolicyAssertion)token, spVersion)){
                     correctSAMLBinding(policy);
                 }
-                
+
                 collectSignaturePolicies(token);
                 if(buildEP){
                     EncryptionPolicy ep = new EncryptionPolicy();
@@ -156,22 +155,24 @@ public class SupportingTokensProcessor {
                     getEPList().add(ep);
                 }
             }
-            
-            //TODO:: Add token to MessagePolicy;
-            AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
-            atp.setFeatureBinding(policy);
-            policyContainer.insert(atp);
+
+           //TODO:: Add token to MessagePolicy;
+            if (!(this instanceof EndorsingSupportingTokensProcessor)) {
+                AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
+                atp.setFeatureBinding(policy);
+                policyContainer.insert(atp);
+            }
             //TODO: Take care of targets.
             addTargets();
         }
     }
-    
+
     protected void collectSignaturePolicies(Token token) throws PolicyException{
         if(buildSP){
             createSupportingSignature(token);
         }
     }
-    
+
     protected void createSupportingSignature(Token token) throws PolicyException{
         SignaturePolicy sp = new SignaturePolicy();
         sp.setUUID(pid.generateID());
@@ -194,28 +195,28 @@ public class SupportingTokensProcessor {
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
         //no-op
     }
-    
+
     protected void endorseSignature(SignaturePolicy sp){
         //no-op
     }
-    
+
     protected ArrayList<SignaturePolicy> getSPList(){
         if(spList == null){
             spList = new ArrayList<SignaturePolicy>();
         }
         return spList;
     }
-    
+
     protected ArrayList<EncryptionPolicy> getEPList(){
         if(epList == null){
             epList = new ArrayList<EncryptionPolicy>();
         }
         return epList;
     }
-    
+
     protected void encryptToken(Token token, SecurityPolicyVersion spVersion)throws PolicyException{
-        if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && 
-                ((UserNameToken)token).hasPassword() && 
+        if(PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
+                ((UserNameToken)token).hasPassword() &&
                 !((UserNameToken)token).useHashPassword()){
             if ( binding != null && token.getTokenId()!= null ) {
                 EncryptionPolicy.FeatureBinding fb =(EncryptionPolicy.FeatureBinding) encryptionPolicy.getFeatureBinding();
@@ -224,8 +225,8 @@ public class SupportingTokensProcessor {
             }
         }
     }
-    
-    
+
+
     protected SignedParts getEmptySignedParts(Iterator itr){
         while(itr.hasNext()){
             Target target = (Target)itr.next();
@@ -238,9 +239,9 @@ public class SupportingTokensProcessor {
         }
         return null;
     }
-    
+
     protected void addTargets(){
-        if(binding != null && binding.getProtectionOrder() == Binding.SIGN_ENCRYPT){
+        if(binding != null && Binding.SIGN_ENCRYPT.equals(binding.getProtectionOrder())){
             if(spList != null){
                 populateSignaturePolicy();
             }
@@ -256,7 +257,7 @@ public class SupportingTokensProcessor {
             }
         }
     }
-    
+
     protected void populateSignaturePolicy(){
         for(SignaturePolicy sp : spList){
             SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)sp.getFeatureBinding();
@@ -278,7 +279,7 @@ public class SupportingTokensProcessor {
         }
         spList.clear();
     }
-    
+
     protected void populateEncryptionPolicy(){
         for(EncryptionPolicy ep :epList){
             EncryptionPolicy.FeatureBinding epFB = (EncryptionPolicy.FeatureBinding)ep.getFeatureBinding();
@@ -295,7 +296,7 @@ public class SupportingTokensProcessor {
             policyContainer.insert(ep);
         }
     }
-    
+
     protected void protectToken(WSSPolicy token,SignaturePolicy sp){
         String uid = token.getUUID();
         boolean strIgnore = false;
@@ -304,18 +305,19 @@ public class SupportingTokensProcessor {
            strIgnore = true;
         }
         if ( uid != null ) {
-            SignatureTargetCreator stc = iAP.getTargetCreator();
-            SignatureTarget st = stc.newURISignatureTarget(uid);
-            stc.addTransform(st);
-            SecurityPolicyUtil.setName(st, token);
+            SignatureTargetCreator stcr = iAP.getTargetCreator();
+            SignatureTarget stg = stcr.newURISignatureTarget(uid);
+            SecurityPolicyUtil.setName(stg, token);
             if(!strIgnore){
-                stc.addSTRTransform(st);
+                stcr.addSTRTransform(stg);
+            } else  {
+               stcr.addTransform(stg);
             }
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
-            fb.addTargetBinding(st);
+            fb.addTargetBinding(stg);
         }
     }
-    
+
     protected void correctSAMLBinding(WSSPolicy policy) {
         //no-op
     }

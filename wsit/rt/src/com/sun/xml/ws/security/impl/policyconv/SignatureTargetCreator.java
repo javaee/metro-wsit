@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -10,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -19,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -59,7 +59,7 @@ public class SignatureTargetCreator {
         this.enforce = enforce;
         this.algorithmSuite = algorithmSuite;
     }
-    
+
     public SignatureTarget newURISignatureTarget(String uid){
         if ( uid != null ) {
             SignatureTarget target = new SignatureTarget();
@@ -72,7 +72,7 @@ public class SignatureTargetCreator {
         }
         return null;
     }
-    
+
     public SignatureTarget newXpathSignatureTarget(String xpathTarget){
         SignatureTarget target = new SignatureTarget();
         target.setType(SignatureTarget.TARGET_TYPE_VALUE_XPATH);
@@ -82,7 +82,7 @@ public class SignatureTargetCreator {
         target.setEnforce(enforce);
         return target;
     }
-    
+
     public SignatureTarget newQNameSignatureTarget(QName name){
         SignatureTarget target = new SignatureTarget();
         target.setType(SignatureTarget.TARGET_TYPE_VALUE_QNAME);
@@ -92,7 +92,7 @@ public class SignatureTargetCreator {
         target.setQName(name);
         return target;
     }
-    
+
     public void addTransform(SignatureTarget target){
         SignatureTarget.Transform tr = target.newSignatureTransform();
         if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14N)){
@@ -100,7 +100,7 @@ public class SignatureTargetCreator {
         } else{
             tr.setTransform(CanonicalizationMethod.EXCLUSIVE);
         }
-        
+
         if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.InclusiveC14NWithCommentsForTransforms)){
             tr.setTransform(CanonicalizationMethod.INCLUSIVE_WITH_COMMENTS);
         } else if(algorithmSuite != null && algorithmSuite.getAdditionalProps().contains(Constants.ExclusiveC14NWithCommentsForTransforms)){
@@ -108,7 +108,7 @@ public class SignatureTargetCreator {
         }
         target.addTransform(tr);
     }
-    
+
     public void addSTRTransform(SignatureTarget target){
         SignatureTarget.Transform tr = target.newSignatureTransform();
         tr.setTransform(MessageConstants.STR_TRANSFORM_URI);
@@ -122,7 +122,9 @@ public class SignatureTargetCreator {
         target.addTransform(tr);
     }
 
-    SignatureTarget newURISignatureTargetForSSToken(String uid) {
+    //a new one for SingedSupportingTokens where we don't add transform by default
+    //a decision on using STR-TX is pending and hence we delay adding the transform
+    public SignatureTarget newURISignatureTargetForSSToken(String uid) {
           if ( uid != null ) {
             SignatureTarget target = new SignatureTarget();
             target.setType(SignatureTarget.TARGET_TYPE_VALUE_URI);
