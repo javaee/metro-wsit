@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,11 +41,17 @@ import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
+import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.Entropy;
 import com.sun.xml.ws.security.trust.elements.Lifetime;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityToken;
 import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponse;
+import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import com.sun.xml.ws.security.trust.elements.RequestedAttachedReference;
 import com.sun.xml.ws.security.trust.elements.RequestedProofToken;
 import com.sun.xml.ws.security.trust.elements.RequestedSecurityToken;
@@ -56,20 +62,11 @@ import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.Locale;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
-import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
-import com.sun.xml.ws.security.trust.WSTrustVersion;
-import com.sun.xml.ws.security.trust.elements.RequestSecurityTokenResponseCollection;
 import java.util.Iterator;
 import java.util.List;
-import com.sun.xml.ws.security.SecurityContextTokenInfo;
-import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WSSCClientContract {
     
@@ -82,9 +79,6 @@ public class WSSCClientContract {
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
     private WSTrustVersion wsTrustVer = WSTrustVersion.WS_TRUST_10;
     
-    public WSSCClientContract() {
-        //this.config = config;                
-    }    
     
     /**
      * Handle an RSTR returned by the Issuer and update Token information into the
@@ -226,8 +220,15 @@ public class WSSCClientContract {
         final AttributedDateTime expires = lifetime.getExpires();
 
         // populate the IssuedTokenContext
-        context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
-        context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
+        if (created != null){
+            context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
+        }else{
+            // set the current time as specified in the spec.
+            context.setCreationTime(new Date());
+        }
+        if (expires != null){
+            context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
+        }
     }
     
     private byte[] computeKey(final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst) throws WSSecureConversationException, UnsupportedOperationException {

@@ -73,6 +73,7 @@ import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 
 import java.net.URI;
+import java.util.Date;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -211,8 +212,14 @@ public class WSTrustClientContractImpl implements WSTrustClientContract {
         final AttributedDateTime expires = lifetime.getExpires();
 
         // populate the IssuedTokenContext
-        context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
-        context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
+        if (created != null){
+            context.setCreationTime(WSTrustUtil.parseAttributedDateTime(created));
+        }else{
+            context.setCreationTime(new Date());
+        }
+        if (expires != null){
+            context.setExpirationTime(WSTrustUtil.parseAttributedDateTime(expires));
+        }
     }
     
     private byte[] getKey(final WSTrustVersion wstVer, final RequestSecurityTokenResponse rstr, final RequestedProofToken proofToken, final RequestSecurityToken rst, final String appliesTo)
