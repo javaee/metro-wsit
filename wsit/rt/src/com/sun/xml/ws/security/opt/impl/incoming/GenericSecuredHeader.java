@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.security.opt.impl.incoming;
 
 import com.sun.xml.stream.buffer.XMLStreamBuffer;
@@ -51,9 +50,7 @@ import com.sun.xml.ws.message.Util;
 import com.sun.xml.ws.security.opt.api.SecuredHeader;
 import com.sun.xml.wss.impl.MessageConstants;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import javax.xml.bind.Unmarshaller;
@@ -80,9 +77,8 @@ import javax.xml.bind.JAXBException;
  *
  * @author K.Venugopal@sun.com
  */
+public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredHeader, NamespaceContextInfo {
 
-public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredHeader,NamespaceContextInfo {
-    
     private static final String SOAP_1_1_MUST_UNDERSTAND = "mustUnderstand";
     private static final String SOAP_1_2_MUST_UNDERSTAND = SOAP_1_1_MUST_UNDERSTAND;
     private static final String SOAP_1_1_ROLE = "actor";
@@ -94,207 +90,211 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
     private SOAPVersion soapVersion = null;
     //private boolean hasId = true;
     private Vector idValues = new Vector(2);
-    private HashMap<String,String> shNSDecls = new HashMap<String,String>();
-    private HashMap<String,String> nsDecls  = null;
+    private HashMap<String, String> shNSDecls = new HashMap<String, String>();
+    private HashMap<String, String> nsDecls = null;
     //private QName headerName = null;
     // never null. role or actor value
     private String role;
     private boolean isRelay;
     private String localName;
-    private String namespaceURI="";
+    private String namespaceURI = "";
     private String id = "";
     private final FinalArrayList<Attribute> attributes;
-    
     private boolean hasED = false;
+
     @SuppressWarnings("unchecked")
-    public GenericSecuredHeader(XMLStreamReader reader,SOAPVersion soapVersion,StreamReaderBufferCreator creator,HashMap nsDecl, XMLInputFactory  staxIF, boolean encHeaderContent)throws XMLStreamBufferException, XMLStreamException  {
-        
+    public GenericSecuredHeader(XMLStreamReader reader, SOAPVersion soapVersion, StreamReaderBufferCreator creator, HashMap nsDecl, XMLInputFactory staxIF, boolean encHeaderContent) throws XMLStreamBufferException, XMLStreamException {
+
         this.shNSDecls = nsDecl;
         this.soapVersion = soapVersion;
-        if(reader.getNamespaceURI() != null){
+        if (reader.getNamespaceURI() != null) {
             namespaceURI = reader.getNamespaceURI();
         }
         localName = reader.getLocalName();
         attributes = processHeaderAttributes(reader);
-        completeHeader = new XMLStreamBufferMark(this.nsDecls,creator);
-        creator.createElementFragment(XMLStreamReaderFactory.createFilteredXMLStreamReader(reader,new IDProcessor()),true);
+        completeHeader = new XMLStreamBufferMark(this.nsDecls, creator);
+        creator.createElementFragment(XMLStreamReaderFactory.createFilteredXMLStreamReader(reader, new IDProcessor()), true);
         nsDecls.putAll(shNSDecls);
-        if(this.id.length() > 0){
+        if (this.id.length() > 0) {
             idValues.add(id);
         }
 
-        if(encHeaderContent){
+        if (encHeaderContent) {
             checkEncryptedData();
         }
     }
-    
-    public boolean hasEncData(){
+
+    public boolean hasEncData() {
         return hasED;
     }
+
     @SuppressWarnings("unchecked")
-    private void checkEncryptedData() throws XMLStreamException{
+    private void checkEncryptedData() throws XMLStreamException {
         XMLStreamReader reader = readHeader();
-        while(StreamUtil.moveToNextElement(reader)){
-            if(reader.getLocalName() == MessageConstants.ENCRYPTED_DATA_LNAME && 
-                    reader.getNamespaceURI() == MessageConstants.XENC_NS){
+        while (StreamUtil.moveToNextElement(reader)) {
+            if (MessageConstants.ENCRYPTED_DATA_LNAME.equals(reader.getLocalName()) &&
+                    MessageConstants.XENC_NS.equals(reader.getNamespaceURI())) {
                 hasED = true;
-                String encId = reader.getAttributeValue(null,"Id");
-                if(encId != null && encId.length() > 0){
+                String encId = reader.getAttributeValue(null, "Id");
+                if (encId != null && encId.length() > 0) {
                     idValues.add(encId);
                 }
                 break;
             }
         }
     }
-    
+
     private com.sun.istack.FinalArrayList<Attribute> processHeaderAttributes(XMLStreamReader reader) {
-        if(soapVersion == soapVersion.SOAP_11){
+        if (soapVersion == soapVersion.SOAP_11) {
             return process11Header(reader);
-        }else{
+        } else {
             return process12Header(reader);
         }
     }
-    
+
     private com.sun.istack.FinalArrayList<Attribute> process12Header(XMLStreamReader reader) {
         FinalArrayList<Attribute> atts = null;
         role = soapVersion.implicitRole;
-        nsDecls = new HashMap<String,String>();
+        nsDecls = new HashMap<String, String>();
         //headerName = reader.getName();
-        nsDecls = new HashMap<String,String>();
+        nsDecls = new HashMap<String, String>();
         if (reader.getNamespaceCount() > 0) {
             for (int i = 0; i < reader.getNamespaceCount(); i++) {
                 nsDecls.put(reader.getNamespacePrefix(i), reader.getNamespaceURI(i));
             }
         }
-        
+
         for (int i = 0; i < reader.getAttributeCount(); i++) {
-            final String localName = reader.getAttributeLocalName(i);
-            final String namespaceURI = reader.getAttributeNamespace(i);
+            final String lName = reader.getAttributeLocalName(i);
+            final String nsURI = reader.getAttributeNamespace(i);
             final String value = reader.getAttributeValue(i);
-            if(namespaceURI == MessageConstants.WSU_NS && localName == "Id".intern()){
+            if (MessageConstants.WSU_NS.equals(nsURI) && "Id".intern().equals(lName)) {
                 //hasId = true;
                 id = value;
-                
-            } else if(namespaceURI == null && localName == "Id".intern()){
+
+            } else if (nsURI == null && "Id".intern().equals(lName)) {
                 //hasId = true;
                 id = value;
             }
             //handle other Id's eg SAML
-            if (namespaceURI == SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE) {
-                if (localName == SOAP_1_1_MUST_UNDERSTAND) {
+            if (SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE.equals(nsURI)) {
+                if (SOAP_1_1_MUST_UNDERSTAND.equals(lName)) {
                     isMustUnderstand = Util.parseBool(value);
-                } else if (localName == SOAP_1_1_ROLE) {
+                } else if (SOAP_1_1_ROLE.equals(lName)) {
                     if (value != null && value.length() > 0) {
                         role = value;
                     }
                 }
             }
-            
-            if(atts==null) {
+
+            if (atts == null) {
                 atts = new FinalArrayList<Attribute>();
             }
-            atts.add(new Attribute(namespaceURI,localName,value));
+            atts.add(new Attribute(nsURI, lName, value));
         }
         return atts;
     }
-    
+
     private final FinalArrayList<Attribute> process11Header(XMLStreamReader reader) {
         FinalArrayList<Attribute> atts = null;
-        
+
         role = soapVersion.implicitRole;
         //headerName = reader.getName();
-        nsDecls = new HashMap<String,String>();
+        nsDecls = new HashMap<String, String>();
         if (reader.getNamespaceCount() > 0) {
-            
+
             for (int j = 0; j < reader.getNamespaceCount(); j++) {
                 nsDecls.put(reader.getNamespacePrefix(j), reader.getNamespaceURI(j));
             }
         }
-        
+
         for (int i = 0; i < reader.getAttributeCount(); i++) {
-            final String localName = reader.getAttributeLocalName(i);
-            final String namespaceURI = reader.getAttributeNamespace(i);
+            final String lName = reader.getAttributeLocalName(i);
+            final String nsURI = reader.getAttributeNamespace(i);
             final String value = reader.getAttributeValue(i);
-            
-            if(namespaceURI == MessageConstants.WSU_NS && localName == "Id".intern()){
+
+            if (MessageConstants.WSU_NS.equals(nsURI) && "Id".intern().equals(lName)) {
                 //hasId = true;
                 id = value;
-            } else if(namespaceURI == null && localName == "Id".intern()){
+            } else if (nsURI == null && "Id".intern().equals(lName)) {
                 //hasId = true;
                 id = value;
             }
-            
-            if (namespaceURI == SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE) {
-                if (localName == SOAP_1_2_MUST_UNDERSTAND) {
+
+            if (SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE.equals(nsURI)) {
+                if (SOAP_1_2_MUST_UNDERSTAND.equals(lName)) {
                     isMustUnderstand = Util.parseBool(value);
-                } else if (localName == SOAP_1_2_ROLE) {
+                } else if (SOAP_1_2_ROLE.equals(lName)) {
                     if (value != null && value.length() > 0) {
                         role = value;
                     }
-                } else if (localName == SOAP_1_2_RELAY) {
+                } else if (SOAP_1_2_RELAY.equals(lName)) {
                     isRelay = Util.parseBool(value);
                 }
             }
-            
-            if(atts==null) {
+
+            if (atts == null) {
                 atts = new FinalArrayList<Attribute>();
             }
-            atts.add(new Attribute(namespaceURI,localName,value));
+            atts.add(new Attribute(nsURI, lName, value));
         }
-        
+
         return atts;
     }
-    
-    
-    
+
     public boolean hasID(String id) {
         return idValues.contains(id);
     }
-    
-    
-    public final boolean isIgnorable( SOAPVersion soapVersion,  Set<String> roles) {
+
+    @Override
+    public final boolean isIgnorable(SOAPVersion soapVersion, Set<String> roles) {
         // check mustUnderstand
-        if(!isMustUnderstand) return true;
-        
+        if (!isMustUnderstand) {
+            return true;
+        }
+
         // now role
         return !roles.contains(role);
     }
-    
+
+    @Override
     public String getRole(SOAPVersion soapVersion) {
-        assert role!=null;
+        assert role != null;
         return role;
     }
-    
+
+    @Override
     public boolean isRelay() {
         return isRelay;
     }
-    
+
     public String getNamespaceURI() {
         return namespaceURI;
     }
-    
+
     public String getLocalPart() {
         return localName;
     }
-    
+
     public String getAttribute(String nsUri, String localName) {
-        if(attributes!=null) {
-            for(int i=attributes.size()-1; i>=0; i-- ) {
+        if (attributes != null) {
+            for (int i = attributes.size() - 1; i >= 0; i--) {
                 Attribute a = attributes.get(i);
-                if(a.localName.equals(localName) && a.nsUri.equals(nsUri))
+                if (a.localName.equals(localName) && a.nsUri.equals(nsUri)) {
                     return a.value;
+                }
             }
         }
         return null;
     }
-    
+
     /**
      * Reads the header as a {@link XMLStreamReader}
      */
     public XMLStreamReader readHeader() throws XMLStreamException {
         return completeHeader.readAsXMLStreamReader();
     }
-    
+
     public void writeTo(XMLStreamWriter w) throws XMLStreamException {
         try {
             // TODO what about in-scope namespaces
@@ -303,7 +303,7 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             throw new XMLStreamException(e);
         }
     }
-    
+
     public void writeTo(SOAPMessage saaj) throws SOAPException {
         try {
             // TODO what about in-scope namespaces
@@ -315,8 +315,9 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             DOMResult result = new DOMResult();
             t.transform(source, result);
             Node d = result.getNode();
-            if(d.getNodeType() == Node.DOCUMENT_NODE)
+            if (d.getNodeType() == Node.DOCUMENT_NODE) {
                 d = d.getFirstChild();
+            }
             SOAPHeader header = saaj.getSOAPHeader();
             Node node = header.getOwnerDocument().importNode(d, true);
             header.appendChild(node);
@@ -324,12 +325,13 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             throw new SOAPException(e);
         }
     }
-    
+
     public void writeTo(ContentHandler contentHandler, ErrorHandler errorHandler) throws SAXException {
         completeHeader.writeTo(contentHandler);
     }
-    
-    public String getStringContent(){
+
+    @Override
+    public String getStringContent() {
         try {
             XMLStreamReader xsr = readHeader();
             xsr.nextTag();
@@ -338,23 +340,29 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             return null;
         }
     }
-    
+
     private static String fixNull(String s) {
-        if(s==null) return "";
-        else        return s;
+        if (s == null) {
+            return "";
+        } else {
+            return s;
+        }
     }
+
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T readAsJAXB(Unmarshaller um) throws javax.xml.bind.JAXBException {
         try {
-            return (T)um.unmarshal(completeHeader.readAsXMLStreamReader());
+            return (T) um.unmarshal(completeHeader.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
             throw new JAXBException(e);
         } catch (Exception e) {
             throw new JAXBException(e);
         }
     }
-    
-    public <T> T readAsJAXB(com.sun.xml.bind.api.Bridge<T>  bridge) throws javax.xml.bind.JAXBException {
+
+    @Override
+    public <T> T readAsJAXB(com.sun.xml.bind.api.Bridge<T> bridge) throws javax.xml.bind.JAXBException {
         try {
             return bridge.unmarshal(completeHeader.readAsXMLStreamReader());
         } catch (XMLStreamException e) {
@@ -363,42 +371,45 @@ public class GenericSecuredHeader extends AbstractHeaderImpl implements SecuredH
             throw new JAXBException(e);
         }
     }
-    
+
     public HashMap<String, String> getInscopeNSContext() {
         return nsDecls;
     }
-    
+
     protected static final class Attribute {
+
         /**
          * Can be empty but never null.
          */
         final String nsUri;
         final String localName;
         final String value;
-        
+
         public Attribute(String nsUri, String localName, String value) {
             this.nsUri = fixNull(nsUri);
             this.localName = localName;
             this.value = value;
         }
     }
-    
-    class IDProcessor implements StreamFilter{
+
+    class IDProcessor implements StreamFilter {
+
         boolean elementRead = false;
+
         @SuppressWarnings("unchecked")
-        public boolean accept(XMLStreamReader reader){
-            if(reader.getEventType() == XMLStreamReader.END_ELEMENT ){
-                if(reader.getLocalName() == localName && reader.getNamespaceURI() == namespaceURI){
+        public boolean accept(XMLStreamReader reader) {
+            if (reader.getEventType() == XMLStreamReader.END_ELEMENT) {
+                if (reader.getLocalName().equals(localName) && reader.getNamespaceURI().equals(namespaceURI)) {
                     elementRead = true;
                 }
             }
-            if(!elementRead && reader.getEventType() == XMLStreamReader.START_ELEMENT){
-                String id = reader.getAttributeValue(MessageConstants.WSU_NS,"Id");
-                if(id != null && id.length() > 0){
+            if (!elementRead && reader.getEventType() == XMLStreamReader.START_ELEMENT) {
+                String id = reader.getAttributeValue(MessageConstants.WSU_NS, "Id");
+                if (id != null && id.length() > 0) {
                     idValues.add(id);
                 }
             }
-            
+
             return true;
         }
     }
