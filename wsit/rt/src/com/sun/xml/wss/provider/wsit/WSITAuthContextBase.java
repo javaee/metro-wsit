@@ -491,7 +491,7 @@ public abstract class WSITAuthContextBase  {
                     if(fPolicy != null){
                         faultPL.add(fPolicy);
                     }else{
-                        continue;
+                        //continue;
                     }
                     Policy ep = policyMerge.merge(faultPL);
                     if(inPH != null){

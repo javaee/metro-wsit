@@ -36,6 +36,9 @@
 
 package com.sun.xml.ws.security.impl.policyconv;
 
+import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import javax.xml.namespace.QName;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedElements;
@@ -142,62 +145,114 @@ public abstract class BindingProcessor {
     }
     
     //TODO:WS-SX Spec:If we have a secondary signature should it protect the token too ?
-    protected void protectToken(WSSPolicy token){
-        if (primarySP == null){
+   protected void protectToken(WSSPolicy token) {
+        if (primarySP == null) {
             return;
         }
-        protectToken(token,false);
+        if ((isServer && isIncoming) || (!isServer && !isIncoming)) {//token protection is from client to service only
+            protectToken(token, false);
+        }
     }
-    
-    protected void protectToken(WSSPolicy token,boolean ignoreSTR){
-        String uid = token.getUUID();
-        if(PolicyTypeUtil.x509CertificateBinding(token)){
-            uid = ((AuthenticationTokenPolicy.X509CertificateBinding)token).getSTRID();
-            if(uid == null){
+
+    protected void protectToken(WSSPolicy token, boolean ignoreSTR) {
+        String uuid = (token != null) ? (token.getUUID()) : null;
+        String uid = null;
+        String includeToken = ((KeyBindingBase) token).getIncludeToken();
+        boolean strIgnore = false;
+        QName qName = null;
+
+        //dont compute STR Transform when the include token type is Always or AlwaysToRecipient
+        if (includeToken.endsWith("Always") || includeToken.endsWith("AlwaysToRecipient") || includeToken.endsWith("Once")) {
+            strIgnore = true;
+        }
+        if (PolicyTypeUtil.UsernameTokenBinding(token)) {
+            uid = ((AuthenticationTokenPolicy.UsernameTokenBinding) token).getUUID();
+            if (uid == null) {
                 uid = pid.generateID();
-                ((AuthenticationTokenPolicy.X509CertificateBinding)token).setSTRID(uid);
+                ((AuthenticationTokenPolicy.UsernameTokenBinding) token).setSTRID(uid);
             }
-        }else if(PolicyTypeUtil.samlTokenPolicy(token)){
-            uid = ((AuthenticationTokenPolicy.SAMLAssertionBinding)token).getSTRID();
-            if(uid == null){
+            // includeToken = ((AuthenticationTokenPolicy.UsernameTokenBinding) kb).getIncludeToken();
+            strIgnore = true;
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
+        } else if (PolicyTypeUtil.x509CertificateBinding(token)) {
+            uid = ((AuthenticationTokenPolicy.X509CertificateBinding) token).getSTRID();
+            if (uid == null) {
                 uid = pid.generateID();
-                ((AuthenticationTokenPolicy.SAMLAssertionBinding)token).setSTRID(uid);
+                ((AuthenticationTokenPolicy.X509CertificateBinding) token).setSTRID(uid);
             }
-        } else if(PolicyTypeUtil.issuedTokenKeyBinding(token)){
-            uid = ((IssuedTokenKeyBinding)token).getSTRID();
-            if(uid == null){
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME);
+        } else if (PolicyTypeUtil.samlTokenPolicy(token)) {
+            //uid = ((AuthenticationTokenPolicy.SAMLAssertionBinding) token).getSTRID();
+            uid = generateSAMLSTRID();
+            //if(uid == null){
+            // uid = pid.generateID();
+            ((AuthenticationTokenPolicy.SAMLAssertionBinding) token).setSTRID(uid);
+            //}
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.SAML_ASSERTION_LNAME);
+        } else if (PolicyTypeUtil.issuedTokenKeyBinding(token)) {
+            IssuedTokenKeyBinding itb = ((IssuedTokenKeyBinding) token);
+            uid = itb.getSTRID();
+            if (MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE.equals(itb.getTokenType()) ||
+                    MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE.equals(itb.getTokenType())) {
+                uid = generateSAMLSTRID();
+                itb.setSTRID(uid);
+                uuid = uid;
+            }
+            if (uid == null) {
                 uid = pid.generateID();
-                ((IssuedTokenKeyBinding)token).setSTRID(uid);
+                itb.setSTRID(uid);
             }
+        } 
+        //when the include token is Never , the sig. reference should refer to the security token reference of KeyInfo
+        // also in case of saml token we have to use the id #_SAML, so ,
+        if (includeToken.endsWith("Never") || PolicyTypeUtil.samlTokenPolicy(token) || PolicyTypeUtil.issuedTokenKeyBinding(token)) {
+            uuid = uid;
         }
         //TODO:: Handle DTK and IssuedToken.
-        if(!ignoreSTR){
-            if ( uid != null ) {
+        if (!ignoreSTR) {
+            if (uuid != null) {
                 SignatureTargetCreator stc = iAP.getTargetCreator();
-                SignatureTarget st = stc.newURISignatureTarget(uid);
-                stc.addTransform(st);
-                stc.addSTRTransform(st);
+                SignatureTarget st = stc.newURISignatureTarget(uuid);
+                if (strIgnore != true) {
+                    stc.addSTRTransform(st);
+                    st.setPolicyName(qName);
+                }else {
+                    stc.addTransform(st);
+                }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
                 fb.addTargetBinding(st);
             }
-        }else{
+        } else {
             SignatureTargetCreator stc = iAP.getTargetCreator();
             SignatureTarget st = null;
             if (PolicyTypeUtil.derivedTokenKeyBinding(token)) {
-                WSSPolicy kbd = ((DerivedTokenKeyBinding)token).getOriginalKeyBinding();
+                WSSPolicy kbd = ((DerivedTokenKeyBinding) token).getOriginalKeyBinding();
                 if (PolicyTypeUtil.symmetricKeyBinding(kbd)) {
-                    WSSPolicy sbd = (KeyBindingBase)kbd.getKeyBinding();
-                    st = stc.newURISignatureTarget(sbd.getUUID());
+                    st = stc.newURISignatureTarget(uuid);
                 } else {
-                    st = stc.newURISignatureTarget(kbd.getUUID());
+                    st = stc.newURISignatureTarget(uuid);
                 }
             } else {
-                st = stc.newURISignatureTarget(token.getUUID());
+                st = stc.newURISignatureTarget(uuid);
             }
-            stc.addTransform(st);
-            SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-            fb.addTargetBinding(st);
+            if (st != null) {  //when st is null, request simply goes with out signing the token;
+               if (strIgnore != true) {
+                    stc.addSTRTransform(st);
+                    st.setPolicyName(qName);
+                } else {
+                    stc.addTransform(st);
+                }
+                SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
+                fb.addTargetBinding(st);
+            }
         }
+    }
+
+      private String generateSAMLSTRID() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SAML");
+        sb.append(pid.generateID());
+        return sb.toString();
     }
     
     
@@ -259,8 +314,8 @@ public abstract class BindingProcessor {
     }
     
     protected boolean requireSC(){
-        if(wss11 != null){
-            if(wss11.getRequiredProperties().contains(WSSAssertion.REQUIRE_SIGNATURE_CONFIRMATION)){
+        if (wss11 != null && wss11.getRequiredProperties() != null) {
+            if (wss11.getRequiredProperties().contains(WSSAssertion.REQUIRE_SIGNATURE_CONFIRMATION)) {
                 return true;
             }
         }

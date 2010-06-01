@@ -147,7 +147,7 @@ public class TokenProcessor {
             setX509TokenRefType(x509CB, x509Token);
             setTokenInclusion(x509CB,(Token) tokenAssertion);
             setTokenValueType(x509CB, tokenAssertion);
-            
+            x509CB.isOptional(tokenAssertion.isOptional());  
             if(x509Token.getIssuer() != null){
                 Address addr = x509Token.getIssuer().getAddress();
                 if(addr != null)
@@ -180,6 +180,7 @@ public class TokenProcessor {
             sab.setSTRID(token.getTokenId());
             sab.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
             setTokenInclusion(sab,(Token) tokenAssertion);
+            sab.isOptional(tokenAssertion.isOptional());
             //sab.setPolicyToken((Token) tokenAssertion);
             
             if(samlToken.getIssuer() != null){
@@ -209,7 +210,11 @@ public class TokenProcessor {
             itkb.setUUID(((Token)tokenAssertion).getTokenId());
             itkb.setSTRID(token.getTokenId());
             IssuedToken it = (IssuedToken)tokenAssertion;
-            
+            itkb.isOptional(tokenAssertion.isOptional());
+            if (it.getRequestSecurityTokenTemplate() != null) {
+                itkb.setTokenType(it.getRequestSecurityTokenTemplate().getTokenType());
+            }
+
             if(it.getIssuer() != null){
                 Address addr = it.getIssuer().getAddress();
                 if(addr != null)
@@ -245,7 +250,7 @@ public class TokenProcessor {
             if(sctPolicy.getClaims() != null){
                 sct.setClaims(sctPolicy.getClaims().getClaimsAsBytes());
             }
-            
+            sct.isOptional(tokenAssertion.isOptional());
             if(sctPolicy.isRequireDerivedKeys()){
                 DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();
                 dtKB.setOriginalKeyBinding(sct);
@@ -281,28 +286,28 @@ public class TokenProcessor {
     
     
     protected void setTokenInclusion(KeyBindingBase xwssToken , Token token) throws PolicyException  {
-        boolean change = false;
+       boolean change = false;
         SecurityPolicyVersion spVersion = token.getSecurityPolicyVersion();
         if(this.isServer && !isIncoming){
             if(!spVersion.includeTokenAlways.equals(token.getIncludeToken())){
                 xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
-                }
-                return;
-            }
+                    }
+                    return;
+                    }
         }else if(!this.isServer && isIncoming){
             if(spVersion.includeTokenAlwaysToRecipient.equals(token.getIncludeToken()) ||
                     spVersion.includeTokenOnce.equals(token.getIncludeToken())){
                 xwssToken.setIncludeToken(SecurityPolicyVersion.SECURITYPOLICY200507.includeTokenNever);
-                
+
                 if(logger.isLoggable(Level.FINEST)){
                     logger.log(Level.FINEST,"Token Inclusion value of INCLUDE NEVER has been set to Token"+ xwssToken);
                 }
                 return;
+                }
             }
-        }
-        
+
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST,"Token Inclusion value of"+token.getIncludeToken()+" has been set to Token"+ xwssToken);
         }
@@ -335,6 +340,7 @@ public class TokenProcessor {
             }
             key.setUUID(token.getTokenId());
             setTokenInclusion(key,token);
+            key.isOptional(((PolicyAssertion) token).isOptional());
             UserNameToken ut = (UserNameToken)token;
             if(!ut.hasPassword()){
                 key.setNoPassword(true);
@@ -365,7 +371,7 @@ public class TokenProcessor {
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             key.setSTRID(token.getTokenId());
-            
+            key.isOptional(((PolicyAssertion) token).isOptional());
             SamlToken samlToken = (SamlToken)token;
             if(samlToken.getIssuer() != null){
                 Address addr = samlToken.getIssuer().getAddress();
@@ -386,7 +392,7 @@ public class TokenProcessor {
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
             key.setSTRID(token.getTokenId());
-            
+            key.isOptional(((PolicyAssertion) token).isOptional());
             IssuedToken it = (IssuedToken)token;
             if(it.getIssuer() != null){
                 Address addr = it.getIssuer().getAddress();
@@ -406,7 +412,7 @@ public class TokenProcessor {
             setTokenInclusion(key,token);
             //key.setPolicyToken(token);
             key.setUUID(token.getTokenId());
-            
+            key.isOptional(((PolicyAssertion) token).isOptional());
             SecureConversationToken sct = (SecureConversationToken)token;
             if(sct.getIssuer() != null){
                 Address addr = sct.getIssuer().getAddress();
@@ -427,7 +433,7 @@ public class TokenProcessor {
             //xt.setPolicyToken(token);
             setTokenInclusion(xt,token);
             setX509TokenRefType(xt, (X509Token) token);
-            
+            xt.isOptional(((PolicyAssertion) token).isOptional());
             X509Token x509Token = (X509Token)token;
             if(x509Token.getIssuer() != null){
                 Address addr = x509Token.getIssuer().getAddress();
@@ -446,7 +452,7 @@ public class TokenProcessor {
             AuthenticationTokenPolicy.KeyValueTokenBinding rsaToken =  new AuthenticationTokenPolicy.KeyValueTokenBinding();
             rsaToken.setUUID(token.getTokenId());
             setTokenInclusion(rsaToken,token);
-            
+            rsaToken.isOptional(((PolicyAssertion) token).isOptional());
             return rsaToken;
         }
         if(logger.isLoggable(Level.SEVERE)){

@@ -222,21 +222,21 @@ public class PolicyResolverImpl implements PolicyResolver{
             try{
                 SOAPBody body = msg.getSOAPBody();
                 NodeList nodes = body.getElementsByTagName("detail");
-                if(nodes.getLength() == 0){
-                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE,"Detail");
+                if (nodes.getLength() == 0) {
+                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Detail");
                 }
-                if(nodes.getLength() >0){
+                if (nodes.getLength() > 0) {
                     Node node = nodes.item(0);
                     Node faultNode = node.getFirstChild();
-                    if(faultNode == null){
+                    if (faultNode == null) {
                         return new MessagePolicy();
                     }
-                    String uri = faultNode.getNamespaceURI();
-                    QName faultDetail = null;
-                    if(uri != null && uri.length() >0){
-                        faultDetail = new QName(faultNode.getNamespaceURI(),faultNode.getNodeName());
-                    }else{
-                        faultDetail = new QName(faultNode.getNodeName());
+                    final String uri = faultNode.getNamespaceURI();
+                    final QName faultDetail;
+                    if (uri != null && uri.length() > 0) {
+                        faultDetail = new QName(uri, faultNode.getLocalName());
+                    } else {
+                        faultDetail = new QName(faultNode.getLocalName());
                     }
                     WSDLFault fault = operation.getFault(faultDetail);
                     SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);
@@ -244,7 +244,7 @@ public class PolicyResolverImpl implements PolicyResolver{
                     MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
                     return faultPolicy;
                 }
-            }catch(SOAPException sx){
+            } catch (SOAPException sx) {
                 //sx.printStackTrace();
                 //log error
             }

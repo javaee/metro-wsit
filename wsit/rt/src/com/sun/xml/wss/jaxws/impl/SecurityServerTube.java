@@ -197,42 +197,61 @@ public class SecurityServerTube extends SecurityTubeBase {
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,pipeConfig,addVer,false, rmVer));
-        try{
-            if(!optimized) {
+       try {
+            if (!optimized) {
                 SOAPMessage soapMessage = msg.readAsSOAPMessage();
                 soapMessage = verifyInboundMessage(soapMessage, ctx);
                 msg = Messages.create(soapMessage);
-            }else{
+            } else {
                 msg = verifyInboundMessage(msg, ctx);
             }
         } catch (WssSoapFaultException ex) {
-            thereWasAFault = true;  
+            thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), ex);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(ex);
+            }
             msg = Messages.create(sfe, soapVersion);
         } catch (XWSSecurityException xwse) {
-            thereWasAFault = true;    
+            thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
             msg = Messages.create(sfe, soapVersion);
-          
+
         } catch (XWSSecurityRuntimeException xwse) {
-            thereWasAFault = true;            
+            thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
             msg = Messages.create(sfe, soapVersion);
-            
+
         } catch (WebServiceException xwse) {
-            thereWasAFault = true;            
+            thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(xwse);
+            }
             msg = Messages.create(sfe, soapVersion);
-          
-        } catch(SOAPException se){
+
+        } catch (SOAPException se) {
             // internal error
             // Log here because this catch is an internal error not logged by the callee
-            log.log(Level.SEVERE, 
+            log.log(Level.SEVERE,
                     LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
-            thereWasAFault = true;            
+            thereWasAFault = true;
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
+            if (sfe.getCause() == null) {
+                sfe.initCause(se);
+            }
             msg = Messages.create(sfe, soapVersion);
-        } 
+        }
         
         Packet retPacket = null;
          if (thereWasAFault) {
@@ -513,14 +532,18 @@ public class SecurityServerTube extends SecurityTubeBase {
     
     protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
         
-        if(cachedOperation != null){
-            WSDLOperation operation = cachedOperation.getOperation();
+       if(cachedOperation != null){
+            WSDLOperation wsdlOperation = cachedOperation.getOperation();
             QName faultDetail = packet.getMessage().getFirstDetailEntryName();
-            if(faultDetail == null){
-                return null;
+            WSDLFault fault = null;
+            if (faultDetail != null) {
+                fault = wsdlOperation.getFault(faultDetail);
             }
-            WSDLFault fault = operation.getFault(faultDetail);
             SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
+            if (fault == null) {
+                MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
+                return faultPolicy1;
+            }
             SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
             MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
             return faultPolicy;

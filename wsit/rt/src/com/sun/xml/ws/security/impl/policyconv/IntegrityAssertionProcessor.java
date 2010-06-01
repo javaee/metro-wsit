@@ -125,6 +125,7 @@ public class IntegrityAssertionProcessor {
                 }
             }
         }
+         signParts.clear();
     }
     
     public void process(SignedElements signedElements,SignaturePolicy.FeatureBinding binding){

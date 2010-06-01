@@ -33,6 +33,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.ServiceConfigurationError;
@@ -146,6 +147,9 @@ public class SecurityTubeAppender implements TubeAppender, TubelineAssemblyConte
     public Tube appendTube(WsitClientTubeAssemblyContext context) throws WebServiceException {
         ClientPipelineHook hook = null;
         ClientPipelineHook[] hooks = getClientTublineHooks(context);
+        if (context.getSEIModel() != null) {
+            JAXBUtil.setSEIJAXBContext(context.getSEIModel().getJAXBContext());
+        }
         if (hooks != null && hooks.length > 0) {
             for (ClientPipelineHook h : hooks) {
                 if (h instanceof com.sun.xml.wss.provider.wsit.ClientPipeCreator) {

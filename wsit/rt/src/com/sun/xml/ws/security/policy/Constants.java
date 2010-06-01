@@ -51,9 +51,9 @@ public interface Constants {
     public static final String AES192 = "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
     public static final String AES256 = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
     public static final String TRIPLE_DES = "http://www.w3.org/2001/04/xmlenc#tripledes-cbc";
-    public static final String KW_AES128 = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
+    public static final String KW_AES128 = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
     public static final String KW_AES192 = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
-    public static final String KW_AES256 = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
+    public static final String KW_AES256 = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
     public static final String KW_TRIPLE_DES = "http://www.w3.org/2001/04/xmlenc#kw-tripledes";
     public static final String KW_RSA_OAEP = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
     public static final String KW_RSA15 = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
