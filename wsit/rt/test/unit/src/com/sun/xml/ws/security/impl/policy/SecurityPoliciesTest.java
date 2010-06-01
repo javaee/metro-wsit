@@ -1554,10 +1554,10 @@ public class SecurityPoliciesTest extends TestCase {
         SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
-        AuthenticationTokenPolicy at =
+        /*AuthenticationTokenPolicy at =
                 createUTPolicy("testuser", null, null, false);
         at.setUUID("UsernameTokenBinding");
-        msgPolicy.append(at);
+        msgPolicy.append(at);*/
         
         TimestampPolicy tp = new TimestampPolicy();
         msgPolicy.append(tp);
@@ -1649,10 +1649,10 @@ public class SecurityPoliciesTest extends TestCase {
         SignatureConfirmationPolicy sigConf = new SignatureConfirmationPolicy();
         msgPolicy.append(sigConf);
         
-        AuthenticationTokenPolicy at =
+        /*AuthenticationTokenPolicy at =
                 createUTPolicy("testuser", null, null, false);
         at.setUUID("UsernameTokenBinding");
-        msgPolicy.append(at);
+        msgPolicy.append(at);*/
         
         TimestampPolicy tp = new TimestampPolicy();
         msgPolicy.append(tp);
