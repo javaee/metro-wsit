@@ -68,7 +68,7 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
            !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) || PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)
            || PolicyUtil.isIssuedToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
-            target.setPolicyName(getQName(policy));
+            //target.setPolicyName(getQName(policy));
         } else {
              stc.addTransform(target);
         }
