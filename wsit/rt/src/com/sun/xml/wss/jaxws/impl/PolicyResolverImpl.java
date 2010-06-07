@@ -64,7 +64,7 @@ import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
@@ -84,7 +84,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
-    private RmVersion rmVer = null;
+    private RmProtocolVersion rmVer = null;
     private PipeConfiguration pipeConfig = null;
     private boolean isClient = false;
     private boolean isSCMessage = false;
@@ -96,7 +96,7 @@ public class PolicyResolverImpl implements PolicyResolver{
      * Creates a new instance of OperationResolverImpl
      */
     
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,PipeConfiguration pipeConfig,AddressingVersion addVer,boolean isClient, RmVersion rmVer) {
+    public PolicyResolverImpl(HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap,HashMap<String,SecurityPolicyHolder> ip ,WSDLBoundOperation cachedOperation,PipeConfiguration pipeConfig,AddressingVersion addVer,boolean isClient, RmProtocolVersion rmVer) {
         this.inMessagePolicyMap = inMessagePolicyMap;
         this.inProtocolPM = ip;
         this.cachedOperation = cachedOperation;
@@ -263,7 +263,7 @@ public class PolicyResolverImpl implements PolicyResolver{
     }
     
     private boolean isRMMessage(){
-        return rmVer.isRmAction(action);
+        return rmVer.isProtocolAction(action);
     }
     
     private String getAction(Message msg){

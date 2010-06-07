@@ -41,7 +41,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelTranslator;
 import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
 import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,15 +54,15 @@ import java.io.Reader;
 public class RMPolicyResolver {
     
     SecurityPolicyVersion spVersion;
-    RmVersion rmVersion;
+    RmProtocolVersion rmVersion;
     
     /** Creates a new instance of RMPolicyResolver */
     public RMPolicyResolver() {
         spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
-        rmVersion = RmVersion.WSRM10;
+        rmVersion = RmProtocolVersion.getDefault();
     }
     
-    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmVersion rmVersion) {
+    public RMPolicyResolver(SecurityPolicyVersion spVersion, RmProtocolVersion rmVersion) {
         this.spVersion = spVersion;
         this.rmVersion = rmVersion;
     }
@@ -72,13 +72,13 @@ public class RMPolicyResolver {
         try {
             String rmMessagePolicy = "rm-msglevel-policy.xml";            
             if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM10.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmProtocolVersion.WSRM200502.protocolNamespaceUri.equals(rmVersion.protocolNamespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sp12.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmProtocolVersion.WSRM200702.protocolNamespaceUri.equals(rmVersion.protocolNamespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sx.xml";
             }else if(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri.equals(spVersion.namespaceUri) &&
-                    RmVersion.WSRM11.namespaceUri.equals(rmVersion.namespaceUri)){
+                    RmProtocolVersion.WSRM200702.protocolNamespaceUri.equals(rmVersion.protocolNamespaceUri)){
                 rmMessagePolicy = "rm-msglevel-policy-sx-sp10.xml";
             }
             

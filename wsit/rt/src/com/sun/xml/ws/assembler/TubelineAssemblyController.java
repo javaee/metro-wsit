@@ -43,8 +43,6 @@ import javax.xml.ws.WebServiceException;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.client.WSPortInfo;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -54,8 +52,9 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.rm.runtime.RmTubeAppender;
-import com.sun.xml.ws.rm.runtime.testing.PacketFilteringTubeAppender;
+import com.sun.xml.ws.rx.mc.runtime.McTubeAppender;
+import com.sun.xml.ws.rx.rm.runtime.RmTubeAppender;
+import com.sun.xml.ws.rx.testing.PacketFilteringTubeAppender;
 import com.sun.xml.ws.transport.tcp.wsit.TCPTransportPipeFactory;
 import com.sun.xml.ws.tx.client.TxClientPipe;
 import com.sun.xml.ws.tx.service.TxServerPipe;
@@ -75,6 +74,7 @@ public class TubelineAssemblyController {
     private static final String WSS_SUFFIX = ".wss";
     private static final String WSA_SUFFIX = ".wsa";
     private static final String WSRM_SUFFIX = ".wsrm";
+    private static final String WSMC_SUFFIX = ".wsmc";
     private static final String WSTX_SUFFIX = ".wstx";
 
     public static class TxTubeAppender implements TubeAppender {
@@ -332,6 +332,7 @@ public class TubelineAssemblyController {
     private static final TubeAppender packetFilteringAppender = new PacketFilteringTubeAppender();
     private static final TubeAppender actionDumpAppender = new ActionDumpTubeAppender();
     private static final TubeAppender securityAppender = new SecurityTubeAppender();
+    private static final TubeAppender makeConnectionAppender = new McTubeAppender();
     private static final TubeAppender reliableMessagingAppender = new RmTubeAppender();
     private static final TubeAppender transactionsAppender = new TxTubeAppender();
     private static final TubeAppender addressingAppender = new AddressingTubeAppender();
@@ -351,6 +352,9 @@ public class TubelineAssemblyController {
         securityAppender,
         new DumpTubeAppender(WSS_SUFFIX + BEFORE_SUFFIX),
         // TODO MEX pipe here
+        new DumpTubeAppender(WSMC_SUFFIX + AFTER_SUFFIX),
+        makeConnectionAppender,
+        new DumpTubeAppender(WSMC_SUFFIX + BEFORE_SUFFIX),
         new DumpTubeAppender(WSRM_SUFFIX + AFTER_SUFFIX),
         reliableMessagingAppender,
         new DumpTubeAppender(WSRM_SUFFIX + BEFORE_SUFFIX),
@@ -382,6 +386,9 @@ public class TubelineAssemblyController {
         new DumpTubeAppender(WSA_SUFFIX + AFTER_SUFFIX),
         addressingAppender,
         new DumpTubeAppender(WSA_SUFFIX + BEFORE_SUFFIX),
+        new DumpTubeAppender(WSMC_SUFFIX + AFTER_SUFFIX),
+        makeConnectionAppender,
+        new DumpTubeAppender(WSMC_SUFFIX + BEFORE_SUFFIX),
         // TODO MEX pipe here ?
         new DumpTubeAppender(WSS_SUFFIX + AFTER_SUFFIX),
         securityAppender,

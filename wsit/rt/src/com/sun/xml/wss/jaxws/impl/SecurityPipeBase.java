@@ -123,7 +123,7 @@ import com.sun.xml.ws.security.policy.WSSAssertion;
 import java.util.Properties;
 import com.sun.xml.ws.api.addressing.*;
 import com.sun.xml.ws.api.message.AttachmentSet;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.filter.DumpFilter;
@@ -164,7 +164,7 @@ public abstract class SecurityPipeBase implements Pipe {
     protected static JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer;
     protected WSTrustVersion wsTrustVer;
-    protected RmVersion rmVer = RmVersion.WSRM10;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.getDefault();
     protected boolean disablePayloadBuffer = false;
     protected AlgorithmSuite bindingLevelAlgSuite = null;    
     
@@ -743,12 +743,12 @@ public abstract class SecurityPipeBase implements Pipe {
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 } 
-                if (endpointPolicy.contains(RmVersion.WSRM11.namespaceUri) || 
-                        endpointPolicy.contains(RmVersion.WSRM11.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM11;                    
-                } else if (endpointPolicy.contains(RmVersion.WSRM10.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM10.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM10;
+                if (endpointPolicy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                        endpointPolicy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200702;
+                } else if (endpointPolicy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                        endpointPolicy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200502;
                 }                
             }
             
@@ -1202,7 +1202,7 @@ public abstract class SecurityPipeBase implements Pipe {
             return false;
         }
         
-        return rmVer.isRmAction(getAction(packet));
+        return rmVer.isProtocolAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){

@@ -75,11 +75,11 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
         return NS_SUPPORTED_LIST;
     }
     
-    protected Class getClass(final AssertionData assertionData) throws AssertionCreationException {
+    protected Class<?> getClass(final AssertionData assertionData) throws AssertionCreationException {
         LOGGER.entering(assertionData);
         try {
             final String className = assertionData.getName().getLocalPart();
-            final Class result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
+            final Class<?> result = Class.forName("com.sun.xml.ws.addressing.impl.policy." + className);
             LOGGER.exiting();
             return result;
         } catch (ClassNotFoundException ex) {
@@ -91,10 +91,10 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
     public PolicyAssertion createAssertion(AssertionData assertionData, Collection<PolicyAssertion> nestedAssertions, AssertionSet nestedAlternative,PolicyAssertionCreator policyAssertionCreator) throws AssertionCreationException {
         String localName = assertionData.getName().getLocalPart();
         if(implementedAssertions.contains(localName)){
-            Class cl=null;
+            Class<?> cl=null;
             cl = getClass(assertionData);
             //            try {
-            Constructor cons = null;
+            Constructor<?> cons = null;
             try {
                 
                 cons = getConstructor(cl);
@@ -159,10 +159,12 @@ public class AddressingPolicyAssertionCreator implements PolicyAssertionCreator 
         return policyAssertionCreator.createAssertion(assertionData,nestedAssertions,nestedAlternative,policyAssertionCreator);
         
     }
-    
-    private Constructor getConstructor(Class cl) throws NoSuchMethodException{
-        Constructor [] cList = cl.getConstructors();
-        return cl.getConstructor(com.sun.xml.ws.policy.sourcemodel.AssertionData.class,java.util.Collection.class,com.sun.xml.ws.policy.AssertionSet.class);
+
+    private Constructor<?> getConstructor(Class<?> cl) throws NoSuchMethodException{
+        return cl.getConstructor(
+                com.sun.xml.ws.policy.sourcemodel.AssertionData.class,
+                java.util.Collection.class,
+                com.sun.xml.ws.policy.AssertionSet.class);
     }
     
 }

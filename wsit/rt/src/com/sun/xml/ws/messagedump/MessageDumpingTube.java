@@ -155,6 +155,7 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
      * <p>
      * We can do this only when we have <tt>stax-utils.jar</tt> in the classpath.
      */
+    @SuppressWarnings("unchecked")
     private XMLStreamWriter createIndenter(XMLStreamWriter writer) {
         try {
             Class clazz = getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");

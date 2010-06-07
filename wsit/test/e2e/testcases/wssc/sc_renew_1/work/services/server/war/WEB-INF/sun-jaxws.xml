@@ -1,0 +1,9 @@
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
+
+
+  <endpoint service="{http://xmlsoap.org/Ping}PingService" wsdl="WEB-INF/wsdl/PingService.wsdl" implementation="wssc.sc_renew_1.server.PingImpl" url-pattern="/PingImpl" port="{http://xmlsoap.org/Ping}XC_IPingService" name="endpoint0">
+    
+  </endpoint>
+      
+
+</endpoints>

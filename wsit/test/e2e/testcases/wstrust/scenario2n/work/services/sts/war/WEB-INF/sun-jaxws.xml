@@ -1,0 +1,9 @@
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
+
+
+  <endpoint service="{http://tempuri.org/}SecurityTokenService" wsdl="WEB-INF/wsdl/sts.wsdl" implementation="wstrust.scenario2n.sts.STSImpl" url-pattern="/STSImpl" port="{http://tempuri.org/}CustomBinding_ISecurityTokenService" name="endpoint0">
+    
+  </endpoint>
+      
+
+</endpoints>

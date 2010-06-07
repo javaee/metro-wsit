@@ -1,0 +1,9 @@
+<endpoints xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime" version="2.0">
+
+
+  <endpoint service="{http://tempuri.org/}PingService" wsdl="WEB-INF/wsdl/PingService.wsdl" implementation="wstrust.wssx_scenario8.server.PingImpl" url-pattern="/PingImpl" port="{http://tempuri.org/}CustomBinding_IPingServiceContract2" name="endpoint0">
+    
+  </endpoint>
+      
+
+</endpoints>

@@ -365,6 +365,7 @@ public class PolicyWSDLGeneratorExtension extends WSDLGeneratorExtension {
         LOGGER.exiting();
     }
 
+    @SuppressWarnings("unchecked")
     private void selectAndProcessSubject(final TypedXmlWriter xmlWriter, final Class clazz, final ScopeType scopeType, final String wsdlName) {
         LOGGER.entering();
         if (subjects != null) {

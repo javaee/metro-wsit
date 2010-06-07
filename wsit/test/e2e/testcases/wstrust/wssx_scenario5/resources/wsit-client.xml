@@ -42,7 +42,7 @@
             <wsp:All>
                 <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"/>
                 <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"/>
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///space/workspace/WSIT/wsit/wsit/test/e2e/testcases/wstrust/wssx_scenario5/work/services/sts/war/" wsdlLocation="file:/space/workspace/WSIT/wsit/wsit/test/e2e/testcases/wstrust/wssx_scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService1" namespace="http://tempuri.org/">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local:///Users/m_potociar/sandbox/java.net/metro-1_4-branch/test/e2e/testcases/wstrust/wssx_scenario5/work/services/sts/war/" wsdlLocation="file:/Users/m_potociar/sandbox/java.net/metro-1_4-branch/test/e2e/testcases/wstrust/wssx_scenario5/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService1" namespace="http://tempuri.org/">
                </tc:PreconfiguredSTS>             
             </wsp:All>
         </wsp:ExactlyOne>

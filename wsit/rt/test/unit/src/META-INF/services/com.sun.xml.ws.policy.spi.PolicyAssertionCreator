@@ -1,6 +1,7 @@
 com.sun.xml.ws.security.impl.policy.SecurityPolicyAssertionCreator
 com.sun.xml.ws.addressing.impl.policy.AddressingPolicyAssertionCreator
-com.sun.xml.ws.rm.policy.spi_impl.RmAssertionCreator
+com.sun.xml.ws.rx.rm.policy.spi_impl.RmAssertionCreator
+com.sun.xml.ws.rx.mc.policy.spi_impl.McAssertionCreator
 com.sun.xml.ws.security.impl.policy.TrustPolicyAssertionCreator
 com.sun.xml.ws.security.impl.policy.WSSClientConfigAssertionCreator
 com.sun.xml.ws.security.impl.policy.WSSServerConfigAssertionCreator

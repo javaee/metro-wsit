@@ -137,7 +137,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.jaxws.impl.ClientPipeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerPipeConfiguration;
-import com.sun.xml.ws.rm.RmVersion;
+import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.impl.PolicyViolationException;
@@ -207,7 +207,7 @@ public abstract class WSITAuthContextBase  {
     protected static final JAXBContext jaxbContext;    
     protected WSSCVersion wsscVer = null;
     protected WSTrustVersion wsTrustVer = null;
-    protected RmVersion rmVer = RmVersion.WSRM10;
+    protected RmProtocolVersion rmVer = RmProtocolVersion.getDefault();
     protected static final ArrayList<String> securityPolicyNamespaces ;
     //TODO: not initialized anywhere and is being used at one place in server auth-ctx
     //protected static MessagePolicy emptyMessagePolicy;
@@ -394,12 +394,12 @@ public abstract class WSITAuthContextBase  {
                     wsscVer = WSSCVersion.WSSC_10;
                     wsTrustVer = WSTrustVersion.WS_TRUST_10;
                 } 
-                if (endpointPolicy.contains(RmVersion.WSRM11.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM11.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM11;                    
-                } else if (endpointPolicy.contains(RmVersion.WSRM10.namespaceUri) ||
-                        endpointPolicy.contains(RmVersion.WSRM10.policyNamespaceUri)) {
-                    rmVer = RmVersion.WSRM10;
+                if (endpointPolicy.contains(RmProtocolVersion.WSRM200702.protocolNamespaceUri) ||
+                        endpointPolicy.contains(RmProtocolVersion.WSRM200702.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200702;
+                } else if (endpointPolicy.contains(RmProtocolVersion.WSRM200502.protocolNamespaceUri) ||
+                        endpointPolicy.contains(RmProtocolVersion.WSRM200502.policyNamespaceUri)) {
+                    rmVer = RmProtocolVersion.WSRM200502;
                 }   
             }
             
@@ -897,7 +897,7 @@ public abstract class WSITAuthContextBase  {
             return false;
         }
 
-        return rmVer.isRmAction(getAction(packet));
+        return rmVer.isProtocolAction(getAction(packet));
     }
     
     protected String getAction(Packet packet){

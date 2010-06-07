@@ -1,0 +1,31 @@
+
+    
+
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
+
+<web-app>
+    <display-name>wstrust.wssx_scenario8</display-name>
+    <description>This is a WS-Trust Scenario with all claims and issued Key/Token encryption paramenters under IssuerToken Polocy</description>
+  
+    <listener>
+        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>wstrust.wssx_scenario8</servlet-name>
+        <display-name>wstrust.wssx_scenario8</display-name>
+        <description>This is a WS-Trust Scenario with all claims and issued Key/Token encryption paramenters under IssuerToken Polocy</description>
+        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    
+
+    <servlet-mapping>
+        <servlet-name>wstrust.wssx_scenario8</servlet-name>
+        <url-pattern>/STSImpl</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>60</session-timeout>
+    </session-config>
+</web-app>
