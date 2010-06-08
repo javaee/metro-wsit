@@ -217,9 +217,9 @@
     <target name="integrate-policy-hudson"
             description="integrates the last successful policy Hudson build">
                 
-        <get src="http://hudson.sfbay.sun.com/job/policy-core/1637/artifact/target/policy.jar"
+        <get src="http://hudson.sfbay.sun.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy.jar"
              dest="${basedir}/lib/runtime/policy.jar" />
-        <get src="http://hudson.sfbay.sun.com/job/policy-core/1637/artifact/target/policy-src.zip"
+        <get src="http://hudson.sfbay.sun.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy-src.zip"
              dest="${basedir}/lib/runtime/policy-src.zip" />
         
     </target>
