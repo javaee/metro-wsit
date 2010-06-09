@@ -518,7 +518,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
     /**
      * TODO javadoc
      */
-    private final String getSecurityContextTokenId(Packet packet) {
+    private String getSecurityContextTokenId(Packet packet) {
         Session session = getSession(packet);
         return (session != null) ? session.getSecurityInfo().getIdentifier() : null;
     }
@@ -531,7 +531,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
      * @param packet packet wrapping the checked message
      * @throws RmSecurityException if the actual security context token identifier does not equal to the expected one
      */
-    private final void validateSecurityContextTokenId(String expectedSctId, Packet packet) throws RmSecurityException {
+    private void validateSecurityContextTokenId(String expectedSctId, Packet packet) throws RmSecurityException {
         String actualSctId = getSecurityContextTokenId(packet);
         boolean isValid = (expectedSctId != null) ? expectedSctId.equals(actualSctId) : actualSctId == null;
 
@@ -540,7 +540,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
         }
     }
 
-    private final long calculateSequenceExpirationTime(long expiryDuration) {
+    private long calculateSequenceExpirationTime(long expiryDuration) {
         if (expiryDuration == Sequence.NO_EXPIRY) {
             return Sequence.NO_EXPIRY;
         } else {
