@@ -249,7 +249,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
         }
     }
 
-    static final ProtocolMessageHandler createRmProtocolMessageHandler(final RuntimeContext rc) {
+    static ProtocolMessageHandler createRmProtocolMessageHandler(final RuntimeContext rc) {
 
         final RmProtocolVersion rmVersion = rc.configuration.getRuntimeVersion().protocolVersion;
 
