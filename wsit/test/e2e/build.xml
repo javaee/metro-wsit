@@ -109,11 +109,6 @@
 
                 <arguments />
                 <arg line="${args}"/>
-                
-                <!-->
-                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000" />
-		<jvmarg value="-Xdebug"/>
-                <!-->
             </java>
             
             <mkdir dir="${logs.dir}/junit-reports" />
@@ -303,6 +298,24 @@
         
         <run-tests>
             <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="debug"
+            description="Runs the e2e tests on the entire workspace"
+            depends="setup-emma-local">
+
+        <run-tests>
+            <arguments>
+                <jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
