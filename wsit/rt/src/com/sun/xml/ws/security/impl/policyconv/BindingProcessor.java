@@ -215,11 +215,11 @@ public abstract class BindingProcessor {
                 SignatureTarget st = stc.newURISignatureTarget(uuid);
                 if (strIgnore != true) {
                     stc.addSTRTransform(st);
+                    st.setPolicyName(qName);
                 }else {
                     stc.addTransform(st);
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-                st.setPolicyName(qName);
                 fb.addTargetBinding(st);
             }
         } else {
@@ -238,11 +238,11 @@ public abstract class BindingProcessor {
             if (st != null) {  //when st is null, request simply goes with out signing the token;
                if (strIgnore != true) {
                     stc.addSTRTransform(st);
+                    st.setPolicyName(qName);
                 } else {
                     stc.addTransform(st);
                 }
                 SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) primarySP.getFeatureBinding();
-                st.setPolicyName(qName);
                 fb.addTargetBinding(st);
             }
         }

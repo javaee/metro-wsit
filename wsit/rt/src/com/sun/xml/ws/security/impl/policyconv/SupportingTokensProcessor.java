@@ -60,6 +60,9 @@ import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.xml.namespace.QName;
+import com.sun.xml.wss.impl.PolicyTypeUtil;
+import com.sun.xml.wss.impl.MessageConstants;
 
 /**
  *
@@ -310,9 +313,10 @@ public class SupportingTokensProcessor {
             SecurityPolicyUtil.setName(stg, token);
             if(!strIgnore){
                 stcr.addSTRTransform(stg);
+                stg.setPolicyName(getQName(token));
             } else  {
                stcr.addTransform(stg);
-            }
+            }            
             SignaturePolicy.FeatureBinding fb = (com.sun.xml.wss.impl.policy.mls.SignaturePolicy.FeatureBinding) sp.getFeatureBinding();
             fb.addTargetBinding(stg);
         }
@@ -320,5 +324,17 @@ public class SupportingTokensProcessor {
 
     protected void correctSAMLBinding(WSSPolicy policy) {
         //no-op
+    }
+
+    protected QName getQName(WSSPolicy token) {
+        QName qName =null;
+         if (PolicyTypeUtil.UsernameTokenBinding(token)) {
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
+        } else if (PolicyTypeUtil.x509CertificateBinding(token)) {
+            qName = new QName(MessageConstants.WSSE_NS, MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME);
+        } else if (PolicyTypeUtil.samlTokenPolicy(token)) {
+            qName = new QName(MessageConstants.WSSE_NS, "SAMLToken");
+        }
+        return qName;
     }
 }

@@ -68,12 +68,13 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
            !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) || PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)
            || PolicyUtil.isIssuedToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
+            target.setPolicyName(getQName(policy));
         } else {
              stc.addTransform(target);
         }
         SignaturePolicy.FeatureBinding spFB = (SignaturePolicy.FeatureBinding)signaturePolicy.getFeatureBinding();
         spFB.addTargetBinding(target);
-    }
+    }    
 
 //    protected void collectSignaturePolicies(Token token) throws PolicyException{
 //        createSupportingSignature(token);

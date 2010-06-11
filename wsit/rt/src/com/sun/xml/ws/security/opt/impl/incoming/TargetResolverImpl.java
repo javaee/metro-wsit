@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 public class TargetResolverImpl implements TargetResolver {
 
     private ProcessingContext ctx = null;
+    private StringBuffer tokenList = new StringBuffer();
     private static Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
@@ -101,7 +102,7 @@ public class TargetResolverImpl implements TargetResolver {
                     throw new XWSSecurityException("Policy verification error:" +
                             "Missing target " + targetInPolicy + " for " + policyType);
                 }
-                break;
+                continue;
             }
             if (!found && targetInPolicy != null) {
                 //check if message has the target
@@ -118,6 +119,18 @@ public class TargetResolverImpl implements TargetResolver {
                                 "Missing target " + targetInPolicy + " for " + policyType);
                     }
 
+                }
+            }
+        }
+        if ("Signature".equals(policyType)) {
+            if (countSTRTransforms(actualTargets,true) != countSTRTransforms(inferredTargets, false)) {
+                if (isEndorsing) {
+                    throw new XWSSecurityException("Policy verification error:" +
+                            "Missing reference for one of { "+ tokenList.toString() + "} for Endorsing " + policyType);
+                } else {
+                    tokenList.delete(tokenList.lastIndexOf(","),tokenList.length());
+                    throw new XWSSecurityException("Policy verification error:" +
+                            "Missing reference for one of { "+ tokenList.toString() + "}  for " + policyType);
                 }
             }
         }
@@ -138,6 +151,28 @@ public class TargetResolverImpl implements TargetResolver {
             }
         }
         return false;
+    }
+    @SuppressWarnings("unchecked")
+    private int countSTRTransforms(List<Target> targets, boolean isActualTarget) {
+        int strTransformCount = 0;
+        for (Target target : targets) {
+            if (target instanceof SignatureTarget) {
+                SignatureTarget st = (SignatureTarget) target;
+                ArrayList ar = st.getTransforms();
+                Iterator it = ar.iterator();
+                while (it.hasNext()) {
+                    SignatureTarget.Transform str = (Transform) it.next();
+                    if (str.getTransform().equals(MessageConstants.STR_TRANSFORM_URI)) {
+                        strTransformCount++;
+                        if(isActualTarget){
+                            String localPart = (st.getPolicyQName() != null)?st.getPolicyQName().getLocalPart():"";
+                            tokenList.append(localPart);tokenList.append(", ");
+                        }
+                    }
+                }
+            }
+        }
+        return strTransformCount;
     }
 
     private String getTargetValue(Target target) {
