@@ -277,6 +277,7 @@ public abstract class WSITAuthContextBase  {
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
     protected boolean isCertValid;
+    private AlgorithmSuite bootStrapAlgoSuite;
     
     static {
         try {
@@ -291,7 +292,7 @@ public abstract class WSITAuthContextBase  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }   
+    }    
     
     /** Creates a new instance of WSITAuthContextBase */
     public WSITAuthContextBase(Map<Object, Object> map) {
@@ -1024,7 +1025,7 @@ public abstract class WSITAuthContextBase  {
                 xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming, spVersion);
                 xwssPolicyGenerator.process(ignoreST);
                 MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-                
+                this.bootStrapAlgoSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
                 
                 if(isServer && isIncoming){
                     EncryptionPolicy optionalPolicy =
@@ -1194,10 +1195,14 @@ public abstract class WSITAuthContextBase  {
         
         // set the policy, issued-token-map, and extraneous properties
         // try { policy need not be set apriori after moving to new policverification code
-        // setting a flag if issued tokens present
-        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+
+        if (hasSecureConversation && this.bootStrapAlgoSuite != null) {
+            ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
+        } else {
+            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        }
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-        
+        // setting a flag if issued tokens present
         ctx.hasIssuedToken(bindingHasIssuedTokenPolicy());
         ctx.setSecurityEnvironment(secEnv);
         //set the server certificate in the context ;

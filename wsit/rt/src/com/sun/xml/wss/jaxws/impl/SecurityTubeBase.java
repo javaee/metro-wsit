@@ -269,6 +269,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     private boolean encryptCancelPayload = false;
     private Policy cancelMSP;
     protected boolean isCertValid;
+    private AlgorithmSuite bootStrapAlgoSuite;
+
     static {
         try {
             //TODO: system property maynot be appropriate for server side.
@@ -282,7 +284,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }    
+    }   
     
     public SecurityTubeBase(TubeConfiguration config, Tube nextTube) {
         super(nextTube);
@@ -570,7 +572,12 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setiterationsForPDK(this.iterationsForPDK);
-        ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        
+        if (hasSecureConversation  && this.bootStrapAlgoSuite != null) {
+            ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
+        } else {
+            ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
+        }
         //set the server certificate in the context ;
         if (serverCert != null) {
             if (isCertValidityVerified == false) {
@@ -1315,7 +1322,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
                 xwssPolicyGenerator = new XWSSPolicyGenerator(effectiveBP,isServer,isIncoming, spVersion);
                 xwssPolicyGenerator.process(ignoreST);
                 MessagePolicy bmp = xwssPolicyGenerator.getXWSSPolicy();
-                
+                this.bootStrapAlgoSuite = xwssPolicyGenerator.getBindingLevelAlgSuite();
                 
                 if(isServer && isIncoming){
                     EncryptionPolicy optionalPolicy =
