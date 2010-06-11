@@ -100,7 +100,7 @@ public final class PacketFilteringTubeAppender implements TubeAppender {
             Collection<WebServiceFeature> features;
 
             features = new RmFeatureConfigurator().getFeatures(key, policyMap);
-            if (features != null) {
+            if (features != null && !features.isEmpty()) {
                 WebServiceFeature feature = features.iterator().next();
                 if (feature instanceof ReliableMessagingFeature) {
                     rmf = (ReliableMessagingFeature) feature;
@@ -108,7 +108,7 @@ public final class PacketFilteringTubeAppender implements TubeAppender {
             }
 
             features = new McFeatureConfigurator().getFeatures(key, policyMap);
-            if (features != null) {
+            if (features != null && !features.isEmpty()) {
                 WebServiceFeature feature = features.iterator().next();
                 if (feature instanceof MakeConnectionSupportedFeature) {
                     mcf = (MakeConnectionSupportedFeature) feature;
