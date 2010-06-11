@@ -1184,8 +1184,10 @@ public abstract class WSITAuthContextBase  {
         }else{
             ctx = new ProcessingContextImpl( packet.invocationProperties);
         }
+        String action = null;
         if (addVer != null) {
-            ctx.setAction(getAction(packet));
+            action = getAction(packet);
+            ctx.setAction(action);
         }
         if(isSCRenew(packet)){            
             ctx.isExpired(true);            
@@ -1195,8 +1197,7 @@ public abstract class WSITAuthContextBase  {
         
         // set the policy, issued-token-map, and extraneous properties
         // try { policy need not be set apriori after moving to new policverification code
-
-        if (hasSecureConversation && this.bootStrapAlgoSuite != null) {
+        if((action != null &&(action.contains("/RST/SCT") ||action.contains("/RSTR/SCT"))) && this.bootStrapAlgoSuite != null){
             ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
         } else {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));

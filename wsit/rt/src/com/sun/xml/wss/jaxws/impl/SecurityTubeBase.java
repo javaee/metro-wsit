@@ -565,15 +565,18 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         if(isSCRenew(packet)){            
             ctx.isExpired(true);            
         }
+        
+        String action = null;
         if (addVer != null) {
-            ctx.setAction(getAction(packet));
+            action = getAction(packet);
+            ctx.setAction(action);
         }
         // Set the SecurityPolicy version namespace in processingContext 
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
         ctx.setiterationsForPDK(this.iterationsForPDK);
         
-        if (hasSecureConversation  && this.bootStrapAlgoSuite != null) {
+       if((action != null &&(action.contains("/RST/SCT") ||action.contains("/RSTR/SCT"))) && this.bootStrapAlgoSuite != null){
             ctx.setAlgorithmSuite(getAlgoSuite(this.bootStrapAlgoSuite));
         } else {
             ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
