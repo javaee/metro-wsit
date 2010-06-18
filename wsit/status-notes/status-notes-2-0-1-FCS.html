@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2010-06-18 11:21:23 $ by $Author: snajper $</pre>
+        <pre>Last Modified : $Date: 2010-06-18 13:21:04 $ by $Author: ritzmann $</pre>
 
         <h5>Updated: June 18, 2010</h5>
 
@@ -64,7 +64,7 @@
         <br>
         <hr>
         <h2><a name="ha"></a>High Availability, JDK support, GF version, etc.</h2>
-        <p><code> Updated: 18.6.2010</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <ul>
             <li>High availability: this release has <em>not</em> implemented nor
@@ -86,6 +86,10 @@
                 webservices-tools was changed to ensure that it does not clash with
                 the POM used for the Metro GlassFish V3 OSGi bundles. See
                 <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1108">this issue</a>.</li>
+                
+            <li>JAXR: The JAXR libraries included with Metro 2.0 had been compiled
+                for the Java SDK 6 and did not run with JKD 5. This has been rectified:
+                <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1314">JAXR libraries are compiled for JDK 1.6</a>.</li>
         </ul>
 
         <!-- ========================================================================================== -->
@@ -130,7 +134,7 @@
         <br>
         <hr>
         <h2><a name="databinding"></a>Data Binding Status</h2>
-        <p><code> Updated: 18.6.2010</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -765,7 +769,7 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
-        <p><code> Updated: 18.6.2010</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
 
@@ -816,22 +820,16 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <hr>
         <h2><a name="policy">
         </a>Policy Status</h2>
-        <p><code> Updated: ???</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1078">Ability to generate a single policy from multiple features starting from java</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1140">Easy way to configure default providers for various policy extension configuration</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1053">Use default prefixes for TypedXmlWriter</a></li>
+            <li>n/a
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=884">First element check when unmarshalling policy expression too strict</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1053">Use default prefixes for TypedXmlWriter</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1075">Policy core doesn't allow to write policy assertions in compact form</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1086">PolicyMap is null, when PolicyMapUpdateProvider is called</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1113">WSIT .xml file parsing is intolerably fussy with valid whitespace</a></li>
+            <li>n/a
         </ul>
 
         <p><b>Known issues</b></p>
@@ -920,23 +918,21 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <hr>
         <h2><a name="cm">
         </a>Configuration Management Status</h2>
-        <p><code> Updated: ???</code></p>
+        <p><code>Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Runtime web service configuration management (WS-CM) allows to reconfigure a running web service instance
-                without losing any messages. The web service does not have to be redeployed or restarted.
-                All configuration changes are persisted across application redeployments and server restarts.</li>
+            <li>n/a
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1317">Investigate servlet pooling</a></li>
         </ul>
 
         <p><b>Known issues</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1364">Invoke dispose on WSEndpoint delegate when swapping endpoint</a></li>
         </ul>
 
         <p><b>Feature requests not implemented in this release</b></p>
