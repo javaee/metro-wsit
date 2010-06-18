@@ -2,28 +2,30 @@
 <html>
     <head>
         <meta http-equiv="CONTENT-TYPE" content="text/html; charset=windows-1252">
-        <title>WSIT Features of Metro 2.0 EA Status Notes</title>
+        <title>WSIT Features of Metro 2.0.1 FCS Status Notes</title>
     </head>
 
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
-        <h1>WSIT Features of Metro 2.0 EA Status Notes</h1>
+        <h1>WSIT Features of Metro 2.0.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2009-05-27 16:21:57 $ by $Author: ritzmann $</pre>
+        <pre>Last Modified : $Date: 2010-06-18 09:54:45 $ by $Author: m_potociar $</pre>
 
-        <h5>Updated: May 26, 2008</h5>
+        <h5>Updated: June 18, 2010</h5>
 
         <h2>Introduction</h2>
 
         <p>
             This document provides a list of
-            <ul>
-                <li>new features,</li>
-                <li>bugs fixed,</li>
-                <li>known issues,</li>
-                <li>what is not implemented</li>
-            </ul>
-            for each major Metro subsystem.
         </p>
+        <ul>
+            <li>new features,</li>
+            <li>bugs fixed,</li>
+            <li>known issues,</li>
+            <li>what is not implemented</li>
+        </ul>
+        <p>
+        </p>
+            for each major Metro subsystem.
 
         <p>This document covers the following topics:</p>
 
@@ -50,6 +52,10 @@
             Policy Status</a></li>
             <li><a href="#securitypolicy">
             Security Policy Status</a></li>
+            <li><a href="#cm">
+            Configuration Management</a></li>
+            <li><a href="#mandm">
+            Monitoring and Management</a></li>
             <li><a href="#soaptcp">
             SOAP/TCP Status</a></li>
         </ul>
@@ -58,7 +64,7 @@
         <br>
         <hr>
         <h2><a name="ha"></a>High Availability, JDK support, GF version, etc.</h2>
-        <p><code> Updated: May 26, 2009</code></p>
+        <p><code> Updated: ??</code></p>
 
         <ul>
             <li>High availability: this release has <em>not</em> implemented nor
@@ -67,7 +73,6 @@
                 know that our reliable messaging and secure conversation
                 implementations have state that is not saved and therefore will not
                 survive a process or machine failure.</li>
-
 
             <li>JDK support: Metro has been tested with Sun's JDK and with IBM's
                 AIX JDK.  Metro should work in any Servlet 2.4 compliant web-container
@@ -92,7 +97,7 @@
         <br>
         <hr>
         <h2><a name="mex"></a>Metadata Exchange Status</h2>
-        <p><code> Updated:  May 26, 2009</code></p>
+        <p><code> Updated:  2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -130,11 +135,11 @@
         <br>
         <hr>
         <h2><a name="databinding"></a>Data Binding Status</h2>
-        <p><code> Updated: 26th May, 2009</code></p>
+        <p><code> Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Includes implementation of JSR 222, JAXB 2.2 api version. For more information, see http://www.jcp.org/en/jsr/detail?id=222</li>
+            <li>Includes implementation of JSR 222, JAXB 2.2 API version. For more information, see http://www.jcp.org/en/jsr/detail?id=222</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
@@ -156,31 +161,28 @@
         <!-- ========================================================================================== -->
         <br>
         <hr>
-        <h2><a name="rm"></a>Reliable Messaging Status</h2>
-        <p><code> Updated:  May 26, 2009</code></p>
+        <h2><a name="rm"></a>Reliable Messaging and Make Connection Status</h2>
+        <p><code> Updated:  2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Make connection support</li>
-            <li>Make connection annonymous URIs support in protocol messages</li>
+            <li>WS-I RSP compliance</li>
+            <li>Extended configuration</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>For the list of fixed WS-RX issues kindly consult <a href="https://wsit.dev.java.net/issues/buglist.cgi?component=wsit&subcomponent=makeconnection&subcomponent=rm&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&target_milestone=2.0.1&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=fulltext&long_desc=&long_desc_type=fulltext&issue_file_loc=&issue_file_loc_type=fulltext&status_whiteboard=&status_whiteboard_type=fulltext&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&order=Reuse+same+sort+as+last+time&Submit+query=Submit+query">this link</a></li>
         </ul>
 
         <p><b>Known issues</b></p>
         <ul>
-            <li>
-                Reliable messaging throws exception due to an issue in bundled JAXB implementation.
-                To workaround this, please install latest JAXB 2.2 bits.
-            </li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1437">Issue 1437</a>: It is not possible to override WS-ReliableMessaging enabled service URL using BindingProvider properties</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1445">Issue 1445</a>: Policy assertion for WS-RM MaxConcurrentSessions does not get picked up</li>
         </ul>
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Persistent RM sequences</li>
             <li>High availability support in RM</li>
         </ul>
 
@@ -188,16 +190,20 @@
         <br>
         <hr>
         <h2><a name="security"></a>Security Status</h2>
-        <p><code> Updated:  27th May, 2009</code></p>
+        <p><code> Updated:  ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
             <li>Support for Password Derived Keys</li>
         </ul>
+        <ul>
+            <li>Support for Publishing Addressing Identity Assertion in EndpointReference</li>
+        </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=206">Issue 206 </a>: validation of server side policy failed.</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=710">Issue 710 </a>: Support Policies at Operation Scope</li>
         </ul>
 
         <p><b>Known Issues</b></p>
@@ -212,19 +218,6 @@
                     </th>
                     <td>
                         <p><b>Remark</b></p>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top;"><a
-                            href="https://wsit.dev.java.net/issues/show_bug.cgi?id=710">Issue 710 </a>:&nbsp;
-                        &lt;sp:IncludeTimestamp&gt; is a binding level assertion in
-                        WS-SecurityPolicy. This prevents a clean approach to having some secure
-                        and some non-secure methods in a WebService<br>
-                    </td>
-                    <td style="vertical-align: top;">Scheduled for Metro 1.3
-                        release.&nbsp; <br>
-                    </td>
-                    <td style="vertical-align: top;"><br>
                     </td>
                 </tr>
                 <tr>
@@ -326,19 +319,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: top;">ProtectToken with X509Token and
-                        RequireDerivedKeys<br>
-                    </td>
-                    <td style="vertical-align: top;"> The client is uanble to
-                        generate the request soap message and the exception thrown is:
-                        <pre>javax.xml.crypto.URIReferenceException: <br> No elements exist with Id/WsuId: 3</pre>
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue#76</a>
-                    </td>
-                    <td style="vertical-align: top;">Will be fixed in a future
-                        release. Note that WCF RTM does not support sp:ProtectTokens assertion<br>
-                    </td>
-                </tr>
-                <tr>
                     <td style="vertical-align: top;">Security with List data type
                         dropping xs namespace declaration&nbsp; <br>
                     </td>
@@ -357,7 +337,16 @@
                     <td style="vertical-align: top;">GlassFish V3 Prelude does not have WS-Security support for JSR 109 WebService<br>
                     </td>
                 </tr>
-
+                <tr>
+                    <td style="vertical-align: top;"> Client side Memory Leak with Metro Secure 109 WebServices Clients running on GlassFish.
+                        &nbsp; <br>
+                    </td>
+                    <td style="vertical-align: top;"><a
+                        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1260">Issue#1260</a></td>
+                    <td style="vertical-align: top;">This issue affects glassfish 109 WebService Client deployments only (and does not affect metro clients on other non-glassfish platforms or standalone webservice clients). The workaround is to call close() on the Proxy once the client has finished its tasks w.r.t that proxy. The workaround details are documented in the issue link. 
+                        <br>
+                    </td>
+                </tr>
             </tbody>
         </table>
 
@@ -382,15 +371,6 @@
                 of&nbsp; catching a Mismatch in AlgorithmSuite values between the
                 Service Policy and the Policy used by the Client to secure the message
             (refer known Issue# 22)</li>
-            <li>The Policy Verification for incoming messages is not capable
-                of&nbsp; catching&nbsp; a Mismatch in reference types used in Keyinfo
-                of Signature (for example if the server requires a KeyIdentifier, but
-                the incoming request makes use of&nbsp; Direct reference, then we do
-                not detect this). Part of the problem arises from the fact that the
-                &lt;sp:Require*&gt; does not entirely govern the reference type
-                actually used, the IncludeTokenPolicy on the Token overrides the
-                &lt;sp:Require*&gt;. This will be fixed in future releases.<br>
-            </li>
             <li>The SAML 2.0 API's supported&nbsp; by WSIT security has only a
                 placeholder for AuthnContextStatement implementation. This will be
                 fixed by adding an appropriate Constructor which takes necessary
@@ -398,8 +378,8 @@
                 individual members.<br>
             </li>
             <li>
-                The Following WS-SecurityPolicy Features from specification Draft:
-                Jul 2005 Ver 1.1 and WS-SecurityPolicy Version 1.2 are unsupported in this release of WSIT:
+                The Following WS-SecurityPolicy Features from specification 
+                are unsupported in this release of WSIT:
                 <br><br>
                 <table border="1" cellpadding="2" cellspacing="3">
                     <tbody>
@@ -440,18 +420,6 @@
                                     Always, AlwaysToRecipient and Never are supported (refer known <a
                                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=19">Issue# 19</a>)<br>
                                 </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p>6.3.1</p>
-                            </td>
-                            <td>
-                                <p>UsernameToken</p>
-                            </td>
-                            <td>
-                                <p>Only &lt;sp:UsernameToken10&gt;&nbsp; is supported in this
-                                    release, &lt;sp:UsernameToken11&gt;</p>
                             </td>
                         </tr>
                         <tr>
@@ -537,9 +505,7 @@
                                 <p>Token Protection</p>
                             </td>
                             <td>
-                                <p>Token Protection in cases where includeTokenPolicy="Never" or
-                                    in cases where the Token is not in the Message, is not handled
-                                    correctly yet (refer known <a
+                                <p>Token Protection in cases where includeTokenPolicy="Never" for a SAML Assertion Token is not handled correctly (refer known <a
                                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue# 76,
                                     206</a>).
                                 </p>
@@ -618,7 +584,7 @@
         <br>
         <hr>
         <h2><a name="sc"></a>Secure Conversation Status</h2>
-        <p><code>Updated: May 26, 2009</code></p>
+        <p><code>Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -627,7 +593,9 @@
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1206">Issue 1206 </a>: transport binding with SecureConversationToken as an
+EndorsingSupportingToken, then the response message for Renew failed with NPE</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1278">Issue 1278 </a>: multiple concurrent calls to a web service with secure conversation enabled causes NPE</li>
         </ul>
 
         <p><b>Known issues</b></p>
@@ -644,18 +612,21 @@
         <br>
         <hr>
         <h2><a name="trust"></a>Trust Status</h2>
-        <p><code> Updated: May 26, 2009</code></p>
+        <p><code> Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>Run time STS configuration with STSIssuedTokenConfiguration</li>
+            <li>Identity delegation with WS-Trust 1.4 ActAs mechanism </li>
+            <li>Issued Token Cache and sharing, SSO among services</li>
+            <li>Managing token lifetime and renew</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1063">Issue 1063</a>: Support oasis tokentype for SAML 2.0</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1063">Issue 1064</a>: Make it possible to inject a STSIssuedTokenConfiguration</li>
-             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1083">Issue 1111</a>: Possible typo in user visible error message</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1073">Issue 1063</a>: STS does not support TruststoreCBH, etc</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1162">Issue 1162</a>: KeyInfo is empty for the EncryptedKey in an issued SAML assertion fro STS if the service cert don't support SubjectKeyIndentifer</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1158">Issue 1158</a>: Policy verification failed with optional KeyValueToken</li>
+             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1105">Issue 1205</a>: AsymmetricBinding with an IssuedToken as anSupportingToken. The certificate for signing the SAML assertion is mistakenly used as the client certificate in the process</li>
         </ul>
         <p><b>Known issues</b></p>
         <ul>
@@ -664,7 +635,6 @@
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Token Cache and SSO</li>
             <li>Token Cancellation Protocol. </li>
             <li>Token Renewing Protocol </li>
             <li>Any profiles on top of Negotiation and Challenge Extensions</li>
@@ -674,7 +644,7 @@
         <br>
         <hr>
         <h2><a name="at-coord"></a>Coordination/Atomic Transactions Status</h2>
-        <p><code> Updated: May 26, 2008</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -697,16 +667,47 @@
             <tr>
                 <td>
                     <p>
-                        "WSTXServices" is listed as a deployed web service in the NetBeans 5.5.1 SJSAS
-                        admin interface (Runtime -> SJSAS -> Applications -> Web Applications)
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1284">issue 1284</a>:
+                        WS-AT web services are not auto-deployed in GFv3
+                </td>
+                <td>
+                    <p>Workaround: <a href="https://metro.dev.java.net/guide/Deploying_and_Configuring_the_WS_TX_Service_on_GlassFish_V3.html">Manually deploy the services on GFv3</a>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=397">issue 397</a>:
+                        Transaction attribute specified in ejb deployment descriptor is disregarded by mapping of CMT EJB web service to appropriate WS-AT policy assertions
                     </p>
                 </td>
                 <td>
+                    <p>Workaround: Use Java EE 5.0 program annotations on Container Managed Transaction (CMT) EJB Web Services.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <p>
-                        This isn't an issue, per se, just an FYI so users are not confused when they see
-                        the WS-TX system app listed in the NB UI.  It is supposed to be hidden (and it is
-                        in NB 6).  Users can attempt to undeploy the app, but the AS prevents this operation
-                        from happening.
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=471">issue 471</a>:
+                        Detect unsupported invocations of WS-AT webmethods
+                    </p>
+                </td>
+                <td>
+                    <p>Partially fixed.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p>
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=539">issue 539</a>:
+                        WS-AT txn registration fails silently, only SEVERE event in server.log
+                    </p>
+                </td>
+                <td>
+                    <p>Check server.log for the following message "SEVERE WSTX-AT-0022: Registration with durable parent failed" if your client isn't working as expected.
                     </p>
                 </td>
             </tr>
@@ -714,48 +715,26 @@
                 <td>
                     <p>
                         <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=717">issue 717</a>:
-                        Ejb web service deployment fails on AIX.
+                        Ejb web service deployment fails on AIX
                     </p>
                 </td>
                 <td>
                     <p>
                         Seeing this error during deployment of some TX SQE functional tests only on AIX:
                         <br>
-                        <code><bold>Could not invoke defineClass!;_RequestID=fe0ba2aa-af5d-474f-88bd-fe8085434899;|EJB5090: Exception in creating EJB container [java.lang.RuntimeException: Could not invoke defineClass!]|#]</bold></code>
+                        <code><b>Could not invoke defineClass!;_RequestID=fe0ba2aa-af5d-474f-88bd-fe8085434899;|EJB5090: Exception in creating EJB container [java.lang.RuntimeException: Could not invoke defineClass!]|#]</b></code>
                     </p>
                 </td>
             </tr>
             <tr>
                 <td>
                     <p>
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=718">issue 718</a>:
-                        TX interop S->M on AIX, Error on HTTP request: 500 Internal Error.
+                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1293">issue 1293</a>:
+                        IllegalStateException: Servlet [CoordinatorPortTypeImpl] and Servlet [CompletionCoordinatorPortTypeImpl] have the same url pattern: [/WSATCoordinator]
                     </p>
                 </td>
                 <td>
-                    <p>
-                        Seeing this error during TX interop S->M on AIX :
-                        <br>
-                        <code><bold> Error on HTTP request: 500 Internal Error</bold></code>.
-                        <br>
-                        Also seeing related problems with TX interop M->S using 1.0.1 on AIX fails, see details here
-                        <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=719">issue 719</a>.
-                        <br><br>
-                        There appears to be some other issue besides security certificate serial number mismatch
-                        between two machines for which mutual trust is being established, as certificates have been
-                        verified by RI lead as correct.  Further investigation required.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=723">Issue 723</a>
-                </td>
-                <td>
-                    <p>
-                        There is a regression causing that TX context does not get initialized in certain cases.
-                        The PolicyMap that is parsed second time (from the WSDL) does not contain the same, correct
-                        data. There is a problem in marshalling Policy data into WSDL during WSDL creation.
+                    <p>Waived for 2.0.
                     </p>
                 </td>
             </tr>
@@ -790,7 +769,7 @@
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
-        <p><code> Updated: 26th May, 2009</code></p>
+        <p><code> Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -814,19 +793,18 @@
                     </th>
                 </tr>
                 <tr>
-                    <td>Security settings are not supported with GlassFish v3</td>
-                    <td>Metro 2.0EA does not yet support Security with JSR109 deployment on GlassFish v3, thus security
-                    settings in QoS dialog are not supported. The fix is targeted to METRO 2.0 FCS release.</td>
+                    <td>STS Security wizard adds incorrect @Session annotation</td>
+                    <td><a href="https://netbeans.org/bugzilla/show_bug.cgi?id=178323">178323</a>. To fix this problem, please remove the @Session annotation.</td>
                 </tr>
                 <tr>
                     <td>To enable Microsoft WCF <-> Java interoperability, an 'action=operationName' attribute needs to be specified on each operation.</td>
                     <td>The sample code should look like this:<br/>
-                        <code><pre>
+                        <pre>
     @WebMethod(action=myOperation)
     public String myOperation() {
         return "";
     )
-                        </pre></code>
+                        </pre>
                     </td>
                 </tr>
                 <tr>
@@ -845,41 +823,40 @@
         <hr>
         <h2><a name="policy">
         </a>Policy Status</h2>
-        <p><code> Updated: May 27, 2009</code></p>
+        <p><code> Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1078">Ability to generate a single policy from multiple features starting from java</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1140">Easy way to configure default providers for various policy extension configuration</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1053">Use default prefixes for TypedXmlWriter</a></li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=329">Unite code that reads wsit-client.xml</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=884">First element check when unmarshalling policy expression too strict</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1053">Use default prefixes for TypedXmlWriter</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1078">Ability to generate a single policy from multiple features starting fromjava</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1075">Policy core doesn't allow to write policy assertions in compact form</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1086">PolicyMap is null, when PolicyMapUpdateProvider is called</a></li>
+            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1113">WSIT .xml file parsing is intolerably fussy with valid whitespace</a></li>
         </ul>
 
         <p><b>Known issues</b></p>
         <ul>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=793">Policy does not set webservice features until WSDL generation</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=884">First element check when unmarshalling policy expression too strict</a></li>
             <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1049">Policy error check should produce line number and system ID</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1075">Policy core does n't allow to write policy assertions in compact form</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1092">validate policy assertions on client</a></li>
-            <li><a href="https://wsit.dev.java.net/issues/show_bug.cgi?id=1113">WSIT .xml file parsing is intolerably fussy with valid white space</a></li>
         </ul>
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Not available in the EA but coming up for the final release is dynamic web services configuration.</li>
+            <li>n/a</li>
         </ul>
 
         <!-- ========================================================================================== -->
         <br>
         <hr>
         <h2><a name="securitypolicy"></a>Security Policy Status</h2>
-        <p><code> Updated: May 27th, 2009</code></p>
+        <p><code> Updated: ???</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -926,12 +903,12 @@
                     <td>
                         <p>
                             The following security policy assertions cause a deploy failure:
-                            <ul>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</li>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPath10</li>
-                                <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</li>
-                            </ul>
                         </p>
+                        <ul>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:SoapNormalization10</li>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPath10</li>
+                            <li>SecurityPolicy:sp:AlgorithmSuite/wsp:Policy/sp:XPathFilter20</li>
+                        </ul>
                     </td>
                 </tr>
             </tbody>
@@ -948,8 +925,65 @@
         <!-- ========================================================================================== -->
         <br>
         <hr>
+        <h2><a name="cm">
+        </a>Configuration Management Status</h2>
+        <p><code> Updated: ???</code></p>
+
+        <p><b>New in this release</b></p>
+        <ul>
+            <li>Runtime web service configuration management (WS-CM) allows to reconfigure a running web service instance
+                without losing any messages. The web service does not have to be redeployed or restarted.
+                All configuration changes are persisted across application redeployments and server restarts.</li>
+        </ul>
+
+        <p><b>Fixed in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Known issues</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Feature requests not implemented in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <!-- ========================================================================================== -->
+        <br>
+        <hr>
+        <h2><a name="mandm">
+        </a>Monitoring and Management</h2>
+        <p><code> Updated: ???</code></p>
+
+        <p><b>New in this release</b></p>
+        <ul>
+            <li>Metro now support JMX monitoring and management.  See
+        the user guide for more information.</li>
+        </ul>
+
+        <p><b>Fixed in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Known issues</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <p><b>Feature requests not implemented in this release</b></p>
+        <ul>
+            <li>n/a</li>
+        </ul>
+
+        <!-- ========================================================================================== -->
+        <br>
+        <hr>
         <h2><a name="soaptcp"></a>SOAP/TCP Status</h2>
-        <p><code> Updated: May 26, 2008</code></p>
+        <p><code> Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
