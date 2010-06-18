@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2010-06-18 09:54:45 $ by $Author: m_potociar $</pre>
+        <pre>Last Modified : $Date: 2010-06-18 11:21:23 $ by $Author: snajper $</pre>
 
         <h5>Updated: June 18, 2010</h5>
 
@@ -64,7 +64,7 @@
         <br>
         <hr>
         <h2><a name="ha"></a>High Availability, JDK support, GF version, etc.</h2>
-        <p><code> Updated: ??</code></p>
+        <p><code> Updated: 18.6.2010</code></p>
 
         <ul>
             <li>High availability: this release has <em>not</em> implemented nor
@@ -81,11 +81,6 @@
                 features depend on GlassFish supplied classes when using IBM's AIX JDK
                 so Metro won't work on non-Sun JDK's or non-IBM/AIX+Glassfish in
                 certain scenarios.</li>
-
-            <li>Source code: The NetBeans project setup that is delivered with the
-                source code has a minor issue. See the bug description for details
-                how to resolve the issue: <a href="https://metro.dev.java.net/issues/show_bug.cgi?id=3">
-                nbproject for rt build depends on missing xmldsig.jar</a></li>
 
             <li>Maven: The artifact ID of the parent POM for webservices-rt and
                 webservices-tools was changed to ensure that it does not clash with
@@ -135,7 +130,7 @@
         <br>
         <hr>
         <h2><a name="databinding"></a>Data Binding Status</h2>
-        <p><code> Updated: ???</code></p>
+        <p><code> Updated: 18.6.2010</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -144,7 +139,8 @@
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li><a href="https://jaxb.dev.java.net/issues/buglist.cgi?component=jaxb&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&target_milestone=2.2&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=fulltext&long_desc=&long_desc_type=fulltext&issue_file_loc=&issue_file_loc_type=fulltext&status_whiteboard=&status_whiteboard_type=fulltext&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&order=Reuse+same+sort+as+last+time&Submit+query=Submit+query">Bug list</a></li>
+            <li><a href="https://jaxb.dev.java.net/issues/buglist.cgi?Submit+query=Submit+query&issue_type=DEFECT&component=jaxb&issue_status=RESOLVED&issue_status=VERIFIED&issue_status=CLOSED&resolution=FIXED&target_milestone=2.2.1&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=fulltext&long_desc=&long_desc_type=fulltext&issue_file_loc=&issue_file_loc_type=fulltext&status_whiteboard=&status_whiteboard_type=fulltext&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&order=Reuse+same+sort+as+last+time">Bug list</a></li>
+            and <a href="https://glassfish.dev.java.net/issues/show_bug.cgi?id=11881">11881</a>.
         </ul>
 
         <p><b>Known issues</b></p>
@@ -769,16 +765,13 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
         <br>
         <hr>
         <h2><a name="netbeans"></a>NetBeans WSIT Module Status</h2>
-        <p><code> Updated: ???</code></p>
+        <p><code> Updated: 18.6.2010</code></p>
 
         <p><b>New in this release</b></p>
-        <ul>
-            <li>Support for Maven projects</li>
-        </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul><li>
-            <a href="http://www.netbeans.org/issues/buglist.cgi?component=websvc&subcomponent=wsit&issue_status=RESOLVED&issue_status=VERIFIED&resolution=FIXED&resolution=INVALID&resolution=WONTFIX&resolution=LATER&resolution=REMIND&resolution=DUPLICATE&resolution=WORKSFORME&target_milestone=6.7&target_milestone=6.7M1&target_milestone=6.7M2&target_milestone=6.7M3&email1=&emailtype1=exact&emailassigned_to1=1&email2=&emailtype2=exact&emailreporter2=1&issueidtype=include&issue_id=&changedin=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&short_desc=&short_desc_type=substring&long_desc=&long_desc_type=substring&issue_file_loc=&issue_file_loc_type=substring&status_whiteboard=&status_whiteboard_type=substring&keywords=&keywords_type=anytokens&field0-0-0=noop&type0-0-0=noop&value0-0-0=&cmdtype=doit&order=Reuse+same+sort+as+last+time&Submit+query=Submit+query">Bugs fixed</a>
+            <a href="http://netbeans.org/bugzilla/buglist.cgi?query_format=advanced&short_desc_type=allwordssubstr&short_desc=&product=webservices&component=WSIT&target_milestone=6.9&long_desc_type=substring&long_desc=&bug_file_loc_type=allwordssubstr&bug_file_loc=&status_whiteboard_type=allwordssubstr&status_whiteboard=&keywords_type=allwords&keywords=&bug_status=RESOLVED&bug_status=VERIFIED&bug_status=CLOSED&emailassigned_to1=1&emailtype1=substring&email1=&emailassigned_to2=1&emailreporter2=1&emailqa_contact2=1&emailcc2=1&emailtype2=substring&email2=&bugidtype=include&bug_id=&votes=&chfieldfrom=&chfieldto=Now&chfieldvalue=&cmdtype=doit&order=Reuse+same+sort+as+last+time&field0-0-0=noop&type0-0-0=noop&value0-0-0=">Bugs fixed</a>
         </li></ul>
 
         <p><b>Known issues</b></p>
@@ -793,8 +786,8 @@ EndorsingSupportingToken, then the response message for Renew failed with NPE</l
                     </th>
                 </tr>
                 <tr>
-                    <td>STS Security wizard adds incorrect @Session annotation</td>
-                    <td><a href="https://netbeans.org/bugzilla/show_bug.cgi?id=178323">178323</a>. To fix this problem, please remove the @Session annotation.</td>
+                    <td>webservices-osgi.jar is not added to project classpath</td>
+                    <td><a href="https://netbeans.org/bugzilla/show_bug.cgi?id=178323">178323</a>. To fix this problem, please add webservices-osgi.jar to the classpath manually. In future releases of Metro this will not be required because private api will be moved out of this implementation jar file.</td>
                 </tr>
                 <tr>
                     <td>To enable Microsoft WCF <-> Java interoperability, an 'action=operationName' attribute needs to be specified on each operation.</td>
