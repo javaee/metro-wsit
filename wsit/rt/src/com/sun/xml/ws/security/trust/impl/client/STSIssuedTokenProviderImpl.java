@@ -99,7 +99,7 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
         ctx.setTokenIssuer(config.getSTSEndpoint());
         boolean shareToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.SHARE_TOKEN));
         boolean renewExpiredToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.RENEW_EXPIRED_TOKEN));
-        long maxClockSkew = Long.parseLong((String)config.getOtherOptions().get(STSIssuedTokenConfiguration.MAX_CLOCK_SKEW));
+        String maxClockSkew = (String)config.getOtherOptions().get(STSIssuedTokenConfiguration.MAX_CLOCK_SKEW);
         Subject subject = SubjectAccessor.getRequesterSubject();
         if (shareToken && subject != null){
             Set pcs = subject.getPrivateCredentials(IssuedTokenContext.class);
@@ -114,8 +114,8 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
                 }
                 long beforeTime = c.getTimeInMillis();
                 long currentTime = beforeTime - offset;
-                if (maxClockSkew > 0){
-                    currentTime = currentTime - maxClockSkew;
+                if (maxClockSkew != null){
+                    currentTime = currentTime - Long.parseLong(maxClockSkew);
                 }
                 c.setTimeInMillis(currentTime);
                 Date currentTimeInDateFormat = c.getTime();

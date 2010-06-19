@@ -203,8 +203,8 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
 
         if (ctx != null && expiryCheck){
             SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
-            long maxClockSkew = Long.parseLong((String)sctConfig.getOtherOptions().get(SCTokenConfiguration.MAX_CLOCK_SKEW));
-
+            String maxClockSkew  = (String)sctConfig.getOtherOptions().get(SCTokenConfiguration.MAX_CLOCK_SKEW);
+            
             // Expiry check of security context token
             Calendar c = new GregorianCalendar();
             long offset = c.get(Calendar.ZONE_OFFSET);
@@ -213,8 +213,8 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
             }
             long beforeTime = c.getTimeInMillis();
             long currentTime = beforeTime - offset;
-            if (maxClockSkew > 0){
-                    currentTime = currentTime - maxClockSkew;
+            if (maxClockSkew != null){
+                currentTime = currentTime - Long.parseLong(maxClockSkew);
             }
             
             c.setTimeInMillis(currentTime);
