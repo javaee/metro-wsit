@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,6 +54,13 @@ import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Constants;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SymmetricBinding;
+import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
+import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
+import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.ws.security.trust.WSTrustVersion;
+import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
+import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
+import com.sun.xml.ws.security.trust.elements.RenewTarget;
 import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import com.sun.xml.ws.security.trust.elements.CancelTarget;
 import com.sun.xml.ws.security.trust.elements.Entropy;
@@ -72,36 +79,27 @@ import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
+import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
+import com.sun.xml.wss.saml.util.SAMLUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.Set;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
-import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
-import com.sun.xml.ws.security.trust.WSTrustElementFactory;
-import com.sun.xml.ws.security.trust.WSTrustVersion;
-import com.sun.xml.ws.security.trust.elements.BaseSTSRequest;
-import com.sun.xml.ws.security.trust.elements.BaseSTSResponse;
-import com.sun.xml.ws.security.trust.elements.RenewTarget;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.Subject;
 import org.w3c.dom.Element;
 import javax.xml.stream.XMLStreamReader;
-import com.sun.xml.wss.saml.util.SAMLUtil;
-import com.sun.xml.wss.XWSSecurityException;
 import javax.xml.stream.XMLStreamException;
 
 public class WSSCContract {

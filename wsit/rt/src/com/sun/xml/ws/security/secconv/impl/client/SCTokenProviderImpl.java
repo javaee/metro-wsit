@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -202,6 +202,9 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
         IssuedTokenContext ctx = issuedTokenContextMap.get(key);                        
 
         if (ctx != null && expiryCheck){
+            SCTokenConfiguration sctConfig = (SCTokenConfiguration)ctx.getSecurityPolicy().get(0);
+            long maxClockSkew = Long.parseLong((String)sctConfig.getOtherOptions().get(SCTokenConfiguration.MAX_CLOCK_SKEW));
+
             // Expiry check of security context token
             Calendar c = new GregorianCalendar();
             long offset = c.get(Calendar.ZONE_OFFSET);
@@ -210,6 +213,9 @@ public class SCTokenProviderImpl implements IssuedTokenProvider {
             }
             long beforeTime = c.getTimeInMillis();
             long currentTime = beforeTime - offset;
+            if (maxClockSkew > 0){
+                    currentTime = currentTime - maxClockSkew;
+            }
             
             c.setTimeInMillis(currentTime);
             

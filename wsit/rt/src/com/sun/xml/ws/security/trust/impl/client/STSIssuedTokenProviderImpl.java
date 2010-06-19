@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -67,11 +67,7 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
             LogDomainConstants.TRUST_IMPL_DOMAIN_BUNDLE);
     
     public void issue(IssuedTokenContext ctx)throws WSTrustException{
-        STSIssuedTokenConfiguration config = (STSIssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
-        ctx.setTokenIssuer(config.getSTSEndpoint());
-        boolean shareToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.SHARE_TOKEN));
-        boolean renewExpiredToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.RENEW_EXPIRED_TOKEN));
-        getIssuedTokenContext(shareToken, renewExpiredToken, ctx);
+        getIssuedTokenContext(ctx);
     } 
     
     public void cancel(IssuedTokenContext ctx)throws WSTrustException{
@@ -98,7 +94,12 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
         ctx.setAttachedSecurityTokenReference(cached.getAttachedSecurityTokenReference());
     }
 
-    private void getIssuedTokenContext(boolean shareToken, boolean renewExpiredToken, IssuedTokenContext ctx)throws WSTrustException {
+    private void getIssuedTokenContext(IssuedTokenContext ctx)throws WSTrustException {
+        STSIssuedTokenConfiguration config = (STSIssuedTokenConfiguration)ctx.getSecurityPolicy().get(0);
+        ctx.setTokenIssuer(config.getSTSEndpoint());
+        boolean shareToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.SHARE_TOKEN));
+        boolean renewExpiredToken = "true".equals(config.getOtherOptions().get(STSIssuedTokenConfiguration.RENEW_EXPIRED_TOKEN));
+        long maxClockSkew = Long.parseLong((String)config.getOtherOptions().get(STSIssuedTokenConfiguration.MAX_CLOCK_SKEW));
         Subject subject = SubjectAccessor.getRequesterSubject();
         if (shareToken && subject != null){
             Set pcs = subject.getPrivateCredentials(IssuedTokenContext.class);
@@ -113,6 +114,9 @@ public class STSIssuedTokenProviderImpl implements IssuedTokenProvider {
                 }
                 long beforeTime = c.getTimeInMillis();
                 long currentTime = beforeTime - offset;
+                if (maxClockSkew > 0){
+                    currentTime = currentTime - maxClockSkew;
+                }
                 c.setTimeInMillis(currentTime);
                 Date currentTimeInDateFormat = c.getTime();
                 if(cached.getExpirationTime() != null && currentTimeInDateFormat.after(cached.getExpirationTime())){

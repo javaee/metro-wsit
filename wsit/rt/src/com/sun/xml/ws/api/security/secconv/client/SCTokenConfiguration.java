@@ -55,7 +55,8 @@ public abstract class SCTokenConfiguration implements IssuedTokenConfiguration{
     
     public static final String PROTOCOL_10 = "http://schemas.xmlsoap.org/ws/2005/02/sc";
     public static final String PROTOCOL_13 = "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512";
-    
+    public static final String MAX_CLOCK_SKEW = "maxClockSkew";
+
     protected String protocol;    
     
     protected boolean renewExpiredSCT = false;

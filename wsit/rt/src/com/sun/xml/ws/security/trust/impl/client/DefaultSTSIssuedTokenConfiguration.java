@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -317,6 +317,12 @@ public class DefaultSTSIssuedTokenConfiguration extends STSIssuedTokenConfigurat
                     this.getOtherOptions().put(RENEW_EXPIRED_TOKEN, renewExpiredToken);
                 }
 
+                // maxClockSkew
+                String maxClockSkew = attrs.get(new QName(CONFIG_NAMESPACE, MAX_CLOCK_SKEW));
+                if (maxClockSkew != null){
+                    this.getOtherOptions().put(MAX_CLOCK_SKEW, maxClockSkew);
+                }
+                
                 // handle LifeTime
                 if (localToken.hasParameters()){
                     Iterator<PolicyAssertion> pas = localToken.getParametersIterator();

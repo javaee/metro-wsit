@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -207,6 +207,11 @@ public class DefaultSCTokenConfiguration extends SCTokenConfiguration{
                 final Map<QName,String> attrs = localToken.getAttributes();
                 this.renewExpiredSCT = Boolean.parseBoolean(attrs.get(new QName(CONFIG_NAMESPACE, RENEW_EXPIRED_SCT)));
                 this.requireCancelSCT = Boolean.parseBoolean(attrs.get(new QName(CONFIG_NAMESPACE, REQUIRE_CANCEL_SCT)));
+                String maxClockSkew = attrs.get(new QName(CONFIG_NAMESPACE, MAX_CLOCK_SKEW));
+                if (maxClockSkew != null){
+                    this.getOtherOptions().put(MAX_CLOCK_SKEW, maxClockSkew);
+                }
+
             }
             final Iterator<PolicyAssertion> sctConfig = localToken.getNestedAssertionsIterator();
             while(sctConfig.hasNext()){

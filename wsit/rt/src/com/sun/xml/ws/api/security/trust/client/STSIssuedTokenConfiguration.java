@@ -62,6 +62,7 @@ public abstract class STSIssuedTokenConfiguration implements IssuedTokenConfigur
     public static final String STS_PORT_NAME ="sts-port-name";
     public static final String STS_NAMESPACE ="sts-namespace";
     public static final String LIFE_TIME = "LifeTime";
+    public static final String MAX_CLOCK_SKEW = "MaxClockSkew";
     
     protected String protocol;
     
