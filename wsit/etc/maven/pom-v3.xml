@@ -69,6 +69,6 @@
     <modules>
         <module>webservices-api-osgi</module>
         <module>webservices-osgi</module>
-        <module>woodstox-osgi</module>
+        <!--module>woodstox-osgi</module-->
     </modules>
 </project>
