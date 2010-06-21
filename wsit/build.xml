@@ -110,6 +110,8 @@
         <delete dir="${dist.dir}/maven"/>
         
         <filter token="metro.version" value="${release.impl.version}${release.mvn.version.suffix}"/>
+        <filter token="woodstox.dependency.version" value="${woodstox.osgi.dependency.version}"/>
+        <filter token="woodstox.release.version" value="${woodstox.osgi.release.version}"/>
         <filter token="jaxb.version" value="${jaxb.osgi.dependency.version}"/>
         <copy todir="${dist.dir}/maven" filtering="true">
             <fileset dir="${etc.dir}/maven" includes="**/pom*.xml" />
