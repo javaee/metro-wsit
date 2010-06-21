@@ -18,34 +18,61 @@ Then execute:
 > cd <WSIT_HOME>
 > mvn -f dist/maven/pom-v3.xml deploy
 
-Customizing Metro version suffix
---------------------------------
+Customizing Metro version and dependency versions
+-------------------------------------------------
 
-To customize the Metro version suffix that will be pushed to Maven, e.g. for promoted builds,
-build Metro with "release.mvn.version.suffix" property set, such as:
+There are several properties that control the Metro version as well as other
+dependency versions as they are generated in the Maven's pom.xml descriptors
+during the Metro build phase. These properties can be customized and passed to
+the main Metro build phase to generate custom pom.xml descriptors as required.
 
-> ant -Drelease.mvn.version.suffix="-b01"
+Alternatively, once Metro build is already finished and only the pom.xml
+descriptors need to be updated "create-pom-files" ANT target can be used
+to generate new pom.xml descriptors for the Metro artifacts:
 
-Alternatively, if the Metro build is already finished and you just want to update the POM files,
-run only "create-pom-files" ANT target:
+Following is the list of supported properties:
 
-> ant -Drelease.mvn.version.suffix="-b01" create-pom-files
+release.impl.version
+  - specifies the main Metro version (e.g. "2.1")
 
-Customizing JAXB dependency version
------------------------------------
+release.mvn.version.suffix
+  - specifies the main Metro version suffix; for FCS release, this property must
+    be set to empty string (""), for non-FCS release the qualifier must start with
+    a dash ('-') (e.g. "-SNAPSHOT", "-b03")
 
-By default, there is a dependecy to a SNAPSHOT JAXB version. To override this with a different version
-(such as a promoted JAXB version), set the "jaxb.osgi.dependency.version" property when building Metro
-or creating Metro POM files:
+jaxb.osgi.dependency.version
+  - specifies JAXB OSGi bundle dependency version (e.g. "2.2.1.1-promoted-b2")
 
-> ant -Djaxb.osgi.dependency.version="2.1.10-b02"
-or
+woodstox.osgi.dependency.version
+  - specifies Woodstox OSGi bundle dependency version (e.g. "3.2.1.1-SNAPSHOT")
+
+woodstox.osgi.release.version
+  - specifies Woodstox OSGi bundle release version (e.g. "3.2.1.1-SNAPSHOT").
+    WARNING: This property controls the actual version of the Woodstox bundle
+    produced by Metro build. It should not be used for customization without
+    a very good knowledge of th impact. Also, the property is a temporary hack
+    and it will be removed soon completely.
+
+
+Example: Customizing the properties in the whole Metro build
+============================================================
+
+To customize the Metro version suffix that will be pushed to Maven, e.g. for
+promoted builds, build Metro with "release.mvn.version.suffix" property set,
+such as:
+
+> ant -Drelease.mvn.version.suffix="-b01" clean dist
+
+Example: Generating new pom.xml descriptors for an already existing build
+=========================================================================
+
+To customize the Metro version suffix that will be pushed to Maven as well as
+Woodstox OSGi dependency version for an already existing build of Metro, use:
+
+> ant -Drelease.mvn.version.suffix="-b01" -Dwoodstox.osgi.dependency.version="4.0.8" create-pom-files
+
+To customize the JAXB OSGi dependency version suffix for an already existing
+build of Metro, use:
+
 > ant -Djaxb.osgi.dependency.version="2.1.10-b02" create-pom-files
 
-
-
-Of course, you can customize both Metro and JAXB version at the same time:
-
-> ant -Drelease.mvn.version.suffix="-b01" -Djaxb.osgi.dependency.version="2.1.10-b02"
-or
-> ant -Drelease.mvn.version.suffix="-b01" -Djaxb.osgi.dependency.version="2.1.10-b02" create-pom-files

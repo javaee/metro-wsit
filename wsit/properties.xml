@@ -66,6 +66,8 @@
     <property name="compile.optimize" value="false"/>
 
     <property name="jaxb.osgi.dependency.version" value="2.2.1.1-promoted-b2"/>
+    <property name="woodstox.osgi.dependency.version" value="3.2.1.1-SNAPSHOT"/>
+    <property name="woodstox.osgi.release.version" value="3.2.1.1-SNAPSHOT"/>
 
     <!-- BEGIN: RELEASE SECTION -->
     <!-- This section needs to be updated with each new release -->
