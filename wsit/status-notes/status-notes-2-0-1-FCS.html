@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2010-06-18 16:02:42 $ by $Author: jdg6688 $</pre>
+        <pre>Last Modified : $Date: 2010-06-22 15:19:26 $ by $Author: kumarjayanti $</pre>
 
         <h5>Updated: June 18, 2010</h5>
 
@@ -190,7 +190,7 @@
         <br>
         <hr>
         <h2><a name="security"></a>Security Status</h2>
-        <p><code> Updated:  ???</code></p>
+        <p><code> Updated:  2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
@@ -325,16 +325,8 @@
                     <td style="vertical-align: top;"><a
                         href="https://wsit.dev.java.net/issues/show_bug.cgi?id=971">Issue#971</a></td>
                     <td style="vertical-align: top;">This issue is now fixed for Sign, and Sign + Encrypt scenario.
-                        It issue still exists for plain Encryption scenario. The workaround should be to use Sign+Encrypt if encryption is required,
+                        Issue still exists for plain Encryption scenario. The workaround should be to use Sign+Encrypt if encryption is required,
                         or use non-optimized security.<br>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top;">Security for JSR 109 WebServices does not work with V3-Prelude&nbsp; <br>
-                    </td>
-                    <td style="vertical-align: top;"><a
-                        href=""></a></td>
-                    <td style="vertical-align: top;">GlassFish V3 Prelude does not have WS-Security support for JSR 109 WebService<br>
                     </td>
                 </tr>
                 <tr>
@@ -371,12 +363,6 @@
                 of&nbsp; catching a Mismatch in AlgorithmSuite values between the
                 Service Policy and the Policy used by the Client to secure the message
             (refer known Issue# 22)</li>
-            <li>The SAML 2.0 API's supported&nbsp; by WSIT security has only a
-                placeholder for AuthnContextStatement implementation. This will be
-                fixed by adding an appropriate Constructor which takes necessary
-                arguments.&nbsp; Getters will also be provided to retrieve the
-                individual members.<br>
-            </li>
             <li>
                 The Following WS-SecurityPolicy Features from specification 
                 are unsupported in this release of WSIT:
@@ -499,48 +485,6 @@
                         </tr>
                         <tr>
                             <td>
-                                <p>7.5</p>
-                            </td>
-                            <td>
-                                <p>Token Protection</p>
-                            </td>
-                            <td>
-                                <p>Token Protection in cases where includeTokenPolicy="Never" for a SAML Assertion Token is not handled correctly (refer known <a
-                                        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue# 76,
-                                    206</a>).
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p>9.2</p>
-                            </td>
-                            <td>
-                                <p>SignedSupportingTokens</p>
-                            </td>
-                            <td>
-                                <p>&nbsp;The runtime will not be able to sign the supporting
-                                    token in cases where the Token is not in the Message (such as for
-                                    includeTokenPolicy=Never/Once). <br>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <p>9.4</p>
-                            </td>
-                            <td>
-                                <p>SignedEndorsingSupportingTokens</p>
-                            </td>
-                            <td>
-                                <p>The runtime will not be able to sign the supporting token in
-                                    cases where the Token is not in the Message (such as for
-                                    includeTokenPolicy=Never/Once).<br>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
                                 <p>10.1</p>
                             </td>
                             <td>
@@ -584,7 +528,7 @@
         <br>
         <hr>
         <h2><a name="sc"></a>Secure Conversation Status</h2>
-        <p><code>Updated: 2008-06-18</code></p>
+        <p><code>Updated: 2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
