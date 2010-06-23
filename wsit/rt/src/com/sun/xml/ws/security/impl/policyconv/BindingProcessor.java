@@ -141,16 +141,16 @@ public abstract class BindingProcessor {
     }
 
     //TODO:WS-SX Spec:If we have a secondary signature should it protect the token too ?
-    protected void protectToken(WSSPolicy token, SecurityPolicyVersion spVersion) {
+    protected void protectToken(WSSPolicy token) {
         if (primarySP == null) {
             return;
         }
         if ((isServer && isIncoming) || (!isServer && !isIncoming)) {//token protection is from client to service only
-            protectToken(token, false, spVersion);
+            protectToken(token, false);
         }
     }
 
-    protected void protectToken(WSSPolicy token, boolean ignoreSTR, SecurityPolicyVersion spVersion) {
+    protected void protectToken(WSSPolicy token, boolean ignoreSTR) {
         String uuid = (token != null) ? (token.getUUID()) : null;
         String uid = null;
         String includeToken = ((KeyBindingBase) token).getIncludeToken();

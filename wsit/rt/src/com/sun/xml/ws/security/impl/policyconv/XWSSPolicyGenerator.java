@@ -126,7 +126,9 @@ public class XWSSPolicyGenerator {
     private List<RequiredElements> reqElements = new ArrayList<RequiredElements>();
     private SecurityPolicyVersion spVersion;
     private boolean isIssuedTokenAsEncryptedSupportingToken = false;
-    /** Creates a new instance of WSPolicyProcessorImpl */
+    /** Creates a new instance of WSPolicyProcessorImpl
+     * @param effectivePolicy
+     */
     //public XWSSPolicyGenerator(AssertionSet assertionSet,boolean isServer,boolean isIncoming){
     public XWSSPolicyGenerator(Policy effectivePolicy,boolean isServer,boolean isIncoming, 
             SecurityPolicyVersion spVersion){
@@ -146,10 +148,12 @@ public class XWSSPolicyGenerator {
     }
     
     public AlgorithmSuite getBindingLevelAlgSuite(){
-        if(_binding != null)
+        if(_binding != null) {
             return _binding.getAlgorithmSuite();
-        else 
+        }
+        else {
             return new com.sun.xml.ws.security.impl.policy.AlgorithmSuite();
+        }
     }
     
     public void process(boolean ignoreST) throws PolicyException {
@@ -193,7 +197,7 @@ public class XWSSPolicyGenerator {
                 }
                 SymmetricBindingProcessor sbp =  new SymmetricBindingProcessor((SymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
-                        signedElements,encryptedElements,spVersion);
+                        signedElements,encryptedElements);
                 if(wssAssertion != null && PolicyUtil.isWSS11(wssAssertion, spVersion)){
                     sbp.setWSS11((WSSAssertion)wssAssertion);
                 }
@@ -208,7 +212,7 @@ public class XWSSPolicyGenerator {
                 }
                 AsymmetricBindingProcessor abp = new AsymmetricBindingProcessor((AsymmetricBinding) _binding, _policyContainer,
                         isServer, isIncoming,signedParts,encryptedParts,
-                        signedElements,encryptedElements,spVersion);
+                        signedElements,encryptedElements);
                 if( wssAssertion != null && PolicyUtil.isWSS11(wssAssertion, spVersion)){
                     abp.setWSS11((WSSAssertion)wssAssertion);
                 }

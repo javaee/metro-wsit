@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,7 +42,6 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.MessageLayout;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
@@ -79,12 +78,12 @@ public class NilBindingProcessor extends BindingProcessor{
     }
     
     @Override
-    protected void protectToken(WSSPolicy token,SecurityPolicyVersion spVersion){
+    protected void protectToken(WSSPolicy token){
         
     }
     
     @Override
-    protected void protectToken(WSSPolicy token,boolean ignoreSTR,SecurityPolicyVersion spVersion){
+    protected void protectToken(WSSPolicy token,boolean ignoreSTR){
         
     }
     
@@ -106,8 +105,8 @@ public class NilBindingProcessor extends BindingProcessor{
     @Override
     public void processSupportingTokens(SupportingTokens st) throws PolicyException{
         
-        SupportingTokensProcessor stp =  new SupportingTokensProcessor((SupportingTokens)st,
-                tokenProcessor,getBinding(),container,primarySP,primaryEP,pid);
+        SupportingTokensProcessor stp =  new SupportingTokensProcessor(
+                st, tokenProcessor,getBinding(),container,primarySP,primaryEP,pid);
         stp.process();
     }
     

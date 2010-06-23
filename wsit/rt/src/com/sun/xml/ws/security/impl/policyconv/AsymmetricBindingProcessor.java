@@ -58,12 +58,12 @@ import static com.sun.xml.ws.security.impl.policy.Constants.logger;
  */
 public class AsymmetricBindingProcessor extends BindingProcessor {
     private final AsymmetricBinding binding;
-    private SecurityPolicyVersion spVersion = null;
+  
     
     /** Creates a new instance of AsymmetricBindingProcessor */
     public AsymmetricBindingProcessor(AsymmetricBinding asBinding,XWSSPolicyContainer container,
             boolean isServer,boolean isIncoming,Vector<SignedParts> signedParts,Vector<EncryptedParts> encryptedParts,
-            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements,SecurityPolicyVersion spVersion) {
+            Vector<SignedElements> signedElements,Vector<EncryptedElements> encryptedElements) {
         this.binding = asBinding;
         this.container = container;
         this.isServer = isServer;
@@ -76,7 +76,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
         this.signedElements = signedElements;
         this.encryptedElements = encryptedElements;
         this.encryptedParts = encryptedParts;
-        this.spVersion = spVersion;
+        
     }
     
     
@@ -132,7 +132,7 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"Token reference by primary signature with ID "+primarySP.getUUID()+" will be Integrity protected");
             }
-            protectToken((WSSPolicy) primarySP.getKeyBinding(),spVersion);
+            protectToken((WSSPolicy) primarySP.getKeyBinding());
         }
         
     }
