@@ -8,7 +8,7 @@
     <body bgcolor="#ffffff" dir="ltr" lang="en-US">
         <h1>WSIT Features of Metro 2.0.1 FCS Status Notes</h1>
 
-        <pre>Last Modified : $Date: 2010-06-22 15:22:01 $ by $Author: kumarjayanti $</pre>
+        <pre>Last Modified : $Date: 2010-06-23 12:17:42 $ by $Author: kumarjayanti $</pre>
 
         <h5>Updated: June 18, 2010</h5>
 
@@ -468,6 +468,43 @@
                                 </font></p>
                             </td>
                         </tr>
+			<tr>
+                            <td>
+                                <p>7.5</p>
+                            </td>
+                            <td>
+                                <p>Token Protection</p>
+                            </td>
+                            <td>
+                                <p>Token Protection in cases where includeTokenPolicy="Never" for a SAML Assertion Token is not handled correctly (refer known <a
+                                        href="https://wsit.dev.java.net/issues/show_bug.cgi?id=76">Issue# 76,
+                                    206</a>).
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>9.2</p>
+                            </td>
+                            <td>
+                                <p>SignedSupportingTokens</p>
+                            </td>
+                            <td> <p>&nbsp;The runtime does not correctly sign the supporting token in cases where the Token is not in the Message (such as for includeTokenPolicy=Never/Once). <br>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>9.4</p>
+                            </td>
+                            <td>
+                                <p>SignedEndorsingSupportingTokens</p>
+                            </td>
+                            <td>
+                                <p>The runtime does not correctly sign the supporting token in cases where the Token is not in the Message (such as for includeTokenPolicy=Never/Once).<br>
+                                </p>
+                            </td>
+                        </tr>`
                         <tr>
                             <td>
                                 <p>10.1</p>
@@ -769,7 +806,7 @@
         <br>
         <hr>
         <h2><a name="securitypolicy"></a>Security Policy Status</h2>
-        <p><code> Updated: ???</code></p>
+        <p><code> Updated:  2010-06-18</code></p>
 
         <p><b>New in this release</b></p>
         <ul>
