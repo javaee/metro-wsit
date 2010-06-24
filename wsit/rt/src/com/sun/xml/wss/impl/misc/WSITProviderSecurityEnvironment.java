@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,6 +53,7 @@ import java.security.cert.CertStore;
 import java.security.cert.CertStoreException;
 import java.util.Collection;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginException;
 import javax.security.auth.message.callback.CertStoreCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
 import javax.security.auth.message.callback.PrivateKeyCallback;
@@ -155,6 +156,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.login.LoginContext;
 import org.ietf.jgss.GSSCredential;
 
 
@@ -247,9 +249,13 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
     private Class usernameValidator;
     private Class timestampValidator;
     private com.sun.xml.wss.impl.callback.PasswordValidationCallback.PasswordValidator pwValidator;
-    private TimestampValidationCallback.TimestampValidator tsValidator;
-    
+    private TimestampValidationCallback.TimestampValidator tsValidator; 
+    private String jaasLoginModuleForKeystore;
+    private Subject loginContextSubjectForKeystore;
+    private String keyStoreCBH;
+    private CallbackHandler keystoreCbHandlerClass;
     /** Creates a new instance of WSITProviderSecurityEnvironment */
+    @SuppressWarnings("empty-statement")
     public WSITProviderSecurityEnvironment(CallbackHandler handler, Map options, Properties configAssertions)
             throws XWSSecurityException {
         _handler = handler;
@@ -284,7 +290,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
 
         this.myUsername = configAssertions.getProperty(DefaultCallbackHandler.MY_USERNAME);
         this.myPassword = configAssertions.getProperty(DefaultCallbackHandler.MY_PASSWORD);
-        this.samlCBH = configAssertions.getProperty(DefaultCallbackHandler.SAML_CBH);
+        this.samlCBH = configAssertions.getProperty(DefaultCallbackHandler.SAML_CBH);        
         if (this.samlCBH != null) {
             samlCbHandler = loadClass(samlCBH);
         }
@@ -378,6 +384,10 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         keystoreCertSelectorClass = loadClass(this.keystoreCertSelectorClassName);
         truststoreCertSelectorClass = loadClass(this.truststoreCertSelectorClassName);
 
+        jaasLoginModuleForKeystore = configAssertions.getProperty(DefaultCallbackHandler.JAAS_KEYSTORE_LOGIN_MODULE);
+        keyStoreCBH = configAssertions.getProperty(DefaultCallbackHandler.KEYSTORE_CBH);
+        loginContextSubjectForKeystore = initJAASKeyStoreLoginModule();
+        
     //keep the self certificate handy
 //           if (_handler != null && this.myAlias != null) {
 //               try {
@@ -1038,6 +1048,35 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         }
         
         return true;
+    }
+
+     private Subject initJAASKeyStoreLoginModule() {
+        if (jaasLoginModuleForKeystore == null) {
+            return null;
+        }
+        LoginContext lc = null;
+        try {
+            if (keyStoreCBH != null) {
+                keystoreCbHandlerClass = (CallbackHandler) loadClass(keyStoreCBH).newInstance();
+                lc = new LoginContext(jaasLoginModuleForKeystore, keystoreCbHandlerClass);
+            }else {
+                lc = new LoginContext(jaasLoginModuleForKeystore);
+            }
+            lc.login();
+            return lc.getSubject();
+        } catch (InstantiationException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+             throw new XWSSecurityRuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+             throw new XWSSecurityRuntimeException(ex);
+        } catch (XWSSecurityException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+             throw new XWSSecurityRuntimeException(ex);
+        } catch (LoginException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            throw new XWSSecurityRuntimeException(ex);
+        }       
     }
 
     private boolean isTrustedSelfSigned(X509Certificate cert) throws XWSSecurityException {
@@ -2224,6 +2263,9 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
         if (context == null) {
             return null;
         }
+        if (loginContextSubjectForKeystore != null){ //giving preference to jaas keystore logincontext's subject
+            return  loginContextSubjectForKeystore;
+        }
         return (Subject)context.get(MessageConstants.SELF_SUBJECT);
     }
 
@@ -2711,7 +2753,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
             if (samlHandler != null) {            
                 SAMLCallback sc = new SAMLCallback();
                 SecurityUtil.copy(sc.getRuntimeProperties(), fpcontext);
-                sc.setConfirmationMethod(sc.SV_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.SV_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 Callback[] cbs = new Callback[] {sc};
                 try {
@@ -2739,7 +2781,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 
                 SAMLCallback sc = new SAMLCallback();
                 SecurityUtil.copy(sc.getRuntimeProperties(), fpcontext);
-                sc.setConfirmationMethod(sc.HOK_ASSERTION_TYPE);
+                sc.setConfirmationMethod(SAMLCallback.HOK_ASSERTION_TYPE);
                 sc.setSAMLVersion(samlBinding.getSAMLVersion());
                 Callback[] cbs = new Callback[] {sc};
                 try {

@@ -1,11 +1,11 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.3 2010-03-20 12:32:40 kumarjayanti Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.4 2010-06-24 10:15:35 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,6 +39,7 @@
  */
 package com.sun.xml.wss.impl.misc;
 
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.impl.kerberos.KerberosLogin;
@@ -67,6 +68,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.LoginException;
 import javax.security.auth.x500.X500Principal;
 import javax.xml.namespace.QName;
 import com.sun.xml.wss.core.Timestamp;
@@ -76,7 +78,9 @@ import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.SecurityEnvironment;
+import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.callback.PasswordCallback;
 import com.sun.xml.wss.impl.callback.PasswordValidationCallback;
 import com.sun.xml.wss.impl.callback.UsernameCallback;
@@ -91,7 +95,13 @@ import com.sun.xml.wss.impl.callback.TimestampValidationCallback;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.configuration.DynamicApplicationContext;
+import com.sun.xml.wss.util.XWSSUtil;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
 import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.x500.X500PrivateCredential;
 import javax.xml.stream.XMLStreamReader;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -124,7 +134,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
     private Properties configAssertions = null;
     
     private long maxNonceAge = MessageConstants.MAX_NONCE_AGE;
-    private String mnaProperty = null;
+    private String mnaProperty = null;    
+    private String JAASLoginModuleForKeystore;
+    private Subject loginContextSubjectForKeystore;
+    private String keyStoreCBH;
+    private CallbackHandler keystoreCbHandlerClass;
     
     public DefaultSecurityEnvironmentImpl(CallbackHandler cHandler) {
         callbackHandler = cHandler;
@@ -166,6 +180,10 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 maxNonceAge = MessageConstants.MAX_NONCE_AGE;
             }
         }
+
+        JAASLoginModuleForKeystore = configAssertions.getProperty(DefaultCallbackHandler.JAAS_KEYSTORE_LOGIN_MODULE);
+        keyStoreCBH = configAssertions.getProperty(DefaultCallbackHandler.KEYSTORE_CBH);
+        loginContextSubjectForKeystore = initJAASKeyStoreLoginModule();        
         // keep the self certificate handy
 //        if (callbackHandler != null && myAlias != null && (callbackHandler instanceof DefaultCallbackHandler)) {
 //            try {
@@ -187,6 +205,10 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
     public X509Certificate getDefaultCertificate(Map context) throws XWSSecurityException {
 
+        X509Certificate cert = getPublicCredentialsFromLCSubject();
+        if (cert != null){
+            return cert;
+        }
         X509Certificate defaultCert = null;
 
         SignatureKeyCallback.PrivKeyCertRequest privKeyRequest =
@@ -224,6 +246,13 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (context != null /*&& !isDefaultHandler*/) {
             ProcessingContext.copy(sigKeyCallback.getRuntimeProperties(), context);
         }
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if (cred != null) {
+            privKeyRequest.setX509Certificate(cred.getCertificate());
+            privKeyRequest.setPrivateKey(cred.getPrivateKey());
+            return privKeyRequest;
+        }
+
         Callback[] callbacks = new Callback[]{sigKeyCallback};
         try {
             callbackHandler.handle(callbacks);
@@ -240,7 +269,12 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         SignatureKeyCallback.AliasPrivKeyCertRequest request =
                 new SignatureKeyCallback.AliasPrivKeyCertRequest(certIdentifier);
-
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if (cred != null && certIdentifier.equals(cred.getAlias())) {
+            request.setX509Certificate(cred.getCertificate());
+            request.setPrivateKey(cred.getPrivateKey());
+            return request;
+        }
         SignatureKeyCallback sigCallback = new SignatureKeyCallback(request);
         Callback[] callback = new Callback[]{sigCallback};
         try {
@@ -256,6 +290,10 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
     public PrivateKey getDefaultPrivateKey(Map context) throws XWSSecurityException {
 
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if(cred != null){
+            return cred.getPrivateKey();
+        }
         PrivateKey defaultPrivKey = null;
 
         SignatureKeyCallback.PrivKeyCertRequest privKeyRequest =
@@ -341,8 +379,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (((alias == null) || ("".equals(alias)) && forSigning)) {
             return getDefaultCertificate(context);
         }
-
-        if (forSigning) {
+        cert = getPublicCredentialsFromLCSubject();
+        if(cert != null){
+            return cert;
+        }
+        if (forSigning) {            
             SignatureKeyCallback.PrivKeyCertRequest certRequest =
                     new SignatureKeyCallback.AliasPrivKeyCertRequest(alias);
             SignatureKeyCallback sigKeyCallback = new SignatureKeyCallback(certRequest);
@@ -359,7 +400,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 throw new XWSSecurityException(e);
             }
             cert = certRequest.getX509Certificate();
-        } else {
+        } else {           
             EncryptionKeyCallback.X509CertificateRequest certRequest =
                     new EncryptionKeyCallback.AliasX509CertificateRequest(alias);
             EncryptionKeyCallback encKeyCallback = new EncryptionKeyCallback(certRequest);
@@ -393,7 +434,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
     }
 
     public X509Certificate getCertificate(Map context, PublicKey publicKey, boolean forSign)
-            throws XWSSecurityException {
+            throws XWSSecurityException {       
+        X509Certificate cert = getPublicCredentialsFromLCSubject();
+        if(cert != null && cert.getPublicKey().equals(publicKey)){
+            return cert;
+        }
         if (!forSign) {
             SignatureVerificationKeyCallback.PublicKeyBasedRequest pubKeyReq =
                     new SignatureVerificationKeyCallback.PublicKeyBasedRequest(publicKey);
@@ -413,7 +458,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 throw new XWSSecurityException(e);
             }
             return pubKeyReq.getX509Certificate();
-        } else {
+        } else {            
             EncryptionKeyCallback.PublicKeyBasedRequest pubKeyReq =
                     new EncryptionKeyCallback.PublicKeyBasedRequest(publicKey);
             EncryptionKeyCallback encCallback = new EncryptionKeyCallback(pubKeyReq);
@@ -443,7 +488,10 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (alias == null) {
             return getDefaultPrivateKey(context);
         }
-
+        X500PrivateCredential cred =  getPKCredentialsFromLCSubject();
+        if(cred != null && cred.getAlias().equals(alias)){
+            return cred.getPrivateKey();
+        }
         SignatureKeyCallback.PrivKeyCertRequest privKeyRequest =
                 new SignatureKeyCallback.AliasPrivKeyCertRequest(alias);
         SignatureKeyCallback sigKeyCallback = new SignatureKeyCallback(privKeyRequest);
@@ -475,6 +523,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             return getPrivateKey(context, identifier);
         }
 
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        try {
+            if (cred != null && matchesThumbPrint(Base64.decode(identifier), cred.getCertificate())) {
+                return cred.getPrivateKey();
+            }
+        } catch (Exception ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new XWSSecurityException(ex);
+        }
         PrivateKey privateKey = null;
 
         DecryptionKeyCallback.PrivateKeyRequest privKeyRequest =
@@ -507,7 +564,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throws XWSSecurityException {
 
         PrivateKey privateKey = null;
-
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+         try {
+            if (cred != null && matchesKeyIdentifier(Base64.decode(keyIdentifier), cred.getCertificate())) {
+                return cred.getPrivateKey();
+            }
+        } catch (Base64DecodingException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new XWSSecurityException(ex);
+        }
         DecryptionKeyCallback.PrivateKeyRequest privKeyRequest =
                 new DecryptionKeyCallback.X509SubjectKeyIdentifierBasedRequest(keyIdentifier);
         DecryptionKeyCallback decryptKeyCallback = new DecryptionKeyCallback(privKeyRequest);
@@ -536,6 +601,19 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
     public PrivateKey getPrivateKey(Map context, BigInteger serialNumber, String issuerName)
             throws XWSSecurityException {
+        
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if (cred != null) {
+            X509Certificate x509Cert = cred.getCertificate();
+            BigInteger serialNo = x509Cert.getSerialNumber();
+            String currentIssuerName =
+                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
+                    x509Cert.getIssuerDN().getName());
+            if (serialNo.equals(serialNumber) &&
+                    currentIssuerName.equals(issuerName)) {
+                return cred.getPrivateKey();
+            }
+        }
 
         PrivateKey privateKey = null;
 
@@ -544,7 +622,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         DecryptionKeyCallback decryptKeyCallback = new DecryptionKeyCallback(privKeyRequest);
 //        if (!isDefaultHandler) {
         ProcessingContext.copy(decryptKeyCallback.getRuntimeProperties(), context);
-//        }
+//        }       
         Callback[] callbacks = new Callback[]{decryptKeyCallback};
         try {
             callbackHandler.handle(callbacks);
@@ -585,6 +663,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         //Else if it is Thumbprint
         X509Certificate cert = null;
+        cert = getPublicCredentialsFromLCSubject();
+        try {
+            if (cert != null && matchesThumbPrint(Base64.decode(identifier), cert)) {
+                return cert;
+            }
+        } catch (Base64DecodingException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new XWSSecurityException(ex);
+        } 
 
         SignatureVerificationKeyCallback.X509CertificateRequest certRequest =
                 new SignatureVerificationKeyCallback.ThumbprintBasedRequest(identifier);
@@ -616,6 +703,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throws XWSSecurityException {
 
         X509Certificate cert = null;
+        cert = getPublicCredentialsFromLCSubject();
+        try {
+            if (cert != null && matchesKeyIdentifier(Base64.decode(keyIdentifier), cert)) {
+                return cert;
+            }
+        } catch (Base64DecodingException ex) {
+            log.log(Level.SEVERE, null, ex);
+            throw new XWSSecurityException(ex);
+        } 
 
         SignatureVerificationKeyCallback.X509CertificateRequest certRequest =
                 new SignatureVerificationKeyCallback.X509SubjectKeyIdentifierBasedRequest(keyIdentifier);
@@ -653,6 +749,17 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throws XWSSecurityException {
 
         X509Certificate cert = null;
+        cert = getPublicCredentialsFromLCSubject();
+        if (cert != null) {
+            BigInteger serialNo = cert.getSerialNumber();
+            String currentIssuerName =
+                    com.sun.org.apache.xml.internal.security.utils.RFC2253Parser.normalize(
+                    cert.getIssuerDN().getName());
+            if (serialNo.equals(serialNumber) &&
+                    currentIssuerName.equals(issuerName)) {
+                return cert;
+            }
+        }       
 
         SignatureVerificationKeyCallback.X509CertificateRequest certRequest =
                 new SignatureVerificationKeyCallback.X509IssuerSerialBasedRequest(issuerName, serialNumber);
@@ -705,6 +812,89 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
     public void updateOtherPartySubject(
             final Subject subject, final String username, final String password) {
     //do nothing....
+    }
+
+    private X500PrivateCredential getPKCredentialsFromLCSubject() {
+        if (loginContextSubjectForKeystore != null) {
+            Set set = loginContextSubjectForKeystore.getPrivateCredentials(X500PrivateCredential.class);
+            if (set != null) {
+                Iterator it = set.iterator();
+                if (it.hasNext()) {
+                    X500PrivateCredential cred = (X500PrivateCredential) it.next();
+                    return cred;
+                }
+            }
+        }
+        return null;
+    }
+
+    private X509Certificate getPublicCredentialsFromLCSubject() {
+        X500PrivateCredential cred =  getPKCredentialsFromLCSubject();
+        if(cred != null){
+            return cred.getCertificate();
+        }
+        return null;
+    }
+
+    private Subject initJAASKeyStoreLoginModule() {
+        if (JAASLoginModuleForKeystore == null) {
+            return null;
+        }
+        LoginContext lc = null;
+        try {
+            if (keyStoreCBH != null) {
+                keystoreCbHandlerClass = (CallbackHandler) loadClass(keyStoreCBH).newInstance();
+                lc = new LoginContext(JAASLoginModuleForKeystore, keystoreCbHandlerClass);
+            } else {
+                lc = new LoginContext(JAASLoginModuleForKeystore);
+            }
+            lc.login();
+            return lc.getSubject();
+        } catch (InstantiationException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            throw new XWSSecurityRuntimeException(ex);
+        } catch (IllegalAccessException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            throw new XWSSecurityRuntimeException(ex);
+        } catch (XWSSecurityException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            throw new XWSSecurityRuntimeException(ex);
+        } catch (LoginException ex) {
+            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            throw new XWSSecurityRuntimeException(ex);
+        }
+    }
+
+    private boolean matchesKeyIdentifier(
+        byte[] keyIdMatch,
+        X509Certificate x509Cert) throws XWSSecurityException {
+
+        byte[] keyId = X509SubjectKeyIdentifier.getSubjectKeyIdentifier(x509Cert);
+        if (keyId == null) {
+            // Cert does not contain a key identifier
+            return false;
+        }
+
+        if (Arrays.equals(keyIdMatch, keyId)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean matchesThumbPrint(
+        byte[] keyIdMatch,
+        X509Certificate x509Cert) throws XWSSecurityException {
+
+        byte[] keyId = XWSSUtil.getThumbprintIdentifier(x509Cert);
+        if (keyId == null) {
+            // Cert does not contain a key identifier
+            return false;
+        }
+
+        if (Arrays.equals(keyIdMatch, keyId)) {
+            return true;
+        }
+        return false;
     }
 
     private void updateUsernameInSubject(
@@ -831,7 +1021,13 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throws XWSSecurityException {
 
         PrivateKey privateKey = null;
-
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if (cred != null) {
+            X509Certificate x509Cert = cred.getCertificate();
+            if (x509Cert.equals(cert)) {
+                return cred.getPrivateKey();
+            }
+        }
         DecryptionKeyCallback.PrivateKeyRequest privateKeyRequest =
                 new DecryptionKeyCallback.X509CertificateBasedRequest(cert);
         DecryptionKeyCallback decryptKeyCallback = new DecryptionKeyCallback(privateKeyRequest);
@@ -859,6 +1055,13 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
     public PrivateKey getPrivateKey(Map context, PublicKey publicKey, boolean forSign)
             throws XWSSecurityException {
+        X500PrivateCredential cred = getPKCredentialsFromLCSubject();
+        if (cred != null) {
+            X509Certificate x509Cert = cred.getCertificate();
+            if (x509Cert.getPublicKey().equals(publicKey)) {
+                return cred.getPrivateKey();
+            }
+        }
         if (forSign) {
             SignatureKeyCallback.PublicKeyBasedPrivKeyCertRequest req =
                     new SignatureKeyCallback.PublicKeyBasedPrivKeyCertRequest(publicKey);
@@ -876,7 +1079,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 throw new XWSSecurityException(e);
             }
             return req.getPrivateKey();
-        } else {
+        } else {            
             DecryptionKeyCallback.PublicKeyBasedPrivKeyRequest req =
                     new DecryptionKeyCallback.PublicKeyBasedPrivKeyRequest(publicKey);
             DecryptionKeyCallback dkc = new DecryptionKeyCallback(req);
@@ -1449,7 +1652,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 //        } else {
             if (context.get(MessageConstants.AUTH_SUBJECT) == null) {
             dynamicCallback.getRuntimeProperties().
-                    put(MessageConstants.AUTH_SUBJECT, this.getSubject(context));
+                    put(MessageConstants.AUTH_SUBJECT, getSubject(context));
             }
 //        }
         try {
@@ -1531,6 +1734,39 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         }   
         
         return nonceMgr.validateNonce(nonce, created);
+    }
+
+
+    private Class loadClass(String classname) throws XWSSecurityException {
+        if (classname == null) {
+            return null;
+        }
+        Class ret = null;
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader != null) {
+            try {
+                ret = loader.loadClass(classname);
+                return ret;
+            } catch (ClassNotFoundException e) {
+                // ignore
+                if (log.isLoggable(Level.FINE)) {
+                    log.log(Level.FINE, "LoadClass: could not load class " + classname, e);
+                }
+            }
+        }
+        // if context classloader didnt work, try this
+        loader = this.getClass().getClassLoader();
+        try {
+            ret = loader.loadClass(classname);
+            return ret;
+        } catch (ClassNotFoundException e) {
+            // ignore
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "LoadClass: could not load class " + classname, e);
+            }
+        }
+        log.log(Level.SEVERE, "WSS1521.error.getting.userClass");
+        throw new XWSSecurityException("Could not find User Class " + classname);
     }
        
         

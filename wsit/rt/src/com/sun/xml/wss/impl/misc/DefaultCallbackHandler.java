@@ -169,6 +169,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     public static final String KRB5_SERVICE_PRINCIPAL = "krb5.service.principal";
     public static final String KRB5_CREDENTIAL_DELEGATION = "krb5.credential.delegation";
     public static final String USE_XWSS_CALLBACKS = "user.xwss.callbacks";
+    public static final String JAAS_KEYSTORE_LOGIN_MODULE = "jaas.loginmodule.for.keystore";
     private String keyStoreURL;
     private String keyStorePassword;
     private String keyStoreType;
@@ -185,7 +186,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     private String certSelectorClassName;
     private String crlSelectorClassName;
     private String keystoreCertSelectorClassName;
-    private String truststoreCertSelectorClassName;
+    private String truststoreCertSelectorClassName;   
     private String myUsername;
     private String myPassword;
     private KeyStore keyStore;
@@ -235,7 +236,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
     private Class keystoreCertSelectorClass;
     private Class truststoreCertSelectorClass;
     private String useXWSSCallbacksStr;
-    private boolean useXWSSCallbacks;
+    private boolean useXWSSCallbacks;     
 
     public DefaultCallbackHandler(String clientOrServer, Properties assertions) throws XWSSecurityException {
 
@@ -283,7 +284,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         this.crlSelectorClassName = properties.getProperty(CERTSTORE_CRLSELECTOR);
 
         this.keystoreCertSelectorClassName = properties.getProperty(KEYSTORE_CERTSELECTOR);
-        this.truststoreCertSelectorClassName = properties.getProperty(TRUSTSTORE_CERTSELECTOR);
+        this.truststoreCertSelectorClassName = properties.getProperty(TRUSTSTORE_CERTSELECTOR);             
 
         String uCBH = properties.getProperty(USERNAME_CBH);
         String pCBH = properties.getProperty(PASSWORD_CBH);
@@ -679,7 +680,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 throw unsupported;
             }
         }
-    }
+    }    
 
     /**
      *

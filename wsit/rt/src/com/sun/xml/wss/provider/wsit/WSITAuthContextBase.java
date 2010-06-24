@@ -1126,6 +1126,24 @@ public abstract class WSITAuthContextBase  {
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {
+       boolean foundLoginModule = false;
+        if(store.getKeyStoreLoginModuleConfigName() != null) {
+            props.put(DefaultCallbackHandler.JAAS_KEYSTORE_LOGIN_MODULE, store.getKeyStoreLoginModuleConfigName());
+            foundLoginModule = true;
+        }
+        if (store.getKeyStoreCallbackHandler() != null) {
+            props.put(DefaultCallbackHandler.KEYSTORE_CBH, store.getKeyStoreCallbackHandler());
+            if (store.getAlias() != null) {
+                props.put(DefaultCallbackHandler.MY_ALIAS, store.getAlias());
+            }
+            if (store.getAliasSelectorClassName() != null) {
+                props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
+            }
+            return;
+        }
+        if(foundLoginModule){
+             return;//
+        }
         if (store.getLocation() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
@@ -1165,7 +1183,7 @@ public abstract class WSITAuthContextBase  {
         
         if (store.getAliasSelectorClassName() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
-        }
+        }        
     }
     
     @SuppressWarnings("unchecked")
@@ -1232,7 +1250,7 @@ public abstract class WSITAuthContextBase  {
         return ctx;
     }
     
-    private void populateTruststoreProps(Properties props, TrustStore store) {
+    private void populateTruststoreProps(Properties props, TrustStore store) { 
         if (store.getLocation() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_URL, store.getLocation());
         } else {
@@ -1274,7 +1292,7 @@ public abstract class WSITAuthContextBase  {
         
         if (store.getCertSelectorClassName() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_CERTSELECTOR, store.getCertSelectorClassName());
-        }
+        }        
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {

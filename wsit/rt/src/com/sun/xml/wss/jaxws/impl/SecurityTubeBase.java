@@ -1413,7 +1413,11 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     private void populateKeystoreProps(Properties props, KeyStore store) {
-        
+        boolean foundLoginModule = false;
+        if(store.getKeyStoreLoginModuleConfigName() != null) {
+            props.put(DefaultCallbackHandler.JAAS_KEYSTORE_LOGIN_MODULE, store.getKeyStoreLoginModuleConfigName());
+            foundLoginModule = true;
+        }
         if (store.getKeyStoreCallbackHandler() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_CBH, store.getKeyStoreCallbackHandler());
             if (store.getAlias() != null) {
@@ -1424,6 +1428,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
             return;
         }
+        if(foundLoginModule){
+             return;//
+        }
+           
         if (store.getLocation() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_URL, store.getLocation());
         } else {
@@ -1460,10 +1468,10 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         if (store.getAliasSelectorClassName() != null) {
             props.put(DefaultCallbackHandler.KEYSTORE_CERTSELECTOR, store.getAliasSelectorClassName());
-        }
+        }       
     }
     
-    private void populateTruststoreProps(Properties props, TrustStore store) {
+    private void populateTruststoreProps(Properties props, TrustStore store) {       
         if (store.getTrustStoreCallbackHandler() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_CBH, store.getTrustStoreCallbackHandler());
             if (store.getPeerAlias() != null) {
@@ -1511,7 +1519,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         if (store.getCertSelectorClassName() != null) {
             props.put(DefaultCallbackHandler.TRUSTSTORE_CERTSELECTOR, store.getCertSelectorClassName());
-        }
+        }       
     }
     
     private String  populateCallbackHandlerProps(Properties props, CallbackHandlerConfiguration conf) {
