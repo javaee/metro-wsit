@@ -1,11 +1,11 @@
 /**
- * $Id: EncryptionFilter.java,v 1.7 2010-03-20 12:33:21 kumarjayanti Exp $
+ * $Id: EncryptionFilter.java,v 1.8 2010-06-25 08:17:23 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -70,12 +70,7 @@ import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
-import com.sun.xml.wss.impl.policy.MLSPolicy;
-import com.sun.xml.wss.impl.policy.mls.PrivateKeyBinding;
 import java.io.UnsupportedEncodingException;
-import java.security.Key;
-import java.security.PrivateKey;
-import java.util.HashMap;
 import org.w3c.dom.Element;
 
 /**
@@ -209,7 +204,7 @@ public class EncryptionFilter {
                         // set the x509 binding as key binding of symmetric binding
                         dtk.setOriginalKeyBinding(skb);
                         keyBinding = dtk;
-                    }else if(PolicyTypeUtil.UsernameTokenBinding(originalKeyBinding)){
+                    }else if(PolicyTypeUtil.usernameTokenBinding(originalKeyBinding)){
                         AuthenticationTokenPolicy.UsernameTokenBinding ckBindingClone =
                                 (AuthenticationTokenPolicy.UsernameTokenBinding)originalKeyBinding.clone();
                         SymmetricKeyBinding skb = new SymmetricKeyBinding();
@@ -218,7 +213,7 @@ public class EncryptionFilter {
                         keyBinding = dtk;
                     }
                 }
-                if(PolicyTypeUtil.UsernameTokenBinding(keyBinding)){
+                if(PolicyTypeUtil.usernameTokenBinding(keyBinding)){
                     UsernameTokenBinding binding = createUntBinding(context,(UsernameTokenBinding)keyBinding);
                     context.setUsernameTokenBinding(binding);
                 }else if (PolicyTypeUtil.x509CertificateBinding(keyBinding)) {
@@ -265,7 +260,7 @@ public class EncryptionFilter {
                         SecretKey sKey = null;
                         
                         WSSPolicy ckBinding = (WSSPolicy) binding.getKeyBinding();
-                        if(PolicyTypeUtil.UsernameTokenBinding(ckBinding)){
+                        if(PolicyTypeUtil.usernameTokenBinding(ckBinding)){
                             if (!sendEKSHA1) {
                              AuthenticationTokenPolicy.UsernameTokenBinding untbinding = createUntBinding(context,(UsernameTokenBinding)ckBinding);
                              context.setUsernameTokenBinding(untbinding);
@@ -380,7 +375,7 @@ public class EncryptionFilter {
                         SecretKey sKey = null;
                         
                         WSSPolicy ckBinding = (WSSPolicy) originalKeyBinding.getKeyBinding();
-                        if(PolicyTypeUtil.UsernameTokenBinding(ckBinding)){
+                        if(PolicyTypeUtil.usernameTokenBinding(ckBinding)){
                             try {
                                 if (!sendEKSHA1) {
                                     AuthenticationTokenPolicy.UsernameTokenBinding untbinding = createUntBinding(context, (UsernameTokenBinding) ckBinding);

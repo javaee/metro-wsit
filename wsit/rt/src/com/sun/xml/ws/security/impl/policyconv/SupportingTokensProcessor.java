@@ -328,7 +328,7 @@ public class SupportingTokensProcessor {
 
     protected QName getQName(WSSPolicy token) {
         QName qName =null;
-         if (PolicyTypeUtil.UsernameTokenBinding(token)) {
+         if (PolicyTypeUtil.usernameTokenBinding(token)) {
             qName = new QName(MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
         } else if (PolicyTypeUtil.x509CertificateBinding(token)) {
             qName = new QName(MessageConstants.WSSE_NS, MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME);

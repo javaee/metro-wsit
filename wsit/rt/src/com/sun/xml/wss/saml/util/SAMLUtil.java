@@ -323,7 +323,7 @@ public class SAMLUtil {
         try {
             Map<String, Object> map = new HashMap<String, Object>();
             String id = samlAssertion.getAttribute("ID");
-            if (id == null && id.length() < 1){
+            if (id == null || id.length() < 1){
                 id = samlAssertion.getAttribute("AssertionID");
             }
             map.put(id, samlAssertion);

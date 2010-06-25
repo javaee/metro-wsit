@@ -112,7 +112,7 @@ public class DerivedKeyTokenBuilder extends TokenBuilder {
             //throw new XWSSecurityException("Asymmetric Binding with DerivedKeys under X509Token Policy Not Yet Supported");
         } else*/
         UsernameTokenBinding utb;
-        if(PolicyTypeUtil.UsernameTokenBinding(originalKeyBinding)){
+        if(PolicyTypeUtil.usernameTokenBinding(originalKeyBinding)){
           if ( context.getusernameTokenBinding() != null) {
                 utb = context.getusernameTokenBinding();
                 context.setUsernameTokenBinding(null);

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -36,7 +36,6 @@
 
 package com.sun.xml.ws.security.opt.impl.keyinfo;
 
-import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.crypto.OctectStreamData;
@@ -68,10 +67,10 @@ public class KerberosTokenBuilder extends TokenBuilder {
      */
     @SuppressWarnings("unchecked")
     public BuilderResult process() throws XWSSecurityException {
-        String id = binding.getUUID();
+        /*String id = binding.getUUID();
         if(id == null || id.equals("")){
-            id = context.generateID();
-        }
+        id = context.generateID();
+        }*/
         
         setIncludeTokenPolicy();
         
@@ -107,6 +106,7 @@ public class KerberosTokenBuilder extends TokenBuilder {
      * sets the include token policy reference type in the binding
      * @throws com.sun.xml.wss.XWSSecurityException
      */
+    @SuppressWarnings("static-access")
     private void setIncludeTokenPolicy() throws XWSSecurityException{
         // no referencetype adjustment if it is not WS-SecurityPolicy
         if(!binding.policyTokenWasSet()){

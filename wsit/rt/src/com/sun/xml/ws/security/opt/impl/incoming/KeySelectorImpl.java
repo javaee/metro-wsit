@@ -304,9 +304,7 @@ public class KeySelectorImpl extends KeySelector {
                 //WSSElementFactory elementFactory = new WSSElementFactory(wssContext.getSOAPVersion());
                 //DirectReference directRef = elementFactory.createDirectReference();
                 //DirectReference dReference = (DirectReference) reference;
-                DirectReference dReference = (DirectReference) reference;
-                String wscInstance = ((com.sun.xml.ws.security.opt.impl.reference.DirectReference) dReference).getAttribute(
-                        wssContext.getWSSCVersion(wssContext.getSecurityPolicyVersion()), "Instance");
+                DirectReference dReference = (DirectReference) reference;                
                 String uri = dReference.getURI();
                 if (isBSP && !uri.startsWith("#")) {
                     throw new XWSSecurityException("Violation of BSP R5204 " + ": When a SECURITY_TOKEN_REFERENCE uses a Direct Reference to an INTERNAL_SECURITY_TOKEN, it MUST use a Shorthand XPointer Reference");
@@ -1107,10 +1105,7 @@ public class KeySelectorImpl extends KeySelector {
             public String getType() {
                 return null;
             }
-        };
-
-        JAXBFilterProcessingContext wssContext = (JAXBFilterProcessingContext) context.get(MessageConstants.WSS_PROCESSING_CONTEXT);
-
+        };        
         try {
             StreamWriterData data = (StreamWriterData) resolver.dereference(uriRef, context);
             //JAXBElement element = data.getJAXBElement();
@@ -1137,15 +1132,7 @@ public class KeySelectorImpl extends KeySelector {
                         MessageConstants.KERBEROS_V5_GSS_APREQ.equals(token.getValueType())) {
                     return (KerberosBinarySecurityToken) token;
                 } else {
-                    X509BinarySecurityToken x509bst = (X509BinarySecurityToken) token;
-                    X509Certificate cert = null;
-                    cert = x509bst.getCertificate();
-                    // this one is directly from Message, since we  validate the X509BinarySecurityToken separately
-                    // so this should not be done here
-//                    if(!wssContext.getSecurityEnvironment().validateCertificate(cert, wssContext.getExtraneousProperties())){
-//                        throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
-//                                "Certificate validation failed", null);
-//                    }
+                    X509BinarySecurityToken x509bst = (X509BinarySecurityToken) token; 
                     return x509bst;
                 }
             } else if (MessageConstants.ENCRYPTEDKEY_LNAME.equals(she.getLocalPart())) {

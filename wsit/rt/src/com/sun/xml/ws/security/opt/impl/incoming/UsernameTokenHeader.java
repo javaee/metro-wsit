@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -66,8 +66,6 @@ import javax.xml.stream.XMLStreamWriter;
 import java.util.logging.Level;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.util.logging.Logger;
-import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
-import com.sun.xml.ws.security.secext10.AttributedString;
 
 /**
  *
@@ -90,7 +88,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
     private AuthenticationTokenPolicy.UsernameTokenBinding utPolicy = null;
     
     private HashMap<String,String> nsDecls;
-    private UsernameToken unToken;
+    //private UsernameToken unToken;
     
     /** Creates a new instance of UsernameTokenHeader */
     @SuppressWarnings("unchecked")

@@ -904,10 +904,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         if (toks.isEmpty()) {
             return;
         }
-        //Note: Assuming only one Kerberos token assertion
-        Token tok = (Token) toks.get(0);
-        String tokId = tok.getTokenId();
-
+        //Note: Assuming only one Kerberos token assertion      
+        
         KerberosContext krbContext = ctx.getSecurityEnvironment().doKerberosLogin();
 
         try {

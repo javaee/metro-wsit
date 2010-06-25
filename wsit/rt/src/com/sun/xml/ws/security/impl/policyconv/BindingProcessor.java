@@ -42,7 +42,6 @@ import com.sun.xml.ws.security.policy.EncryptedParts;
 import com.sun.xml.ws.security.policy.EncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.EndorsingSupportingTokens;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedElements;
 import com.sun.xml.ws.security.policy.SignedEncryptedSupportingTokens;
 import com.sun.xml.ws.security.policy.SignedEndorsingEncryptedSupportingTokens;
@@ -161,7 +160,7 @@ public abstract class BindingProcessor {
         if (includeToken.endsWith("Always") || includeToken.endsWith("AlwaysToRecipient") || includeToken.endsWith("Once")) {
             strIgnore = true;
         }
-        if (PolicyTypeUtil.UsernameTokenBinding(token)) {
+        if (PolicyTypeUtil.usernameTokenBinding(token)) {
             uid = ((AuthenticationTokenPolicy.UsernameTokenBinding) token).getUUID();
             if (uid == null) {
                 uid = pid.generateID();

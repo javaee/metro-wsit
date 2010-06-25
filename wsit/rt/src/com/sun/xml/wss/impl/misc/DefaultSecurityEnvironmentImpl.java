@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.4 2010-06-24 10:15:35 sm228678 Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.5 2010-06-25 08:17:37 sm228678 Exp $
  */
 
 /*
@@ -167,8 +167,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         if (callbackHandler instanceof DefaultCallbackHandler) {
             isDefaultHandler = true;
         }
-        //store the relevant config assertions here
-        String myAlias = configAssertions.getProperty(DefaultCallbackHandler.MY_ALIAS);
+        //store the relevant config assertions here        
         this.mnaProperty = configAssertions.getProperty(DefaultCallbackHandler.MAX_NONCE_AGE_PROPERTY);
         if (this.mnaProperty != null) {
             try {

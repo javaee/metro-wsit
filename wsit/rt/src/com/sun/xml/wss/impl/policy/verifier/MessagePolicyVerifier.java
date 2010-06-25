@@ -1,7 +1,7 @@
 /*$
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -433,8 +433,8 @@ public class MessagePolicyVerifier implements PolicyVerifier{
             throws XWSSecurityException {
         boolean verified = false;
         if(actualKeyBinding != null && inferredKeyBinding != null){
-            if(PolicyTypeUtil.UsernameTokenBinding(actualKeyBinding) &&
-                 PolicyTypeUtil.UsernameTokenBinding(inferredKeyBinding)) {
+            if(PolicyTypeUtil.usernameTokenBinding(actualKeyBinding) &&
+                 PolicyTypeUtil.usernameTokenBinding(inferredKeyBinding)) {
                 verified = true;
             }else if(PolicyTypeUtil.x509CertificateBinding(actualKeyBinding) &&
                     PolicyTypeUtil.x509CertificateBinding(inferredKeyBinding)){
@@ -458,7 +458,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 verified = verifyKeyBinding(
                         actualKeyBinding.getKeyBinding(), inferredKeyBinding.getKeyBinding(),
                         isEncryptPolicy);
-                if(((SymmetricKeyBinding)inferredKeyBinding).usesEKSHA1KeyBinding() && PolicyTypeUtil.UsernameTokenBinding(actualKeyBinding.getKeyBinding())){
+                if(((SymmetricKeyBinding)inferredKeyBinding).usesEKSHA1KeyBinding() && PolicyTypeUtil.usernameTokenBinding(actualKeyBinding.getKeyBinding())){
                     verified = true;
                 }
             } else if(PolicyTypeUtil.issuedTokenKeyBinding(actualKeyBinding) &&
@@ -475,10 +475,10 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 verified = verifyKeyBinding(((DerivedTokenKeyBinding)actualKeyBinding).getOriginalKeyBinding(),
                         ((DerivedTokenKeyBinding)inferredKeyBinding).getOriginalKeyBinding(),
                         isEncryptPolicy);
-            } else if (PolicyTypeUtil.UsernameTokenBinding(actualKeyBinding) &&
+            } else if (PolicyTypeUtil.usernameTokenBinding(actualKeyBinding) &&
                     PolicyTypeUtil.symmetricKeyBinding(inferredKeyBinding)){
                  MLSPolicy  ikbkb = inferredKeyBinding.getKeyBinding();
-                 if (isEncryptPolicy && PolicyTypeUtil.UsernameTokenBinding(ikbkb)) {
+                 if (isEncryptPolicy && PolicyTypeUtil.usernameTokenBinding(ikbkb)) {
                     verified = true;
                 }
             } else if (PolicyTypeUtil.x509CertificateBinding(actualKeyBinding) &&
@@ -504,9 +504,9 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 
                 verified = true;
             } else if (PolicyTypeUtil.symmetricKeyBinding(actualKeyBinding) &&
-                    PolicyTypeUtil.UsernameTokenBinding(inferredKeyBinding)) {
+                    PolicyTypeUtil.usernameTokenBinding(inferredKeyBinding)) {
                 MLSPolicy akbkb = actualKeyBinding.getKeyBinding();
-                if (isEncryptPolicy && PolicyTypeUtil.UsernameTokenBinding(akbkb)) {
+                if (isEncryptPolicy && PolicyTypeUtil.usernameTokenBinding(akbkb)) {
                     verified = true;
                 }
             } else if (PolicyTypeUtil.symmetricKeyBinding(actualKeyBinding) &&
@@ -649,6 +649,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
         return null;
     }
     
+    @SuppressWarnings("static-access")
     private void correctIncludeTokenPolicy(AuthenticationTokenPolicy.X509CertificateBinding x509Bind,
             WSSAssertion wssAssertion){
         String iTokenType = x509Bind.getIncludeToken();

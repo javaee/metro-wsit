@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,14 +45,12 @@ import com.sun.xml.ws.api.pipe.ServerTubeAssemblerContext;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubelineAssembler;
 import com.sun.xml.ws.api.pipe.TubelineAssemblerFactory;
-import com.sun.xml.ws.api.server.ServiceDefinition;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.ws.api.server.Container;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Collection;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
@@ -62,8 +60,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class XWSSTubelineAssemblerFactory extends TubelineAssemblerFactory {
 
-    private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
-    private BindingID bindingId;
+    private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";   
     private static final String addrVersionClass = "com.sun.xml.ws.api.addressing.AddressingVersion";
     private static final boolean disable;
 

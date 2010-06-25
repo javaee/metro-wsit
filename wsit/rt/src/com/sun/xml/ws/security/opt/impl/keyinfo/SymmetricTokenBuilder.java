@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,7 +37,6 @@ package com.sun.xml.ws.security.opt.impl.keyinfo;
 
 import com.sun.xml.ws.security.impl.PasswordDerivedKey;
 import com.sun.xml.ws.security.opt.api.EncryptedKey;
-import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.impl.enc.JAXBEncryptedKey;
@@ -52,7 +51,6 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
-import com.sun.xml.wss.impl.policy.MLSPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -61,7 +59,6 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.logging.Level;
 import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
-import javax.crypto.SecretKey;
 
 /**
  *
@@ -103,9 +100,8 @@ public class SymmetricTokenBuilder extends TokenBuilder {
             }
         }
         BuilderResult stbResult = new BuilderResult();
-        WSSPolicy ckBinding = (WSSPolicy) binding.getKeyBinding();
-        MLSPolicy mlspolicy = ckBinding.getKeyBinding();
-        if (PolicyTypeUtil.UsernameTokenBinding(ckBinding)) {
+        WSSPolicy ckBinding = (WSSPolicy) binding.getKeyBinding();        
+        if (PolicyTypeUtil.usernameTokenBinding(ckBinding)) {
              if (sendEKSHA1) {
                 String ekSha1Ref = (String) context.getExtraneousProperty(MessageConstants.EK_SHA1_VALUE);
                 buildKeyInfoWithEKSHA1(ekSha1Ref);
@@ -242,8 +238,8 @@ public class SymmetricTokenBuilder extends TokenBuilder {
                 if (ekId == null) {
 
                     TokenBuilder builder = new X509TokenBuilder(context, certificateBinding);
-                    BuilderResult result = builder.process();
-                    KeyInfo ekKI = (com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo) result.getKeyInfo();
+                    BuilderResult bResult = builder.process();
+                    KeyInfo ekKI = (com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo) bResult.getKeyInfo();
                     context.setExtraneousProperty("SecretKey", dataProtectionKey);
                     ek = (SecurityHeaderElement) elementFactory.createEncryptedKey(context.generateID(), keyProtectionAlg, ekKI, keyProtectionKey, dataProtectionKey);
                     context.getSecurityHeader().add(ek);

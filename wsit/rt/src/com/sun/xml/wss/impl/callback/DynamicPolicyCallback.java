@@ -1,11 +1,11 @@
 /*
- * $Id: DynamicPolicyCallback.java,v 1.3 2010-03-20 12:35:11 kumarjayanti Exp $
+ * $Id: DynamicPolicyCallback.java,v 1.4 2010-06-25 08:17:36 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -122,7 +122,7 @@ public class DynamicPolicyCallback extends XWSSCallback implements Callback {
  
             this._policy = _policy;
         } else {
-            if (this._policy.getType() != _policy.getType() ) { 
+            if (!(this._policy.getType().equals(_policy.getType()))) {
                 // log
                 throw new UnsupportedOperationException (
                           "Can not change object instance for WSSPolicy");

@@ -1,11 +1,11 @@
 /*
- * $Id: PolicyTypeUtil.java,v 1.4 2010-03-20 12:33:42 kumarjayanti Exp $
+ * $Id: PolicyTypeUtil.java,v 1.5 2010-06-25 08:17:33 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,7 +42,6 @@ package com.sun.xml.wss.impl;
 
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
-import com.sun.xml.wss.*;
 
 /*
  * A type utility class for policies (useful for avoiding instanceof checks).
@@ -143,7 +142,7 @@ public  class PolicyTypeUtil {
         return (policy.getType() == USERNAMETOKEN_TYPE);
     }
     
-   public static boolean UsernameTokenBinding(SecurityPolicy policy){
+   public static boolean usernameTokenBinding(SecurityPolicy policy){
        if(policy == null) return false;
        return (policy.getType() == USERNAMETOKEN_TYPE );       
    }

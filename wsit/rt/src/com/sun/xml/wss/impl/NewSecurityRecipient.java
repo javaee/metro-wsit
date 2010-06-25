@@ -1,11 +1,11 @@
 /*
- * $Id: NewSecurityRecipient.java,v 1.3 2010-03-20 12:33:41 kumarjayanti Exp $
+ * $Id: NewSecurityRecipient.java,v 1.4 2010-06-25 08:17:33 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -104,6 +104,7 @@ public class NewSecurityRecipient {
      *     When a WssSoapFaultException is thrown the getFaultCode() method on the WssSoapFaultException
      *     will return a <code>QName</code> which would correspond to the WSS defined fault.
      */
+    @SuppressWarnings("static-access")
     public static void validateMessage(ProcessingContext context)
     throws XWSSecurityException {
         
@@ -122,9 +123,7 @@ public class NewSecurityRecipient {
         fpContext.setExtraneousProperty("receivedSignValues", scList);
         fpContext.setMode(FilterProcessingContext.WSDL_POLICY);
 
-        pProcess(fpContext);
-
-        boolean isTrust = fpContext.isTrustMessage();
+        pProcess(fpContext);        
         //TODO: Venu this is a workaround for PROTOCOL Messages
         //To be removed after resolveOperationPolicy starts returning correct policy for
         //protocol messages.

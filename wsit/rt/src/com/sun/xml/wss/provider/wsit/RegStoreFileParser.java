@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -361,7 +361,8 @@ public final class RegStoreFileParser {
 
     private EntryInfo readConEntry(BufferedReader reader) throws IOException {
         // entry must contain class name as next line
-        String className = reader.readLine().trim();
+        String line = reader.readLine();
+        String className = (line != null) ? line.trim() : null;
         Map<String, String> properties = readProperties(reader);
         return new EntryInfo(className, properties);
     }
@@ -374,8 +375,8 @@ public final class RegStoreFileParser {
      */
     private Map<String, String> readProperties(BufferedReader reader)
         throws IOException {
-        
-        String line = reader.readLine().trim();
+        String nextLine = reader.readLine();
+        String line = (nextLine != null)? nextLine.trim():null;
         if (line.equals("}")) {
             return null;
         }
@@ -393,7 +394,8 @@ public final class RegStoreFileParser {
         Map<String, String> properties = null;
         List<RegistrationContext> ctxs =
             new ArrayList<RegistrationContext>();
-        String line = reader.readLine().trim();
+        String nextLine = reader.readLine();
+        String line = (nextLine != null)? nextLine.trim():null;
         while (!line.equals("}")) {
             if (line.startsWith(CON_ENTRY)) {
                 EntryInfo conEntry = readConEntry(reader);
@@ -413,7 +415,8 @@ public final class RegStoreFileParser {
         String layer = null;
         String appCtx = null;
         String description = null;
-        String line = reader.readLine().trim();
+        String nextLine = reader.readLine();
+        String line = (nextLine != null)? nextLine.trim():null;
         while (!line.equals("}")) {
             String value = line.substring(line.indexOf(SEP) + 1,
                 line.length());

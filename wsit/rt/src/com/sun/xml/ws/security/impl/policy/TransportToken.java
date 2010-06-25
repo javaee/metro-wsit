@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,9 +40,7 @@ import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.NestedPolicy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.Collection;
-import java.util.UUID;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 
@@ -55,7 +53,7 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
     private HttpsToken token = null;
     private boolean populated;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
-    private static QName itQname;
+    private QName itQname;
     private String includeToken;
     /**
      * Creates a new instance of TransportToken
@@ -72,14 +70,15 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
         itQname = new QName(getSecurityPolicyVersion().namespaceUri, Constants.IncludeToken);
     }
     
+    @Override
     public String getTokenId() {
         return id;
     }
-    
+    @Override
     public String getIncludeToken() {
         throw new UnsupportedOperationException("This method is not supported for TransportToken");
     }
-    
+    @Override
     public void setIncludeToken(String type) {
         throw new UnsupportedOperationException("This method is not supported for TransportToken");
     }
@@ -92,6 +91,7 @@ public class TransportToken extends Token implements com.sun.xml.ws.security.pol
         //TODO::
     }
     
+    @Override
     public AssertionFitness validate(boolean isServer) {
         return populate(isServer);
     }

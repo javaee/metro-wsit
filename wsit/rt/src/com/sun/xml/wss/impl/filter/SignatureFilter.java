@@ -1,11 +1,11 @@
 /*
- * $Id: SignatureFilter.java,v 1.4 2010-03-20 12:33:20 kumarjayanti Exp $
+ * $Id: SignatureFilter.java,v 1.5 2010-06-25 08:17:23 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -177,7 +177,7 @@ public class SignatureFilter {
                     DerivedTokenKeyBinding dtk = (DerivedTokenKeyBinding)keyBinding.clone();
                     WSSPolicy originalKeyBinding = dtk.getOriginalKeyBinding();
 
-                     if(PolicyTypeUtil.UsernameTokenBinding(originalKeyBinding)){
+                     if(PolicyTypeUtil.usernameTokenBinding(originalKeyBinding)){
                         AuthenticationTokenPolicy.UsernameTokenBinding ckBindingClone =
                                 (AuthenticationTokenPolicy.UsernameTokenBinding)originalKeyBinding.clone();
                         SymmetricKeyBinding skb = new SymmetricKeyBinding();
@@ -187,7 +187,7 @@ public class SignatureFilter {
                     }
                 }
                 //SignaturePolicy.FeatureBinding featureBinding = (SignaturePolicy.FeatureBinding) policy.getFeatureBinding();
-                if (PolicyTypeUtil.UsernameTokenBinding(keyBinding)) {
+                if (PolicyTypeUtil.usernameTokenBinding(keyBinding)) {
                     UsernameTokenBinding binding = createUntBinding(context,(UsernameTokenBinding)keyBinding,MessageConstants.VALUE_FOR_SIGNATURE);
                     context.setUsernameTokenBinding(binding);                    
                 }else if (PolicyTypeUtil.x509CertificateBinding(keyBinding)) {
@@ -389,7 +389,7 @@ public class SignatureFilter {
                         boolean wss11Sender = "true".equals(context.getExtraneousProperty("EnableWSS11PolicySender"));
                         boolean wss10 = !wss11Sender;
                         boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
-                        if (PolicyTypeUtil.UsernameTokenBinding(ckBinding)) {
+                        if (PolicyTypeUtil.usernameTokenBinding(ckBinding)) {
                             try {
                                 if (!sendEKSHA1) {
                                     AuthenticationTokenPolicy.UsernameTokenBinding untbinding = createUntBinding(context, (UsernameTokenBinding) ckBinding, MessageConstants.VALUE_FOR_ENCRYPTION);
@@ -485,7 +485,7 @@ public class SignatureFilter {
                         boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getReceivedSecret(context) != null);
                         
                         WSSPolicy ckBinding = (WSSPolicy) originalKeyBinding.getKeyBinding();
-                        if (PolicyTypeUtil.UsernameTokenBinding(ckBinding)) {
+                        if (PolicyTypeUtil.usernameTokenBinding(ckBinding)) {
                             try {
                                 if (!sendEKSHA1) {
                                     AuthenticationTokenPolicy.UsernameTokenBinding untbinding = createUntBinding(context, (UsernameTokenBinding) ckBinding, MessageConstants.VALUE_FOR_ENCRYPTION);

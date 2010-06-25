@@ -1,11 +1,11 @@
 /*
- * $Id: SubjectConfirmation.java,v 1.1 2010-03-20 12:33:29 kumarjayanti Exp $
+ * $Id: SubjectConfirmation.java,v 1.2 2010-06-25 08:17:38 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -60,8 +60,7 @@ import javax.xml.bind.JAXBContext;
 public class SubjectConfirmation extends SubjectConfirmationType
         implements com.sun.xml.wss.saml.SubjectConfirmation {
     
-    protected PublicKey keyInfoKeyValue = null;
-    private List<String> confirmationMethod;    
+    protected PublicKey keyInfoKeyValue = null;  
     
     protected static final Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,

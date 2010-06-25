@@ -269,10 +269,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     @SuppressWarnings("unchecked")
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
         // Add addrsssing headers to trust message
-        String iTM = (String)messageInfo.getMap().get("IS_TRUST_MESSAGE");
-        boolean isTrustMessage = (iTM != null) ? true : false;
-        //TODO: replace this with correct method, i believe we can update the reqPacket into MessageInfo
-        Packet packet = (Packet)messageInfo.getMap().get("VALIDATE_REQ_PACKET");
+        //TODO: replace this with correct method, i believe we can update the reqPacket into MessageInfo     
         
         //TODO: this is the one that came from nextPipe.process
         //TODO: replace this with call to packetMessageInfo.getResponsePacket

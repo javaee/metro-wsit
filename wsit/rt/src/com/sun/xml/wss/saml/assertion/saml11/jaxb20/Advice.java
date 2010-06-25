@@ -1,11 +1,11 @@
 /*
- * $Id: Advice.java,v 1.3 2010-03-20 12:32:08 kumarjayanti Exp $
+ * $Id: Advice.java,v 1.4 2010-06-25 08:17:38 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -66,9 +66,7 @@ public class Advice  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.AdviceT
     protected static final Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
-
-     private List adviceList;
-
+   
     @SuppressWarnings("unchecked")
     public static AdviceType fromElement(Element element) throws SAMLException {
         try {

@@ -7,7 +7,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,7 +50,6 @@ import com.sun.xml.ws.security.opt.impl.keyinfo.IssuedTokenBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.KerberosTokenBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.SCTBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.SamlTokenBuilder;
-import com.sun.xml.ws.security.opt.impl.keyinfo.KeyValueTokenBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.SymmetricTokenBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.X509TokenBuilder;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
@@ -131,7 +130,7 @@ public class TokenProcessor {
             dataEncAlgo = tmp;
         }
         
-        if (PolicyTypeUtil.UsernameTokenBinding(keyBinding)) {            
+        if (PolicyTypeUtil.usernameTokenBinding(keyBinding)) {
             AuthenticationTokenPolicy.UsernameTokenBinding usernameTokenBinding = null;
             if ( context.getusernameTokenBinding() != null ) {
                 usernameTokenBinding  = context.getusernameTokenBinding();
@@ -201,8 +200,8 @@ public class TokenProcessor {
             return itbResult;
         } else if (PolicyTypeUtil.secureConversationTokenKeyBinding(keyBinding)) {
             ((NamespaceContextEx)context.getNamespaceContext()).addSCNS();
-            SCTBuilder builder = new SCTBuilder(context,(SecureConversationTokenKeyBinding)keyBinding);
-            BuilderResult sctResult = builder.process();
+            SCTBuilder sctBuilder = new SCTBuilder(context,(SecureConversationTokenKeyBinding)keyBinding);
+            BuilderResult sctResult = sctBuilder.process();
             return sctResult;
         } else if (PolicyTypeUtil.samlTokenPolicy(keyBinding)) {
             ((NamespaceContextEx)context.getNamespaceContext()).addSAMLNS();
@@ -210,8 +209,8 @@ public class TokenProcessor {
             return stb.process();
         } else if (PolicyTypeUtil.keyValueTokenBinding(keyBinding)) {
             ((NamespaceContextEx)context.getNamespaceContext()).addSAMLNS();            
-            KeyValueTokenBuilder builder = new KeyValueTokenBuilder(context,(AuthenticationTokenPolicy.KeyValueTokenBinding)keyBinding);
-            BuilderResult kvtResult = builder.process();                        
+            KeyValueTokenBuilder sctBuilder = new KeyValueTokenBuilder(context,(AuthenticationTokenPolicy.KeyValueTokenBinding)keyBinding);
+            BuilderResult kvtResult = sctBuilder.process();
             return kvtResult;            
          } else{
             logger.log(Level.SEVERE, LogStringsMessages.WSS_1703_UNSUPPORTED_KEYBINDING_SIGNATUREPOLICY(keyBinding));

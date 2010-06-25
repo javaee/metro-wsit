@@ -1,11 +1,11 @@
 /*
- * $Id: Subject.java,v 1.3 2010-03-20 12:33:24 kumarjayanti Exp $
+ * $Id: Subject.java,v 1.4 2010-06-25 08:17:25 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,11 +47,9 @@ import com.sun.xml.wss.saml.NameID;
 import com.sun.xml.wss.saml.internal.saml11.jaxb10.SubjectType;
 import com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.SubjectTypeImpl;
 import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 
 /**
  * The <code>Subject</code> element specifies one or more subjects. It contains either or
@@ -69,10 +67,7 @@ being identified. A <Subject> element SHOULD NOT identify more than one
 principal.
 */
 public class Subject extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.SubjectImpl 
-    implements com.sun.xml.wss.saml.Subject {
-    
-    private NameIdentifier nameIdentifier;
-    private SubjectConfirmation subjectConfirmation;
+    implements com.sun.xml.wss.saml.Subject {        
     
     protected static final Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
@@ -101,9 +96,7 @@ public class Subject extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.Su
             setSubjectConfirmation(subjectConfirmation);
     }       
     
-    public Subject(SubjectType subjectType){
-        NameIdentifier nameId = new NameIdentifier(subjectType.getNameIdentifier());
-        SubjectConfirmation subConf = new SubjectConfirmation(subjectType.getSubjectConfirmation());        
+    public Subject(SubjectType subjectType){               
     }
     
     @Override

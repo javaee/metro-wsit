@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -120,13 +120,12 @@ public class ConnectionManagementSettings {
                     Class.forName("com.sun.xml.ws.transport.tcp.wsit.PolicyConnectionManagementSettingsHolder");
             Method getSingltonMethod = policyHolderClass.getMethod("getInstance");
             holder = (ConnectionManagementSettingsHolder) getSingltonMethod.invoke(null);
-
             logger.log(Level.FINE, MessagesMessages.WSTCP_1150_CON_MNGMNT_SETTINGS_POLICY());
         } catch(Exception e) {
             logger.log(Level.FINE, MessagesMessages.WSTCP_1151_CON_MNGMNT_SETTINGS_SYST_PROPS());
             isOk = false;
         }
-        
+
         return isOk;
     }
 

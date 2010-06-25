@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -900,8 +900,7 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    public ApplicationMessage retrieveMessage(String correlationId) {
-        ByteArrayInputStream bais = null;
+    public ApplicationMessage retrieveMessage(String correlationId) {        
 
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
@@ -952,15 +951,7 @@ final class PersistentSequenceData implements SequenceData {
                     correlationId), ex));
         } finally {
             cm.recycle(ps);
-            cm.recycle(con);
-
-            if (bais != null) {
-                try {
-                    bais.close();
-                } catch (IOException ex) {
-                    LOGGER.warning("Error closing ByteArrayOutputStream after message bytes were sent to DB", ex);
-                }
-            }
+            cm.recycle(con);            
         }
     }
 }
