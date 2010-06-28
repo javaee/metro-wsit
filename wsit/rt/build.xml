@@ -309,6 +309,7 @@
                 <include name="saaj-api.jar"/>
                 <include name="jaxr-api.jar"/>
                 <exclude name="gmbal*.jar"/>
+                <exclude name="ha-api*.jar"/>
                 <exclude name="management-api*.jar"/>
                 <!--exclude name="jaxb*.jar"/-->
                 <exclude name="jaxb-api.jar"/>

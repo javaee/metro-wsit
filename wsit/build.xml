@@ -266,7 +266,14 @@
         <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.2/lastSuccessfulBuild"/>
         
     </target>
-    
+
+    <target name="integrate-ha-api" description="integrate the latest GF HA API">
+        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/3.1-b06/ha-api-3.1-b06.jar"
+             dest="lib/runtime/ha-api.jar" />
+        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/3.1-b06/ha-api-3.1-b06-sources.jar"
+             dest="lib/runtime/ha-api-sources.jar" />
+    </target>
+
     <target name="integrate-xwss30-hudson"
             description="integrate the last successful XWSS 3.0 Hudson build">
         <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
