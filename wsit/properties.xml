@@ -65,12 +65,12 @@
     <property name="compile.deprecation" value="false"/>
     <property name="compile.optimize" value="false"/>
 
-    <property name="jaxb.osgi.dependency.version" value="2.2.2-promoted-b91"/>
-    <property name="woodstox.osgi.dependency.version" value="3.2.1.1"/>
-    <property name="woodstox.osgi.release.version" value="3.2.1.1"/>
 
     <!-- BEGIN: RELEASE SECTION -->
     <!-- This section needs to be updated with each new release -->
+
+    <property name="woodstox.osgi.dependency.version" value="3.2.1.1"/>
+    <property name="woodstox.osgi.release.version" value="3.2.1.1"/>
 
     <property name="release.impl.version" value="2.1"/>
     <property name="release.underscore.version" value="2_1"/>
@@ -92,6 +92,7 @@
     <property name="jaxb.spec.version" value="2.2.1"/>
     <property name="jaxb.release.version" value="2.2.2"/>
     <property name="jaxb.release.context.url" value="2.2.2"/>
+    <property name="jaxb.osgi.dependency.version" value="2.2.2-promoted-b91"/>
 
     <!-- END: RELEASE SECTION -->
 
