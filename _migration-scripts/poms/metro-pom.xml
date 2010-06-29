@@ -263,7 +263,11 @@
     <!--reporting></reporting-->
     <dependencyManagement>
         <dependencies>
-            <!-- istack commons -->
+            <dependency>
+                <groupId>org.glassfish.ha</groupId>
+                <artifactId>ha-api</artifactId>
+                <version>${ha-api.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.sun.istack</groupId>
                 <artifactId>istack-commons-runtime</artifactId>
@@ -401,9 +405,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ha-api.version>3.1-SNAPSHOT</ha-api.version>
         <istack.version>2.2</istack.version>
-        <jaxb.api.version>2.2</jaxb.api.version>
-        <jaxb.ri.version>2.2</jaxb.ri.version>
+        <jaxb.api.version>2.2.1</jaxb.api.version>
+        <jaxb.ri.version>2.2.1</jaxb.ri.version>
         <jaxws.api.version>2.2</jaxws.api.version>
         <jaxws.ri.version>2.2.1-SNAPSHOT</jaxws.ri.version>
         <policy.version>2.2</policy.version>
