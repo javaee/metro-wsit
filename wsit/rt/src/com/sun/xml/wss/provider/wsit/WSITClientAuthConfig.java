@@ -77,8 +77,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
     private String layer = null;
     private String appContext = null;
-    private CallbackHandler callbackHandler = null;
-    private WSITClientAuthContext clientAuthContext = null;
+    private CallbackHandler callbackHandler = null;    
     //private PolicyMap policyMap = null;
     private ReentrantReadWriteLock rwLock;
     private ReentrantReadWriteLock.ReadLock rLock;
@@ -107,11 +106,11 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         if (pMap == null || pMap.isEmpty()) {
             return null;
         }
-        if ( hashCode == null) {
-            //this is a cloned pipe
-            log.log(Level.INFO, "called getAuthContext() of WsitClientAuthConfig");
-            return clientAuthContext;
-        }
+        /*if ( hashCode == null) {
+        //this is a cloned pipe
+        log.log(Level.INFO, "called getAuthContext() of WsitClientAuthConfig");
+        return clientAuthContext;
+        }*/
         //now check if security is enabled
         //if the policy has changed due to redeploy recheck if security is enabled
         try {
@@ -134,28 +133,21 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         } finally {
             rLock.unlock(); // release read lock
         }
-
-
-        boolean authContextInitialized = false;
+        WSITClientAuthContext clientAuthContext = null;
         this.rLock.lock();
         try {
-            if (clientAuthContext != null) {
-                //probably the app was redeployed
-                //if so reacquire the AuthContext
-                if (tubetoClientAuthContextHash.containsKey( hashCode)) {
-                    authContextInitialized = true;
-                    clientAuthContext = (WSITClientAuthContext) tubetoClientAuthContextHash.get( hashCode);
-                }
+            if (tubetoClientAuthContextHash.containsKey(hashCode)) {                
+                clientAuthContext = (WSITClientAuthContext) tubetoClientAuthContextHash.get(hashCode);
             }
         } finally {
             this.rLock.unlock();
         }
 
-        if (!authContextInitialized) {
+        if (clientAuthContext == null) {
             this.wLock.lock();
             try {
                 // recheck the precondition, since the rlock was released.                
-                if (clientAuthContext == null || !tubetoClientAuthContextHash.containsKey( hashCode)) {
+                if (!tubetoClientAuthContextHash.containsKey( hashCode)) {
                     clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);
                     tubetoClientAuthContextHash.put( hashCode, clientAuthContext);
                 }
@@ -164,7 +156,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             }
         }
 
-        this.startSecureConversation(map);
+        this.startSecureConversation(map, clientAuthContext);
         return clientAuthContext;
     }
 
@@ -196,7 +188,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     }
 
     @SuppressWarnings("unchecked")
-    public JAXBElement startSecureConversation(Map map) {
+    private JAXBElement startSecureConversation(Map map, WSITClientAuthContext clientAuthContext) {
         //check if we need to start secure conversation
         JAXBElement ret = null;
         try {

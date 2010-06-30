@@ -621,7 +621,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         }
     }
 
-    public JAXBElement startSecureConversation(Packet packet)
+     JAXBElement startSecureConversation(Packet packet)
             throws WSSecureConversationException {
 
         List toks = getOutBoundSCP(packet.getMessage());
