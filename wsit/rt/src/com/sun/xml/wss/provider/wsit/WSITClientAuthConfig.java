@@ -84,7 +84,7 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
     private ReentrantReadWriteLock.ReadLock rLock;
     private ReentrantReadWriteLock.WriteLock wLock;
     private volatile boolean secEnabled;
-    private Map<Object, WSITClientAuthContext> tubetoClientAuthContextHash = Collections.synchronizedMap(new WeakHashMap<Object, WSITClientAuthContext>());
+    private Map<Integer, WSITClientAuthContext> tubetoClientAuthContextHash = Collections.synchronizedMap(new WeakHashMap<Integer, WSITClientAuthContext>());
     /** Creates a new instance of WSITClientAuthConfig */
     public WSITClientAuthConfig(String layer, String appContext, CallbackHandler callbackHandler) {
         this.layer = layer;
@@ -101,12 +101,13 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         PolicyMap pMap = (PolicyMap) map.get("POLICY");
         WSDLPort port = (WSDLPort) map.get("WSDL_MODEL");
         Object tubeOrPipe = map.get(PipeConstants.SECURITY_PIPE);
+        Integer hashCode = (tubeOrPipe != null) ? tubeOrPipe.hashCode() : null;
         map.put(PipeConstants.AUTH_CONFIG, this);
 
         if (pMap == null || pMap.isEmpty()) {
             return null;
         }
-        if (tubeOrPipe == null) {
+        if ( hashCode == null) {
             //this is a cloned pipe
             log.log(Level.INFO, "called getAuthContext() of WsitClientAuthConfig");
             return clientAuthContext;
@@ -115,11 +116,11 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         //if the policy has changed due to redeploy recheck if security is enabled
         try {
             rLock.lock(); // acquire read lock
-            if (!secEnabled || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
+            if (!secEnabled || !tubetoClientAuthContextHash.containsKey( hashCode)) {
                 rLock.unlock(); // must unlock read, before acquiring write lock
                 wLock.lock(); // acquire write lock
                 try {
-                    if (!secEnabled || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) { //re-check
+                    if (!secEnabled || !tubetoClientAuthContextHash.containsKey( hashCode)) { //re-check
                         if (!WSITAuthConfigProvider.isSecurityEnabled(pMap, port)) {
                             return null;
                         }
@@ -141,9 +142,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             if (clientAuthContext != null) {
                 //probably the app was redeployed
                 //if so reacquire the AuthContext
-                if (tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
+                if (tubetoClientAuthContextHash.containsKey( hashCode)) {
                     authContextInitialized = true;
-                    clientAuthContext = (WSITClientAuthContext) tubetoClientAuthContextHash.get(tubeOrPipe);
+                    clientAuthContext = (WSITClientAuthContext) tubetoClientAuthContextHash.get( hashCode);
                 }
             }
         } finally {
@@ -154,9 +155,9 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
             this.wLock.lock();
             try {
                 // recheck the precondition, since the rlock was released.                
-                if (clientAuthContext == null || !tubetoClientAuthContextHash.containsKey(tubeOrPipe)) {
+                if (clientAuthContext == null || !tubetoClientAuthContextHash.containsKey( hashCode)) {
                     clientAuthContext = new WSITClientAuthContext(operation, subject, map, callbackHandler);
-                    tubetoClientAuthContextHash.put(tubeOrPipe, clientAuthContext);
+                    tubetoClientAuthContextHash.put( hashCode, clientAuthContext);
                 }
             } finally {
                 this.wLock.unlock();
@@ -190,8 +191,8 @@ public class WSITClientAuthConfig implements ClientAuthConfig {
         return true;
     }
 
-    public ClientAuthContext cleanupAuthContext(Object tubeOrPipe) {
-        return this.tubetoClientAuthContextHash.remove(tubeOrPipe);
+    public ClientAuthContext cleanupAuthContext(Object  hashCode) {
+        return this.tubetoClientAuthContextHash.remove( hashCode);
     }
 
     @SuppressWarnings("unchecked")

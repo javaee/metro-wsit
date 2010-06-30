@@ -167,7 +167,8 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     WSITClientAuthModule authModule = null;  
     private Hashtable<String, String> scPolicyIDtoSctIdMap = new Hashtable<String, String>();
     protected WeakReference<WSITClientAuthConfig> authConfig;
-    protected WeakReference<Object> tubeOrPipe;    
+    //protected WeakReference<Object> tubeOrPipe;
+    protected int tubeOrPipeHashCode;
 
 
     
@@ -176,7 +177,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     public WSITClientAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
         this.authConfig = new WeakReference<WSITClientAuthConfig>((WSITClientAuthConfig) map.get(PipeConstants.AUTH_CONFIG));
-        this.tubeOrPipe = new WeakReference<Object>(map.get(PipeConstants.SECURITY_PIPE));
+        this.tubeOrPipeHashCode =(map.get(PipeConstants.SECURITY_PIPE)).hashCode();
         WSDLPortImpl wpi = (WSDLPortImpl) map.get("WSDL_MODEL");
         ClientTubeAssemblerContext context = (ClientTubeAssemblerContext) map.get(PipeConstants.WRAPPED_CONTEXT);
         //this.serverCert = (X509Certificate) map.get(PipeConstants.SERVER_CERT);
@@ -423,9 +424,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
         cancelSecurityContextToken();
-        authConfig.get().cleanupAuthContext(this.tubeOrPipe.get());
+        authConfig.get().cleanupAuthContext(this.tubeOrPipeHashCode); 
         authConfig.clear();
-        this.tubeOrPipe.clear();
+        this.nextPipe = null;
+        this.nextTube = null;
         //issuedTokenContextMap.clear();
         //scPolicyIDtoSctIdMap.clear();
     }
