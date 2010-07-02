@@ -45,7 +45,6 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.istack.logging.Logger;
@@ -105,8 +104,8 @@ final class ClientTube extends AbstractFilterTubeImpl {
         this.outboundSequenceId = original.outboundSequenceId;
     }
 
-    ClientTube(RmConfiguration configuration, Tube tubelineHead, ClientTubelineAssemblyContext context) throws RxRuntimeException {
-        super(tubelineHead); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
+    ClientTube(RmConfiguration configuration, ClientTubelineAssemblyContext context) throws RxRuntimeException {
+        super(context.getTubelineHead()); // cannot use context.getTubelineHead as McClientTube might have been created in RxTubeFactory
 
         this.outboundSequenceId = new VolatileReference<String>(null);
 

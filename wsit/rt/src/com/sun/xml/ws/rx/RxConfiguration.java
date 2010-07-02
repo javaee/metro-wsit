@@ -37,12 +37,13 @@ package com.sun.xml.ws.rx;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
- * TODO split into sperate configurations for WS-MC and WS-RM
+ * Common base for WS-RX technology configuration
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
@@ -87,4 +88,11 @@ public interface RxConfiguration {
      * @return GMBAL/JMX manager. May return null.
      */
     public ManagedObjectManager getManagedObjectManager();
+
+    /**
+     * Returns provider of high-availability services
+     * 
+     * @return high-availability service provider
+     */
+    public HighAvailabilityProvider getHighAvailabilityProvider();
 }

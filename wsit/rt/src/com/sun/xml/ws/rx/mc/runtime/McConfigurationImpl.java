@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
@@ -52,13 +53,21 @@ class McConfigurationImpl extends RxConfigurationBase implements McConfiguration
     private final McRuntimeVersion runtimeVersion;
 
     McConfigurationImpl(
-            ReliableMessagingFeature rmFeature,
-            MakeConnectionSupportedFeature mcSupportedFeature,
-            SOAPVersion soapVersion,
-            AddressingVersion addressingVersion,
-            boolean requestResponseDetected,
-            ManagedObjectManager managedObjectManager) {
-        super(rmFeature != null && rmFeature.isEnabled(), mcSupportedFeature != null && mcSupportedFeature.isEnabled(), soapVersion, addressingVersion, requestResponseDetected, managedObjectManager);
+            final ReliableMessagingFeature rmFeature,
+            final MakeConnectionSupportedFeature mcSupportedFeature,
+            final SOAPVersion soapVersion,
+            final AddressingVersion addressingVersion,
+            final boolean requestResponseDetected,
+            final ManagedObjectManager managedObjectManager,
+            final HighAvailabilityProvider haProvider) {
+        super(
+                rmFeature != null && rmFeature.isEnabled(),
+                mcSupportedFeature != null && mcSupportedFeature.isEnabled(),
+                soapVersion,
+                addressingVersion,
+                requestResponseDetected,
+                managedObjectManager,
+                haProvider);
 
         this.mcSupportedFeature = mcSupportedFeature;
         this.runtimeVersion = (mcSupportedFeature != null) ? McRuntimeVersion.forProtocolVersion(mcSupportedFeature.getProtocolVersion()) : null;

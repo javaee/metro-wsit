@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
@@ -57,7 +58,7 @@ import org.glassfish.gmbal.ManagedObjectManager;
 final class SequenceTestUtils  {
     private SequenceTestUtils() {}
 
-    static final RmConfiguration getConfiguration() {
+    static RmConfiguration getConfiguration() {
         final ReliableMessagingFeature rmf = new ReliableMessagingFeatureBuilder(RmProtocolVersion.WSRM200702).build();
 
         return new RmConfiguration() {
@@ -92,10 +93,14 @@ final class SequenceTestUtils  {
             public RmRuntimeVersion getRuntimeVersion() {
                 return RmRuntimeVersion.WSRM200702;
             }
+
+            public HighAvailabilityProvider getHighAvailabilityProvider() {
+                return new HighAvailabilityProvider();
+            }
        };
     }
 
-    static final DeliveryQueueBuilder getDeliveryQueueBuilder() {
+    static DeliveryQueueBuilder getDeliveryQueueBuilder() {
 
 
         return DeliveryQueueBuilder.getBuilder(getConfiguration(), PostmanPool.INSTANCE.getPostman(), new Postman.Callback() {
@@ -105,7 +110,7 @@ final class SequenceTestUtils  {
         });
     }
 
-    static final List<Sequence.AckRange> createAckRanges(long... msgNumbers) {
+    static List<Sequence.AckRange> createAckRanges(long... msgNumbers) {
         List<Sequence.AckRange> ackList = new LinkedList<Sequence.AckRange>();
 
         if (msgNumbers.length > 0) {

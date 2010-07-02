@@ -33,45 +33,22 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx.testing;
 
-import com.sun.xml.ws.api.WSBinding;
-import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.TubeFactory;
-import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
-import com.sun.xml.ws.rx.rm.runtime.RmConfigurationFactory;
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.assembler.dev;
+
+import org.glassfish.ha.store.api.BackingStoreFactory;
+import org.glassfish.ha.store.impl.NoOpBackingStoreFactory;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class PacketFilteringTubeFactory implements TubeFactory {
+public final class HighAvailabilityProvider {
+    private static final BackingStoreFactory NOOP_BSF = new NoOpBackingStoreFactory();
 
-    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getBinding())) {
-        RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(context);
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
+    public BackingStoreFactory getBackingStoreFactory() {
+        // TODO P1 logic for getting other factories
+        return NOOP_BSF;
     }
 
-    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        if (isPacketFilteringEnabled(context.getEndpoint().getBinding())) {
-            RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(context);
-
-            return new PacketFilteringTube(configuration, context.getTubelineHead(), context);
-        } else {
-            return context.getTubelineHead();
-        }
-    }
-
-    private boolean isPacketFilteringEnabled(WSBinding binding) {
-        PacketFilteringFeature pfFeature = binding.getFeature(PacketFilteringFeature.class);
-        return pfFeature != null && pfFeature.isEnabled() && pfFeature.hasFilters();
-    }
 }

@@ -38,6 +38,9 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
+import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.util.PortUtilities;
@@ -50,7 +53,15 @@ import org.glassfish.gmbal.ManagedObjectManager;
 public enum McConfigurationFactory {
     INSTANCE;
 
-    public McConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
+    public McConfiguration createInstance(ServerTubelineAssemblyContext context) {
+        return createInstance(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager(), context.getHighAvailabilityProvider());
+    }
+
+    public McConfiguration createInstance(ClientTubelineAssemblyContext context) {
+        return createInstance(context.getWsdlPort(), context.getBinding(), context.getWrappedContext().getBindingProvider().getManagedObjectManager(), context.getHighAvailabilityProvider());
+    }
+
+    private McConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager, final HighAvailabilityProvider haProvider) {
 
         return new McConfigurationImpl(
                 binding.getFeature(ReliableMessagingFeature.class),
@@ -58,7 +69,8 @@ public enum McConfigurationFactory {
                 binding.getSOAPVersion(),
                 binding.getAddressingVersion(),
                 PortUtilities.checkForRequestResponseOperations(wsdlPort),
-		managedObjectManager);
+		managedObjectManager,
+                haProvider);
     }
 
 }

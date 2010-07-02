@@ -51,4 +51,5 @@ public interface TubelineAssemblyContext {
 
     Tube getTubelineHead();
 
+    HighAvailabilityProvider getHighAvailabilityProvider();
 }

@@ -39,6 +39,7 @@ import com.sun.xml.ws.assembler.dev.TubelineAssemblyContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -49,6 +50,7 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
+    private static final HighAvailabilityProvider HA_PROVIDER = new HighAvailabilityProvider();
 
     private Tube head;
     private Pipe adaptedHead;
@@ -84,5 +86,9 @@ class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
             }
         }
         return null;
+    }
+
+    public HighAvailabilityProvider getHighAvailabilityProvider() {
+        return HA_PROVIDER;
     }
 }

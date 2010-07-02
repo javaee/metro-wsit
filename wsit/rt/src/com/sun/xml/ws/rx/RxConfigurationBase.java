@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
@@ -52,8 +53,16 @@ public abstract class RxConfigurationBase implements RxConfiguration {
     private final AddressingVersion addressingVersion;
     private final boolean requestResponseDetected;
     private final ManagedObjectManager managedObjectManager;
+    private final HighAvailabilityProvider haProvider;
 
-    protected RxConfigurationBase(boolean isRmEnabled, boolean isMcEnabled, SOAPVersion soapVersion, AddressingVersion addressingVersion, boolean requestResponseDetected, ManagedObjectManager managedObjectManager) {
+    protected RxConfigurationBase(
+            final boolean isRmEnabled,
+            final boolean isMcEnabled,
+            final SOAPVersion soapVersion,
+            final AddressingVersion addressingVersion,
+            final boolean requestResponseDetected,
+            final ManagedObjectManager managedObjectManager,
+            final HighAvailabilityProvider haProvider) {
         this.rmEnabled = isRmEnabled;
         this.mcSupportEnabled = isMcEnabled;
 
@@ -61,6 +70,7 @@ public abstract class RxConfigurationBase implements RxConfiguration {
         this.addressingVersion = addressingVersion;
         this.requestResponseDetected = requestResponseDetected;
 	this.managedObjectManager = managedObjectManager;
+        this.haProvider = haProvider;
     }
 
     public boolean isReliableMessagingEnabled() {
@@ -85,5 +95,9 @@ public abstract class RxConfigurationBase implements RxConfiguration {
 
     public ManagedObjectManager getManagedObjectManager() {
 	return managedObjectManager;
+    }
+
+    public HighAvailabilityProvider getHighAvailabilityProvider() {
+        return haProvider;
     }
 }

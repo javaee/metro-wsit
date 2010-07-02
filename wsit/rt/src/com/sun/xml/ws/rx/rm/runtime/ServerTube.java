@@ -39,7 +39,6 @@ import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.xml.ws.api.pipe.NextAction;
-import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.server.WSEndpoint;
@@ -102,8 +101,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
         this.endpoint = original.endpoint;
     }
 
-    public ServerTube(RmConfiguration configuration, Tube tubelineHead, ServerTubelineAssemblyContext context) {
-        super(tubelineHead);
+    public ServerTube(RmConfiguration configuration, ServerTubelineAssemblyContext context) {
+        super(context.getTubelineHead());
 
         this.endpoint = context.getEndpoint();
 

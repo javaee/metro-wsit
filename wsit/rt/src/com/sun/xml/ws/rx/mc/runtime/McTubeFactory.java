@@ -56,11 +56,11 @@ public final class McTubeFactory implements TubeFactory {
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
-     * @param context wsit client tubeline assembler context
+     * @param context Metro client tubeline assembler context
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
-        McConfiguration configuration = McConfigurationFactory.INSTANCE.createInstance(context.getWsdlPort(), context.getBinding(), null);
+        McConfiguration configuration = McConfigurationFactory.INSTANCE.createInstance(context);
 
         if (configuration.isMakeConnectionSupportEnabled()) {
             return new McClientTube(configuration, context.getTubelineHead());
@@ -72,11 +72,11 @@ public final class McTubeFactory implements TubeFactory {
     /**
      * Adds RM tube to the service-side tubeline, depending on whether RM is enabled or not.
      * 
-     * @param context wsit service tubeline assembler context
+     * @param context Metro service tubeline assembler context
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
-        McConfiguration configuration = McConfigurationFactory.INSTANCE.createInstance(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager());
+        McConfiguration configuration = McConfigurationFactory.INSTANCE.createInstance(context);
 
         if (configuration.isMakeConnectionSupportEnabled()) {
             return new McServerTube(configuration, context.getTubelineHead());
