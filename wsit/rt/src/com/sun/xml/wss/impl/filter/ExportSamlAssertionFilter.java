@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,6 +59,9 @@ import com.sun.xml.wss.impl.keyinfo.KeyIdentifierStrategy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.saml.util.SAMLUtil;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import org.w3c.dom.Element;
 
 /*
@@ -118,21 +121,31 @@ public class ExportSamlAssertionFilter {
         Assertion _assertion = null;
         Element assertionElement = resolvedPolicy.getAssertion();
         Element _authorityBinding = resolvedPolicy.getAuthorityBinding();
-        
+        XMLStreamReader reader = resolvedPolicy.getAssertionReader();
+
+        if (assertionElement == null && reader != null) {
+            try {
+                assertionElement = SAMLUtil.createSAMLAssertion(reader);
+            } catch (XMLStreamException ex) {
+               // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
+               // ignore the exception 
+            }
+        }
+
         try {
-            if ( System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
+            if (System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
                 if (assertionElement.getAttributeNode("ID") != null) {
-                    _assertion = (Assertion)com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion.fromElement(assertionElement);
-                }else{
-                    _assertion = (Assertion)com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(assertionElement);
+                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion.fromElement(assertionElement);
+                } else {
+                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(assertionElement);
                 }
             } else {
-                _assertion = (Assertion)com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(assertionElement);
+                _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(assertionElement);
             }
         } catch (SAMLException ex) {
             //ignore
-        }
-        
+            }
+
         if (samlPolicy.getIncludeToken() == samlPolicy.INCLUDE_NEVER ||
                samlPolicy.getIncludeToken() == samlPolicy.INCLUDE_NEVER_VER2 ) {
             if (_authorityBinding != null) {
