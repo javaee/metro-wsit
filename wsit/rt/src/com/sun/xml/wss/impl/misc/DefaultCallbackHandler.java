@@ -724,6 +724,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
+                samlBinding.setAssertion(sc.getAssertionReader());
                 samlBinding.setAuthorityBinding(sc.getAuthorityBindingElement());
                 dp.setSecurityPolicy(samlBinding);
                 samlBinding.setAssertionId(sc.getAssertionId());
@@ -743,6 +744,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
+                samlBinding.setAssertion(sc.getAssertionReader());
                 samlBinding.setAuthorityBinding(sc.getAuthorityBindingElement());
                 samlBinding.setAssertionId(sc.getAssertionId());
                 dp.setSecurityPolicy(samlBinding);
@@ -820,6 +822,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
+                samlBinding.setAssertion(sc.getAssertionReader());
             } else {
                 log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
@@ -836,6 +839,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 Callback[] cbs = new Callback[]{sc};
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
+                samlBinding.setAssertion(sc.getAssertionReader());
                 PrivateKeyBinding pkBinding = (PrivateKeyBinding) samlBinding.newPrivateKeyBinding();
 
                 SignatureKeyCallback.DefaultPrivKeyCertRequest request =
