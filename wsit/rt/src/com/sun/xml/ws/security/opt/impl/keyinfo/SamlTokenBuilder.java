@@ -54,11 +54,15 @@ import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.impl.policy.mls.PrivateKeyBinding;
 import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
 
+import com.sun.xml.wss.saml.util.SAMLUtil;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import org.w3c.dom.Element;
 
 /**
@@ -88,9 +92,21 @@ public class SamlTokenBuilder extends TokenBuilder{
         SecurityHeaderElement she = null;
         
         Element samlAssertion = keyBinding.getAssertion();
-        if(samlAssertion != null)
+        try {
+            if (samlAssertion == null) {
+                XMLStreamReader reader = keyBinding.getAssertionReader();
+                if (reader != null) {
+                    samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+                }
+            }
+        } catch (XMLStreamException ex) {
+            // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
+            // ignore the exception
+        }
+        if (samlAssertion != null) {
             she = new GSHeaderElement(samlAssertion);
-        JAXBEncryptedKey ek  = null;
+        }
+        JAXBEncryptedKey ek = null;
         String asID = "";
         String id = "";
         String keyEncAlgo = XMLCipher.RSA_v1dot5;

@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureFilter.java,v 1.5 2010-06-25 08:17:23 sm228678 Exp $
+ * $Id: SignatureFilter.java,v 1.6 2010-07-07 06:13:39 sm228678 Exp $
  */
 
 /*
@@ -358,7 +358,7 @@ public class SignatureFilter {
                         context.getExtraneousProperties().put(MessageConstants.SAML_ASSERTION_CLIENT_CACHE, resolvedSAMLBinding);
                     }
                     if ((resolvedSAMLBinding.getAssertion() == null) &&
-                            (resolvedSAMLBinding.getAuthorityBinding() == null)) {
+                            (resolvedSAMLBinding.getAuthorityBinding() == null) && (resolvedSAMLBinding.getAssertionReader() == null) ) {
                         log.log(Level.SEVERE, "WSS1418.saml.info.notset");
                         throw new XWSSecurityException(
                                 "None of SAML Assertion, SAML AuthorityBinding information was set into " +

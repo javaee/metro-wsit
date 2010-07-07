@@ -121,17 +121,19 @@ public class ExportSamlAssertionFilter {
         Assertion _assertion = null;
         Element assertionElement = resolvedPolicy.getAssertion();
         Element _authorityBinding = resolvedPolicy.getAuthorityBinding();
-        XMLStreamReader reader = resolvedPolicy.getAssertionReader();
 
-        if (assertionElement == null && reader != null) {
+        if (assertionElement == null) {
+            XMLStreamReader reader = resolvedPolicy.getAssertionReader();
             try {
-                assertionElement = SAMLUtil.createSAMLAssertion(reader);
+                if (reader != null) {
+                    assertionElement = SAMLUtil.createSAMLAssertion(reader);
+                }
             } catch (XMLStreamException ex) {
-               // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
-               // ignore the exception 
+                // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
+                // ignore the exception
             }
         }
-
+        
         try {
             if (System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
                 if (assertionElement.getAttributeNode("ID") != null) {
