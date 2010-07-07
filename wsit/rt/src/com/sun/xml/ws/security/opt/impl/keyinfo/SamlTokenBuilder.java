@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,6 @@ import com.sun.xml.ws.security.opt.impl.incoming.SAMLAssertion;
 import com.sun.xml.ws.security.opt.impl.reference.DirectReference;
 import com.sun.xml.ws.security.opt.impl.reference.KeyIdentifier;
 import com.sun.xml.ws.security.opt.impl.message.GSHeaderElement;
-import com.sun.xml.ws.security.secext10.SecurityTokenReferenceType;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
@@ -56,11 +55,8 @@ import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
 
 import com.sun.xml.wss.saml.util.SAMLUtil;
 import java.security.Key;
-import java.security.PublicKey;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.w3c.dom.Element;
@@ -109,8 +105,7 @@ public class SamlTokenBuilder extends TokenBuilder{
         JAXBEncryptedKey ek = null;
         String asID = "";
         String id = "";
-        String keyEncAlgo = XMLCipher.RSA_v1dot5;
-        X509Certificate x509Cert = null;
+        String keyEncAlgo = XMLCipher.RSA_v1dot5;        
         Key samlkey = null;
         if(samlAssertion != null){
             asID = samlAssertion.getAttributeNS(null,"AssertionID");
