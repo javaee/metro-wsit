@@ -56,6 +56,7 @@ import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
 import java.security.PublicKey;
@@ -202,7 +203,8 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
     @SuppressWarnings("unchecked")
     protected SecurityTokenReference buildSTR(String strId, Reference ref) {
         SecurityTokenReference str = elementFactory.createSecurityTokenReference(ref);
-        if (context.getSecurityPolicy() instanceof SignaturePolicy) {
+        SecurityPolicy sp = context.getSecurityPolicy();
+        if (sp instanceof SignaturePolicy || sp instanceof AuthenticationTokenPolicy ) {
             ((SecurityElement) str).setId(strId);
         }
         if (context.getWSSAssertion() != null) {

@@ -43,6 +43,7 @@ import com.sun.xml.ws.security.policy.Binding;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.SignedSupportingTokens;
 import com.sun.xml.ws.security.policy.Token;
+import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
@@ -59,10 +60,20 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
     }
     @Override
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
-        SignatureTarget target = stc.newURISignatureTargetForSSToken(policy.getUUID());
-        SecurityPolicyUtil.setName(target, policy);
-        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
         String includeToken = token.getIncludeToken();
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion) token);
+        SignatureTarget target = null;
+        if (includeToken.endsWith("Never") && PolicyUtil.isX509Token((PolicyAssertion) token, spVersion)) {
+            String uid = "SSTokenId" + pid.generateID();
+            ((AuthenticationTokenPolicy.X509CertificateBinding) policy).setSTRID(uid);
+            target = stc.newURISignatureTargetForSSToken(uid);
+           //this flag will be used for computing securitytokenreference when the includetoken type is Never !!
+            target.isITNever(true);
+        } else {
+            target = stc.newURISignatureTargetForSSToken(policy.getUUID());
+        }
+        SecurityPolicyUtil.setName(target, policy);
+
         if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
            !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) || PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)

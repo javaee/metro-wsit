@@ -1,11 +1,11 @@
 /*
- * $Id: SignatureTarget.java,v 1.3 2010-03-20 12:32:27 kumarjayanti Exp $
+ * $Id: SignatureTarget.java,v 1.4 2010-07-12 06:28:07 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,6 +59,7 @@ public class SignatureTarget extends Target implements Cloneable {
     private boolean isOptimized = false;
     
     private String xpathVersion = "";
+    private boolean isITNever = false;
             
     /**
      * Default constructor
@@ -99,7 +100,17 @@ public class SignatureTarget extends Target implements Cloneable {
     public ArrayList getTransforms() {
         return _transforms;
     }
-    
+    /**
+     * is the include token type Never?
+     */
+    public void isITNever(boolean iToken){
+        this.isITNever = iToken;
+    }
+
+    public boolean isITNever(){
+        return this.isITNever;
+    }
+
     /**
      * set the Digest Algorithm to be used for this Target
      * @param digest Digest Algorithm
@@ -157,6 +168,7 @@ public class SignatureTarget extends Target implements Cloneable {
      * @return a clone of this SignatureTarget
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Object clone() {
         SignatureTarget target = new SignatureTarget();
         
@@ -264,6 +276,7 @@ public class SignatureTarget extends Target implements Cloneable {
          * clone operator
          * @return a clone of this Transform
          */
+        @Override
         public Object clone() {
             Transform transform = new Transform(_transform);
             
@@ -290,10 +303,12 @@ public class SignatureTarget extends Target implements Cloneable {
         this.isOptimized = isOptimized;
     }
     
+    @Override
     public void setXPathVersion(String version){
         this.xpathVersion = version;
     }
     
+    @Override
     public String getXPathVersion(){
         return xpathVersion;
     }
