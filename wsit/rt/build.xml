@@ -316,6 +316,7 @@
                 <exclude name="jaxb-impl.jar"/>
                 <exclude name="jaxb1-impl.jar"/>
                 <exclude name="jsr173_api.jar"/>
+                <exclude name="resolver.jar"/>
                 <exclude name="woodstox.jar"/>
                 <exclude name="mimepull.jar"/>
                 <exclude name="FastInfoset.jar"/>
