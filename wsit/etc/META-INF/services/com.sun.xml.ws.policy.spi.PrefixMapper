@@ -1,6 +1,0 @@
-com.sun.xml.ws.security.addressing.policy.WsawAddressingPrefixMapper
-com.sun.xml.ws.tx.common.TxPrefixMapper
-com.sun.xml.ws.rx.mc.policy.spi_impl.McPrefixMapper
-com.sun.xml.ws.rx.rm.policy.spi_impl.RmPrefixMapper
-com.sun.xml.ws.transport.tcp.wsit.TCPTransportPrefixMapper
-com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper

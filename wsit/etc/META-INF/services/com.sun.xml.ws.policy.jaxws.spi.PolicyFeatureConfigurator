@@ -1,9 +1,0 @@
-com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator
-com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator
-com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator
-com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator
-com.sun.xml.ws.transport.tcp.policy.TCPTransportFeatureConfigurator
-com.sun.xml.ws.transport.tcp.policy.OptimalTransportFeatureConfigurator
-com.sun.xml.ws.rx.mc.policy.spi_impl.McFeatureConfigurator
-com.sun.xml.ws.rx.rm.policy.spi_impl.RmFeatureConfigurator
-com.sun.xml.ws.security.addressing.policy.WsawAddressingFeatureConfigurator

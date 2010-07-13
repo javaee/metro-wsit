@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: Web Services Interoperable Technologies
-Implementation-Version: 1.0
-Implementation-Vendor: Sun Microsystems, Inc.
-Implementation-Vendor-Id: com.sun
