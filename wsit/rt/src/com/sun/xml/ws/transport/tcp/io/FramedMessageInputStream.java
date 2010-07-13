@@ -67,7 +67,7 @@ public final class FramedMessageInputStream extends InputStream implements LifeC
     /**
      * The time to wait before timing out when reading bytes
      */
-    final private static int READ_TIMEOUT = 1000;
+    final private static int READ_TIMEOUT = 30000;
     
     /**
      * Number of times to retry before return EOF
