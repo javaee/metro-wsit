@@ -37,14 +37,14 @@
 package com.sun.xml.ws.assembler.dev;
 
 import org.glassfish.ha.store.api.BackingStoreFactory;
-import org.glassfish.ha.store.impl.NoOpBackingStoreFactory;
+//import org.glassfish.ha.store.impl.NoOpBackingStoreFactory;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class HighAvailabilityProvider {
-    private static final BackingStoreFactory NOOP_BSF = new NoOpBackingStoreFactory();
+    private static final BackingStoreFactory NOOP_BSF = null; //new NoOpBackingStoreFactory();
 
     public BackingStoreFactory getBackingStoreFactory() {
         // TODO P1 logic for getting other factories
