@@ -48,8 +48,10 @@ Export-Package: \
   com.sun.xml.ws.client.*;version=@JAX-WS_RELEASE_VERSION@, \
   com.sun.xml.ws.commons;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.config.management;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.config.management.jmx;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.config.management.persistence;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.config.management.policy;version=@JAX-WS_RELEASE_VERSION@, \
-  com.sun.xml.ws.config.management.*;version=@RELEASE_VERSION@, \
+  com.sun.xml.ws.config.management.server;version=@RELEASE_VERSION@, \
   com.sun.xml.ws.developer;version=@JAX-WS_RELEASE_VERSION@, \
   com.sun.xml.ws.developer.*;version=@JAX-WS_RELEASE_VERSION@, \
   com.sun.xml.ws.dump;version=@RELEASE_VERSION@, \
