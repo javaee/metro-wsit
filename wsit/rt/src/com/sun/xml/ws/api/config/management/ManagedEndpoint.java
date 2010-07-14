@@ -284,6 +284,11 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     }
 
     @Override
+    public void process(Packet request, CompletionCallback callback, FiberContextSwitchInterceptor interceptor) {
+        this.endpointDelegate.schedule(request, callback, interceptor);
+    }
+
+    @Override
     public PipeHead createPipeHead() {
         return this.endpointDelegate.createPipeHead();
     }
