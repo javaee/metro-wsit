@@ -59,6 +59,9 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
@@ -97,6 +100,11 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
     private final Collection<ReconfigNotifier> reconfigNotifiers = new LinkedList<ReconfigNotifier>();
     private final Configurator<T> configurator;
 
+    // Delay before dispose is called on a replaced endpoint delegate. Defaults to 2 minutes.
+    private static final long ENDPOINT_DISPOSE_DELAY_DEFAULT = 120000l;
+    private final long endpointDisposeDelay;
+    private final ScheduledExecutorService disposeThreadPool = Executors.newScheduledThreadPool(1);
+
     /**
      * Initializes this endpoint.
      *
@@ -115,6 +123,8 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
             // right away because any reconfiguration will overwrite the policies in
             // the endpoint.
             this.assertion = ManagedServiceAssertion.getAssertion(endpoint);
+
+            this.endpointDisposeDelay = this.assertion.getEndpointDisposeDelay(ENDPOINT_DISPOSE_DELAY_DEFAULT);
 
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader == null) {
@@ -138,7 +148,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
                 LOGGER.fine(ManagementMessages.WSM_5056_STARTED_CONFIGURATOR(this.configurator));
             }
             
-            for (CommunicationServer commInterface : commInterfaces) {
+            for (CommunicationServer<T> commInterface : commInterfaces) {
                 if (LOGGER.isLoggable(Level.FINE)) {
                     LOGGER.fine(ManagementMessages.WSM_5057_STARTING_COMMUNICATION(commInterface));
                 }
@@ -197,6 +207,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         // The Set will make sure that there is only one instance of the publisher.
         endpointComponents.add(new ManagedHttpMetadataPublisher());
 
+        final WSEndpoint<T> oldEndpoint = this.endpointDelegate;
         this.endpointDelegate = endpoint;
         for (EndpointComponent component : endpointComponents) {
             final Reconfigurable reconfigurable = component.getSPI(Reconfigurable.class);
@@ -204,12 +215,13 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
                 reconfigurable.reconfigure();
             }
         }
+        disposeDelegate(oldEndpoint);
         LOGGER.info(ManagementMessages.WSM_5000_RECONFIGURED_ENDPOINT(this.id));
     }
 
     @Override
-    public void dispose() {
-        for (CommunicationServer commInterface: this.commInterfaces) {
+    synchronized public void dispose() {
+        for (CommunicationServer<T> commInterface: this.commInterfaces) {
             try {
                 if (LOGGER.isLoggable(Level.FINE)) {
                     LOGGER.fine(ManagementMessages.WSM_5061_STOPPING_COMMUNICATION(commInterface));
@@ -233,6 +245,7 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         } catch (WebServiceException e) {
             LOGGER.severe(ManagementMessages.WSM_5064_FAILED_CONFIGURATOR_STOP(this.configurator));
         }
+        this.disposeThreadPool.shutdown();
         if (this.endpointDelegate != null) {
             this.endpointDelegate.dispose();
         }
@@ -328,4 +341,24 @@ public class ManagedEndpoint<T> extends WSEndpoint<T> implements EndpointStarter
         return this.endpointDelegate.getAssemblerContext();
     }
 
+    /**
+     * Call dispose on the endpoint delegate that was swapped out against a new
+     * instance.
+     * 
+     * @param endpoint The previous endpoint delegate
+     */
+    private void disposeDelegate(final WSEndpoint<T> endpoint) {
+        final Runnable dispose = new Runnable() {
+            final WSEndpoint<T> disposableEndpoint = endpoint;
+            public void run() {
+                try {
+                    disposableEndpoint.dispose();
+                } catch (WebServiceException e) {
+                    LOGGER.severe(ManagementMessages.WSM_5101_DISPOSE_FAILED(), e);
+                }
+            }
+        };
+        disposeThreadPool.schedule(dispose, this.endpointDisposeDelay, TimeUnit.MILLISECONDS);
+    }
+    
 }
