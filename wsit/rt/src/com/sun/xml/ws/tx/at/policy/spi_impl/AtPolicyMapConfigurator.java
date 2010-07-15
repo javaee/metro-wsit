@@ -35,28 +35,25 @@
  */
 package com.sun.xml.ws.tx.at.policy.spi_impl;
 
+import com.sun.xml.ws.tx.at.policy.EjbTransactionAnnotationProcessor;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.JavaMethod;
 import com.sun.xml.ws.api.model.SEIModel;
-import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicySubject;
-import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
-import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.tx.at.api.WsatNamespace;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
-import com.sun.xml.ws.tx.at.policy.spi_impl.EjbTransactionAnnotationProcessor.TransactionAttributeType;
+import com.sun.xml.ws.tx.at.policy.AtPolicyCreator;
+import com.sun.xml.ws.tx.at.policy.EjbTransactionAttributeType;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.logging.Level;
 
 /**
@@ -67,7 +64,6 @@ import java.util.logging.Level;
 public class AtPolicyMapConfigurator implements PolicyMapConfigurator {
 
     private static final Logger LOGGER = Logger.getLogger(AtPolicyMapConfigurator.class);
-
     private static boolean NON_JAVAEE_CONTAINER = false;
 
     /**
@@ -81,141 +77,72 @@ public class AtPolicyMapConfigurator implements PolicyMapConfigurator {
      * @param wsBinding
      */
     public Collection<PolicySubject> update(final PolicyMap policyMap, final SEIModel model, final WSBinding wsBinding) throws PolicyException {
-        final Collection<PolicySubject> subjects = new ArrayList<PolicySubject>();
+        final Collection<PolicySubject> subjects = new LinkedList<PolicySubject>();
 
-        if (NON_JAVAEE_CONTAINER) {
-            return subjects;
-        }
-
-        // For each method of a CMT EJB, map its effective javax.ejb.TransactionAttribute to semantically equivalent 
-        // ws-at policy assertion.
-        if (model != null) {
-            final Collection<? extends JavaMethod> methods = model.getJavaMethods();
-            Class CMTEJB = null;
-            TransactionAttributeType classDefaultTxnAttr = null;
-            for (JavaMethod method : methods) {
-
-                if (CMTEJB == null) {
-                    boolean isCMTEJB = false;
-                    final Class theClass = method.getSEIMethod().getDeclaringClass();
-                    try {
-                        isCMTEJB = EjbTransactionAnnotationProcessor.isContainerManagedEJB(theClass);
-                    } catch (NoClassDefFoundError e) {
-                        // running in a container that does not support EJBs; terminate processing of EJB annotations
-                        NON_JAVAEE_CONTAINER = true;
-                        LOGGER.fine(LocalizationMessages.WSAT_1001_NON_EE_CONTAINER("NoClassDefFoundError: " + e.getLocalizedMessage()));
-                        return subjects;
-                    }
-                    if (isCMTEJB) {
-                        // perform class level caching of info
-                        CMTEJB = theClass;
-                        classDefaultTxnAttr = EjbTransactionAnnotationProcessor.getTransactionAttributeDefault(theClass);
-                    } else {
-                        // not a CMT EJB, no transaction attributes to look for; just return
-                        return subjects;
-                    }
-                }
-
-                // we have a CMT EJB. Map its transaction attribute to proper ws-at policy assertion.
-
-                final TransactionAttributeType txnAttr =
-                        EjbTransactionAnnotationProcessor.getEffectiveTransactionAttribute(method.getSEIMethod(), classDefaultTxnAttr);
-                final String policyId = model.getBoundPortTypeName().getLocalPart() + "_" + method.getOperationName() + "_WSAT_Policy";
-                final Policy policy = mapTransactionAttribute2WSATPolicy(policyId, txnAttr);
-                if (policy != null) {
-                    // attach ws-at policy assertion to binding/operation
-                    final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingOperationSubject(model.getBoundPortTypeName(),
-                                                                                                            new QName(model.getTargetNamespace(), method.getOperationName()));
-                    final PolicySubject generatedWsatPolicySubject = new PolicySubject(wsdlSubject, policy);
-                    if (LOGGER.isLoggable(Level.FINE)) {
-                        LOGGER.fine(LocalizationMessages.WSAT_1002_ADD_AT_POLICY_ASSERTION(
-                                model.getPortName().toString(),
-                                method.getOperationName(),
-                                policy.toString(),
-                                txnAttr.toString(),
-                                CMTEJB.getName(),
-                                method.getMethod().getName()));
-                    } else {
-                        LOGGER.info(LocalizationMessages.WSAT_1002_ADD_AT_POLICY_ASSERTION(
-                                model.getPortName().toString(),
-                                method.getOperationName(),
-                                policy.getId(),
-                                txnAttr.toString(),
-                                CMTEJB.getName(),
-                                method.getMethod().getName()));
-                    }
-                    subjects.add(generatedWsatPolicySubject);
-                }
-            } // for each method in CMT EJB
-        }
+//        if (NON_JAVAEE_CONTAINER || model == null) {
+//            return subjects;
+//        }
+//
+//        // For each method of a CMT EJB, map its effective javax.ejb.TransactionAttribute to semantically equivalent
+//        // WS-AT policy assertion.
+//
+//        final Collection<? extends JavaMethod> methods = model.getJavaMethods();
+//        Class<?> cmtEjbClass = null;
+//        EjbTransactionAttributeType classDefaultTxnAttr = null;
+//        for (JavaMethod method : methods) {
+//
+//            if (cmtEjbClass == null) {
+//                boolean isCMTEJB = false;
+//                final Class theClass = method.getSEIMethod().getDeclaringClass();
+//                try {
+//                    isCMTEJB = EjbTransactionAnnotationProcessor.isContainerManagedEJB(theClass);
+//                } catch (NoClassDefFoundError e) {
+//                    // running in a container that does not support EJBs; terminate processing of EJB annotations
+//                    NON_JAVAEE_CONTAINER = true;
+//                    LOGGER.fine(LocalizationMessages.WSAT_1101_NON_EE_CONTAINER("NoClassDefFoundError: " + e.getLocalizedMessage()));
+//                    return subjects;
+//                }
+//                if (isCMTEJB) {
+//                    // perform class level caching of info
+//                    cmtEjbClass = theClass;
+//                    classDefaultTxnAttr = EjbTransactionAnnotationProcessor.getTransactionAttributeDefault(theClass);
+//                } else {
+//                    // not a CMT EJB, no transaction attributes to look for; just return
+//                    return subjects;
+//                }
+//            }
+//
+//            // we have a CMT EJB. Map its transaction attribute to proper ws-at policy assertion.
+//
+//            final EjbTransactionAttributeType txnAttr = EjbTransactionAnnotationProcessor.getEffectiveTransactionAttribute(method.getSEIMethod(), classDefaultTxnAttr);
+//            final String policyId = model.getBoundPortTypeName().getLocalPart() + "_" + method.getOperationName() + "_WSAT_Policy";
+//            final Policy policy = AtPolicyCreator.createPolicy(policyId, WsatNamespace.WSAT200410, null, txnAttr);
+//            if (policy != null) {
+//                // attach ws-at policy assertion to binding/operation
+//                final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingOperationSubject(model.getBoundPortTypeName(),
+//                        new QName(model.getTargetNamespace(), method.getOperationName()));
+//                final PolicySubject generatedWsatPolicySubject = new PolicySubject(wsdlSubject, policy);
+//                if (LOGGER.isLoggable(Level.FINE)) {
+//                    LOGGER.fine(LocalizationMessages.WSAT_1102_ADD_AT_POLICY_ASSERTION(
+//                            model.getPortName().toString(),
+//                            method.getOperationName(),
+//                            policy.toString(),
+//                            txnAttr.toString(),
+//                            cmtEjbClass.getName(),
+//                            method.getMethod().getName()));
+//                } else {
+//                    LOGGER.info(LocalizationMessages.WSAT_1102_ADD_AT_POLICY_ASSERTION(
+//                            model.getPortName().toString(),
+//                            method.getOperationName(),
+//                            policy.getId(),
+//                            txnAttr.toString(),
+//                            cmtEjbClass.getName(),
+//                            method.getMethod().getName()));
+//                }
+//                subjects.add(generatedWsatPolicySubject);
+//            }
+//        } // for each method in CMT EJB
+        
         return subjects;
-    }
-    
-    static class WsatPolicyAssertion extends SimpleAssertion {
-        /**
-         * patch for wsit 419
-         */
-        private static final QName WSP2002_OPTIONAL = new QName("http://schemas.xmlsoap.org/ws/2002/12/policy", "Optional");
-        //
-        private static AssertionData createAssertionData(final QName assertionQName, final boolean isOptional) {
-            final AssertionData result = AssertionData.createAssertionData(assertionQName);
-            result.setOptionalAttribute(isOptional);
-            if (isOptional) {
-                // patch for wsit 419
-                result.setAttribute(WSP2002_OPTIONAL, "true");
-            }
-            return result;
-        }
-
-        WsatPolicyAssertion(final QName wsatPolicyAssertionName, final boolean isOptional) {
-            super(createAssertionData(wsatPolicyAssertionName, isOptional), null);
-        }
-    }
-    
-    private static final QName AT_ASSERTION = WsatNamespace.WSAT200410.createFqn("ATAssertion");
-    private static final WsatPolicyAssertion AT_ASSERTION_OPTIONAL = new WsatPolicyAssertion(AT_ASSERTION, true);
-    private static final WsatPolicyAssertion AT_ASSERTION_REQUIRED = new WsatPolicyAssertion(AT_ASSERTION, false);
-    private static final WsatPolicyAssertion AT_ALWAYS_CAPABILITY_PA = new WsatPolicyAssertion(WsatNamespace.WSAT200410.createFqn("ATAllwaysCapability"), false);
-    
-    /**
-     * Pass in what the effective transaction attribute for a given Container Manager Transaction EJB method and return the
-     * semantically closest WS-AT policy assertion.
-     * <p/>
-     * This is best match between Java EE Transaction Attribute and WS-AT Policy Assertion.
-     * There are a number of differences between them.
-     */
-    private Policy mapTransactionAttribute2WSATPolicy(final String id, final TransactionAttributeType txnAttr) {
-
-        switch (txnAttr) {
-            case NOT_SUPPORTED:
-            case NEVER:          // ws-at does not require exception thrown if txn propagated with no assertion.
-                // no ws-at policy assertion on wsdl:binding/wsdl:operation is equivalent of no
-                // claim.
-                return null;
-
-            case MANDATORY:
-                return createATPolicy(id, AT_ASSERTION_REQUIRED);
-
-            case SUPPORTS:
-                return createATPolicy(id, AT_ASSERTION_OPTIONAL);
-
-            case REQUIRES_NEW:
-                return createATPolicy(id, AT_ALWAYS_CAPABILITY_PA);
-
-            case REQUIRED:
-                return createATPolicy(id, AT_ASSERTION_OPTIONAL, AT_ALWAYS_CAPABILITY_PA);
-
-            default:
-                return null;
-        }
-    }
-
-    private static Policy createATPolicy(final String id, final WsatPolicyAssertion... assertions) {
-        assert assertions != null && assertions.length > 0;
-
-        final List<AssertionSet> assertionSets = new ArrayList<AssertionSet>(1);
-        assertionSets.add(AssertionSet.createAssertionSet(Arrays.asList(assertions)));
-
-        return Policy.createPolicy("", id, assertionSets);
     }
 }

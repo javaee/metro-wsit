@@ -74,24 +74,44 @@ public @interface Transactional {
 
     enum Version {
 
-        WSAT10("wsat10", WsatNamespace.WSAT200410.namespace),
-        WSAT11("wsat11", WsatNamespace.WSAT200606.namespace),
-        WSAT12("wsat12", WsatNamespace.WSAT200606.namespace),
-        DEFAULT("wsat", "");
+        WSAT10("wsat10", WsatNamespace.WSAT200410),
+        WSAT11("wsat11", WsatNamespace.WSAT200606),
+        WSAT12("wsat12", WsatNamespace.WSAT200606),
+        DEFAULT("wsat", null);
 
-        QName qname;
+        public final QName qname;
+        public final WsatNamespace namespaceVersion;
 
-        Version(String prefix, String namespaceUri) {
-            this.qname = new QName(namespaceUri, "ATAssertion", prefix);
+        Version(String prefix, WsatNamespace namespaceVersion) {
+            this.namespaceVersion = namespaceVersion;
+
+            this.qname = new QName((namespaceVersion != null) ? namespaceVersion.namespace : "", "ATAssertion", prefix);
         }
 
         public QName getQName() {
             return qname;
         }
 
+        public static Version forNamespaceVersion(WsatNamespace nsVersion) {
+            for (Version version : Version.values()) {
+                if (version == WSAT11) {
+                    continue; // return WSAT12 for this namespace
+                }
+
+                if (version.namespaceVersion == nsVersion) {
+                    return version;
+                }
+            }
+            return DEFAULT;
+        }
+
         public static Version forNamespaceUri(String ns) {
             for (Version version : Version.values()) {
-                if (ns.equals(version.qname.getNamespaceURI())) {
+                if (version == WSAT11) {
+                    continue; // return WSAT12 for this namespace
+                }
+
+                if (version.qname.getNamespaceURI().equals(ns)) {
                     return version;
                 }
             }

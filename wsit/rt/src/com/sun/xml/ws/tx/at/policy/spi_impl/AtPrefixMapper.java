@@ -62,5 +62,4 @@ public class AtPrefixMapper implements PrefixMapper {
     public Map<String, String> getPrefixMap() {
         return prefixMap;
     }
-    
 }

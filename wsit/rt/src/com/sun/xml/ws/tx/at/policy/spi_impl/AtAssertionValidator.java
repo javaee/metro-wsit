@@ -33,53 +33,47 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.tx.at.api;
+package com.sun.xml.ws.tx.at.policy.spi_impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
+import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.tx.at.policy.AtAlwaysCapability;
+import com.sun.xml.ws.tx.at.policy.AtAssertion;
+
 import javax.xml.namespace.QName;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Enumeration of all supported WS-AT namespaces
- * 
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar
  */
-public enum WsatNamespace {
+public class AtAssertionValidator implements PolicyAssertionValidator {
 
-    WSAT200410("wsat200410", "http://schemas.xmlsoap.org/ws/2004/10/wsat"),
-    WSAT200606("wsat200410", "http://docs.oasis-open.org/ws-tx/wsat/2006/06");
-    //
-    public static List<String> namespacesList() {
-        List<String> retVal = new ArrayList<String>(WsatNamespace.values().length);
-        for (WsatNamespace pns : WsatNamespace.values()) {
-            retVal.add(pns.toString());
-        }
-        return retVal;
-    }
-    //
-    public final String defaultPrefix;
-    public final String namespace;
+    private static final List<String> SUPPORTED_DOMAINS = Collections.unmodifiableList(WsatNamespace.namespacesList());
+    private static final List<QName> SUPPORTED_ASSERTIONS;
 
-    private WsatNamespace(String defaultPrefix, String namespace) {
-        this.defaultPrefix = defaultPrefix;
-        this.namespace = namespace;
-    }
+    static {
+        List<QName> tmpList = new ArrayList<QName>(3);
 
-    public QName createFqn(final String name) {
-        return new QName(namespace, name, defaultPrefix);
-    }
-
-    public QName createFqn(final String prefix, final String name) {
-        return new QName(namespace, name, prefix);
-    }
-
-    public static WsatNamespace forNamespaceUri(String uri) {
         for (WsatNamespace ns : WsatNamespace.values()) {
-            if (ns.namespace.equals(uri)) {
-                return ns;
-            }
+            tmpList.add(AtAssertion.nameForNamespace(ns));
         }
+        tmpList.add(AtAlwaysCapability.NAME);
 
-        return null;
+        SUPPORTED_ASSERTIONS = Collections.unmodifiableList(tmpList);
+    }
+
+    public Fitness validateClientSide(final PolicyAssertion assertion) {
+        return SUPPORTED_ASSERTIONS.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public Fitness validateServerSide(final PolicyAssertion assertion) {
+        return SUPPORTED_ASSERTIONS.contains(assertion.getName()) ? Fitness.SUPPORTED : Fitness.UNKNOWN;
+    }
+
+    public String[] declareSupportedDomains() {
+        return SUPPORTED_DOMAINS.toArray(new String[SUPPORTED_DOMAINS.size()]);
     }
 }

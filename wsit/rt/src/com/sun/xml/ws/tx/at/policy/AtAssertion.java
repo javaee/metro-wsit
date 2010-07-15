@@ -33,53 +33,38 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.tx.at.api;
 
-import java.util.ArrayList;
-import java.util.List;
+package com.sun.xml.ws.tx.at.policy;
+
+import com.sun.xml.ws.policy.PolicyAssertion;
+import com.sun.xml.ws.policy.sourcemodel.AssertionData;
+import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import java.util.Collection;
 import javax.xml.namespace.QName;
 
+
 /**
- * Enumeration of all supported WS-AT namespaces
- * 
+ *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public enum WsatNamespace {
+public class AtAssertion extends WsatAssertionBase {
 
-    WSAT200410("wsat200410", "http://schemas.xmlsoap.org/ws/2004/10/wsat"),
-    WSAT200606("wsat200410", "http://docs.oasis-open.org/ws-tx/wsat/2006/06");
-    //
-    public static List<String> namespacesList() {
-        List<String> retVal = new ArrayList<String>(WsatNamespace.values().length);
-        for (WsatNamespace pns : WsatNamespace.values()) {
-            retVal.add(pns.toString());
-        }
-        return retVal;
-    }
-    //
-    public final String defaultPrefix;
-    public final String namespace;
 
-    private WsatNamespace(String defaultPrefix, String namespace) {
-        this.defaultPrefix = defaultPrefix;
-        this.namespace = namespace;
+    private final WsatNamespace namespace;
+
+    public static QName nameForNamespace(WsatNamespace ns) {
+        return ns.createFqn("ATAssertion");
     }
 
-    public QName createFqn(final String name) {
-        return new QName(namespace, name, defaultPrefix);
+    public AtAssertion(WsatNamespace ns, boolean isOptional) {
+        super(nameForNamespace(ns), isOptional);
+
+        this.namespace = ns;
     }
 
-    public QName createFqn(final String prefix, final String name) {
-        return new QName(namespace, name, prefix);
-    }
+    public AtAssertion(AssertionData data, Collection<? extends PolicyAssertion> assertionParameters) {
+        super(data, assertionParameters);
 
-    public static WsatNamespace forNamespaceUri(String uri) {
-        for (WsatNamespace ns : WsatNamespace.values()) {
-            if (ns.namespace.equals(uri)) {
-                return ns;
-            }
-        }
-
-        return null;
+        this.namespace = WsatNamespace.forNamespaceUri(data.getName().getNamespaceURI());
     }
 }
