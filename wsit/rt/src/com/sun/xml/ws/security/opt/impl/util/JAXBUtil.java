@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -83,7 +83,9 @@ public class JAXBUtil {
                             "com.sun.xml.ws.security.opt.impl.keyinfo:com.sun.xml.ws.security.opt.impl.reference:" +
                             "com.sun.xml.ws.security.secext10:com.sun.xml.ws.security.wsu10:com.sun.xml.ws.security.secext11:" +
                             "com.sun.xml.ws.security.secconv.impl.bindings:" +
-                            "com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.security.core.ai");
+                            "com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.security.core.ai:" +
+                            "com.sun.xml.wss.saml.internal.saml20.jaxb20:" +
+                            "com.sun.xml.wss.saml.internal.saml11.jaxb20:");
                     return null;
                 }
             });

@@ -42,9 +42,11 @@ import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.crypto.SSEData;
 import com.sun.xml.ws.security.opt.impl.message.GSHeaderElement;
+import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.crypto.Data;
 import java.util.HashMap;
 import com.sun.xml.wss.saml.SAMLException;
@@ -59,8 +61,9 @@ import com.sun.xml.wss.impl.keyinfo.KeyIdentifierStrategy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 
 import com.sun.xml.wss.impl.MessageConstants;
-import com.sun.xml.wss.saml.util.SAMLUtil;
-import javax.xml.stream.XMLStreamException;
+import com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLStreamReader;
 import org.w3c.dom.Element;
 
@@ -121,32 +124,41 @@ public class ExportSamlAssertionFilter {
         Assertion _assertion = null;
         Element assertionElement = resolvedPolicy.getAssertion();
         Element _authorityBinding = resolvedPolicy.getAuthorityBinding();
-
+        JAXBElement el = null;
+        
         if (assertionElement == null) {
             XMLStreamReader reader = resolvedPolicy.getAssertionReader();
             try {
                 if (reader != null) {
-                    assertionElement = SAMLUtil.createSAMLAssertion(reader);
+                    //assertionElement = SAMLUtil.createSAMLAssertion(reader);
+                    JAXBContext jc = JAXBUtil.getJAXBContext();
+                    javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+                    el = (JAXBElement) u.unmarshal(reader);
+                    if("2.0".equals(((AssertionType)el.getValue()).getVersion())){
+                       _assertion = new com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion((AssertionType)el.getValue());
+                    }else{
+                        _assertion = new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion((com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType)el.getValue());
+                    }                    
                 }
-            } catch (XMLStreamException ex) {
-                // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
-                // ignore the exception
+            } catch (JAXBException ex) {
+                //ignore the exception 
+            }
+
+        } else {
+            try {
+                if (System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
+                    if (assertionElement.getAttributeNode("ID") != null) {
+                        _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion.fromElement(assertionElement);
+                    } else {
+                        _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(assertionElement);
+                    }
+                } else {
+                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(assertionElement);
+                }
+            } catch (SAMLException ex) {
+                //ignore
             }
         }
-        
-        try {
-            if (System.getProperty("com.sun.xml.wss.saml.binding.jaxb") == null) {
-                if (assertionElement.getAttributeNode("ID") != null) {
-                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion.fromElement(assertionElement);
-                } else {
-                    _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion.fromElement(assertionElement);
-                }
-            } else {
-                _assertion = (Assertion) com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion.fromElement(assertionElement);
-            }
-        } catch (SAMLException ex) {
-            //ignore
-            }
 
         if (samlPolicy.getIncludeToken() == samlPolicy.INCLUDE_NEVER ||
                samlPolicy.getIncludeToken() == samlPolicy.INCLUDE_NEVER_VER2 ) {
@@ -173,7 +185,14 @@ public class ExportSamlAssertionFilter {
                         ((com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion)_assertion).toElement(securityHeader);
                     }
                 } else{
-                    she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                    if(assertionElement != null){
+                        she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                    }else {
+                        she = new GSHeaderElement(el, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                        //with the above constructor setId() is not happening , so set explicitely
+                        she.setId(_assertion.getAssertionID());
+                    }
+                    
                     if(optSecHeader.getChildElement(she.getId()) == null){
                         optSecHeader.add(she);
                     } else{
@@ -188,7 +207,13 @@ public class ExportSamlAssertionFilter {
                 if(!isOptimized){
                     ((com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion)_assertion).toElement(securityHeader);
                 } else{
-                    she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                    if(assertionElement != null){
+                        she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                    }else {
+                        she = new GSHeaderElement(el, ((JAXBFilterProcessingContext)context).getSOAPVersion());
+                        //with the above constructor setId() is not happening , so set explicitely
+                        she.setId(_assertion.getAssertionID());
+                    }
                     if(optSecHeader.getChildElement(she.getId()) == null){
                         optSecHeader.add(she);
                     } else{
