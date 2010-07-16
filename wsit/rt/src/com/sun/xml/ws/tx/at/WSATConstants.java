@@ -100,8 +100,7 @@ public interface WSATConstants {
     static final QName ROUTING_QNAME = new QName(WLA_WSAT_NS_URI, ROUTING, _WSAT);
     // outbound endpoints
     public static final String WSAT_COORDINATORPORTTYPEPORT = "/"+_WSAT+"/CoordinatorPortType";
-    //public static final String WSAT_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+_WSAT+"/RegistrationPortTypeRPC";
-    public static final String WSAT_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+_WSAT+"/wscoor/coordinator/synchRegister";
+    public static final String WSAT_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+_WSAT+"/RegistrationPortTypeRPC";
     // inbound endpoints
     public static final String WSAT_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+_WSAT+"/RegistrationRequesterPortType";
     //RegistrationRequesterPortTypeRPC";

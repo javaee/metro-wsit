@@ -35,6 +35,7 @@
 */
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.WSATException;
 
@@ -44,11 +45,12 @@ import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 
 public class TransactionServicesImpl implements TransactionServices {
-
+    private static TransactionServices INSTANCE;
 
 
     public static TransactionServices getInstance() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if(INSTANCE==null) INSTANCE = new TransactionServicesImpl();
+        return INSTANCE;
     }
 
     public byte[] getGlobalTransactionId() {
@@ -60,7 +62,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException {
-        
+        log("regsync");
     }
 
     public int getExpires() {
@@ -72,24 +74,29 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public String prepare(byte[] tId) throws WSATException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log("prepare");
+        return WSATConstants.PREPARED;
     }
 
     public void commit(byte[] tId) throws WSATException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log("commit");
     }
 
     public void rollback(byte[] tId) throws WSATException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log("rollback");
     }
 
     public void replayCompletion(String tId, XAResource xaResource) throws WSATException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log("replayCompleiton");
     }
 
     public EndpointReference getParentReference(Xid xid) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log("getParentReference");
+        return null;
     }
 
+    private void log(String msg){
+        System.out.println("txservicesimpl:"+msg);
+    }
 
 }

@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.security.AccessController;
 
 /**
  * This singleton serves not only as a helper and utility but as the core of the WS-AT resource manager and
@@ -474,7 +473,7 @@ public class WSATHelper<T> {
      * Used by getXidFromWebServiceContextHeaderList in WSATHelper and replayOperation of Coordinator service
      *
      * @param context WebServiceContext
-     * @return WS-AT Txid String
+     * @return WS-AT Txid StringØ
      */
     public String getWSATTidFromWebServiceContextHeaderList(WebServiceContext context) {
         javax.xml.ws.handler.MessageContext messageContext = context.getMessageContext();

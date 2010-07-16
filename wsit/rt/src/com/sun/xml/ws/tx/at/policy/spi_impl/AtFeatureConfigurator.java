@@ -90,7 +90,7 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
             }
 
             final TransactionalFeature feature = getAtFeature(policyMap.getOperationEffectivePolicy(key), true);
-            if (feature == null && !feature.isEnabled()) {
+            if (feature == null || !feature.isEnabled()) {
                 continue;
             }
 

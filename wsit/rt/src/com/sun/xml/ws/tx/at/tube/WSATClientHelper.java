@@ -47,6 +47,8 @@ import org.w3c.dom.Element;
 import com.sun.xml.ws.tx.at.WSATHelper;
 //import com.sun.xml.ws.tx.common.TransactionImportManager;
 //import com.sun.xml.ws.tx.common.TransactionImportWrapper;
+import com.sun.xml.ws.tx.at.common.TransactionImportManager;
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
@@ -171,9 +173,21 @@ public class WSATClientHelper implements WSATClient {
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logSuspendSuccessfulInClientSideHandler(suspendedTransaction, Thread.currentThread());
 
-        String txId = "wsattesttxid"; //todoremoveWSATTubeHelper.getWSATTxIdForTransaction(suspendedTransaction);
-        long ttl = 90000;//todoremove suspendedTransaction.getTimeToLiveMillis();
+        String txId = "wsattesttxid";
+        try {
+            txId = TransactionManagerImpl.getInstance().getTransaction().toString(); //todoremoveWSATTubeHelper.getWSATTxIdForTransaction(suspendedTransaction);
+        } catch (SystemException ex) {
+            Logger.getLogger(WSATClientHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        long ttl = 30000; //todoremove
 
+        try {
+            ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout(); //todoremove suspendedTransaction.getTimeToLiveMillis();
+            //todoremove         if (WSATHelper.isDebugEnabled())
+            //todoremove             WseeWsatLogger.logWSATInfoInClientSideHandler(txId, ttl, suspendedTransaction, Thread.currentThread());
+        } catch (SystemException ex) {
+            Logger.getLogger(WSATClientHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logWSATInfoInClientSideHandler(txId, ttl, suspendedTransaction, Thread.currentThread());
 

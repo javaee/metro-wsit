@@ -40,7 +40,6 @@ import com.sun.xml.ws.developer.MemberSubmissionAddressing;
 import com.sun.xml.ws.tx.coord.v10.types.RegisterResponseType;
 import com.sun.xml.ws.tx.coord.v10.types.RegisterType;
 import com.sun.xml.ws.tx.coord.v10.types.RegistrationPortTypeRPC;
-import com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationProxyImpl;
 import com.sun.xml.ws.tx.coord.v10.XmlTypeAdapter;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 
