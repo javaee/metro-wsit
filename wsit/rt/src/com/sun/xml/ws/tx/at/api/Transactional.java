@@ -49,28 +49,9 @@ import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 @WebServiceFeatureAnnotation(id = TransactionalFeature.ID, bean = TransactionalFeature.class)
 public @interface Transactional {
 
-    /**
-     * Specifies if this feature is enabled or disabled.
-     */
-    boolean enabled() default true;
-
-    /**
-     * Specifies the transaction flow type.
-     */
-    TransactionFlowType value() default TransactionFlowType.SUPPORTS;
-
     enum TransactionFlowType {
-
         MANDATORY, SUPPORTS, NEVER
     }
-
-    /**
-     * Specifies the version of WS-AT being supported, when used together with
-     * @WebServiceRef, the default value Version.WSAT10. When used together with
-     * @Webservice and @Provider, all versions will be supported, the real version
-     * will be determined by the request message.
-     */
-    Version version() default Version.DEFAULT;
 
     enum Version {
 
@@ -118,4 +99,22 @@ public @interface Transactional {
             return DEFAULT;
         }
     }
+
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
+
+    /**
+     * Specifies the transaction flow type.
+     */
+    TransactionFlowType value() default TransactionFlowType.SUPPORTS;
+
+    /**
+     * Specifies the version of WS-AT being supported, when used together with
+     * @WebServiceRef, the default value Version.WSAT10. When used together with
+     * @Webservice and @Provider, all versions will be supported, the real version
+     * will be determined by the request message.
+     */
+    Version version() default Version.DEFAULT;
 }

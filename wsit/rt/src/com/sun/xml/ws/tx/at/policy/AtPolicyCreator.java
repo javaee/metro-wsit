@@ -55,9 +55,9 @@ import static com.sun.xml.ws.tx.at.api.WsatNamespace.*;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class AtPolicyCreator {
-    private static final Map<WsatNamespace, Map<TransactionFlowType, Map<EjbTransactionAttributeType, Collection<WsatAssertionBase>>>> SUPPORTED_COMBINATIONS;
+    private static final Map<WsatNamespace, Map<TransactionFlowType, Map<EjbTransactionType, Collection<WsatAssertionBase>>>> SUPPORTED_COMBINATIONS;
 
-    private static void registerCombination(WsatNamespace version, TransactionFlowType flowType, EjbTransactionAttributeType ejbTat, WsatAssertionBase... assertions) {
+    private static void registerCombination(WsatNamespace version, TransactionFlowType flowType, EjbTransactionType ejbTat, WsatAssertionBase... assertions) {
         if (assertions == null) {
             assertions = new WsatAssertionBase[0];
         }
@@ -65,27 +65,45 @@ public final class AtPolicyCreator {
     }
 
     static {
-        SUPPORTED_COMBINATIONS = new EnumMap<WsatNamespace, Map<TransactionFlowType, Map<EjbTransactionAttributeType, Collection<WsatAssertionBase>>>>(WsatNamespace.class);
+        SUPPORTED_COMBINATIONS = new EnumMap<WsatNamespace, Map<TransactionFlowType, Map<EjbTransactionType, Collection<WsatAssertionBase>>>>(WsatNamespace.class);
         for (WsatNamespace ns : WsatNamespace.values()) {
-            Map<TransactionFlowType, Map<EjbTransactionAttributeType, Collection<WsatAssertionBase>>> nsMap = new EnumMap<TransactionFlowType, Map<EjbTransactionAttributeType, Collection<WsatAssertionBase>>>(TransactionFlowType.class);
+            Map<TransactionFlowType, Map<EjbTransactionType, Collection<WsatAssertionBase>>> nsMap = new EnumMap<TransactionFlowType, Map<EjbTransactionType, Collection<WsatAssertionBase>>>(TransactionFlowType.class);
             for (TransactionFlowType flowType : TransactionFlowType.values()) {
-                nsMap.put(flowType, new EnumMap<EjbTransactionAttributeType, Collection<WsatAssertionBase>>(EjbTransactionAttributeType.class));
+                nsMap.put(flowType, new EnumMap<EjbTransactionType, Collection<WsatAssertionBase>>(EjbTransactionType.class));
             }
             SUPPORTED_COMBINATIONS.put(ns, nsMap);
         }
 
-        registerCombination(WSAT200410, MANDATORY, EjbTransactionAttributeType.MANDATORY, new AtAssertion(WSAT200410, false));
-        registerCombination(WSAT200410, MANDATORY, EjbTransactionAttributeType.REQUIRED, new AtAssertion(WSAT200410, false));
-        registerCombination(WSAT200410, SUPPORTS, EjbTransactionAttributeType.REQUIRED, new AtAssertion(WSAT200410, true), new AtAlwaysCapability(false));
-        registerCombination(WSAT200410, SUPPORTS, EjbTransactionAttributeType.SUPPORTS, new AtAssertion(WSAT200410, true));
-        registerCombination(WSAT200410, NEVER, EjbTransactionAttributeType.REQUIRES_NEW, new AtAlwaysCapability(false));
-        registerCombination(WSAT200410, NEVER, EjbTransactionAttributeType.REQUIRED, new AtAlwaysCapability(false));
-        registerCombination(WSAT200410, NEVER, EjbTransactionAttributeType.NEVER); // no assertions
+        // WSAT200410
+        registerCombination(WSAT200410, MANDATORY, EjbTransactionType.NOT_DEFINED, new AtAssertion(WSAT200410, false));
+        registerCombination(WSAT200410, MANDATORY, EjbTransactionType.MANDATORY, new AtAssertion(WSAT200410, false));
+        registerCombination(WSAT200410, MANDATORY, EjbTransactionType.REQUIRED, new AtAssertion(WSAT200410, false));
 
-        // TODO WSAT200606
+        registerCombination(WSAT200410, SUPPORTS, EjbTransactionType.NOT_DEFINED, new AtAssertion(WSAT200410, true));
+        registerCombination(WSAT200410, SUPPORTS, EjbTransactionType.SUPPORTS, new AtAssertion(WSAT200410, true));
+        registerCombination(WSAT200410, SUPPORTS, EjbTransactionType.REQUIRED, new AtAssertion(WSAT200410, true), new AtAlwaysCapability(false));
+
+        registerCombination(WSAT200410, NEVER, EjbTransactionType.NOT_DEFINED); // no assertions
+        registerCombination(WSAT200410, NEVER, EjbTransactionType.NEVER); // no assertions
+        registerCombination(WSAT200410, NEVER, EjbTransactionType.REQUIRES_NEW, new AtAlwaysCapability(false));
+        registerCombination(WSAT200410, NEVER, EjbTransactionType.REQUIRED, new AtAlwaysCapability(false));
+
+        // WSAT200606
+        registerCombination(WSAT200606, MANDATORY, EjbTransactionType.NOT_DEFINED, new AtAssertion(WSAT200606, false));
+        registerCombination(WSAT200606, MANDATORY, EjbTransactionType.MANDATORY, new AtAssertion(WSAT200606, false));
+        registerCombination(WSAT200606, MANDATORY, EjbTransactionType.REQUIRED, new AtAssertion(WSAT200606, false));
+
+        registerCombination(WSAT200606, SUPPORTS, EjbTransactionType.NOT_DEFINED, new AtAssertion(WSAT200606, true));
+        registerCombination(WSAT200606, SUPPORTS, EjbTransactionType.SUPPORTS, new AtAssertion(WSAT200606, true));
+        registerCombination(WSAT200606, SUPPORTS, EjbTransactionType.REQUIRED, new AtAssertion(WSAT200606, true));
+
+        registerCombination(WSAT200606, NEVER, EjbTransactionType.NOT_DEFINED); // no assertions
+        registerCombination(WSAT200606, NEVER, EjbTransactionType.NEVER); // no assertions
+        registerCombination(WSAT200606, NEVER, EjbTransactionType.REQUIRES_NEW); // no assertions
+        registerCombination(WSAT200606, NEVER, EjbTransactionType.NOT_SUPPORTED); // no assertions
     }
 
-    public static Policy createPolicy(String policyId, WsatNamespace version, Transactional.TransactionFlowType wsatFlowType, EjbTransactionAttributeType ejbTat) {
+    public static Policy createPolicy(String policyId, WsatNamespace version, Transactional.TransactionFlowType wsatFlowType, EjbTransactionType ejbTat) {
         if (wsatFlowType == null || ejbTat == null) {
             return null;
         }
