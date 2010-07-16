@@ -68,61 +68,97 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
      * Process WS-RM policy assertions and if found and is not optional then RM is enabled on the
      * {@link WSDLPort}
      *
-     * @param key Key that identifies the endpoint scope
+     * @param endpointKey Key that identifies the endpoint scope
      * @param policyMap must not be {@code null}
      * @return The list of features
      * @throws PolicyException If retrieving the policy triggered an exception
      */
-    public Collection<WebServiceFeature> getFeatures(PolicyMapKey key, PolicyMap policyMap) throws PolicyException {
+    public Collection<WebServiceFeature> getFeatures(PolicyMapKey endpointKey, PolicyMap policyMap) throws PolicyException {
         final Collection<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
-        if ((key != null) && (policyMap != null)) {
-            Policy policy = policyMap.getEndpointEffectivePolicy(key);
-            if (policy != null) {
-                for (AssertionSet alternative : policy) {
-                    WebServiceFeature feature;
-                    feature = getAtFeature(alternative);
-                    if (feature != null) {
-                        features.add(feature);
-                    }
-                }
-            } // end-if policy not null
+        if (endpointKey == null || policyMap == null) {
+            return features;
         }
-        return features;
 
+        TransactionalFeature endpointFeature = getAtFeature(policyMap.getEndpointEffectivePolicy(endpointKey), false);
+        if (endpointFeature != null) {
+            features.add(endpointFeature);
+        }
+
+        for (PolicyMapKey key : policyMap.getAllOperationScopeKeys()) {
+            if (!endpointKey.equals(key)) {
+                continue;
+            }
+
+            final TransactionalFeature feature = getAtFeature(policyMap.getOperationEffectivePolicy(key), true);
+            if (feature == null && !feature.isEnabled()) {
+                continue;
+            }
+
+            if (endpointFeature == null) {
+                endpointFeature = feature;
+                features.add(endpointFeature);
+            } else if (endpointFeature.getVersion() != feature.getVersion()) {
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1004_ENDPOINT_AND_OPERATION_POLICIES_DONT_MATCH(endpointKey, key)));
+            }
+
+            endpointFeature.setExplicitMode(true);
+            String opName = "";// TODO key.getOperation().getLocalPart();
+            feature.setFlowType(opName, feature.getFlowType());
+            feature.setEnabled(opName, true);
+        }
+
+        return features;
     }
 
-    private TransactionalFeature getAtFeature(AssertionSet alternative) throws PolicyException {
-        TransactionalFeature feature = null;
+    private TransactionalFeature getAtFeature(final Policy policy, final boolean setExplictMode) throws WebServiceException, PolicyException {
+        if (policy == null) {
+            return null;
+        }
 
-        int atAssertionCount = 0;
+        TransactionalFeature resultFeature = null;
+        for (AssertionSet alternative : policy) {
+            TransactionalFeature feature = getAtFeature(alternative, setExplictMode);
+            if (feature == null) {
+                continue;
+            }
+            if (resultFeature == null) {
+                resultFeature = feature;
+            } else if (!areCompatible(resultFeature, feature)) { // Multiple Transactional features in a single effective policy must be compatible
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1003_INCOMPATIBLE_FEATURES_DETECTED(policy.toString())));
+            }
+        } // end for all alternatives in policy
+
+        return resultFeature;
+    }
+
+    private TransactionalFeature getAtFeature(final AssertionSet alternative, final boolean setExplicitMode) throws PolicyException {
+        TransactionalFeature feature = null;
         for (PolicyAssertion assertion : alternative) {
             if (assertion instanceof AtAssertion) {
-                atAssertionCount++;
-                if (atAssertionCount > 1) {
-                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1001_DUPLICATE_ASSERTION_IN_POLICY(atAssertionCount)));
+                if (feature != null) {
+                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1001_DUPLICATE_ASSERTION_IN_POLICY(alternative.toString())));
                 }
 
-                if (feature == null) {
-                    feature = new TransactionalFeature();
-                    feature.setExplicitMode(true);
-                }
+                feature = new TransactionalFeature(true);
+                feature.setExplicitMode(setExplicitMode);
                 WsatNamespace version = WsatNamespace.forNamespaceUri(assertion.getName().getNamespaceURI());
 
                 feature.setVersion(Transactional.Version.forNamespaceVersion(version));
-                feature.setFlowType(toFlowType(assertion.isOptional()));
-                feature.setEnabled(true);
+                feature.setFlowType(assertion.isOptional() ? TransactionFlowType.SUPPORTS : TransactionFlowType.MANDATORY);
             }
         } // next assertion
 
         return feature;
     }
 
-    private static TransactionFlowType toFlowType(boolean isOptinal) {
-        if (isOptinal) {
-            return TransactionFlowType.SUPPORTS;
-        } else {
-            return TransactionFlowType.MANDATORY;
-        }
+    private static boolean areCompatible(TransactionalFeature featureA, TransactionalFeature featureB) {
+        boolean result = true;
+
+        result = result && (featureA.isEnabled() == featureB.isEnabled());
+        result = result && featureA.getVersion() == featureB.getVersion();
+        result = result && featureA.getFlowType() == featureB.getFlowType();
+
+        return result;
     }
 //    public static TransactionalFeature buildFeatureFromWsdl(WsdlPort port, PolicyServer policyServer) {
 //        TransactionalFeature feature = null;
