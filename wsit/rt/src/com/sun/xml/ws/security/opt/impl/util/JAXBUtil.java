@@ -83,9 +83,7 @@ public class JAXBUtil {
                             "com.sun.xml.ws.security.opt.impl.keyinfo:com.sun.xml.ws.security.opt.impl.reference:" +
                             "com.sun.xml.ws.security.secext10:com.sun.xml.ws.security.wsu10:com.sun.xml.ws.security.secext11:" +
                             "com.sun.xml.ws.security.secconv.impl.bindings:" +
-                            "com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.security.core.ai:" +
-                            "com.sun.xml.wss.saml.internal.saml20.jaxb20:" +
-                            "com.sun.xml.wss.saml.internal.saml11.jaxb20:");
+                            "com.sun.xml.ws.security.secconv.impl.wssx.bindings:com.sun.xml.security.core.ai:");
                     return null;
                 }
             });
