@@ -213,4 +213,16 @@ public class OutboundSequenceTest extends TestCase {
         }      
          */
     }
+
+    public void testSequenceExpiry() throws Exception {
+        Sequence inbound = sequenceManager.createInboundSequence(
+        sequenceManager.generateSequenceUID(),
+        null,
+        System.currentTimeMillis() + 1000);
+        
+        assertFalse(inbound.isExpired());
+
+        Thread.sleep(1100);
+        assertTrue(inbound.isExpired());
+    }
 }

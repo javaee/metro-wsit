@@ -279,6 +279,9 @@ public class PolicyResolverImpl implements PolicyResolver {
     }
 
     private MessagePolicy getInboundXWSBootstrapPolicy(Token scAssertion) {
+        if(scAssertion == null){
+            return null;
+        }
         return ((SCTokenWrapper) scAssertion).getMessagePolicy();
     }
 

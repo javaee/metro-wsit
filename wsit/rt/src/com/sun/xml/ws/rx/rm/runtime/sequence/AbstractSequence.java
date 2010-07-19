@@ -165,7 +165,7 @@ public abstract class AbstractSequence implements Sequence {
     }
 
     public boolean isExpired() {
-        return (data.getExpirationTime() == Sequence.NO_EXPIRY) ? false : timeSynchronizer.currentTimeInMillis() < data.getExpirationTime();
+        return (data.getExpirationTime() == Sequence.NO_EXPIRY) ? false : timeSynchronizer.currentTimeInMillis() > data.getExpirationTime();
     }
 
     public void preDestroy() {

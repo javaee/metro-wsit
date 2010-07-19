@@ -211,4 +211,16 @@ public class InboundSequenceTest extends TestCase {
             sequence.acknowledgeMessageNumber(entry.getValue().getMessageNumber());
         }
     }
+
+    public void testSequenceExpiry() throws Exception {
+        Sequence inbound = sequenceManager.createInboundSequence(
+        sequenceManager.generateSequenceUID(),
+        null,
+        System.currentTimeMillis() + 1000);
+        
+        assertFalse(inbound.isExpired());
+
+        Thread.sleep(1100);
+        assertTrue(inbound.isExpired());
+    }
 }
