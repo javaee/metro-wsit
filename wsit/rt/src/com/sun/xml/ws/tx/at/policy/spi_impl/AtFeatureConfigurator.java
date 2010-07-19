@@ -102,7 +102,7 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
             }
 
             endpointFeature.setExplicitMode(true);
-            String opName = "";// TODO key.getOperation().getLocalPart();
+            String opName = key.getOperation().getLocalPart();
             feature.setFlowType(opName, feature.getFlowType());
             feature.setEnabled(opName, true);
         }
