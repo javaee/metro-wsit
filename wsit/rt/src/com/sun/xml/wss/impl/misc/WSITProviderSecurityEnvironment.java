@@ -2768,6 +2768,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 ret.setAssertion(sc.getAssertionElement());
                 ret.setAssertion(sc.getAssertionReader());
                 ret.setAuthorityBinding(sc.getAuthorityBindingElement());
+                ret.setSAMLVersion(sc.getSAMLVersion());
                 
             }else {
                 log.log(Level.SEVERE, "WSS0717.no.SAMLCallbackHandler");
@@ -2800,7 +2801,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
                 PrivateKey key = getPrivateKey(fpcontext, this.myAlias);
                 pkBinding.setPrivateKey(key);
                 ret.setAssertionId(sc.getAssertionId());
-                
+                ret.setSAMLVersion(sc.getSAMLVersion());
             } else {
                 log.log(Level.SEVERE, "WSS0717.no.SAMLCallbackHandler");
                 throw new XWSSecurityException(
