@@ -51,4 +51,14 @@ public final class HighAvailabilityProvider {
         return NOOP_BSF;
     }
 
+    /**
+     * Provides information on whether there is a HA service available in the
+     * current JVM or not.
+     * 
+     * @return {@code true} in case there is a HA service available in the current
+     *         JVM, {@code false} otherwise
+     */
+    public boolean isHaServiceAvailable() {
+        return false; // TODO implement
+    }
 }
