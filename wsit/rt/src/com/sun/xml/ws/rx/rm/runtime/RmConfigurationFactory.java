@@ -58,19 +58,17 @@ public enum RmConfigurationFactory {
         return createInstance(
                 context.getWsdlPort(),
                 context.getEndpoint().getBinding(),
-                context.getWrappedContext().getEndpoint().getManagedObjectManager(),
-                context.getHighAvailabilityProvider());
+                context.getWrappedContext().getEndpoint().getManagedObjectManager());
     }
 
     public RmConfiguration createInstance(ClientTubelineAssemblyContext context) {
         return createInstance(
                 context.getWsdlPort(),
                 context.getBinding(),
-                context.getWrappedContext().getBindingProvider().getManagedObjectManager(),
-                context.getHighAvailabilityProvider());
+                context.getWrappedContext().getBindingProvider().getManagedObjectManager());
     }
 
-    private RmConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager, final HighAvailabilityProvider haProvider) {
+    private RmConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager) {
 
         return new RmConfigurationImpl(
                 binding.getFeature(ReliableMessagingFeature.class),
@@ -79,7 +77,7 @@ public enum RmConfigurationFactory {
                 binding.getAddressingVersion(),
                 PortUtilities.checkForRequestResponseOperations(wsdlPort),
 		managedObjectManager,
-                haProvider);
+                HighAvailabilityProvider.INSTANCE);
     }
 
 }

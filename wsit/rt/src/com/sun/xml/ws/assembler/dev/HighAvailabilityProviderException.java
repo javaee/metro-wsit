@@ -33,59 +33,23 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.rx;
 
-import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
-import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
-import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
-import org.glassfish.gmbal.ManagedObjectManager;
+package com.sun.xml.ws.assembler.dev;
+
+import javax.xml.ws.WebServiceException;
 
 /**
- * Common base for WS-RX technology configuration
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public interface RxConfiguration {
-    public static final String ACK_REQUESTED_HEADER_SET = RxConfiguration.class.getName() + ".ACK_REQUESTED_HEADER_SET";
-    
-    /**
-     * @see ReliableMessagingFeature
-     */
-    public boolean isReliableMessagingEnabled();
-    
-    /**
-     * @see MakeConnectionSupportedFeature
-     */
-    public boolean isMakeConnectionSupportEnabled();
+public final class HighAvailabilityProviderException extends WebServiceException {
 
-    /**
-     * Provides information about the SOAP protocol version used on the endpoint.
-     * 
-     * @return the SOAP protocol version used on the RM-enabled endpoint
-     */
-    public SOAPVersion getSoapVersion();
+    public HighAvailabilityProviderException(String message, Throwable cause) {
+        super (message, cause);
+    }
 
-    /**
-     * Provides information about the WS-Addressing protocol version used on the endpoint.
-     * 
-     * @return the WS-Addressing protocol version used on the RM-enabled endpoint
-     */
-    public AddressingVersion getAddressingVersion();
-    
-    /**
-     * Provides information if the port, which this configuration belongs to, has 
-     * any request/response operations.
-     *
-     * @return {@code true} in case the port has any request/response operations; {@code false} otherwise
-     */
-    public boolean requestResponseOperationsDetected();
-    
-    /**
-     * Returns GMBAL/JMX manager
-     *
-     * @return GMBAL/JMX manager. May return null.
-     */
-    public ManagedObjectManager getManagedObjectManager();
+    public HighAvailabilityProviderException(String message) {
+        super (message);
+    }
+
 }
