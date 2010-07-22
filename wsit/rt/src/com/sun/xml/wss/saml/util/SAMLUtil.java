@@ -45,6 +45,7 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType;
@@ -263,7 +264,9 @@ public class SAMLUtil {
         Assertion _assertion = null;
 
         if(SAMLVersion == null){
-            throw new XWSSecurityException("SAML Version should be set in the callback handler when using saml assertion reader");
+            XWSSecurityRuntimeException ex  =new XWSSecurityRuntimeException("SAML Version should be set in the callback handler when using saml assertion reader");
+            logger.log(Level.SEVERE, "SAML Version is not set in the saml callback", ex);
+            throw ex;
         }
 
         try {

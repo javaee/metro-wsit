@@ -229,9 +229,9 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
         if (element != null ) {
             String nsURI = element.getName() != null ? element.getName().getNamespaceURI(): null;
             if (nsURI != null && nsURI.contains("SAML:2.0")) {
-                return SAML20JAXBUtil.getJAXBContext().createMarshaller();
+                return SAML20JAXBUtil.createMarshaller(soapVersion);
             } else if(nsURI != null && nsURI.contains("SAML:1.0")){
-                return SAMLJAXBUtil.getJAXBContext().createMarshaller();
+                return SAMLJAXBUtil.createMarshaller(soapVersion);
             }
         }
         return JAXBUtil.createMarshaller(soapVersion);

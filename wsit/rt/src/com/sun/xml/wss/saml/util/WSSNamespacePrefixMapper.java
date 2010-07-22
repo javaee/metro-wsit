@@ -43,9 +43,13 @@ import com.sun.xml.wss.impl.MessageConstants;
  * @author K.Venugopal@sun.com
  */
 public class WSSNamespacePrefixMapper extends NamespacePrefixMapper{
+    private boolean soap12;
     
     /** Creates a new instance of NamespacePrefixMapper */
     public WSSNamespacePrefixMapper() {
+    }
+    public WSSNamespacePrefixMapper(boolean soap12) {
+        this.soap12 = soap12;
     }
     
     public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
