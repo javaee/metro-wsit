@@ -53,8 +53,14 @@ public enum HighAvailabilityProvider {
     private static final Logger LOGGER = Logger.getLogger(HighAvailabilityProvider.class);
 
     public static enum StoreType {
-        IN_MEMORY,
-        NOOP
+        IN_MEMORY("replicated"), // FIXME replace with a constant reference when available
+        NOOP(BackingStoreConfiguration.NO_OP_PERSISTENCE_TYPE);
+
+        private final String storeTypeId;
+
+        private StoreType(String storeTypeId) {
+            this.storeTypeId = storeTypeId;
+        }
     }
 
     private static class HaEnvironment {
@@ -144,17 +150,9 @@ public enum HighAvailabilityProvider {
     }
 
     private BackingStoreFactory getSafeBackingStoreFactory(final StoreType type) throws HighAvailabilityProviderException {
-        final String storeType = ""; // TODO retrieve proper store type string
-
         try {
-            return BackingStoreFactoryRegistry.getFactoryInstance(storeType);
+            return BackingStoreFactoryRegistry.getFactoryInstance(type.storeTypeId);
         } catch (BackingStoreException ex) {
-            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO message
-        } catch (ClassNotFoundException ex) {
-            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO message
-        } catch (InstantiationException ex) {
-            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO message
-        } catch (IllegalAccessException ex) {
             throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO message
         }
     }
