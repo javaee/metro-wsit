@@ -499,10 +499,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         Session session = SessionManager.getSessionManager(packet.endpoint).getSession(sessionId);
 
-        if (session == null && rc.configuration.getRmFeature().isPersistenceEnabled()) {
-            // inbound sequence id (session id) is valid, but there's no session 
-            // in the session manager => there must have been a crash or redeploy
-            // starting a new session
+        if (session == null) {
             session = Utilities.startSession(packet.endpoint, sessionId);
         }
 
