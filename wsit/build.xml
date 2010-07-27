@@ -268,9 +268,10 @@
     </target>
 
     <target name="integrate-ha-api" description="integrate the latest GF HA API">
-        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/3.1-b06/ha-api-3.1-b06.jar"
+        <property name="ha-api-version" value="3.1-SNAPSHOT" />
+        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/${ha-api-version}/ha-api-${ha-api-version}.jar"
              dest="lib/runtime/ha-api.jar" />
-        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/3.1-b06/ha-api-3.1-b06-sources.jar"
+        <get src="http://download.java.net/maven/glassfish/org/glassfish/ha/ha-api/${ha-api-version}/ha-api-${ha-api-version}-sources.jar"
              dest="lib/runtime/ha-api-sources.jar" />
     </target>
 
