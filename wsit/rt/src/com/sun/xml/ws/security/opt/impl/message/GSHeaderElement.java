@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,7 +45,6 @@ import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
@@ -54,6 +53,8 @@ import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.wss.saml.util.SAML20JAXBUtil;
+import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
 
 /**
  *
@@ -224,7 +225,15 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
         writeTo(streamWriter);
     }
     
-    private Marshaller getMarshaller() throws javax.xml.bind.JAXBException{
+    private Marshaller getMarshaller() throws javax.xml.bind.JAXBException {
+        if (element != null ) {
+            String nsURI = element.getName() != null ? element.getName().getNamespaceURI(): null;
+            if (nsURI != null && nsURI.contains("SAML:2.0")) {
+                return SAML20JAXBUtil.createMarshaller(soapVersion);
+            } else if(nsURI != null && nsURI.contains("SAML:1.0")){
+                return SAMLJAXBUtil.createMarshaller(soapVersion);
+            }
+        }
         return JAXBUtil.createMarshaller(soapVersion);
     }
 }

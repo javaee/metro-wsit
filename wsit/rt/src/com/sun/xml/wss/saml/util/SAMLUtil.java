@@ -45,7 +45,10 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
+import com.sun.xml.wss.saml.Assertion;
+import com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType;
 import java.text.ParseException;
 import java.util.Date;
 import java.io.ByteArrayInputStream;
@@ -76,6 +79,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.bind.JAXBElement;
 import javax.xml.crypto.Data;
 import javax.xml.crypto.NodeSetData;
 import javax.xml.crypto.URIDereferencer;
@@ -89,9 +93,9 @@ import org.w3c.dom.NamedNodeMap;
 
 public class SAMLUtil {
     private static Logger logger = Logger.getLogger(LogDomainConstants.SAML_API_DOMAIN,
-            LogDomainConstants.SAML_API_DOMAIN_BUNDLE);
+            LogDomainConstants.SAML_API_DOMAIN_BUNDLE);   
     
-    
+    public static JAXBElement element = null;
     public static Element locateSamlAssertion(String assertionId,Document soapDocument)
     throws XWSSecurityException {
         
@@ -253,6 +257,35 @@ public class SAMLUtil {
         }catch(Exception xe){
             throw new XWSSecurityException("Error occurred while trying to convert SAMLAssertion stream into DOM Element", xe);
         }
+    }
+
+    public static Assertion createSAMLAssertion(XMLStreamReader reader,String SAMLVersion) throws XWSSecurityException {
+        JAXBContext jc = null;
+        Assertion _assertion = null;
+
+        if(SAMLVersion == null){
+            XWSSecurityRuntimeException ex  =new XWSSecurityRuntimeException("SAML Version should be set in the callback handler when using saml assertion reader");
+            logger.log(Level.SEVERE, "SAML Version is not set in the saml callback", ex);
+            throw ex;
+        }
+
+        try {
+            if ("2.0".equals(SAMLVersion)) {
+                jc = SAML20JAXBUtil.getJAXBContext();
+                javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+                element = (JAXBElement) u.unmarshal(reader, AssertionType.class);
+                _assertion = new com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion((AssertionType) element.getValue());
+            } else {
+                jc = SAMLJAXBUtil.getJAXBContext();
+                javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
+                element = (JAXBElement) u.unmarshal(reader, com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType.class);
+                _assertion = new com.sun.xml.wss.saml.assertion.saml11.jaxb20.Assertion((com.sun.xml.wss.saml.internal.saml11.jaxb20.AssertionType) element.getValue());
+            }
+        } catch (Exception ex) {
+            throw new XWSSecurityException("Error occurred while trying to create SAMLAssertion from xml stream reader", ex);
+        }
+
+        return _assertion;
     }
     
     public static boolean validateTimeInConditionsStatement(Element samlAssertion) throws XWSSecurityException {

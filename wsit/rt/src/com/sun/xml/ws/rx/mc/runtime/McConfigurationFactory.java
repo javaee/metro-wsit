@@ -54,11 +54,11 @@ public enum McConfigurationFactory {
     INSTANCE;
 
     public McConfiguration createInstance(ServerTubelineAssemblyContext context) {
-        return createInstance(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager(), context.getHighAvailabilityProvider());
+        return createInstance(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
     }
 
     public McConfiguration createInstance(ClientTubelineAssemblyContext context) {
-        return createInstance(context.getWsdlPort(), context.getBinding(), context.getWrappedContext().getBindingProvider().getManagedObjectManager(), context.getHighAvailabilityProvider());
+        return createInstance(context.getWsdlPort(), context.getBinding(), context.getWrappedContext().getBindingProvider().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
     }
 
     private McConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager, final HighAvailabilityProvider haProvider) {

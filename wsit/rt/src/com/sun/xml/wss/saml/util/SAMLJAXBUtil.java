@@ -44,10 +44,12 @@
  */
 package com.sun.xml.wss.saml.util;
 
+import com.sun.xml.ws.api.SOAPVersion;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -58,6 +60,8 @@ public class SAMLJAXBUtil {
 
     /** Creates a new instance of SAMLJAXBUtil */
     public static JAXBContext jaxbContext;
+    public static final WSSNamespacePrefixMapper prefixMapper11 = new WSSNamespacePrefixMapper();
+    public static final WSSNamespacePrefixMapper prefixMapper12 = new WSSNamespacePrefixMapper(true);
 
     static {
         try {
@@ -80,5 +84,21 @@ public class SAMLJAXBUtil {
     public static JAXBContext getJAXBContext(String namespaces) throws JAXBException{
         jaxbContext = JAXBContext.newInstance("com.sun.xml.wss.saml.internal.saml11.jaxb20"+":"+namespaces);
         return jaxbContext;
+    }
+
+    public static Marshaller createMarshaller(SOAPVersion soapVersion)throws JAXBException {
+        try{
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            if(SOAPVersion.SOAP_11 == soapVersion){
+                marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper11);
+            }else{
+                marshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", prefixMapper12);
+            }
+            marshaller.setProperty(Marshaller.JAXB_FRAGMENT,true);
+            marshaller.setProperty("com.sun.xml.bind.xmlDeclaration", false);
+            return marshaller;
+        }catch(javax.xml.bind.PropertyException pe){
+            throw new JAXBException("Error occurred while setting security marshaller properties",pe);
+        }
     }
 }

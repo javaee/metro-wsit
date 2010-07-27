@@ -33,12 +33,10 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.wss;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.impl.misc.DefaultNonceManager;
-import com.sun.xml.wss.impl.misc.NonceCache;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.logging.LogDomainConstants;
@@ -67,20 +65,19 @@ import java.util.WeakHashMap;
 @Description("per-endpoint NonceManager")
 @AMXMetadata(type = "WSNonceManager")
 public abstract class NonceManager {
-    protected static final Logger LOGGER = 
-        Logger.getLogger(LogDomainConstants.WSS_API_DOMAIN,
-                         LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
 
+    protected static final Logger LOGGER =
+            Logger.getLogger(LogDomainConstants.WSS_API_DOMAIN,
+            LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     public static final String nonceManager = "com.sun.xml.xwss.NonceManager";
     private static final String NONCE_MANAGER = "NonceManager"; // monitoring
     private static WeakHashMap<WSEndpoint, NonceManager> nonceMgrMap = new WeakHashMap<WSEndpoint, NonceManager>();
     private static NonceManager jaxRPCNonceManager = null;
-
     private long maxNonceAge;
 
     /**
      * 
-     * @return the approximate maximum age for which a recieved nonce would be stored by the NonceManager
+     * @return the approximate maximum age for which a received nonce would be stored by the NonceManager
      */
     @ManagedAttribute
     public long getMaxNonceAge() {
@@ -88,7 +85,7 @@ public abstract class NonceManager {
     }
 
     /**
-     * Set the approximate maximum age for which a recieved nonce needs to be stored by the NonceManager
+     * Set the approximate maximum age for which a received nonce needs to be stored by the NonceManager
      * @param maxNonceAge  
      */
     public void setMaxNonceAge(long maxNonceAge) {
@@ -96,7 +93,7 @@ public abstract class NonceManager {
     }
 
     /**
-     * Exception to be thrown when an Error in processing Recieved Nonces occurs. 
+     * Exception to be thrown when an Error in processing received nonces occurs.
      * A Nonce-replay would also be indicated by a NonceException.
      */
     public static class NonceException extends XWSSecurityException {
@@ -125,9 +122,8 @@ public abstract class NonceManager {
         public NonceException(Throwable cause) {
             super(cause);
         }
-    
     }
-    
+
     /**
      * 
      * @param nonce the nonce to be validated
@@ -136,10 +132,10 @@ public abstract class NonceManager {
      * @throws com.sun.xml.wss.NonceManager.NonceException  if a replay is detected
      */
     public abstract boolean validateNonce(String nonce, String created) throws NonceException;
-    
+
     /**
      * 
-     * @param maxNonceAge the approximate maximum age for which a recieved nonce would be stored by the NonceManager
+     * @param maxNonceAge the approximate maximum age for which a received nonce would be stored by the NonceManager
      * @return the singleton instance of the configured NonceManager, calling getInstance with different maxNonceAge 
      * will have no effect and will instead return the same NonceManager which was initialized first.
      */
@@ -148,22 +144,22 @@ public abstract class NonceManager {
         if (endpoint == null) {
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.log(Level.FINE,
-                           String.format("getInstance(): endpoint is null: using singleton"));
+                        String.format("getInstance(): endpoint is null: using singleton"));
             }
         }
 
-        NonceManager nonceMgr = 
-            endpoint != null ? nonceMgrMap.get(endpoint) : jaxRPCNonceManager;
+        NonceManager nonceMgr =
+                endpoint != null ? nonceMgrMap.get(endpoint) : jaxRPCNonceManager;
 
         if (nonceMgr != null) {
             if (LOGGER.isLoggable(Level.FINE)) {
                 LOGGER.log(Level.FINE,
-                           String.format("getInstance(%s): found existing: %s",
-                                         endpoint, nonceMgr));
+                        String.format("getInstance(%s): found existing: %s",
+                        endpoint, nonceMgr));
             }
             return nonceMgr;
         }
-            
+
         final URL url = SecurityUtil.loadFromClasspath("/META-INF/services/" + nonceManager);
         if (url != null) {
             Object obj = SecurityUtil.loadSPIClass(url, nonceManager);
@@ -172,10 +168,10 @@ public abstract class NonceManager {
             }
             nonceMgr = (NonceManager) obj;
         }
-        
+
         if (nonceMgr == null) {
-            nonceMgr = new DefaultNonceManager();   
-        } 
+            nonceMgr = new DefaultNonceManager();
+        }
 
         nonceMgr.setMaxNonceAge(maxNonceAge);
 
@@ -188,8 +184,8 @@ public abstract class NonceManager {
 
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.log(Level.FINE,
-                       String.format("getInstance(%s): created: %s",
-                                     endpoint, nonceMgr));
+                    String.format("getInstance(%s): created: %s",
+                    endpoint, nonceMgr));
         }
 
         return nonceMgr;
@@ -205,9 +201,8 @@ public abstract class NonceManager {
         }
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.log(Level.FINE,
-                       String.format("deleteInstance(%s): %s", endpoint, o));
+                    String.format("deleteInstance(%s): %s", endpoint, o));
         }
 
     }
 }
-

@@ -36,19 +36,135 @@
 
 package com.sun.xml.ws.assembler.dev;
 
+import com.sun.istack.logging.Logger;
+import java.io.Serializable;
+import org.glassfish.ha.store.api.BackingStoreConfiguration;
+import org.glassfish.ha.store.api.BackingStoreException;
 import org.glassfish.ha.store.api.BackingStoreFactory;
-//import org.glassfish.ha.store.impl.NoOpBackingStoreFactory;
+import org.glassfish.ha.store.spi.BackingStoreFactoryRegistry;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class HighAvailabilityProvider {
-    private static final BackingStoreFactory NOOP_BSF = null; //new NoOpBackingStoreFactory();
+public enum HighAvailabilityProvider {
+    INSTANCE;
 
-    public BackingStoreFactory getBackingStoreFactory() {
-        // TODO P1 logic for getting other factories
-        return NOOP_BSF;
+    private static final Logger LOGGER = Logger.getLogger(HighAvailabilityProvider.class);
+
+    public static enum StoreType {
+        IN_MEMORY("replicated"), // FIXME replace with a constant reference when available
+        NOOP(BackingStoreConfiguration.NO_OP_PERSISTENCE_TYPE);
+
+        private final String storeTypeId;
+
+        private StoreType(String storeTypeId) {
+            this.storeTypeId = storeTypeId;
+        }
     }
 
+    private static class HaEnvironment {
+        public static final HaEnvironment NO_HA_ENVIRONMENT = new HaEnvironment(null, null);
+
+        private final String clusterName;
+        private final String instanceName;
+
+        private HaEnvironment(final String clusterName, final String instanceName) {
+            this.clusterName = clusterName;
+            this.instanceName = instanceName;
+        }
+
+        public static HaEnvironment getInstance(final String clusterName, final String instanceName) {
+            if (clusterName == null && instanceName == null) {
+                return NO_HA_ENVIRONMENT;
+            }
+
+            return new HaEnvironment(clusterName, instanceName);
+        }
+
+        public String getClusterName() {
+            return clusterName;
+        }
+
+        public String getInstanceName() {
+            return instanceName;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final HaEnvironment other = (HaEnvironment) obj;
+            if ((this.clusterName == null) ? (other.clusterName != null) : !this.clusterName.equals(other.clusterName)) {
+                return false;
+            }
+            if ((this.instanceName == null) ? (other.instanceName != null) : !this.instanceName.equals(other.instanceName)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 89 * hash + (this.clusterName != null ? this.clusterName.hashCode() : 0);
+            hash = 89 * hash + (this.instanceName != null ? this.instanceName.hashCode() : 0);
+            return hash;
+        }
+    }
+
+    private volatile HaEnvironment haEnvironment = HaEnvironment.NO_HA_ENVIRONMENT;
+
+    public void initHaEnvironment(final String clusterName, final String instanceName) {
+        this.haEnvironment = HaEnvironment.getInstance(clusterName, instanceName);
+    }
+
+    public <K extends Serializable, V extends Serializable> BackingStoreConfiguration<K, V> initBackingStoreConfiguration(
+            final String storeName,
+            final Class<K> keyClass,
+            final Class<V> valueClass) {
+
+        final HaEnvironment env = this.haEnvironment; // prevents synchronization issues with concurrent invocation of initEnvironment(...)
+
+        return new BackingStoreConfiguration<K, V>()
+                .setClusterName(env.clusterName)
+                .setInstanceName(env.getInstanceName())
+                .setStoreName(storeName)
+                .setKeyClazz(keyClass)
+                .setValueClazz(valueClass);
+    }
+
+    public BackingStoreFactory getBackingStoreFactory(final StoreType type) throws HighAvailabilityProviderException {
+        if (!isHaEnvironmentConfigured()) {
+            return getSafeBackingStoreFactory(StoreType.NOOP);
+        }
+
+        return getSafeBackingStoreFactory(type);
+    }
+
+    private BackingStoreFactory getSafeBackingStoreFactory(final StoreType type) throws HighAvailabilityProviderException {
+        try {
+            return BackingStoreFactoryRegistry.getFactoryInstance(type.storeTypeId);
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO message
+        }
+    }
+
+    /**
+     * Provides information on whether there is a HA service available in the
+     * current JVM or not.
+     * 
+     * @return {@code true} in case there is a HA service available in the current
+     *         JVM, {@code false} otherwise
+     */
+    public boolean isHaEnvironmentConfigured() {
+        return !HaEnvironment.NO_HA_ENVIRONMENT.equals(this.haEnvironment);
+    }
 }

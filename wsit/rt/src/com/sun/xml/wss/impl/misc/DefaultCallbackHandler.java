@@ -728,6 +728,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlBinding.setAuthorityBinding(sc.getAuthorityBindingElement());
                 dp.setSecurityPolicy(samlBinding);
                 samlBinding.setAssertionId(sc.getAssertionId());
+                samlBinding.setSAMLVersion(sc.getSAMLVersion());
             } else {
                 log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
@@ -747,6 +748,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlBinding.setAssertion(sc.getAssertionReader());
                 samlBinding.setAuthorityBinding(sc.getAuthorityBindingElement());
                 samlBinding.setAssertionId(sc.getAssertionId());
+                samlBinding.setSAMLVersion(sc.getSAMLVersion());
                 dp.setSecurityPolicy(samlBinding);
                 PrivateKeyBinding pkBinding = (PrivateKeyBinding) samlBinding.newPrivateKeyBinding();
 
@@ -823,6 +825,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
                 samlBinding.setAssertion(sc.getAssertionReader());
+                samlBinding.setSAMLVersion(sc.getSAMLVersion());
             } else {
                 log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
@@ -840,6 +843,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlHandler.handle(cbs);
                 samlBinding.setAssertion(sc.getAssertionElement());
                 samlBinding.setAssertion(sc.getAssertionReader());
+                samlBinding.setSAMLVersion(sc.getSAMLVersion());
                 PrivateKeyBinding pkBinding = (PrivateKeyBinding) samlBinding.newPrivateKeyBinding();
 
                 SignatureKeyCallback.DefaultPrivKeyCertRequest request =

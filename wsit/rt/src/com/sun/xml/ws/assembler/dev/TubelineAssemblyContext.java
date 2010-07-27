@@ -50,6 +50,4 @@ public interface TubelineAssemblyContext {
     <T> T getImplementation(Class<T> type);
 
     Tube getTubelineHead();
-
-    HighAvailabilityProvider getHighAvailabilityProvider();
 }

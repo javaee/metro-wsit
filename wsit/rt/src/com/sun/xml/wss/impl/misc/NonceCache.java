@@ -1,7 +1,6 @@
 /*
- * $Id: NonceCache.java,v 1.3.2.2 2010-07-14 14:06:51 m_potociar Exp $
+ * $Id: NonceCache.java,v 1.3.2.3 2010-07-27 15:17:51 m_potociar Exp $
  */
-                                                                                                                   
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
@@ -37,18 +36,19 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.wss.impl.misc;
 
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.NonceManager.NonceException;
-import java.util.Hashtable;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.MessageConstants;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
@@ -59,44 +59,47 @@ import org.glassfish.gmbal.ManagedData;
 @ManagedData
 public class NonceCache extends TimerTask {
 
-     /** logger */
+    /** logger */
     protected static final Logger log =
-        Logger.getLogger(
+            Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
-
-     // Nonce Cache
-    private Hashtable nonceCache = new Hashtable();
-    private Hashtable oldNonceCache = new Hashtable();
+    // Nonce Cache
+    private Map<String, String> nonceCache = Collections.synchronizedMap(new HashMap<String, String>());
+    private Map<String, String> oldNonceCache = Collections.synchronizedMap(new HashMap<String, String>());
 
     @ManagedAttribute // Only for monitoring
-    private Hashtable getNonceCache () { return nonceCache; }
-    @ManagedAttribute // Only for monitoring
-    private Hashtable getOldNonceCache () { return oldNonceCache; }
+    private Map<String, String> getNonceCache() {
+        return nonceCache;
+    }
 
+    @ManagedAttribute // Only for monitoring
+    private Map<String, String> getOldNonceCache() {
+        return oldNonceCache;
+    }
     // default
     private long MAX_NONCE_AGE = MessageConstants.MAX_NONCE_AGE;
-
     // flag to indicate if this timertask is scheduled into the Timer queue
     private boolean scheduledFlag = false;
     private boolean canceledFlag = false;
 
-    public NonceCache() {}
+    public NonceCache() {
+    }
 
-    
     public NonceCache(long maxNonceAge) {
         MAX_NONCE_AGE = maxNonceAge;
     }
+
     @SuppressWarnings("unchecked")
     public boolean validateAndCacheNonce(String nonce, String created) throws NonceException {
-        if (nonceCache.containsKey(nonce)|| oldNonceCache.containsKey(nonce)) {
-            log.log(Level.WARNING, 
-                    "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce);
-            throw new NonceManager.NonceException("Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce);
+        if (nonceCache.containsKey(nonce) || oldNonceCache.containsKey(nonce)) {
+            final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
+            log.log(Level.WARNING, message);
+            throw new NonceManager.NonceException(message);
         }
 
-        if (log.isLoggable(Level.FINE)){
-            log.log(Level.FINE, "Storing Nonce Value " + nonce  + " into " + this);
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE, "Storing Nonce Value {0} into {1}", new Object[]{nonce, this});
         }
 
         nonceCache.put(nonce, created);
@@ -119,24 +122,25 @@ public class NonceCache extends TimerTask {
 
     public void run() {
 
-        if (nonceCache.size() == 0) {
+        if (nonceCache.isEmpty()) {
             cancel();
-            if (log.isLoggable(Level.FINE)){
-                log.log(Level.FINE, "Canceled Timer Task due to inactivity ...for " + this); 
+            if (log.isLoggable(Level.FINE)) {
+                log.log(Level.FINE, "Canceled Timer Task due to inactivity ...for {0}", this);
             }
             return;
         }
 
-        if (log.isLoggable(Level.FINE)){
-            log.log(Level.FINE, "Clearing old Nonce values...for " + this);
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE, "Clearing old Nonce values...for {0}", this);
         }
 
         oldNonceCache.clear();
-        Hashtable temp = nonceCache;
+        Map<String, String> temp = nonceCache;
         nonceCache = oldNonceCache;
         oldNonceCache = temp;
     }
 
+    @Override
     public boolean cancel() {
         boolean ret = super.cancel();
         canceledFlag = true;
@@ -151,4 +155,3 @@ public class NonceCache extends TimerTask {
         return MAX_NONCE_AGE;
     }
 }
-

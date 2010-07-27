@@ -98,7 +98,7 @@ public class ServiceChannelWSImpl {
                 BindingUtils.getNegotiatedContentTypesAndParams(adapter.getEndpoint().getBinding());
         
         negotiatedMimeTypes.value.retainAll(serviceSupportedContent.negotiatedMimeTypes);
-        if (negotiatedMimeTypes.value.size() == 0) {
+        if (negotiatedMimeTypes.value.isEmpty()) {
             throw new ServiceChannelException(ServiceChannelErrorCode.CONTENT_NEGOTIATION_FAILED, MessagesMessages.WSTCP_0033_CONTENT_NEGOTIATION_FAILED(targetWSURI, serviceSupportedContent.negotiatedMimeTypes));
         }
         

@@ -37,7 +37,6 @@ package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeatureBuilder;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
@@ -94,9 +93,6 @@ final class SequenceTestUtils  {
                 return RmRuntimeVersion.WSRM200702;
             }
 
-            public HighAvailabilityProvider getHighAvailabilityProvider() {
-                return new HighAvailabilityProvider();
-            }
        };
     }
 
