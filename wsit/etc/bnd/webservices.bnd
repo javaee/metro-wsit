@@ -18,10 +18,7 @@ Export-Package: \
   org.jvnet.staxex;version=@RELEASE_VERSION@, \
   *
 Import-Package: \
-  javax.xml.ws;version=@JAX-WS_SPEC_VERSION@, \
-  javax.xml.ws.*;version=@JAX-WS_SPEC_VERSION@, \
-  javax.xml.bind;version=@JAXB_SPEC_VERSION@, \
-  javax.xml.bind.*;version=@JAXB_SPEC_VERSION@, \
+  com.sun.appserv.server;resolution:=optional, \
   com.sun.enterprise.security.*;resolution:=optional, \
   com.sun.enterprise.transaction.*;resolution:=optional, \
   com.sun.enterprise.web.*;resolution:=optional, \
@@ -33,11 +30,14 @@ Import-Package: \
   com.sun.xml.bind.validator;resolution:=optional, \
   com.sun.xml.rpc.*;resolution:=optional, \
   com.sun.xml.ws.spi.runtime;resolution:=optional, \
+  javax.ejb;resolution:=optional, \
+  javax.xml.ws;version=@JAX-WS_SPEC_VERSION@, \
+  javax.xml.ws.*;version=@JAX-WS_SPEC_VERSION@, \
+  javax.xml.bind;version=@JAXB_SPEC_VERSION@, \
+  javax.xml.bind.*;version=@JAXB_SPEC_VERSION@, \
+  org.apache.coyote;resolution:=optional, \
+  org.apache.tomcat.util.buf;resolution:=optional, \
   org.iso_relax.verifier.impl;resolution:=optional, \
   org.relaxng.datatype;resolution:=optional, \
-  com.sun.appserv.server;resolution:=optional, \
-  org.apache.tomcat.util.buf;resolution:=optional, \
-  org.apache.coyote;resolution:=optional, \
-  javax.ejb;resolution:=optional, \
   *
 Private-Package: *
