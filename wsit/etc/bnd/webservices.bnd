@@ -31,6 +31,8 @@ Import-Package: \
   com.sun.xml.rpc.*;resolution:=optional, \
   com.sun.xml.ws.spi.runtime;resolution:=optional, \
   javax.ejb;resolution:=optional, \
+  javax.jws;version=2.0, \
+  javax.jws.soap;version=2.0, \
   javax.xml.ws;version=@JAX-WS_SPEC_VERSION@, \
   javax.xml.ws.*;version=@JAX-WS_SPEC_VERSION@, \
   javax.xml.bind;version=@JAXB_SPEC_VERSION@, \
