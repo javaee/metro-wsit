@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.tx.at.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.namespace.QName;
 
 /**
@@ -46,6 +48,14 @@ public enum WsatNamespace {
 
     WSAT200410("wsat200410", "http://schemas.xmlsoap.org/ws/2004/10/wsat"),
     WSAT200606("wsat200410", "http://docs.oasis-open.org/ws-tx/wsat/2006/06");
+    //
+    public static List<String> namespacesList() {
+        List<String> retVal = new ArrayList<String>(WsatNamespace.values().length);
+        for (WsatNamespace pns : WsatNamespace.values()) {
+            retVal.add(pns.toString());
+        }
+        return retVal;
+    }
     //
     public final String defaultPrefix;
     public final String namespace;

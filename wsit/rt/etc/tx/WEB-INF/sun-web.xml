@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!DOCTYPE sun-web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Application Server 9.0 Servlet 2.5//EN" "http://www.sun.com/software/appserver/dtds/sun-web-app_2_5-0.dtd">
 <!--
  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- 
+
  Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- 
+
  The contents of this file are subject to the terms of either the GNU
  General Public License Version 2 only ("GPL") or the Common Development
  and Distribution License("CDDL") (collectively, the "License").  You
@@ -12,7 +12,7 @@
  a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  language governing permissions and limitations under the License.
- 
+
  When distributing the software, include this License Header Notice in each
  file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  Sun designates this particular file as subject to the "Classpath" exception
@@ -21,9 +21,9 @@
  Header, with the fields enclosed by brackets [] replaced by your own
  identifying information: "Portions Copyrighted [year]
  [name of copyright owner]"
- 
+
  Contributor(s):
- 
+
  If you wish your version of this file to be governed by only the CDDL or
  only the GPL Version 2, indicate your decision by adding "[Contributor]
  elects to include this software in this distribution under the [CDDL or GPL
@@ -35,125 +35,58 @@
  only if the new code is made subject to such option by the copyright
  holder.
 -->
-
-<!DOCTYPE sun-web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Application Server 9.0 Servlet 2.5//EN" "http://www.sun.com/software/appserver/dtds/sun-web-app_2_5-0.dtd">
-<sun-web-app>
-    <context-root>__wstx-services</context-root>
-    <servlet>
-        <servlet-name>CompletionCoordinatorPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>CompletionCoordinatorPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wsat/completion/coordinator</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
-                <localpart>WSATCoordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.at.CompletionCoordinatorPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>RegistrationPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>RegistrationPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wscoor/coordinator/synchRegister</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
-                <localpart>Coordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>ActivationCoordinatorPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>ActivationCoordinatorPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wscoor/coordinator/createCoordinationContext</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
-                <localpart>Coordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationCoordinatorPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>ActivationRequesterPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>ActivationRequesterPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wscoor/coordinator/createCoordinationContextResponse</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
-                <localpart>Coordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.coord.ActivationRequesterPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>RegistrationCoordinatorPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>RegistrationCoordinatorPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wscoor/coordinator/register</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
-                <localpart>Coordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationCoordinatorPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>CoordinatorPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wsat/coordinator</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
-                <localpart>WSATCoordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.at.CoordinatorPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>CompletionInitiatorPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>CompletionInitiatorPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wsat/completion/initiator</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
-                <localpart>WSATCoordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.at.CompletionInitiatorPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>ParticipantPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>ParticipantPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wsat/2pc</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
-                <localpart>WSATCoordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.at.ParticipantPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
-    <servlet>
-        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
-        <webservice-endpoint>
-            <port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
-            <endpoint-address-uri>/wscoor/coordinator/registerResponse</endpoint-address-uri>
-            <service-qname>
-                <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
-                <localpart>Coordinator</localpart>
-            </service-qname>
-            <servlet-impl-class>com.sun.xml.ws.tx.webservice.member.coord.RegistrationRequesterPortTypeImpl</servlet-impl-class>
-            <debugging-enabled>true</debugging-enabled>
-        </webservice-endpoint>
-    </servlet>
+<sun-web-app error-url="">
+  <context-root>wsat-wsat</context-root>
+  <servlet>
+    <servlet-name>RegistrationPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/wscoor/coordinator/synchRegister</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
+        <localpart>Coordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationPortTypeRPCPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>CoordinatorPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/wsat/coordinator</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
+        <localpart>WSATCoordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v10.endpoint.CoordinatorPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>ParticipantPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>ParticipantPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/wsat/2pc</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
+        <localpart>WSATCoordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v10.endpoint.ParticipantPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/wscoor/coordinator/registerResponse</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
+        <localpart>Coordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationRequesterPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
 </sun-web-app>

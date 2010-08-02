@@ -1,8 +1,8 @@
-com.sun.xml.ws.encoding.policy.MtomPolicyMapConfigurator
 com.sun.xml.ws.addressing.policy.AddressingPolicyMapConfigurator
-com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyMapConfigurator
-com.sun.xml.ws.tx.common.TxPolicyMapConfigurator
+com.sun.xml.ws.encoding.policy.MtomPolicyMapConfigurator
 com.sun.xml.ws.rx.mc.policy.spi_impl.McPolicyMapConfigurator
 com.sun.xml.ws.rx.rm.policy.spi_impl.RmPolicyMapConfigurator
+com.sun.xml.ws.security.addressing.policy.WsawAddressingPolicyMapConfigurator
 com.sun.xml.ws.transport.tcp.policy.TCPTransportPolicyMapConfigurator
 com.sun.xml.ws.transport.tcp.policy.OptimalTransportPolicyMapConfigurator
+com.sun.xml.ws.tx.at.policy.spi_impl.AtPolicyMapConfigurator
