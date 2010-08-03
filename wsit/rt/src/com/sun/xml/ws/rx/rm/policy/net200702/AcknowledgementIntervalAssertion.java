@@ -84,7 +84,7 @@ public class AcknowledgementIntervalAssertion extends SimpleAssertion implements
     }
 
     public ReliableMessagingFeatureBuilder update(ReliableMessagingFeatureBuilder builder) {
-        return builder.acknowledgementTransmittionInterval(timeout);
+        return builder.acknowledgementTransmissionInterval(timeout);
     }
 
     public boolean isCompatibleWith(RmProtocolVersion version) {
