@@ -607,15 +607,17 @@ public class ReliableMessagingFeature extends WebServiceFeature {
     }
 
     /**
-     * Returns {@code true} if the number of potential message retransmissions is
-     * limited by the infrastructure. In such case the RM runtime uses
-     * {@link #getMaxMessageRetransmissionCount()} to determine whether or not a message
-     * can be resend again.
+     * Returns {@code true} if the next attempt to retransmit a message indicated by
+     * {@code nextRetransmissionCount} input parameter is allowed as per current
+     * feature configuration.
      *
-     * @return {@code true} if the number of potential message retransmissions is
-     *         limited by the infrastructure, {@code false} otherwise.
+     * @param nextRetransmissionCount indicates the ordinal number of the next (potential)
+     * attempt to retransmit a single message
+     *
+     * @return {@code true} if it is possible to retransmit a message, {@code false} otherwise.
+     *
+     * @see #getMaxMessageRetransmissionCount()
      */
-    @ManagedAttribute
     public boolean canRetransmitMessage(long nextRetransmissionCount) {
         if (maxMessageRetransmissionCount < 0) {
             return true;
