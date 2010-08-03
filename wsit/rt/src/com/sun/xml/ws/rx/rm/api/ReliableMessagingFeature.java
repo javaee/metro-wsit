@@ -67,9 +67,9 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      * A constant specifies the default value of maximum number of message redelivery
      * attempts.
      *
-     * Currently, the default value is set to infinity (0).
+     * Currently, the default value is set to infinity (-1).
      */
-    public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = 0;
+    public static final long DEFAULT_MAX_MESSAGE_RETRANSMISSION_COUNT = -1;
     /**
      * A constant specifies the default value of maximum number of attempts to send
      * a reliable messaging session control messgae such as CreateSequence, CloseSequence
@@ -616,8 +616,12 @@ public class ReliableMessagingFeature extends WebServiceFeature {
      *         limited by the infrastructure, {@code false} otherwise.
      */
     @ManagedAttribute
-    public boolean isMessageRetransmissionLimited() {
-        return maxMessageRetransmissionCount > 0;
+    public boolean canRetransmitMessage(long nextRetransmissionCount) {
+        if (maxMessageRetransmissionCount < 0) {
+            return true;
+        }
+
+        return nextRetransmissionCount <= maxMessageRetransmissionCount;
     }
 
     /**

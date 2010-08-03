@@ -81,7 +81,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
             }
 
             final int nextResendCount = request.getNextResendCount();
-            if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+            if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
                 resumeParentFiber(error);
                 return;
             }
@@ -127,7 +127,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 }
             } else {
                 final int nextResendCount = request.getNextResendCount();
-                if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+                if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
                     resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
                     return;
                 }
@@ -143,7 +143,7 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         public void onCompletion(Throwable error) {
             if (Utilities.isResendPossible(error)) {
                 final int nextResendCount = request.getNextResendCount();
-                if (rc.configuration.getRmFeature().isMessageRetransmissionLimited() && nextResendCount > rc.configuration.getRmFeature().getMaxMessageRetransmissionCount()) {
+                if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
                     resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
                     return;
                 }
