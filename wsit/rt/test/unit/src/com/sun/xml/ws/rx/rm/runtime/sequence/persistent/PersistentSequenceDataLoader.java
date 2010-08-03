@@ -107,7 +107,7 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
     public void setUp() {
         tearDown();
 
-        dbInstance = EmbeddedDerbyDbInstance.start("PersistentRmTestDb");
+        dbInstance = EmbeddedDerbyDbInstance.start("PersistentRmJunitTestDb");
 
         if (dbInstance.tableExists("RM_UNACKED_MESSAGES")) {
             dbInstance.execute("DROP TABLE RM_UNACKED_MESSAGES");
