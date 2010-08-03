@@ -47,7 +47,7 @@ import org.glassfish.gmbal.ManagedData;
 @ManagedData
 public class MakeConnectionSupportedFeature extends WebServiceFeature {
 
-    public static final String ID = "com.sun.xml.ws.rm.MakeConnectionSupportedFeature";
+    public static final String ID = "http://docs.oasis-open.org/ws-rx/wsmc/";
     /**
      * Default response retrieval timeout value [milliseconds]
      */

@@ -58,7 +58,7 @@ public class TransactionalFeature extends WebServiceFeature{
   /**
    * Constant value identifying the TransactionalFeature
    */
-  public static final String ID = "com.sun.xml.ws.tx.at.api.TransactionalFeature";
+  public static final String ID = "http://docs.oasis-open.org/ws-tx/";
 
   private Transactional.TransactionFlowType flowType = Transactional.TransactionFlowType.SUPPORTS;
   private boolean isExplicitMode;

@@ -47,7 +47,7 @@ import org.glassfish.gmbal.ManagedData;
 @ManagedData
 public class ReliableMessagingFeature extends WebServiceFeature {
 
-    public static final String ID = "com.sun.xml.ws.rm.ReliableMessagingFeature";
+    public static final String ID = "http://docs.oasis-open.org/ws-rx/wsrm/";
     /**
      * A constant specifying the default value of sequence inactivity timeout.
      * Currently the default value is set to 600000.
