@@ -64,7 +64,7 @@ public class SignedSupportingTokensProcessor extends SupportingTokensProcessor {
         SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion) token);
         SignatureTarget target = null;
         if (includeToken.endsWith("Never") && PolicyUtil.isX509Token((PolicyAssertion) token, spVersion)) {
-            String uid = "SSTokenId" + pid.generateID();
+            String uid = pid.generateID();
             ((AuthenticationTokenPolicy.X509CertificateBinding) policy).setSTRID(uid);
             target = stc.newURISignatureTargetForSSToken(uid);
            //this flag will be used for computing securitytokenreference when the includetoken type is Never !!

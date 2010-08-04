@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureTarget.java,v 1.4 2010-07-12 06:28:07 sm228678 Exp $
+ * $Id: SignatureTarget.java,v 1.5 2010-08-04 12:14:39 sm228678 Exp $
  */
 
 /*
@@ -106,7 +106,9 @@ public class SignatureTarget extends Target implements Cloneable {
     public void isITNever(boolean iToken){
         this.isITNever = iToken;
     }
-
+    /**
+     * is the include token type Never?
+     */
     public boolean isITNever(){
         return this.isITNever;
     }

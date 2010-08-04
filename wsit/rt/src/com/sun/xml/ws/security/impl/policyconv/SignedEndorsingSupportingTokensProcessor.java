@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,6 +47,7 @@ import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
+import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 /**
  *
  * @author K.Venugopal@sun.com
@@ -62,16 +63,26 @@ public class SignedEndorsingSupportingTokensProcessor extends EndorsingSupportin
     
     
     protected void addToPrimarySignature(WSSPolicy policy,Token token) throws PolicyException{
-        SignatureTarget target = stc.newURISignatureTargetForSSToken(policy.getUUID());
-        
-        SecurityPolicyUtil.setName(target, policy);
-        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion)token);
         String includeToken = token.getIncludeToken();
-        if(!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) && 
-           !PolicyUtil.isSecureConversationToken((PolicyAssertion)token, spVersion) &&
+        SecurityPolicyVersion spVersion = SecurityPolicyUtil.getSPVersion((PolicyAssertion) token);
+        SignatureTarget target = null;
+        if (includeToken.endsWith("Never") && PolicyUtil.isX509Token((PolicyAssertion) token, spVersion)) {
+            String uid = pid.generateID();
+            ((AuthenticationTokenPolicy.X509CertificateBinding) policy).setSTRID(uid);
+            target = stc.newURISignatureTargetForSSToken(uid);
+           //this flag will be used for computing securitytokenreference when the includetoken type is Never !!
+            target.isITNever(true);
+        } else {
+            target = stc.newURISignatureTargetForSSToken(policy.getUUID());
+        }
+        SecurityPolicyUtil.setName(target, policy);
+
+        if((!PolicyUtil.isUsernameToken((PolicyAssertion) token, spVersion) &&
            !spVersion.includeTokenAlways.equals(includeToken) &&
-           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)){
+           !spVersion.includeTokenAlwaysToRecipient.equals(includeToken)) || PolicyUtil.isSamlToken((PolicyAssertion)token,spVersion)
+           || PolicyUtil.isIssuedToken((PolicyAssertion)token,spVersion)){
             stc.addSTRTransform(target);
+            target.setPolicyName(getQName(policy));
         } else {
              stc.addTransform(target);
         }

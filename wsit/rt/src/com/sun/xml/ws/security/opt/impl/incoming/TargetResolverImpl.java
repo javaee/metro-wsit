@@ -88,6 +88,11 @@ public class TargetResolverImpl implements TargetResolver {
         }
 
         for (Target actualTarget : actualTargets) {
+            if("Signature".equals(policyType) && ((SignatureTarget)actualTarget).isITNever() == true){
+                //ignore resolving the target when the target is S.S or S.E.S.Token target because this breaks oracle interop
+                //need to refine it later if something goes wrong 
+                continue;
+            }
             boolean found = false;
             String targetInPolicy = getTargetValue(actualTarget);
             for (Target inferredTarget : inferredTargets) {

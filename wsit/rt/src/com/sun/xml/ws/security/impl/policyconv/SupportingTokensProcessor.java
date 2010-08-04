@@ -39,6 +39,7 @@ package com.sun.xml.ws.security.impl.policyconv;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
+import com.sun.xml.ws.security.impl.policy.X509Token;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.policy.UserNameToken;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
@@ -160,7 +161,8 @@ public class SupportingTokensProcessor {
             }
 
            //TODO:: Add token to MessagePolicy;
-            if (!(this instanceof EndorsingSupportingTokensProcessor)) {
+            if (!(this instanceof EndorsingSupportingTokensProcessor) ||
+                    (this instanceof EndorsingSupportingTokensProcessor && token instanceof X509Token && token.getIncludeToken().endsWith("Never"))) {
                 AuthenticationTokenPolicy atp = new AuthenticationTokenPolicy();
                 atp.setFeatureBinding(policy);
                 policyContainer.insert(atp);
