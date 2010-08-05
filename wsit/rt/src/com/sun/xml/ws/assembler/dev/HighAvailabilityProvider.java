@@ -38,12 +38,14 @@ package com.sun.xml.ws.assembler.dev;
 
 import com.sun.istack.logging.Logger;
 import java.io.Serializable;
+import org.glassfish.ha.store.api.BackingStore;
 import org.glassfish.ha.store.api.BackingStoreConfiguration;
 import org.glassfish.ha.store.api.BackingStoreException;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 import org.glassfish.ha.store.spi.BackingStoreFactoryRegistry;
 
 /**
+ * Singleton high-availability provider for Metro
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
@@ -52,8 +54,17 @@ public enum HighAvailabilityProvider {
 
     private static final Logger LOGGER = Logger.getLogger(HighAvailabilityProvider.class);
 
+    /**
+     * Enumeration of supported backing store factory types
+     */
     public static enum StoreType {
+        /**
+         * In-memory replicated {@link BackingStoreFactory} implementation
+         */
         IN_MEMORY("replicated"), // FIXME replace with a constant reference when available
+        /**
+         * NOOP implementation of {@link BackingStoreFactory} interface
+         */
         NOOP(BackingStoreConfiguration.NO_OP_PERSISTENCE_TYPE);
 
         private final String storeTypeId;
@@ -122,10 +133,35 @@ public enum HighAvailabilityProvider {
 
     private volatile HaEnvironment haEnvironment = HaEnvironment.NO_HA_ENVIRONMENT;
 
+    /**
+     * This method is not meant to be used directly by the user of the Metro
+     * {@link HighAvailabilityProvider} class.
+     *
+     * It is primarily used by a container to inject the proper cluster name and
+     * instance name values that are later used to initialize all {@link BackingStoreConfiguration}
+     * instances created via {@link #initBackingStoreConfiguration(java.lang.String, java.lang.Class, java.lang.Class)}
+     * method
+     *
+     * @param clusterName name of the cluster
+     * @param instanceName name of the cluster instance
+     */
     public void initHaEnvironment(final String clusterName, final String instanceName) {
         this.haEnvironment = HaEnvironment.getInstance(clusterName, instanceName);
     }
 
+    /**
+     * Creates {@link BackingStoreConfiguration} instance initialized  with
+     * all mandatory fields. This instance can be used to create {@link BackingStore}
+     * instance.
+     *
+     * @param <K> backing store key type
+     * @param <V> backing store value type
+     * @param storeName name of the backing store
+     * @param keyClass backing store key class
+     * @param valueClass backing store value class
+     *
+     * @return initialized {@link BackingStoreConfiguration} instance
+     */
     public <K extends Serializable, V extends Serializable> BackingStoreConfiguration<K, V> initBackingStoreConfiguration(
             final String storeName,
             final Class<K> keyClass,
@@ -141,6 +177,21 @@ public enum HighAvailabilityProvider {
                 .setValueClazz(valueClass);
     }
 
+    /**
+     * Retrieves {@link BackingStoreFactory} implementation of the requested type.
+     * In case this method is executed outside an HA environment (e.g. standalone mode),
+     * {@link StoreType.NOOP} implementation is returned.
+     *
+     * @param type type of the {@link BackingStoreFactory} implementation to be retrieved
+     *
+     * @return {@link BackingStoreFactory} implementation of the requested type.
+     * When executed outside HA environment, {@link StoreType.NOOP} implementation
+     * is returned.
+     *
+     * @throws HighAvailabilityProviderException in case the method is executed inside
+     * HA environment and the requested {@link BackingStoreFactory} implementation is not
+     * available.
+     */
     public BackingStoreFactory getBackingStoreFactory(final StoreType type) throws HighAvailabilityProviderException {
         if (!isHaEnvironmentConfigured()) {
             return getSafeBackingStoreFactory(StoreType.NOOP);
