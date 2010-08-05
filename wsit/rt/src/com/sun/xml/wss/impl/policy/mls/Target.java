@@ -1,5 +1,5 @@
 /*
- * $Id: Target.java,v 1.5 2010-03-20 12:32:29 kumarjayanti Exp $
+ * $Id: Target.java,v 1.6 2010-08-05 05:36:32 sm228678 Exp $
  */
 
 /*
@@ -322,7 +322,7 @@ public class Target {
         xpathVersion = version;
     }
     
-    public void setPolicyName(QName policyQName){
+    public void setPolicyQName(QName policyQName){
         this.policyQName = policyQName;
     }
     

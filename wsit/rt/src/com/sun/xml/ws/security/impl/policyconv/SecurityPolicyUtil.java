@@ -98,7 +98,7 @@ public class SecurityPolicyUtil {
     
     public static void setName(Target target, WSSPolicy policy){
         if(target.getType() == Target.TARGET_TYPE_VALUE_URI){
-            target.setPolicyName(getQNameFromPolicy(policy));
+            target.setPolicyQName(getQNameFromPolicy(policy));
         }
     }
     
@@ -113,6 +113,8 @@ public class SecurityPolicyUtil {
             return usernameTokenPolicy;
         } else if(PolicyTypeUtil.secureConversationTokenKeyBinding(policy)){
             return MessageConstants.SCT_NAME;
+        } else if (PolicyTypeUtil.samlTokenPolicy(policy)) {
+            return new QName(MessageConstants.WSSE_NS, "SAMLToken");
         }
         return null;
     }

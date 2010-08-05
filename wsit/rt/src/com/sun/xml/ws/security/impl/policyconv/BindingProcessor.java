@@ -214,7 +214,7 @@ public abstract class BindingProcessor {
                 SignatureTarget st = stc.newURISignatureTarget(uuid);
                 if (strIgnore != true) {
                     stc.addSTRTransform(st);
-                    st.setPolicyName(qName);
+                    st.setPolicyQName(qName);
                 }else {
                     stc.addTransform(st);
                 }
@@ -237,7 +237,7 @@ public abstract class BindingProcessor {
             if (st != null) {  //when st is null, request simply goes with out signing the token;
                if (strIgnore != true) {
                     stc.addSTRTransform(st);
-                    st.setPolicyName(qName);
+                    st.setPolicyQName(qName);
                 } else {
                     stc.addTransform(st);
                 }

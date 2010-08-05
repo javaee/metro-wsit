@@ -315,7 +315,7 @@ public class SupportingTokensProcessor {
             SecurityPolicyUtil.setName(stg, token);
             if(!strIgnore){
                 stcr.addSTRTransform(stg);
-                stg.setPolicyName(getQName(token));
+                stg.setPolicyQName(getQName(token));
             } else  {
                stcr.addTransform(stg);
             }            
