@@ -147,6 +147,7 @@ final class InVmSequenceData implements SequenceData {
         try {
             lockWrite();
             // NOTE this must be a new String object
+            @SuppressWarnings("RedundantStringConstructorCall")
             String correlationKey = new String(message.getCorrelationId());
 
             Long msgNumberKey = getUnackedMessageIdentifierKey(message.getMessageNumber());
