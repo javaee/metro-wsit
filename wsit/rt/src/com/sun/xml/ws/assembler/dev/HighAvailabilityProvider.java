@@ -218,4 +218,81 @@ public enum HighAvailabilityProvider {
     public boolean isHaEnvironmentConfigured() {
         return !HaEnvironment.NO_HA_ENVIRONMENT.equals(this.haEnvironment);
     }
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when creating a new {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param <K> backing store key parameter type
+     * @param <V> backing store value parameter type
+     * @param factory {@link BackingStoreFactory} instance
+     * @param backingStoreName name of the backing store to be created
+     * @param keyClass backing store key class
+     * @param valueClass backing store value class
+     *
+     * @return newly created {@link BackingStore} instance.
+     */
+    public <K extends Serializable, V extends Serializable> BackingStore<K, V> createBackingStore(
+            BackingStoreFactory factory,
+            String backingStoreName,
+            Class<K> keyClass,
+            Class<V> valueClass) {
+
+        final BackingStoreConfiguration<K, V> bsConfig = initBackingStoreConfiguration(
+                backingStoreName,
+                keyClass,
+                valueClass);
+        try {
+            return factory.createBackingStore(bsConfig);
+        } catch (BackingStoreException ex) {
+           throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when loading a value from a {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param <K> backing store key parameter type
+     * @param <V> backing store value parameter type
+     * @param backingStore {@link BackingStore} instance
+     * @param key stored value identifier
+     * @param version stored value version
+     *
+     * @return stored value as specified by {@link BackingStore#load(java.io.Serializable, java.lang.String)}
+     */
+    public <K extends Serializable, V extends Serializable> V loadFrom(BackingStore<K, V> backingStore, K key, String version) {
+        try {
+            return backingStore.load(key, version);
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when storing data into a {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param <K> backing store key parameter type
+     * @param <V> backing store value parameter type
+     * @param backingStore {@link BackingStore} instance
+     * @param key stored data identifier
+     * @param value data to be stored
+     * @param isNew See {@link BackingStore#save(java.io.Serializable, java.io.Serializable, boolean)}
+     *
+     * @return See {@link BackingStore#save(java.io.Serializable, java.io.Serializable, boolean)}
+     */
+    public <K extends Serializable, V extends Serializable> String saveTo(BackingStore<K, V> backingStore, K key, V value, boolean isNew) {
+        try {
+            return backingStore.save(key, value, isNew);
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
 }
