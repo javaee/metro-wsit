@@ -209,9 +209,6 @@ public class SequenceDataTest extends TestCase {
             } catch (DuplicateMessageRegistrationException ex) {
                 // passed test
             }
-
-
-            // TODO test filling in gaps
         }
     }
 
@@ -291,15 +288,12 @@ public class SequenceDataTest extends TestCase {
     /**
      * Test of getLastActivityTime method, of class SequenceData.
      */
+    @SuppressWarnings("SleepWhileHoldingLock")
     public void testGetLastActivityTime() throws DuplicateMessageRegistrationException, InterruptedException {
         for (SequenceData instance : instances) {
             assertEquals(INITIAL_LAST_ACTIVITY_TIME, instance.getLastActivityTime());
 
             long oldLastActivityTime;
-
-            // TODO instance.attachMessageToUnackedMessageNumber(null);
-            // TODO SequenceData.retrieveMessage(java.lang.String)
-
             final int SLEEP_TIME = 100;
 
             oldLastActivityTime = instance.getLastActivityTime();
