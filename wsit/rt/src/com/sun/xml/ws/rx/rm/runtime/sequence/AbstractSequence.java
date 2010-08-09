@@ -46,7 +46,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * TODO javadoc
+ * Provides abstract sequence implementation common to both - inbound and outbound
+ * sequence
  * 
  * @author Marek Potociar (marek.potociar at sun.com)
  */
@@ -65,6 +66,7 @@ public abstract class AbstractSequence implements Sequence {
      * 
      * @param expirationTime sequence expiration time
      */
+    @SuppressWarnings("LeakingThisInConstructor")
     AbstractSequence(@NotNull SequenceData data, @NotNull DeliveryQueueBuilder deliveryQueueBuilder, @NotNull TimeSynchronizer timeSynchronizer) {
         assert data != null;
         assert deliveryQueueBuilder != null;
@@ -74,7 +76,6 @@ public abstract class AbstractSequence implements Sequence {
         this.data = data;
         this.timeSynchronizer = timeSynchronizer;
 
-        // TODO initialize delivery queue
         deliveryQueueBuilder.sequence(this);
         this.deliveryQueue = deliveryQueueBuilder.build();
     }
