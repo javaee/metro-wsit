@@ -111,7 +111,6 @@ public class EmbeddedDerbyDbInstance {
 
     public Connection getConnection() {
         try {
-            // TODO
             if (connection == null || connection.isClosed()) {
                 connection = createConnection(databaseName, connectionUrl);
             }

@@ -213,8 +213,6 @@ public interface Sequence {
      * @param message application message to be registered
      * @param storeMessageFlag boolean flag indicating whether message should be stored until acknowledged or not
      *
-     * TODO should throw duplicate message exception instead of the IMIE
-     *
      * @exception DuplicateMessageNumberException in case a message with such message number
      * has already been registered with the sequence
      *

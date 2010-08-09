@@ -72,7 +72,7 @@ public final class InvalidAcknowledgementException extends AbstractSoapFaultExce
     private final List<Sequence.AckRange> ackedRanges;
     
     public InvalidAcknowledgementException(String sequenceId, long messageIdentifier, List<Sequence.AckRange> ackedRanges) {
-        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(sequenceId, messageIdentifier), // TODO P3 message
+        super(LocalizationMessages.WSRM_1125_ILLEGAL_MESSAGE_ID(sequenceId, messageIdentifier),
                 "The SequenceAcknowledgement violates the cumulative Acknowledgement invariant.",
                 false);
 

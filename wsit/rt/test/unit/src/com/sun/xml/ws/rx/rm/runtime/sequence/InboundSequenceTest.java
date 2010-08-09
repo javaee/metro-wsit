@@ -186,8 +186,6 @@ public class InboundSequenceTest extends TestCase {
                 Sequence.NO_EXPIRY);
         assertEquals(Sequence.State.CREATED, inbound.getState());
 
-        // TODO test closing
-
         inbound.close();
         assertEquals(Sequence.State.CLOSED, inbound.getState());
 
