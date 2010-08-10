@@ -38,6 +38,9 @@ package com.sun.xml.ws.tx.at.internal;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.WSATException;
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.transaction.*;
 import javax.transaction.xa.XAResource;
@@ -58,6 +61,12 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public byte[] enlistResource(XAResource resource, Xid xid) throws WSATException {
+        try {
+            TransactionManagerImpl.transaction.enlistResource(resource); //todo temp hack until gettx api is ready REMOVE
+        } catch (Exception ex) {
+            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            throw new WSATException(ex);
+        } 
         return new byte[]{'a'};
     }
 
@@ -70,6 +79,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public Xid importTransaction(int timeout, byte[] tId) throws WSATException {
+        //todo getterminator and infect - then getTx and return txid (temporarily use hashcode)
         return new XidImpl(1, new byte[]{'a'}, new byte[]{'a'});
     }
 
@@ -91,8 +101,18 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public EndpointReference getParentReference(Xid xid) {
-        log("getParentReference");
-        return null;
+      log("getParentReference");
+      if (xid == null) throw new IllegalArgumentException("No subordinate transaction " + xid);
+   //todo readd this and either set it on thread for getResource call below or get the frc off it directly somehow
+   //   Transaction tx = (Transaction) getTM().getTransaction(xid);
+   //   if (tx == null) throw new IllegalArgumentException("No subordinate transaction " + xid);
+      ForeignRecoveryContext foreignRecoveryContext =
+              (ForeignRecoveryContext)TransactionManagerImpl.getInstance().getResource(
+                    WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT);
+      //          (ForeignRecoveryContext) tx.getProperty(WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT);
+      if (foreignRecoveryContext == null)
+          throw new AssertionError("No recovery context associated with transaction " + xid);
+      return foreignRecoveryContext.getEndpointReference();
     }
 
     private void log(String msg){

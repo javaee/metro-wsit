@@ -65,9 +65,6 @@ public class WSATClientTube extends AbstractFilterTubeImpl implements WSATConsta
         m_wsbinding = context.getBinding();
         m_transactionalFeature = feature;
         m_port = context.getWsdlPort();
-        if (m_transactionalFeature==null) {
-            m_transactionalFeature = new TransactionalFeature();
-        }
     }
 
     private WSATClientTube(WSATClientTube that, TubeCloner cloner) {
@@ -95,7 +92,8 @@ public class WSATClientTube extends AbstractFilterTubeImpl implements WSATConsta
 
     private void doProcessRequest(Packet request) {
         System.out.println("WSATClientTube processRequest");
-        TransactionalAttribute transactionalAttribute = WSATTubeHelper.getTransactionalAttribute(m_transactionalFeature, request, m_port);
+        TransactionalAttribute transactionalAttribute =
+                WSATTubeHelper.getTransactionalAttribute(m_transactionalFeature, request, m_port);
         System.out.println("WSATClientTube processRequest2");
         transactionalAttribute.setSoapVersion(m_wsbinding.getSOAPVersion());
         System.out.println("WSATClientTube processRequest3");

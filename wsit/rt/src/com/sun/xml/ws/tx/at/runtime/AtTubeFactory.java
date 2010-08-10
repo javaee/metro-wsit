@@ -46,6 +46,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.tx.at.api.TransactionalFeature;
 import com.sun.xml.ws.tx.at.tube.WSATClientTube;
 import com.sun.xml.ws.tx.at.tube.WSATServerTube;
 import javax.xml.namespace.QName;
@@ -64,9 +65,10 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) {
+        final TransactionalFeature feature =
+                context.getWrappedContext().getWsdlModel().getFeature(TransactionalFeature.class);
         if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), false)) {
-            return new WSATClientTube(context.getTubelineHead(), context, null/**feature*/);
-         //   return PipeAdapter.adapt(new TxClientPipe(context, context.getAdaptedTubelineHead()));
+            return new WSATClientTube(context.getTubelineHead(), context, feature);
         } else {
             return context.getTubelineHead();
         }
@@ -79,9 +81,10 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) {
+        final TransactionalFeature feature =
+                context.getWrappedContext().getWsdlModel().getFeature(TransactionalFeature.class);
         if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), true)) {
-            return new WSATServerTube(context.getTubelineHead(), context, null/**feature*/);
-      //     return PipeAdapter.adapt(new TxServerPipe(context, context.getAdaptedTubelineHead()));
+            return new WSATServerTube(context.getTubelineHead(), context, feature);
         } else {
             return context.getTubelineHead();
         }

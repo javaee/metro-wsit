@@ -38,6 +38,8 @@ package com.sun.xml.ws.tx.at.common;
 import com.sun.xml.ws.tx.at.common.TxLogger;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.naming.Context;
@@ -64,6 +66,8 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     //
     private static final TransactionManagerImpl singleton = new TransactionManagerImpl();
 
+    public static Transaction transaction; //todo temporary hack REMOVE
+    
     static public TransactionManagerImpl getInstance() {
         return singleton;
     }
@@ -99,7 +103,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
     public boolean isTransactionManagerAvailable() {
-        return javaeeTM != null;
+        return javaeeTM != null; 
     }
 
     public void begin() throws NotSupportedException, SystemException {
@@ -144,12 +148,49 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeSynchReg.getTransactionKey();
     }
 
+    //todo delete this
+    private static final TransactionSynchronizationRegistry tempjavaeeSynchReg =
+            new TransactionSynchronizationRegistry(){
+        Map map = new HashMap();
+
+        public Object getTransactionKey() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void putResource(Object o, Object o1) {
+            map.put(o, o1);
+        }
+
+        public Object getResource(Object o) {
+            return map.get(o);
+        }
+
+        public void registerInterposedSynchronization(Synchronization s) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int getTransactionStatus() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void setRollbackOnly() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean getRollbackOnly() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+    };
+
     public void putResource(final Object object, final Object object0) {
-        javaeeSynchReg.putResource(object, object0);
+        tempjavaeeSynchReg.putResource(object, object0);
+        //todo use sync of/on obtained tx instead of metrolevel cache javaeeSynchReg.putResource(object, object0);
     }
 
     public Object getResource(final Object object) {
-        return javaeeSynchReg.getResource(object);
+        return tempjavaeeSynchReg.getResource(object);
+        //todo use sync of/on obtained tx instead of metrolevel cache return javaeeSynchReg.getResource(object);
     }
 
     public void registerInterposedSynchronization(final Synchronization synchronization) {

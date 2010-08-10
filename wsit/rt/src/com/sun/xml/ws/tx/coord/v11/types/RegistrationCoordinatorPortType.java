@@ -54,8 +54,8 @@ public interface RegistrationCoordinatorPortType {
     /**
      * 
      * @param parameters
-     */
-    @WebMethod(operationName = "RegisterOperation", action = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06/Register")
+     *///todo paul was operationName = "RegisterOperation"
+    @WebMethod(operationName = "Register", action = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06/Register")
     @Oneway
     public void registerOperation(
         @WebParam(name = "Register", targetNamespace = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06", partName = "parameters")

@@ -41,7 +41,7 @@
     <servlet-name>RegistrationPortTypeImpl</servlet-name>
     <webservice-endpoint>
       <port-component-name>RegistrationPortTypeImpl</port-component-name>
-      <endpoint-address-uri>/wscoor/coordinator/synchRegister</endpoint-address-uri>
+      <endpoint-address-uri>/RegistrationPortTypeRPC</endpoint-address-uri>
       <service-qname>
         <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
         <localpart>Coordinator</localpart>
@@ -54,7 +54,7 @@
     <servlet-name>CoordinatorPortTypeImpl</servlet-name>
     <webservice-endpoint>
       <port-component-name>CoordinatorPortTypeImpl</port-component-name>
-      <endpoint-address-uri>/wsat/coordinator</endpoint-address-uri>
+      <endpoint-address-uri>/CoordinatorPortType</endpoint-address-uri>
       <service-qname>
         <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
         <localpart>WSATCoordinator</localpart>
@@ -67,7 +67,7 @@
     <servlet-name>ParticipantPortTypeImpl</servlet-name>
     <webservice-endpoint>
       <port-component-name>ParticipantPortTypeImpl</port-component-name>
-      <endpoint-address-uri>/wsat/2pc</endpoint-address-uri>
+      <endpoint-address-uri>/ParticipantPortType</endpoint-address-uri>
       <service-qname>
         <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
         <localpart>WSATCoordinator</localpart>
@@ -80,7 +80,7 @@
     <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
     <webservice-endpoint>
       <port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
-      <endpoint-address-uri>/wscoor/coordinator/registerResponse</endpoint-address-uri>
+      <endpoint-address-uri>/RegistrationRequesterPortType</endpoint-address-uri>
       <service-qname>
         <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
         <localpart>Coordinator</localpart>

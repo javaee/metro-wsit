@@ -58,7 +58,7 @@ public class RegistrationServiceV10
     }
 
     public RegistrationServiceV10() {
-        super(REGISTRATIONSERVICEV10_WSDL_LOCATION, new QName("http://schemas.xmlsoap.org/ws/2004/10/wscoor", "RegistrationService_V10"));
+        super(REGISTRATIONSERVICEV10_WSDL_LOCATION, new QName("http://schemas.xmlsoap.org/ws/2004/10/wscoor", "Coordinator"));//todo paul was RegistrationService_V10
     }
 
     /**

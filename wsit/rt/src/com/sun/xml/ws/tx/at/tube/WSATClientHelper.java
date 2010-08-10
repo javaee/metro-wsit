@@ -43,10 +43,8 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.w3c.dom.Element;
 import com.sun.xml.ws.tx.at.WSATHelper;
-//import com.sun.xml.ws.tx.common.TransactionImportManager;
-//import com.sun.xml.ws.tx.common.TransactionImportWrapper;
+
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
@@ -56,8 +54,6 @@ import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.xml.ws.WebServiceException;
 
 
 public class WSATClientHelper implements WSATClient {
@@ -82,7 +78,6 @@ public class WSATClientHelper implements WSATClient {
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logOutboundApplicationMessageTransactionBeforeAddingContext(transaction);
         List<Header> addedHeaders = processTransactionalRequest(transactionalAttribute, map);
-
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logOutboundApplicationMessageTransactionAfterAddingContext(transaction);
         return addedHeaders;
@@ -114,18 +109,18 @@ public class WSATClientHelper implements WSATClient {
     private boolean resume(Transaction transaction) {
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logWillResumeInClientSideHandler(transaction, Thread.currentThread());
-//todoremove         try {
-//todoremove            WSATTubeHelper.getTransactionHelper().getTransactionManager().resume(transaction);
+    try {
+        TransactionManagerImpl.getInstance().getTransactionManager().resume(transaction);
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logResumedInClientSideHandler(transaction, Thread.currentThread());
-            return true;
-/**        } catch (InvalidTransactionException e) {
+            return true; //todo redundant catch blocks below...
+    } catch (InvalidTransactionException e) {
             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logInvalidTransactionExceptionInClientSideHandler(
 //todoremove                         e, transaction, Thread.currentThread());
-            WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
+//todoremove            WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
 //todoremove             transaction.setRollbackOnly(e);
-               WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
+//todoremove               WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
             try {
                 transaction.setRollbackOnly();
             } catch (IllegalStateException ex) {
@@ -140,7 +135,7 @@ public class WSATClientHelper implements WSATClient {
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logSystemExceptionInClientSideHandler(
 //todoremove                         e, transaction, Thread.currentThread());
-            WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
+//todoremove            WSATTubeHelper.getTransactionHelper().getTransactionManager().forceResume(transaction);
             try {
                 transaction.setRollbackOnly();
                 return false;
@@ -152,7 +147,7 @@ public class WSATClientHelper implements WSATClient {
                 return false;
             }
 
-        } */
+        } 
     }
 
     /**
@@ -167,7 +162,7 @@ public class WSATClientHelper implements WSATClient {
      *         true otherwise
      */
     private List<Header> processTransactionalRequest(TransactionalAttribute transactionalAttribute, Map map) {
-        Transaction suspendedTransaction = suspend(map);
+      //  Transaction suspendedTransaction = suspend(map);
 //todoremove        if (suspendedTransaction==null) return null;
         List<Header> headers = new ArrayList<Header>();
 //todoremove         if (WSATHelper.isDebugEnabled())
@@ -182,7 +177,7 @@ public class WSATClientHelper implements WSATClient {
         long ttl = 30000; //todoremove
 
         try {
-            ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout(); //todoremove suspendedTransaction.getTimeToLiveMillis();
+            ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout(); //todoremove verify if this call is from inbound only suspendedTransaction.getTimeToLiveMillis();
             //todoremove         if (WSATHelper.isDebugEnabled())
             //todoremove             WseeWsatLogger.logWSATInfoInClientSideHandler(txId, ttl, suspendedTransaction, Thread.currentThread());
         } catch (SystemException ex) {
@@ -190,17 +185,14 @@ public class WSATClientHelper implements WSATClient {
         }
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logWSATInfoInClientSideHandler(txId, ttl, suspendedTransaction, Thread.currentThread());
-
         WSCBuilderFactory builderFactory = WSCBuilderFactory.newInstance(transactionalAttribute.getVersion());
         WSATCoordinationContextBuilder builder  = builderFactory.newWSATCoordinationContextBuilder();
         CoordinationContextIF cc = builder.txId(txId).expires(ttl).soapVersion(transactionalAttribute.getSoapVersion()).mustUnderstand(true).build();
         Header coordinationHeader = Headers.create(cc.getJAXBRIContext(),cc.getDelegate());
         headers.add(coordinationHeader);
-
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logOutboundApplicationMessageTransactionAfterAddingContext(suspendedTransaction);
-
-
+        Transaction suspendedTransaction = suspend(map);
         return headers;
     }
 
@@ -211,23 +203,20 @@ public class WSATClientHelper implements WSATClient {
      */
     private Transaction suspend(Map map) {
         Transaction suspendedTransaction = null;
-  //       try {
-
-//todo         TransactionImportManager.getInstance().release(null);
-             //todoremove             TransactionManager clientTransactionManager =
+       try {
+           suspendedTransaction = TransactionManagerImpl.getInstance().getTransactionManager().suspend();
 //todoremove                     WSATTubeHelper.getTransactionHelper().getTransactionManager();
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logAboutToSuspendInClientSideHandler(clientTransactionManager, Thread.currentThread());
-//todoremove             suspendedTransaction = (Transaction)clientTransactionManager.suspend();
-//todoremove             suspendedTransaction.setLocalProperty(Constants.OTS_TX_EXPORT_PROPNAME, null);
-//todoremove             map.put("wsat.transaction", suspendedTransaction);
+           TransactionManagerImpl.transaction = suspendedTransaction; //todo temporary hack REMOVE
+           map.put("wsat.transaction", suspendedTransaction);
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logSuspendedInClientSideHandler(suspendedTransaction, Thread.currentThread());
-    //     } catch (SystemException e) {
+         } catch (SystemException e) {
             //tx should always be null here as suspend would either work or not
 //todoremove             WseeWsatLogger.logSystemExceptionDuringSuspend(e, suspendedTransaction, Thread.currentThread());
-   //         return null;
-  //       }
+            return null;
+         }
          return suspendedTransaction;
     }
 

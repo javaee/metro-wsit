@@ -41,6 +41,8 @@ import com.sun.xml.ws.tx.coord.common.client.RegistrationProxyBuilder;
 import com.sun.xml.ws.tx.coord.common.client.RegistrationMessageBuilder;
 import com.sun.xml.ws.tx.coord.v10.client.RegistrationMessageBuilderImpl;
 import com.sun.xml.ws.tx.coord.v10.client.RegistrationProxyBuilderImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WSCBuilderFactoryImpl extends WSCBuilderFactory {
     public WSATCoordinationContextBuilder newWSATCoordinationContextBuilder() {
@@ -48,6 +50,14 @@ public class WSCBuilderFactoryImpl extends WSCBuilderFactory {
     }
 
     public RegistrationProxyBuilder newRegistrationProxyBuilder() {
+//        final ClassLoader classLoader = WSCBuilderFactoryImpl.class.getClassLoader();
+  //      System.out.println("-------> WSCBuilderFactoryImpl.class.getClassLoader():"+
+    //            classLoader);
+    //    try {
+    //        final Class<?> loadClass = classLoader.loadClass(RegistrationProxyBuilderImpl.class.getName());
+    //    } catch (ClassNotFoundException ex) {
+    //        Logger.getLogger(WSCBuilderFactoryImpl.class.getName()).log(Level.SEVERE, null, ex);
+    //    }
         return new RegistrationProxyBuilderImpl();
     }
 

@@ -46,6 +46,8 @@ import com.sun.xml.ws.tx.at.common.*;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 import com.sun.xml.ws.tx.at.common.client.ParticipantProxyBuilder;
 import com.sun.xml.ws.tx.at.tube.WSATTubeHelper;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
@@ -534,7 +536,7 @@ public class WSATHelper<T> {
     }
 
     public void debug(String msg) {
-//todoremove         debugWSAT.debug(msg);
+        Logger.getLogger(WSATHelper.class.getName()).log(Level.INFO, null);
     }
 
   public static String assignUUID(){

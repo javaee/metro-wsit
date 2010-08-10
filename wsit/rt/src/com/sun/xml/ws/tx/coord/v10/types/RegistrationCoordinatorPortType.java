@@ -54,8 +54,8 @@ public interface RegistrationCoordinatorPortType {
     /**
      * 
      * @param parameters
-     */
-    @WebMethod(operationName = "RegisterOperation", action = "http://schemas.xmlsoap.org/ws/2004/10/wscoor/RegisterOperation")
+     */ //todo paul was http://schemas.xmlsoap.org/ws/2004/10/wscoor/RegisterOperation
+    @WebMethod(operationName = "RegisterOperation", action = "http://schemas.xmlsoap.org/ws/2004/10/wscoor/Register")
     @Oneway
     public void registerOperation(
         @WebParam(name = "Register", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wscoor", partName = "parameters")

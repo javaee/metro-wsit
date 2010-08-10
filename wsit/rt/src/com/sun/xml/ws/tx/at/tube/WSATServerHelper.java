@@ -36,12 +36,14 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.xml.ws.api.message.HeaderList;
+import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContext;
 import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContextManager;
 import com.sun.xml.ws.tx.at.WSATException;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.CoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.RegistrationIF;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
@@ -58,9 +60,11 @@ import javax.xml.ws.WebServiceException;
 public class WSATServerHelper implements WSATServer {
     public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
         if(WSATHelper.isDebugEnabled())
-            debug("processRequest HeaderList:"+headers+" TransactionalAttribute:"+tx+ " isEnabled:"+tx.isEnabled());
+            debug("processRequest HeaderList:"+headers+
+                    " TransactionalAttribute:"+tx+ " isEnabled:"+tx.isEnabled());
         if (tx.isEnabled()) {
-            CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers,tx.getVersion());
+            CoordinationContextBuilder ccBuilder =
+                    CoordinationContextBuilder.headers(headers,tx.getVersion());
             if(ccBuilder != null) {
                 processIncomingTransaction(headers, ccBuilder);
             } else {
@@ -70,7 +74,7 @@ public class WSATServerHelper implements WSATServer {
     }
     
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
-        if (transactionalAttribute!=null&&transactionalAttribute.isEnabled()) {
+        if (transactionalAttribute!=null && transactionalAttribute.isEnabled()) {
 //todoremove             if(WSATHelper.isDebugEnabled()) debug("processResponse isTransactionalAnnotationPresent about to suspend");
 //todoremove             javax.transaction.Transaction suspendedTx =
 //todoremove                     TransactionHelper.getTransactionHelper().getTransactionManager().forceSuspend();
@@ -103,7 +107,7 @@ public class WSATServerHelper implements WSATServer {
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
-        boolean notRegisterred = TransactionIdHelper.getInstance().getXid(tid.getBytes()) == null;
+        boolean notRegisterred = true; //TransactionIdHelper.getInstance().getXid(tid.getBytes()) == null;
         try {
           Xid foreignXid = WSATHelper.getTransactionServices().importTransaction((int) timeout, tid.getBytes());
           if(notRegisterred) {
@@ -117,7 +121,7 @@ public class WSATServerHelper implements WSATServer {
     private void register(
             HeaderList headers, CoordinationContextBuilder builder, CoordinationContextIF cc, Xid foreignXid, long timeout)
     {
-       String participantId = "participantidWSAT"; //todoremove  TransactionIdHelper.getInstance().xid2wsatid(foreignXid);
+       String participantId = TransactionIdHelper.getInstance().xid2wsatid(foreignXid);
        Transactional.Version version = builder.getVersion();
         WSCBuilderFactory factory = WSCBuilderFactory.newInstance(version);
         RegistrationMessageBuilder rrBuilder = factory.newWSATRegistrationRequestBuilder();
@@ -143,6 +147,8 @@ public class WSATServerHelper implements WSATServer {
                     ForeignRecoveryContextManager.getInstance().addAndGetForeignRecoveryContextForTidByteArray(
                             foreignXid);
             frc.setEndpointReference(epr,builder.getVersion());
+            TransactionManagerImpl.getInstance().putResource(
+                    WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT, frc);
         } else {
             log("Sending fault. Context refused registerResponseType is null");
             throw new WebServiceException("Sending fault. Context refused registerResponseType is null");
