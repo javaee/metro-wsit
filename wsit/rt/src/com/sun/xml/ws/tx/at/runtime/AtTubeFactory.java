@@ -65,9 +65,8 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) {
-        final TransactionalFeature feature =
-                context.getWrappedContext().getWsdlModel().getFeature(TransactionalFeature.class);
-        if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), false)) {
+        final TransactionalFeature feature = context.getBinding().getFeature(TransactionalFeature.class);
+        if (feature != null && feature.isEnabled()) {
             return new WSATClientTube(context.getTubelineHead(), context, feature);
         } else {
             return context.getTubelineHead();
@@ -81,48 +80,11 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) {
-        final TransactionalFeature feature =
-                context.getWrappedContext().getWsdlModel().getFeature(TransactionalFeature.class);
-        if (isTransactionsEnabled(context.getPolicyMap(), context.getWsdlPort(), true)) {
+        final TransactionalFeature feature = context.getEndpoint().getBinding().getFeature(TransactionalFeature.class);
+        if (feature != null && feature.isEnabled()) {
             return new WSATServerTube(context.getTubelineHead(), context, feature);
         } else {
             return context.getTubelineHead();
         }
-    }
-
-    /**
-     * Checks to see whether WS-Atomic Transactions are enabled or not.
-     *
-     * @param policyMap policy map for {@link this} assembler
-     * @param wsdlPort the WSDLPort object
-     * @param isServerSide true if this method is being called from {@link PipelineAssembler#createServer(ServerPipeAssemblerContext)}
-     * @return true if Transactions is enabled, false otherwise
-     */
-    private boolean isTransactionsEnabled(PolicyMap policyMap, WSDLPort wsdlPort, boolean isServerSide) {
-        if (policyMap == null || wsdlPort == null /* TODO : fix missing util method || !Util.isJTAAvailable()*/) {
-            // false for standalone WSIT client or WSIT Service in Tomcat
-            return false;
-        }
-        try {
-            PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(wsdlPort.getOwner().getName(), wsdlPort.getName());
-            Policy policy = policyMap.getEndpointEffectivePolicy(endpointKey);
-            for (WSDLBoundOperation wbo : wsdlPort.getBinding().getBindingOperations()) {
-                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(wsdlPort.getOwner().getName(), wsdlPort.getName(), wbo.getName());
-                policy = policyMap.getOperationEffectivePolicy(operationKey);
-                if (policy != null) {
-                    // look for ATAlwaysCapable on the server side
-                    if ((isServerSide) && (policy.contains(AT_ALWAYS_CAPABILITY))) {
-                        return true;
-                    }
-                    // look for ATAssertion in both client and server
-                    if (policy.contains(AT_ASSERTION)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (PolicyException e) {
-            throw new WebServiceException(e);
-        }
-        return false;
     }
 }
