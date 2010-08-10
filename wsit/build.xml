@@ -82,11 +82,11 @@
         </copy>
         
         <mkdir dir="${v3.build.dir}"/>
-        <bnd classpath="rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar"
+        <bnd classpath="rt/${osgi.build.dir}/webservices-rt.jar, tools/${osgi.build.dir}/webservices-tools.jar, ${lib.osgi.dir}/jaxb-api-osgi.jar, ${lib.osgi.dir}/jaxb-osgi.jar"
              failok="false"
              output="${v3.build.dir}/webservices-osgi.jar"
              files="${build.dir}/bnd/webservices.bnd"/>
-        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar"
+        <bnd classpath="rt/${osgi.build.dir}/webservices-api.jar, ${lib.osgi.dir}/jaxb-api-osgi.jar"
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
