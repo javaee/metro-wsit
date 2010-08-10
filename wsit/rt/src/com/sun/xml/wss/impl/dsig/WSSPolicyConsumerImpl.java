@@ -451,7 +451,10 @@ public class WSSPolicyConsumerImpl {
         //String digestAlgo = featureBinding.getDigestAlgorithm();
         ArrayList targetList = featureBinding.getTargetBindings();
         String keyAlgo = null;
-        String algo = fpContext.getAlgorithmSuite().getSignatureAlgorithm();
+        String algo = MessageConstants.RSA_SHA1;
+        if (fpContext.getAlgorithmSuite() != null) {
+            algo = fpContext.getAlgorithmSuite().getSignatureAlgorithm();
+        }
 
         keyAlgo = SecurityUtil.getKeyAlgo(algo);
                 
