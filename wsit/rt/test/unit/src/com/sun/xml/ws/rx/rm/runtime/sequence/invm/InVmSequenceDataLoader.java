@@ -52,21 +52,21 @@ public class InVmSequenceDataLoader implements SequenceDataLoader {
     public void tearDown() {
     }
 
-    public SequenceData newInstance(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
-        return new InVmSequenceData(
+    public SequenceData newInstance(boolean isInbound, String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
+        SequenceDataPojo sdPojo = new SequenceDataPojo(sequenceId, securityContextTokenId, expirationTime, isInbound, null);
+        sdPojo.setState(state);
+        sdPojo.setAckRequestedFlag(ackRequestedFlag);
+        sdPojo.setLastMessageNumber(lastMessageId);
+        sdPojo.setLastActivityTime(lastActivityTime);
+        sdPojo.setLastAcknowledgementRequestTime(lastAcknowledgementRequestTime);
+
+        return InVmSequenceData.newInstace(
                 new TimeSynchronizer() {
 
                     public long currentTimeInMillis() {
                         return System.currentTimeMillis();
                     }
                 },
-                sequenceId,
-                securityContextTokenId,
-                expirationTime,
-                state,
-                ackRequestedFlag,
-                lastMessageId,
-                lastActivityTime,
-                lastAcknowledgementRequestTime);
+                sdPojo);
     }
 }

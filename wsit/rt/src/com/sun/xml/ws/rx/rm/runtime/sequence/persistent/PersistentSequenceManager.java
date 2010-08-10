@@ -58,7 +58,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -119,11 +118,6 @@ public final class PersistentSequenceManager implements SequenceManager {
         this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
 
         this.cm = ConnectionManager.getInstance(new DefaultDataSourceProvider());
-
-        ManagedObjectManager mom = configuration.getManagedObjectManager();
-        if (mom != null) {
-            mom.registerAtRoot(this, MANAGED_BEAN_NAME);
-        }
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),

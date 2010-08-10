@@ -39,6 +39,7 @@ import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.invm.InVmSequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.persistent.PersistentSequenceManager;
+import org.glassfish.gmbal.ManagedObjectManager;
 
 /**
  *
@@ -63,10 +64,18 @@ public enum SequenceManagerFactory {
      * @return newly created {@link SequenceManager} instance
      */
     public SequenceManager createSequenceManager(boolean persistent, String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
+        SequenceManager result;
         if (persistent) {
-            return new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+            result = new PersistentSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+        } else {
+            result = new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
         }
-        
-        return new InVmSequenceManager(uniqueEndpointId, inboundQueueBuilder, outboundQueueBuilder, configuration);
+
+        ManagedObjectManager mom = configuration.getManagedObjectManager();
+        if (mom != null) {
+            mom.registerAtRoot(result, SequenceManager.MANAGED_BEAN_NAME);
+        }
+
+        return result;
     }
 }

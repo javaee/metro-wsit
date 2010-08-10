@@ -253,17 +253,17 @@ public enum HighAvailabilityProvider {
 
     /**
      * Helper method that avoids the need for exception handling boilerplate code
-     * when loading a value from a {@link BackingStore} instance.
+     * when loading data from a {@link BackingStore} instance.
      * The original checked {@link BackingStoreException} is wrapped into a new
      * unchecked {@link HighAvailabilityProviderException}.
      *
      * @param <K> backing store key parameter type
-     * @param <V> backing store value parameter type
+     * @param <V> backing store data parameter type
      * @param backingStore {@link BackingStore} instance
-     * @param key stored value identifier
-     * @param version stored value version
+     * @param key stored data identifier
+     * @param version stored data version
      *
-     * @return stored value as specified by {@link BackingStore#load(java.io.Serializable, java.lang.String)}
+     * @return stored data as specified by {@link BackingStore#load(java.io.Serializable, java.lang.String)}
      */
     public <K extends Serializable, V extends Serializable> V loadFrom(BackingStore<K, V> backingStore, K key, String version) {
         try {
@@ -291,6 +291,58 @@ public enum HighAvailabilityProvider {
     public <K extends Serializable, V extends Serializable> String saveTo(BackingStore<K, V> backingStore, K key, V value, boolean isNew) {
         try {
             return backingStore.save(key, value, isNew);
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when removing data from a {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param <K> backing store key parameter type
+     * @param <V> backing store data parameter type
+     * @param backingStore {@link BackingStore} instance
+     * @param key stored data identifier
+     */
+    public <K extends Serializable, V extends Serializable> void removeFrom(BackingStore<K, V> backingStore, K key) {
+        try {
+            backingStore.remove(key);
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
+
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when closing a {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param backingStore {@link BackingStore} instance
+     */
+    public void close(BackingStore<?, ?> backingStore) {
+        try {
+            backingStore.close();
+        } catch (BackingStoreException ex) {
+            throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
+        }
+    }
+
+    /**
+     * Helper method that avoids the need for exception handling boilerplate code
+     * when destroying a {@link BackingStore} instance.
+     * The original checked {@link BackingStoreException} is wrapped into a new
+     * unchecked {@link HighAvailabilityProviderException}.
+     *
+     * @param backingStore {@link BackingStore} instance
+     */
+    public void destroy(BackingStore<?, ?> backingStore) {
+        try {
+            backingStore.destroy();
         } catch (BackingStoreException ex) {
             throw LOGGER.logSevereException(new HighAvailabilityProviderException("", ex)); // TODO exception message
         }

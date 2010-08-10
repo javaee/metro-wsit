@@ -82,6 +82,7 @@ public class SequenceDataTest extends TestCase {
 
         for (int i = 0; i < instances.length; i++) {
             instances[i] = loaders[i].newInstance(
+                    true, // this value has no effect on the actual tests
                     EXPECTED_SEQUENCE_ID,
                     EXPECTED_STR_ID,
                     EXPECTED_EXPIRY_TIME,

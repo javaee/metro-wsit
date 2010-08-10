@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
@@ -58,16 +59,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.glassfish.gmbal.ManagedObjectManager;
+import org.glassfish.ha.store.api.BackingStore;
+import org.glassfish.ha.store.api.BackingStoreFactory;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-public final class InVmSequenceManager implements SequenceManager {
+public final class InVmSequenceManager implements SequenceManager, ReplicationManager<String, AbstractSequence> {
+
     private static final Logger LOGGER = Logger.getLogger(InVmSequenceManager.class);
-
-
     /**
      * Internal in-memory data access lock
      */
@@ -75,11 +76,15 @@ public final class InVmSequenceManager implements SequenceManager {
     /**
      * Internal in-memory storage of sequence data
      */
-    private final Map<String, AbstractSequence> sequences = new HashMap<String, AbstractSequence>();
+    private final HighlyAvailableMap<String, AbstractSequence> sequences;
+    /**
+     * Sequence data POJo backing store
+     */
+    private final BackingStore<String, SequenceDataPojo> sequenceDataBs;
     /**
      * Internal in-memory map of bound sequences
      */
-    private final Map<String, String> boundSequences = new HashMap<String, String>();
+    private final HighlyAvailableMap<String, String> boundSequences;
     /**
      * Inbound delivery queue builder
      */
@@ -105,6 +110,7 @@ public final class InVmSequenceManager implements SequenceManager {
      */
     private final AtomicLong actualConcurrentInboundSequences;
 
+    @SuppressWarnings("LeakingThisInConstructor")
     public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
@@ -114,11 +120,22 @@ public final class InVmSequenceManager implements SequenceManager {
 
         this.actualConcurrentInboundSequences = new AtomicLong(0);
         this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
-        
-        ManagedObjectManager mom = configuration.getManagedObjectManager();
-        if (mom != null) {
-            mom.registerAtRoot(this, MANAGED_BEAN_NAME);
-        }
+
+        final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
+        this.boundSequences = HighlyAvailableMap.newInstanceForBs(
+                new HashMap<String, String>(),
+                HighAvailabilityProvider.INSTANCE.createBackingStore(
+                bsFactory,
+                uniqueEndpointId + "_BOUND_SEQUENCE_BS",
+                String.class,
+                String.class));
+
+        this.sequenceDataBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
+                bsFactory,
+                uniqueEndpointId + "_SEQUENCE_DATA_BS",
+                String.class,
+                SequenceDataPojo.class);
+        this.sequences = HighlyAvailableMap.newInstance(new HashMap<String, AbstractSequence>(), this);
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
@@ -160,7 +177,7 @@ public final class InVmSequenceManager implements SequenceManager {
         try {
             dataLock.readLock().lock();
 
-            return new HashMap<String, String>(boundSequences);
+            return boundSequences.getLocalMapCopy();
         } finally {
             dataLock.readLock().unlock();
         }
@@ -177,7 +194,14 @@ public final class InVmSequenceManager implements SequenceManager {
      * {@inheritDoc}
      */
     public Sequence createOutboundSequence(String sequenceId, String strId, long expirationTime) throws DuplicateSequenceException {
-        SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, OutboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        SequenceDataPojo sequenceDataPojo = new SequenceDataPojo(sequenceId, strId, expirationTime, false, sequenceDataBs);
+        sequenceDataPojo.setState(Sequence.State.CREATED);
+        sequenceDataPojo.setAckRequestedFlag(false);
+        sequenceDataPojo.setLastMessageNumber(OutboundSequence.INITIAL_LAST_MESSAGE_ID);
+        sequenceDataPojo.setLastActivityTime(currentTimeInMillis());
+        sequenceDataPojo.setLastAcknowledgementRequestTime(0L);
+
+        SequenceData data = InVmSequenceData.newInstace(this, sequenceDataPojo);
         return registerSequence(new OutboundSequence(data, this.outboundQueueBuilder, this));
     }
 
@@ -193,7 +217,14 @@ public final class InVmSequenceManager implements SequenceManager {
             }
         }
 
-        SequenceData data = new InVmSequenceData(this, sequenceId, strId, expirationTime, InboundSequence.INITIAL_LAST_MESSAGE_ID, currentTimeInMillis());
+        SequenceDataPojo sequenceDataPojo = new SequenceDataPojo(sequenceId, strId, expirationTime, true, sequenceDataBs);
+        sequenceDataPojo.setState(Sequence.State.CREATED);
+        sequenceDataPojo.setAckRequestedFlag(false);
+        sequenceDataPojo.setLastMessageNumber(InboundSequence.INITIAL_LAST_MESSAGE_ID);
+        sequenceDataPojo.setLastActivityTime(currentTimeInMillis());
+        sequenceDataPojo.setLastAcknowledgementRequestTime(0L);
+
+        SequenceData data = InVmSequenceData.newInstace(this, sequenceDataPojo);
         return registerSequence(new InboundSequence(data, this.inboundQueueBuilder, this));
     }
 
@@ -219,19 +250,18 @@ public final class InVmSequenceManager implements SequenceManager {
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
         try {
             dataLock.readLock().lock();
-            if (sequences.containsKey(sequenceId)) {
-                Sequence sequence = sequences.get(sequenceId);
-
-                if (shouldTeminate(sequence)) {
-                    dataLock.readLock().unlock();
-                    tryTerminateSequence(sequenceId);
-                    dataLock.readLock().lock();
-                }
-
-                return sequence;
-            } else {
+            Sequence sequence = sequences.get(sequenceId);
+            if (sequence == null) {
                 throw new UnknownSequenceException(sequenceId);
             }
+
+            if (shouldTeminate(sequence)) {
+                dataLock.readLock().unlock();
+                tryTerminateSequence(sequenceId);
+                dataLock.readLock().lock();
+            }
+
+            return sequence;
         } finally {
             dataLock.readLock().unlock();
         }
@@ -253,20 +283,19 @@ public final class InVmSequenceManager implements SequenceManager {
     private Sequence tryTerminateSequence(String sequenceId) {
         try {
             dataLock.writeLock().lock();
-            if (sequences.containsKey(sequenceId)) {
-                final AbstractSequence sequence = sequences.get(sequenceId);
-
-                if (sequence.getState() != Sequence.State.TERMINATING) {
-                    if (sequence instanceof InboundSequence) {
-                        actualConcurrentInboundSequences.decrementAndGet();
-                    }
-                    sequence.preDestroy();
-                }
-
-                return sequence;
-            } else {
+            final Sequence sequence = sequences.get(sequenceId);
+            if (sequence == null) {
                 return null;
             }
+
+            if (sequence.getState() != Sequence.State.TERMINATING) {
+                if (sequence instanceof InboundSequence) {
+                    actualConcurrentInboundSequences.decrementAndGet();
+                }
+                sequence.preDestroy();
+            }
+
+            return sequence;
         } finally {
             dataLock.writeLock().unlock();
         }
@@ -353,13 +382,15 @@ public final class InVmSequenceManager implements SequenceManager {
             dataLock.writeLock().lock();
 
             Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
-            while(sequenceKeyIterator.hasNext()) {
+            while (sequenceKeyIterator.hasNext()) {
                 String key = sequenceKeyIterator.next();
 
-                final AbstractSequence sequence = sequences.get(key);
+                final Sequence sequence = sequences.get(key);
                 if (shouldRemove(sequence)) {
                     LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
                     sequenceKeyIterator.remove();
+                    sequences.getReplicationManager().remove(key);
+
                     if (boundSequences.containsKey(sequence.getId())) {
                         boundSequences.remove(sequence.getId());
                     }
@@ -384,5 +415,37 @@ public final class InVmSequenceManager implements SequenceManager {
         // Later we may decide to introduce a timeout before a terminated
         // sequence is removed from the sequence storage
         return sequence.getState() == Sequence.State.TERMINATING;
+    }
+
+    public AbstractSequence load(String key) {
+        SequenceDataPojo state = HighAvailabilityProvider.INSTANCE.loadFrom(sequenceDataBs, key, null);
+        if (state == null) {
+            return null;
+        }
+
+        InVmSequenceData data = InVmSequenceData.loadReplica(null, state); // TODO HA time sync.
+        return (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
+    }
+
+    public String save(String key, AbstractSequence value, boolean isNew) {
+        SequenceData _data = value.getData();
+        if (!(_data instanceof InVmSequenceData)) {
+            throw new IllegalArgumentException("Unsupported sequence data class: " + _data.getClass().getName());
+        }
+
+        InVmSequenceData data = (InVmSequenceData) _data;
+        return HighAvailabilityProvider.INSTANCE.saveTo(sequenceDataBs, key, data.getSequenceStatePojo(), isNew);
+    }
+
+    public void remove(String key) {
+        HighAvailabilityProvider.INSTANCE.removeFrom(sequenceDataBs, key);
+    }
+
+    public void close() {
+        HighAvailabilityProvider.INSTANCE.close(sequenceDataBs);
+    }
+
+    public void destroy() {
+        HighAvailabilityProvider.INSTANCE.destroy(sequenceDataBs);
     }
 }

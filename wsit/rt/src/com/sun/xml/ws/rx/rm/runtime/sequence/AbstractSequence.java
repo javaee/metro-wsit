@@ -174,6 +174,10 @@ public abstract class AbstractSequence implements Sequence {
 
         // nothing else to do...
     }
+
+    public SequenceData getData() {
+        return data;
+    }
     
     public ApplicationMessage retrieveMessage(String correlationId) {
         return data.retrieveMessage(correlationId);

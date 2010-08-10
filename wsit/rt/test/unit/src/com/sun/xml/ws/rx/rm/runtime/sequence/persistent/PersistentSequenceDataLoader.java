@@ -162,7 +162,7 @@ public class PersistentSequenceDataLoader implements SequenceDataLoader {
         }
     }
 
-    public SequenceData newInstance(String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
+    public SequenceData newInstance(boolean isInbound, String sequenceId, String securityContextTokenId, long expirationTime, State state, boolean ackRequestedFlag, long lastMessageId, long lastActivityTime, long lastAcknowledgementRequestTime) {
         return PersistentSequenceData.newInstance(
                 ts,
                 cm,
