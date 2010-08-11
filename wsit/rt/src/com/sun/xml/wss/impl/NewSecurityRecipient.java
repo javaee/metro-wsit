@@ -1,5 +1,5 @@
 /*
- * $Id: NewSecurityRecipient.java,v 1.4 2010-06-25 08:17:33 sm228678 Exp $
+ * $Id: NewSecurityRecipient.java,v 1.5 2010-08-11 06:30:25 kumarjayanti Exp $
  */
 
 /*
@@ -60,6 +60,8 @@ import com.sun.xml.wss.impl.filter.AuthenticationTokenFilter;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.impl.policy.PolicyAlternatives;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
 
 /**
  * This class exports a static Security Service for Verifying/Validating Security in an Inbound SOAPMessage.
@@ -111,8 +113,17 @@ public class NewSecurityRecipient {
         HarnessUtil.validateContext(context);
         FilterProcessingContext fpContext = new FilterProcessingContext(context);
         fpContext.isInboundMessage(true);
+        SecurityPolicy pol = fpContext.getSecurityPolicy();
+        MessagePolicy msgPolicy = null;
+        List<MessagePolicy> messagePolicies = null;
 
-        MessagePolicy msgPolicy = (MessagePolicy) fpContext.getSecurityPolicy();
+        //we have to retain this stuff for old Metro 2.0 style backward compatibility
+        if (pol instanceof MessagePolicy) {
+            msgPolicy = (MessagePolicy) pol;
+        } else if (pol instanceof PolicyAlternatives) {
+            messagePolicies = ((PolicyAlternatives) pol).getSecurityPolicy();
+        }
+
         if ((msgPolicy != null) && (msgPolicy.dumpMessages())) {
             DumpFilter.process(fpContext);
         }
@@ -123,19 +134,28 @@ public class NewSecurityRecipient {
         fpContext.setExtraneousProperty("receivedSignValues", scList);
         fpContext.setMode(FilterProcessingContext.WSDL_POLICY);
 
-        pProcess(fpContext);        
-        //TODO: Venu this is a workaround for PROTOCOL Messages
-        //To be removed after resolveOperationPolicy starts returning correct policy for
-        //protocol messages.
-        if(msgPolicy == null || msgPolicy.size() <= 0){
+        pProcess(fpContext);
+        
+        if((msgPolicy == null || msgPolicy.size() <= 0) && (messagePolicies == null && messagePolicies.size() <=0) ){
             PolicyResolver opResolver = 
                     (PolicyResolver)fpContext.getExtraneousProperty(fpContext.OPERATION_RESOLVER);
-            if(opResolver != null)
-                msgPolicy = opResolver.resolvePolicy(fpContext);
+            if(opResolver != null){
+                pol = opResolver.resolvePolicy(fpContext);
+            }
         }
+        //we have to retain this stuff for old Metro 2.0 style backward compatibility
+        if (pol instanceof MessagePolicy) {
+            msgPolicy = (MessagePolicy) pol;
+        } else if (pol instanceof PolicyAlternatives) {
+            messagePolicies = ((PolicyAlternatives) pol).getSecurityPolicy();
+            //temporary workaround for this legacy code
+            msgPolicy = (messagePolicies != null) ? messagePolicies.get(0) : null;
+        }
+
+
         //TODO: this is a workaround for PROTOCOL Message
         try {
-            if ((msgPolicy == null) ||
+            if (msgPolicy == null ||
                     (msgPolicy.size() == 0 && fpContext.getSOAPMessage().getSOAPBody().hasFault())) {
                 
                 fpContext.getSecurableSoapMessage().deleteSecurityHeader();

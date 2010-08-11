@@ -1,14 +1,8 @@
-/*
- * PolicyVerifier.java
- *
- * Created on August 7, 2005, 8:52 PM
- */
-
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright 2010 Sun Microsystems, Inc. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
@@ -16,7 +10,7 @@
  * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
  * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
  * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
  * Sun designates this particular file as subject to the "Classpath" exception
@@ -25,9 +19,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own
  * identifying information: "Portions Copyrighted [year]
  * [name of copyright owner]"
- * 
+ *
  * Contributor(s):
- * 
+ *
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -40,26 +34,48 @@
  * holder.
  */
 
-package com.sun.xml.wss.impl.policy.spi;
 
-import com.sun.xml.wss.impl.PolicyViolationException;
-import com.sun.xml.wss.impl.policy.*;
+package com.sun.xml.wss.impl.policy;
+
+import com.sun.xml.wss.impl.PolicyTypeUtil;
+import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import java.util.List;
+
 
 /**
- * This is an internal interface not exposed to developer.
  *
- * @author K.Venugopal@sun.com
+ * @author vbkumarjayanti
  */
+public class PolicyAlternatives implements SecurityPolicy {
 
-public interface PolicyVerifier {
-    
-    /**
-     *
-     * @param configPolicy Policy configured for the incoming message.
-     * @param recvdPolicy policy inferred from the incoming message.
-     * @throws com.sun.xml.wss.PolicyViolationException when policy inferred from incoming message does not match with what
-     * is configured.
-     *
+    private final List<MessagePolicy> policyAlternatives;
+
+    PolicyAlternatives(List<MessagePolicy> policies) {
+        //TODO: store an immutable list internally.
+        this.policyAlternatives = policies;
+    }
+    public String getType() {
+        return PolicyTypeUtil.SEC_POLICY_ALTERNATIVES_TYPE;
+    }
+
+    public final List<MessagePolicy> getSecurityPolicy() {
+        return this.policyAlternatives;
+    }
+
+     /**
+     * @return true if empty
      */
-    public void verifyPolicy (SecurityPolicy recvdPolicy ,SecurityPolicy configPolicy )throws PolicyViolationException;
+    public boolean isEmpty() {
+        if (policyAlternatives == null) {
+            return true;
+        }
+
+        for (MessagePolicy m : policyAlternatives) {
+            if (!m.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

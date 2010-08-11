@@ -68,6 +68,7 @@ import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
 
 /**
  *
@@ -104,7 +105,7 @@ public class PolicyResolverImpl implements PolicyResolver {
         this.mcVer = mcVer;
     }
 
-    public MessagePolicy resolvePolicy(ProcessingContext ctx) {
+    public SecurityPolicy resolvePolicy(ProcessingContext ctx) {
         Message msg = null;
         SOAPMessage soapMsg = null;
         if (ctx instanceof JAXBFilterProcessingContext) {
@@ -119,7 +120,7 @@ public class PolicyResolverImpl implements PolicyResolver {
             wsscVer = WSSCVersion.WSSC_13;
         }
 
-        MessagePolicy mp = null;
+        SecurityPolicy mp = null;
 
         action = getAction(msg);
         if (isRMMessage() || isMCMessage()) {
@@ -183,10 +184,9 @@ public class PolicyResolverImpl implements PolicyResolver {
         return null;
     }
 
-    private MessagePolicy getInboundXWSSecurityPolicy(Message msg) {
-        MessagePolicy mp = null;
-
-
+    //TODO:POLALT modify this to return a PolicyAlternatives object when applicable
+    private SecurityPolicy getInboundXWSSecurityPolicy(Message msg) {
+        SecurityPolicy mp = null;
 
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
         WSDLBoundOperation operation = null;
@@ -214,7 +214,8 @@ public class PolicyResolverImpl implements PolicyResolver {
         return mp;
     }
 
-    private MessagePolicy getInboundFaultPolicy(SOAPMessage msg) {
+    //TODO:POLALT modify this to return a PolicyAlternatives object when applicable
+    private SecurityPolicy getInboundFaultPolicy(SOAPMessage msg) {
         if (cachedOperation != null) {
             WSDLOperation operation = cachedOperation.getOperation();
             try {
@@ -239,7 +240,7 @@ public class PolicyResolverImpl implements PolicyResolver {
                     WSDLFault fault = operation.getFault(faultDetail);
                     SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);
                     SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
-                    MessagePolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
+                    SecurityPolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
                     return faultPolicy;
                 }
             } catch (SOAPException sx) {
@@ -278,7 +279,7 @@ public class PolicyResolverImpl implements PolicyResolver {
 
     }
 
-    private MessagePolicy getInboundXWSBootstrapPolicy(Token scAssertion) {
+    private SecurityPolicy getInboundXWSBootstrapPolicy(Token scAssertion) {
         if(scAssertion == null){
             return null;
         }

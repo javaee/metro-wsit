@@ -37,7 +37,7 @@
 package com.sun.xml.wss.impl; 
 
 import com.sun.xml.wss.ProcessingContext;
-import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
 
 /**
  *
@@ -45,6 +45,7 @@ import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
  */
 public interface PolicyResolver {
     
-    MessagePolicy resolvePolicy(ProcessingContext ctx);
+    //MessagePolicy resolvePolicy(ProcessingContext ctx);
+    SecurityPolicy resolvePolicy(ProcessingContext ctx);
            
 }

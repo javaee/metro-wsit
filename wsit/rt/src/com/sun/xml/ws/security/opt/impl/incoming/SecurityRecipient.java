@@ -61,8 +61,6 @@ import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
-import com.sun.xml.wss.impl.policy.verifier.MessagePolicyVerifier;
-import com.sun.xml.wss.impl.policy.verifier.TargetResolver;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -97,6 +95,10 @@ import com.sun.xml.wss.logging.impl.opt.LogStringsMessages;
 import static com.sun.xml.wss.BasicSecurityProfile.*;
 import com.sun.xml.ws.security.opt.impl.util.VerifiedMessageXMLStreamReader;
 import com.sun.xml.wss.impl.WssSoapFaultException;
+import com.sun.xml.wss.impl.policy.PolicyAlternatives;
+import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
+import com.sun.xml.wss.impl.policy.verifier.PolicyVerifierFactory;
 
 /**
  *
@@ -586,7 +588,7 @@ public final class SecurityRecipient {
                     encIds.put(ed.getId(), she.getId());
                     edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                     ek.getPendingReferenceList().remove(ed.getId());
-                    if (ek.getPendingReferenceList().size() == 0) {
+                    if (ek.getPendingReferenceList().isEmpty()) {
                         pendingElement = null;
                         bufferedHeaders.remove(ek);
                         addSecurityHeader(ek);
@@ -598,7 +600,7 @@ public final class SecurityRecipient {
                     Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
                     securityContext.getDecryptedAttachmentSet().add(as);
                     ek.getPendingReferenceList().remove(ed.getId());
-                    if (ek.getPendingReferenceList().size() == 0) {
+                    if (ek.getPendingReferenceList().isEmpty()) {
                         pendingElement = null;
                         bufferedHeaders.remove(ek);
                         addSecurityHeader(ek);
@@ -626,7 +628,7 @@ public final class SecurityRecipient {
                     encIds.put(ed.getId(), she.getId());
                     edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                     refList.getPendingReferenceList().remove(ed.getId());
-                    if (refList.getPendingReferenceList().size() == 0) {
+                    if (refList.getPendingReferenceList().isEmpty()) {
                         pendingElement = null;
                     }
                     checkDecryptedData(she, refList.getPolicy());
@@ -636,7 +638,7 @@ public final class SecurityRecipient {
                     Attachment as = new AttachmentImpl(ed.getAttachmentContentId(), decryptedMimeData, ed.getAttachmentMimeType());
                     securityContext.getDecryptedAttachmentSet().add(as);
                     refList.getPendingReferenceList().remove(ed.getId());
-                    if (refList.getPendingReferenceList().size() == 0) {
+                    if (refList.getPendingReferenceList().isEmpty()) {
                         pendingElement = null;
                     }
                 }
@@ -758,7 +760,7 @@ public final class SecurityRecipient {
                 fb.encryptsSignature(true);
             }
             Signature sig = (Signature) she;
-            if (sig.getReferences().size() != 0 && isPending()) {
+            if (!sig.getReferences().isEmpty() && isPending()) {
                 if (pendingElement == null) {
                     pendingElement = she;
                 } else {
@@ -818,7 +820,7 @@ public final class SecurityRecipient {
                     if (refList.getPendingReferenceList().size() > 0) {
                         findAndReplaceED((ArrayList<String>) refList.getPendingReferenceList(), refList);
                     }
-                    if (refList.getPendingReferenceList().size() == 0) {
+                    if (refList.getPendingReferenceList().isEmpty()) {
                         pendingElement = null;
                     } else {
                         String uri = refList.getPendingReferenceList().get(0);
@@ -888,17 +890,18 @@ public final class SecurityRecipient {
                 scCancel = true;
             }
         }
-        MessagePolicy msgPolicy = (MessagePolicy) context.getSecurityPolicy();
+        SecurityPolicy msgPolicy =  context.getSecurityPolicy();
+
         //boolean isTrust = context.isTrustMessage();
-        if (msgPolicy == null || msgPolicy.size() <= 0) {
+        if (isEmpty(msgPolicy)) {
             PolicyResolver opResolver =
                     (PolicyResolver) context.getExtraneousProperty(context.OPERATION_RESOLVER);
             if (opResolver != null) {
                 msgPolicy = opResolver.resolvePolicy(context);
             }
         }
-        if (context.isSecure() && context.getInferredSecurityPolicy().size() == 0) {
-            if (msgPolicy == null || msgPolicy.size() == 0 || context.isMissingTimestampAllowed()) {
+        if (context.isSecure() && context.getInferredSecurityPolicy().isEmpty()) {
+            if (isEmpty(msgPolicy) || context.isMissingTimestampAllowed()) {
                 return streamMsg;
             } else {
                 throw new XWSSecurityException("Security Requirements not met - No Security header in message");
@@ -969,25 +972,18 @@ public final class SecurityRecipient {
             return streamMsg;
         }
 
-        // for policy verification
-        TargetResolver targetResolver = new TargetResolverImpl(context);
-        MessagePolicyVerifier mpv = new MessagePolicyVerifier(context, targetResolver);
-
-        if (msgPolicy != null) {
-            if (msgPolicy.isSSL() && !context.isSecure()) {
-                logger.log(Level.SEVERE, LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
-                throw new XWSSecurityException(LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
-            }
-        }
-        //if(!isTrust){
         if (context.getInferredSecurityPolicy() == null || context.getInferredSecurityPolicy().isEmpty()) {
             if (context.isClient() && MessageConstants.RSTR_CANCEL_ACTION.equals(context.getAction())) {
                 return streamMsg;
             }
         }
-        mpv.verifyPolicy(context.getInferredSecurityPolicy(), msgPolicy);
-        //}
 
+        // for policy verification
+        //TargetResolver targetResolver = new TargetResolverImpl(context);
+        //MessagePolicyVerifier mpv = new MessagePolicyVerifier(context, targetResolver);
+        PolicyVerifier mpv = PolicyVerifierFactory.createVerifier(msgPolicy, context);
+        mpv.verifyPolicy(context.getInferredSecurityPolicy(), msgPolicy);
+        
         return streamMsg;
     }
 
@@ -1006,7 +1002,7 @@ public final class SecurityRecipient {
         try {
             return getEmptyBody();
         } catch (XMLStreamException ex) {
-            ex.printStackTrace();
+            logger.log(Level.FINE,"",ex);
         }
         return null;
     }
@@ -1194,7 +1190,7 @@ public final class SecurityRecipient {
                     securityContext.getDecryptedAttachmentSet().add(as);
                 }
             } catch (XMLStreamException ex) {
-                ex.printStackTrace();
+                logger.log(Level.SEVERE,"",ex);
                 throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
             }
         } else if (she instanceof EncryptedKey) {
@@ -1216,13 +1212,13 @@ public final class SecurityRecipient {
                             payLoadWsuId = ed.getId();
                             handlePayLoadED(ed);
                         } catch (XMLStreamException ex) {
-                            ex.printStackTrace();
+                            logger.log(Level.SEVERE, "", ex);
                             throw new XWSSecurityException("Error occurred while parsing EncryptedData" + ex);
                         }
                         ek.getPendingReferenceList().remove(payLoadWsuId);
                     }
                 }
-                if (ek.getPendingReferenceList().size() != 0) {
+                if (!ek.getPendingReferenceList().isEmpty()) {
                     throw new XWSSecurityException("Data  Reference under EncryptedKey with ID " + ek.getId() + " is not found");
                 } else {
                     pendingElement = null;
@@ -1316,7 +1312,7 @@ public final class SecurityRecipient {
                 cachePayLoadId();
                 ek.getPendingReferenceList().remove(((SecurityHeaderElement) ed).getId());
                 findAndReplaceED((ArrayList<String>) ek.getPendingReferenceList(), ek);
-                if (ek.getPendingReferenceList().size() == 0) {
+                if (ek.getPendingReferenceList().isEmpty()) {
                     pendingElement = null;
                 } else {
                     String uri = ek.getPendingReferenceList().get(0);
@@ -1581,7 +1577,7 @@ public final class SecurityRecipient {
                                 edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                                 bufferedHeaders.set(i, she);
                             } catch (XMLStreamException ex) {
-                                ex.printStackTrace();
+                                logger.log(Level.SEVERE,"", ex);
                                 throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
                             }
                         } else {
@@ -1728,9 +1724,10 @@ public final class SecurityRecipient {
 
             return gsh;
         } catch (XMLStreamException ex) {
-            ex.printStackTrace();
+            logger.log(Level.SEVERE, "", ex);
             throw new XWSSecurityException("Error occurred while decrypting EncryptedData ", ex);
         } catch (XMLStreamBufferException ex) {
+            logger.log(Level.SEVERE, "", ex);
             throw new XWSSecurityException("Error occurred while decrypting EncryptedData", ex);
         }
     }
@@ -1779,5 +1776,20 @@ public final class SecurityRecipient {
             }
         }
         return true;
+    }
+
+    private boolean isEmpty(SecurityPolicy msgPolicy) {
+        if (msgPolicy == null) {
+            return true;
+        }
+        //TODO: it will be best if SecurityPolicy interface had an isEmpty
+        //will make that change after initial checkin for policy-alternatives
+        if (msgPolicy instanceof MessagePolicy) {
+            return (((MessagePolicy)msgPolicy).isEmpty());
+        } else if (msgPolicy instanceof PolicyAlternatives) {
+            PolicyAlternatives pol = (PolicyAlternatives)msgPolicy;
+            return pol.isEmpty();
+        }
+        return false;
     }
 }

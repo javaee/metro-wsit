@@ -1,4 +1,4 @@
-/*$
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
  * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
@@ -45,6 +45,7 @@
 
 package com.sun.xml.wss.impl.policy.verifier;
 
+import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
@@ -53,6 +54,7 @@ import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.wss.impl.WSSAssertion;
 import com.sun.xml.wss.impl.WssSoapFaultException;
+import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
 import com.sun.xml.wss.impl.policy.PolicyGenerationException;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
@@ -73,6 +75,7 @@ import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.impl.opt.LogStringsMessages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -105,7 +108,20 @@ public class MessagePolicyVerifier implements PolicyVerifier{
         
         MessagePolicy actualPolicy = (MessagePolicy)ap;
         MessagePolicy inferredSecurityPolicy = (MessagePolicy)ip;
-        
+        JAXBFilterProcessingContext context = null;
+        if (ctx instanceof JAXBFilterProcessingContext) {
+            context = (JAXBFilterProcessingContext)ctx;
+        }
+        //this code has been moved from SecurityRecipient.
+        //because in the presence of alternatives this check has to be done
+        //with a specific actualpolicy only.
+        if (actualPolicy != null) {
+            if (actualPolicy.isSSL() && context != null && !context.isSecure()) {
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
+                throw new XWSSecurityRuntimeException(LogStringsMessages.WSS_1601_SSL_NOT_ENABLED());
+            }
+        }
+
         if(actualPolicy == null || actualPolicy.size() <= 0){
             if ((inferredSecurityPolicy != null) && (inferredSecurityPolicy.size() > 0)) {
                 //this could be a plain SSL scenario

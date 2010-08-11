@@ -1,5 +1,5 @@
 /*
- * $Id: PolicyTypeUtil.java,v 1.5 2010-06-25 08:17:33 sm228678 Exp $
+ * $Id: PolicyTypeUtil.java,v 1.6 2010-08-11 06:30:25 kumarjayanti Exp $
  */
 
 /*
@@ -51,6 +51,7 @@ public  class PolicyTypeUtil {
     
     public static final String SEC_POLICY_CONTAINER_TYPE = "SecurityPolicyContainer";
     public static final String DYN_SEC_POLICY_TYPE= "DynamicSecurityPolicy";
+    public static final String SEC_POLICY_ALTERNATIVES_TYPE= "SecurityPolicyAlternatives";
     public static final String BOOLEAN_COMPOSER_TYPE = "BooleanComposer";
     public static final String APP_SEC_CONFIG_TYPE = "ApplicationSecurityConfiguration";
     public static final String DECL_SEC_CONFIG_TYPE = "DeclarativeSecurityConfiguration";
