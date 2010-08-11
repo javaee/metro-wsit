@@ -95,7 +95,7 @@ import com.sun.xml.wss.logging.impl.opt.LogStringsMessages;
 import static com.sun.xml.wss.BasicSecurityProfile.*;
 import com.sun.xml.ws.security.opt.impl.util.VerifiedMessageXMLStreamReader;
 import com.sun.xml.wss.impl.WssSoapFaultException;
-import com.sun.xml.wss.impl.policy.PolicyAlternatives;
+import com.sun.xml.wss.impl.policy.PolicyUtils;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.impl.policy.verifier.PolicyVerifierFactory;
@@ -893,7 +893,7 @@ public final class SecurityRecipient {
         SecurityPolicy msgPolicy =  context.getSecurityPolicy();
 
         //boolean isTrust = context.isTrustMessage();
-        if (isEmpty(msgPolicy)) {
+        if (PolicyUtils.isEmpty(msgPolicy)) {
             PolicyResolver opResolver =
                     (PolicyResolver) context.getExtraneousProperty(context.OPERATION_RESOLVER);
             if (opResolver != null) {
@@ -901,7 +901,7 @@ public final class SecurityRecipient {
             }
         }
         if (context.isSecure() && context.getInferredSecurityPolicy().isEmpty()) {
-            if (isEmpty(msgPolicy) || context.isMissingTimestampAllowed()) {
+            if (PolicyUtils.isEmpty(msgPolicy) || context.isMissingTimestampAllowed()) {
                 return streamMsg;
             } else {
                 throw new XWSSecurityException("Security Requirements not met - No Security header in message");
@@ -1776,20 +1776,5 @@ public final class SecurityRecipient {
             }
         }
         return true;
-    }
-
-    private boolean isEmpty(SecurityPolicy msgPolicy) {
-        if (msgPolicy == null) {
-            return true;
-        }
-        //TODO: it will be best if SecurityPolicy interface had an isEmpty
-        //will make that change after initial checkin for policy-alternatives
-        if (msgPolicy instanceof MessagePolicy) {
-            return (((MessagePolicy)msgPolicy).isEmpty());
-        } else if (msgPolicy instanceof PolicyAlternatives) {
-            PolicyAlternatives pol = (PolicyAlternatives)msgPolicy;
-            return pol.isEmpty();
-        }
-        return false;
     }
 }

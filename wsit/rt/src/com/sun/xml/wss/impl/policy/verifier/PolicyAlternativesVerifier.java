@@ -97,7 +97,7 @@ public class PolicyAlternativesVerifier implements PolicyVerifier {
 
     //TODO: make the AlternativeSelector to be used configurable via META-INF/Services or as Classpath Resource ?.
     //Or Have a Factory Method.
-    public static interface AlternativeSelector {
+    private static interface AlternativeSelector {
         public MessagePolicy selectAlternative(ProcessingContext ctx, List<MessagePolicy> alternatives, SecurityPolicy recvdPolicy);
     }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: NewSecurityRecipient.java,v 1.5 2010-08-11 06:30:25 kumarjayanti Exp $
+ * $Id: NewSecurityRecipient.java,v 1.6 2010-08-11 06:55:19 kumarjayanti Exp $
  */
 
 /*
@@ -61,6 +61,7 @@ import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.*;
 import com.sun.xml.wss.impl.policy.PolicyAlternatives;
+import com.sun.xml.wss.impl.policy.PolicyUtils;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 
 /**
@@ -136,7 +137,7 @@ public class NewSecurityRecipient {
 
         pProcess(fpContext);
         
-        if((msgPolicy == null || msgPolicy.size() <= 0) && (messagePolicies == null && messagePolicies.size() <=0) ){
+        if(PolicyUtils.isEmpty(pol)){
             PolicyResolver opResolver = 
                     (PolicyResolver)fpContext.getExtraneousProperty(fpContext.OPERATION_RESOLVER);
             if(opResolver != null){
