@@ -72,6 +72,10 @@ public enum HighAvailabilityProvider {
         private StoreType(String storeTypeId) {
             this.storeTypeId = storeTypeId;
         }
+
+        public String getStoreTypeId() {
+            return storeTypeId;
+        }
     }
 
     private static class HaEnvironment {
