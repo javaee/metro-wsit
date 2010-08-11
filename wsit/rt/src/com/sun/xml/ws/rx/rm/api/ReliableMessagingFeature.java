@@ -240,7 +240,7 @@ public class ReliableMessagingFeature extends WebServiceFeature {
          *
          * @see BackoffAlgorithm
          */
-        LINEAR("Linear") {
+        CONSTANT("Constant") {
 
             public long getDelayInMillis(int resendAttemptNumber, long baseRate) {
                 return baseRate;
@@ -278,12 +278,12 @@ public class ReliableMessagingFeature extends WebServiceFeature {
         /**
          * Provides a default back-off algorithm value.
          *
-         * @return a default back-off algorithm value. Currently returns {@link #LINEAR}.
+         * @return a default back-off algorithm value. Currently returns {@link #CONSTANT}.
          *
          * @see BackoffAlgorithm
          */
         public static BackoffAlgorithm getDefault() {
-            return BackoffAlgorithm.LINEAR; // if changed, update also in ReliableMesaging annotation
+            return BackoffAlgorithm.CONSTANT;
         }
 
 
