@@ -972,5 +972,17 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         if (password != null) {
             requestPacket.invocationProperties.put(com.sun.xml.wss.XWSSConstants.PASSWORD_PROPERTY, password);
         }
-    }    
+    }
+
+     private void renewSCT(ProcessingContext ctx, Packet ret) {
+         SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
+         config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
+            IssuedTokenContext itc = itm.createIssuedTokenContext(config, ret.endpointAddress.toString());
+            try {
+                itm.renewIssuedToken(itc);
+            } catch (WSTrustException se) {
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0052_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSITPVD_0027_ERROR_POPULATING_CLIENT_CONFIG_PROP(), se);
+            }
+    } 
 }

@@ -44,6 +44,7 @@
 package com.sun.xml.ws.security.opt.impl.util;
 
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,6 +83,10 @@ public class SOAPUtil {
             enableFaultDetail = true;
             System.setProperty("com.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace", "true");
         }
+    }
+
+    public static SOAPFaultException getSOAPFaultException(QName faultCode, WSSecureConversationRuntimeException wsre, SOAPFactory soapFactory, SOAPVersion sOAPVersion) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /** Creates a new instance of SOAPUtil */
@@ -182,6 +187,20 @@ public class SOAPUtil {
         setFaultDetail(fault, cause);
         return createSOAPFault(fault,ex);
 
+    }
+
+     public static SOAPFaultException getSOAPFaultException(QName faultCode, Exception ex, SOAPFactory factory, SOAPVersion version) {
+        String msg = ex.getMessage();
+        if (msg == null) {
+            msg = ex.getClass().getName();
+        }
+        SOAPFault fault = getSOAPFault(faultCode, msg, factory, version);
+        if (!enableFaultDetail) {
+            return createSOAPFault(fault,ex);
+
+        }
+        setFaultDetail(fault, ex);
+        return createSOAPFault(fault,ex);
     }
 
     public static SOAPFaultException getSOAPFaultException(Exception ex, SOAPFactory factory, SOAPVersion version) {

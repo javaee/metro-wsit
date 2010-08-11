@@ -401,6 +401,9 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         DumpFilter.process(ctx);
                     }
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
+                    if ((new QName(wsscVer.getNamespaceURI(), "RenewNeeded")).equals(fault.getFaultCodeAsQName())){
+                        renewSCT(ctx, ret);
+                    }
                     //log.log(Level.SEVERE,
                     //        LogStringsMessages.WSSTUBE_0034_FAULTY_RESPONSE_MSG(fault));
                     throw new SOAPFaultException(fault);
@@ -804,5 +807,16 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
     }
 
-   
+    private void renewSCT(ProcessingContext ctx, Packet ret) {
+         SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
+         config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
+            IssuedTokenContext itc = itm.createIssuedTokenContext(config, ret.endpointAddress.toString());
+            try {
+                itm.renewIssuedToken(itc);
+            } catch (WSTrustException se) {
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+                throw new WebServiceException(LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+            }
+    } 
 }

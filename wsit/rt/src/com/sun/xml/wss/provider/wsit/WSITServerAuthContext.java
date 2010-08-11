@@ -52,6 +52,7 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
+import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
@@ -358,6 +359,16 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
             msg = Messages.create(sfe, soapVersion);
             
+        } catch (WSSecureConversationRuntimeException wsre){
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSITPVD_0035_ERROR_VERIFY_INBOUND_MSG(), wsre);
+            thereWasAFault = true;
+             QName faultCode = wsre.getFaultCode();
+             if (faultCode != null){
+                 faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
+             }
+             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
+             msg = Messages.create(sfe, soapVersion);
         } catch(SOAPException se){
             // internal error
             log.log(Level.SEVERE,

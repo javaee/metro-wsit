@@ -52,6 +52,7 @@ import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.api.security.CallbackHandlerFeature;
+import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.policy.Policy;
@@ -309,6 +310,15 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
             msg = Messages.create(sfe, soapVersion);
 
+        } catch (WSSecureConversationRuntimeException wsre){
+             thereWasAFault = true;
+             log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), wsre);
+             QName faultCode = wsre.getFaultCode();
+             if (faultCode != null){
+                 faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
+             }
+             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
+             msg = Messages.create(sfe, soapVersion);
         } catch (SOAPException se) {
             // internal error
             // Log here because this catch is an internal error not logged by the callee

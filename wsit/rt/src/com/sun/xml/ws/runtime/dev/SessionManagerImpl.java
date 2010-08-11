@@ -41,6 +41,7 @@
 
 package com.sun.xml.ws.runtime.dev;
 
+import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
@@ -51,6 +52,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.GregorianCalendar;
 import java.util.Set;
+import javax.xml.namespace.QName;
 
 import javax.xml.ws.WebServiceException;
 
@@ -216,7 +218,7 @@ public class SessionManagerImpl extends SessionManager {
             Date currentTimeInDateFormat = c.getTime();
             if(!(currentTimeInDateFormat.after(ctx.getCreationTime())
                 && currentTimeInDateFormat.before(ctx.getExpirationTime()))){
-                throw new WebServiceException("SecureConversation session for session Id:" + key +"has expired.");
+                throw new WSSecureConversationRuntimeException(new QName("RenewNeeded"), "The provided context token has expired");
             }            
         }
         if(((SecurityContextToken)ctx.getSecurityToken()).getInstance() != null){
