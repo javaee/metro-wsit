@@ -83,6 +83,7 @@ import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
+import com.sun.xml.wss.impl.PolicyResolver;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
@@ -92,7 +93,6 @@ import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.misc.WSITProviderSecurityEnvironment;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
 import com.sun.xml.wss.jaxws.impl.Constants;
-import com.sun.xml.wss.jaxws.impl.PolicyResolverImpl;
 import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.util.Iterator;
 import java.util.List;
@@ -156,24 +156,33 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //this.map = map;
         endPoint = new WeakReference((WSEndpoint)map.get("ENDPOINT"));
         sessionManager = SessionManager.getSessionManager(endPoint.get());
-        Iterator it = inMessagePolicyMap.values().iterator();
+
+        //need to merge config assertions from all alternatives
+        //because we do not know which alternative the req uses
+        //and so if username comes we need to have usersupplied validator
+        //and if SAML comes we need the userspecified SAML validator
         Set configAssertions = null;
-        while (it.hasNext()) {
-            SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-            if (configAssertions != null) {
-                configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
-            } else {
-                configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
-            }
-            if (trustConfig != null) {
-                trustConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
-            } else {
-                trustConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-            }
-            if (wsscConfig != null) {
-                wsscConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
-            } else {
-                wsscConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            //TODO:suresh remove this direct public member access
+            Iterator it = p.inMessagePolicyMap.values().iterator();
+            
+            while (it.hasNext()) {
+                SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+                if (configAssertions != null) {
+                    configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
+                } else {
+                    configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
+                }
+                if (trustConfig != null) {
+                    trustConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
+                } else {
+                    trustConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                }
+                if (wsscConfig != null) {
+                    wsscConfig.addAll(holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
+                } else {
+                    wsscConfig = holder.getConfigAssertions(com.sun.xml.ws.security.impl.policy.Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+                }
             }
         }
         String isGF = System.getProperty("com.sun.aas.installRoot");
@@ -200,7 +209,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             }
         } else {
             //This will handle Non-GF containers where no config assertions
-            // are required in the WSDL. Ex. UsernamePassword validatio
+            // are required in the WSDL. Ex. UsernamePassword validation
             // with Default Realm Authentication
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
@@ -269,8 +278,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     @SuppressWarnings("unchecked")
     public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) throws AuthException {
-        // Add addrsssing headers to trust message
-        //TODO: replace this with correct method, i believe we can update the reqPacket into MessageInfo     
+        // Add addressing headers to trust message
         
         //TODO: this is the one that came from nextPipe.process
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
@@ -321,8 +329,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         //update the client subject passed to the AuthModule itself.
         ctx.setExtraneousProperty(MessageConstants.AUTH_SUBJECT, clientSubject);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,
-                new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation(packet),pipeConfig,addVer,false, rmVer, mcVer));
+        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(policyAlternatives,
+                cachedOperation(packet),pipeConfig,addVer,false, rmVer, mcVer);
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
+
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         try{
             if(!optimized) {
@@ -578,13 +588,16 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
             MessagePolicy policy = null;
+             PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,isSCMessage);
+
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
             } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
-                SecurityPolicyHolder holder = outProtocolPM.get("RM");
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
@@ -643,13 +656,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //Message message = packet.getMessage();
         
         MessagePolicy mp = null;
+        PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,isSCMessage);
         WSDLBoundOperation wsdlOperation = cachedOperation(packet);
         //if(operation == null){
         //Body could be encrypted. Security will have to infer the
         //policy from the message till the Body is decrypted.
         //    mp = emptyMessagePolicy;
         //}
-        if (outMessagePolicyMap == null) {
+        if (applicableAlternative.outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();
         }
@@ -660,7 +675,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             cacheOperation(wsdlOperation, packet);
         }
         
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) outMessagePolicyMap.get(wsdlOperation);
+        SecurityPolicyHolder sph = (SecurityPolicyHolder)
+                applicableAlternative.outMessagePolicyMap.get(wsdlOperation);
         if(sph == null){
             return new MessagePolicy();
         }
@@ -670,7 +686,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
         WSDLBoundOperation cachedOp = cachedOperation(packet);
-        
+        PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,false);
         if(cachedOp != null){
             WSDLOperation wsdlOperation = cachedOp.getOperation();
             QName faultDetail = packet.getMessage().getFirstDetailEntryName();
@@ -678,7 +695,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (faultDetail != null) {
                 fault = wsdlOperation.getFault(faultDetail);
             }
-            SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOp);
+            SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOp);
             if (fault == null) {
                 MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
                 return faultPolicy1;
@@ -841,25 +858,26 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         return retPacket;
     }
-    
-    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
+
+    //TODO:Encapsulate, change this direct member access in all the 4 methods
+    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
-        inMessagePolicyMap.put(operation,sph);
+        ph.inMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
-        outMessagePolicyMap.put(operation,sph);
+        ph.outMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
+        ph.outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
     }
     
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
+        ph.inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
     }
     
     protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{

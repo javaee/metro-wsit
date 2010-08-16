@@ -1,5 +1,5 @@
 /*
- * $Id: MessagePolicy.java,v 1.4 2010-03-20 12:32:28 kumarjayanti Exp $
+ * $Id: MessagePolicy.java,v 1.5 2010-08-16 07:35:23 kumarjayanti Exp $
  */
 
 /*
@@ -87,6 +87,8 @@ public class MessagePolicy implements SecurityPolicy {
     //TODO: temporary workaround for obtain the algosuite
     // need to remove this once we have the SC Layer taking care of it
     private AlgorithmSuite algoSuite;
+    //ID of the policy Alternative
+    private String polAltId;
     
     
     /**
@@ -698,6 +700,13 @@ public class MessagePolicy implements SecurityPolicy {
     }
     public boolean isSSL(){
         return onSSL;
+    }
+
+    public String getPolicyAlternativeId() {
+        return polAltId;
+    }
+    public void setPolicyAlternativeId(String polId) {
+        this.polAltId = polId;
     }
     
 }

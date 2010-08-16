@@ -42,6 +42,7 @@ import com.sun.xml.wss.impl.PolicyViolationException;
 import com.sun.xml.wss.impl.policy.PolicyAlternatives;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.util.List;
@@ -72,6 +73,9 @@ public class PolicyAlternativesVerifier implements PolicyVerifier {
         if (mps.size() == 1) {
             PolicyVerifier verifier = PolicyVerifierFactory.createVerifier(mps.get(0), ctx);
             verifier.verifyPolicy(recvdPolicy, mps.get(0));
+            if (mps.get(0).getPolicyAlternativeId() != null) {
+                ctx.getExtraneousProperties().put(POLICY_ALTERNATIVE_ID,mps.get(0).getPolicyAlternativeId());
+            }
             return;
         } else {
            //do policy verification 
@@ -84,6 +88,9 @@ public class PolicyAlternativesVerifier implements PolicyVerifier {
             if (toVerify != null) {
                 PolicyVerifier verifier = PolicyVerifierFactory.createVerifier(toVerify, ctx);
                 verifier.verifyPolicy(recvdPolicy, toVerify);
+                if (toVerify.getPolicyAlternativeId() != null) {
+                   ctx.getExtraneousProperties().put(POLICY_ALTERNATIVE_ID,toVerify.getPolicyAlternativeId());
+                }
                 return;
             } else {
                 //unsupported
@@ -147,10 +154,13 @@ public class PolicyAlternativesVerifier implements PolicyVerifier {
                 MessagePolicy pol = (MessagePolicy)recvdPolicy;
                 for (int i=0; i < pol.size(); i++) {
                     try {
-                        if (PolicyTypeUtil.usernameTokenBinding(pol.get(i))) {
+                        WSSPolicy p =(WSSPolicy) pol.get(i);
+                        if (PolicyTypeUtil.usernameTokenBinding(p) ||
+                              PolicyTypeUtil.usernameTokenBinding(p.getFeatureBinding())) {
                             ret = SupportingTokenType.USERNAME;
                             break;
-                        } else if (PolicyTypeUtil.samlTokenPolicy(pol.get(i))) {
+                        } else if (PolicyTypeUtil.samlTokenPolicy(p) ||
+                                PolicyTypeUtil.samlTokenPolicy(p.getFeatureBinding())) {
                             ret = SupportingTokenType.SAML;
                             break;
                         }

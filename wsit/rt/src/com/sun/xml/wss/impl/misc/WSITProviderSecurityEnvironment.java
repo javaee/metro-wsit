@@ -258,7 +258,7 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
     @SuppressWarnings("empty-statement")
     public WSITProviderSecurityEnvironment(CallbackHandler handler, Map options, Properties configAssertions)
             throws XWSSecurityException {
-        _handler = handler;
+        _handler = new PriviledgedHandler(handler);
         _securityOptions = options;
 
         if (_securityOptions != null) {
@@ -3123,6 +3123,29 @@ public class WSITProviderSecurityEnvironment implements SecurityEnvironment {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"CallerPrincipalCallback"});
             throw new XWSSecurityRuntimeException(e);
+        }
+    }
+
+    class PriviledgedHandler implements CallbackHandler {
+
+        CallbackHandler delegate = null;
+
+        public PriviledgedHandler(CallbackHandler handler) {
+            delegate = handler;
+        }
+
+        public void handle(final Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            AccessController.doPrivileged(new PrivilegedAction() {
+
+                public Object run() {
+                    try {
+                        delegate.handle(callbacks);
+                        return null;
+                    } catch (Exception ex) {
+                        throw new XWSSecurityRuntimeException(ex);
+                    }
+                }
+            });
         }
     }
 }

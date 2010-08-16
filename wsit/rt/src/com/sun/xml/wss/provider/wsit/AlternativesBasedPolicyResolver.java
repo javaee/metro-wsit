@@ -1,39 +1,9 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
- * 
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common Development
- * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License. You can obtain
- * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
- * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
- * language governing permissions and limitations under the License.
- * 
- * When distributing the software, include this License Header Notice in each
- * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
- * Sun designates this particular file as subject to the "Classpath" exception
- * as provided by Sun in the GPL Version 2 section of the License file that
- * accompanied this code.  If applicable, add the following below the License
- * Header, with the fields enclosed by brackets [] replaced by your own
- * identifying information: "Portions Copyrighted [year]
- * [name of copyright owner]"
- * 
- * Contributor(s):
- * 
- * If you wish your version of this file to be governed by only the CDDL or
- * only the GPL Version 2, indicate your decision by adding "[Contributor]
- * elects to include this software in this distribution under the [CDDL or GPL
- * Version 2] license."  If you don't indicate a single choice of license, a
- * recipient has the option to distribute your version of this file under
- * either the CDDL, the GPL Version 2 or to extend the choice of license to
- * its licensees as provided above.  However, if you add GPL Version 2 code
- * and therefore, elected the GPL Version 2 license, then the option applies
- * only if the new code is made subject to such option by the copyright
- * holder.
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
-package com.sun.xml.wss.jaxws.impl;
+
+package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Message;
@@ -58,7 +28,6 @@ import javax.xml.soap.SOAPConstants;
 import org.w3c.dom.Node;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPException;
-import java.util.HashMap;
 import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.api.addressing.*;
@@ -68,17 +37,18 @@ import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
+import com.sun.xml.wss.impl.policy.PolicyAlternatives;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
+import java.util.ArrayList;
 
 /**
  *
- * @author Ashutosh.Shahi@sun.com
+ * @author vbkumarjayanti
  */
-public class PolicyResolverImpl implements PolicyResolver {
+class AlternativesBasedPolicyResolver implements PolicyResolver {
 
     private WSDLBoundOperation cachedOperation = null;
-    private HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap = null;
-    private HashMap<String, SecurityPolicyHolder> inProtocolPM = null;
     //private PolicyAttributes pa = null;
     private AddressingVersion addVer = null;
     private RmProtocolVersion rmVer = null;
@@ -90,17 +60,20 @@ public class PolicyResolverImpl implements PolicyResolver {
     private String action = "";
     private WSTrustVersion wstVer = WSTrustVersion.WS_TRUST_10;
     private WSSCVersion wsscVer = WSSCVersion.WSSC_10;
+    private List<PolicyAlternativeHolder> policyAlternatives = null;
 
     /**
      * Creates a new instance of OperationResolverImpl
      */
-    public PolicyResolverImpl(HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap, HashMap<String, SecurityPolicyHolder> ip, WSDLBoundOperation cachedOperation, TubeConfiguration tubeConfig, AddressingVersion addVer, boolean isClient, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
-        this.inMessagePolicyMap = inMessagePolicyMap;
-        this.inProtocolPM = ip;
+     public AlternativesBasedPolicyResolver(List<PolicyAlternativeHolder> alternatives,
+            WSDLBoundOperation cachedOperation, TubeConfiguration tubeConfig,
+            AddressingVersion addVer, boolean client, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
+
+        this.policyAlternatives = alternatives;
         this.cachedOperation = cachedOperation;
         this.tubeConfig = tubeConfig;
         this.addVer = addVer;
-        this.isClient = isClient;
+        this.isClient = client;
         this.rmVer = rmVer;
         this.mcVer = mcVer;
     }
@@ -120,22 +93,17 @@ public class PolicyResolverImpl implements PolicyResolver {
             wsscVer = WSSCVersion.WSSC_13;
         }
 
-        SecurityPolicy mp = null;
+        
 
         action = getAction(msg);
         if (isRMMessage() || isMCMessage()) {
-            SecurityPolicyHolder holder = inProtocolPM.get("RM");
-            return holder.getMessagePolicy();
+            return getProtocolPolicy("RM");
         }
 
         if (isSCCancel()) {
-            SecurityPolicyHolder holder = inProtocolPM.get("SC-CANCEL");
-            /*SecurityPolicyHolder holder = inProtocolPM.get("SC");
-            if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-            holder = inProtocolPM.get("RM");
-            }*/
-            return holder.getMessagePolicy();
+            return getProtocolPolicy("SC-CANCEL");
         }
+        SecurityPolicy mp = null;
         isSCMessage = isSCMessage();
         if (isSCMessage) {
             Token scToken = (Token) getInBoundSCP();
@@ -164,9 +132,12 @@ public class PolicyResolverImpl implements PolicyResolver {
     protected PolicyAssertion getInBoundSCP() {
 
         SecurityPolicyHolder sph = null;
-        Collection coll = inMessagePolicyMap.values();
-        Iterator itr = coll.iterator();
+        Collection coll = new ArrayList();
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
+            coll.addAll(p.inMessagePolicyMap.values());
+        }
 
+        Iterator itr = coll.iterator();
         while (itr.hasNext()) {
             SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
             if (ph != null) {
@@ -184,6 +155,7 @@ public class PolicyResolverImpl implements PolicyResolver {
         return null;
     }
 
+    //TODO:POLALT modify this to return a PolicyAlternatives object when applicable
     private SecurityPolicy getInboundXWSSecurityPolicy(Message msg) {
         SecurityPolicy mp = null;
 
@@ -198,53 +170,59 @@ public class PolicyResolverImpl implements PolicyResolver {
             }
         }
 
-        SecurityPolicyHolder sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
-        //TODO: pass isTrustMessage Flag to this method later
-        if (sph == null && (isTrustMessage() || isSCMessage)) {
-            operation = getWSDLOpFromAction();
-            sph = (SecurityPolicyHolder) inMessagePolicyMap.get(operation);
+        List<MessagePolicy> mps = new ArrayList<MessagePolicy>();
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.inMessagePolicyMap.get(operation);
+            //TODO: pass isTrustMessage Flag to this method later
+            if (sph == null && (isTrustMessage() || isSCMessage)) {
+                operation = getWSDLOpFromAction();
+                sph = (SecurityPolicyHolder) p.inMessagePolicyMap.get(operation);
+            }
+            if (sph != null) {
+                mps.add(cloneWithId(sph.getMessagePolicy(), p.getId()));
+            }
         }
-        if (sph == null) {
-            return null;
-        }
-
-        mp = sph.getMessagePolicy();
-
-        return mp;
+        return new PolicyAlternatives(mps);
     }
 
+    //TODO:POLALT modify this to return a PolicyAlternatives object when applicable
     private SecurityPolicy getInboundFaultPolicy(SOAPMessage msg) {
         if (cachedOperation != null) {
-            WSDLOperation operation = cachedOperation.getOperation();
-            try {
-                SOAPBody body = msg.getSOAPBody();
-                NodeList nodes = body.getElementsByTagName("detail");
-                if (nodes.getLength() == 0) {
-                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Detail");
-                }
-                if (nodes.getLength() > 0) {
-                    Node node = nodes.item(0);
-                    Node faultNode = node.getFirstChild();
-                    if (faultNode == null) {
-                        return new MessagePolicy();
+            List<MessagePolicy> mps = new ArrayList<MessagePolicy>();
+            for (PolicyAlternativeHolder p : this.policyAlternatives) {
+                WSDLOperation operation = cachedOperation.getOperation();
+                try {
+                    SOAPBody body = msg.getSOAPBody();
+                    NodeList nodes = body.getElementsByTagName("detail");
+                    if (nodes.getLength() == 0) {
+                        nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Detail");
                     }
-                    final String uri = faultNode.getNamespaceURI();
-                    final QName faultDetail;
-                    if (uri != null && uri.length() > 0) {
-                        faultDetail = new QName(uri, faultNode.getLocalName());
-                    } else {
-                        faultDetail = new QName(faultNode.getLocalName());
+                    if (nodes.getLength() > 0) {
+                        Node node = nodes.item(0);
+                        Node faultNode = node.getFirstChild();
+                        if (faultNode == null) {
+                            return new MessagePolicy();
+                        }
+                        final String uri = faultNode.getNamespaceURI();
+                        final QName faultDetail;
+                        if (uri != null && uri.length() > 0) {
+                            faultDetail = new QName(uri, faultNode.getLocalName());
+                        } else {
+                            faultDetail = new QName(faultNode.getLocalName());
+                        }
+                        WSDLFault fault = operation.getFault(faultDetail);
+                        SecurityPolicyHolder sph = p.inMessagePolicyMap.get(cachedOperation);
+                        SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
+                        if (faultPolicyHolder != null) {
+                            mps.add(cloneWithId(faultPolicyHolder.getMessagePolicy(), p.getId()));
+                        }
                     }
-                    WSDLFault fault = operation.getFault(faultDetail);
-                    SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);
-                    SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
-                    SecurityPolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
-                    return faultPolicy;
+                } catch (SOAPException sx) {
+                    //sx.printStackTrace();
+                    //log error
                 }
-            } catch (SOAPException sx) {
-                //sx.printStackTrace();
-                //log error
             }
+            return new PolicyAlternatives(mps);
         }
         return new MessagePolicy();
 
@@ -312,7 +290,8 @@ public class PolicyResolverImpl implements PolicyResolver {
     }
 
     private WSDLBoundOperation getWSDLOpFromAction() {
-        Set<WSDLBoundOperation> keys = inMessagePolicyMap.keySet();
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
+        Set<WSDLBoundOperation> keys = p.inMessagePolicyMap.keySet();
         for (WSDLBoundOperation wbo : keys) {
             WSDLOperation wo = wbo.getOperation();
             // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
@@ -321,7 +300,37 @@ public class PolicyResolverImpl implements PolicyResolver {
                 return wbo;
             }
         }
+        }
         return null;
     }
-}
 
+    private SecurityPolicy getProtocolPolicy(String protocol) {
+        List<MessagePolicy> mps = new ArrayList<MessagePolicy>();
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
+            SecurityPolicyHolder sph = p.inProtocolPM.get(protocol);
+            if (sph != null) {
+                mps.add(cloneWithId(sph.getMessagePolicy(), p.getId()));
+            }
+        }
+        PolicyAlternatives p = new PolicyAlternatives(mps);
+        return p;
+    }
+
+    private MessagePolicy cloneWithId (MessagePolicy toClone, String id) {
+        if (toClone == null) {
+            return null;
+        }
+        try {
+            MessagePolicy copy = new MessagePolicy();
+            copy.setPolicyAlternativeId(id);
+            Iterator it = toClone.iterator();
+            while (it.hasNext()) {
+                copy.append((SecurityPolicy) it.next());
+            }
+            return copy;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+}

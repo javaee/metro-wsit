@@ -1,5 +1,5 @@
 /*
- * $Id: WssProviderSecurityEnvironment.java,v 1.1 2010-03-20 12:33:41 kumarjayanti Exp $
+ * $Id: WssProviderSecurityEnvironment.java,v 1.2 2010-08-16 07:35:25 kumarjayanti Exp $
  */
 
 /*
@@ -101,6 +101,7 @@ import com.sun.xml.wss.saml.Assertion;
 
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.configuration.DynamicApplicationContext;
+import java.io.IOException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.ietf.jgss.GSSName;
@@ -121,6 +122,7 @@ import java.util.Collections;
 import java.util.List;
 
 //import javax.security.auth.message.callback.PasswordValidationCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.callback.CertStoreCallback;
 import javax.security.auth.message.callback.PasswordValidationCallback;
 import javax.security.auth.message.callback.PrivateKeyCallback;
@@ -129,6 +131,8 @@ import javax.security.auth.message.callback.TrustStoreCallback;
 import org.ietf.jgss.GSSCredential;
 
 public class WssProviderSecurityEnvironment implements SecurityEnvironment {
+
+
     /* menu of module options - includes algorithm Ids, keystore aliases etc., */
     private Map _securityOptions;
 
@@ -153,7 +157,7 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
  
     public WssProviderSecurityEnvironment(CallbackHandler handler, Map options) 
            throws XWSSecurityException {
-           _handler = handler;
+           _handler = new PriviledgedHandler(handler);
            _securityOptions = options;
 
            if (_securityOptions != null) {
@@ -1580,6 +1584,29 @@ public class WssProviderSecurityEnvironment implements SecurityEnvironment {
 
     public void updateOtherPartySubject(Subject subject, GSSName clientCred, GSSCredential gssCred) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    class PriviledgedHandler implements CallbackHandler {
+
+        CallbackHandler delegate = null;
+
+        public PriviledgedHandler(CallbackHandler handler) {
+            delegate = handler;
+        }
+
+        public void handle(final Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            AccessController.doPrivileged(new PrivilegedAction() {
+
+                public Object run() {
+                    try {
+                        delegate.handle(callbacks);
+                        return null;
+                    } catch (Exception ex) {
+                        throw new XWSSecurityRuntimeException(ex);
+                    }
+                }
+            });
+        }
     }
 
 }

@@ -50,7 +50,7 @@ public class PolicyAlternatives implements SecurityPolicy {
 
     private final List<MessagePolicy> policyAlternatives;
 
-    PolicyAlternatives(List<MessagePolicy> policies) {
+    public PolicyAlternatives(List<MessagePolicy> policies) {
         //TODO: store an immutable list internally.
         this.policyAlternatives = policies;
     }

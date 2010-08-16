@@ -1,8 +1,3 @@
-/*
- * PolicyVerifier.java
- *
- * Created on August 7, 2005, 8:52 PM
- */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
@@ -52,10 +47,20 @@ import com.sun.xml.wss.impl.policy.*;
  */
 
 public interface PolicyVerifier {
-    
+
+    /**
+     * A concrete PolicyVerifier can indicate to the runtime the
+     * ID of the alternative that satisfied the incoming request's
+     * policy.
+     *
+     * The ID is then used by the runtime to get the correct response policy for
+     * securing the response messages.
+     */
+    public static final String POLICY_ALTERNATIVE_ID="policy-alternative-id";
     /**
      *
-     * @param configPolicy Policy configured for the incoming message.
+     * @param configPolicy Policy configured for the incoming message, can be
+     * a single MessagePolicy or PolicyAlternatives.
      * @param recvdPolicy policy inferred from the incoming message.
      * @throws com.sun.xml.wss.PolicyViolationException when policy inferred from incoming message does not match with what
      * is configured.
