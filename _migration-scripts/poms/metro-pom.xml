@@ -213,6 +213,7 @@
     <!-- profiles /-->
 
     <modules>
+        <module>wsit</module>
         <!-- module>contribs</module -->
     </modules>
 

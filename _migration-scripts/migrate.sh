@@ -106,6 +106,9 @@ popd
 # Creating Metro bundle projects
 echo "Creating Metro bundle projects"
 
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/bundles -p ./poms/bundles-pom.xml
+
+
 ensureDir "$NEW_PROJECT_ROOT/bundles"
 echo "TODO: create Metro bundle modules"
 echo "TODO: migrate installer"

@@ -30,15 +30,37 @@ POM_TEMPLATE="./poms/_wsit-module-pom.xml"
 WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
 
 #
-# WSIT policy configuration file handling
+# Metro configuration project
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-config"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Policy Configuration Project" -i "wsit-config" -P "wsit-project" -p ./poms/wsit-config-pom.xml
+CONFIG_MODULE_ROOT="$WSIT_MODULE_ROOT/config"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$CONFIG_MODULE_ROOT" -n "Metro Configuration Project" -i "config" -P "wsit-project" -p ./poms/config-project-pom.xml
+
+#
+# Metro configuration API
+#
+MODULE_ROOT="$CONFIG_MODULE_ROOT/config-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration API" -i "config-api" -P "config" -p ./poms/config-api-pom.xml
 SRC_ARTIFACTS="\
+com/sun/xml/ws/config/metro/dev:\
+com/sun/xml/ws/config/metro/util:\
+com/sun/xml/ws/runtime/config:\
+com/sun/xml/ws/policy/config/PolicyFeature.java"
+TEST_ARTIFACTS="$SRC_ARTIFACTS"
+TEST_RESOURCES=""
+source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
+#
+# Metro configuration Implementation
+#
+MODULE_ROOT="$CONFIG_MODULE_ROOT/config-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration Implementation" -i "config-impl" -P "config" -p ./poms/config-impl-pom.xml
+SRC_ARTIFACTS="\
+com/sun/xml/ws/config/metro:\
 com/sun/xml/ws/policy/jcaps:\
 com/sun/xml/ws/policy/localization:\
 com/sun/xml/ws/policy/parser:\
-com/sun/xml/ws/policy/WsitPolicyUtil.java"
+com/sun/xml/ws/policy/WsitPolicyUtil.java:\
+com/sun/xml/ws/policy/config/PolicyFeatureReader.java"
 TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/policy/testutils"
 TEST_RESOURCES="policy"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
@@ -47,10 +69,10 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.parser.WsitPolicyResolverFactory" "com.sun.xml.ws.api.policy.PolicyResolverFactory"
 
 #
-# WSIT Xml document filter API
+# XML document filter API
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-xmlfilter"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT XML Document Filtering Project" -i "wsit-xmlfilter" -P "wsit-project" -p ./poms/wsit-xmlfilter-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/xmlfilter"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT XML Document Filtering Project" -i "xmlfilter" -P "wsit-project" -p ./poms/xmlfilter-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/xmlfilter"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="xmlfilter"
@@ -71,11 +93,11 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT SOAP/TCP Transport
 #
-SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-soaptcp"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "WSIT SOAP over TCP Transport Project" -i "wsit-soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
+SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "WSIT SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
 
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/legacy-dependencies/gfv2-deployment"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "wsit-soaptcp" -p ./poms/gfv2-deployment-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "soaptcp" -p ./poms/gfv2-deployment-pom.xml
 if [ ! -e "$MODULE_ROOT/lib" ] ; then
     mkdir -p $VERBOSE "$MODULE_ROOT/lib"
 fi
@@ -85,10 +107,13 @@ cp $VERBOSE "$OLD_METRO_LIB_DIR/compiletime/appserv-deployment.jar" "$MODULE_ROO
 # WSIT SOAP/TCP Transport API
 #
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport API" -i "soaptcp-api" -P "wsit-soaptcp" -p ./poms/soaptcp-api-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport API" -i "soaptcp-api" -P "soaptcp" -p ./poms/soaptcp-api-pom.xml
 SRC_ARTIFACTS="\
+com/sun/xml/ws/transport/SelectOptimalTransport.java:\
 com/sun/xml/ws/transport/SelectOptimalTransportFeature.java:\
+com/sun/xml/ws/transport/TcpTransport.java:\
 com/sun/xml/ws/transport/TcpTransportFeature.java:\
+com/sun/xml/ws/transport/TcpTransportFeatureReader.java:\
 com/sun/xml/ws/transport/tcp/util/TCPConstants.java"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -98,7 +123,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT SOAP/TCP Transport Implementation
 #
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/soaptcp-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "wsit-soaptcp" -p ./poms/soaptcp-impl-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "SOAP over TCP Transport Implementation" -i "soaptcp-impl" -P "soaptcp" -p ./poms/soaptcp-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/transport"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -112,8 +137,8 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT Commons
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-commons"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Common Utilities and Classes" -i "wsit-commons" -P "wsit-project" -p ./poms/wsit-commons-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/commons"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Common Utilities and Classes" -i "commons" -P "wsit-project" -p ./poms/wsit-commons-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/commons"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -122,8 +147,8 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT Runtime API
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-rt-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime API" -i "wsit-rt-api" -P "wsit-project" -p ./poms/wsit-rt-api-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/runtime-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime API" -i "runtime-api" -P "wsit-project" -p ./poms/wsit-rt-api-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/assembler/dev:\
 com/sun/xml/ws/assembler/ServerPipelineHook.java:\
@@ -134,8 +159,8 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # WSIT Runtime Implementation
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/wsit-rt-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime Implementation" -i "wsit-rt-impl" -P "wsit-project" -p ./poms/wsit-rt-impl-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/runtime-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime Implementation" -i "runtime-impl" -P "wsit-project" -p ./poms/wsit-rt-impl-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/assembler:\
 com/sun/xml/ws/dump:\
@@ -368,9 +393,11 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
-./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
-./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
-./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.common.TxPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtFeatureConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtPolicyMapConfigurator" "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtAssertionCreator" "com.sun.xml.ws.policy.spi.PolicyAssertionCreator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
+./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
 
 echo "TODO: create WS-TX WAR module (?)"
 

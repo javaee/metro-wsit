@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-commons</artifactId>
+            <artifactId>commons</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -80,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-config</artifactId>
+            <artifactId>config-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

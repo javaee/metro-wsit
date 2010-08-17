@@ -158,7 +158,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-rt-api</artifactId>
+            <artifactId>runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -168,11 +168,17 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wsit-config</artifactId>
+            <artifactId>config-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!-- Test scope -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>config-impl</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

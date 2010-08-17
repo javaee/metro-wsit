@@ -49,27 +49,7 @@
     <artifactId>@module.id@</artifactId>
     <packaging>jar</packaging>
     <name>@module.name@</name>
-
     <!-- prerequisites -->
-    <build>
-        <plugins>
-            <plugin>
-                <!-- TODO: Remove exlusion of tests once adapted to maven project structure -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
-                        </exclude>
-                        <exclude>
-                            com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <!-- Compile scope -->
@@ -78,38 +58,20 @@
             <artifactId>istack-commons-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
-        </dependency>
-        <!--dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>policy</artifactId>
-        </dependency-->
-        <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.txw2</groupId>
-            <artifactId>txw2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.stream.buffer</groupId>
-            <artifactId>streambuffer</artifactId>
         </dependency>
 
         <!-- Test scope -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>config-impl</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

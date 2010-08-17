@@ -184,12 +184,12 @@
     </build>
 
     <modules>
-        <module>wsit-xmlfilter</module>
-        <module>wsit-commons</module>
-        <module>wsit-soaptcp</module>
-        <module>wsit-config</module>
-        <module>wsit-rt-api</module>
-        <module>wsit-rt-impl</module>
+        <module>xmlfilter</module>
+        <module>commons</module>
+        <module>soaptcp</module>
+        <module>config</module>
+        <module>runtime-api</module>
+        <module>runtime-impl</module>
         <module>ws-cm</module>
         <module>ws-mex</module>
         <module>ws-rx</module>
