@@ -36,11 +36,9 @@
 
 package com.sun.xml.ws.config.metro.parser;
 
-import java.io.FileReader;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceFeature;
 
 import junit.framework.TestCase;
 
@@ -73,9 +71,8 @@ public class MetroParserTest extends TestCase {
      * Test of unmarshal method, of class MetroParser.
      */
     public void testUnmarshal_Reader() throws Exception {
-        final FileReader fileReader = new FileReader("test/unit/data/config/metro-webservices.xml");
         final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        final XMLStreamReader streamReader = inputFactory.createXMLStreamReader(fileReader);
+        final XMLStreamReader streamReader = inputFactory.createXMLStreamReader(getClass().getClassLoader().getResourceAsStream("config/metro-webservices.xml"));
         final MetroParser instance = new MetroParser();
         final List<ParsedElement> result = instance.unmarshal(streamReader);
         assertNotNull(result);
