@@ -105,12 +105,41 @@ popd
 
 # Creating Metro bundle projects
 echo "Creating Metro bundle projects"
+BUNDLES_MODULE_ROOT="$NEW_PROJECT_ROOT/bundles"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$BUNDLES_MODULE_ROOT" -n "Metro Bundles" -i "bundles" -p ./poms/bundles-pom.xml
 
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/bundles -p ./poms/bundles-pom.xml
+ensureDir $BUNDLES_MODULE_ROOT
 
+MODULE_NAME=webservices-api-osgi
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
-ensureDir "$NEW_PROJECT_ROOT/bundles"
-echo "TODO: create Metro bundle modules"
+MODULE_NAME=webservices-osgi
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=webservices-api
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API non-OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=webservices-rt
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime non-OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=webservices-tools
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Tools non-OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=webservices-extra-api
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra API non-OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=webservices-extra
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+echo "TODO: implement Metro bundle module poms"
+
 echo "TODO: migrate installer"
 echo "TODO: migrate E2E tests"
 

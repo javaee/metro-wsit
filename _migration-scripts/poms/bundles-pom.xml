@@ -6,12 +6,12 @@
         <version>2.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>metro-bundles</artifactId>
+    <artifactId>@module.id@</artifactId>
     <packaging>pom</packaging>
-    <name>Metro binary bundles</name>
+    <name>@module.name@</name>
     <modules>
-        <module>webservices-osgi</module>
         <module>webservices-api-osgi</module>
+        <module>webservices-osgi</module>
         <module>webservices-api</module>
         <module>webservices-rt</module>
         <module>webservices-tools</module>

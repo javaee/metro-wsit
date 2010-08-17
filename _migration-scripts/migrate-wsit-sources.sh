@@ -62,7 +62,7 @@ com/sun/xml/ws/policy/parser:\
 com/sun/xml/ws/policy/WsitPolicyUtil.java:\
 com/sun/xml/ws/policy/config/PolicyFeatureReader.java"
 TEST_ARTIFACTS="$SRC_ARTIFACTS:com/sun/xml/ws/policy/testutils"
-TEST_RESOURCES="policy"
+TEST_RESOURCES="policy:config"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
@@ -379,7 +379,7 @@ echo "TODO: Uncomment ws-tx module in the WSIT project (?)"
 #
 MODULE_ROOT="$TX_MODULE_ROOT/wstx-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX API" -i "wstx-api" -P "wstx-project" -p $POM_TEMPLATE
-SRC_ARTIFACTS="com/sun/xml/ws/api/tx"
+SRC_ARTIFACTS="com/sun/xml/ws/tx/at/api"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
