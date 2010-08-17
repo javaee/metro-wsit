@@ -48,9 +48,9 @@
                    wsdl-name="joe:operation1">
             <!-- operation specific settings -->
             <input>
-                <wsp:policy>
+                <wsp:Policy>
                 <!-- Any operation scope WS-Policy -->
-                </wsp:policy>
+                </wsp:Policy>
              </input>
              <output>
                 <!-- output message specific settings -->
@@ -70,9 +70,9 @@
             <tube-factory className="com"/>
         </tubeline>
         <operation wsdl-name="joe:operation1">
-            <wsp:policy>
+            <wsp:Policy>
                <!-- Any operation scope WS-Policy -->
-            </wsp:policy>
+            </wsp:Policy>
          </operation>
     </port-component-ref> 
 </metro-webservices>
