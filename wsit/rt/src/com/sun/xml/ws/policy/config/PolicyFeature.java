@@ -58,11 +58,10 @@ public class PolicyFeature extends WebServiceFeature {
     private final PolicyMap policyMap;
 
     @FeatureConstructor({
-        "enabled",
         "policyMap"
     })
-    public PolicyFeature(boolean enabled, PolicyMap policyMap) {
-        super.enabled = enabled;
+    public PolicyFeature(PolicyMap policyMap) {
+        this.enabled = true;
         this.policyMap = policyMap;
     }
 

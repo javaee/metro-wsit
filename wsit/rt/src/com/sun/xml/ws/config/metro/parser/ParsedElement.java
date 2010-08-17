@@ -135,14 +135,6 @@ public class ParsedElement {
         return this.operationWsdlName;
     }
 
-    public boolean isInputMessage() {
-        return this.isInputMessage;
-    }
-
-    public boolean isOutputMessage() {
-        return this.isOutputMessage;
-    }
-
     public String getFaultWsdlName() {
         return this.faultWsdlName;
     }
@@ -151,4 +143,136 @@ public class ParsedElement {
         return this.webServiceFeature;
     }
     
+    public boolean isInputMessage() {
+        return this.isInputMessage;
+    }
+
+    public boolean isOutputMessage() {
+        return this.isOutputMessage;
+    }
+
+    public boolean isPortComponent() {
+        return (this.portComponentName != null) && (this.operationWsdlName == null);
+    }
+
+    public boolean isPortComponentRef() {
+        return (this.portComponentRefName != null) && (this.operationWsdlName == null);
+    }
+
+    public boolean isPortComponentOperation() {
+        return (this.portComponentName != null) && (this.operationWsdlName != null) &&
+                (! this.isInputMessage) && (! this.isOutputMessage) && (this.faultWsdlName == null);
+    }
+
+    public boolean isPortComponentRefOperation() {
+        return (this.portComponentRefName != null) && (this.operationWsdlName != null) &&
+                (! this.isInputMessage) && (! this.isOutputMessage) && (this.faultWsdlName == null);
+    }
+
+    public boolean isPortComponentInput() {
+        return (this.portComponentName != null) && (this.operationWsdlName != null) && this.isInputMessage;
+    }
+
+    public boolean isPortComponentOutput() {
+        return (this.portComponentName != null) && (this.operationWsdlName != null) && this.isOutputMessage;
+    }
+
+    public boolean isPortComponentFault() {
+        return (this.portComponentName != null) && (this.operationWsdlName != null) && (this.faultWsdlName != null);
+    }
+
+    public boolean isPortComponentRefInput() {
+        return (this.portComponentRefName != null) && (this.operationWsdlName != null) && this.isInputMessage;
+    }
+
+    public boolean isPortComponentRefOutput() {
+        return (this.portComponentRefName != null) && (this.operationWsdlName != null) && this.isOutputMessage;
+    }
+
+    public boolean isPortComponentRefFault() {
+        return (this.portComponentRefName != null) && (this.operationWsdlName != null) && (this.faultWsdlName != null);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder text = new StringBuilder("ParsedElement: ");
+        if (isPortComponent()) {
+            text.append("port component [");
+            text.append(this.portComponentName);
+            text.append(']');
+        }
+        else if (isPortComponentRef()) {
+            text.append("port component ref [");
+            text.append(this.portComponentRefName);
+            text.append(']');
+        }
+        else if (isPortComponentOperation()) {
+            text.append("port component operation [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentRefOperation()) {
+            text.append("port component ref operation [");
+            text.append(this.portComponentRefName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentInput()) {
+            text.append("port component input [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentRefInput()) {
+            text.append("port component ref input [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentOutput()) {
+            text.append("port component output [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentRefOutput()) {
+            text.append("port component ref output [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentFault()) {
+            text.append("port component fault [");
+            text.append(this.portComponentName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(", ");
+            text.append(this.faultWsdlName);
+            text.append(']');
+        }
+        else if (isPortComponentRefFault()) {
+            text.append("port component ref fault [");
+            text.append(this.portComponentRefName);
+            text.append(", ");
+            text.append(this.operationWsdlName);
+            text.append(", ");
+            text.append(this.faultWsdlName);
+            text.append(']');
+        }
+        else {
+            text.append("unknown element");
+        }
+        text.append(" -> [");
+        text.append(this.webServiceFeature);
+        text.append(']');
+        return text.toString();
+    }
+
 }

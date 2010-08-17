@@ -43,10 +43,12 @@ import com.sun.xml.ws.config.metro.dev.FeatureReader;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -56,36 +58,79 @@ import javax.xml.ws.WebServiceException;
 public class TubelineFeatureReader implements FeatureReader {
 
     private static final Logger LOGGER = Logger.getLogger(TubelineFeatureReader.class);
+    private static final QName NAME_ATTRIBUTE_NAME = new QName("name");
 
     // TODO implement
     public TubelineFeature parse(XMLEventReader reader) throws WebServiceException {
-        try{
-            boolean attributeEnabled = true;
+        try {
             final StartElement element = reader.nextEvent().asStartElement();
-            final QName elementName = element.getName();
+            boolean attributeEnabled = true;
             final Iterator iterator = element.getAttributes();
             while (iterator.hasNext()) {
                 final Attribute nextAttribute = (Attribute) iterator.next();
                 final QName attributeName = nextAttribute.getName();
                 if (ENABLED_ATTRIBUTE_NAME.equals(attributeName)) {
                     attributeEnabled = ParserUtil.parseBooleanValue(nextAttribute.getValue());
-                }
-                else {
+                } else if (NAME_ATTRIBUTE_NAME.equals(attributeName)) {
+                    // TODO use name attribute
+                } else {
                     // TODO logging message
                     throw LOGGER.logSevereException(new WebServiceException("Unexpected attribute"));
                 }
             }
-            // TODO Read nested tubeFactory elements
-            final EndElement endElement = reader.nextEvent().asEndElement();
-            if (!elementName.equals(endElement.getName())) {
-                // TODO logging message
-                throw LOGGER.logSevereException(new WebServiceException("Expected end element"));
-            }
-            return new TubelineFeature(attributeEnabled);
+            return parseFactories(attributeEnabled, element, reader);
         } catch (XMLStreamException e) {
-            // TODO logging message
             throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal XML document", e));
         }
+    }
+
+    private TubelineFeature parseFactories(final boolean enabled, final StartElement element, final XMLEventReader reader)
+            throws WebServiceException {
+        int elementRead = 0;
+        loop:
+        while (reader.hasNext()) {
+            try {
+                final XMLEvent event = reader.nextEvent();
+                switch (event.getEventType()) {
+                    case XMLStreamConstants.COMMENT:
+                        break; // skipping the comments and start document events
+                    case XMLStreamConstants.CHARACTERS:
+                        if (event.asCharacters().isWhiteSpace()) {
+                            break;
+                        }
+                        else {
+                            // TODO: logging message
+                            throw LOGGER.logSevereException(new WebServiceException("No character data allowed, was " + event.asCharacters()));
+                        }
+                    case XMLStreamConstants.START_ELEMENT:
+                        // TODO implement
+                        elementRead++;
+                        break;
+                    case XMLStreamConstants.END_ELEMENT:
+                        elementRead--;
+                        if (elementRead < 0) {
+                            final EndElement endElement = event.asEndElement();
+                            if (!element.getName().equals(endElement.getName())) {
+                                // TODO logging message
+                                throw LOGGER.logSevereException(new WebServiceException("End element does not match " + endElement));
+                            }
+                            break loop;
+                        }
+                        else {
+                            break;
+                        }
+                    default:
+                        // TODO logging message
+                        throw LOGGER.logSevereException(new WebServiceException("Unexpected event, was " + event));
+                }
+            } catch (XMLStreamException e) {
+                // TODO logging message
+                throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal XML document", e));
+            }
+        }
+
+        // TODO implement
+        return new TubelineFeature(enabled);
     }
 
 }

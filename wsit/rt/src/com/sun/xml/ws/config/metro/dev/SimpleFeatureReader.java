@@ -42,10 +42,12 @@ import com.sun.xml.ws.config.metro.util.ParserUtil;
 import java.util.Iterator;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 
@@ -59,10 +61,10 @@ public abstract class SimpleFeatureReader<T extends WebServiceFeature> implement
 
     private static final Logger LOGGER = Logger.getLogger(SimpleFeatureReader.class);
 
-    public T parse(XMLEventReader reader) throws WebServiceException {
-        try{
-            boolean attributeEnabled = true;
+    public T parse(final XMLEventReader reader) throws WebServiceException {
+        try {
             final StartElement element = reader.nextEvent().asStartElement();
+            boolean attributeEnabled = true;
             final QName elementName = element.getName();
             final Iterator iterator = element.getAttributes();
             while (iterator.hasNext()) {
@@ -73,13 +75,39 @@ public abstract class SimpleFeatureReader<T extends WebServiceFeature> implement
                 }
                 else {
                     // TODO logging message
-                    throw LOGGER.logSevereException(new WebServiceException("Unexpected attribute"));
+                    throw LOGGER.logSevereException(new WebServiceException("Unexpected attribute, was " + nextAttribute));
                 }
             }
-            final EndElement endElement = reader.nextEvent().asEndElement();
-            if (!elementName.equals(endElement.getName())) {
-                // TODO logging message
-                throw LOGGER.logSevereException(new WebServiceException("Expected end element"));
+
+            loop:
+            while (reader.hasNext()) {
+                try {
+                    final XMLEvent event = reader.nextEvent();
+                    switch (event.getEventType()) {
+                        case XMLStreamConstants.COMMENT:
+                            break; // skipping the comments and start document events
+                        case XMLStreamConstants.CHARACTERS:
+                            if (event.asCharacters().isWhiteSpace()) {
+                                break;
+                            }
+                            else {
+                                // TODO: logging message
+                                throw LOGGER.logSevereException(new WebServiceException("No character data allowed, was " + event.asCharacters()));
+                            }
+                        case XMLStreamConstants.END_ELEMENT:
+                            final EndElement endElement = event.asEndElement();
+                            if (!elementName.equals(endElement.getName())) {
+                                // TODO logging message
+                                throw LOGGER.logSevereException(new WebServiceException("Expected end element"));
+                            }
+                            break loop;
+                        default:
+                            throw LOGGER.logSevereException(new WebServiceException("Unexpected event, was " + event));
+                    }
+                } catch (XMLStreamException e) {
+                    // TODO logging message
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal XML document", e));
+                }
             }
             return createFeature(attributeEnabled);
         } catch (XMLStreamException e) {

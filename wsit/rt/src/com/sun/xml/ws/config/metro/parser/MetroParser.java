@@ -39,12 +39,9 @@ package com.sun.xml.ws.config.metro.parser;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.metro.dev.ElementFeatureMapping;
 import com.sun.xml.ws.config.metro.dev.FeatureReader;
-import com.sun.xml.ws.policy.config.PolicyFeatureReader;
 import com.sun.xml.ws.policy.privateutil.PolicyUtils;
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import com.sun.xml.ws.policy.sourcemodel.wspolicy.XmlToken;
-import com.sun.xml.ws.runtime.config.TubelineFeatureReader;
-import com.sun.xml.ws.transport.TcpTransportFeatureReader;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -86,28 +83,53 @@ public class MetroParser {
     private static final QName NAME_ATTRIBUTE = new QName("name");
     private static final QName WSDL_NAME_ATTRIBUTE = new QName("wsdl-name");
 
-    private static final QName TCP_TRANSPORT_ELEMENT_NAME = new QName("tcp-transport");
-    private static final QName TUBELINE_ELEMENT_NAME = new QName("tubeline");
+    private static final QName TCP_TRANSPORT_ELEMENT_NAME = new QName(CONFIG_NAMESPACE, "tcp-transport");
+    private static final QName TUBELINE_ELEMENT_NAME = new QName(CONFIG_NAMESPACE, "tubeline");
 
     private static final Map<QName, FeatureReader<?>> nameToReader = new HashMap<QName, FeatureReader<?>>();
 
     static {
-        nameToReader.put(NamespaceVersion.v1_5.asQName(XmlToken.Policy), new PolicyFeatureReader());
-        nameToReader.put(TCP_TRANSPORT_ELEMENT_NAME, new TcpTransportFeatureReader());
-        nameToReader.put(TUBELINE_ELEMENT_NAME, new TubelineFeatureReader());
-
-        // TODO move ServiceFinder to istack
-        final ElementFeatureMapping[] elementFeatureMappings = PolicyUtils.ServiceProvider.load(ElementFeatureMapping.class);
-        if (elementFeatureMappings != null) {
-            for (int i = 0; i < elementFeatureMappings.length; i++) {
-                final ElementFeatureMapping elementFeatureMapping = elementFeatureMappings[i];
-                final QName elementName = elementFeatureMapping.getElementName();
-                if (nameToReader.containsKey(elementName)) {
-                    // TODO: logging message
-                    throw LOGGER.logSevereException(new WebServiceException("duplicate registration of reader ... for element ..."));
+        try {
+            nameToReader.put(NamespaceVersion.v1_5.asQName(XmlToken.Policy),
+                    instantiateFeatureReader("com.sun.xml.ws.policy.config.PolicyFeatureReader"));
+            nameToReader.put(TCP_TRANSPORT_ELEMENT_NAME,
+                    instantiateFeatureReader("com.sun.xml.ws.transport.TcpTransportFeatureReader"));
+            nameToReader.put(TUBELINE_ELEMENT_NAME,
+                    instantiateFeatureReader("com.sun.xml.ws.runtime.config.TubelineFeatureReader"));
+            // TODO move ServiceFinder to istack
+            final ElementFeatureMapping[] elementFeatureMappings = PolicyUtils.ServiceProvider.load(ElementFeatureMapping.class);
+            if (elementFeatureMappings != null) {
+                for (int i = 0; i < elementFeatureMappings.length; i++) {
+                    final ElementFeatureMapping elementFeatureMapping = elementFeatureMappings[i];
+                    final QName elementName = elementFeatureMapping.getElementName();
+                    if (nameToReader.containsKey(elementName)) {
+                        // TODO: logging message
+                        throw LOGGER.logSevereException(new WebServiceException("duplicate registration of reader ... for element ..."));
+                    }
+                    nameToReader.put(elementName, elementFeatureMapping.getFeatureReader());
                 }
-                nameToReader.put(elementName, elementFeatureMapping.getFeatureReader());
             }
+        } catch (ClassNotFoundException ex) {
+            // TODO logging message
+            LOGGER.logSevereException(new WebServiceException("Failed to initialize feature readers", ex));
+        } catch (InstantiationException ex) {
+            // TODO logging message
+            LOGGER.logSevereException(new WebServiceException("Failed to initialize feature readers", ex));
+        } catch (IllegalAccessException ex) {
+            // TODO logging message
+            LOGGER.logSevereException(new WebServiceException("Failed to initialize feature readers", ex));
+        }
+    }
+
+    private static FeatureReader instantiateFeatureReader(String className)
+            throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return Class.forName(className).asSubclass(FeatureReader.class).newInstance();
+    }
+
+    public MetroParser() throws WebServiceException {
+        if (nameToReader == null || nameToReader.isEmpty()) {
+            // TODO logging message
+            throw LOGGER.logSevereException(new WebServiceException("Failed to initialize feature readers"));
         }
     }
 
@@ -126,17 +148,15 @@ public class MetroParser {
         loop:
         while (reader.hasNext()) {
             try {
-                final XMLEvent event = reader.peek();
+                final XMLEvent event = reader.nextEvent();
                 switch (event.getEventType()) {
                     case XMLStreamConstants.START_DOCUMENT:
                     case XMLStreamConstants.COMMENT:
-                        reader.next();
                         break; // skipping the comments and start document events
                     case XMLStreamConstants.CHARACTERS:
                         processCharacters(event.asCharacters(), null);
                         // we advance the reader only if there is no exception thrown from
                         // the processCharacters(...) call. Otherwise we don't modify the stream
-                        reader.next();
                         break;
                     case XMLStreamConstants.START_ELEMENT:
                         if (CONFIG_ROOT_ELEMENT.equals(event.asStartElement().getName())) {
@@ -145,10 +165,10 @@ public class MetroParser {
                         }
                         else {
                             // TODO logging message
-                            throw LOGGER.logSevereException(new WebServiceException("metro-webservice element expected"));
+                            throw LOGGER.logSevereException(new WebServiceException("metro-webservice element expected, instead got " + event));
                         }
                     default:
-                        throw LOGGER.logSevereException(new WebServiceException("metro-webservice element expected"));
+                        throw LOGGER.logSevereException(new WebServiceException("metro-webservice element expected, instead got " + event));
                 }
             } catch (XMLStreamException e) {
                 // TODO logging message
@@ -161,30 +181,37 @@ public class MetroParser {
     private void unmarshalComponents(final List<ParsedElement> configElements, final XMLEventReader reader)
             throws WebServiceException {
         unmarshal(configElements, CONFIG_ROOT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                if (PORT_COMPONENT_ELEMENT.equals(element.getName())) {
-                    final Attribute nameAttribute = element.getAttributeByName(NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponent(configElements, nameAttribute.getValue(), reader);
+            public void parse(XMLEventReader reader) {
+                try {
+                    final StartElement element = reader.peek().asStartElement();
+                    if (PORT_COMPONENT_ELEMENT.equals(element.getName())) {
+                        final Attribute nameAttribute = element.getAttributeByName(NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponent(configElements, nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(new WebServiceException("Expected name attribute"));
+                        }
+                    }
+                    else if (PORT_COMPONENT_REF_ELEMENT.equals(element.getName())) {
+                        final Attribute nameAttribute = element.getAttributeByName(NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponentRef(configElements, nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(new WebServiceException("Expected name attribute"));
+                        }
                     }
                     else {
-                        // logging message
-                        throw LOGGER.logSevereException(new WebServiceException("Expected name attribute"));
+                        // TODO logging message
+                        throw new WebServiceException("Expected component element, got " + element);
                     }
-                }
-                else if (PORT_COMPONENT_REF_ELEMENT.equals(element.getName())) {
-                    final Attribute nameAttribute = element.getAttributeByName(NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponentRef(configElements, nameAttribute.getValue(), reader);
-                    }
-                    else {
-                        // logging message
-                        throw LOGGER.logSevereException(new WebServiceException("Expected name attribute"));
-                    }
-                }
-                else {
-                    // TODO logging message
-                    throw new WebServiceException("Expected component element");
+                } catch (XMLStreamException e) {
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal", e));
                 }
             }
         });
@@ -193,22 +220,28 @@ public class MetroParser {
     private void unmarshalPortComponent(final List<ParsedElement> configElements, final String componentName,
             final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, PORT_COMPONENT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                if (OPERATION_ELEMENT.equals(element.getName())) {
-                    final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponentOperation(configElements, componentName,
-                                nameAttribute.getValue(), reader);
+            public void parse(XMLEventReader reader) {
+                try {
+                    final StartElement element = reader.peek().asStartElement();
+                    if (OPERATION_ELEMENT.equals(element.getName())) {
+                        final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponentOperation(configElements, componentName,
+                                    nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(
+                                    new WebServiceException("Expected wsdl-name attribute"));
+                        }
                     }
                     else {
-                        // logging message
-                        throw LOGGER.logSevereException(
-                                new WebServiceException("Expected wsdl-name attribute"));
+                        final WebServiceFeature feature = parseElement(reader);
+                        configElements.add(ParsedElement.createPortComponentElement(componentName, feature));
                     }
-                }
-                else {
-                    final WebServiceFeature feature = parseElement(element, reader);
-                    configElements.add(ParsedElement.createPortComponentElement(componentName, feature));
+                } catch (XMLStreamException e) {
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal", e));
                 }
             }
         });
@@ -217,22 +250,28 @@ public class MetroParser {
     private void unmarshalPortComponentRef(final List<ParsedElement> configElements, final String componentName,
             final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, PORT_COMPONENT_REF_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                if (OPERATION_ELEMENT.equals(element.getName())) {
-                    final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponentRefOperation(configElements, componentName,
-                                nameAttribute.getValue(), reader);
+            public void parse(XMLEventReader reader) {
+                try {
+                    final StartElement element = reader.peek().asStartElement();
+                    if (OPERATION_ELEMENT.equals(element.getName())) {
+                        final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponentRefOperation(configElements, componentName,
+                                    nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(
+                                    new WebServiceException("Expected wsdl-name attribute"));
+                        }
                     }
                     else {
-                        // logging message
-                        throw LOGGER.logSevereException(
-                                new WebServiceException("Expected wsdl-name attribute"));
+                        final WebServiceFeature feature = parseElement(reader);
+                        configElements.add(ParsedElement.createPortComponentRefElement(componentName, feature));
                     }
-                }
-                else {
-                    final WebServiceFeature feature = parseElement(element, reader);
-                    configElements.add(ParsedElement.createPortComponentRefElement(componentName, feature));
+                } catch (XMLStreamException e) {
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal", e));
                 }
             }
         });
@@ -241,30 +280,38 @@ public class MetroParser {
     private void unmarshalPortComponentOperation(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, OPERATION_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final QName childName = element.getName();
-                if (INPUT_ELEMENT.equals(childName)) {
-                    unmarshalPortComponentInput(configElements, componentName, operationName, reader);
-                }
-                else if (OUTPUT_ELEMENT.equals(childName)) {
-                    unmarshalPortComponentOutput(configElements, componentName, operationName, reader);
-                }
-                else if (FAULT_ELEMENT.equals(childName)) {
-                    final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponentFault(configElements, componentName, operationName,
-                                nameAttribute.getValue(), reader);
+            public void parse(XMLEventReader reader) {
+                try {
+                    final StartElement element = reader.peek().asStartElement();
+                    final QName childName = element.getName();
+                    if (INPUT_ELEMENT.equals(childName)) {
+                        reader.next();
+                        unmarshalPortComponentInput(configElements, componentName, operationName, reader);
+                    }
+                    else if (OUTPUT_ELEMENT.equals(childName)) {
+                        reader.next();
+                        unmarshalPortComponentOutput(configElements, componentName, operationName, reader);
+                    }
+                    else if (FAULT_ELEMENT.equals(childName)) {
+                        final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponentFault(configElements, componentName, operationName,
+                                    nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(
+                                    new WebServiceException("Expected wsdl-name attribute"));
+                        }
                     }
                     else {
-                        // logging message
-                        throw LOGGER.logSevereException(
-                                new WebServiceException("Expected wsdl-name attribute"));
+                        final WebServiceFeature feature = parseElement(reader);
+                        configElements.add(ParsedElement.createPortComponentOperationElement(
+                                componentName, operationName, feature));
                     }
-                }
-                else {
-                    final WebServiceFeature feature = parseElement(element, reader);
-                    configElements.add(ParsedElement.createPortComponentOperationElement(
-                            componentName, operationName, feature));
+                } catch (XMLStreamException e) {
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal", e));
                 }
             }
         });
@@ -273,30 +320,38 @@ public class MetroParser {
     private void unmarshalPortComponentRefOperation(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, OPERATION_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final QName childName = element.getName();
-                if (INPUT_ELEMENT.equals(childName)) {
-                    unmarshalPortComponentRefInput(configElements, componentName, operationName, reader);
-                }
-                else if (OUTPUT_ELEMENT.equals(childName)) {
-                    unmarshalPortComponentRefOutput(configElements, componentName, operationName, reader);
-                }
-                else if (FAULT_ELEMENT.equals(childName)) {
-                    final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
-                    if (nameAttribute != null) {
-                        unmarshalPortComponentRefFault(configElements, componentName, operationName,
-                                nameAttribute.getValue(), reader);
+            public void parse(XMLEventReader reader) {
+                try {
+                    final StartElement element = reader.peek().asStartElement();
+                    final QName childName = element.getName();
+                    if (INPUT_ELEMENT.equals(childName)) {
+                        reader.next();
+                        unmarshalPortComponentRefInput(configElements, componentName, operationName, reader);
+                    }
+                    else if (OUTPUT_ELEMENT.equals(childName)) {
+                        reader.next();
+                        unmarshalPortComponentRefOutput(configElements, componentName, operationName, reader);
+                    }
+                    else if (FAULT_ELEMENT.equals(childName)) {
+                        final Attribute nameAttribute = element.getAttributeByName(WSDL_NAME_ATTRIBUTE);
+                        if (nameAttribute != null) {
+                            reader.next();
+                            unmarshalPortComponentRefFault(configElements, componentName, operationName,
+                                    nameAttribute.getValue(), reader);
+                        }
+                        else {
+                            // logging message
+                            throw LOGGER.logSevereException(
+                                    new WebServiceException("Expected wsdl-name attribute"));
+                        }
                     }
                     else {
-                        // logging message
-                        throw LOGGER.logSevereException(
-                                new WebServiceException("Expected wsdl-name attribute"));
+                        final WebServiceFeature feature = parseElement(reader);
+                        configElements.add(ParsedElement.createPortComponentRefOperationElement(
+                                componentName, operationName, feature));
                     }
-                }
-                else {
-                    final WebServiceFeature feature = parseElement(element, reader);
-                    configElements.add(ParsedElement.createPortComponentRefOperationElement(
-                            componentName, operationName, feature));
+                } catch (XMLStreamException e) {
+                    throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal", e));
                 }
             }
         });
@@ -305,8 +360,8 @@ public class MetroParser {
     private void unmarshalPortComponentInput(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, INPUT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentInputElement(
                         componentName, operationName, feature));
             }
@@ -316,8 +371,8 @@ public class MetroParser {
     private void unmarshalPortComponentOutput(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, OUTPUT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentOutputElement(
                         componentName, operationName, feature));
             }
@@ -327,8 +382,8 @@ public class MetroParser {
     private void unmarshalPortComponentFault(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final String faultName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, FAULT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentFaultElement(
                         componentName, operationName, faultName, feature));
             }
@@ -338,8 +393,8 @@ public class MetroParser {
     private void unmarshalPortComponentRefInput(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, INPUT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentRefInputElement(
                         componentName, operationName, feature));
             }
@@ -349,8 +404,8 @@ public class MetroParser {
     private void unmarshalPortComponentRefOutput(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, OUTPUT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentRefOutputElement(
                         componentName, operationName, feature));
             }
@@ -360,8 +415,8 @@ public class MetroParser {
     private void unmarshalPortComponentRefFault(final List<ParsedElement> configElements, final String componentName,
             final String operationName, final String faultName, final XMLEventReader reader) throws WebServiceException {
         unmarshal(configElements, FAULT_ELEMENT, reader, new ElementParser() {
-            public void parse(StartElement element) {
-                final WebServiceFeature feature = parseElement(element, reader);
+            public void parse(XMLEventReader reader) {
+                final WebServiceFeature feature = parseElement(reader);
                 configElements.add(ParsedElement.createPortComponentRefFaultElement(
                         componentName, operationName, faultName, feature));
             }
@@ -373,19 +428,19 @@ public class MetroParser {
         loop:
         while (reader.hasNext()) {
             try {
-                final XMLEvent xmlParserEvent = reader.nextEvent();
+                final XMLEvent xmlParserEvent = reader.peek();
                 switch (xmlParserEvent.getEventType()) {
                     case XMLStreamConstants.COMMENT:
+                        reader.next();
                         break; // skipping the comments
                     case XMLStreamConstants.CHARACTERS:
-                        processCharacters(xmlParserEvent.asCharacters(), null);
+                        processCharacters(reader.nextEvent().asCharacters(), null);
                         break;
                     case XMLStreamConstants.END_ELEMENT:
-                        checkEndTagName(endTag, xmlParserEvent.asEndElement());
+                        checkEndTagName(endTag, reader.nextEvent().asEndElement());
                         break loop; // data exctraction for currently processed policy node is done
                     case XMLStreamConstants.START_ELEMENT:
-                        final StartElement childElement = xmlParserEvent.asStartElement();
-                        parser.parse(childElement);
+                        parser.parse(reader);
                         break;
                     default:
                         // TODO logging messages
@@ -397,16 +452,22 @@ public class MetroParser {
         }
     }
 
-    private WebServiceFeature parseElement(final StartElement element, final XMLEventReader reader)
+    private WebServiceFeature parseElement(final XMLEventReader reader)
             throws WebServiceException {
-        final QName elementName = element.getName();
-        final FeatureReader featureReader = nameToReader.get(elementName);
-        if (featureReader != null) {
-            return featureReader.parse(reader);
-        }
-        else {
+        try {
+            final StartElement element = reader.peek().asStartElement();
+            final QName elementName = element.getName();
+            final FeatureReader featureReader = nameToReader.get(elementName);
+            if (featureReader != null) {
+                return featureReader.parse(reader);
+            }
+            else {
+                // TODO logging message
+                throw LOGGER.logSevereException(new WebServiceException("unknown element " + element));
+            }
+        } catch (XMLStreamException e) {
             // TODO logging message
-            throw new WebServiceException("unknown element");
+            throw LOGGER.logSevereException(new WebServiceException("failed to parse", e));
         }
     }
     
@@ -437,14 +498,19 @@ public class MetroParser {
      */
     private StringBuilder processCharacters(final Characters characters,
             final StringBuilder currentValueBuffer) throws WebServiceException {
-        // TODO: logging message
-        throw LOGGER.logSevereException(new WebServiceException("No character data allowed"));
+        if (characters.isWhiteSpace()) {
+            return currentValueBuffer;
+        }
+        else {
+            // TODO: logging message
+            throw LOGGER.logSevereException(new WebServiceException("No character data allowed"));
+        }
     }
 
 
     private interface ElementParser {
 
-        void parse(StartElement element) throws WebServiceException;
+        void parse(final XMLEventReader reader) throws WebServiceException;
 
     }
 

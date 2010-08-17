@@ -37,6 +37,9 @@
 package com.sun.xml.ws.transport;
 
 import com.sun.xml.ws.config.metro.dev.SimpleFeatureReader;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 
 /**
  *

@@ -39,14 +39,11 @@ package com.sun.xml.ws.policy.config;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.config.metro.dev.FeatureReader;
 import com.sun.xml.ws.config.metro.util.ParserUtil;
+import com.sun.xml.ws.policy.PolicyException;
+import com.sun.xml.ws.policy.sourcemodel.PolicyModelUnmarshaller;
+import com.sun.xml.ws.policy.sourcemodel.PolicySourceModel;
 
-import java.util.Iterator;
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -60,31 +57,12 @@ public class PolicyFeatureReader implements FeatureReader {
     // TODO implement
     public PolicyFeature parse(XMLEventReader reader) throws WebServiceException {
         try{
-            boolean attributeEnabled = true;
-            final StartElement element = reader.nextEvent().asStartElement();
-            final QName elementName = element.getName();
-            final Iterator iterator = element.getAttributes();
-            while (iterator.hasNext()) {
-                final Attribute nextAttribute = (Attribute) iterator.next();
-                final QName attributeName = nextAttribute.getName();
-                if (ENABLED_ATTRIBUTE_NAME.equals(attributeName)) {
-                    attributeEnabled = ParserUtil.parseBooleanValue(nextAttribute.getValue());
-                }
-                else {
-                    // TODO logging message
-                    throw LOGGER.logSevereException(new WebServiceException("Unexpected attribute"));
-                }
-            }
-            // TODO Read nested tubeFactory elements
-            final EndElement endElement = reader.nextEvent().asEndElement();
-            if (!elementName.equals(endElement.getName())) {
-                // TODO logging message
-                throw LOGGER.logSevereException(new WebServiceException("Expected end element"));
-            }
-            return new PolicyFeature(attributeEnabled, null);
-        } catch (XMLStreamException e) {
+            final PolicyModelUnmarshaller unmarshaller = PolicyModelUnmarshaller.getXmlUnmarshaller();
+            final PolicySourceModel model = unmarshaller.unmarshalModel(reader);
+            return new PolicyFeature(null);
+        } catch (PolicyException e) {
             // TODO logging message
-            throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal XML document", e));
+            throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal policy expression", e));
         }
     }
 
