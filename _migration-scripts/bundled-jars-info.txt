@@ -1,10 +1,9 @@
 ==============================================
-API jars
+API jars [DONE]
 ==============================================
 
 jaxws-api.jar
 jsr181-api.jar
-
 activation.jar
 jaxb-api.jar
 saaj-api.jar
@@ -17,31 +16,31 @@ jaxws-api.jar
 jsr181-api.jar
 
 ==============================================
-RT jars
+RT jars [DONE except TODOs]
 ==============================================
+TODO: jaxrpc-api.jar -> include or remove?
+TODO: jsr173_api.jar -> include or remove?
+TODO: txnannprocessor.jar -> include or remove?
+TODO: keyidentifierspi.jar -> locate
 
 KerbLibrary.jar
 jaxb10-saml.jar
 jaxr-impl.jar
-jaxrpc-api.jar
 jaxrpc-impl.jar
 jaxrpc-spi.jar
 jaxws-rt.jar
-keyidentifierspi.jar
 policy.jar
 resolver.jar
 saaj-impl.jar
 sjsxp.jar
 stax-utils.jar
 streambuffer.jar
-txnannprocessor.jar
 xmlsec.jar
 
 FastInfoset.jar
 gmbal.jar
 jaxb-impl.jar
 jaxb1-impl.jar
-jsr173_api.jar
 management-api.jar
 mimepull.jar
 stax-ex.jar
@@ -79,11 +78,10 @@ jsr173_api.jar
 woodstox.jar
 
 ==============================================
-Tools jars
+Tools jars [DONE]
 ==============================================
 
 jaxws-tools.jar
-
 jaxb-xjc.jar
 
 ==============================================
@@ -93,14 +91,14 @@ Tools v3 jars
 jaxws-tools.jar
 
 ==============================================
-Extras API jars
+Extras API jars [DONE]
 ==============================================
 
 jaxr-api.jar
 jaxrpc-api.jar
 
 ==============================================
-Extras jars
+Extras jars [DONE]
 ==============================================
 
 grizzly.jar
