@@ -8,6 +8,7 @@ if [ $# -le 1 ]; then
 fi
 
 # parse command line arguments
+sm_metroGroupId=org.glassfish.metro
 sm_verbose=
 sm_forceRmFlag=
 sm_moduleRoot=
@@ -65,7 +66,7 @@ fi
 if [ -z "$sm_pomTemplate" ] ; then
     echo "No pom.xml template specified"
 else
-    sed -e "s/@module.id@/$sm_moduleId/g" -e "s/@module.name@/$sm_moduleName/g" -e "s/@parent.id@/$sm_parentId/g" < $sm_pomTemplate > $sm_moduleRoot/pom.xml
+    sed -e "s/@metro.groupId@/$sm_metroGroupId/g" -e "s/@module.id@/$sm_moduleId/g" -e "s/@module.name@/$sm_moduleName/g" -e "s/@parent.id@/$sm_parentId/g" < $sm_pomTemplate > $sm_moduleRoot/pom.xml
 fi
 
 

@@ -57,30 +57,53 @@ pushd .
 cd `pwd`/`dirname $0`/..
 SECURITY_EXTRAS_ROOT=`pwd`/\_security-extras
 NEW_PROJECT_ROOT=`pwd`/metro
-EXPORTED_RT_MASTER_ROOT=`pwd`/\_tmp-exported-rt-master
-EXPORTED_RT_ROOT=`pwd`/\_tmp-exported-rt
+EXPORTED_MASTER_ROOT=`pwd`/\_tmp-exported-master
+EXPORTED_ROOT=`pwd`/\_tmp-exported
+EXPORTED_RT_ROOT=$EXPORTED_ROOT/rt
 OLD_METRO_LIB_DIR=`pwd`/wsit/lib
 popd
 
-continueChoice "Security extras root is set to: $SECURITY_EXTRAS_ROOT\nNew project root is set to: $NEW_PROJECT_ROOT\nExported WSIT RT MASTER root is set to: $EXPORTED_RT_MASTER_ROOT\nExported WSIT RT root is set to: $EXPORTED_RT_ROOT\n"
+continueChoice "Security extras root is set to: $SECURITY_EXTRAS_ROOT\nNew project root is set to: $NEW_PROJECT_ROOT\nExported WSIT MASTER root is set to: $EXPORTED_MASTER_ROOT\nExported WSIT root is set to: $EXPORTED_ROOT\n"
 
 echo "\n===============[ Starting migration ]===============\n"
 
 if [ ! -n "$NO_EXPORT" ] ; then
-    if [ -e $EXPORTED_RT_MASTER_ROOT ] ; then
-        rm -rf $VERBOSE $EXPORTED_RT_MASTER_ROOT
+    if [ -e $EXPORTED_MASTER_ROOT ] ; then
+        rm -rf $VERBOSE $EXPORTED_MASTER_ROOT
     fi
+    mkdir $VERBOSE $EXPORTED_MASTER_ROOT
 
     pushd .
-    cd `dirname $EXPORTED_RT_MASTER_ROOT`
-    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_RT_MASTER_ROOT` wsit/wsit/rt
+    cd $EXPORTED_MASTER_ROOT
+
+    EXPORTED_DIR=etc
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=licenses
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=rt
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=samples
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=status-notes
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=test
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
+    EXPORTED_DIR=tools
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
+
     popd
 fi
 
-if [ -e $EXPORTED_RT_ROOT ] ; then
-    rm -rf $VERBOSE $EXPORTED_RT_ROOT
+if [ -e $EXPORTED_ROOT ] ; then
+    rm -rf $VERBOSE $EXPORTED_ROOT
 fi
-cp -R $EXPORTED_RT_MASTER_ROOT $EXPORTED_RT_ROOT
+cp -R $EXPORTED_MASTER_ROOT/ $EXPORTED_ROOT/
 
 
 if [ -e $NEW_PROJECT_ROOT ] ; then
@@ -88,8 +111,8 @@ if [ -e $NEW_PROJECT_ROOT ] ; then
 fi
 mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT -p ./poms/metro-pom.xml
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -p ./poms/wsit-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT -n "Metro Web Services Stack Project" -p ./poms/metro-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -n "Web Services Interoperability Technology Project" -p ./poms/wsit-pom.xml
 
 source ./migrate-wsit-sources.sh
 
