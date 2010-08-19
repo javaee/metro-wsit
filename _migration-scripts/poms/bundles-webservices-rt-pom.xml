@@ -235,7 +235,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <inlcude>${project.groupId}.wsit:*</inlcude>
+                                    <inlcude>${project.groupId}:*</inlcude>
                                 </includes>
                                 <excludes>
                                     <exclude>javax.activation:activation</exclude>
