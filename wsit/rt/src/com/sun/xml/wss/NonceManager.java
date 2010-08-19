@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -168,6 +168,14 @@ public abstract class NonceManager {
             }
             nonceMgr = (NonceManager) obj;
         }
+
+        /*if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+        final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
+        BackingStore<String, HANonceManager.MyPojo> backingStore = HighAvailabilityProvider.INSTANCE.createBackingStore(bsFactory, "HANonceManagerStore", String.class, HANonceManager.MyPojo.class);
+        nonceMgr = new HANonceManager(backingStore, maxNonceAge);
+        } else {
+        nonceMgr = new DefaultNonceManager();
+        }*/
 
         if (nonceMgr == null) {
             nonceMgr = new DefaultNonceManager();
