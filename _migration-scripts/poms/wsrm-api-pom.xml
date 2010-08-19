@@ -41,7 +41,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>net.java.metro.wsit</groupId>
+        <groupId>org.glassfish.metro</groupId>
         <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
         <!--relativePath>../../pom.xml</relativePath-->
