@@ -201,7 +201,7 @@ public abstract class SessionManager {
                     if (finder != null && finder.toArray().length > 0) {
                         sm = finder.toArray()[0];
                     } else {
-                        sm = new SessionManagerImpl();
+                        sm = new SessionManagerImpl(endpoint);
                     }
                     sessionManagers.put(endpoint, sm);
                     endpoint.getManagedObjectManager()

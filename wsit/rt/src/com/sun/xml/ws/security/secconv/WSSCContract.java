@@ -78,7 +78,7 @@ import com.sun.xml.ws.security.trust.elements.str.SecurityTokenReference;
 import com.sun.xml.ws.security.trust.util.WSTrustUtil;
 import com.sun.xml.ws.security.wsu10.AttributedDateTime;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
-import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
+import com.sun.xml.ws.runtime.dev.SecurityContextTokenInfoImpl;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.saml.util.SAMLUtil;

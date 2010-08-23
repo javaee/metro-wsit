@@ -41,7 +41,9 @@ import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
 
 import java.util.Date;
+import java.io.Serializable;
 import java.util.Set;
+
 
 /**
  * The </code>SecurityContextTokenInfo</code> class represents security parameters
@@ -52,7 +54,7 @@ import java.util.Set;
  */
 @ManagedData(name="SecurityContextTokenInfo")
 @Description("Security parameters")
-public interface SecurityContextTokenInfo {
+public interface SecurityContextTokenInfo extends Serializable {
 
     @ManagedAttribute
     @Description("Identifier")

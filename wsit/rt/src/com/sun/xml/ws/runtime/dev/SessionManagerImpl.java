@@ -41,7 +41,9 @@
 
 package com.sun.xml.ws.runtime.dev;
 
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
+import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
@@ -49,12 +51,16 @@ import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.GregorianCalendar;
 import java.util.Set;
 import javax.xml.namespace.QName;
 
 import javax.xml.ws.WebServiceException;
+
+import org.glassfish.ha.store.api.BackingStore;
+import org.glassfish.ha.store.api.BackingStoreFactory;
 
 /**
  * In memory implementation of <code>SessionManager</code>
@@ -66,21 +72,29 @@ public class SessionManagerImpl extends SessionManager {
     /**
      * Map of session id --> session
      */
-    private Hashtable<String, Session> sessionMap
-            = new Hashtable<String, Session>();
+    private Map<String, Session> sessionMap
+            = new HashMap<String, Session>();
     /**
      * Map of SecurityContextId --> IssuedTokenContext
      */
-    private Hashtable<String, IssuedTokenContext> issuedTokenContextMap
-            = new Hashtable<String, IssuedTokenContext>();    
+    private Map<String, IssuedTokenContext> issuedTokenContextMap
+            = new HashMap<String, IssuedTokenContext>();
     /**
      * Map of wsu:Instance --> SecurityContextTokenInfo
      */
-    private Hashtable<String, SecurityContextTokenInfo> securityContextTokenInfoMap
-            = new Hashtable<String, SecurityContextTokenInfo>();    
+    private Map<String, SecurityContextTokenInfo> securityContextTokenInfoMap
+            = new HashMap<String, SecurityContextTokenInfo>();
+
+    private final BackingStore<String, SecurityContextTokenInfoImpl> sctBs;
     
     /** Creates a new instance of SessionManagerImpl */
-    public SessionManagerImpl() {
+    public SessionManagerImpl(WSEndpoint endpoint) {
+        final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
+        this.sctBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
+                bsFactory,
+                endpoint.getServiceName() + ":" + endpoint.getPortName()+ "_SCT_BS",
+                String.class,
+                SecurityContextTokenInfoImpl.class);
         
     }
     
@@ -91,7 +105,14 @@ public class SessionManagerImpl extends SessionManager {
      * @returns The Session with the given key.  <code>null</code> if none exists.
      */
     public Session  getSession(String key) {
-        return sessionMap.get(key);
+        Session session = sessionMap.get(key);
+        if (session ==null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+            SecurityContextTokenInfo sctInfo = HighAvailabilityProvider.INSTANCE.loadFrom(sctBs, key, null);
+            session = new Session(this, key, null);
+            session.setSecurityInfo(sctInfo);
+            sessionMap.put(key, session);
+        }
+        return session;
     }
 
     /**
@@ -114,6 +135,9 @@ public class SessionManagerImpl extends SessionManager {
      */
     public void terminateSession(String key) {
         sessionMap.remove(key);
+        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+            HighAvailabilityProvider.INSTANCE.removeFrom(sctBs, key);
+        }
     }
 
     /**
@@ -155,6 +179,11 @@ public class SessionManagerImpl extends SessionManager {
         
         Session sess = new Session(this, key, obj);
         sessionMap.put(key, sess);
+
+        SecurityContextTokenInfo sctInfo = sess.getSecurityInfo();
+        if (sctInfo != null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+            HighAvailabilityProvider.INSTANCE.saveTo(sctBs, key, (SecurityContextTokenInfoImpl)sctInfo, true);
+        }
         return sess;
     }
     
@@ -170,7 +199,6 @@ public class SessionManagerImpl extends SessionManager {
        return createSession(key, new java.util.Hashtable<String, String>());
     }
     
- 
      
     /**
      * Does nothing in this implementation.
