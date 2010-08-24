@@ -18,24 +18,23 @@ jsr181-api.jar
 ==============================================
 RT jars [DONE except TODOs]
 ==============================================
-TODO: jaxrpc-api.jar -> include or remove?
-TODO: jsr173_api.jar -> include or remove?
-TODO: txnannprocessor.jar -> include or remove?
-TODO: keyidentifierspi.jar -> locate
+TODO: keyidentifierspi.jar -> push to maven
+TODO: xmlsec.jar -> split into the 3 new jars
 
 KerbLibrary.jar
 jaxb10-saml.jar
 jaxr-impl.jar
+jaxrpc-api.jar
 jaxrpc-impl.jar
 jaxrpc-spi.jar
 jaxws-rt.jar
+jsr173_api.jar
 policy.jar
 resolver.jar
 saaj-impl.jar
 sjsxp.jar
 stax-utils.jar
 streambuffer.jar
-xmlsec.jar
 
 FastInfoset.jar
 gmbal.jar

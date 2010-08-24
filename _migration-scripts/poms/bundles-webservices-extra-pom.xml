@@ -17,11 +17,10 @@
     </description>
 
     <dependencies>
-        <!--dependency>
-            TODO: grizzly.jar
-            <groupId></groupId>
-            <artifactId></artifactId>
-        </dependency-->
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-framework-http</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.sun.net.httpserver</groupId>
             <artifactId>http</artifactId>

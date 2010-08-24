@@ -40,8 +40,8 @@
 
         <!-- Non shaded dependencies -->
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
+            <groupId>javax.xml</groupId>
+            <artifactId>jsr173</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -63,7 +63,7 @@
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>javax.xml.stream:stax-api</exclude>
+                                    <exclude>javax.xml:jsr173</exclude>
                                     <exclude>javax.annotation:jsr250-api</exclude>
                                     <!--exclude>junit:junit</exclude-->
                                 </excludes>

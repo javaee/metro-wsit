@@ -198,7 +198,6 @@
 
     <!--dependencies></dependencies-->
 
-    <properties>
-        <grizzly.version>1.0.31</grizzly.version>
-    </properties>
+    <!--properties>
+    </properties-->
 </project>
