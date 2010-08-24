@@ -33,7 +33,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.wss.jaxws.impl;
 
 import com.sun.xml.ws.api.message.Message;
@@ -136,9 +135,8 @@ import javax.xml.ws.soap.SOAPFaultException;
  */
 public class SecurityServerTube extends SecurityTubeBase {
 
-    private static final String WSCONTEXT_DELEGATE="META-INF/services/com.sun.xml.ws.api.server.WebServiceContextDelegate";
+    private static final String WSCONTEXT_DELEGATE = "META-INF/services/com.sun.xml.ws.api.server.WebServiceContextDelegate";
     private Class contextDelegate = null;
-
     private SessionManager sessionManager = null;
     //private WSDLBoundOperation cachedOperation = null;
     private Set trustConfig = null;
@@ -149,42 +147,42 @@ public class SecurityServerTube extends SecurityTubeBase {
     private boolean isSCIssueMessage;
     private boolean isSCCancelMessage;
     private String reqAction = null;
-    private WSEndpoint wsEndpoint = null; 
-    
+    private WSEndpoint wsEndpoint = null;
+
     // Creates a new instance of SecurityServerTube
     @SuppressWarnings("unchecked")
     public SecurityServerTube(ServerTubelineAssemblyContext context, Tube nextTube) {
         super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
-         this.wsEndpoint = context.getEndpoint();
+        this.wsEndpoint = context.getEndpoint();
         try {
-        //need to merge config assertions from all alternatives
-        //because we do not know which alternative the req uses
-        //and so if username comes we need to have usersupplied validator
-        //and if SAML comes we need the userspecified SAML validator
-        Set configAssertions = null;
-        for (PolicyAlternativeHolder p : policyAlternatives) {
-            //TODO:suresh remove this direct public member access
-            Iterator it = p.inMessagePolicyMap.values().iterator();
+            //need to merge config assertions from all alternatives
+            //because we do not know which alternative the req uses
+            //and so if username comes we need to have usersupplied validator
+            //and if SAML comes we need the userspecified SAML validator
+            Set configAssertions = null;
+            for (PolicyAlternativeHolder p : policyAlternatives) {
+                //TODO:suresh remove this direct public member access
+                Iterator it = p.inMessagePolicyMap.values().iterator();
 
-            while (it.hasNext()) {
-                SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-                if (configAssertions != null) {
-                    configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
-                } else {
-                    configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
-                }
-                if (trustConfig != null) {
-                    trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
-                } else {
-                    trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
-                }
-                if (wsscConfig != null) {
-                    wsscConfig.addAll(holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
-                } else {
-                    wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+                while (it.hasNext()) {
+                    SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+                    if (configAssertions != null) {
+                        configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
+                    } else {
+                        configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
+                    }
+                    if (trustConfig != null) {
+                        trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
+                    } else {
+                        trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS);
+                    }
+                    if (wsscConfig != null) {
+                        wsscConfig.addAll(holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
+                    } else {
+                        wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
+                    }
                 }
             }
-        }
 
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
@@ -197,17 +195,17 @@ public class SecurityServerTube extends SecurityTubeBase {
             props.put(PipeConstants.ENDPOINT, context.getEndpoint());
             props.put(PipeConstants.POLICY, context.getPolicyMap());
             props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
-            //Registers IdentityComponent if either cs is not null
-            
-           
+        //Registers IdentityComponent if either cs is not null
+
+
         } catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);
             throw new RuntimeException(
-                    LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);            
+                    LogStringsMessages.WSSTUBE_0028_ERROR_CREATING_NEW_INSTANCE_SEC_SERVER_TUBE(), e);
         }
     }
-    
+
     // copy constructor
     protected SecurityServerTube(SecurityServerTube that, TubeCloner cloner) {
         super(that, cloner);
@@ -217,12 +215,11 @@ public class SecurityServerTube extends SecurityTubeBase {
         handler = that.handler;
         contextDelegate = that.contextDelegate;
     }
-    
-    public AbstractTubeImpl copy(TubeCloner cloner){
+
+    public AbstractTubeImpl copy(TubeCloner cloner) {
         return new SecurityServerTube(this, cloner);
     }
-    
-    
+
     //Note: There is an Assumption that the STS is distinct from the WebService in case of
     // WS-Trust and the STS and WebService are the same entity for SecureConversation
     @Override
@@ -233,15 +230,15 @@ public class SecurityServerTube extends SecurityTubeBase {
 //        if (!optimized) {
 //            cacheMessage(packet);
 //        }
-        
+
         Message msg = packet.getMessage();
-        
+
         isSCIssueMessage = false;
         isSCCancelMessage = false;
         isTrustMessage = false;
         tmpPacket = null;
         //String reqAction= null;
-        
+
         boolean thereWasAFault = false;
 
 
@@ -274,9 +271,9 @@ public class SecurityServerTube extends SecurityTubeBase {
         //Do Security Processing for Incoming Message
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
-        
+
         PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(policyAlternatives,
-                cachedOperation,tubeConfig,addVer,false, rmVer, mcVer);
+                cachedOperation, tubeConfig, addVer, false, rmVer, mcVer);
         ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         try {
@@ -322,15 +319,15 @@ public class SecurityServerTube extends SecurityTubeBase {
             }
             msg = Messages.create(sfe, soapVersion);
 
-        } catch (WSSecureConversationRuntimeException wsre){
-             thereWasAFault = true;
-             log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), wsre);
-             QName faultCode = wsre.getFaultCode();
-             if (faultCode != null){
-                 faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
-             }
-             SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
-             msg = Messages.create(sfe, soapVersion);
+        } catch (WSSecureConversationRuntimeException wsre) {
+            thereWasAFault = true;
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), wsre);
+            QName faultCode = wsre.getFaultCode();
+            if (faultCode != null) {
+                faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
+            }
+            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
+            msg = Messages.create(sfe, soapVersion);
         } catch (SOAPException se) {
             // internal error
             // Log here because this catch is an internal error not logged by the callee
@@ -345,11 +342,11 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
 
         Packet retPacket = null;
-         if (thereWasAFault) {
+        if (thereWasAFault) {
             //retPacket = packet;
             if (this.isAddressingEnabled()) {
                 if (optimized) {
-                    packet.setMessage(((JAXBFilterProcessingContext)ctx).getPVMessage());
+                    packet.setMessage(((JAXBFilterProcessingContext) ctx).getPVMessage());
                 }
                 retPacket = packet.createServerResponse(
                         msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
@@ -358,134 +355,136 @@ public class SecurityServerTube extends SecurityTubeBase {
                 retPacket = packet;
             }
         }
-        
+
         packet.setMessage(msg);
-        
+
         if (isAddressingEnabled()) {
-            reqAction= getAction(packet);
+            reqAction = getAction(packet);
             if (wsscVer.getSCTRequestAction().equals(reqAction) || wsscVer.getSCTRenewRequestAction().equals(reqAction)) {
                 isSCIssueMessage = true;
-                if(wsscConfig != null){
-                    packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS,wsscConfig.iterator());
+                if (wsscConfig != null) {
+                    packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, wsscConfig.iterator());
                 }
             } else if (wsscVer.getSCTCancelRequestAction().equals(reqAction)) {
                 isSCCancelMessage = true;
-            } else if (wsTrustVer.getIssueRequestAction().equals(reqAction)||
-                       wsTrustVer.getValidateRequestAction().equals(reqAction)) {
+            } else if (wsTrustVer.getIssueRequestAction().equals(reqAction) ||
+                    wsTrustVer.getValidateRequestAction().equals(reqAction)) {
                 isTrustMessage = true;
                 //packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
-                
-                if(trustConfig != null){
-                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS,trustConfig.iterator());
+
+                if (trustConfig != null) {
+                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, trustConfig.iterator());
                 }
-                
+
                 //set the callbackhandler
                 packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
                 packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
-                IssuedTokenContext ictx = ((ProcessingContextImpl)ctx).getTrustContext();
-                if(ictx != null && ictx.getAuthnContextClass() != null){                    
+                IssuedTokenContext ictx = ((ProcessingContextImpl) ctx).getTrustContext();
+                if (ictx != null && ictx.getAuthnContextClass() != null) {
                     packet.invocationProperties.put(WSTrustConstants.AUTHN_CONTEXT_CLASS, ictx.getAuthnContextClass());
-                }                
+                }
             }
-            
-            if (isSCIssueMessage){
+
+            if (isSCIssueMessage) {
                 List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
-                if(!policies.isEmpty()) {
+                if (!policies.isEmpty()) {
                     packet.invocationProperties.put(SC_ASSERTION, policies.get(0));
                 }
             }
         }
-        
-        if(!isSCIssueMessage ){
+
+        if (!isSCIssueMessage) {
             cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
-            if(cachedOperation == null){
-                if(addVer != null)
+            if (cachedOperation == null) {
+                if (addVer != null) {
                     cachedOperation = getWSDLOpFromAction(packet, true);
+                }
             }
         }
-        
-        
-        
+
+
+
         if (!thereWasAFault) {
-            
+
             if (isSCIssueMessage || isSCCancelMessage) {
                 //-------put application message on hold and invoke SC contract--------
-                
+
                 retPacket = invokeSecureConversationContract(
                         packet, ctx, isSCIssueMessage, reqAction);
                 tmpPacket = packet;
                 return processResponse(retPacket);
-                
+
             } else {
                 //--------INVOKE NEXT TUBE------------
                 // Put the addressing headers as unread
                 // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
                 updateSCBootstrapCredentials(packet, ctx);
-                tmpPacket = packet;                
+                tmpPacket = packet;
                 return doInvoke(next, packet);
             }
-        }else{
+        } else {
             return doReturnWith(retPacket);
         }
     }
+
     @Override
     public NextAction processResponse(Packet retPacket) {
-                
+
         // Add addrsssing headers to trust message
         //if (isTrustMessage){
-          //  retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
-       // }
-        
-        if(retPacket.getMessage() == null){
+        //  retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
+        // }
+
+        if (retPacket.getMessage() == null) {
             return doReturnWith(retPacket);
         }
-        
+
         /* TODO:this piece of code present since payload should be read once*/
         if (!optimized) {
-            try{
+            try {
                 SOAPMessage sm = retPacket.getMessage().readAsSOAPMessage();
                 Message newMsg = Messages.create(sm);
                 retPacket.setMessage(newMsg);
-            }catch(SOAPException ex){
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSSTUBE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);                
+            } catch (SOAPException ex) {
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSTUBE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex);
                 return doThrow(new WebServiceException(LogStringsMessages.WSSTUBE_0005_PROBLEM_PROC_SOAP_MESSAGE(), ex));
             }
         }
-        
+
         //---------------OUTBOUND SECURITY PROCESSING----------
         ProcessingContext ctx = initializeOutgoingProcessingContext(retPacket, isSCIssueMessage, isTrustMessage /*, thereWasAFault*/);
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         Message msg = null;
-        try{
+        try {
             msg = retPacket.getMessage();
-            if (ctx.getSecurityPolicy() != null && ((MessagePolicy)ctx.getSecurityPolicy()).size() >0) {
-                if(!optimized) {
+            if (ctx.getSecurityPolicy() != null && ((MessagePolicy) ctx.getSecurityPolicy()).size() > 0) {
+                if (!optimized) {
                     SOAPMessage soapMessage = msg.readAsSOAPMessage();
                     soapMessage = secureOutboundMessage(soapMessage, ctx);
                     msg = Messages.create(soapMessage);
-                }else{
+                } else {
                     msg = secureOutboundMessage(msg, ctx);
                 }
             }
         } catch (WssSoapFaultException ex) {
             msg = Messages.create(getSOAPFault(ex));
-        } catch(SOAPException se) {
+        } catch (SOAPException se) {
             // internal error
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSTUBE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);                        
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSTUBE_0024_ERROR_SECURING_OUTBOUND_MSG(), se);
             return doThrow(new WebServiceException(LogStringsMessages.WSSTUBE_0024_ERROR_SECURING_OUTBOUND_MSG(), se));
-        } finally{
-            if (isSCCancel(retPacket)){
+        } finally {
+            if (isSCCancel(retPacket)) {
                 removeContext(tmpPacket);
             }
             tmpPacket = null;
         }
         resetCachedOperation();
         retPacket.setMessage(msg);
-        return doReturnWith(retPacket);        
+        return doReturnWith(retPacket);
     }
-    
+
     @Override
     public NextAction processException(Throwable t) {
         if (!(t instanceof WebServiceException)) {
@@ -493,84 +492,84 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         return doThrow(t);
     }
-     
+
     private void removeContext(final Packet packet) {
-        SecurityContextToken sct = (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
-        if (sct != null){
+        SecurityContextToken sct = (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+        if (sct != null) {
             String strId = sct.getIdentifier().toString();
-            if(strId!=null){
+            if (strId != null) {
                 issuedTokenContextMap.remove(strId);
                 sessionManager.terminateSession(strId);
             }
         }
     }
-    
+
     @Override
     public void preDestroy() {
-        if(super.next != null){
+        if (super.next != null) {
             super.next.preDestroy();
         }
         issuedTokenContextMap.clear();
-        SessionManager.removeSessionManager(((ServerTubeConfiguration)tubeConfig).getEndpoint());
+        SessionManager.removeSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
         NonceManager.deleteInstance(wsEndpoint);
-    }        
-    
+    }
+
     public Packet processMessage(XMLStreamReaderMessage msg) {
         //TODO:Optimized security
         throw new UnsupportedOperationException();
     }
-    
+
     public InputStreamMessage processInputStream(XMLStreamReaderMessage msg) {
         //TODO:Optimized security
         throw new UnsupportedOperationException();
     }
-    
+
     public InputStreamMessage processInputStream(Message msg) {
         //TODO:Optimized security
         throw new UnsupportedOperationException();
-    }    
-    
+    }
+
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage, boolean isTrustMessage /*, boolean thereWasAFault*/) {
         ProcessingContext ctx = initializeOutgoingProcessingContext(packet, isSCMessage/*, thereWasAFault*/);
         return ctx;
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     protected ProcessingContext initializeOutgoingProcessingContext(
             Packet packet, boolean isSCMessage /*, boolean thereWasAFault*/) {
-        
+
         ProcessingContextImpl ctx;
-        if(optimized){
+        if (optimized) {
             ctx = new JAXBFilterProcessingContext(packet.invocationProperties);
-            ((JAXBFilterProcessingContext)ctx).setAddressingVersion(addVer);
-            ((JAXBFilterProcessingContext)ctx).setSOAPVersion(soapVersion);
-            ((JAXBFilterProcessingContext)ctx).setBSP(bsp10);
-        }else{
-            ctx = new ProcessingContextImpl( packet.invocationProperties);
+            ((JAXBFilterProcessingContext) ctx).setAddressingVersion(addVer);
+            ((JAXBFilterProcessingContext) ctx).setSOAPVersion(soapVersion);
+            ((JAXBFilterProcessingContext) ctx).setBSP(bsp10);
+        } else {
+            ctx = new ProcessingContextImpl(packet.invocationProperties);
         }
         if (addVer != null) {
             ctx.setAction(getAction(packet));
         }
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
-           MessagePolicy policy = null;
-             PolicyAlternativeHolder applicableAlternative =
-                    resolveAlternative(packet,isSCMessage);
+            MessagePolicy policy = null;
+            PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet, isSCMessage);
 
             if (packet.getMessage().isFault()) {
-                policy =  getOutgoingFaultPolicy(packet);
-            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
+                policy = getOutgoingFaultPolicy(packet);
+            } else if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
                 SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
-            } else if(isSCCancel(packet)){
+            } else if (isSCCancel(packet)) {
                 SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
-            }else {
+            } else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
             }
-            
+
             if (debug && policy != null) {
                 policy.dumpMessages(true);
             }
@@ -579,14 +578,14 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (policy != null) {
                 ctx.setSecurityPolicy(policy);
             }
-            if(isTrustMessage(packet)){
+            if (isTrustMessage(packet)) {
                 ctx.isTrustMessage(true);
             }
             // set the policy, issued-token-map, and extraneous properties
             //ctx.setIssuedTokenContextMap(issuedTokenContextMap);
-            if (isSCMessage){
+            if (isSCMessage) {
                 ctx.setAlgorithmSuite(policy.getAlgorithmSuite());
-            }else{
+            } else {
                 ctx.setAlgorithmSuite(getAlgoSuite(getBindingAlgorithmSuite(packet)));
             }
             ctx.setSecurityEnvironment(secEnv);
@@ -600,18 +599,18 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         return ctx;
     }
-    
+
     @Override
     protected MessagePolicy getOutgoingXWSSecurityPolicy(
             Packet packet, boolean isSCMessage) {
         if (isSCMessage) {
-            Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
+            Token scToken = (Token) packet.invocationProperties.get(SC_ASSERTION);
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
-       
+
         MessagePolicy mp = null;
         PolicyAlternativeHolder applicableAlternative =
-                    resolveAlternative(packet,isSCMessage);
+                resolveAlternative(packet, isSCMessage);
         WSDLBoundOperation wsdlOperation = cachedOperation;
         //if(operation == null){
         //Body could be encrypted. Security will have to infer the
@@ -623,31 +622,31 @@ public class SecurityServerTube extends SecurityTubeBase {
             return new MessagePolicy();
         }
 
-        if(isTrustMessage(packet) || cachedOperation == null){
-            cachedOperation = getWSDLOpFromAction(packet,false);           
+        if (isTrustMessage(packet) || cachedOperation == null) {
+            cachedOperation = getWSDLOpFromAction(packet, false);
         }
 
         SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOperation);
-        if(sph == null){
+        if (sph == null) {
             return new MessagePolicy();
         }
         mp = sph.getMessagePolicy();
         return mp;
     }
-    
+
     protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
         PolicyAlternativeHolder applicableAlternative =
-                    resolveAlternative(packet,false);
-        if(cachedOperation != null){
+                resolveAlternative(packet, false);
+        if (cachedOperation != null) {
             WSDLOperation operation = cachedOperation.getOperation();
             QName faultDetail = packet.getMessage().getFirstDetailEntryName();
             WSDLFault fault = null;
-            if(faultDetail != null){
-                 fault = operation.getFault(faultDetail);
+            if (faultDetail != null) {
+                fault = operation.getFault(faultDetail);
             }
             SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOperation);
-             if (fault == null) {
-                MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
+            if (fault == null) {
+                MessagePolicy faultPolicy1 = (sph != null) ? (sph.getMessagePolicy()) : new MessagePolicy();
                 return faultPolicy1;
             }
             SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
@@ -655,119 +654,116 @@ public class SecurityServerTube extends SecurityTubeBase {
             return faultPolicy;
         }
         return null;
-        
+
     }
-    
-    
-    
-    
+
     @Override
     protected SOAPMessage verifyInboundMessage(SOAPMessage message, ProcessingContext ctx)
-    throws WssSoapFaultException, XWSSecurityException {
+            throws WssSoapFaultException, XWSSecurityException {
         ctx.setSOAPMessage(message);
         NewSecurityRecipient.validateMessage(ctx);
         return ctx.getSOAPMessage();
     }
-    
+
     // The packet has the Message with RST/SCT inside it
     // TODO: Need to inspect if it is really a Issue or a Cancel
     @SuppressWarnings("unchecked")
     private Packet invokeSecureConversationContract(
             Packet packet, ProcessingContext ctx, boolean isSCTIssue, String action) {
-        
+
         IssuedTokenContext ictx = new IssuedTokenContextImpl();
         ictx.getOtherProperties().put("SessionManager", sessionManager);
-        
+
         Message msg = packet.getMessage();
-        Message retMsg  ;
-        String retAction  ;
-        
+        Message retMsg;
+        String retAction;
+
         try {
             // Set the requestor authenticated Subject in the IssuedTokenContext
             Subject subject = SubjectAccessor.getRequesterSubject(ctx);
-            
-            ictx.setRequestorSubject(subject);                       
-                        
+
+            ictx.setRequestorSubject(subject);
+
             WSTrustElementFactory wsscEleFac = WSTrustElementFactory.newInstance(wsscVer);
-            
+
             JAXBElement rstEle = msg.readPayloadAsJAXB(WSTrustElementFactory.getContext(wsTrustVer).createUnmarshaller());
             BaseSTSRequest rst;
-            
+
             rst = wsscEleFac.createRSTFrom(rstEle);
-            URI requestType = ((RequestSecurityToken)rst).getRequestType();            
-            BaseSTSResponse rstr ;
+            URI requestType = ((RequestSecurityToken) rst).getRequestType();
+            BaseSTSResponse rstr;
             WSSCContract scContract = WSSCFactory.newWSSCContract(wsscVer);
-            scContract.setWSSCServerConfig((Iterator)packet.invocationProperties.get(
+            scContract.setWSSCServerConfig((Iterator) packet.invocationProperties.get(
                     Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS));
             if (requestType.toString().equals(wsTrustVer.getIssueRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
-                rstr =  scContract.issue(rst, ictx, (SecureConversationToken)policies.get(0));
+                rstr = scContract.issue(rst, ictx, (SecureConversationToken) policies.get(0));
                 retAction = wsscVer.getSCTResponseAction();
-                SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
+                SecurityContextToken sct = (SecurityContextToken) ictx.getSecurityToken();
                 String sctId = sct.getIdentifier().toString();
-                
+
                 Session session = sessionManager.getSession(sctId);
                 if (session == null) {
-                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0029_ERROR_SESSION_CREATION());                   
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0029_ERROR_SESSION_CREATION());
                     throw new WSSecureConversationException(
                             LogStringsMessages.WSSTUBE_0029_ERROR_SESSION_CREATION());
                 }
-                
+
                 // Put it here for RM to pick up
                 packet.invocationProperties.put(
                         Session.SESSION_ID_KEY, sctId);
-                
+
                 packet.invocationProperties.put(
                         Session.SESSION_KEY, session.getUserData());
-           
-                //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);                
-                
+
+            //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, ictx);
+
             } else if (requestType.toString().equals(wsTrustVer.getRenewRequestTypeURI())) {
                 List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
                 retAction = wsscVer.getSCTRenewResponseAction();
-                rstr =  scContract.renew(rst, ictx,(SecureConversationToken)policies.get(0));
+                rstr = scContract.renew(rst, ictx, (SecureConversationToken) policies.get(0));
             } else if (requestType.toString().equals(wsTrustVer.getCancelRequestTypeURI())) {
                 retAction = wsscVer.getSCTCancelResponseAction();
-                rstr =  scContract.cancel(rst, ictx);
+                rstr = scContract.cancel(rst, ictx);
             } else {
-                log.log(Level.SEVERE, 
-                        LogStringsMessages.WSSTUBE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType));                
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSTUBE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType));
                 throw new UnsupportedOperationException(
-                        LogStringsMessages.WSSTUBE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType)); 
+                        LogStringsMessages.WSSTUBE_0030_UNSUPPORTED_OPERATION_EXCEPTION(requestType));
             }
-            
+
             // construct the complete message here containing the RSTR and the
             // correct Action headers if any and return the message.
-            retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), wsscEleFac.toJAXBElement(rstr), soapVersion);    
+            retMsg = Messages.create(WSTrustElementFactory.getContext(wsTrustVer).createMarshaller(), wsscEleFac.toJAXBElement(rstr), soapVersion);
         } catch (com.sun.xml.wss.XWSSecurityException ex) {
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);  
+            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
         } catch (javax.xml.bind.JAXBException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0001_PROBLEM_MAR_UNMAR(), ex);
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0001_PROBLEM_MAR_UNMAR(), ex);
-        } catch (WSSecureConversationException ex){
+        } catch (WSSecureConversationException ex) {
             log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0031_ERROR_INVOKE_SC_CONTRACT(), ex);
         }
-        
-      
+
+
         Packet retPacket = addAddressingHeaders(packet, retMsg, retAction);
-        if (isSCTIssue){
+        if (isSCTIssue) {
             List<PolicyAssertion> policies = getOutBoundSCP(packet.getMessage());
-            
-            if(!policies.isEmpty()) {
+
+            if (!policies.isEmpty()) {
                 retPacket.invocationProperties.put(SC_ASSERTION, policies.get(0));
             }
         }
-        
+
         return retPacket;
     }
-    
+
     public InputStreamMessage processInputStream(Packet packet) {
         //TODO:Optimized security
         throw new UnsupportedOperationException("Will be supported for optimized path");
     }
-    
+
     /** private Packet addAddressingHeaders(Packet packet, String relatesTo, String action){
      * AddressingBuilder builder = AddressingBuilder.newInstance();
      * AddressingProperties ap = builder.newAddressingProperties();
@@ -794,55 +790,54 @@ public class SecurityServerTube extends SecurityTubeBase {
      *
      * return packet;
      * }*/
-    
-     //TODO:Encapsulate, change this direct member access in all the 4 methods
-     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
-        SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
-        ph.inMessagePolicyMap.put(operation,sph);
+    //TODO:Encapsulate, change this direct member access in all the 4 methods
+    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
+        SecurityPolicyHolder sph = constructPolicyHolder(policy, true, true);
+        ph.inMessagePolicyMap.put(operation, sph);
         return sph;
     }
-    
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
-        SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
-        ph.outMessagePolicyMap.put(operation,sph);
+
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
+        SecurityPolicyHolder sph = constructPolicyHolder(policy, true, false);
+        ph.outMessagePolicyMap.put(operation, sph);
         return sph;
     }
-    
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
-        ph.outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
+
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
+        ph.outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, true, false, true));
     }
 
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
-        ph.inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
-    }
-    
-    protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
-        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,false);
-        sph.addFaultPolicy(fault,faultPH);
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
+        ph.inProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, true, true, false));
     }
 
-    protected void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
-        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,true);
-        sph.addFaultPolicy(fault,faultPH);
+    protected void addIncomingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
+        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy, true, false);
+        sph.addFaultPolicy(fault, faultPH);
     }
-    
-    protected String getAction(WSDLOperation operation,boolean inComming){
-        if(inComming){
+
+    protected void addOutgoingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
+        SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy, true, true);
+        sph.addFaultPolicy(fault, faultPH);
+    }
+
+    protected String getAction(WSDLOperation operation, boolean inComming) {
+        if (inComming) {
             return operation.getInput().getAction();
-        }else{
+        } else {
             return operation.getOutput().getAction();
         }
     }
-    
-    private Packet addAddressingHeaders(Packet packet, Message retMsg, String action){
+
+    private Packet addAddressingHeaders(Packet packet, Message retMsg, String action) {
         Packet retPacket = packet.createServerResponse(retMsg, addVer, soapVersion, action);
-        
+
         retPacket.proxy = packet.proxy;
         retPacket.invocationProperties.putAll(packet.invocationProperties);
-        
+
         return retPacket;
-    }       
-    
+    }
+
     private CallbackHandler configureServerHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         //Properties props = new Properties();
         CallbackHandlerFeature cbFeature =
@@ -855,25 +850,25 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (ret != null) {
                 Object obj = loadClass(ret).newInstance();
                 if (!(obj instanceof CallbackHandler)) {
-                    log.log(Level.SEVERE, 
+                    log.log(Level.SEVERE,
                             LogStringsMessages.WSSTUBE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
                     throw new RuntimeException(
-                            LogStringsMessages.WSSTUBE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));                                        
+                            LogStringsMessages.WSSTUBE_0033_INVALID_CALLBACK_HANDLER_CLASS(ret));
                 }
-                return (CallbackHandler)obj;
+                return (CallbackHandler) obj;
             }
             // ServletContext context =
             //         ((ServerPipeConfiguration)pipeConfig).getEndpoint().getContainer().getSPI(ServletContext.class);
-            RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerTubeConfiguration)tubeConfig).getEndpoint());
+            RealmAuthenticationAdapter adapter = getRealmAuthenticationAdapter(((ServerTubeConfiguration) tubeConfig).getEndpoint());
             return new DefaultCallbackHandler("server", props, adapter);
-            //return new DefaultCallbackHandler("server", props);
+        //return new DefaultCallbackHandler("server", props);
         } catch (Exception e) {
-            log.log(Level.SEVERE, 
-                    LogStringsMessages.WSSTUBE_0032_ERROR_CONFIGURE_SERVER_HANDLER(), e);                 
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSTUBE_0032_ERROR_CONFIGURE_SERVER_HANDLER(), e);
             throw new RuntimeException(LogStringsMessages.WSSTUBE_0032_ERROR_CONFIGURE_SERVER_HANDLER(), e);
         }
-    }    
-    
+    }
+
     @SuppressWarnings("unchecked")
     private RealmAuthenticationAdapter getRealmAuthenticationAdapter(WSEndpoint wSEndpoint) {
         String className = "javax.servlet.ServletContext";
@@ -903,41 +898,42 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         return null;
     }
-    
+
     //doing this here becuase doing inside keyselector of optimized security would
     //mean doing it twice (if SCT was used for sign and encrypt) which can impact performance
     @SuppressWarnings("unchecked")
     private void updateSCBootstrapCredentials(Packet packet, ProcessingContext ctx) {
         SecurityContextToken sct =
-                (SecurityContextToken)packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
+                (SecurityContextToken) packet.invocationProperties.get(MessageConstants.INCOMING_SCT);
         if (sct != null) {
             //Session session = this.sessionManager.getSession(sct.getIdentifier().toString());
             //IssuedTokenContext ctx = session.getSecurityInfo().getIssuedTokenContext();
             //IssuedTokenContext itctx = (IssuedTokenContext)((ProcessingContextImpl)ctx).getIssuedTokenContextMap().get(sct.getIdentifier().toString());
-            
+
             // get the secure session id 
             String sessionId = sct.getIdentifier().toString();
-            
+
             // put the secure session id the the message context
             packet.invocationProperties.put(Session.SESSION_ID_KEY, sessionId);
             packet.invocationProperties.put(Session.SESSION_KEY, sessionManager.getSession(sessionId).getUserData());
-            
+
             // update the Sbject
             IssuedTokenContext itctx = sessionManager.getSecurityContext(sessionId, true);
             if (itctx != null) {
                 Subject from = itctx.getRequestorSubject();
                 Subject to = DefaultSecurityEnvironmentImpl.getSubject(packet.invocationProperties);
-                copySubject(from,to);
+                copySubject(from, to);
             }
         }
     }
 
-     @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     private static void copySubject(final Subject from, final Subject to) {
         if (from == null || to == null) {
             return;
         }
         AccessController.doPrivileged(new PrivilegedAction() {
+
             public Object run() {
                 to.getPrincipals().addAll(from.getPrincipals());
                 to.getPublicCredentials().addAll(from.getPublicCredentials());
@@ -947,7 +943,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         });
     }
 
-     private static String getMetaINFServiceClass(String metaInfService) {
+    private static String getMetaINFServiceClass(String metaInfService) {
         URL url = loadFromClasspath(metaInfService);
         if (url != null) {
             InputStream is = null;
@@ -975,6 +971,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         return null;
     }
+
     public static URL loadFromClasspath(final String configFileName) {
 
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();

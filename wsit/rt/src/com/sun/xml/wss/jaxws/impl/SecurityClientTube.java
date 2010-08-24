@@ -147,26 +147,26 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         //scPlugin = new WSSCPlugin(null, wsscVer);
         try {
             for (PolicyAlternativeHolder p : this.policyAlternatives) {
-            Iterator it = p.outMessagePolicyMap.values().iterator();
-            while (it.hasNext()) {
-                SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
-                if (configAssertions != null) {
-                    configAssertions.addAll(holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS));
-                } else {
-                    configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
-                }
-                if (trustConfig != null) {
-                    trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS));
-                } else {
-                    trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
-                }
-                if (wsscConfig != null) {
-                    wsscConfig.addAll(holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS));
-                } else {
-                    wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
+                Iterator it = p.outMessagePolicyMap.values().iterator();
+                while (it.hasNext()) {
+                    SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
+                    if (configAssertions != null) {
+                        configAssertions.addAll(holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS));
+                    } else {
+                        configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_CLIENT_POLICY_NS);
+                    }
+                    if (trustConfig != null) {
+                        trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS));
+                    } else {
+                        trustConfig = holder.getConfigAssertions(Constants.SUN_TRUST_CLIENT_SECURITY_POLICY_NS);
+                    }
+                    if (wsscConfig != null) {
+                        wsscConfig.addAll(holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS));
+                    } else {
+                        wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
+                    }
                 }
             }
-        }
             this.wsitContext = wsitContext;
             //props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
             //props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel());
@@ -196,8 +196,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     @Override
     public NextAction processRequest(Packet packet) {
-         //computing EPR related stuff
-         //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
+        //computing EPR related stuff
+        //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
         if (wsitContext != null) {
             WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
             WSEndpointReference epr = bpr.getWSEndpointReference();
@@ -210,13 +210,13 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
                         idExtn = epr.getEPRExtension(ID_QNAME);
                         if (idExtn != null) {
-                            xmlReader = idExtn.readAsXMLStreamReader();                           
+                            xmlReader = idExtn.readAsXMLStreamReader();
                             CertificateRetriever cr = new CertificateRetriever();
                             //byte[] bstValue = cr.digestBST(xmlReader);
                             byte[] bstValue = cr.getBSTFromIdentityExtension(xmlReader);
                             X509Certificate certificate = null;
                             if (bstValue != null) {
-                                certificate = cr.constructCertificate(bstValue);                               
+                                certificate = cr.constructCertificate(bstValue);
                             }
                             if (certificate != null) {
                                 props.put(PipeConstants.SERVER_CERT, certificate);
@@ -225,8 +225,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         }
                     } catch (XMLStreamException ex) {
                         log.log(Level.WARNING, ex.getMessage());
-                        //throw new RuntimeException(ex);
-                    } 
+                    //throw new RuntimeException(ex);
+                    }
                 }
             } else {
                 //log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
@@ -388,8 +388,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl) ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
-        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(this.policyAlternatives,cachedOperation, tubeConfig, addVer, true, rmVer, mcVer);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,pr);
+        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(this.policyAlternatives, cachedOperation, tubeConfig, addVer, true, rmVer, mcVer);
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
         Message msg = null;
         try {
             msg = ret.getMessage();
@@ -406,7 +406,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                         DumpFilter.process(ctx);
                     }
                     SOAPFault fault = soapMessage.getSOAPBody().getFault();
-                    if ((new QName(wsscVer.getNamespaceURI(), "RenewNeeded")).equals(fault.getFaultCodeAsQName())){
+                    if ((new QName(wsscVer.getNamespaceURI(), "RenewNeeded")).equals(fault.getFaultCodeAsQName())) {
                         renewSCT(ctx, ret);
                     }
                     //log.log(Level.SEVERE,
@@ -612,7 +612,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
             if (stsFeature != null) {
                 rtConfig = stsFeature.getSTSIssuedTokenConfiguration();
             }
-            
+
             // Create the configuration to use
             STSIssuedTokenConfiguration config = null;
             if (issuedTokenContextMap.get(((Token) issuedTokenAssertion).getTokenId()) == null || rtConfig != null) {
@@ -638,28 +638,28 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     }
 
                     config.getOtherOptions().putAll(packet.invocationProperties);
-                    
+
                     // put the server certificate, if available, in the configuration
-                    X509Certificate x509ServerCertificate = (X509Certificate)props.get(PipeConstants.SERVER_CERT);
-                     // and make sure the  validition of the server certificate happens only once
+                    X509Certificate x509ServerCertificate = (X509Certificate) props.get(PipeConstants.SERVER_CERT);
+                    // and make sure the  validition of the server certificate happens only once
                     if (x509ServerCertificate != null) {
                         if (isCertValidityVerified == false) {
                             CertificateRetriever cr = new CertificateRetriever();
                             isCertValid = cr.setServerCertInTheSTSConfig(config, secEnv, x509ServerCertificate);
                             cr = null;
                             isCertValidityVerified = true;
-                        }else {
-                            if(isCertValid == true){
-                                 config.getOtherOptions().put("Identity", x509ServerCertificate);
+                        } else {
+                            if (isCertValid == true) {
+                                config.getOtherOptions().put("Identity", x509ServerCertificate);
                             }
                         }
                     }
 
                     // get entries from run time configuration
-                    if (rtConfig != null){
+                    if (rtConfig != null) {
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.ISSUED_TOKEN, config);
                         rtConfig.getOtherOptions().put(STSIssuedTokenConfiguration.APPLIES_TO, packet.endpointAddress.toString());
-                        ((DefaultSTSIssuedTokenConfiguration)config).copy(rtConfig);
+                        ((DefaultSTSIssuedTokenConfiguration) config).copy(rtConfig);
 
                         config.getOtherOptions().put("RunTimeConfig", rtConfig);
                     }
@@ -782,6 +782,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
     }
     //TODO use constants here
+
     private CallbackHandler configureClientHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         CallbackHandlerFeature chf = tubeConfig.getBinding().getFeature(CallbackHandlerFeature.class);
         if (chf != null) {
@@ -811,15 +812,15 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     }
 
     private void renewSCT(ProcessingContext ctx, Packet ret) {
-         SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
-         config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
-            IssuedTokenContext itc = itm.createIssuedTokenContext(config, ret.endpointAddress.toString());
-            try {
-                itm.renewIssuedToken(itc);
-            } catch (WSTrustException se) {
-                log.log(Level.SEVERE,
-                        LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
-                throw new WebServiceException(LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
-            }
-    } 
+        SCTokenConfiguration config = new DefaultSCTokenConfiguration(wsscVer.getNamespaceURI());
+        config.getOtherOptions().put("MessagePolicy", (MessagePolicy) ctx.getSecurityPolicy());
+        IssuedTokenContext itc = itm.createIssuedTokenContext(config, ret.endpointAddress.toString());
+        try {
+            itm.renewIssuedToken(itc);
+        } catch (WSTrustException se) {
+            log.log(Level.SEVERE,
+                    LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+            throw new WebServiceException(LogStringsMessages.WSSTUBE_0035_ERROR_ISSUEDTOKEN_CREATION(), se);
+        }
+    }
 }
