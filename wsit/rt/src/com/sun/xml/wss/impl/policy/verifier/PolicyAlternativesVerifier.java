@@ -68,8 +68,8 @@ public class PolicyAlternativesVerifier implements PolicyVerifier {
 
     public void verifyPolicy(SecurityPolicy recvdPolicy, SecurityPolicy configPolicy) throws PolicyViolationException {
         PolicyAlternatives confPolicies = (PolicyAlternatives)configPolicy;
-
-        List<MessagePolicy> mps = confPolicies.getSecurityPolicy();
+       
+        List<MessagePolicy> mps = confPolicies.getSecurityPolicy();        
         if (mps.size() == 1) {
             PolicyVerifier verifier = PolicyVerifierFactory.createVerifier(mps.get(0), ctx);
             verifier.verifyPolicy(recvdPolicy, mps.get(0));

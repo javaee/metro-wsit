@@ -110,10 +110,10 @@ import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.SubjectAccessor;
 import com.sun.xml.wss.RealmAuthenticationAdapter;
 import com.sun.xml.wss.impl.NewSecurityRecipient;
+import com.sun.xml.wss.impl.PolicyResolver;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
-import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -121,6 +121,8 @@ import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 import com.sun.xml.wss.provider.wsit.PipeConstants;
+import com.sun.xml.wss.provider.wsit.PolicyAlternativeHolder;
+import com.sun.xml.wss.provider.wsit.PolicyResolverFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -155,14 +157,21 @@ public class SecurityServerTube extends SecurityTubeBase {
         super(new ServerTubeConfiguration(context.getPolicyMap(), context.getWsdlPort(), context.getEndpoint()), nextTube);
          this.wsEndpoint = context.getEndpoint();
         try {
-            Iterator it = inMessagePolicyMap.values().iterator();
-            Set<PolicyAssertion> configAssertions = null;
+        //need to merge config assertions from all alternatives
+        //because we do not know which alternative the req uses
+        //and so if username comes we need to have usersupplied validator
+        //and if SAML comes we need the userspecified SAML validator
+        Set configAssertions = null;
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            //TODO:suresh remove this direct public member access
+            Iterator it = p.inMessagePolicyMap.values().iterator();
+
             while (it.hasNext()) {
                 SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
                 if (configAssertions != null) {
-                    configAssertions.addAll(holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS));
+                    configAssertions.addAll(holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS));
                 } else {
-                    configAssertions = holder.getConfigAssertions(SUN_WSS_SECURITY_SERVER_POLICY_NS);
+                    configAssertions = holder.getConfigAssertions(Constants.SUN_WSS_SECURITY_SERVER_POLICY_NS);
                 }
                 if (trustConfig != null) {
                     trustConfig.addAll(holder.getConfigAssertions(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS));
@@ -175,6 +184,7 @@ public class SecurityServerTube extends SecurityTubeBase {
                     wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS);
                 }
             }
+        }
 
             Properties props = new Properties();
             handler = configureServerHandler(configAssertions, props);
@@ -265,7 +275,9 @@ public class SecurityServerTube extends SecurityTubeBase {
         //---------------INBOUND SECURITY VERIFICATION----------
         ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
         
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap,inProtocolPM,cachedOperation,tubeConfig,addVer,false, rmVer, mcVer));
+        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(policyAlternatives,
+                cachedOperation,tubeConfig,addVer,false, rmVer, mcVer);
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
         ctx.setExtraneousProperty("SessionManager", sessionManager);
         try {
             if (!optimized) {
@@ -543,18 +555,17 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         ctx.setSecurityPolicyVersion(spVersion.namespaceUri);
         try {
-            MessagePolicy policy;
-            if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
-                SecurityPolicyHolder holder = outProtocolPM.get("RM");
-                policy = holder.getMessagePolicy();
-            } else if (packet.getMessage().isFault()) {
+           MessagePolicy policy = null;
+             PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,isSCMessage);
+
+            if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
+            } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
+                policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
-                /*SecurityPolicyHolder holder = outProtocolPM.get("SC");
-                if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                holder = outProtocolPM.get("RM");
-                }*/
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
@@ -598,29 +609,35 @@ public class SecurityServerTube extends SecurityTubeBase {
             return getOutgoingXWSBootstrapPolicy(scToken);
         }
        
-        if (outMessagePolicyMap == null) {
+        MessagePolicy mp = null;
+        PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,isSCMessage);
+        WSDLBoundOperation wsdlOperation = cachedOperation;
+        //if(operation == null){
+        //Body could be encrypted. Security will have to infer the
+        //policy from the message till the Body is decrypted.
+        //    mp = emptyMessagePolicy;
+        //}
+        if (applicableAlternative.outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();
         }
-        
-        if(isTrustMessage(packet)){
-            cachedOperation = getWSDLOpFromAction(packet,false);
+
+        if(isTrustMessage(packet) || cachedOperation == null){
+            cachedOperation = getWSDLOpFromAction(packet,false);           
         }
 
-        if(cachedOperation == null) {                
-            cachedOperation = getWSDLOpFromAction(packet, false);                    
-        }
-
-        SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
+        SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOperation);
         if(sph == null){
             return new MessagePolicy();
         }
-        MessagePolicy mp = sph.getMessagePolicy();
+        mp = sph.getMessagePolicy();
         return mp;
     }
     
     protected MessagePolicy getOutgoingFaultPolicy(Packet packet) {
-        
+        PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,false);
         if(cachedOperation != null){
             WSDLOperation operation = cachedOperation.getOperation();
             QName faultDetail = packet.getMessage().getFirstDetailEntryName();
@@ -628,7 +645,7 @@ public class SecurityServerTube extends SecurityTubeBase {
             if(faultDetail != null){
                  fault = operation.getFault(faultDetail);
             }
-            SecurityPolicyHolder sph = outMessagePolicyMap.get(cachedOperation);
+            SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOperation);
              if (fault == null) {
                 MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
                 return faultPolicy1;
@@ -778,33 +795,32 @@ public class SecurityServerTube extends SecurityTubeBase {
      * return packet;
      * }*/
     
-    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-
+     //TODO:Encapsulate, change this direct member access in all the 4 methods
+     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
-        inMessagePolicyMap.put(operation,sph);
+        ph.inMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException{
-
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
-        outMessagePolicyMap.put(operation,sph);
+        ph.outMessagePolicyMap.put(operation,sph);
         return sph;
     }
     
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
+        ph.outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
     }
-    
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException{
-        inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
+
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
+        ph.inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
     }
     
     protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
         SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,false);
         sph.addFaultPolicy(fault,faultPH);
     }
-    
+
     protected void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{
         SecurityPolicyHolder faultPH = constructPolicyHolder(effectivePolicy,true,true);
         sph.addFaultPolicy(fault,faultPH);

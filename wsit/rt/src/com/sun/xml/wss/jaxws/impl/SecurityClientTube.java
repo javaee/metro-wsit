@@ -95,6 +95,7 @@ import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.impl.client.DefaultSTSIssuedTokenConfiguration;
 import com.sun.xml.wss.XWSSConstants;
+import com.sun.xml.wss.impl.PolicyResolver;
 import com.sun.xml.wss.impl.PolicyTypeUtil;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.WssSoapFaultException;
@@ -113,6 +114,8 @@ import static com.sun.xml.wss.jaxws.impl.Constants.SUN_WSS_SECURITY_CLIENT_POLIC
 import java.util.logging.Level;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
 import com.sun.xml.wss.provider.wsit.PipeConstants;
+import com.sun.xml.wss.provider.wsit.PolicyAlternativeHolder;
+import com.sun.xml.wss.provider.wsit.PolicyResolverFactory;
 import java.security.cert.X509Certificate;
 import java.util.Hashtable;
 import java.util.ListIterator;
@@ -143,7 +146,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         super(new ClientTubeConfiguration(wsitContext.getPolicyMap(), wsitContext.getWsdlPort(), wsitContext.getBinding()), nextTube);
         //scPlugin = new WSSCPlugin(null, wsscVer);
         try {
-            Iterator it = outMessagePolicyMap.values().iterator();            
+            for (PolicyAlternativeHolder p : this.policyAlternatives) {
+            Iterator it = p.outMessagePolicyMap.values().iterator();
             while (it.hasNext()) {
                 SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
                 if (configAssertions != null) {
@@ -162,6 +166,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     wsscConfig = holder.getConfigAssertions(Constants.SUN_SECURE_CLIENT_CONVERSATION_POLICY_NS);
                 }
             }
+        }
             this.wsitContext = wsitContext;
             //props.put(PipeConstants.POLICY, wsitContext.getPolicyMap());
             //props.put(PipeConstants.WSDL_MODEL, wsitContext.getWrappedContext().getWsdlModel());
@@ -383,8 +388,8 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
         ((ProcessingContextImpl) ctx).setIssuedTokenContextMap(issuedTokenContextMap);
         ((ProcessingContextImpl) ctx).setSCPolicyIDtoSctIdMap(scPolicyIDtoSctIdMap);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, new PolicyResolverImpl(inMessagePolicyMap, inProtocolPM, cachedOperation, tubeConfig, addVer, true, rmVer, mcVer));
-
+        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(this.policyAlternatives,cachedOperation, tubeConfig, addVer, true, rmVer, mcVer);
+        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER,pr);
         Message msg = null;
         try {
             msg = ret.getMessage();
@@ -480,22 +485,22 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     // returns a list of IssuedTokenPolicy Assertions contained in the
     // service policy
     protected List<PolicyAssertion> getIssuedTokenPolicies(Packet packet, String scope) {
-        if (outMessagePolicyMap == null) {
-            return new ArrayList<PolicyAssertion>();
-        }
+        List<PolicyAssertion> ret = new ArrayList<PolicyAssertion>();
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
 
-        WSDLBoundOperation operation = null;
-        if (isTrustMessage(packet)) {
-            operation = getWSDLOpFromAction(packet, false);
-        } else {
-            operation = getOperation(packet.getMessage());
-        }
+            WSDLBoundOperation operation = null;
+            if (isTrustMessage(packet)) {
+                operation = getWSDLOpFromAction(packet, false);
+            } else {
+                operation = getOperation(packet.getMessage());
+            }
 
-        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
-        if (sph == null) {
-            return EMPTY_LIST;
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.outMessagePolicyMap.get(operation);
+            if (sph != null) {
+                ret.addAll(sph.getIssuedTokens());
+            }
         }
-        return sph.getIssuedTokens();
+        return ret;
     }
 
     public JAXBElement startSecureConversation(Packet packet)
@@ -676,27 +681,24 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
         }
     }
 
-    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation, Policy policy) throws PolicyException {
-
-
+    protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
         SecurityPolicyHolder sph = constructPolicyHolder(policy, false, false);
-        outMessagePolicyMap.put(operation, sph);
+        ph.outMessagePolicyMap.put(operation, sph);
         return sph;
     }
 
-    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation, Policy policy) throws PolicyException {
-
+    protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
         SecurityPolicyHolder sph = constructPolicyHolder(policy, false, true);
-        inMessagePolicyMap.put(operation, sph);
+        ph.inMessagePolicyMap.put(operation, sph);
         return sph;
     }
 
-    protected void addIncomingProtocolPolicy(Policy effectivePolicy, String protocol) throws PolicyException {
-        inProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, true, true));
+    protected void addIncomingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
+        ph.inProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, true, true));
     }
 
-    protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol) throws PolicyException {
-        outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, false));
+    protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
+        ph.outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, false));
     }
 
     protected void addIncomingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
@@ -742,42 +744,43 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
          * of policyId of issuedTokenAssertion
          */
         Message message = packet.getMessage();
-        WSDLBoundOperation operation = message.getOperation(tubeConfig.getWSDLPort());
-        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
-        if (sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()) {
-            MessagePolicy policy = sph.getMessagePolicy();
-            ArrayList list = policy.getPrimaryPolicies();
-            Iterator i = list.iterator();
-            boolean breakOuterLoop = false;
-            while (i.hasNext()) {
-                SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
-                if (PolicyTypeUtil.encryptionPolicy(primaryPolicy)) {
-                    EncryptionPolicy encPolicy = (EncryptionPolicy) primaryPolicy;
-                    EncryptionPolicy.FeatureBinding featureBinding = (EncryptionPolicy.FeatureBinding) encPolicy.getFeatureBinding();
-                    ArrayList targetList = featureBinding.getTargetBindings();
-                    ListIterator iterator = targetList.listIterator();
-                    while (iterator.hasNext()) {
-                        EncryptionTarget encryptionTarget = (EncryptionTarget) iterator.next();
-                        String targetURI = encryptionTarget.getValue();
-                        if (targetURI.equals(issuedTokenPolicyId)) {
-                            if (ctx != null) {
-                                GenericToken issuedToken = (GenericToken) ctx.getSecurityToken();
-                                encryptionTarget.setValue(issuedToken.getId());
-                                sph.setMessagePolicy(policy);
-                                outMessagePolicyMap.put(operation, sph);
-                                breakOuterLoop = true;
-                                break;
+        for (PolicyAlternativeHolder p : this.policyAlternatives) {
+            WSDLBoundOperation operation = message.getOperation(tubeConfig.getWSDLPort());
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.outMessagePolicyMap.get(operation);
+            if (sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()) {
+                MessagePolicy policy = sph.getMessagePolicy();
+                ArrayList list = policy.getPrimaryPolicies();
+                Iterator i = list.iterator();
+                boolean breakOuterLoop = false;
+                while (i.hasNext()) {
+                    SecurityPolicy primaryPolicy = (SecurityPolicy) i.next();
+                    if (PolicyTypeUtil.encryptionPolicy(primaryPolicy)) {
+                        EncryptionPolicy encPolicy = (EncryptionPolicy) primaryPolicy;
+                        EncryptionPolicy.FeatureBinding featureBinding = (EncryptionPolicy.FeatureBinding) encPolicy.getFeatureBinding();
+                        ArrayList targetList = featureBinding.getTargetBindings();
+                        ListIterator iterator = targetList.listIterator();
+                        while (iterator.hasNext()) {
+                            EncryptionTarget encryptionTarget = (EncryptionTarget) iterator.next();
+                            String targetURI = encryptionTarget.getValue();
+                            if (targetURI.equals(issuedTokenPolicyId)) {
+                                if (ctx != null) {
+                                    GenericToken issuedToken = (GenericToken) ctx.getSecurityToken();
+                                    encryptionTarget.setValue(issuedToken.getId());
+                                    sph.setMessagePolicy(policy);
+                                    p.outMessagePolicyMap.put(operation, sph);
+                                    breakOuterLoop = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (breakOuterLoop) {
-                        break;
+                        if (breakOuterLoop) {
+                            break;
+                        }
                     }
                 }
             }
         }
     }
-
     //TODO use constants here
     private CallbackHandler configureClientHandler(Set<PolicyAssertion> configAssertions, Properties props) {
         CallbackHandlerFeature chf = tubeConfig.getBinding().getFeature(CallbackHandlerFeature.class);

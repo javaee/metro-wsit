@@ -106,8 +106,10 @@ import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.misc.DefaultCallbackHandler;
 import com.sun.xml.wss.impl.filter.DumpFilter;
+import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.jaxws.impl.logging.LogDomainConstants;
 import com.sun.xml.wss.jaxws.impl.logging.LogStringsMessages;
+import com.sun.xml.wss.provider.wsit.PolicyAlternativeHolder;
 import static com.sun.xml.wss.jaxws.impl.Constants.SC_ASSERTION;
 import static com.sun.xml.wss.jaxws.impl.Constants.bsOperationName;
 
@@ -115,7 +117,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -134,6 +135,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -221,12 +223,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     // SOAP Factory
     protected  SOAPFactory soapFactory = null;
     
-    protected PolicyMap wsPolicyMap = null;
+    protected PolicyMap wsPolicyMap = null;    
     
-    protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> outMessagePolicyMap = null;
-    protected HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
-    protected HashMap<String,SecurityPolicyHolder> outProtocolPM = null;
-    protected HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
     //public static final URI ISSUE_REQUEST_URI ;
     //public static final URI CANCEL_REQUEST_URI;
     protected Policy bpMSP = null;
@@ -235,6 +233,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     protected int iterationsForPDK = 0;
     protected boolean isEPREnabled = false;
     protected boolean isCertValidityVerified = false;
+    protected List<PolicyAlternativeHolder> policyAlternatives = new ArrayList<PolicyAlternativeHolder>();
     /**
      * Constants for RM Security Processing
      */
@@ -288,19 +287,15 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     public SecurityTubeBase(TubeConfiguration config, Tube nextTube) {
         super(nextTube);
-        this.tubeConfig = config;
-        this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
-        this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
+        this.tubeConfig = config;       
         soapVersion = tubeConfig.getBinding().getSOAPVersion();
         //addressingEnabled = (pipeConfig.getBinding().getAddressingVersion() == null) ?  false : true;
         isSOAP12 = (soapVersion == SOAPVersion.SOAP_12);
         wsPolicyMap = tubeConfig.getPolicyMap();
-        soapFactory = tubeConfig.getBinding().getSOAPVersion().saajSoapFactory;
-        this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
-        this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
+        soapFactory = tubeConfig.getBinding().getSOAPVersion().saajSoapFactory;       
         //unmarshaller as instance variable of the pipe
         if(wsPolicyMap != null){
-            collectPolicies();
+            collectPolicies(policyAlternatives);
         }
         
         try {
@@ -342,11 +337,8 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         this.mcVer = that.mcVer;
         this.encRMLifecycleMsg = that.encRMLifecycleMsg;
         wsPolicyMap = that.wsPolicyMap;
-        outMessagePolicyMap = that.outMessagePolicyMap;
-        inMessagePolicyMap = that.inMessagePolicyMap;
-        bindingLevelAlgSuite = that.bindingLevelAlgSuite;
-        this.inProtocolPM = that.inProtocolPM;
-        this.outProtocolPM = that.outProtocolPM;
+        this.policyAlternatives = that.policyAlternatives;
+        bindingLevelAlgSuite = that.bindingLevelAlgSuite;       
         this.hasIssuedTokens = that.hasIssuedTokens;
         this.hasKerberosToken = that.hasKerberosToken;
         this.hasSecureConversation = that.hasSecureConversation;
@@ -515,17 +507,20 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
         //Review : Will this return operation name in all cases , doclit,rpclit, wrap / non wrap ?
         
-        MessagePolicy mp  ;
+        MessagePolicy mp = null;
+        PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet,isSCMessage);
         //if(operation == null){
         //Body could be encrypted. Security will have to infer the
         //policy from the message till the Body is decrypted.
         //    mp =  new MessagePolicy();
         //}
-        if (outMessagePolicyMap == null) {
+        if (applicableAlternative.outMessagePolicyMap == null) {
             //empty message policy
             return new MessagePolicy();
         }
-        SecurityPolicyHolder sph = outMessagePolicyMap.get(operation);
+        SecurityPolicyHolder sph =
+                (SecurityPolicyHolder) applicableAlternative.outMessagePolicyMap.get(operation);
         if(sph == null){
             return new MessagePolicy();
         }
@@ -661,21 +656,19 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             }
         }
         try {
-            MessagePolicy policy  ;
+            PolicyAlternativeHolder applicableAlternative =
+                    resolveAlternative(packet, isSCMessage);
+            MessagePolicy policy = null;
             if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
-                SecurityPolicyHolder holder = outProtocolPM.get("RM");
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
                 policy = holder.getMessagePolicy();
-            }else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = outProtocolPM.get("SC-CANCEL");
-                //commented the below if() to make IBM RSP test case to pass               
-                /*if (WSSCVersion.WSSC_13.getNamespaceURI().equals(wsscVer.getNamespaceURI())){
-                    holder = outProtocolPM.get("RM");
-                }*/
+            } else if (isSCCancel(packet)) {
+                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
-            }else if(isSCRenew(packet)){
+            } else if (isSCRenew(packet)) {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
-                ctx.isExpired(true);                
-            }else {
+                ctx.isExpired(true);
+            } else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
             }
             if (debug) {
@@ -763,7 +756,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
      *   2)wsdl:Binding
      */
     
-    protected void collectPolicies(){
+    protected void collectPolicies(List<PolicyAlternativeHolder> alternatives){
         try{
             if (wsPolicyMap == null) {
                 return;
@@ -778,193 +771,258 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             //Review:Will getEffectivePolicy return null or empty policy ?.
             Policy endpointPolicy = wsPolicyMap.getEndpointEffectivePolicy(endpointKey);
 
-            //This will be used for setting credentials like  spVersion.... etc for binding level policies
+            //This will be used for setting credentials like  spVersion... etc for binding level policies
             setPolicyCredentials(endpointPolicy);
 
-              //This will be used for setting credentials like  spVersion.... etc for operation level policies
+              //This will be used for setting credentials like  spVersion... etc for operation level policies
             for (WSDLBoundOperation operation : tubeConfig.getWSDLPort().getBinding().getBindingOperations()) {
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(), operation.getName().getLocalPart());
                 PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, operationName);
                 Policy operationPolicy = wsPolicyMap.getOperationEffectivePolicy(operationKey);
                 setPolicyCredentials(operationPolicy);
+            }                                    
+           
+           if (endpointPolicy == null) {
+                ArrayList<Policy> policyList = new ArrayList<Policy>();
+                PolicyAlternativeHolder ph = new PolicyAlternativeHolder(null, spVersion, bpMSP);
+                alternatives.add(ph);
+                collectOperationAndMessageLevelPolicies(wsPolicyMap, null, policyList,ph);
+                return;
             }
-                                    
-            buildProtocolPolicy(endpointPolicy);
-            ArrayList<Policy> policyList = new ArrayList<Policy>();
-            if(endpointPolicy != null){
-                policyList.add(endpointPolicy);
+           Iterator<AssertionSet> policiesIter = endpointPolicy.iterator();
+           while (policiesIter.hasNext()) {
+                ArrayList<Policy> policyList = new ArrayList<Policy>();
+                AssertionSet ass = policiesIter.next();
+                PolicyAlternativeHolder ph = new PolicyAlternativeHolder(ass, spVersion, bpMSP);
+                alternatives.add(ph);
+
+                Collection<AssertionSet> coll = new ArrayList<AssertionSet>();
+                coll.add(ass);
+                Policy singleAlternative = Policy.createPolicy(
+                        endpointPolicy.getNamespaceVersion(), endpointPolicy.getName(), endpointPolicy.getId(), coll);
+
+                buildProtocolPolicy(singleAlternative, ph);
+                //if(endpointPolicy != null){
+                policyList.add(singleAlternative);
+                //}
+                collectOperationAndMessageLevelPolicies(wsPolicyMap, singleAlternative, policyList, ph);
             }
-            for( WSDLBoundOperation operation: tubeConfig.getWSDLPort().getBinding().getBindingOperations()){
+        } catch (PolicyException pe) {
+            throw generateInternalError(pe);
+        }
+    }
+
+    //TODO:POLALT Alternatives only at BindingLevel for Now
+    private void collectOperationAndMessageLevelPolicies(PolicyMap wsPolicyMap,
+            Policy singleAlternative, ArrayList<Policy> policyList, PolicyAlternativeHolder ph) {
+        if (wsPolicyMap == null) {
+            return;
+        }
+        try {
+            QName serviceName = tubeConfig.getWSDLPort().getOwner().getName();
+            QName portName = tubeConfig.getWSDLPort().getName();
+
+            PolicyMerger policyMerge = PolicyMerger.getMerger();
+            for (WSDLBoundOperation operation : tubeConfig.getWSDLPort().getBinding().getBindingOperations()) {
                 QName operationName = new QName(operation.getBoundPortType().getName().getNamespaceURI(),
                         operation.getName().getLocalPart());
 
-                PolicyMapKey messageKey =  PolicyMap.createWsdlMessageScopeKey(
-                        serviceName,portName,operationName);
-                
-                
-                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName,portName,operationName);
-                
+                PolicyMapKey messageKey = PolicyMap.createWsdlMessageScopeKey(
+                        serviceName, portName, operationName);
+                PolicyMapKey operationKey = PolicyMap.createWsdlOperationScopeKey(serviceName, portName, operationName);
+
                 //Review:Not sure if this is need and what is the
                 //difference between operation and message level key.
                 //securityPolicyNamespaces
-                
                 Policy operationPolicy = wsPolicyMap.getOperationEffectivePolicy(operationKey);
-                if(operationPolicy != null ){
+                if (operationPolicy != null) {
                     policyList.add(operationPolicy);
-                }else{
+                } else {
                     //log fine message
-                    
                     //System.out.println("Operation Level Security policy is null");
                 }
-                
-                
-                Policy imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
-                if(imPolicy != null ){
+
+                Policy imPolicy = null;
+                imPolicy = wsPolicyMap.getInputMessageEffectivePolicy(messageKey);
+                if (imPolicy != null) {
                     policyList.add(imPolicy);
                 }
                 //input message effective policy to be used. Policy elements at various
                 //scopes merged.
-                
                 Policy imEP = policyMerge.merge(policyList);
-                SecurityPolicyHolder outPH = addOutgoingMP(operation,imEP);
-                if(imPolicy != null){
+                SecurityPolicyHolder outPH = null;
+                if (imEP != null) {
+                    outPH = addOutgoingMP(operation, imEP, ph);
+                }
+
+                if (imPolicy != null) {
                     policyList.remove(imPolicy);
                 }
                 //one way
-                SecurityPolicyHolder inPH  ;
-                //TODO: Venu to verify this fix later
-                /*if(output != null){*/
-                Policy omPolicy  ;
+                SecurityPolicyHolder inPH = null;
+
+                Policy omPolicy = null;
                 omPolicy = wsPolicyMap.getOutputMessageEffectivePolicy(messageKey);
-                if(omPolicy != null){
+                if (omPolicy != null) {
                     policyList.add(omPolicy);
                 }
                 //ouput message effective policy to be used. Policy elements at various
                 //scopes merged.
-                
-                Policy omEP =  policyMerge.merge(policyList);
-                if(omPolicy != null){
+
+                Policy omEP = policyMerge.merge(policyList);
+                if (omPolicy != null) {
                     policyList.remove(omPolicy);
                 }
-                inPH = addIncomingMP(operation,omEP);
-                /*}*/
+                if (omEP != null) {
+                    inPH = addIncomingMP(operation, omEP, ph);
+                }
+
                 Iterator faults = operation.getOperation().getFaults().iterator();
                 ArrayList<Policy> faultPL = new ArrayList<Policy>();
-                faultPL.add(endpointPolicy);
-                if(operationPolicy != null){
+                if (singleAlternative != null) {
+                    faultPL.add(singleAlternative);
+                }
+                if (operationPolicy != null) {
                     faultPL.add(operationPolicy);
                 }
-                while(faults.hasNext()){
+                while (faults.hasNext()) {
                     WSDLFault fault = (WSDLFault) faults.next();
-                    
-                    PolicyMapKey fKey  ;
+                    PolicyMapKey fKey = null;
                     fKey = PolicyMap.createWsdlFaultMessageScopeKey(
-                            serviceName,portName,operationName,
+                            serviceName, portName, operationName,
                             new QName(operationName.getNamespaceURI(), fault.getName()));
                     Policy fPolicy = wsPolicyMap.getFaultMessageEffectivePolicy(fKey);
-                    
-                    if(fPolicy != null){
+
+                    if (fPolicy != null) {
                         faultPL.add(fPolicy);
-                    }else{
+                    } else {
                         //continue;
                     }
                     Policy ep = policyMerge.merge(faultPL);
-                    if(inPH != null){
-                        addIncomingFaultPolicy(ep,inPH,fault);
+                    if (inPH != null) {
+                        addIncomingFaultPolicy(ep, inPH, fault);
                     }
-                    if(outPH != null){
-                        addOutgoingFaultPolicy(ep,outPH,fault);
+                    if (outPH != null) {
+                        addOutgoingFaultPolicy(ep, outPH, fault);
                     }
                     faultPL.remove(fPolicy);
                 }
-                 if(operationPolicy != null){
+                if (operationPolicy != null) {
                     policyList.remove(operationPolicy);
                 }
             }
-        }catch(PolicyException pe){
+        } catch (PolicyException pe) {
             throw generateInternalError(pe);
         }
     }
-    
+    //TODO:POLALT : should this method look over all alternatives
     protected List<PolicyAssertion> getInBoundSCP(Message message){
-        if (inMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
-        SecurityPolicyHolder sph = null;
-
-        for (SecurityPolicyHolder ph : inMessagePolicyMap.values()) {
-            if (ph != null) {
-                sph = ph;
-                break;
+       SecurityPolicyHolder sph = null;
+        //TODO:encapsulate this explicit public member access p.x below
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            if (p.inMessagePolicyMap == null) {
+                return Collections.emptyList();
             }
-        }
-        if(sph == null){
-            return EMPTY_LIST;
+
+            Collection coll = p.inMessagePolicyMap.values();
+            Iterator itr = coll.iterator();
+
+            while (itr.hasNext()) {
+                SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+                if (ph != null) {
+                    sph = ph;
+                    break;
+                }
+            }
+            if (sph == null) {
+                return EMPTY_LIST;
+            }
         }
         return sph.getSecureConversationTokens();
     }
-    
+    //TODO:POLALT : should this method look over all alternatives
     protected List<PolicyAssertion> getOutBoundSCP(
             Message message) {
         
-        if (outMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
-        SecurityPolicyHolder sph = null;
+     SecurityPolicyHolder sph = null;
+        //TODO:encapsulate this explicit public member access p.x below
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            if (p.outMessagePolicyMap == null) {
+                return Collections.emptyList();
+            }
 
-        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
-            if (ph != null) {
-                sph = ph;
-                break;
+            Collection coll = p.outMessagePolicyMap.values();
+            Iterator itr = coll.iterator();
+
+            while (itr.hasNext()) {
+                SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+                if (ph != null) {
+                    sph = ph;
+                    break;
+                }
+            }
+            if (sph == null) {
+                return EMPTY_LIST;
             }
         }
-        if(sph == null){
-            return EMPTY_LIST;
-        }
         return sph.getSecureConversationTokens();
-        
+
     }
-    
+    //TODO:POLALT : should this method look over all alternatives
     protected List<PolicyAssertion> getOutBoundKTP(Packet packet, boolean isSCMessage){
-        if(isSCMessage){
+      if(isSCMessage){
             Token scToken = (Token)packet.invocationProperties.get(SC_ASSERTION);
             return ((SCTokenWrapper)scToken).getKerberosTokens();
         }
-        if (outMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
         SecurityPolicyHolder sph = null;
-        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
-            if (ph != null) {
-                sph = ph;
-                break;
+        //TODO:encapsulate this explicit public member access p.x below
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            if (p.outMessagePolicyMap == null) {
+                return Collections.emptyList();
             }
-        }
-        if(sph == null){
-            return EMPTY_LIST;
+            Message message = packet.getMessage();
+
+            Collection coll = p.outMessagePolicyMap.values();
+            Iterator itr = coll.iterator();
+
+            while (itr.hasNext()) {
+                SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+                if (ph != null) {
+                    sph = ph;
+                    break;
+                }
+            }
+            if (sph == null) {
+                return EMPTY_LIST;
+            }
         }
         return sph.getKerberosTokens();
-    }
-    
+    }    
+     //TODO:POLALT : should this method look over all alternatives
     protected List<PolicyAssertion> getSecureConversationPolicies(
             Message message, String scope) {
-        
-        if (outMessagePolicyMap == null) {
-            return Collections.emptyList();
-        }
-        SecurityPolicyHolder sph = null;
+      SecurityPolicyHolder sph = null;
+        //TODO:encapsulate this explicit public member access p.x below
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            if (p.outMessagePolicyMap == null) {
+                return Collections.emptyList();
+            }
 
-        for (SecurityPolicyHolder ph : outMessagePolicyMap.values()) {
-            if (ph != null) {
-                sph = ph;
-                break;
+            Collection coll = p.outMessagePolicyMap.values();
+            Iterator itr = coll.iterator();
+
+            while (itr.hasNext()) {
+                SecurityPolicyHolder ph = (SecurityPolicyHolder) itr.next();
+                if (ph != null) {
+                    sph = ph;
+                    break;
+                }
+            }
+            if (sph == null) {
+                return EMPTY_LIST;
             }
         }
-        if(sph == null){
-            return EMPTY_LIST;
-        }
         return sph.getSecureConversationTokens();
-        
     }
     
     //TODO :: Refactor
@@ -1047,9 +1105,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         
     }
     
-    protected abstract SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException;
+    protected abstract SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException;
     
-    protected abstract SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy)throws PolicyException;
+    protected abstract SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException;
     
     protected AlgorithmSuite getBindingAlgorithmSuite(Packet packet) {
         return bindingLevelAlgSuite;
@@ -1242,20 +1300,23 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     }
     
     protected WSDLBoundOperation getWSDLOpFromAction(Packet packet ,boolean isIncomming){
-        String uriValue = getAction(packet);
-        Set <WSDLBoundOperation>keys = outMessagePolicyMap.keySet();
-        for(WSDLBoundOperation wbo : keys){
-            WSDLOperation wo = wbo.getOperation();
-            // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
-            String action = getAction(wo, isIncomming);
-            if(action != null && action.equals(uriValue)){
-                return wbo;
+         String uriValue = getAction(packet);
+        for (PolicyAlternativeHolder p : policyAlternatives) {
+            Set<WSDLBoundOperation> keys = p.outMessagePolicyMap.keySet();
+            for (WSDLBoundOperation wbo : keys) {
+                WSDLOperation wo = wbo.getOperation();
+                // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
+                String action = getAction(wo, isIncomming);
+                if (action != null && action.equals(uriValue)) {
+                    return wbo;
+                }
             }
         }
         return null;
+
     }
     
-    protected void buildProtocolPolicy(Policy endpointPolicy)throws PolicyException{
+    protected void buildProtocolPolicy(Policy endpointPolicy, PolicyAlternativeHolder ph)throws PolicyException{
         if(endpointPolicy == null ){
             return;
         }
@@ -1267,24 +1328,24 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             pList.add(endpointPolicy);
             pList.add(msgLevelPolicy);
             Policy effectivePolicy = merger.merge(pList);
-            addIncomingProtocolPolicy(effectivePolicy,"RM");
-            addOutgoingProtocolPolicy(effectivePolicy,"RM");
+            addIncomingProtocolPolicy(effectivePolicy,"RM",ph);
+            addOutgoingProtocolPolicy(effectivePolicy,"RM",ph);
             
             pList.remove(msgLevelPolicy);
             pList.add(getMessageBootstrapPolicy());
             PolicyMerger pm = PolicyMerger.getMerger();
             //add secure conversation policy.
             Policy ep = pm.merge(pList);
-            addIncomingProtocolPolicy(ep,"SC");
-            addOutgoingProtocolPolicy(ep,"SC");
+            addIncomingProtocolPolicy(ep,"SC",ph);
+            addOutgoingProtocolPolicy(ep,"SC",ph);
             ArrayList<Policy> pList1 = new ArrayList<Policy>(2);
             pList1.add(endpointPolicy);
             pList1.add(getSCCancelPolicy(encryptCancelPayload));
             PolicyMerger pm1 = PolicyMerger.getMerger();
             //add secure conversation policy.
             Policy ep1 = pm1.merge(pList1);
-            addIncomingProtocolPolicy(ep1,"SC-CANCEL");
-            addOutgoingProtocolPolicy(ep1,"SC-CANCEL");
+            addIncomingProtocolPolicy(ep1,"SC-CANCEL",ph);
+            addOutgoingProtocolPolicy(ep1,"SC-CANCEL",ph);
         }catch(IOException ie){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSTUBE_0008_PROBLEM_BUILDING_PROTOCOL_POLICY(), ie);
@@ -1717,9 +1778,9 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
     
     protected abstract void addOutgoingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException;
     
-    protected abstract void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
+    protected abstract void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException;
     
-    protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol)throws PolicyException;
+    protected abstract void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException;
     
     protected abstract String getAction(WSDLOperation operation, boolean isIncomming) ;
 
@@ -1798,5 +1859,26 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             cancelMSP = ModelTranslator.getTranslator().translate(model);
         }
         return cancelMSP;
+    }
+
+    protected PolicyAlternativeHolder resolveAlternative(Packet packet, boolean isSCMessage) {
+        if (this.policyAlternatives.size() == 1) {
+            return this.policyAlternatives.get(0);
+        }
+
+        String alternativeId = (String)packet.invocationProperties.get(PolicyVerifier.POLICY_ALTERNATIVE_ID);
+        if (alternativeId != null) {
+            for (PolicyAlternativeHolder p : this.policyAlternatives) {
+                if (alternativeId.equals(p.getId())) {
+                    return p;
+                }
+            }
+        }
+        //return arbitrarily
+        if (!this.policyAlternatives.isEmpty()) {
+            return this.policyAlternatives.get(0);
+        }else {
+            return null;
+        }
     }
 }
