@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.SecurityContextTokenInfo;
 
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class SessionManagerImpl extends SessionManager {
     private Map<String, SecurityContextTokenInfo> securityContextTokenInfoMap
             = new HashMap<String, SecurityContextTokenInfo>();
 
-    private final BackingStore<String, SecurityContextTokenInfoImpl> sctBs;
+    private final BackingStore<String, SecurityContextTokenInfo> sctBs;
     
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl(WSEndpoint endpoint) {
@@ -94,7 +95,7 @@ public class SessionManagerImpl extends SessionManager {
                 bsFactory,
                 endpoint.getServiceName() + ":" + endpoint.getPortName()+ "_SCT_BS",
                 String.class,
-                SecurityContextTokenInfoImpl.class);
+                SecurityContextTokenInfo.class);
         
     }
     
@@ -182,21 +183,21 @@ public class SessionManagerImpl extends SessionManager {
 
         SecurityContextTokenInfo sctInfo = sess.getSecurityInfo();
         if (sctInfo != null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
-            HighAvailabilityProvider.INSTANCE.saveTo(sctBs, key, (SecurityContextTokenInfoImpl)sctInfo, true);
+            HighAvailabilityProvider.INSTANCE.saveTo(sctBs, key, (SecurityContextTokenInfo)sctInfo, true);
         }
         return sess;
     }
     
      /**
      * Creates a Session with the given key, using an instance of 
-     * java.util.Hashtable<String, String> asa holder for user-defined data.
+     * synchronized java.util.Map<String, String> a sa holder for user-defined data.
      *
      * @param key The Session key to be used.
      * @returns The new Session.
      * 
      */ 
     public Session createSession(String key) {   
-       return createSession(key, new java.util.Hashtable<String, String>());
+       return createSession(key, Collections.synchronizedMap(new HashMap<String, String>()));
     }
     
      

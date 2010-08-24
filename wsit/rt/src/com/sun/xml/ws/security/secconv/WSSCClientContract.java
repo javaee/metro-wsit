@@ -42,7 +42,7 @@ import com.sun.xml.ws.policy.impl.bindings.AppliesTo;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
-import com.sun.xml.ws.runtime.dev.SecurityContextTokenInfoImpl;
+import com.sun.xml.ws.security.secconv.impl.SecurityContextTokenInfoImpl;
 import com.sun.xml.ws.security.secconv.logging.LogDomainConstants;
 import com.sun.xml.ws.security.secconv.logging.LogStringsMessages;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
