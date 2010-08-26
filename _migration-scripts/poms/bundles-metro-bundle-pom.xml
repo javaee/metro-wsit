@@ -4,23 +4,12 @@
 
     <parent>
         <groupId>org.glassfish.metro</groupId>
-        <artifactId>metro-project</artifactId>
+        <artifactId>@parent.id@</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>pom</packaging>
+    <packaging>zip</packaging>
     <name>@module.name@</name>
 
-    <modules>
-        <module>webservices-api</module>
-        <module>webservices-rt</module>
-        <module>webservices-tools</module>
-        <module>webservices-extra</module>
-        <module>webservices-extra-api</module>
-        <!--module>webservices-api-osgi</module>
-        <module>webservices-osgi</module>
-
-        <module>metro-bundle</module-->
-    </modules>
 </project>

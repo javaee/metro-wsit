@@ -173,6 +173,13 @@ MODULE_NAME=webservices-extra
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
+MODULE_NAME=metro-bundle
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Offline Zipped Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+mkdir -p $MODULE_ROOT/src/main/resources/install-scripts/
+mv $EXPORTED_ROOT/etc/metro-on-*.xml $MODULE_ROOT/src/main/resources/install-scripts/
+mv $EXPORTED_ROOT/etc/readme.html $MODULE_ROOT/src/main/resources/
+echo "TODO: Finish metro zip bundle module"
 
 # Migrating etc/* data
 echo "Migrations data from etc/ directory"
@@ -180,7 +187,6 @@ ensureDir "$NEW_PROJECT_ROOT/etc"
 mv $EXPORTED_ROOT/etc/schemas $NEW_PROJECT_ROOT/etc/
 mv $EXPORTED_ROOT/etc/sql $NEW_PROJECT_ROOT/etc/
 echo "TODO: migrate etc/bnd files"
-echo "TODO: migrate installer"
 
 # Migrating E2E tests
 echo "Migrating E2E tests"
