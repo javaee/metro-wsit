@@ -18,7 +18,6 @@ jsr181-api.jar
 ==============================================
 RT jars [DONE except TODOs]
 ==============================================
-TODO: fix includes and excludes
 
 apache-xmlsec.jar       OK
 FastInfoset.jar         OK
@@ -42,7 +41,7 @@ policy.jar              OK
 resolver.jar            OK
 saaj-impl.jar           OK
 sjsxp.jar               OK
-stax-utils.jar
+stax-utils.jar          OK
 stax-ex.jar             OK
 streambuffer.jar        OK
 woodstox.jar (wstx-asl) OK
