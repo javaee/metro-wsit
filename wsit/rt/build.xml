@@ -69,12 +69,15 @@
                 <fileset dir="@{libdir}">
                     <include name="*.jar"/>
                     <include name="jaxrpc-api.jar"/>
+                    <include name="jsr105-api.jar"/>
+                    <include name="jsr173_api.jar"/>
                     <exclude name="*-sources.jar"/>
                     <exclude name="*javadocs*.jar"/>
                     <exclude name="jaxb-api.jar"/>
                     <exclude name="jaxws-api.jar"/>
-                    <exclude name="jmac-api.jar"/>
-                    <exclude name="jsr*-api.jar"/>
+                    <exclude name="jmac-api.jar"/>                
+                    <exclude name="jsr181-api.jar"/>
+                    <exclude name="jsr250-api.jar"/>
                     <exclude name="jaxws-local-transport.jar"/>
                     <exclude name="activation.jar"/>
                     <exclude name="http.jar"/>
