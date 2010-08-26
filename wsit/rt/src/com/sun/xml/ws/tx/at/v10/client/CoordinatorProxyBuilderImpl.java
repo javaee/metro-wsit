@@ -71,31 +71,26 @@ public class CoordinatorProxyBuilderImpl extends CoordinatorProxyBuilder<Notific
             port = service.getCoordinatorPortTypePort(to,getEnabledFeatures());
         }
 
-        @Override
         public void preparedOperation(Notification parameters) {
             port.preparedOperation(parameters);
             closePort();
         }
 
-        @Override
         public void abortedOperation(Notification parameters) {
             port.abortedOperation(parameters);
             closePort();
         }
 
-        @Override
         public void readOnlyOperation(Notification parameters) {
             port.readOnlyOperation(parameters);
             closePort();
         }
 
-        @Override
         public void committedOperation(Notification parameters) {
             port.committedOperation(parameters);
             closePort();
         }
 
-        @Override
         public void replayOperation(Notification parameters) {
            port.replayOperation(parameters);
            closePort();

@@ -66,23 +66,21 @@ public class ParticipantProxyBuilderImpl extends ParticipantProxyBuilder<Notific
             port = service.getParticipantPortTypePort(to,getEnabledFeatures());
        }
 
+        @Override
         public String toString() {
             return getClass().getName() + " hashcode:"+hashCode()+ " to(EndpointReference):"+to + " port:"+port;
         }
 
-        @Override
         public void prepare(Notification parameters) {
             port.prepare(parameters);
             // do not close port as we will cache for commit or rollback
         }
 
-        @Override
         public void commit(Notification parameters) {
             port.commit(parameters);
             closePort();
         }
 
-        @Override
         public void rollback(Notification parameters) {
             port.rollback(parameters);
             closePort();

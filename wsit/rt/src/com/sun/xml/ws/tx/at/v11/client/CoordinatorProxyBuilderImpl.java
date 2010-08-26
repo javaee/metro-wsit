@@ -70,27 +70,22 @@ public class CoordinatorProxyBuilderImpl extends CoordinatorProxyBuilder<Notific
             port = service.getCoordinatorPort(to,getEnabledFeatures());
         }
 
-        @Override
         public void preparedOperation(Notification parameters) {
             port.preparedOperation(parameters);
         }
 
-        @Override
         public void abortedOperation(Notification parameters) {
             port.abortedOperation(parameters);
         }
 
-        @Override
         public void readOnlyOperation(Notification parameters) {
             port.readOnlyOperation(parameters);
         }
 
-        @Override
         public void committedOperation(Notification parameters) {
             port.committedOperation(parameters);
         }
 
-        @Override
         public void replayOperation(Notification parameters) {
            throw new WebServiceException("replayOperation is not supported by WS-AT 1.1 and 1.2");
         }

@@ -71,17 +71,14 @@ public class ParticipantProxyBuilderImpl extends ParticipantProxyBuilder<Notific
 
         }
 
-        @Override
         public void prepare(Notification parameters) {
             port.prepareOperation(parameters);
         }
 
-        @Override
         public void commit(Notification parameters) {
             port.commitOperation(parameters);
         }
 
-        @Override
         public void rollback(Notification parameters) {
             port.rollbackOperation(parameters);
         }
