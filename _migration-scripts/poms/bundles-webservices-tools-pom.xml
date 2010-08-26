@@ -15,30 +15,6 @@
         This module contains the Metro tooling code.
     </description>
 
-    <dependencies>
-        <!-- Shaded dependencies -->
-        <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-tools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-xjc</artifactId>
-        </dependency>
-
-        <!-- Non-shaded dependencies -->
-        <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>webservices-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--dependency>
-            <groupId>org.glassfish.metro</groupId>
-            <artifactId>webservices-rt</artifactId>
-            <version>${project.version}</version>
-        </dependency-->
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -75,4 +51,28 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <!-- Shaded dependencies -->
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-xjc</artifactId>
+        </dependency>
+
+        <!-- Non-shaded dependencies -->
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--dependency>
+            <groupId>org.glassfish.metro</groupId>
+            <artifactId>webservices-rt</artifactId>
+            <version>${project.version}</version>
+        </dependency-->
+    </dependencies>
 </project>

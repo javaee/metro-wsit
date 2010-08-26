@@ -136,6 +136,14 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$BUNDLES_MODULE_ROOT" -n "M
 
 ensureDir $BUNDLES_MODULE_ROOT
 
+MODULE_NAME=wsit-api
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Interoperability Technology API Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+MODULE_NAME=wsit-impl
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Interoperability Technology Implementation Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
 MODULE_NAME=webservices-api-osgi
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"

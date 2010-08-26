@@ -15,9 +15,88 @@
         This module contains the Metro runtime code.
     </description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>${project.groupId}:wsit*</include>
+
+                                    <include>javax.xml:jaxrpc-api</include>
+                                    <include>javax.xml:jsr173</include>
+                                    <include>javax.xml.crypto:jsr105-api</include>
+                                    <include>com.sun.org.apache.xml.internal:resolver</include>
+                                    <include>com.sun.xml.bind:jaxb-impl</include>
+                                    <include>com.sun.xml.bind:jaxb1-impl</include>
+                                    <include>com.sun.xml.fastinfoset:FastInfoset</include>
+                                    <include>com.sun.xml.messaging.saaj:saaj-impl</include>
+                                    <include>com.sun.xml.registry:jaxr-impl</include>
+                                    <include>com.sun.xml.rpc:jaxrpc-impl</include>
+                                    <include>com.sun.xml.rpc:jaxrpc-spi</include>
+                                    <include>com.sun.xml.security:apache-xmlsec</include>
+                                    <include>com.sun.xml.security:jsr105-impl</include>
+                                    <include>com.sun.xml.security:saml-jaxb10-bindings</include>
+                                    <include>com.sun.xml.stream:sjsxp</include>
+                                    <include>com.sun.xml.stream.buffer:streambuffer</include>
+                                    <include>com.sun.xml.ws:jaxws-rt</include>
+                                    <include>com.sun.xml.ws:policy</include>
+                                    <include>com.sun.xml.ws.security.kerb:kerberos-wss-extension</include>
+                                    <include>com.sun.xml.wss.core.reference:keyidspi-ibm-impl</include>
+                                    <include>net.java.dev.stax-utils:stax-utils</include>
+                                    <include>org.codehaus.woodstox:wstx-asl</include>
+                                    <include>org.glassfish.external:management-api</include>
+                                    <include>org.glassfish.gmbal:gmbal</include>
+                                    <include>org.glassfish.ha:ha-api</include>
+                                    <include>org.jvnet.staxex:stax-ex</include>
+                                    <include>org.jvnet:mimepull</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>com.sun.xml.stream:sjsxp</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/services/*</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/jaxrpc/ToolPlugin.xml</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Shaded dependencies -->
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wsit-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>commons</artifactId>
             <version>${project.version}</version>
@@ -121,7 +200,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>xmlfilter</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
 
         <!-- Non-wsit dependencies -->
         <dependency>
@@ -240,73 +319,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>${project.groupId}:*</include>
-
-                                    <include>javax.xml:jaxrpc-api</include>
-                                    <include>javax.xml:jsr173</include>
-                                    <include>javax.xml.crypto:jsr105-api</include>
-                                    <include>com.sun.org.apache.xml.internal:resolver</include>
-                                    <include>com.sun.xml.bind:jaxb-impl</include>
-                                    <include>com.sun.xml.bind:jaxb1-impl</include>
-                                    <include>com.sun.xml.fastinfoset:FastInfoset</include>
-                                    <include>com.sun.xml.messaging.saaj:saaj-impl</include>
-                                    <include>com.sun.xml.registry:jaxr-impl</include>
-                                    <include>com.sun.xml.rpc:jaxrpc-impl</include>
-                                    <include>com.sun.xml.rpc:jaxrpc-spi</include>
-                                    <include>com.sun.xml.security:apache-xmlsec</include>
-                                    <include>com.sun.xml.security:jsr105-impl</include>
-                                    <include>com.sun.xml.security:saml-jaxb10-bindings</include>
-                                    <include>com.sun.xml.stream:sjsxp</include>
-                                    <include>com.sun.xml.stream.buffer:streambuffer</include>
-                                    <include>com.sun.xml.ws:jaxws-rt</include>
-                                    <include>com.sun.xml.ws:policy</include>
-                                    <include>com.sun.xml.ws.security.kerb:kerberos-wss-extension</include>
-                                    <include>com.sun.xml.wss.core.reference:keyidspi-ibm-impl</include>
-                                    <include>net.java.dev.stax-utils:stax-utils</include>
-                                    <include>org.codehaus.woodstox:wstx-asl</include>
-                                    <include>org.glassfish.external:management-api</include>
-                                    <include>org.glassfish.gmbal:gmbal</include>
-                                    <include>org.glassfish.ha:ha-api</include>
-                                    <include>org.jvnet.staxex:stax-ex</include>
-                                    <include>org.jvnet:mimepull</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>com.sun.xml.stream:sjsxp</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/services/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/jaxrpc/ToolPlugin.xml</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

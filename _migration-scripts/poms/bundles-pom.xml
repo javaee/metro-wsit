@@ -19,8 +19,11 @@
         <module>webservices-extra</module>
         <module>webservices-extra-api</module>
         <!--module>webservices-api-osgi</module>
-        <module>webservices-osgi</module>
+        <module>webservices-osgi</module-->
 
-        <module>metro-bundle</module-->
+        <module>wsit-api</module>
+        <module>wsit-impl</module>
+
+        <!--module>metro-bundle</module-->
     </modules>
 </project>
