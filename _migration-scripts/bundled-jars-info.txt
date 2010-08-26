@@ -50,7 +50,7 @@ woodstox.jar (wstx-asl) OK
 RT v3 jars
 ==============================================
 
-KerbLibrary.jar
+apache-xmlsec.jar
 jaxb10-saml.jar
 jaxr-api.jar
 jaxr-impl.jar
@@ -58,19 +58,20 @@ jaxrpc-api.jar
 jaxrpc-impl.jar
 jaxrpc-spi.jar
 jaxws-rt.jar
+jsr105-impl.jar
+jsr105-api.jar
 keyidentifierspi.jar
+KerbLibrary.jar
 policy.jar
 resolver.jar
+
+saaj-api.jar
+
 saaj-impl.jar
 sjsxp.jar
 stax-utils.jar
 streambuffer.jar
 txnannprocessor.jar
-jsr105-impl.jar
-jsr105-api.jar
-apache-xmlsec.jar
-
-saaj-api.jar
 
 ==============================================
 Woodstox v3 jars
@@ -87,7 +88,7 @@ jaxws-tools.jar
 jaxb-xjc.jar
 
 ==============================================
-Tools v3 jars
+Tools v3 jars [DONE: DISCARDED]
 ==============================================
 
 jaxws-tools.jar

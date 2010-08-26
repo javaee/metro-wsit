@@ -55,7 +55,7 @@
     <modules>
         <module>wstx-api</module>
         <module>wstx-impl</module>
-        <!--module>wstx-services</module-->
+        <module>wstx-services</module>
     </modules>
     
     <!--dependencies></dependencies-->

@@ -395,6 +395,7 @@ SRC_ARTIFACTS="com/sun/xml/ws/tx/at/api"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
+
 #
 # WSIT WS-TX implementation
 #
@@ -411,7 +412,12 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtAssertionValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.tx.at.policy.spi_impl.AtPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
 
-echo "TODO: create WS-TX WAR module (?)"
-
+#
+# WSIT WS-TX Webservices
+#
+MODULE_ROOT="$TX_MODULE_ROOT/wstx-services"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX Protocol Web Services" -i "wstx-services" -P "wstx-project" -p ./poms/wstx-services-pom.xml
+mkdir -p $MODULE_ROOT/src/main/webapp/
+mv $EXPORTED_RT_ROOT/etc/tx/WEB-INF $MODULE_ROOT/src/main/webapp/
 
 echo "TODO: Clean-up WSIT module dependencies"
