@@ -281,9 +281,29 @@
                 <version>1.1</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>1.8.0</version>
+            </dependency>
+            <dependency>
                 <groupId>com.sun.xml.security</groupId>
                 <artifactId>apache-xmlsec</artifactId>
                 <version>1.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.resource</groupId>
+                <artifactId>connector-api</artifactId>
+                <version>1.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>coyote</artifactId>
+                <version>6.0.16</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ejb</groupId>
+                <artifactId>ejb-api</artifactId>
+                <version>3.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.fastinfoset</groupId>
@@ -303,7 +323,7 @@
             <dependency>
                 <groupId>org.glassfish.ha</groupId>
                 <artifactId>ha-api</artifactId>
-                <version>${ha-api.version}</version>
+                <version>${glassfish.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.net.httpserver</groupId>
@@ -433,7 +453,7 @@
             <dependency>
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
-                <version>1.4</version>
+                <version>1.4.3</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.external</groupId>
@@ -471,6 +491,11 @@
                 <version>1.0</version>
             </dependency>
             <dependency>
+                <groupId>org.glassfish.security</groupId>
+                <artifactId>security</artifactId>
+                <version>${glassfish.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
                 <version>2.5</version>
@@ -481,9 +506,9 @@
                 <version>1.0.1</version>
             </dependency>
             <dependency>
-                <groupId>stax-utils</groupId>
+                <groupId>net.java.dev.stax-utils</groupId>
                 <artifactId>stax-utils</artifactId>
-                <version>snapshot-20040917</version>
+                <version>20040917</version>
             </dependency>
             <dependency>
                 <groupId>org.jvnet.staxex</groupId>
@@ -494,6 +519,11 @@
                 <groupId>com.sun.xml.stream.buffer</groupId>
                 <artifactId>streambuffer</artifactId>
                 <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>transaction-api</artifactId>
+                <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.txw2</groupId>
@@ -527,13 +557,13 @@
 
     <properties>
         <grizzly.version>1.0.31</grizzly.version>
-        <ha-api.version>3.1-SNAPSHOT</ha-api.version>
+        <glassfish.version>3.1-SNAPSHOT</glassfish.version>
         <istack.version>2.2</istack.version>
         <jaxb.api.version>2.2.2-promoted-b92</jaxb.api.version>
         <jaxb.ri.version>2.2.2-promoted-b92</jaxb.ri.version>
         <jaxws.api.version>2.2.2-SNAPSHOT</jaxws.api.version>
         <jaxws.ri.version>2.2.2-SNAPSHOT</jaxws.ri.version>
-        <policy.version>2.2.1</policy.version>
+        <policy.version>2.2.2-SNAPSHOT</policy.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

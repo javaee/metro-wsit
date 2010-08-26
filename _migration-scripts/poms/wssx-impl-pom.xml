@@ -70,14 +70,12 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.8.0</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.security</groupId>
             <artifactId>security</artifactId>
-            <version>3.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -85,12 +83,10 @@
         <dependency>
             <groupId>javax.security.auth.message</groupId>
             <artifactId>jmac</artifactId>
-            <version>1.0-rev-1</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4.3</version>
         </dependency>
 
         <dependency>
@@ -123,22 +119,22 @@
         <dependency>
             <groupId>javax.xml.crypto</groupId>
             <artifactId>jsr105-api</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.security</groupId>
-            <artifactId>xml-security-impl</artifactId>
-            <version>1.0</version>
+            <artifactId>jsr105-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>apache-xmlsec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.security</groupId>
             <artifactId>saml-jaxb10-bindings</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws.security.kerb</groupId>
             <artifactId>kerberos-wss-extension</artifactId>
-            <version>1.0</version>
         </dependency>
 
         <dependency>

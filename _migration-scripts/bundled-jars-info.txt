@@ -20,33 +20,32 @@ RT jars [DONE except TODOs]
 ==============================================
 TODO: fix includes and excludes
 
-keyidentifierspi.jar
-jsr105-impl.jar
-jsr105-api.jar
-apache-xmlsec.jar
-KerbLibrary.jar
-jaxb10-saml.jar
-jaxr-impl.jar
-jaxrpc-api.jar
-jaxrpc-impl.jar
-jaxrpc-spi.jar
-jaxws-rt.jar
-jsr173_api.jar
-policy.jar
-resolver.jar
-saaj-impl.jar
-sjsxp.jar
+apache-xmlsec.jar       OK
+FastInfoset.jar         OK
+gmbal.jar               OK
+jaxb-impl.jar           OK
+jaxb1-impl.jar          OK
+jaxb10-saml.jar         OK
+jaxr-impl.jar           OK
+jaxrpc-api.jar          OK
+jaxrpc-impl.jar         OK
+jaxrpc-spi.jar          OK
+jaxws-rt.jar            OK
+jsr105-api.jar          OK
+jsr105-impl.jar         OK
+jsr173_api.jar          OK
+keyidentifierspi.jar    OK
+KerbLibrary.jar         OK
+management-api.jar      OK
+mimepull.jar            OK
+policy.jar              OK
+resolver.jar            OK
+saaj-impl.jar           OK
+sjsxp.jar               OK
 stax-utils.jar
-streambuffer.jar
-
-FastInfoset.jar
-gmbal.jar
-jaxb-impl.jar
-jaxb1-impl.jar
-management-api.jar
-mimepull.jar
-stax-ex.jar
-woodstox.jar
+stax-ex.jar             OK
+streambuffer.jar        OK
+woodstox.jar (wstx-asl) OK
 
 ==============================================
 RT v3 jars

@@ -193,7 +193,7 @@
         <module>ws-mex</module>
         <module>ws-rx</module>
         <module>ws-sx</module>
-        <!--module>ws-tx</module-->
+        <module>ws-tx</module>
     </modules>
 
     <!--dependencies></dependencies-->

@@ -53,12 +53,9 @@
     <!-- prerequisites -->
 
     <modules>
-        <module>wsmc-api</module>
-        <module>wsrm-api</module>
-        <module>wsrx-commons</module>
-        <module>wsmc-impl</module>
-        <module>wsrm-impl</module>
-        <module>wsrx-testing</module>
+        <module>wstx-api</module>
+        <module>wstx-impl</module>
+        <!--module>wstx-services</module-->
     </modules>
     
     <!--dependencies></dependencies-->

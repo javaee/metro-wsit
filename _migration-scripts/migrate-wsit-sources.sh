@@ -68,6 +68,8 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.jcaps.JCapsPolicyValidator" "com.sun.xml.ws.policy.spi.PolicyAssertionValidator"
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.policy.parser.WsitPolicyResolverFactory" "com.sun.xml.ws.api.policy.PolicyResolverFactory"
 
+mv $EXPORTED_ROOT/etc/META-INF/metro-default.xml $MODULE_ROOT/src/main/resources/META-INF/
+
 #
 # XML document filter API
 #
@@ -173,6 +175,18 @@ wsdl_filter"
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.assembler.TubelineAssemblerFactoryImpl" "com.sun.xml.ws.api.pipe.TubelineAssemblerFactory"
+
+PROVIDERS="\
+com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator:\
+com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator:\
+com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator:\
+com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator"
+./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator"
+
+PROVIDERS="\
+com.sun.xml.ws.addressing.policy.AddressingPolicyMapConfigurator:\
+com.sun.xml.ws.encoding.policy.MtomPolicyMapConfigurator"
+./register-providers.sh $MODULE_ROOT $PROVIDERS "com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator"
 
 #
 # WSIT Configuration management
@@ -370,15 +384,13 @@ com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper"
 # WSIT WS-TX Parent project
 #
 TX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-tx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p $PARENT_MODULE_POM_TEMPLATE
-
-echo "TODO: Uncomment ws-tx module in the WSIT project (?)"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p ./poms/wstx-project-pom.xml
 
 #
 # WSIT WS-TX API
 #
 MODULE_ROOT="$TX_MODULE_ROOT/wstx-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX API" -i "wstx-api" -P "wstx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX API" -i "wstx-api" -P "wstx-project" -p ./poms/wstx-api-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/tx/at/api"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -387,7 +399,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-TX implementation
 #
 MODULE_ROOT="$TX_MODULE_ROOT/wstx-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX Implementation" -i "wstx-impl" -P "wstx-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX Implementation" -i "wstx-impl" -P "wstx-project" -p ./poms/wstx-impl-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/tx"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -403,8 +415,3 @@ echo "TODO: create WS-TX WAR module (?)"
 
 
 echo "TODO: Clean-up WSIT module dependencies"
-echo "TODO: turn on Woodstox for Metro/WSIT (via service providers)"
-echo "TODO: Migrate ToolPlugin.xml"
-echo "TODO: Migrate metro-default.xml"
-echo "TODO: Migrate metro XSD schemas"
-echo "TODO: Migrate metro durable RM SQL script"

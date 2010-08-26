@@ -124,6 +124,9 @@ cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD
 
 cd $NEW_PROJECT_ROOT
 cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d legal wsit/_migration-scripts/metro-legal
+
+# Migrating 3rd party licenses
+mv $EXPORTED_ROOT/licenses $NEW_PROJECT_ROOT/legal/3rd-party-licenses
 popd
 
 # Creating Metro bundle projects
@@ -150,15 +153,17 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webse
 MODULE_NAME=webservices-rt
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
-echo "TODO: uncomment WS-TX dependencies"
-echo "TODO: jaxrpc-api.jar -> include or remove?"
-echo "TODO: jsr173_api.jar -> include or remove?"
-echo "TODO: txnannprocessor.jar -> include or remove?"
-echo "TODO: keyidentifierspi.jar -> locate"
+
+mkdir -p $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
+mv $EXPORTED_RT_ROOT/toolPlugin/ToolPlugin.xml $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
+mv $EXPORTED_RT_ROOT/etc/META-INF/MANIFEST.MF $MODULE_ROOT/src/main/resources/META-INF/
 
 MODULE_NAME=webservices-tools
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Tools non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+
+mkdir -p $MODULE_ROOT/src/main/resources/META-INF/
+mv $EXPORTED_ROOT/tools/etc/META-INF/MANIFEST.MF $MODULE_ROOT/src/main/resources/META-INF/
 
 MODULE_NAME=webservices-extra-api
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
@@ -167,22 +172,29 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webse
 MODULE_NAME=webservices-extra
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
-echo "$MODULE_NAME TODO: Find grizzly.jar dependency in maven repos"
 
+
+# Migrating etc/* data
+echo "Migrations data from etc/ directory"
+ensureDir "$NEW_PROJECT_ROOT/etc"
+mv $EXPORTED_ROOT/etc/schemas $NEW_PROJECT_ROOT/etc/
+mv $EXPORTED_ROOT/etc/sql $NEW_PROJECT_ROOT/etc/
+echo "TODO: migrate etc/bnd files"
 echo "TODO: migrate installer"
-echo "TODO: migrate E2E tests"
+
+# Migrating E2E tests
+echo "Migrating E2E tests"
+mv $EXPORTED_ROOT/test $NEW_PROJECT_ROOT/tests
+echo "TODO: fix migration of E2E tests"
 
 # Adding Metro hudson job scripts
 echo "Adding Metro hudson job scripts"
-
 ensureDir "$NEW_PROJECT_ROOT/hudson"
 echo "TODO: create hudson job scripts"
 
 # Migrating Metro samples
 echo "Migrating Metro samples"
-
-ensureDir "$NEW_PROJECT_ROOT/samples"
-echo "TODO: migrate samples"
+mv $EXPORTED_ROOT/samples $NEW_PROJECT_ROOT/samples
 
 # Migrating Metro release notes
 echo "Migrating Metro release notes"
