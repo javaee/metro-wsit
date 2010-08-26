@@ -128,17 +128,26 @@
         <dependency>
             <groupId>com.sun.xml.ws.security.kerb</groupId>
             <artifactId>kerberos-wss-extension</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.security</groupId>
             <artifactId>saml-jaxb10-bindings</artifactId>
-            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.crypto</groupId>
+            <artifactId>jsr105-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.security</groupId>
-            <artifactId>xml-security-impl</artifactId>
-            <version>1.0</version>
+            <artifactId>jsr105-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>apache-xmlsec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.wss.core.reference</groupId>
+            <artifactId>keyidspi-ibm-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.registry</groupId>

@@ -18,9 +18,12 @@ jsr181-api.jar
 ==============================================
 RT jars [DONE except TODOs]
 ==============================================
-TODO: keyidentifierspi.jar -> push to maven
-TODO: xmlsec.jar -> split into the 3 new jars
+TODO: fix includes and excludes
 
+keyidentifierspi.jar
+jsr105-impl.jar
+jsr105-api.jar
+apache-xmlsec.jar
 KerbLibrary.jar
 jaxb10-saml.jar
 jaxr-impl.jar
@@ -65,7 +68,9 @@ sjsxp.jar
 stax-utils.jar
 streambuffer.jar
 txnannprocessor.jar
-xmlsec.jar
+jsr105-impl.jar
+jsr105-api.jar
+apache-xmlsec.jar
 
 saaj-api.jar
 

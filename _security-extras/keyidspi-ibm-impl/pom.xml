@@ -40,12 +40,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>javax.xml.crypto</groupId>
-    <artifactId>jsr105-api</artifactId>
-    <version>1.0.1</version>
+    <groupId>com.sun.xml.wss.core.reference</groupId>
+    <artifactId>keyidspi-ibm-impl</artifactId>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>JSR105 API</name>
+    <name>Key Identifier SPI Implementation for IBM JDK</name>
 
     <build>
         <extensions>
@@ -68,7 +68,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <attachArtifact file="./jsr105-api.jar"/>
+                                <attachArtifact file="./keyidspi-ibm-impl.jar"/>
                             </tasks>
                         </configuration>
                     </execution>
