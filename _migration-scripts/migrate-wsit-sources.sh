@@ -27,19 +27,19 @@ shift `expr $OPTIND - 1`
 
 PARENT_MODULE_POM_TEMPLATE="./poms/_wsit-module-parent-pom.xml"
 POM_TEMPLATE="./poms/_wsit-module-pom.xml"
-WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT/wsit"
+WSIT_MODULE_ROOT="$NEW_PROJECT_ROOT"
 
 #
 # Metro configuration project
 #
-CONFIG_MODULE_ROOT="$WSIT_MODULE_ROOT/config"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$CONFIG_MODULE_ROOT" -n "Metro Configuration Project" -i "config" -P "wsit-project" -p ./poms/config-project-pom.xml
+CONFIG_MODULE_ROOT="$WSIT_MODULE_ROOT/metro-config"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$CONFIG_MODULE_ROOT" -n "Metro Configuration Project" -i "metro-config" -P "metro-project" -p ./poms/metro-config-project-pom.xml
 
 #
 # Metro configuration API
 #
-MODULE_ROOT="$CONFIG_MODULE_ROOT/config-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration API" -i "config-api" -P "config" -p ./poms/config-api-pom.xml
+MODULE_ROOT="$CONFIG_MODULE_ROOT/metro-config-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration API" -i "metro-config-api" -P "metro-config" -p ./poms/metro-config-api-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/config/metro/dev:\
 com/sun/xml/ws/config/metro/util:\
@@ -52,8 +52,8 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 #
 # Metro configuration Implementation
 #
-MODULE_ROOT="$CONFIG_MODULE_ROOT/config-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration Implementation" -i "config-impl" -P "config" -p ./poms/config-impl-pom.xml
+MODULE_ROOT="$CONFIG_MODULE_ROOT/metro-config-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Configuration Implementation" -i "metro-config-impl" -P "metro-config" -p ./poms/metro-config-impl-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/config/metro:\
 com/sun/xml/ws/policy/jcaps:\
@@ -74,7 +74,7 @@ mv $EXPORTED_ROOT/etc/META-INF/metro-default.xml $MODULE_ROOT/src/main/resources
 # XML document filter API
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/xmlfilter"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT XML Document Filtering Project" -i "xmlfilter" -P "wsit-project" -p ./poms/xmlfilter-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT XML Document Filtering Project" -i "xmlfilter" -P "metro-project" -p ./poms/xmlfilter-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/xmlfilter"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES="xmlfilter"
@@ -84,7 +84,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT MEX
 #
 MODULE_ROOT="$WSIT_MODULE_ROOT/ws-mex"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Service Implementation" -i "ws-mex" -P "wsit-project" -p ./poms/wsmex-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-MetadataExchange Service Implementation" -i "ws-mex" -P "metro-project" -p ./poms/wsmex-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/mex"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
@@ -96,7 +96,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT SOAP/TCP Transport
 #
 SOAPTCP_MODULE_ROOT="$WSIT_MODULE_ROOT/soaptcp"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "WSIT SOAP over TCP Transport Project" -i "soaptcp" -P "wsit-project" -p ./poms/soaptcp-project-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SOAPTCP_MODULE_ROOT" -n "SOAP over TCP Transport Project" -i "soaptcp" -P "metro-project" -p ./poms/soaptcp-project-pom.xml
 
 MODULE_ROOT="$SOAPTCP_MODULE_ROOT/legacy-dependencies/gfv2-deployment"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Glassfish v2 Deplyoment Classes" -i "gfv2-deployment" -P "soaptcp" -p ./poms/gfv2-deployment-pom.xml
@@ -137,20 +137,25 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 ./register-providers.sh $MODULE_ROOT "com.sun.xml.ws.transport.tcp.wsit.TCPTransportPrefixMapper" "com.sun.xml.ws.policy.spi.PrefixMapper"
 
 #
-# WSIT Commons
+# Metro Commons
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/commons"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Common Utilities and Classes" -i "commons" -P "wsit-project" -p ./poms/wsit-commons-pom.xml
+MODULE_ROOT="$WSIT_MODULE_ROOT/metro-commons"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Common Utilities and Classes" -i "metro-commons" -P "metro-project" -p ./poms/metro-commons-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/commons"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 
 #
-# WSIT Runtime API
+# Metro Runtime
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/runtime-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime API" -i "runtime-api" -P "wsit-project" -p ./poms/wsit-rt-api-pom.xml
+RT_MODULE_ROOT="$WSIT_MODULE_ROOT/metro-runtime"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RT_MODULE_ROOT" -n "Metro Runtime Project" -i "metro-runtime" -P "metro-project" -p ./poms/metro-rt-project-pom.xml
+#
+# Metro Runtime API
+#
+MODULE_ROOT="$RT_MODULE_ROOT/metro-runtime-api"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Runtime API" -i "metro-runtime-api" -P "metro-runtime" -p ./poms/metro-rt-api-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/assembler/dev:\
 com/sun/xml/ws/assembler/ServerPipelineHook.java:\
@@ -159,10 +164,10 @@ TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
 #
-# WSIT Runtime Implementation
+# Metro Runtime Implementation
 #
-MODULE_ROOT="$WSIT_MODULE_ROOT/runtime-impl"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WSIT Runtime Implementation" -i "runtime-impl" -P "wsit-project" -p ./poms/wsit-rt-impl-pom.xml
+MODULE_ROOT="$RT_MODULE_ROOT/metro-runtime-impl"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "Metro Runtime Implementation" -i "metro-runtime-impl" -P "metro-runtime" -p ./poms/metro-rt-impl-pom.xml
 SRC_ARTIFACTS="\
 com/sun/xml/ws/assembler:\
 com/sun/xml/ws/dump:\
@@ -192,7 +197,7 @@ com.sun.xml.ws.encoding.policy.MtomPolicyMapConfigurator"
 # WSIT Configuration management
 #
 WSCM_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-cm"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-ConfigurationManagement Project" -i "wscm-project" -P "wsit-project" -p ./poms/wscm-project-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-ConfigurationManagement Project" -i "wscm-project" -P "metro-project" -p ./poms/wscm-project-pom.xml
 #
 # WSIT Configuration management API
 #
@@ -218,7 +223,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-RX Parent project
 #
 RX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-rx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "wsit-project" -p ./poms/wsrx-project-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$RX_MODULE_ROOT" -n "WS-RX Project" -i "wsrx-project" -P "metro-project" -p ./poms/wsrx-project-pom.xml
 #
 # WSIT WS-RX common packages
 #
@@ -298,7 +303,7 @@ source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $S
 # WSIT WS-SX Parent project
 #
 SX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-sx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "wsit-project" -p ./poms/wssx-project-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$SX_MODULE_ROOT" -n "WS-Security Project" -i "wssx-project" -P "metro-project" -p ./poms/wssx-project-pom.xml
 #
 # WSIT WS-SX API
 #
@@ -384,7 +389,7 @@ com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper"
 # WSIT WS-TX Parent project
 #
 TX_MODULE_ROOT="$WSIT_MODULE_ROOT/ws-tx"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "wsit-project" -p ./poms/wstx-project-pom.xml
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX Project" -i "wstx-project" -P "metro-project" -p ./poms/wstx-project-pom.xml
 
 #
 # WSIT WS-TX API

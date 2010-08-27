@@ -49,6 +49,29 @@
         It is a one-stop shop for all your web service needs, from the simplest
         hello world web service to reliable, secured, and transacted web service
         that involves .NET services.
+
+        Metro consists of JAX-WS Reference Implementation project and
+        Web Services Interoperability Technology project.
+
+        JAX-WS Reference Implementation (JAX-WS RI) provides core web servicing
+        support and the base framework for extensions provided by the WSIT layer.
+
+        Web Services Interoperability Technologies (WSIT) (previously known as
+        Project Tango) includes implementations of:
+        - SOAP over TCP
+        - WS-AtomicTransactions/Coordination
+        - WS-MetadataExchange
+        - WS-Policy (policy.dev.java.net)
+        - WS-ReliableMessaging
+        - WS-SecureConversation
+        - WS-Security
+        - WS-SecurityPolicy
+        - WS-Trust
+
+        Note:
+        - WS-Policy (policy.dev.java.net)
+        has its own codebase however WS-Policy related issues can be submitted into
+        the Metro (WSIT) Issue tracker
     </description>
     <url>https://metro.dev.java.net/</url>
     <!-- prerequisites -->
@@ -62,6 +85,7 @@
     </ciManagement-->
     <inceptionYear>2005</inceptionYear>
     <mailingLists>
+        <!-- General Metro Specific Mailing Lists -->
         <mailingList>
             <name>Metro Announcements</name>
             <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=announce</archive>
@@ -86,6 +110,33 @@
             <name>Metro Commits</name>
             <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=commits</archive>
             <post>announce@metro.dev.java.net</post>
+        </mailingList>
+
+        <!-- WSIT Specific Mailing Lists -->
+        <mailingList>
+            <name>WSIT Announcements</name>
+            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=announce</archive>
+            <post>announce@wsit.dev.java.net</post>
+        </mailingList>
+        <mailingList>
+            <name>WSIT Users List</name>
+            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=users</archive>
+            <post>wsit@jersey.dev.java.net</post>
+        </mailingList>
+        <mailingList>
+            <name>WSIT Developers List</name>
+            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=dev</archive>
+            <post>dev@wsit.dev.java.net</post>
+        </mailingList>
+        <mailingList>
+            <name>WSIT Issues</name>
+            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=issues</archive>
+            <post>issues@wsit.dev.java.net</post>
+        </mailingList>
+        <mailingList>
+            <name>WSIT Commits</name>
+            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=commits</archive>
+            <post>announce@wsit.dev.java.net</post>
         </mailingList>
     </mailingLists>
     <!--developers></developers-->
@@ -112,15 +163,57 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.0-beta-4</version>
+                    <configuration>
+                        <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
+                        <items>
+                            <item>timestamp</item>
+                        </items>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin-->
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3</version>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.5</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${project.build.directory}/generated-sources/rsrc-gen</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.0.1</version>
+                    <version>2.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -128,92 +221,116 @@
                     <version>2.1</version>
                 </plugin>
                 <plugin>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>maven-istack-commons-plugin</artifactId>
+                    <version>0.1</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>rs-gen</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <directory>${basedir}/src/main/resources</directory>
+                                    <includes>
+                                        <include>**/*.properties</include>
+                                    </includes>
+                                </resources>
+                                <destDir>${project.build.directory}/generated-sources/rsrc-gen</destDir>
+                                <localizationUtilitiesPkgName>com.sun.xml.ws.util.localization</localizationUtilitiesPkgName>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.2</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-Id>${project.version} ${buildNumber}</Build-Id>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.7</version>
+                    <configuration>
+                        <minmemory>128m</minmemory>
+                        <maxmemory>512m</maxmemory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>1.3.3</version>
+                    <version>1.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
+                    <configuration>
+                        <forkMode>once</forkMode>
+                        <childDelegation>false</childDelegation>
+                        <argLine>
+                            -Djava.awt.headless=true -XX:MaxPermSize=256m -Xmx256m
+                        </argLine>
+                        <!--includes>
+                            <include>**/*Tests.class</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/Abstract*</exclude>
+                        </excludes-->
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+
+            <!-- TODO: Move these into a milestone/release profile -->
             <!--plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>2.4-SNAPSHOT</version>
-                    <configuration>
-                        <filteringEnabled>true</filteringEnabled>
-                    </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <inherited>true</inherited>
             </plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Build-Id>${project.version} ${buildNumber}</Build-Id>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.0-beta-3</version>
-                <configuration>
-                    <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
-                    <items>
-                        <item>timestamp</item>
-                    </items>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <minmemory>128m</minmemory>
-                    <maxmemory>512m</maxmemory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <inherited>true</inherited>
             </plugin>
         </plugins>
         <extensions>
@@ -228,8 +345,17 @@
     <!-- profiles /-->
 
     <modules>
+        <module>metro-commons</module>
+        <module>metro-config</module>
+        <module>metro-runtime</module>
+        <module>soaptcp</module>
+        <module>ws-cm</module>
+        <module>ws-mex</module>
+        <module>ws-rx</module>
+        <module>ws-sx</module>
+        <module>ws-tx</module>
+        <module>xmlfilter</module>
         <module>bundles</module>
-        <module>wsit</module>
         <!-- module>contribs</module -->
     </modules>
 

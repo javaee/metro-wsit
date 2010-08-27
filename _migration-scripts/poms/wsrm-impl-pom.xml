@@ -52,6 +52,21 @@
 
     <!-- prerequisites -->
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>maven-istack-commons-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Compile scope -->
         <dependency>
@@ -101,7 +116,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>commons</artifactId>
+            <artifactId>metro-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -126,7 +141,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>runtime-api</artifactId>
+            <artifactId>metro-runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

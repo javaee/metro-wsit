@@ -112,7 +112,6 @@ fi
 mkdir -p $VERBOSE $NEW_PROJECT_ROOT
 
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT -n "Metro Web Services Stack Project" -p ./poms/metro-pom.xml
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT/wsit -n "Web Services Interoperability Technology Project" -p ./poms/wsit-pom.xml
 
 source ./migrate-wsit-sources.sh
 

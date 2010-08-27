@@ -52,11 +52,26 @@
 
     <!-- prerequisites -->
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>maven-istack-commons-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Compile scope -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>config-api</artifactId>
+            <artifactId>metro-config-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

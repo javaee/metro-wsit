@@ -53,12 +53,12 @@
         <!-- Shaded dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>config-impl</artifactId>
+            <artifactId>metro-config-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>runtime-impl</artifactId>
+            <artifactId>metro-runtime-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

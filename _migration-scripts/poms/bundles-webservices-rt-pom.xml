@@ -98,27 +98,27 @@
         </dependency>
         <!--dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>commons</artifactId>
+            <artifactId>metro-commons</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>config-api</artifactId>
+            <artifactId>metro-config-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>config-impl</artifactId>
+            <artifactId>metro-config-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>runtime-api</artifactId>
+            <artifactId>metro-runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>runtime-impl</artifactId>
+            <artifactId>metro-runtime-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

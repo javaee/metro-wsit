@@ -55,6 +55,17 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>maven-istack-commons-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -178,7 +189,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>runtime-api</artifactId>
+            <artifactId>metro-runtime-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -216,7 +227,7 @@
         <!-- Test scope -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>config-impl</artifactId>
+            <artifactId>metro-config-impl</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

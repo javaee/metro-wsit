@@ -47,24 +47,16 @@
     </parent>
 
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>@module.name@</name>
 
     <!-- prerequisites -->
 
-    <dependencies>
-        <!-- Compile scope -->
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-        </dependency>
-
-        <!-- Test scope -->
-        <!--dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency-->
-    </dependencies>
+    <modules>
+        <module>metro-config-api</module>
+        <module>metro-config-impl</module>
+    </modules>
+    
+    <!--dependencies></dependencies-->
     <!--properties></properties-->
 </project>
