@@ -146,12 +146,13 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webse
 MODULE_NAME=webservices-api-osgi
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
-echo "TODO: implement $MODULE_NAME Metro bundle pom"
 
 MODULE_NAME=webservices-osgi
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
-echo "TODO: implement $MODULE_NAME Metro bundle pom"
+
+mkdir -p $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
+cp $EXPORTED_RT_ROOT/toolPlugin/ToolPlugin.xml $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
 
 MODULE_NAME=webservices-api
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"

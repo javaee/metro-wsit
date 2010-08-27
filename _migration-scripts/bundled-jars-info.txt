@@ -64,9 +64,6 @@ keyidentifierspi.jar
 KerbLibrary.jar
 policy.jar
 resolver.jar
-
-saaj-api.jar
-
 saaj-impl.jar
 sjsxp.jar
 stax-utils.jar

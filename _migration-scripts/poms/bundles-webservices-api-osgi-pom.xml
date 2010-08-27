@@ -7,8 +7,43 @@
         <version>2.1-SNAPSHOT</version>
     </parent>
 
+    <groupId>javax.xml</groupId>
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>@module.name@</name>
+    <description>Metro Web Services API OSGi Bundle</description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            javax.jws.*;version=2.0,
+                            javax.xml.ws.*;version=${jaxws.spec.version}
+                        </Export-Package>
+                        <Import-Package>
+                            javax.xml.bind;version=${jaxb.spec.version},
+                            javax.xml.bind.*;version=${jaxb.spec.version},
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.jws</groupId>
+            <artifactId>jsr181-api</artifactId>
+        </dependency>
+    </dependencies>
 </project>
