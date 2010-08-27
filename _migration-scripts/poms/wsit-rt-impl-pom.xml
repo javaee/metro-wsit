@@ -55,24 +55,38 @@
     <dependencies>
         <!-- Compile scope -->
         <dependency>
+            <groupId>org.glassfish.gmbal</groupId>
+            <artifactId>gmbal</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun.istack</groupId>
             <artifactId>istack-commons-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
         </dependency>
-        
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>xmlfilter</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>policy</artifactId>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>commons</artifactId>
-            <version>${project.version}</version>
+            <groupId>stax</groupId>
+            <artifactId>stax-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.stream.buffer</groupId>
+            <artifactId>streambuffer</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config-api</artifactId>
@@ -91,6 +105,16 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>soaptcp-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>xmlfilter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wssx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 

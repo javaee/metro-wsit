@@ -51,32 +51,12 @@
     <name>@module.name@</name>
 
     <!-- prerequisites -->
-    <build>
-        <plugins>
-            <plugin>
-                <!-- TODO: Remove exlusion of tests once adapted to maven project structure -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            com/sun/xml/ws/policy/parser/PolicyConfigParserTest.java
-                        </exclude>
-                        <exclude>
-                            com/sun/xml/ws/policy/parser/PolicyWSDLParserExtensionTest.java
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <!-- Compile scope -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>config-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.glassfish.gmbal</groupId>
+            <artifactId>gmbal</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.istack</groupId>
@@ -98,21 +78,12 @@
             <groupId>stax</groupId>
             <artifactId>stax-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sun.xml.stream.buffer</groupId>
-            <artifactId>streambuffer</artifactId>
-        </dependency>
+
 
         <!-- Test scope -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>soaptcp-api</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

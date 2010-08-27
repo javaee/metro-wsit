@@ -197,7 +197,7 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$WSCM_MODULE_ROOT" -n "WS-C
 # WSIT Configuration management API
 #
 MODULE_ROOT="$WSCM_MODULE_ROOT/wscm-api"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-ConfigurationManagement API" -i "wscm-api" -P "wscm-project" -p $POM_TEMPLATE
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-ConfigurationManagement API" -i "wscm-api" -P "wscm-project" -p ./poms/wscm-api-pom.xml
 SRC_ARTIFACTS="com/sun/xml/ws/api/config/management:com/sun/xml/ws/config/management/Management.properties"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
