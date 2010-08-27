@@ -22,10 +22,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.groupId}</Bundle-SymbolicName>
-                        <Bundle-Name>metro</Bundle-Name>
-                        <Bundle-Version>${project.version}</Bundle-Version>
-
                         <Export-Package>
                             com.sun.tools.ws.spi;version=${jaxws.ri.version},
                             com.sun.tools.ws.util.xml;version=${jaxws.ri.version},
