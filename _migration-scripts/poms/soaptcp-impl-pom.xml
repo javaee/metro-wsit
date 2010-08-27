@@ -107,7 +107,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>stax</groupId>
+            <groupId>javax.xml.stream</groupId>
             <artifactId>stax-api</artifactId>
         </dependency>
         <dependency>

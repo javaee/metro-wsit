@@ -8,6 +8,7 @@
         <version>2.1-SNAPSHOT</version>
     </parent>
 
+    <groupId>com.sun.xml.ws</groupId>
     <artifactId>@module.id@</artifactId>
     <packaging>jar</packaging>
     <name>@module.name@</name>
@@ -29,10 +30,10 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>${project.groupId}:wsit*</include>
+                                    <include>${parent.groupId}:wsit*</include>
 
                                     <include>javax.xml:jaxrpc-api</include>
-                                    <include>javax.xml:jsr173</include>
+                                    <include>javax.xml.stream:stax-api</include>
                                     <include>javax.xml.crypto:jsr105-api</include>
                                     <include>com.sun.org.apache.xml.internal:resolver</include>
                                     <include>com.sun.xml.bind:jaxb-impl</include>
@@ -68,7 +69,7 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>*:*</artifact>
+                                    <artifact>com.sun.xml.rpc:jaxrpc-impl</artifact>
                                     <excludes>
                                         <exclude>META-INF/jaxrpc/ToolPlugin.xml</exclude>
                                     </excludes>
@@ -87,120 +88,15 @@
     <dependencies>
         <!-- Shaded dependencies -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>wsit-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>${parent.groupId}</groupId>
             <artifactId>wsit-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-config-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-config-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-runtime-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>metro-runtime-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>soaptcp-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>soaptcp-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wscm-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wscm-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ws-mex</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsmc-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsmc-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrm-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrm-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrx-commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wsrx-testing</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wssx-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wssx-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wstx-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wstx-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>xmlfilter</artifactId>
-            <version>${project.version}</version>
-        </dependency-->
 
         <!-- Non-wsit dependencies -->
         <dependency>
@@ -236,8 +132,8 @@
             <artifactId>jaxr-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jsr173</artifactId>
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.xml</groupId>

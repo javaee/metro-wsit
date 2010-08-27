@@ -32,7 +32,7 @@
                                     <include>${project.groupId}:*</include>
                                 </includes>
                                 <excludes>
-                                    <exclude>${project.groupId}:commons</exclude>
+                                    <exclude>${project.groupId}:metro-commons</exclude>
                                     <exclude>${project.groupId}:*-api</exclude>
                                 </excludes>
                             </artifactSet>
