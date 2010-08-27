@@ -10,7 +10,7 @@
 
     <groupId>com.sun.xml.ws</groupId>
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>@module.name@</name>
     <description>Metro Web Services Runtime OSGi Bundle</description>
 
@@ -23,20 +23,27 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.sun.tools.ws.spi;version=${jaxws.ri.version},
-                            com.sun.tools.ws.util.xml;version=${jaxws.ri.version},
-                            com.sun.xml.fastinfoset.sax;version=${project.version},
-                            com.sun.xml.fastinfoset.stax;version=${project.version},
+                            com.sun.istack.ws.*;version=${jaxws.ri.version},
+                            com.sun.tools.ws.*;version=${jaxws.ri.version},
                             com.sun.xml.messaging.saaj.soap;version=1.3,
-                            com.sun.xml.ws;version=${jaxws.ri.version},
-                            com.sun.xml.ws.*;version=${jaxws.ri.version},
-                            javax.xml.registry;version=1.0,
+                            com.sun.xml.wsit;version=${project.version},
+                            com.sun.xml.registry.*;version=1.0,
+                            com.sun.xml.rpc.plugins;version=${project.version},
+                            com.sun.xml.rpc.security;version=${project.version},
+                            com.sun.xml.rpc.*;version=1.1,
+                            com.sun.xml.security;version=${project.version},
+                            com.sun.xml.stream,
+                            com.sun.xml.stream.buffer.*,
+                            com.sun.xml.stream.dtd.*,
+                            com.sun.xml.stream.events,
+                            com.sun.xml.stream.util,
+                            com.sun.xml.stream.writers,
+                            com.sun.xml.stream.xerces.*,
+                            com.sun.xml.ws.*;version=${project.version},
+                            com.sun.xml.wss.*;version=${project.version},
+                            com.sun.xml.xwss.*;version=${project.version},
                             javax.xml.registry.*;version=1.0,
-                            javax.xml.rpc;version=1.1,
                             javax.xml.rpc.*;version=1.1,
-                            org.jvnet.fastinfoset;version=${project.version},
-                            org.jvnet.staxex;version=${project.version},
-                            *
                         </Export-Package>
                         <Import-Package>
                             com.sun.appserv.server;resolution:=optional,
@@ -54,9 +61,7 @@
                             javax.ejb;resolution:=optional;version=3.0,
                             javax.jws;version=2.0,
                             javax.jws.soap;version=2.0,
-                            javax.xml.ws;version=${jaxws.spec.version},
                             javax.xml.ws.*;version=${jaxws.spec.version},
-                            javax.xml.bind;version=${jaxb.spec.version},
                             javax.xml.bind.*;version=${jaxb.spec.version},
                             org.apache.coyote;resolution:=optional,
                             org.apache.tomcat.util.buf;resolution:=optional,
@@ -64,7 +69,10 @@
                             org.relaxng.datatype;resolution:=optional,
                             *
                         </Import-Package>
-                        <Private-Package>*</Private-Package>
+                        <Private-Package>
+                            com.sun.org.apache.internal.security.*,
+                            javanet.staxutils.*
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -72,90 +80,24 @@
     </build>
 
     <dependencies>
-        <!-- Shaded dependencies -->
-        <dependency>
-            <groupId>${parent.groupId}</groupId>
-            <artifactId>wsit-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${parent.groupId}</groupId>
-            <artifactId>wsit-impl</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Non-wsit dependencies -->
-        <dependency>
-            <groupId>com.sun.xml.ws.security.kerb</groupId>
-            <artifactId>kerberos-wss-extension</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>saml-jaxb10-bindings</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.crypto</groupId>
-            <artifactId>jsr105-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>jsr105-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>apache-xmlsec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.wss.core.reference</groupId>
-            <artifactId>keyidspi-ibm-impl</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>jaxr-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.registry</groupId>
-            <artifactId>jaxr-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxrpc-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.rpc</groupId>
-            <artifactId>jaxrpc-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.rpc</groupId>
-            <artifactId>jaxrpc-spi</artifactId>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-rt</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
-            <artifactId>jaxws-rt</artifactId>
+            <artifactId>webservices-extra</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>policy</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.org.apache.xml.internal</groupId>
-            <artifactId>resolver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.messaging.saaj</groupId>
-            <artifactId>saaj-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.stream</groupId>
-            <artifactId>sjsxp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.stax-utils</groupId>
-            <artifactId>stax-utils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.stream.buffer</groupId>
-            <artifactId>streambuffer</artifactId>
+            <groupId>com.sun.tools.ws</groupId>
+            <artifactId>webservices-tools</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

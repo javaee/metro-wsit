@@ -8,6 +8,7 @@
         <version>2.1-SNAPSHOT</version>
     </parent>
 
+    <groupId>javax.xml</groupId>
     <artifactId>@module.id@</artifactId>
     <packaging>jar</packaging>
     <name>@module.name@</name>
