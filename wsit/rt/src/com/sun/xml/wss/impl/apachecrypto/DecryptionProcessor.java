@@ -642,10 +642,10 @@ public class DecryptionProcessor {
             EncryptionPolicy.FeatureBinding featureBinding =
                     (EncryptionPolicy.FeatureBinding)inferredWsdlEncPolicy.getFeatureBinding();
             EncryptionTarget target = new EncryptionTarget();
-            if(actualEncrypted.getNamespaceURI().equals(MessageConstants.WSSE_NS) ||
+            if(actualEncrypted.getNamespaceURI() != null && (actualEncrypted.getNamespaceURI().equals(MessageConstants.WSSE_NS) ||
                     actualEncrypted.getNamespaceURI().equals(MessageConstants.WSSE11_NS) ||
                     actualEncrypted.getNamespaceURI().equals(MessageConstants.WSSC_NS) ||
-                    actualEncrypted.getNamespaceURI().equals(MessageConstants.WSU_NS)){
+                    actualEncrypted.getNamespaceURI().equals(MessageConstants.WSU_NS))){
                 String id = actualEncrypted.getAttribute("Id");
                 if("".equals(id)){
                     id = actualEncrypted.getAttributeNS(MessageConstants.WSU_NS, "Id");
