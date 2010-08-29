@@ -585,13 +585,12 @@ public abstract class WSITAuthContextBase  {
     //TODO:POLALT : should this method look over all alternatives
     protected List<PolicyAssertion> getInBoundSCP(Message message){
         SecurityPolicyHolder sph = null;
-        //TODO:encapsulate this explicit public member access p.x below
         for (PolicyAlternativeHolder p : policyAlternatives) {
-            if (p.inMessagePolicyMap == null) {
+            if (p.getInMessagePolicyMap() == null) {
                 return Collections.emptyList();
             }
 
-            Collection coll = p.inMessagePolicyMap.values();
+            Collection coll = p.getInMessagePolicyMap().values();
             Iterator itr = coll.iterator();
 
             while (itr.hasNext()) {
@@ -614,11 +613,11 @@ public abstract class WSITAuthContextBase  {
         SecurityPolicyHolder sph = null;
         //TODO:encapsulate this explicit public member access p.x below
         for (PolicyAlternativeHolder p : policyAlternatives) {
-            if (p.outMessagePolicyMap == null) {
+            if (p.getOutMessagePolicyMap() == null) {
                 return Collections.emptyList();
             }
 
-            Collection coll = p.outMessagePolicyMap.values();
+            Collection coll = p.getOutMessagePolicyMap().values();
             Iterator itr = coll.iterator();
 
             while (itr.hasNext()) {
@@ -645,12 +644,12 @@ public abstract class WSITAuthContextBase  {
         SecurityPolicyHolder sph = null;
         //TODO:encapsulate this explicit public member access p.x below
         for (PolicyAlternativeHolder p : policyAlternatives) {
-            if (p.outMessagePolicyMap == null) {
+            if (p.getOutMessagePolicyMap() == null) {
                 return Collections.emptyList();
             }
             Message message = packet.getMessage();
 
-            Collection coll = p.outMessagePolicyMap.values();
+            Collection coll = p.getOutMessagePolicyMap().values();
             Iterator itr = coll.iterator();
 
             while (itr.hasNext()) {
@@ -673,11 +672,11 @@ public abstract class WSITAuthContextBase  {
         SecurityPolicyHolder sph = null;
         //TODO:encapsulate this explicit public member access p.x below
         for (PolicyAlternativeHolder p : policyAlternatives) {
-            if (p.outMessagePolicyMap == null) {
+            if (p.getOutMessagePolicyMap() == null) {
                 return Collections.emptyList();
             }
 
-            Collection coll = p.outMessagePolicyMap.values();
+            Collection coll = p.getOutMessagePolicyMap().values();
             Iterator itr = coll.iterator();
 
             while (itr.hasNext()) {
@@ -996,7 +995,7 @@ public abstract class WSITAuthContextBase  {
     protected WSDLBoundOperation getWSDLOpFromAction(Packet packet ,boolean isIncomming){
         String uriValue = getAction(packet);
         for (PolicyAlternativeHolder p : policyAlternatives) {
-            Set<WSDLBoundOperation> keys = p.outMessagePolicyMap.keySet();
+            Set<WSDLBoundOperation> keys = p.getOutMessagePolicyMap().keySet();
             for (WSDLBoundOperation wbo : keys) {
                 WSDLOperation wo = wbo.getOperation();
                 // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
@@ -1614,10 +1613,10 @@ public abstract class WSITAuthContextBase  {
                     resolveAlternative(packet,isSCMessage);
             MessagePolicy policy = null;
             if (isRMMessage(packet) || isMakeConnectionMessage(packet)) {
-                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
+                SecurityPolicyHolder holder = applicableAlternative.getOutProtocolPM().get("RM");
                 policy = holder.getMessagePolicy();
             }else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
+                SecurityPolicyHolder holder = applicableAlternative.getOutProtocolPM().get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else if(isSCRenew(packet)){
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
@@ -1669,12 +1668,12 @@ public abstract class WSITAuthContextBase  {
         //policy from the message till the Body is decrypted.
         //    mp =  new MessagePolicy();
         //}
-        if (applicableAlternative.outMessagePolicyMap == null) {
+        if (applicableAlternative.getOutMessagePolicyMap() == null) {
             //empty message policy
             return new MessagePolicy();
         }
         SecurityPolicyHolder sph = 
-                (SecurityPolicyHolder) applicableAlternative.outMessagePolicyMap.get(operation);
+                (SecurityPolicyHolder) applicableAlternative.getOutMessagePolicyMap().get(operation);
         if(sph == null){
             return new MessagePolicy();
         }

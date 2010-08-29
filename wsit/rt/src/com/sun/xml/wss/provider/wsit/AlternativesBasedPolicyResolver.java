@@ -134,7 +134,7 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
         SecurityPolicyHolder sph = null;
         Collection coll = new ArrayList();
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
-            coll.addAll(p.inMessagePolicyMap.values());
+            coll.addAll(p.getInMessagePolicyMap().values());
         }
 
         Iterator itr = coll.iterator();
@@ -172,11 +172,11 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
 
         List<MessagePolicy> mps = new ArrayList<MessagePolicy>();
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
-            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.inMessagePolicyMap.get(operation);
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.getInMessagePolicyMap().get(operation);
             //TODO: pass isTrustMessage Flag to this method later
             if (sph == null && (isTrustMessage() || isSCMessage)) {
                 operation = getWSDLOpFromAction();
-                sph = (SecurityPolicyHolder) p.inMessagePolicyMap.get(operation);
+                sph = (SecurityPolicyHolder) p.getInMessagePolicyMap().get(operation);
             }
             if (sph != null) {
                 mps.add(cloneWithId(sph.getMessagePolicy(), p.getId()));
@@ -211,7 +211,7 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
                             faultDetail = new QName(faultNode.getLocalName());
                         }
                         WSDLFault fault = operation.getFault(faultDetail);
-                        SecurityPolicyHolder sph = p.inMessagePolicyMap.get(cachedOperation);
+                        SecurityPolicyHolder sph = p.getInMessagePolicyMap().get(cachedOperation);
                         SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
                         if (faultPolicyHolder != null) {
                             mps.add(cloneWithId(faultPolicyHolder.getMessagePolicy(), p.getId()));
@@ -291,7 +291,7 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
 
     private WSDLBoundOperation getWSDLOpFromAction() {
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
-        Set<WSDLBoundOperation> keys = p.inMessagePolicyMap.keySet();
+        Set<WSDLBoundOperation> keys = p.getInMessagePolicyMap().keySet();
         for (WSDLBoundOperation wbo : keys) {
             WSDLOperation wo = wbo.getOperation();
             // WsaWSDLOperationExtension extensions = wo.getExtension(WsaWSDLOperationExtension.class);
@@ -307,7 +307,7 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
     private SecurityPolicy getProtocolPolicy(String protocol) {
         List<MessagePolicy> mps = new ArrayList<MessagePolicy>();
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
-            SecurityPolicyHolder sph = p.inProtocolPM.get(protocol);
+            SecurityPolicyHolder sph = p.getInProtocolPM().get(protocol);
             if (sph != null) {
                 mps.add(cloneWithId(sph.getMessagePolicy(), p.getId()));
             }

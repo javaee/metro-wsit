@@ -33,20 +33,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
-//import com.sun.xml.ws.policy.PolicyUtil;
-
-
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
-import com.sun.xml.ws.security.policy.AlgorithmSuite;
-
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
-
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.util.HashMap;
 import java.util.UUID;
@@ -58,20 +51,15 @@ import java.util.logging.Logger;
  */
 public class PolicyAlternativeHolder {
 
-     protected static final Logger log =
+    protected static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSIT_PVD_DOMAIN,
             LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
-
     private AssertionSet alternative;
-    //TODO:Suresh : make them private and change the code in WSITAuthContextBase and its subclasses
-    //need to expose, put(), get(), keySet() and values(). I have added put/get methods so far.
-    public HashMap<WSDLBoundOperation,SecurityPolicyHolder> outMessagePolicyMap = null;
-    public HashMap<WSDLBoundOperation,SecurityPolicyHolder> inMessagePolicyMap = null;
-    public HashMap<String,SecurityPolicyHolder> outProtocolPM = null;
-    public HashMap<String,SecurityPolicyHolder> inProtocolPM = null;
-
-
+    private HashMap<WSDLBoundOperation, SecurityPolicyHolder> outMessagePolicyMap = null;
+    private HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap = null;
+    private HashMap<String, SecurityPolicyHolder> outProtocolPM = null;
+    private HashMap<String, SecurityPolicyHolder> inProtocolPM = null;
 //TODO:POLALT in future all of these can be per-alternative
 //    private boolean hasIssuedTokens = false;
 //    private boolean hasSecureConversation = false;
@@ -80,7 +68,6 @@ public class PolicyAlternativeHolder {
 //    private boolean hasKerberosToken = false;
 //    protected AlgorithmSuite bindingLevelAlgSuite = null;
 //    private AlgorithmSuite bootStrapAlgoSuite;
-
     protected Policy bpMSP = null;
     protected SecurityPolicyVersion spVersion;
     private String uuid;
@@ -90,10 +77,10 @@ public class PolicyAlternativeHolder {
         this.spVersion = sv;
         this.bpMSP = bpMSP;
         uuid = UUID.randomUUID().toString();
-        this.inMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
-        this.outMessagePolicyMap = new HashMap<WSDLBoundOperation,SecurityPolicyHolder>();
-        this.inProtocolPM = new HashMap<String,SecurityPolicyHolder>();
-        this.outProtocolPM = new HashMap<String,SecurityPolicyHolder>();
+        this.inMessagePolicyMap = new HashMap<WSDLBoundOperation, SecurityPolicyHolder>();
+        this.outMessagePolicyMap = new HashMap<WSDLBoundOperation, SecurityPolicyHolder>();
+        this.inProtocolPM = new HashMap<String, SecurityPolicyHolder>();
+        this.outProtocolPM = new HashMap<String, SecurityPolicyHolder>();
     }
 
     public void putToOutMessagePolicyMap(WSDLBoundOperation op, SecurityPolicyHolder sh) {
@@ -112,7 +99,7 @@ public class PolicyAlternativeHolder {
         return this.inMessagePolicyMap.get(op);
     }
 
-     public void putToOutProtocolPolicyMap(String protocol, SecurityPolicyHolder sh) {
+    public void putToOutProtocolPolicyMap(String protocol, SecurityPolicyHolder sh) {
         this.outProtocolPM.put(protocol, sh);
     }
 
@@ -120,7 +107,7 @@ public class PolicyAlternativeHolder {
         return this.outProtocolPM.get(protocol);
     }
 
-     public void putToInProtocolPolicyMap(String protocol, SecurityPolicyHolder sh) {
+    public void putToInProtocolPolicyMap(String protocol, SecurityPolicyHolder sh) {
         this.inProtocolPM.put(protocol, sh);
     }
 
@@ -136,4 +123,31 @@ public class PolicyAlternativeHolder {
         return uuid;
     }
 
+    /**
+     * @return the outMessagePolicyMap
+     */
+    public HashMap<WSDLBoundOperation, SecurityPolicyHolder> getOutMessagePolicyMap() {
+        return outMessagePolicyMap;
+    }
+
+    /**
+     * @return the inMessagePolicyMap
+     */
+    public HashMap<WSDLBoundOperation, SecurityPolicyHolder> getInMessagePolicyMap() {
+        return inMessagePolicyMap;
+    }
+
+    /**
+     * @return the outProtocolPM
+     */
+    public HashMap<String, SecurityPolicyHolder> getOutProtocolPM() {
+        return outProtocolPM;
+    }
+
+    /**
+     * @return the inProtocolPM
+     */
+    public HashMap<String, SecurityPolicyHolder> getInProtocolPM() {
+        return inProtocolPM;
+    }
 }

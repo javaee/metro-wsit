@@ -162,10 +162,8 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //and so if username comes we need to have usersupplied validator
         //and if SAML comes we need the userspecified SAML validator
         Set configAssertions = null;
-        for (PolicyAlternativeHolder p : policyAlternatives) {
-            //TODO:suresh remove this direct public member access
-            Iterator it = p.inMessagePolicyMap.values().iterator();
-            
+        for (PolicyAlternativeHolder p : policyAlternatives) {           
+            Iterator it = p.getInMessagePolicyMap().values().iterator();
             while (it.hasNext()) {
                 SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
                 if (configAssertions != null) {
@@ -594,10 +592,10 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (packet.getMessage().isFault()) {
                 policy =  getOutgoingFaultPolicy(packet);
             } else if (isRMMessage(packet)|| isMakeConnectionMessage(packet)) {
-                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("RM");
+                SecurityPolicyHolder holder = applicableAlternative.getOutProtocolPM().get("RM");
                 policy = holder.getMessagePolicy();
             } else if(isSCCancel(packet)){
-                SecurityPolicyHolder holder = applicableAlternative.outProtocolPM.get("SC-CANCEL");
+                SecurityPolicyHolder holder = applicableAlternative.getOutProtocolPM().get("SC-CANCEL");
                 policy = holder.getMessagePolicy();
             }else {
                 policy = getOutgoingXWSSecurityPolicy(packet, isSCMessage);
@@ -664,7 +662,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //policy from the message till the Body is decrypted.
         //    mp = emptyMessagePolicy;
         //}
-        if (applicableAlternative.outMessagePolicyMap == null) {
+        if (applicableAlternative.getOutMessagePolicyMap() == null) {
             //empty message policy
             return new MessagePolicy();
         }
@@ -676,7 +674,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         }
         
         SecurityPolicyHolder sph = (SecurityPolicyHolder)
-                applicableAlternative.outMessagePolicyMap.get(wsdlOperation);
+                applicableAlternative.getOutMessagePolicyMap().get(wsdlOperation);
         if(sph == null){
             return new MessagePolicy();
         }
@@ -695,7 +693,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
             if (faultDetail != null) {
                 fault = wsdlOperation.getFault(faultDetail);
             }
-            SecurityPolicyHolder sph = applicableAlternative.outMessagePolicyMap.get(cachedOp);
+            SecurityPolicyHolder sph = applicableAlternative.getOutMessagePolicyMap().get(cachedOp);
             if (fault == null) {
                 MessagePolicy faultPolicy1 = (sph != null)?(sph.getMessagePolicy()):new MessagePolicy();
                 return faultPolicy1;
@@ -858,26 +856,25 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         return retPacket;
     }
-
-    //TODO:Encapsulate, change this direct member access in all the 4 methods
+   
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,true);
-        ph.inMessagePolicyMap.put(operation,sph);
+        ph.getInMessagePolicyMap().put(operation,sph);
         return sph;
     }
     
     protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation,Policy policy, PolicyAlternativeHolder ph)throws PolicyException{
         SecurityPolicyHolder sph = constructPolicyHolder(policy,true,false);
-        ph.outMessagePolicyMap.put(operation,sph);
+        ph.getOutMessagePolicyMap().put(operation,sph);
         return sph;
     }
     
     protected void addIncomingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
-        ph.outProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
+        ph.getOutProtocolPM().put(protocol,constructPolicyHolder(effectivePolicy, true, false, true));
     }
     
     protected void addOutgoingProtocolPolicy(Policy effectivePolicy,String protocol, PolicyAlternativeHolder ph)throws PolicyException{
-        ph.inProtocolPM.put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
+        ph.getInProtocolPM().put(protocol,constructPolicyHolder(effectivePolicy, true, true, false));
     }
     
     protected void addIncomingFaultPolicy(Policy effectivePolicy,SecurityPolicyHolder sph,WSDLFault fault)throws PolicyException{

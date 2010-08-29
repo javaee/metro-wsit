@@ -191,7 +191,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         //scPlugin = WSSCFactory.newSCPlugin(null, wsscVer);
         Set configAssertions = null;
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
-            Iterator it = p.outMessagePolicyMap.values().iterator();
+            Iterator it = p.getOutMessagePolicyMap().values().iterator();
             while (it.hasNext()) {
                 SecurityPolicyHolder holder = (SecurityPolicyHolder) it.next();
                 if (configAssertions != null) {
@@ -585,22 +585,22 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 
     protected SecurityPolicyHolder addOutgoingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
         SecurityPolicyHolder sph = constructPolicyHolder(policy, false, false);
-        ph.outMessagePolicyMap.put(operation, sph);
+        ph.getOutMessagePolicyMap().put(operation, sph);
         return sph;
     }
 
     protected SecurityPolicyHolder addIncomingMP(WSDLBoundOperation operation, Policy policy, PolicyAlternativeHolder ph) throws PolicyException {
         SecurityPolicyHolder sph = constructPolicyHolder(policy, false, true);
-        ph.inMessagePolicyMap.put(operation, sph);
+        ph.getInMessagePolicyMap().put(operation, sph);
         return sph;
     }
 
     protected void addIncomingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
-        ph.inProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, true, true));
+        ph.getInProtocolPM().put(protocol, constructPolicyHolder(effectivePolicy, false, true, true));
     }
 
     protected void addOutgoingProtocolPolicy(Policy effectivePolicy, String protocol, PolicyAlternativeHolder ph) throws PolicyException {
-        ph.outProtocolPM.put(protocol, constructPolicyHolder(effectivePolicy, false, false, false));
+        ph.getOutProtocolPM().put(protocol, constructPolicyHolder(effectivePolicy, false, false, false));
     }
 
     protected void addIncomingFaultPolicy(Policy effectivePolicy, SecurityPolicyHolder sph, WSDLFault fault) throws PolicyException {
@@ -894,7 +894,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                 operation = getOperation(packet.getMessage(), packet);
             }
 
-            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.outMessagePolicyMap.get(operation);
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.getOutMessagePolicyMap().get(operation);
             if (sph != null) {
                 ret.addAll(sph.getIssuedTokens());
             }
@@ -930,7 +930,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
         Message message = packet.getMessage();
         for (PolicyAlternativeHolder p : this.policyAlternatives) {
             WSDLBoundOperation operation = message.getOperation(pipeConfig.getWSDLPort());
-            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.outMessagePolicyMap.get(operation);
+            SecurityPolicyHolder sph = (SecurityPolicyHolder) p.getOutMessagePolicyMap().get(operation);
             if (sph != null && sph.isIssuedTokenAsEncryptedSupportingToken()) {
                 MessagePolicy policy = sph.getMessagePolicy();
                 ArrayList list = policy.getPrimaryPolicies();
@@ -951,7 +951,7 @@ public class WSITClientAuthContext extends WSITAuthContextBase
                                     GenericToken issuedToken = (GenericToken) ctx.getSecurityToken();
                                     encryptionTarget.setValue(issuedToken.getId());
                                     sph.setMessagePolicy(policy);
-                                    p.outMessagePolicyMap.put(operation, sph);
+                                    p.getOutMessagePolicyMap().put(operation, sph);
                                     breakOuterLoop = true;
                                     break;
                                 }

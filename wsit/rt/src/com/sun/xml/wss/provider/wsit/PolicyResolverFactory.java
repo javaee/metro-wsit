@@ -26,8 +26,7 @@ public class PolicyResolverFactory {
             alternatives, WSDLBoundOperation cachedOperation, TubeConfiguration tubeConfig, 
             AddressingVersion addVer, boolean isClient, RmProtocolVersion rmVer, McProtocolVersion mcVer) {
         if (alternatives.size() == 1) {
-            return new PolicyResolverImpl(alternatives.get(0).inMessagePolicyMap,
-                    alternatives.get(0).inProtocolPM, cachedOperation,tubeConfig,addVer, isClient, rmVer,mcVer);
+            return new PolicyResolverImpl(alternatives.get(0).getInMessagePolicyMap(), alternatives.get(0).getInProtocolPM(), cachedOperation,tubeConfig,addVer, isClient, rmVer,mcVer);
         } else {
             return new AlternativesBasedPolicyResolver(alternatives,cachedOperation,tubeConfig,addVer, isClient, rmVer,mcVer);
         }
