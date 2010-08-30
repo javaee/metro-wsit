@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,7 +38,6 @@ package com.sun.xml.wss.impl.filter;
 
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
-import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.TokenBuilder;
 import com.sun.xml.ws.security.opt.impl.keyinfo.X509TokenBuilder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -55,7 +54,6 @@ import com.sun.xml.wss.impl.FilterProcessingContext;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.impl.XMLUtil;
-import com.sun.xml.wss.impl.filter.UsernameTokenDataResolver;
 import com.sun.xml.wss.logging.LogDomainConstants;
 
 import com.sun.xml.wss.core.SecurityHeader;
@@ -81,6 +79,7 @@ import org.w3c.dom.NodeList;
 
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import javax.xml.crypto.Data;
 import org.w3c.dom.Element;
 
@@ -169,7 +168,7 @@ public class AuthenticationTokenFilter {
                     policy.setFeatureBinding((AuthenticationTokenPolicy.UsernameTokenBinding)dynamicCallback.getSecurityPolicy());
                     //context.setSecurityPolicy(policy);
                 } catch (Exception e) {
-                   log.log(Level.SEVERE, "WSS1427.error.adhoc", e);
+                   log.log(Level.SEVERE, LogStringsMessages.WSS_1427_ERROR_ADHOC(),e);
                     throw new XWSSecurityException(e);
                 }
             }
@@ -178,10 +177,10 @@ public class AuthenticationTokenFilter {
             NodeList nodeList = wsseSecurity.getElementsByTagNameNS(MessageConstants.WSSE_NS,
                     MessageConstants.USERNAME_TOKEN_LNAME);
             if(nodeList.getLength() <= 0){
-                log.log(Level.SEVERE, "WSS1400.nousername.found");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1400_NOUSERNAME_FOUND());
                 throw new XWSSecurityException("No Username token found ,Receiver requirement not met");
             } else if (nodeList.getLength() > 1) {
-                log.log(Level.SEVERE, "WSS1401.morethanone.username.found");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1401_MORETHANONE_USERNAME_FOUND());
                 throw new XWSSecurityException(
                         "More than one Username token found, Receiver requirement not met");
             }else{
@@ -192,7 +191,7 @@ public class AuthenticationTokenFilter {
         }else{
             
             if (context.getMode() == FilterProcessingContext.POSTHOC) {
-                log.log(Level.SEVERE, "WSS1402.error.posthoc");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1402_ERROR_POSTHOC());
                 throw new XWSSecurityException(
                         "Internal Error: Called UsernameTokenFilter in POSTHOC Mode");
             }
@@ -200,7 +199,7 @@ public class AuthenticationTokenFilter {
             try{
                 token = new UsernameToken(wsseSecurity.getCurrentHeaderElement());
             } catch(XWSSecurityException ex) {
-                log.log(Level.SEVERE, "WSS1403.import.username.token",ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1403_IMPORT_USERNAME_TOKEN(),ex);
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "Exception while importing Username Password Token",
@@ -224,28 +223,28 @@ public class AuthenticationTokenFilter {
             
             // do policy checks
             if (utBinding.getDigestOn() && (passwordDigest == null)) {
-                log.log(Level.SEVERE, "WSS1404.notmet.digested");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1404_NOTMET_DIGESTED());
                 throw new XWSSecurityException(
                         "Receiver Requirement for Digested " +
                         "Password has not been met");
             }
             
             if (!utBinding.getDigestOn() && (passwordDigest != null)) {
-                log.log(Level.SEVERE, "WSS1405.notmet.plaintext");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1405_NOTMET_PLAINTEXT());
                 throw new XWSSecurityException(
                         "Receiver Requirement for Plain-Text " +
                         "Password has not been met, Received token has Password-Digest");
             }
             
             if (utBinding.getUseNonce() && (nonce == null)) {
-                log.log(Level.SEVERE, "WSS1406.notmet.nonce");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1406_NOTMET_NONCE());
                 throw new XWSSecurityException(
                         "Receiver Requirement for nonce " +
                         "has not been met");
             }
             
             if (!utBinding.getUseNonce() && (nonce != null)) {
-                log.log(Level.SEVERE, "WSS1407.notmet.nononce");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1407_NOTMET_NONONCE());
                 throw new XWSSecurityException(
                         "Receiver Requirement for no nonce " +
                         "has not been met, Received token has a nonce specified");
@@ -271,7 +270,7 @@ public class AuthenticationTokenFilter {
             }
             
             if (!authenticated) {
-                log.log(Level.SEVERE, "WSS1408.failed.sender.authentication");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1408_FAILED_SENDER_AUTHENTICATION());
                 XWSSecurityException xwse =
                         new XWSSecurityException("Invalid Username Password Pair");
                 throw SecurableSoapMessage.newSOAPFaultException(
@@ -320,7 +319,7 @@ public class AuthenticationTokenFilter {
                         XWSSecurityException xwse =
                                 new XWSSecurityException(
                                 "Invalid/Repeated Nonce value for Username Token");
-                        log.log(Level.SEVERE, "WSS1406.notmet.nonce", xwse);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1406_NOTMET_NONCE(), xwse);
                         throw SecurableSoapMessage.newSOAPFaultException(
                                 MessageConstants.WSSE_FAILED_AUTHENTICATION,
                                 "Invalid/Repeated Nonce value for Username Token",
@@ -335,7 +334,7 @@ public class AuthenticationTokenFilter {
             }
             
         } catch (XWSSecurityException xwsse) {
-            log.log(Level.SEVERE, "WSS1408.failed.sender.authentication", xwsse);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1408_FAILED_SENDER_AUTHENTICATION(), xwsse);
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
                     xwsse.getMessage(),
@@ -377,7 +376,7 @@ public class AuthenticationTokenFilter {
             }
             
             if (userName == null || "".equals(userName)) {
-            log.log(Level.SEVERE, "WSS1409.error.creating.usernametoken");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1409_INVALID_USERNAME_TOKEN());
             throw new XWSSecurityException("Username has not been set");
             }
             
@@ -391,7 +390,7 @@ public class AuthenticationTokenFilter {
             }
             if(!userNamePolicy.hasNoPassword()){
             if (password == null) {
-            log.log(Level.SEVERE, "WSS1424.invalid.username.token");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1424_INVALID_USERNAME_TOKEN());
             throw new XWSSecurityException("Password for the username has not been set"); 
             }
             if(token != null)
@@ -432,7 +431,7 @@ public class AuthenticationTokenFilter {
                 return resolvedPolicy;
                 
             } catch (Exception e) {
-              log.log(Level.SEVERE, "WSS1403.import.username.token", e);
+              log.log(Level.SEVERE, LogStringsMessages.WSS_1403_IMPORT_USERNAME_TOKEN(), e);
                 throw new XWSSecurityException(e);
             }
         }
@@ -531,7 +530,7 @@ public class AuthenticationTokenFilter {
      * @param context FilterProcessingContext
      * @throws XWSSecurityException
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "static-access" })
     public static void addIssuedTokenToMessage(FilterProcessingContext context)
     throws XWSSecurityException{
         AuthenticationTokenPolicy authPolicy = (AuthenticationTokenPolicy)context.getSecurityPolicy();

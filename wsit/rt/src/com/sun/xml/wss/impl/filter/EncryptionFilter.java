@@ -1,5 +1,5 @@
 /**
- * $Id: EncryptionFilter.java,v 1.8 2010-06-25 08:17:23 sm228678 Exp $
+ * $Id: EncryptionFilter.java,v 1.9 2010-08-30 10:49:47 sm228678 Exp $
  */
 
 /*
@@ -70,6 +70,7 @@ import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import java.io.UnsupportedEncodingException;
 import org.w3c.dom.Element;
 
@@ -230,7 +231,7 @@ public class EncryptionFilter {
                         context.setX509CertificateBinding(binding);
                         
                     } catch (Exception e) {
-                        log.log(Level.SEVERE, "WSS1413.error.extracting.certificate", e);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1413_ERROR_EXTRACTING_CERTIFICATE(), e);
                         throw new XWSSecurityException(e);
                     }
                 } else if(PolicyTypeUtil.kerberosTokenBinding(keyBinding)) {
@@ -248,7 +249,7 @@ public class EncryptionFilter {
                         SecretKey sKey = krbContext.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(dataEncAlgo));
                         binding.setSecretKey(sKey);
                     }else{
-                        log.log(Level.SEVERE, "WSS1423.kerberos.context.notset");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1423_KERBEROS_CONTEXT_NOTSET());
                         throw new XWSSecurityException("WSS1423.kerberos.context.notset");
                     }
                     context.setKerberosTokenBinding(binding);
@@ -277,7 +278,7 @@ public class EncryptionFilter {
                                     context.setX509CertificateBinding(ckBindingClone);
                                 }
                             } catch (Exception e) {
-                                log.log(Level.SEVERE, "WSS1413.error.extracting.certificate", e);
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_1413_ERROR_EXTRACTING_CERTIFICATE(), e);
                                 throw new XWSSecurityException(e);
                             }
                         } else if(PolicyTypeUtil.kerberosTokenBinding(ckBinding)){
@@ -295,7 +296,7 @@ public class EncryptionFilter {
                                 sKey = krbContext.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(dataEncAlgo));
                                 ckBindingClone.setSecretKey(sKey);
                             } else{
-                                log.log(Level.SEVERE, "WSS1423.kerberos.context.notset");
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_1423_KERBEROS_CONTEXT_NOTSET());
                                 throw new XWSSecurityException("WSS1423.kerberos.context.notset");
                             }
                             context.setKerberosTokenBinding(ckBindingClone);
@@ -317,8 +318,7 @@ public class EncryptionFilter {
                         context.setSymmetricKeyBinding(binding);
                     } catch (Exception e) {
                         //TODO: this error message should come only in Symm Keystore case
-                        log.log(Level.SEVERE, "WSS1414.error.extracting.symmetrickey",
-                                new Object[] { e.getMessage()});
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1414_ERROR_EXTRACTING_SYMMETRICKEY(new Object[] { e.getMessage()}));
                         throw new XWSSecurityException(e);
                     }
                 } else if (PolicyTypeUtil.samlTokenPolicy(keyBinding)) {
@@ -382,7 +382,7 @@ public class EncryptionFilter {
                                     context.setUsernameTokenBinding(untbinding);
                                 }
                             } catch (Exception e) {
-                                log.log(Level.SEVERE, "WSS1413.error.extracting.UsernameToken", e);
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_1433_ERROR_EXTRACTING_USERNAMETOKEN(), e);
                                 throw new XWSSecurityException(e);
                             }
                         }
@@ -398,7 +398,7 @@ public class EncryptionFilter {
                                     context.setX509CertificateBinding(ckBindingClone);
                                 }
                             } catch (Exception e) {
-                                log.log(Level.SEVERE, "WSS1413.error.extracting.certificate", e);
+                                log.log(Level.SEVERE,  LogStringsMessages.WSS_1413_ERROR_EXTRACTING_CERTIFICATE(), e);
                                 throw new XWSSecurityException(e);
                             }
                         } else if(PolicyTypeUtil.kerberosTokenBinding(ckBinding)){
@@ -415,7 +415,7 @@ public class EncryptionFilter {
                                 sKey = krbContext.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(dataEncAlgo));
                                 ckBindingClone.setSecretKey(sKey);
                             } else{
-                                log.log(Level.SEVERE, "WSS1423.kerberos.context.notset");
+                                log.log(Level.SEVERE,  LogStringsMessages.WSS_1423_KERBEROS_CONTEXT_NOTSET());
                                 throw new XWSSecurityException("WSS1423.kerberos.context.notset");
                             }
                             context.setKerberosTokenBinding(ckBindingClone);
@@ -439,7 +439,7 @@ public class EncryptionFilter {
                         SecurityUtil.resolveIssuedToken(context, itkb);
                     }
                 } else {
-                    log.log(Level.SEVERE,"WSS1422.unsupported.keybinding.EncryptionPolicy");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1422_UNSUPPORTED_KEYBINDING_ENCRYPTION_POLICY());
                     throw new XWSSecurityException("Unsupported KeyBinding for EncryptionPolicy");
                 }
                 
@@ -463,8 +463,7 @@ public class EncryptionFilter {
                     resolvedPolicy = (EncryptionPolicy)dynamicCallback.getSecurityPolicy();
                     
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS1412.error.processing.dynamicpolicy",
-                            new Object[] { e.getMessage()});
+                    log.log(Level.SEVERE,  LogStringsMessages.WSS_1412_ERROR_PROCESSING_DYNAMICPOLICY(new Object[] { e.getMessage()}));
                     throw new XWSSecurityException(e);
                 }
             }
@@ -495,8 +494,7 @@ public class EncryptionFilter {
                     resolvedPolicy = (EncryptionPolicy)dynamicCallback.getSecurityPolicy();
                     
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS1420.dynamic.policy.signature",
-                            new Object[] {e.getMessage()});
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1420_DYNAMIC_POLICY_SIGNATURE(new Object[] {e.getMessage()}));
                     throw new XWSSecurityException(e);
                 }
                 context.setSecurityPolicy(resolvedPolicy);

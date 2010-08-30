@@ -1,11 +1,11 @@
 /*
- * $Id: DumpFilter.java,v 1.3 2010-03-20 12:33:20 kumarjayanti Exp $
+ * $Id: DumpFilter.java,v 1.4 2010-08-30 10:49:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,6 +46,7 @@ import java.util.logging.Level;
 
 import com.sun.xml.wss.ProcessingContext;
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import java.util.logging.Logger;
 
 /**
@@ -89,8 +90,7 @@ public class DumpFilter  {
         } catch (Exception e) {
             log.log(
             Level.SEVERE,
-            "WSS1411.unableto.dump.soapmessage",
-            new Object[] { e.getMessage()});
+            LogStringsMessages.WSS_1411_UNABLETO_DUMP_SOAPMESSAGE(new Object[] { e.getMessage()}));
             throw new XWSSecurityException("Unable to dump SOAPMessage");
         }
         

@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -58,6 +58,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import java.util.logging.Logger;
 import org.w3c.dom.NodeList;
 import com.sun.xml.wss.impl.policy.mls.MessagePolicy;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import org.w3c.dom.Text;
 
 /**
@@ -130,7 +131,7 @@ public class ImportSamlAssertionFilter{
             
             //for now we dont allow multiple saml assertions
             if (nodeListLength == 0) {
-               log.log(Level.SEVERE, "WSS0428.saml.not.found");
+               log.log(Level.SEVERE, LogStringsMessages.WSS_1431_NO_SAML_FOUND());
                 throw new XWSSecurityException(
                 "No SAML Assertion found, Reciever requirement not met");
             //}else if ((nodeListLength - countSamlInsideAdviceElement) > 1) {
@@ -141,7 +142,7 @@ public class ImportSamlAssertionFilter{
                 try {
                     samlAssertion = AssertionUtil.fromElement(samlElement);
                 } catch(Exception e) {
-                    log.log(Level.SEVERE,"WSS0418.saml.import.exception",e);
+                    log.log(Level.SEVERE,LogStringsMessages.WSS_1432_SAML_IMPORT_EXCEPTION(),e);
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_INVALID_SECURITY,
                             "Exception while importing SAML Token",
@@ -162,7 +163,7 @@ public class ImportSamlAssertionFilter{
                         //log here
                         XWSSecurityException xwse = new XWSSecurityException("Invalid Assertion Issuer, expected "  + 
                             samlPolicy.getAuthorityIdentifier() + ", found " + (samlAssertion.getSamlIssuer()));
-                        log.log(Level.SEVERE, "WSS0422.saml.issuer.validation.failed", xwse);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1434_SAML_ISSUER_VALIDATION_FAILED(), xwse);
                         throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                             "Received SAML Assertion has invalid Issuer",
@@ -187,7 +188,7 @@ public class ImportSamlAssertionFilter{
             try{
                 samlAssertion = AssertionUtil.fromElement(wsseSecurity.getCurrentHeaderElement());
             } catch(Exception ex) {
-                log.log(Level.SEVERE, "WSS0418.saml.import.exception", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1432_SAML_IMPORT_EXCEPTION(), ex);
                 throw SecurableSoapMessage.newSOAPFaultException(
                 MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                 "Exception while importing SAML Assertion",

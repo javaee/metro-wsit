@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -56,6 +56,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 /**
  *
  * @author suresh
@@ -98,7 +99,7 @@ public class UsernameTokenDataResolver {
                 userName = context.getSecurityEnvironment().getUsername(context.getExtraneousProperties());
             }            
             if (userName == null || "".equals(userName)) {
-                log.log(Level.SEVERE, "WSS1409.error.creating.usernametoken");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1409_INVALID_USERNAME_TOKEN());
                 throw new XWSSecurityException("Username has not been set");
             }
             unToken.setUsernameValue(userName);
@@ -108,7 +109,7 @@ public class UsernameTokenDataResolver {
             }
             if (!untBinding.hasNoPassword()) {
                 if (password == null) {
-                    log.log(Level.SEVERE, "WSS1424.invalid.username.token");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1424_INVALID_USERNAME_TOKEN());
                     throw new XWSSecurityException("Password for the username has not been set");
                 }
             }
@@ -133,7 +134,7 @@ public class UsernameTokenDataResolver {
                 try {
                     salt = Base64.decode(decodeString);
                 } catch (Base64DecodingException ex) {
-                    log.log(Level.SEVERE, "WSS1426.Base64.decoding.error", ex);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1426_BASE_64_DECODING_ERROR(), ex);
                     throw new UnsupportedEncodingException("error while decoding the salt in username token");
                 }
             }
@@ -142,7 +143,7 @@ public class UsernameTokenDataResolver {
             try {
                 macSignature = pdk.generate160BitKey(password, iterations, salt);
             } catch (UnsupportedEncodingException ex) {
-                log.log(Level.SEVERE, "WSS1425.unsupported.encoding", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1425_UNSUPPORTED_ENCODING(), ex);
                 throw new UnsupportedEncodingException("error while creating 160 bit key");
             }
             untBinding.setSecretKey(macSignature);        
@@ -179,7 +180,7 @@ public class UsernameTokenDataResolver {
             userName = context.getSecurityEnvironment().getUsername(context.getExtraneousProperties());
         }
         if (userName == null || "".equals(userName)) {
-            log.log(Level.SEVERE, "WSS1409.error.creating.usernametoken");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1409_INVALID_USERNAME_TOKEN());
             throw new XWSSecurityException("Username has not been set");
         }
         unToken.setUsernameValue(userName);
@@ -190,7 +191,7 @@ public class UsernameTokenDataResolver {
         }
         if (!untBinding.hasNoPassword()) {
             if (password == null) {
-                log.log(Level.SEVERE, "WSS1424.invalid.username.token");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1424_INVALID_USERNAME_TOKEN());
                 throw new XWSSecurityException("Password for the username has not been set");
             }
         }
@@ -215,7 +216,7 @@ public class UsernameTokenDataResolver {
             try {
                 salt = Base64.decode(decodeString);
             } catch (Base64DecodingException ex) {
-                log.log(Level.SEVERE, "WSS1426.Base64.decoding.error", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1426_BASE_64_DECODING_ERROR(), ex);
                 throw new UnsupportedEncodingException("error while decoding the salt in username token");
             }
         }
@@ -223,7 +224,7 @@ public class UsernameTokenDataResolver {
         try {
             encSignature = pdk.generate160BitKey(password, iterations, salt);
         } catch (UnsupportedEncodingException ex) {
-            log.log(Level.SEVERE, "WSS1425.unsupported.encoding", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1425_UNSUPPORTED_ENCODING(), ex);
             throw new UnsupportedEncodingException("error while creating 128 bit key");
         }
         for (int i = 0; i < 16; i++) {
@@ -256,7 +257,7 @@ public class UsernameTokenDataResolver {
                 userName = context.getSecurityEnvironment().getUsername(context.getExtraneousProperties());
             }
             if (userName == null || "".equals(userName)) {
-                log.log(Level.SEVERE, "WSS1409.error.creating.usernametoken");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1409_INVALID_USERNAME_TOKEN());
                 throw new XWSSecurityException("Username has not been set");
             }
             if (token != null) {
@@ -269,7 +270,7 @@ public class UsernameTokenDataResolver {
             }
             if (!userNamePolicy.hasNoPassword()) {
                 if (password == null) {
-                    log.log(Level.SEVERE, "WSS1424.invalid.username.token");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1424_INVALID_USERNAME_TOKEN());
                     throw new XWSSecurityException("Password for the username has not been set");
                 }
                 if (token != null) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,9 +59,9 @@ import com.sun.xml.wss.core.SignatureConfirmationHeaderBlock;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.FilterProcessingContext;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
-import com.sun.xml.wss.impl.policy.mls.SignatureConfirmationPolicy;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.Name;
@@ -115,7 +115,7 @@ public class SignatureConfirmationFilter {
             
             SecurityHeader secHeader = context.getSecurableSoapMessage().findSecurityHeader();
             if(secHeader == null){
-               log.log(Level.SEVERE, "WSS1428.signature.confirmation.error");
+               log.log(Level.SEVERE, LogStringsMessages.WSS_1428_SIGNATURE_CONFIRMATION_ERROR());
                 throw new XWSSecurityException(
                         "Message does not confirm to SignatureConfirmation Policy:" + 
                         "wsse11:SignatureConfirmation element not found in Header");
@@ -137,7 +137,7 @@ public class SignatureConfirmationFilter {
                             MessageConstants.WSSE11_NS);
                     Iterator i = secHeader.getChildElements(name);
                     if(!i.hasNext()){
-                        log.log(Level.SEVERE, "WSS1428.signature.confirmation.error");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1428_SIGNATURE_CONFIRMATION_ERROR());
                         throw new XWSSecurityException("Message does not confirm to Security Policy:" + 
                                 "wss11:SignatureConfirmation Element not found");
                     }
@@ -146,7 +146,7 @@ public class SignatureConfirmationFilter {
                         try{
                             signConfirm = new SignatureConfirmationHeaderBlock(sc);
                         } catch( XWSSecurityException xwsse){
-                            log.log(Level.SEVERE, xwsse.getMessage(), xwsse);
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE(), xwsse);
                             throw SecurableSoapMessage.newSOAPFaultException(
                                 MessageConstants.WSSE_INVALID_SECURITY,
                                 "Failure in SignatureConfirmation validation\n" + 
@@ -159,14 +159,14 @@ public class SignatureConfirmationFilter {
                         //SignatureConfirmation with no Value attribute
                         if(signValue == null){
                             if(i.hasNext() || !scList.isEmpty()){                            
-                                log.log(Level.SEVERE, "Failure in SignatureConfirmation Validation");
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE());
                                 throw new XWSSecurityException("Failure in SignatureConfirmation Validation");
                             }
                         } else if(scList.contains(signValue)){ // match the Value in received message
                             //with the stored value
                             scList.remove(signValue);
                         }else{
-                            log.log(Level.SEVERE, "Failure in SignatureConfirmation Validation");
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE());
                             throw new XWSSecurityException("Mismatch in SignatureConfirmation Element");
                         }
                     }
@@ -175,7 +175,7 @@ public class SignatureConfirmationFilter {
                     throw new XWSSecurityException(se);
                 }
                 if(!scList.isEmpty()){
-                    log.log(Level.SEVERE, "Failure in SignatureConfirmation Validation");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE());
                     throw new XWSSecurityException("Failure in SignatureConfirmation");
                 }
                 context.setExtraneousProperty("SignatureConfirmation", MessageConstants._EMPTY);

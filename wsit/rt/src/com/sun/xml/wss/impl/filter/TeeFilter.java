@@ -1,11 +1,11 @@
 /*
- * $Id: TeeFilter.java,v 1.3 2010-03-20 12:33:20 kumarjayanti Exp $
+ * $Id: TeeFilter.java,v 1.4 2010-08-30 10:49:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,6 +55,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import com.sun.xml.wss.XWSSecurityException;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.util.logging.Logger;
 
 /**
@@ -157,7 +158,7 @@ public class TeeFilter {
             try {
                 templates = tf.newTemplates(stylesheet);
             } catch (TransformerConfigurationException e) {
-                log.log(Level.SEVERE, "WSS0147.unableto.use.stylesheet",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0147_DIAG_CAUSE_1(),
                 new Object[] {e.getMessage()});
                 throw new XWSSecurityException("Unable to use stylesheet", e);
             }
@@ -212,8 +213,7 @@ public class TeeFilter {
                 transformer.transform(msgSource, new StreamResult(out));
             }
         } catch (Exception ex) {
-            log.log(Level.SEVERE, "WSS0148.unableto.process.soapmessage",
-            new Object[] {ex.getMessage()});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0148_UNABLETO_PROCESS_SOAPMESSAGE(new Object[] {ex.getMessage()}));
             throw new XWSSecurityException("Unable to process SOAPMessage", ex);
         }
     }
