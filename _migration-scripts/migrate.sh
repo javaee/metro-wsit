@@ -181,6 +181,11 @@ MODULE_NAME=webservices-extra
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
+MODULE_NAME=webservices-extra-jdk-packages
+MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Extra JDK 6 packages required by Metro Web Services OSGi bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+mkdir -p $MODULE_ROOT/src/main/resources/
+
 MODULE_NAME=metro-bundle
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Offline Zipped Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
