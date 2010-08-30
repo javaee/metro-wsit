@@ -37,7 +37,6 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
-import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -57,11 +56,11 @@ import org.glassfish.ha.store.api.BackingStore;
 class SequenceDataPojo implements Serializable {
     static final long serialVersionUID = -5024744406713321676L;
 
-    private final BackingStore<String, SequenceDataPojo> backingStore;
+    private transient BackingStore<String, SequenceDataPojo> backingStore;
     //
-    private final String sequenceId;
-    private final String boundSecurityTokenReferenceId;
-    private final long expirationTime;
+    private String sequenceId;
+    private String boundSecurityTokenReferenceId;
+    private long expirationTime;
     //
     private volatile State state;
     private volatile boolean ackRequestedFlag;
@@ -69,11 +68,14 @@ class SequenceDataPojo implements Serializable {
     private volatile long lastActivityTime;
     private volatile long lastAcknowledgementRequestTime;
     //
-    private final Set<Long> allUnackedMessageNumbers;
-    private final Set<Long> receivedUnackedMessageNumbers;
+    private Set<Long> allUnackedMessageNumbers;
+    private Set<Long> receivedUnackedMessageNumbers;
     //
-    private final Map<Long, String> unackedNumberToCorrelationIdMap;
-    private final boolean inbound;
+    private Map<Long, String> unackedNumberToCorrelationIdMap;
+    private boolean inbound;
+
+    protected SequenceDataPojo() {
+    }
 
     public SequenceDataPojo(String sequenceId, String boundSecurityTokenReferenceId, long expirationTime, boolean isInbound, BackingStore<String, SequenceDataPojo> bs) {
         this.sequenceId = sequenceId;
@@ -155,6 +157,10 @@ class SequenceDataPojo implements Serializable {
 
     public boolean isInbound() {
         return inbound;
+    }
+
+    public void setBackingStore(BackingStore<String, SequenceDataPojo> backingStore) {
+        this.backingStore = backingStore;
     }
 
     public void replicate() {
