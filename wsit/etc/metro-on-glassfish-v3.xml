@@ -121,6 +121,7 @@
         <copy todir="${backup.dir}" failonerror="false">
             <fileset dir="${as.lib.home}">
                 <include name="webservices-osgi.jar"/>
+                <include name="webservices-extra-jdk-packages.jar"/>
                 <include name="woodstox-osgi.jar"/>
                 <include name="jaxb-osgi.jar"/>
             </fileset>
@@ -141,6 +142,7 @@
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${basedir}/osgi">
                 <include name="webservices-osgi.jar"/>
+                <include name="webservices-extra-jdk-packages.jar"/>
                 <include name="woodstox-osgi.jar"/>
                 <include name="jaxb-osgi.jar"/>
             </fileset>  
@@ -193,6 +195,7 @@
         <copy todir="${as.lib.home}" overwrite="true">
             <fileset dir="${backup.dir}">
                 <include name="webservices-osgi.jar"/>
+                <include name="webservices-extra-jdk-packages.jar"/>
                 <include name="woodstox-osgi.jar"/>
                 <include name="jaxb-osgi.jar"/>
             </fileset>

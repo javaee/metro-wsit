@@ -90,6 +90,8 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
+        <jar destfile="${v3.build.dir}/webservices-extra-jdk-packages.jar"
+             manifest="etc/bnd/webservices-extra-jdk-packages.bnd"/>
         <bnd classpath="lib/runtime/woodstox.jar, lib/runtime/jsr173_api.jar"
              failok="false"
              output="${v3.build.dir}/woodstox-osgi.jar"
@@ -98,6 +100,7 @@
         <copy todir="${dist.image.wsit.dir}/osgi" filtering="false">
             <fileset dir="${v3.build.dir}">
                 <include name="webservices*osgi.jar"/>
+                <include name="webservices-extra-jdk-packages.jar"/>
                 <include name="woodstox-osgi.jar"/>
             </fileset>
             <fileset dir="${lib.osgi.dir}">
