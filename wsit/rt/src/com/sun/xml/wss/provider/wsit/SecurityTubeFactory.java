@@ -197,6 +197,9 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                     //something else.
                     initializeJMAC();
                     break;
+                } else {
+                    hook = h;
+                    break;
                 }
             }
         }
