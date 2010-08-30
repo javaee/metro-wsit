@@ -321,6 +321,7 @@
                 <exclude name="jsr181-api.jar"/>
                 <exclude name="jsr105-impl.jar"/>
                 <exclude name="jsr105-api.jar"/>
+                <exclude name="apache-xmlsec.jar"/>
                 <exclude name="resolver.jar"/>
                 <exclude name="woodstox.jar"/>
                 <exclude name="mimepull.jar"/>
