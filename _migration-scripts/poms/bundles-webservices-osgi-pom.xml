@@ -23,8 +23,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            com.sun.istack.ws.*;version=${jaxws.ri.version},
-                            com.sun.org.apache.xml.internal.security.*,
+                            com.sun.istack.ws.*;version=${jaxws.ri.version},                            
                             com.sun.tools.ws.*;version=${jaxws.ri.version},
                             com.sun.xml.messaging.saaj.soap;version=1.3,
                             com.sun.xml.registry.*;version=1.0,
