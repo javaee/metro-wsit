@@ -90,6 +90,10 @@
             <artifactId>jaxws-rt</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.sun.xml.security</groupId>
+            <artifactId>jsr105-impl</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>policy</artifactId>
         </dependency>
