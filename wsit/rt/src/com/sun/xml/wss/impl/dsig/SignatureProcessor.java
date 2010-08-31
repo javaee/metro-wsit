@@ -1,12 +1,12 @@
 
 /*
- * $Id: SignatureProcessor.java,v 1.15 2010-04-27 14:20:32 m_potociar Exp $
+ * $Id: SignatureProcessor.java,v 1.16 2010-08-31 07:15:41 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,7 +45,6 @@ package com.sun.xml.wss.impl.dsig;
 import com.sun.org.apache.xml.internal.security.encryption.EncryptedKey;
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.xml.wss.core.reference.KeyIdentifier;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.impl.DerivedKeyTokenImpl;
@@ -137,6 +136,7 @@ import org.w3c.dom.NodeList;
 import com.sun.xml.ws.security.trust.GenericToken;
 
 import com.sun.xml.wss.impl.XMLUtil;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.security.NoSuchAlgorithmException;
 import javax.xml.soap.SOAPException;
 
@@ -187,7 +187,7 @@ public class SignatureProcessor{
             boolean sendEKSHA1 =  wss11Receiver && wss11Sender && (getEKSHA1Ref(context) != null);
             
             if (PolicyTypeUtil.usernameTokenPolicy(keyBinding)) {
-                logger.log(Level.SEVERE, "WSS1326.unsupported.usernametoken.keybinding");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1326_UNSUPPORTED_USERNAMETOKEN_KEYBINDING());
                 throw new XWSSecurityException("UsernameToken as KeyBinding for SignaturePolicy is Not Yet Supported");
             } else if ( PolicyTypeUtil.derivedTokenKeyBinding(keyBinding)) {
                 DerivedTokenKeyBinding dtk = (DerivedTokenKeyBinding)keyBinding.clone();
@@ -207,7 +207,7 @@ public class SignatureProcessor{
                 
                 if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)) {
                     // this is becuase SecurityPolicy Converter never produces this combination
-                    logger.log(Level.SEVERE, "WSS1327.unsupported.asymmetricbinding.derivedkey.x509token");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1327_UNSUPPORTED_ASYMMETRICBINDING_DERIVEDKEY_X_509_TOKEN());
                     throw new XWSSecurityException("Asymmetric Binding with DerivedKeys under X509Token Policy Not Yet Supported");
                 } else if ( PolicyTypeUtil.symmetricKeyBinding(originalKeyBinding)) {
                     
@@ -240,7 +240,7 @@ public class SignatureProcessor{
                         X509Certificate cert =
                                 context.getTrustContext().getRequestorCertificate();
                         if (cert == null){
-                            logger.log(Level.SEVERE, "WSS1328.illegal.Certificate.key.null");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1328_ILLEGAL_CERTIFICATE_KEY_NULL());
                             throw new XWSSecurityException(
                                     "Requestor Certificate and Proof Key are both null for Issued Token");
                         }
@@ -331,7 +331,7 @@ public class SignatureProcessor{
                     X509Certificate cert =
                             context.getTrustContext().getRequestorCertificate();
                     if (cert == null){
-                        logger.log(Level.SEVERE, "WSS1328.illegal.Certificate.key.null");
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1328_ILLEGAL_CERTIFICATE_KEY_NULL());
                         throw new XWSSecurityException(
                                 "Requestor Certificate and Proof Key are both null for Issued Token");
                     }
@@ -441,20 +441,20 @@ public class SignatureProcessor{
                         (AuthenticationTokenPolicy.SAMLAssertionBinding)keyBinding;
                 PrivateKeyBinding privKBinding  = (PrivateKeyBinding)samlBinding.getKeyBinding();
                 if (privKBinding == null) {
-                    logger.log(Level.SEVERE, "WSS1329.null.privatekeybinding.SAMLPolicy");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1329_NULL_PRIVATEKEYBINDING_SAML_POLICY());
                     throw new XWSSecurityException("PrivateKey binding not set for SAML Policy by CallbackHandler");
                 }
                 
                 signingKey = privKBinding.getPrivateKey();
                 
                 if (signingKey == null) {
-                    logger.log(Level.SEVERE, "WSS1330.null.privatekey.SAMLPolicy");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1330_NULL_PRIVATEKEY_SAML_POLICY());
                     throw new XWSSecurityException("PrivateKey null inside PrivateKeyBinding set for SAML Policy ");
                 }
                 
                 String referenceType = samlBinding.getReferenceType();
                 if (referenceType.equals(MessageConstants.EMBEDDED_REFERENCE_TYPE)) {
-                    logger.log(Level.SEVERE, "WSS1331.unsupported.EmbeddedReference.SAML");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1331_UNSUPPORTED_EMBEDDED_REFERENCE_SAML());
                     throw new XWSSecurityException("Embedded Reference Type for SAML Assertions not supported yet");
                 }
                 
@@ -464,7 +464,7 @@ public class SignatureProcessor{
                 
                 if (assertionId == null) {
                     if (_assertion == null) {
-                        logger.log(Level.SEVERE, "WSS1332.null.SAMLAssertion.SAMLAssertionId");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1332_NULL_SAML_ASSERTION_SAML_ASSERTION_ID());
                         throw new XWSSecurityException(
                                 "None of SAML Assertion, SAML Assertion Id information was set into " +
                                 " the Policy by the CallbackHandler");
@@ -580,7 +580,7 @@ public class SignatureProcessor{
                     }
                     String referenceType =  x509Binding.getReferenceType();
                     if(referenceType.equals("Identifier") && x509Binding.getValueType().equals(MessageConstants.X509v1_NS)){
-                        logger.log(Level.SEVERE, "WSS1333.unsupported.keyidentifer.X509v1");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1333_UNSUPPORTED_KEYIDENTIFER_X_509_V_1());
                         throw new XWSSecurityException("Key Identifier strategy in X509v1 is not supported");
                     }
                     KeyInfoStrategy  strategy = KeyInfoStrategy.getInstance(referenceType);
@@ -638,7 +638,7 @@ public class SignatureProcessor{
                                 encryptedKey = keyEncryptor.encryptKey(secureMessage.getSOAPPart(), signingKey);
                             }
                         }catch(Exception e){
-                            logger.log(Level.SEVERE, "WSS1334.error.creating.encryptedkey");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1334_ERROR_CREATING_ENCRYPTEDKEY());
                             throw new XWSSecurityException(e);
                         }
                         id = secureMessage.generateId();
@@ -694,7 +694,7 @@ public class SignatureProcessor{
                     
                 }
             }else {
-                logger.log(Level.SEVERE,"WSS1335.unsupported.keybinding.signaturepolicy");
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1335_UNSUPPORTED_KEYBINDING_SIGNATUREPOLICY());
                 throw new XWSSecurityException("Unsupported Key Binding for SignaturePolicy");
             }
             
@@ -738,10 +738,10 @@ public class SignatureProcessor{
             //End SignatureConfirmation specific code
             
         }catch(XWSSecurityException xe){          
-                logger.log(Level.SEVERE,"WSS1316.sign.failed",xe);           
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1316_SIGN_FAILED(),xe);
             throw xe;
         }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1316.sign.failed",ex);       
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1316_SIGN_FAILED(),ex);
             throw new XWSSecurityException(ex);
         }
         return 0;
@@ -824,7 +824,7 @@ public class SignatureProcessor{
                         logger.log(Level.FINEST,"Reference["+j+"] validity status: " + refValid);
                     }
                 }
-                    logger.log(Level.SEVERE, "WSS1315.signature.verification.failed");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1315_SIGNATURE_VERIFICATION_FAILED());
                 XWSSecurityException xwsse =   new XWSSecurityException("Signature verification failed");
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_CHECK,"Signature verification failed ",xwsse);
@@ -842,7 +842,7 @@ public class SignatureProcessor{
                         for (int index=0; t.hasNext(); index++) {
                             Transform transform = (Transform) t.next();
                             if (Transform.ENVELOPED.equals(transform.getAlgorithm())) {
-                                logger.log(Level.SEVERE, "WSS1336.illegal.envelopedsignature");
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1336_ILLEGAL_ENVELOPEDSIGNATURE());
                                 throw new XWSSecurityException("Enveloped signatures not permitted by BSP");
                             }
                             if (MessageConstants.TRANSFORM_C14N_EXCL_OMIT_COMMENTS.equals(transform.getAlgorithm())) {
@@ -850,7 +850,7 @@ public class SignatureProcessor{
                                 if (transform.getParameterSpec()!=null) {
                                     ExcC14NParameterSpec spec = (ExcC14NParameterSpec)transform.getParameterSpec();
                                     if (spec.getPrefixList().isEmpty())
-                                        logger.log(Level.SEVERE, "WSS1337.invalid.Emptyprefixlist");
+                                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1337_INVALID_EMPTYPREFIXLIST());
                                         throw new XWSSecurityException("Prefix List cannot be empty: violation of BSP 5407");
                                 }
                             }
@@ -884,14 +884,14 @@ public class SignatureProcessor{
                 }
             }
         }catch(XWSSecurityException xwe){
-            logger.log(Level.SEVERE, "WSS1338.error.verify");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
             throw xwe;
         }catch(XMLSignatureException xse){
             
             Throwable t1 = xse.getCause();
             
             if(t1== null){
-                logger.log(Level.SEVERE, "WSS1338.error.verify");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
                 throw new XWSSecurityException(xse);
             }
             if(t1 instanceof KeySelectorException || t1 instanceof URIReferenceException ){
@@ -899,18 +899,18 @@ public class SignatureProcessor{
                 Throwable t2 = t1.getCause();
                 
                 if(t2 != null && t2 instanceof WssSoapFaultException){
-                    logger.log(Level.SEVERE, "WSS1338.error.verify");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
                     throw (WssSoapFaultException)t2;
                 }else{
-                    logger.log(Level.SEVERE, "WSS1338.error.verify");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
                     throw new XWSSecurityException((Exception)t1);
                 }
             }
-            logger.log(Level.SEVERE, "WSS1338.error.verify");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
             throw new XWSSecurityException(xse);
             
         }catch(Exception ex){
-            logger.log(Level.SEVERE, "WSS1338.error.verify");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1338_ERROR_VERIFY());
             throw new XWSSecurityException(ex);
         }finally{
             context.setInferredPolicy(null);
@@ -974,7 +974,7 @@ public class SignatureProcessor{
             }catch(Exception ex){
                 logger.log(Level.SEVERE,"WSS1302.reflist_error",ex);
                 if(requiredTarget){
-                    logger.log(Level.SEVERE, "WSS1339.invalid.ReceiverRequirements");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1339_INVALID_RECEIVER_REQUIREMENTS());
                     throw new XWSSecurityException("Receiver requirement for SignatureTarget "+
                             signatureTarget.getValue()+" is not met");
                 }
@@ -984,7 +984,7 @@ public class SignatureProcessor{
                 continue;
             }
             if( referenceList.size() <= 0){
-                logger.log(Level.SEVERE, "WSS1339.invalid.ReceiverRequirements");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1339_INVALID_RECEIVER_REQUIREMENTS());
                 throw new XWSSecurityException("Receiver requirement for SignatureTarget "+
                         signatureTarget.getValue()+" is not met");
             }
@@ -1007,7 +1007,7 @@ public class SignatureProcessor{
                     }
                 }catch(Exception ex){
                     if(requiredTarget){
-                        logger.log(Level.SEVERE, "WSS1339.invalid.ReceiverRequirements");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1339_INVALID_RECEIVER_REQUIREMENTS());
                         throw new XWSSecurityException("Receiver requirement for SignatureTarget "+
                                 signatureTarget.getValue()+" is not met");
                     }
@@ -1019,7 +1019,7 @@ public class SignatureProcessor{
         }
         
         if(optionalReqList.size() ==0 && requiredReferenceList.size() != signedReferenceList.size()){
-            logger.log(Level.SEVERE, "WSS1340.illegal.unmatched.NoofTargets");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1340_ILLEGAL_UNMATCHED_NOOF_TARGETS());
             throw new XWSSecurityException("Number of Targets in the message"+
                     " dont match number of Targets in receiver requirements");
         }
@@ -1048,7 +1048,7 @@ public class SignatureProcessor{
                 //Reference st = (Reference)requiredReferenceList.get(i);
                 String uri = rData.getTarget().getValue();
                 String type = rData.getTarget().getType();
-                logger.log(Level.SEVERE, "WSS1341.illegal.unmatched.Type.Uri");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1341_ILLEGAL_UNMATCHED_TYPE_URI());
                 throw new XWSSecurityException("Receiver requirement for SignatureTarget "+
                         "having " + type+" type and value " +uri+" is not met");
             }
@@ -1109,7 +1109,7 @@ public class SignatureProcessor{
                 
                 if(!found){
                     Reference st = (Reference)signedReferenceList.get(i);
-                    logger.log(Level.SEVERE, "WSS1341.illegal.unmatched.Type.Uri");
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1341_ILLEGAL_UNMATCHED_TYPE_URI());
                     throw new XWSSecurityException("SignatureTarget in the message "+
                             "with URI " +st.getURI()+ " has not met receiver requirements");
                 }
@@ -1222,7 +1222,7 @@ public class SignatureProcessor{
         
         List tList2 = ref2.getTransforms();
         if(tList1.size() != tList2.size()){
-            logger.log(Level.SEVERE, "WSS1342.illegal.unmatched.transforms");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1342_ILLEGAL_UNMATCHED_TRANSFORMS());
             throw new XWSSecurityException("Receiver Requirements for the transforms are not met");
             //return false;
         }else{
@@ -1237,7 +1237,7 @@ public class SignatureProcessor{
                 if(alg1 == alg2 || (alg1 != null && alg1.equals(alg2))){
                     continue;
                 }else{
-                    logger.log(Level.SEVERE, "WSS1342.illegal.unmatched.transforms");
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1342_ILLEGAL_UNMATCHED_TRANSFORMS());
                     throw new XWSSecurityException("Receiver Requirements for the transforms are not met");
                     //return false;
                 }
@@ -1371,7 +1371,7 @@ public class SignatureProcessor{
                 WSSPolicy originalKeyBinding = dtk.getOriginalKeyBinding();
                 
                 if (PolicyTypeUtil.x509CertificateBinding(originalKeyBinding)) {
-                    logger.log(Level.SEVERE, "WSS1327.unsupported.asymmetricbinding.derivedkey.x509token");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1327_UNSUPPORTED_ASYMMETRICBINDING_DERIVEDKEY_X_509_TOKEN());
                     throw new XWSSecurityException("Asymmetric Binding with DerivedKeys under X509Token Policy Not Yet Supported");
                 } else  if ( PolicyTypeUtil.symmetricKeyBinding(originalKeyBinding)) {
                     
@@ -1490,7 +1490,7 @@ public class SignatureProcessor{
                                     encryptedKey = keyEncryptor.encryptKey(secureMessage.getSOAPPart(), originalKey);
                                 }
                             }catch(Exception e){
-                                logger.log(Level.SEVERE, "WSS1334.error.creating.encryptedkey");
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1335_UNSUPPORTED_KEYBINDING_SIGNATUREPOLICY());
                                 throw new XWSSecurityException(e);
                             }
                             ekId = secureMessage.generateId();
@@ -1596,7 +1596,7 @@ public class SignatureProcessor{
                                                 );
                     
                     if (includeIST && (issuedToken == null)) {
-                        logger.log(Level.SEVERE, "WSS1343.null.IssuedToken");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1343_NULL_ISSUED_TOKEN());
                         throw new XWSSecurityException("Issued Token to be inserted into the Message was Null");
                     }
                     
@@ -1618,7 +1618,7 @@ public class SignatureProcessor{
                             String wsuId = SecurityUtil.getWsuIdOrId((Element)tok);
                             issuedTokenElementFromMsg = (SOAPElement)secureMessage.getElementById(wsuId);
                             if (issuedTokenElementFromMsg == null) {
-                                logger.log(Level.SEVERE, "WSS1344.error.locateIssueToken.Message");
+                                logger.log(Level.SEVERE,LogStringsMessages.WSS_1344_ERROR_LOCATE_ISSUE_TOKEN_MESSAGE());
                                 throw new XWSSecurityException("Could not locate Issued Token in Message");
                             }
                         }
@@ -1689,7 +1689,7 @@ public class SignatureProcessor{
                     return keyInfo;
                     
                 } else if ( PolicyTypeUtil.samlTokenPolicy(originalKeyBinding)) {
-                    logger.log(Level.SEVERE, "WSS1345.unsupported.derivedkeys.SAMLToken");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1345_UNSUPPORTED_DERIVEDKEYS_SAML_TOKEN());
                     throw new UnsupportedOperationException("DerivedKeys with SAMLToken not yet supported");
                     
                 } else if (PolicyTypeUtil.secureConversationTokenKeyBinding(originalKeyBinding)) {
@@ -1756,7 +1756,7 @@ public class SignatureProcessor{
                           ikb.INCLUDE_ALWAYS_TO_RECIPIENT_VER2.equals(iTokenType)
                           );
                 if (includeIST && (issuedToken == null)) {
-                    logger.log(Level.SEVERE, "WSS1343.null.IssuedToken");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1343_NULL_ISSUED_TOKEN());
                     throw new XWSSecurityException("Issued Token to be inserted into the Message was Null");
                 }
                 
@@ -1778,7 +1778,7 @@ public class SignatureProcessor{
                         String wsuId = SecurityUtil.getWsuIdOrId((Element)tok);
                         issuedTokenElementFromMsg = (SOAPElement)secureMessage.getElementById(wsuId);
                         if (issuedTokenElementFromMsg == null) {
-                            logger.log(Level.SEVERE, "WSS1344.error.locateIssueToken.Message");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1344_ERROR_LOCATE_ISSUE_TOKEN_MESSAGE());
                             throw new XWSSecurityException("Could not locate Issued Token in Message");
                         }
                     }
@@ -1791,7 +1791,7 @@ public class SignatureProcessor{
                 }
                 
                 if(strElem == null){
-                    logger.log(Level.SEVERE, "WSS1378.unableto.refer.IssueToken");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1378_UNABLETO_REFER_ISSUE_TOKEN());
                     throw new XWSSecurityException("Cannot determine how to reference the Issued Token in the Message");
                 }
                 
@@ -1837,13 +1837,13 @@ public class SignatureProcessor{
             }
             
         } catch (SOAPException ex ) {
-            logger.log(Level.SEVERE, "WSS1346.error.preparing.symmetrickey.signature", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1346_ERROR_PREPARING_SYMMETRICKEY_SIGNATURE(), ex);
             throw new XWSSecurityException(ex);
         } catch (Base64DecodingException ex) {
-            logger.log(Level.SEVERE, "WSS1346.error.preparing.symmetrickey.signature", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1346_ERROR_PREPARING_SYMMETRICKEY_SIGNATURE(), ex);
             throw new XWSSecurityException(ex);
         } catch (NoSuchAlgorithmException ex) {
-            logger.log(Level.SEVERE, "WSS1346.error.preparing.symmetrickey.signature", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1346_ERROR_PREPARING_SYMMETRICKEY_SIGNATURE(), ex);
             throw new XWSSecurityException(ex);
         }
         
@@ -1868,7 +1868,7 @@ public class SignatureProcessor{
         if (sct == null) {
             SecurityContextToken sct1 =(SecurityContextToken)ictx.getSecurityToken();
             if (sct1 == null) {
-                logger.log(Level.SEVERE, "WSS1347.null.SecureConversationToken");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1347_NULL_SECURE_CONVERSATION_TOKEN());
                 throw new XWSSecurityException("SecureConversation Token not Found");
             }
             
@@ -1981,7 +1981,7 @@ public class SignatureProcessor{
             }else if(referenceType.equals("Identifier")){
                 String valueType = certInfo.getValueType();
                 if(valueType==MessageConstants.X509v1_NS||valueType.equals(MessageConstants.X509v1_NS)) {
-                    logger.log(Level.SEVERE, "WSS1333.unsupported.keyidentifer.X509v1");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1333_UNSUPPORTED_KEYIDENTIFER_X_509_V_1());
                     throw new XWSSecurityException("Key Identifier reference Type is not allowed for X509v1 Certificates");
                 }
                 KeyIdentifierStrategy keyIdentifier =
@@ -2001,7 +2001,7 @@ public class SignatureProcessor{
             }else if(referenceType.equals(MessageConstants.THUMB_PRINT_TYPE)){
                 String valueType = certInfo.getValueType();
                 if(valueType==MessageConstants.X509v1_NS||valueType.equals(MessageConstants.X509v1_NS)) {
-                    logger.log(Level.SEVERE,"WSS1348.illegal.thumbprint.x509v1");
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1348_ILLEGAL_THUMBPRINT_X_509_V_1());
                     throw new XWSSecurityException("Thumb reference Type is not allowed for X509v1 Certificates");
                 }
                 KeyIdentifierStrategy keyIdentifier = new KeyIdentifierStrategy(certInfo.getCertificateIdentifier(),true, true);
@@ -2031,11 +2031,11 @@ public class SignatureProcessor{
                 nxtSiblingContainer[0] = nextSibling;
                 return keyInfo;
             }else{
-                logger.log(Level.SEVERE, "WSS1308.unsupported.reference.mechanism");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1308_UNSUPPORTED_REFERENCE_MECHANISM());
                 throw new XWSSecurityException("Reference type "+referenceType+"not supported");
             }
         } catch(Exception e){
-            logger.log(Level.SEVERE, "WSS1349.error.handlingX509Binding", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1349_ERROR_HANDLING_X_509_BINDING(), e);
             throw new XWSSecurityException(e);
         }
     }

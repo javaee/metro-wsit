@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -143,6 +143,7 @@ import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 
 /**
  * Implementation of JSR 105 KeySelector interface.
@@ -184,7 +185,7 @@ public class KeySelectorImpl extends KeySelector{
     public KeySelectorResult select(KeyInfo keyInfo, Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
         if (keyInfo == null) {
             if(logger.getLevel() == Level.SEVERE){
-                logger.log(Level.SEVERE,"WSS1317.keyinfo.null");
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1317_KEYINFO_NULL());
             }
             throw new KeySelectorException("Null KeyInfo object!");
         }
@@ -211,7 +212,7 @@ public class KeySelectorImpl extends KeySelector{
             }
             
             if (isBSP && list.size() > 1) {
-                logger.log(Level.SEVERE, "WSS1350.illegal.BSP.Violation.KeyInfo");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1350_ILLEGAL_BSP_VIOLATION_KEY_INFO());
                 throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "BSP Violation of R5402: KeyInfo MUST have exactly one child", null);
             }
@@ -225,7 +226,7 @@ public class KeySelectorImpl extends KeySelector{
                     try {
                         pk = ((KeyValue)xmlStructure).getPublicKey();
                     } catch (KeyException ke) {
-                        logger.log(Level.SEVERE,"WSS1351.exception.keyselector.publickey", ke);
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1351_EXCEPTION_KEYSELECTOR_PUBLICKEY(), ke);
                         throw new KeySelectorException(ke);
                     }
                     //if the purpose is signature verification, we need to make sure we
@@ -272,19 +273,19 @@ public class KeySelectorImpl extends KeySelector{
             }
             
             if (isBSP && !isStr) {
-                logger.log(Level.SEVERE, "BSP Violation of R5409: Child element of KeyInfo MUST be a STR element");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1379_ILLEGAL_BSP_VIOLATION_OF_R_5409());
                 throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "BSP Violation of R5409: Child element of KeyInfo MUST be a STR element", null);
             }
             
         }catch(KeySelectorException kse){
-            logger.log(Level.SEVERE, "WSS1352.exception.keyselector", kse);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1352_EXCEPTION_KEYSELECTOR(), kse);
             throw kse;
         }catch(Exception ex){
-              logger.log(Level.SEVERE,"WSS1353.unable.resolve.keyInformation",ex.getMessage());            
+              logger.log(Level.SEVERE,LogStringsMessages.WSS_1353_UNABLE_RESOLVE_KEY_INFORMATION(),ex.getMessage());
             throw new KeySelectorException(ex);
         }
-        logger.log(Level.SEVERE, "WSS1354.null.keyValue");
+        logger.log(Level.SEVERE, LogStringsMessages.WSS_1354_NULL_KEY_VALUE());
         throw new KeySelectorException("No KeyValue element found!");
     }
     
@@ -472,7 +473,7 @@ public class KeySelectorImpl extends KeySelector{
                             returnKey = secretKey;
                     }else{
                         String message = "EncryptedKeySHA1 reference not correct";
-                        logger.log(Level.SEVERE,"WSS1306:unsupported.KeyIdentifier.Reference.Type.encountered", new Object[] {message});
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1306_UNSUPPORTED_KEY_IDENTIFIER_REFERENCE_TYPE(), new Object[] {message});
                         throw new KeySelectorException(message);
                     }
                     //returnKey = null; 
@@ -499,7 +500,7 @@ public class KeySelectorImpl extends KeySelector{
                             try {
                                 tokenElement = samlAssertion.toElement(null);
                             } catch (Exception e) {
-                                logger.log(Level.SEVERE,"WSS1355.unableto.resolve.SAMLAssertion",e.getMessage());
+                                logger.log(Level.SEVERE,LogStringsMessages.WSS_1355_UNABLETO_RESOLVE_SAML_ASSERTION(),e.getMessage());
                                 throw new KeySelectorException(e);
                             }
                         }
@@ -613,7 +614,7 @@ public class KeySelectorImpl extends KeySelector{
                 }
                 String uri = ((DirectReference) refElement).getURI();
                 if (isBSP && !uri.startsWith("#")) {
-                    logger.log(Level.SEVERE, "WSS1356.Violation.BSP.R5204");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1356_VIOLATION_BSP_R_5204());
                     throw new XWSSecurityException("Violation of BSP R5204 "
                             + ": When a SECURITY_TOKEN_REFERENCE uses a Direct Reference to an INTERNAL_SECURITY_TOKEN, it MUST use a Shorthand XPointer Reference");
                 }
@@ -638,7 +639,7 @@ public class KeySelectorImpl extends KeySelector{
                     if(token == null){
                         token = (X509SecurityToken)resolveToken(wsuId,context);
                         if(token == null){
-                            logger.log(Level.SEVERE, "WSS1357.unableto.locate.Token");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1357_UNABLETO_LOCATE_TOKEN());
                             throw new KeySelectorException("Token with Id "+wsuId+ "not found");
                         }else{
                             tokenCache.put(wsuId, token);
@@ -675,7 +676,7 @@ public class KeySelectorImpl extends KeySelector{
                     if(token == null){
                         token = resolveToken(wsuId, context);
                         if(token == null){
-                            logger.log(Level.SEVERE, "WSS1357.unableto.locate.Token");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1357_UNABLETO_LOCATE_TOKEN());
                             throw new KeySelectorException("Token with Id "+wsuId+ "not found");//TODO LOG ::Venu
                         }else{
                             tokenCache.put(wsuId, token);
@@ -723,7 +724,7 @@ public class KeySelectorImpl extends KeySelector{
                         }
 
                         if(token == null){
-                            logger.log(Level.SEVERE, "WSS1358.unableto.locate.SCTToken");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1358_UNABLETO_LOCATE_SCT_TOKEN());
                             throw new KeySelectorException("SCT Token with Id "+sctId+ "not found");
                         }else{
                             tokenCache.put(sctId, token);
@@ -744,7 +745,7 @@ public class KeySelectorImpl extends KeySelector{
                         returnKey = resolveSCT(wssContext, (SecurityContextTokenImpl)token, purpose);
                         
                     } else {
-                        logger.log(Level.SEVERE, "WSS1359.invalid.valuetype.nonSCTtoken");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1359_INVALID_VALUETYPE_NON_SC_TTOKEN());
                         throw new KeySelectorException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");
                     }
 
@@ -763,7 +764,7 @@ public class KeySelectorImpl extends KeySelector{
                         }
 
                         if(token == null){
-                            logger.log(Level.SEVERE, "WSS1357.unableto.locate.Token");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1357_UNABLETO_LOCATE_TOKEN());
                             throw new KeySelectorException("Token with Id "+wsuId+ "not found");
                         }else{
                             tokenCache.put(wsuId, token);
@@ -848,7 +849,7 @@ public class KeySelectorImpl extends KeySelector{
                             } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
                                 //already set - do nothing
                             } else{
-                                logger.log(Level.SEVERE,"WSS1360.invalid.DerivedKeyToken");
+                                logger.log(Level.SEVERE,LogStringsMessages.WSS_1360_INVALID_DERIVED_KEY_TOKEN());
                                 throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                             }
                         }                        
@@ -863,8 +864,7 @@ public class KeySelectorImpl extends KeySelector{
                     }
                     
                 } else {
-                    logger.log(Level.SEVERE,"WSS1307.unsupported.directref.mechanism",
-                            new Object[] {((DirectReference)refElement).getValueType()});
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1307_UNSUPPORTED_DIRECTREF_MECHANISM( new Object[] {((DirectReference)refElement).getValueType()}));
                             
                             throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                     "unsupported directreference ValueType "+ ((DirectReference) refElement).getValueType(),null);
@@ -910,7 +910,7 @@ public class KeySelectorImpl extends KeySelector{
                 }
                 
             } else {
-                logger.log(Level.SEVERE, "WSS1308.unsupported.reference.mechanism");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1308_UNSUPPORTED_REFERENCE_MECHANISM());
                 KeySelectorException xwsse = new KeySelectorException(
                         "Key reference mechanism not supported");
                 //throw xwsse;
@@ -919,13 +919,13 @@ public class KeySelectorImpl extends KeySelector{
             }
             return returnKey;
         }catch(XWSSecurityException xwsExp){
-                logger.log(Level.SEVERE,"WSS1353.unable.resolve.keyInformation",xwsExp);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1353_UNABLE_RESOLVE_KEY_INFORMATION(),xwsExp);
                 throw new KeySelectorException(xwsExp);
         }catch(MarshalException me){
-                logger.log(Level.SEVERE,"WSS1353.unable.resolve.keyInformation",me);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1353_UNABLE_RESOLVE_KEY_INFORMATION(),me);
                 throw new KeySelectorException(me);
         }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1353.unable.resolve.keyInformation",ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1353_UNABLE_RESOLVE_KEY_INFORMATION(),ex);
                 throw new KeySelectorException(ex);
         }
     }
@@ -943,7 +943,7 @@ public class KeySelectorImpl extends KeySelector{
         }                        
         
         if (samlAssertion == null) {
-            logger.log(Level.SEVERE, "WSS1355.unableto.resolve.SAMLAssertion");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1355_UNABLETO_RESOLVE_SAML_ASSERTION());
             throw new XWSSecurityException("Cannot Resolve SAML Assertion");
         }
         
@@ -953,7 +953,7 @@ public class KeySelectorImpl extends KeySelector{
             //verify the signature inside the SAML assertion
             if ( nl.getLength() == 0) {                                
                 XWSSecurityException e = new XWSSecurityException("Unsigned SAML Assertion encountered");
-                logger.log(Level.SEVERE, "WSS1309.saml.signature.verify.failed", e);
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1309_SAML_SIGNATURE_VERIFY_FAILED(), e);
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         "Exception during Signature verfication in SAML Assertion",
@@ -975,7 +975,7 @@ public class KeySelectorImpl extends KeySelector{
                     elem = (Element)nl.item(returnSigNodeIndex);
                 }else{
                     XWSSecurityException e = new XWSSecurityException("Unsigned SAML Assertion encountered");
-                        logger.log(Level.SEVERE, "WSS1309.saml.signature.verify.failed", e);
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1309_SAML_SIGNATURE_VERIFY_FAILED(), e);
                         throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_INVALID_SECURITY,
                             "Exception during Signature verfication in SAML Assertion",
@@ -993,7 +993,7 @@ public class KeySelectorImpl extends KeySelector{
             
             try {
                 if ( !SignatureProcessor.verifySignature(elem, context)) {
-                    logger.log(Level.SEVERE, "WSS1310.saml.signature.invalid");
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1310_SAML_SIGNATURE_INVALID());
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_FAILED_AUTHENTICATION,
                             "SAML Assertion has invalid Signature",
@@ -1001,7 +1001,7 @@ public class KeySelectorImpl extends KeySelector{
                             "SAML Assertion has invalid Signature"));
                 }
             } catch (XWSSecurityException ex) {
-                logger.log(Level.SEVERE, "WSS1310.saml.signature.invalid");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1310_SAML_SIGNATURE_INVALID());
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "SAML Assertion has invalid Signature",
@@ -1021,7 +1021,7 @@ public class KeySelectorImpl extends KeySelector{
         while(content.hasNext()){
             Object data = content.next();
             if(data instanceof KeyName){
-                logger.log(Level.SEVERE, "WSS1361.unsupported.KeyName.SAML");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1361_UNSUPPORTED_KEY_NAME_SAML());
                 throw new XWSSecurityException("Unsupported KeyName under SAML SubjectConfirmation");
             }else if(data instanceof KeyValue){
                 key = resolveKeyValue(context, (KeyValue)data, purpose);
@@ -1040,7 +1040,7 @@ public class KeySelectorImpl extends KeySelector{
                    try {
                        bs = WSTrustElementFactory.newInstance().createBinarySecret(reference);
                    }catch (WSTrustException ex) {
-                       logger.log(Level.SEVERE, "WSS1362.exception.WSTrust.CreatingBinarySecret", ex);
+                       logger.log(Level.SEVERE, LogStringsMessages.WSS_1362_EXCEPTION_WS_TRUST_CREATING_BINARY_SECRET(), ex);
                        throw new XWSSecurityException(ex);
                    } 
                    // assuming the Binary Secret is of Type 
@@ -1052,7 +1052,7 @@ public class KeySelectorImpl extends KeySelector{
                         key = new SecretKeySpec(bs.getRawValue(), algo);
                         break;
                    } else {
-                       logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                       logger.log(Level.SEVERE,LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                        throw new KeySelectorException("Unsupported wst:BinarySecret Type");
                    }
                } else if (SecurityUtil.isEncryptedKey(reference)) {
@@ -1070,17 +1070,17 @@ public class KeySelectorImpl extends KeySelector{
                        key = ekToken.getSecretKey(privKey, dataEncAlgo);
                        break;
                     } else {
-                       logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                       logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                        throw new KeySelectorException("Unsupported Key Information Inside EncryptedKey");
                     }
 
                } else {
-                   logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                   logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                    throw new KeySelectorException("Unsupported Key Information");
                }
 
             }else {
-                logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                 throw new KeySelectorException("Unsupported Key Information");
             }
         }
@@ -1109,7 +1109,7 @@ public class KeySelectorImpl extends KeySelector{
                         context.getExtraneousProperties(), keyValue.getPublicKey(), true);
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE,"WSS1313.illegal.key.value",e.getMessage());
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1313_ILLEGAL_KEY_VALUE(""),e.getMessage());
             throw new KeySelectorException(e);
         }
         return null;
@@ -1153,7 +1153,7 @@ public class KeySelectorImpl extends KeySelector{
                                 context.getExtraneousProperties(), ski);
                     }
                 } else if (content instanceof String) {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "X509SubjectName child element of X509Data is not yet supported by our implementation");
                 } else if (content instanceof X509IssuerSerial) {
@@ -1172,14 +1172,14 @@ public class KeySelectorImpl extends KeySelector{
                     }
                     
                 } else {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "Unsupported child element of X509Data encountered");
                 }
                 
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE,"WSS1314.illegal.x509.data", e.getMessage());
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1314_ILLEGAL_X_509_DATA(""), e.getMessage());
             throw new KeySelectorException(e);
         }
         return null;//Should never come here.
@@ -1216,7 +1216,7 @@ public class KeySelectorImpl extends KeySelector{
                             return context.getSecurityEnvironment().getPrivateKey(context.getExtraneousProperties(), cert);
                         }
                 } else if (content instanceof String) {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "X509SubjectName child element of X509Data is not yet supported by our implementation");
                 } else if (content instanceof X509IssuerSerial) {
@@ -1233,13 +1233,13 @@ public class KeySelectorImpl extends KeySelector{
                         }
                     
                 } else {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "Unsupported child element of X509Data encountered");
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE,"WSS1314.illegal.x509.data", e.getMessage());
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1314_ILLEGAL_X_509_DATA(""), e.getMessage());
             throw new KeySelectorException(e);
         }
         return null;//Should never come here.
@@ -1322,12 +1322,12 @@ public class KeySelectorImpl extends KeySelector{
                     try{
                         cert = token.getCertificate();
                     }catch(XWSSecurityException xwe){
-                        logger.log(Level.SEVERE,"WSS1363.invalid.security.token");
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1363_INVALID_SECURITY_TOKEN());
                         throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                 "A Invalid security token was provided ", xwe);
                     }
                     if(!wssContext.getSecurityEnvironment().validateCertificate(cert, wssContext.getExtraneousProperties())){
-                        logger.log(Level.SEVERE,"WSS1364.unableto.validate.certificate");
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1364_UNABLETO_VALIDATE_CERTIFICATE());
                         throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                 "Certificate validation failed", null);
                     }
@@ -1342,14 +1342,14 @@ public class KeySelectorImpl extends KeySelector{
                 
             }
         }catch(URIReferenceException ure){
-            logger.log(Level.SEVERE,"WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE",ure);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1304_FC_SECURITY_TOKEN_UNAVAILABLE(),ure);
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                     "Referenced Security Token could not be retrieved",
                     ure);
         }
         
-        logger.log(Level.SEVERE,"WSS1305.UnSupported.security.token");       
+        logger.log(Level.SEVERE,LogStringsMessages.WSS_1305_UN_SUPPORTED_SECURITY_TOKEN());
         throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_UNSUPPORTED_SECURITY_TOKEN, "A Unsupported token was provided ", null);
     }
     
@@ -1393,7 +1393,7 @@ public class KeySelectorImpl extends KeySelector{
                 // do nothing
             }
         } catch (Exception e) {
-                logger.log(Level.SEVERE,"WSS1355.unableto.resolve.SAMLAssertion",e);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1355_UNABLETO_RESOLVE_SAML_ASSERTION(),e);
             throw new XWSSecurityException(e);
         }
         
@@ -1470,7 +1470,7 @@ public class KeySelectorImpl extends KeySelector{
         }        
         
         if (ctx == null) {
-            logger.log(Level.SEVERE, "WSS1365.unableto.locate.SecureConversation.Session");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1365_UNABLETO_LOCATE_SECURE_CONVERSATION_SESSION());
             throw new XWSSecurityException("Could not locate SecureConversation session for Id:" + scId);
         }
         
@@ -1490,7 +1490,7 @@ public class KeySelectorImpl extends KeySelector{
         // this is because the key would be used for Signatures
         //TODO: PLUGFEST : change this to globally available encryption algo
         if (proofKey == null) {
-            logger.log(Level.SEVERE, "WSS1365.unableto.locate.SecureConversation.Session");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1365_UNABLETO_LOCATE_SECURE_CONVERSATION_SESSION());
             throw new XWSSecurityException("Could not locate SecureConversation session for Id:" + scId);
         }
 
@@ -1541,7 +1541,7 @@ public class KeySelectorImpl extends KeySelector{
         Key returnKey = dkt.generateSymmetricKey(jceAlgo);
         return returnKey;
         } catch (Exception e){
-            logger.log(Level.SEVERE, "WSS1366.unable.generateSymmetricKey.DKT", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1366_UNABLE_GENERATE_SYMMETRIC_KEY_DKT(), e);
             throw new XWSSecurityException(e);
         }
     }

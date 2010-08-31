@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,6 +53,7 @@ import com.sun.xml.wss.core.X509SecurityToken;
 import com.sun.xml.wss.core.reference.DirectReference;
 import com.sun.xml.wss.core.reference.KeyIdentifier;
 import com.sun.xml.wss.core.reference.X509IssuerSerial;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import com.sun.xml.wss.saml.AssertionUtil;
 
 import java.io.InputStream;
@@ -251,7 +252,7 @@ public class DSigResolver implements URIDereferencer{
             }
             return data;
         }catch(URIReferenceException ue){
-            logger.log (Level.SEVERE,"WSS1325.dsig.externaltarget",uri);
+            logger.log (Level.SEVERE,LogStringsMessages.WSS_1325_DSIG_EXTERNALTARGET(ue));
             throw ue;
         }
         
@@ -443,7 +444,7 @@ public class DSigResolver implements URIDereferencer{
                     // As specified by WSS spec
                     newElement.removeAttribute ("EncodingType");
                 } catch (DOMException de) {
-                    //log.log(Level.SEVERE, "WSS0607.str.transform.exception");
+                    logger.log(Level.SEVERE,com.sun.xml.wss.logging.LogStringsMessages.WSS_0607_STR_TRANSFORM_EXCEPTION());
                     throw new XWSSecurityRuntimeException (de.getMessage (), de);
                 }
             } else if (MessageConstants.ThumbPrintIdentifier_NS.equals (valueType)) {
@@ -469,7 +470,7 @@ public class DSigResolver implements URIDereferencer{
                     // As specified by WSS spec
                     newElement.removeAttribute ("EncodingType");
                 } catch (DOMException de) {
-                    //log.log(Level.SEVERE, "WSS0607.str.transform.exception");
+                    logger.log(Level.SEVERE,com.sun.xml.wss.logging.LogStringsMessages.WSS_0607_STR_TRANSFORM_EXCEPTION());
                     throw new XWSSecurityRuntimeException (de.getMessage (), de);
                 }
             }else if(MessageConstants.EncryptedKeyIdentifier_NS.equals (valueType)){
@@ -541,12 +542,11 @@ public class DSigResolver implements URIDereferencer{
                 // EncodingType should not be set - As specified by WSS spec
                 newElement.removeAttribute ("EncodingType");
             } catch (DOMException de) {
-                //log.log(Level.SEVERE,"WSS0607.str.transform.exception");
+                logger.log(Level.SEVERE,com.sun.xml.wss.logging.LogStringsMessages.WSS_0607_STR_TRANSFORM_EXCEPTION());
                 throw new XWSSecurityException (de.getMessage (), de);
             }
         } else {
-           /* log.log(Level.SEVERE,
-            "WSS0608.illegal.reference.mechanism");*/
+            logger.log(Level.SEVERE,com.sun.xml.wss.logging.LogStringsMessages.WSS_0608_DIAG_CAUSE_1());
             throw new XWSSecurityException (
                     "Cannot handle reference mechanism: " +
                     refElement.getTagName ());

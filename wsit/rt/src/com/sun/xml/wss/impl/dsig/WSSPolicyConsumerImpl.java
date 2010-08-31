@@ -61,8 +61,8 @@ import com.sun.xml.wss.impl.policy.mls.SymmetricKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.SignaturePolicy;
 import com.sun.xml.wss.impl.policy.mls.SignatureTarget;
 
-import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.security.AccessController;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -111,7 +111,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -161,7 +160,7 @@ public class WSSPolicyConsumerImpl {
             Class providerClass = Class.forName(providerName,true,loader);
             provider = (Provider) providerClass.newInstance();
         }catch(Exception ex){
-            logger.log(Level.SEVERE,"WSS1324.dsig.factory",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1324_DSIG_FACTORY(),ex);
         }
 
         if(logger.isLoggable(Level.FINEST)) {
@@ -297,7 +296,7 @@ public class WSSPolicyConsumerImpl {
             return XMLSignatureFactory.getInstance("DOM",provider);
             //XMLSignatureFactory.getInstance (pMT,providerName);
         }catch(Exception ex) {
-            logger.log(Level.SEVERE,"WSS1324.dsig.factory",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1324_DSIG_FACTORY(),ex);
             throw new RuntimeException(ex);
         }
     }
@@ -310,7 +309,7 @@ public class WSSPolicyConsumerImpl {
         try {
             return getSignatureFactory().getKeyInfoFactory();
         }catch(Exception ex) {
-            logger.log(Level.SEVERE,"WSS1323.dsig.keyinfo.factory",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1323_DSIG_KEYINFO_FACTORY(),ex);
             throw new RuntimeException(ex);
         }
     }
@@ -390,7 +389,7 @@ public class WSSPolicyConsumerImpl {
                         target.setType(SignatureTarget.TARGET_TYPE_VALUE_QNAME);
                     }
                 } else{
-                    logger.log(Level.SEVERE, "WSS1376.failed.verify.policy.noElementbyID");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1376_FAILED_VERIFY_POLICY_NO_ELEMENTBY_ID());
                     throw new XWSSecurityException("Policy verification for Signature failed: Element with Id: " + Id
                             + "not found in message" );
                 }
@@ -493,7 +492,7 @@ public class WSSPolicyConsumerImpl {
                keyAlgo = MessageConstants.RSA_SHA1_SIGMETHOD;
            }
        } else { 
-            logger.log(Level.SEVERE, "WSS1335.unsupported.keybinding.signaturepolicy");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1335_UNSUPPORTED_KEYBINDING_SIGNATUREPOLICY());
             throw new XWSSecurityException("Unsupported KeyBinding for SignaturePolicy");
        }
         
@@ -638,7 +637,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
             try{
                 digestMethod = signatureFactory.newDigestMethod(digestAlgo, null);
             }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1301.invalid.digest.algo",digestAlgo);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1301_INVALID_DIGEST_ALGO(digestAlgo),ex);
                 throw new XWSSecurityException(ex.getMessage());
             }
             
@@ -659,7 +658,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                     //XPathFilterParameterSpec spec = null;
                     
                     if(spec == null){
-                        logger.log(Level.SEVERE, "WSS1367.illegal.xpath");
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1367_ILLEGAL_XPATH());
                         throw new XWSSecurityException("XPATH parameters cannot be null");
                         
                     }
@@ -676,7 +675,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                         algo = transformParams.getParamValue();
                     }
                     if(algo == null){
-                        logger.log(Level.SEVERE, "WSS1368.illegal.str.canoncalization");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1368_ILLEGAL_STR_CANONCALIZATION());
                         throw new XWSSecurityException("STR Transform must have a"+
                                 "canonicalization method specified");
                     }
@@ -695,7 +694,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                         XMLStructure transformSpec = new DOMStructure(tp);
                         transform = signatureFactory.newTransform(transformAlgo,transformSpec);
                     }catch(Exception ex){
-                        logger.log(Level.SEVERE,"WSS1300.dsig.transform_param.error",ex);
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1300_DSIG_TRANSFORM_PARAM_ERROR(),ex);
                         throw new XWSSecurityException(ex.getMessage());
                     }
                 } else if (MessageConstants.TRANSFORM_C14N_EXCL_OMIT_COMMENTS.equalsIgnoreCase(transformAlgo)) {
@@ -758,7 +757,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                                 }
                             };
                         }catch(SOAPException se){
-                            logger.log(Level.SEVERE, "WSS1369.unable.get.signatureTarget.by.URI");
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1369_UNABLE_GET_SIGNATURE_TARGET_BY_URI());
                             throw new XWSSecurityException("SignatureTarget with URI "+targetValue+
                                    " is not in the message");
                              //logger.log(
@@ -815,7 +814,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                                     }
                                 }
                             } catch (SOAPException se){
-                                logger.log(Level.SEVERE, "WSS1370.failed.process.header");
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1370_FAILED_PROCESS_HEADER());
                                 throw new XWSSecurityException(se);
                             }
                         }
@@ -845,7 +844,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                 int i=0;
                 if(nodes == null || nodes.getLength() <= 0){
                     if(signatureTarget.getEnforce()){
-                        logger.log(Level.SEVERE, "WSS1369.unable.get.signatureTarget.by.URI");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1369_UNABLE_GET_SIGNATURE_TARGET_BY_URI());
                         throw new XWSSecurityException("SignatureTarget with URI "+signatureTarget.getValue()+
                                " is not in the message");
                     } else{
@@ -870,7 +869,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                         logger.log(Level.FINEST, "Nodes is "+nodes.item(i));
                     Node nodeRef = nodes.item(i++);
                     if(nodeRef.getNodeType() != Node.ELEMENT_NODE) {
-                        logger.log (Level.SEVERE, "WSS1371.failed.resolve.XPath");
+                        logger.log (Level.SEVERE, LogStringsMessages.WSS_1371_FAILED_RESOLVE_X_PATH());
                         throw new XWSSecurityException(
                                 "XPath does not correspond to a DOM Element");
                     }
@@ -935,7 +934,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                 if(targetURI == MessageConstants.PROCESS_ALL_ATTACHMENTS){
                     Iterator itr = secureMessage.getAttachments();
                     if ( !itr.hasNext()) {
-                        logger.log(Level.SEVERE, "WSS1372.no.attachmentFound");
+                        logger.log(Level.SEVERE, LogStringsMessages.WSS_1372_NO_ATTACHMENT_FOUND());
                         throw new XWSSecurityException("No attachment present in the message");
                         //logger.log(Level.WARNING, "No Attachment Part present in the message to be secured");
                         //continue;
@@ -949,7 +948,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                             int sindex = _cid.indexOf('<');
                             if(lindex < sindex || lindex == sindex){
                                 //log error
-                                logger.log(Level.SEVERE,"WSS1303.cid_error");
+                                logger.log(Level.SEVERE,LogStringsMessages.WSS_1303_CID_ERROR());
                             }
                             cid = "cid:"+_cid.substring(sindex+1,lindex);
                         }else{
@@ -1081,7 +1080,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
             logger.log(Level.FINEST, "\n");
             }
         }catch(Exception ex){
-            logger.log(Level.SEVERE, "WSS1374.failedto.print.document", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1374_FAILEDTO_PRINT_DOCUMENT(), ex);
             throw new RuntimeException(ex);
         }
     }

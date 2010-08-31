@@ -1,11 +1,11 @@
 /**
- * $Id: TimestampFilter.java,v 1.3 2010-03-20 12:33:21 kumarjayanti Exp $
+ * $Id: TimestampFilter.java,v 1.4 2010-08-31 07:15:42 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -64,6 +64,7 @@ import com.sun.xml.wss.impl.callback.DynamicPolicyCallback;
 import com.sun.xml.wss.impl.configuration.DynamicApplicationContext;
 import com.sun.xml.wss.impl.misc.SecurityHeaderBlockImpl;
 import com.sun.xml.wss.impl.HarnessUtil;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 
 /**
  * Processes export and import of wsu:Timestamp
@@ -172,7 +173,7 @@ public class TimestampFilter {
                              context.getSecurityEnvironment().getCallbackHandler());
 
                      } catch (Exception e) {
-                    log.log(Level.SEVERE, "Message does not conform to time stamp policy", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1436_MESSAGE_DOESNOT_CONFORM_TIMESTAMP_POLICY(), e);
                          throw new XWSSecurityException (e);
                      }
                      context.setSecurityPolicy(policyClone);
@@ -184,7 +185,7 @@ public class TimestampFilter {
 
                  SecurityHeader secHeader = context.getSecurableSoapMessage().findSecurityHeader();
                  if (secHeader == null) {
-		         log.log(Level.SEVERE, "WSS0276.invalid.policy.NoTimestamp.SecHeader");
+		         log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0276_INVALID_POLICY_NO_TIMESTAMP_SEC_HEADER());
                          throw new XWSSecurityException(
                         "Message does not conform to Timestamp policy: " +
 	                "wsu:Timestamp element not found in header");
@@ -203,11 +204,11 @@ public class TimestampFilter {
 		     if (i.hasNext()) {
 		         ts = (SOAPElement) i.next();
 			 if (i.hasNext()) {
-                             log.log(Level.SEVERE, "BSP3227.Single.Timestamp");
+                             log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.BSP_3227_SINGLE_TIMESTAMP());
 			     throw new XWSSecurityException("More than one wsu:Timestamp element in the header");
 			 }
 		     } else {
-			  log.log(Level.SEVERE, "WSS0276.invalid.policy.NoTimestamp.SecHeader");
+			  log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0276_INVALID_POLICY_NO_TIMESTAMP_SEC_HEADER());
 			 throw new XWSSecurityException(
                              "Message does not conform to Timestamp policy: " +
 		             "wsu:Timestamp element not found in header");
@@ -220,7 +221,7 @@ public class TimestampFilter {
 		 try {
 		     timestamp = new Timestamp (ts);                     
                  } catch (XWSSecurityException xwsse) {
-                     log.log(Level.SEVERE, "WSS1429.error.timestamp.internalization", xwsse);
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_1429_ERROR_TIMESTAMP_INTERNALIZATION(), xwsse);
                     throw SecurableSoapMessage.newSOAPFaultException(
                          MessageConstants.WSSE_INVALID_SECURITY,
                          "Failure in Timestamp internalization.\n" +
@@ -232,7 +233,7 @@ public class TimestampFilter {
                      context.getSecurityEnvironment().validateTimestamp(
                          context.getExtraneousProperties(), timestamp, maxClockSkew, timeStampFreshness);
                  } catch (XWSSecurityException xwsse) {
-                     log.log(Level.SEVERE, "WSS1430.error.timestamp.validation", xwsse);
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_1430_ERROR_TIMESTAMP_VALIDATION(), xwsse);
                     throw SecurableSoapMessage.newSOAPFaultException(
                          MessageConstants.WSSE_INVALID_SECURITY,
                          "Failure in Timestamp validation.\n" +
@@ -260,7 +261,7 @@ public class TimestampFilter {
                          SecurityHeaderBlockImpl.fromSoapElement(
                              secHeader.getCurrentHeaderElement(),Timestamp.class);
                  } catch (XWSSecurityException xwsse) {
-                     log.log(Level.SEVERE, "Failure in Timestamp internalization", xwsse);
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_1429_ERROR_TIMESTAMP_INTERNALIZATION(), xwsse);
                      throw SecurableSoapMessage.newSOAPFaultException(
                            MessageConstants.WSSE_INVALID_SECURITY,
                            "Failure in Timestamp internalization.\n" +
@@ -275,7 +276,7 @@ public class TimestampFilter {
                           Timestamp.MAX_CLOCK_SKEW, 
                           Timestamp.TIMESTAMP_FRESHNESS_LIMIT);
                  } catch (XWSSecurityException xwsse) {
-                     log.log(Level.SEVERE, "Failure in Timestamp validation", xwsse);
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_1430_ERROR_TIMESTAMP_VALIDATION(), xwsse);
                     throw SecurableSoapMessage.newSOAPFaultException(
                          MessageConstants.WSSE_INVALID_SECURITY,
                          "Failure in Timestamp validation.\n" +
