@@ -161,10 +161,6 @@
         </dependency>
         <dependency>
             <groupId>com.sun.xml.security</groupId>
-            <artifactId>apache-xmlsec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.security</groupId>
             <artifactId>saml-jaxb10-bindings</artifactId>
         </dependency>
         <dependency>

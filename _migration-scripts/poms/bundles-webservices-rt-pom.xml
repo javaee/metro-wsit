@@ -43,7 +43,6 @@
                                     <include>com.sun.xml.registry:jaxr-impl</include>
                                     <include>com.sun.xml.rpc:jaxrpc-impl</include>
                                     <include>com.sun.xml.rpc:jaxrpc-spi</include>
-                                    <include>com.sun.xml.security:apache-xmlsec</include>
                                     <include>com.sun.xml.security:jsr105-impl</include>
                                     <include>com.sun.xml.security:saml-jaxb10-bindings</include>
                                     <include>com.sun.xml.stream:sjsxp</include>
@@ -118,10 +117,6 @@
         <dependency>
             <groupId>com.sun.xml.security</groupId>
             <artifactId>jsr105-impl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.security</groupId>
-            <artifactId>apache-xmlsec</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.wss.core.reference</groupId>

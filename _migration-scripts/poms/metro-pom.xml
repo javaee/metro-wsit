@@ -417,11 +417,6 @@
                 <version>1.8.0</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.security</groupId>
-                <artifactId>apache-xmlsec</artifactId>
-                <version>1.0.1</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.resource</groupId>
                 <artifactId>connector-api</artifactId>
                 <version>1.5</version>
@@ -569,7 +564,7 @@
             <dependency>
                 <groupId>com.sun.xml.security</groupId>
                 <artifactId>jsr105-impl</artifactId>
-                <version>1.0.1</version>
+                <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>javax.annotation</groupId>
