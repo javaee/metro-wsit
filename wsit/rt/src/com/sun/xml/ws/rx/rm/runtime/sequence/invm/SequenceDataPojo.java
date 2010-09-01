@@ -36,7 +36,7 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import java.io.Serializable;
 import java.util.HashMap;

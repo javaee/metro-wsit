@@ -38,7 +38,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.RxConfigurationBase;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;

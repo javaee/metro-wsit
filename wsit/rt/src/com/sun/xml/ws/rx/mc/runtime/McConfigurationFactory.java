@@ -39,7 +39,7 @@ package com.sun.xml.ws.rx.mc.runtime;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.rx.mc.api.MakeConnectionSupportedFeature;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;

@@ -38,7 +38,7 @@ package com.sun.xml.ws.rx;
 
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import org.glassfish.gmbal.ManagedObjectManager;
 
 /**

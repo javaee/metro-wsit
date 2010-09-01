@@ -43,7 +43,7 @@ package com.sun.xml.ws.runtime.dev;
 
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
