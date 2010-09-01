@@ -36,47 +36,54 @@
 
 package com.sun.xml.ws.config.metro.parser;
 
-import java.util.List;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.config.metro.parser.jsr109.WebserviceDescriptionType;
+import com.sun.xml.ws.config.metro.parser.jsr109.WebservicesType;
 
-import junit.framework.TestCase;
+import java.util.List;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.ws.WebServiceException;
 
 /**
+ * Parse webservices.xml.
  *
  * @author Fabian Ritzmann
  */
-public class MetroParserTest extends TestCase {
-    
-    public MetroParserTest(String testName) {
-        super(testName);
+class WsParser {
+
+    private static final Logger LOGGER = Logger.getLogger(WsParser.class);
+
+    private static JAXBContext context;
+
+    public WsParser() throws WebServiceException {
+        try {
+            // We don't need to care about race conditions here, in the worst case
+            // the context gets initialized several times. We don't instantiate context
+            // in a static block because we would lose the exception message.
+            if (context == null) {
+                context = JAXBContext.newInstance("com.sun.xml.ws.config.metro.parser.jsr109");
+            }
+        } catch (JAXBException e) {
+            // TODO logging message
+            throw LOGGER.logSevereException(new WebServiceException("Failed to initialize", e));
+        }
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testNew() {
-        final MetroParser result = new MetroParser();
-        assertNotNull(result);
-    }
-
-    /**
-     * Test of unmarshal method, of class MetroParser.
-     */
-    public void testUnmarshal_Reader() throws Exception {
-        final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        final XMLStreamReader streamReader = inputFactory.createXMLStreamReader(getClass().getClassLoader().getResourceAsStream("config/metro-webservices.xml"));
-        final MetroParser instance = new MetroParser();
-        final List<ParsedElement> result = instance.unmarshal(streamReader);
-        assertNotNull(result);
-        assertEquals(6, result.size());
+    public List<WebserviceDescriptionType> parse(final XMLStreamReader reader) throws WebServiceException {
+        try {
+            final Unmarshaller unmarshaller = context.createUnmarshaller();
+            final JAXBElement<WebservicesType> elements = unmarshaller.unmarshal(reader, WebservicesType.class);
+            final WebservicesType root = elements.getValue();
+            final List<WebserviceDescriptionType> descriptions = root.getWebserviceDescription();
+            return descriptions;
+        } catch (JAXBException e) {
+            // TODO logging message
+            throw LOGGER.logSevereException(new WebServiceException("Failed to unmarshal webservices.xml", e));
+        }
     }
 
 }

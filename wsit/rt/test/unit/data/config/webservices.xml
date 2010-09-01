@@ -1,0 +1,16 @@
+<webservices xmlns="http://java.sun.com/xml/ns/javaee"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/javaee_web_services_1_3.xsd"  version="1.3">
+    <webservice-description>
+        <webservice-description-name>FooService</webservice-description-name>
+        <wsdl-file>META-INF/wsdl/foo.wsdl</wsdl-file>
+        <port-component xmlns:foo="http://foo.com">
+            <port-component-name>FooPort</port-component-name>
+            <wsdl-service>foo:FooService</wsdl-service>
+            <service-impl-bean>
+                <servlet-link>Foo</servlet-link>
+            </service-impl-bean>
+        </port-component>
+    </webservice-description>
+</webservices>
