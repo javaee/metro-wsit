@@ -165,7 +165,7 @@ class SequenceDataPojo implements Serializable {
 
     public void replicate() {
         if (backingStore != null) {
-            HighAvailabilityProvider.INSTANCE.saveTo(backingStore, sequenceId, this, false);
+            HighAvailabilityProvider.saveTo(backingStore, sequenceId, this, false);
         }
     }
 }

@@ -68,25 +68,25 @@ final class InVmSequenceData implements SequenceData {
         }
 
         public ApplicationMessage load(String key) {
-            ApplicationMessageState state = HighAvailabilityProvider.INSTANCE.loadFrom(unackedMesagesBs, key, null);
+            ApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, key, null);
             return state.toMessage();
         }
 
         public String save(String key, ApplicationMessage value, boolean isNew) {
             ApplicationMessageState ams = new ApplicationMessageState(value);
-            return HighAvailabilityProvider.INSTANCE.saveTo(unackedMesagesBs, key, ams, isNew);
+            return HighAvailabilityProvider.saveTo(unackedMesagesBs, key, ams, isNew);
         }
 
         public void remove(String key) {
-            HighAvailabilityProvider.INSTANCE.removeFrom(unackedMesagesBs, key);
+            HighAvailabilityProvider.removeFrom(unackedMesagesBs, key);
         }
 
         public void close() {
-            HighAvailabilityProvider.INSTANCE.close(unackedMesagesBs);
+            HighAvailabilityProvider.close(unackedMesagesBs);
         }
 
         public void destroy() {
-            HighAvailabilityProvider.INSTANCE.destroy(unackedMesagesBs);
+            HighAvailabilityProvider.destroy(unackedMesagesBs);
         }
     }
 

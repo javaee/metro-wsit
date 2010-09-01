@@ -83,23 +83,23 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
         }
 
         public V load(K key) {
-            return HighAvailabilityProvider.INSTANCE.loadFrom(backingStore, key, null);
+            return HighAvailabilityProvider.loadFrom(backingStore, key, null);
         }
 
         public String save(K key, V value, boolean isNew) {
-            return HighAvailabilityProvider.INSTANCE.saveTo(backingStore, key, value, isNew);
+            return HighAvailabilityProvider.saveTo(backingStore, key, value, isNew);
         }
 
         public void remove(K key) {
-            HighAvailabilityProvider.INSTANCE.removeFrom(backingStore, key);
+            HighAvailabilityProvider.removeFrom(backingStore, key);
         }
 
         public void close() {
-            HighAvailabilityProvider.INSTANCE.close(backingStore);
+            HighAvailabilityProvider.close(backingStore);
         }
 
         public void destroy() {
-            HighAvailabilityProvider.INSTANCE.destroy(backingStore);
+            HighAvailabilityProvider.destroy(backingStore);
         }
     }
 

@@ -418,7 +418,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
     }
 
     public AbstractSequence load(String key) {
-        SequenceDataPojo state = HighAvailabilityProvider.INSTANCE.loadFrom(sequenceDataBs, key, null);
+        SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, key, null);
         if (state == null) {
             return null;
         }
@@ -435,18 +435,18 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         }
 
         InVmSequenceData data = (InVmSequenceData) _data;
-        return HighAvailabilityProvider.INSTANCE.saveTo(sequenceDataBs, key, data.getSequenceStatePojo(), isNew);
+        return HighAvailabilityProvider.saveTo(sequenceDataBs, key, data.getSequenceStatePojo(), isNew);
     }
 
     public void remove(String key) {
-        HighAvailabilityProvider.INSTANCE.removeFrom(sequenceDataBs, key);
+        HighAvailabilityProvider.removeFrom(sequenceDataBs, key);
     }
 
     public void close() {
-        HighAvailabilityProvider.INSTANCE.close(sequenceDataBs);
+        HighAvailabilityProvider.close(sequenceDataBs);
     }
 
     public void destroy() {
-        HighAvailabilityProvider.INSTANCE.destroy(sequenceDataBs);
+        HighAvailabilityProvider.destroy(sequenceDataBs);
     }
 }
