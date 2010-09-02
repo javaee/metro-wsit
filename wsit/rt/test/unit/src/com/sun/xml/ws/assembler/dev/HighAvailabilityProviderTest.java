@@ -36,7 +36,8 @@
 
 package com.sun.xml.ws.assembler.dev;
 
-import com.sun.xml.ws.assembler.dev.HighAvailabilityProvider.StoreType;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider.StoreType;
 import junit.framework.TestCase;
 import org.glassfish.ha.store.api.BackingStoreConfiguration;
 import org.glassfish.ha.store.api.BackingStoreFactory;
