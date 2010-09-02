@@ -1,11 +1,11 @@
 /*
- * $Id: LogDomainConstants.java,v 1.3 2010-03-20 12:35:40 kumarjayanti Exp $
+ * $Id: LogDomainConstants.java,v 1.4 2010-09-02 06:25:25 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,7 +39,6 @@
  */
 
 package com.sun.xml.wss.logging;
-import com.sun.xml.wss.*;
 import java.util.logging.Logger;
 
 /**

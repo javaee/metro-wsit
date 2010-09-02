@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -144,14 +144,14 @@ public class SignatureConfirmation implements SecurityHeaderElement, TokenValida
         if(scList != null){
             if(signatureValue == null){
                 if(!scList.isEmpty()){
-                    log.log(Level.SEVERE, "Failure in SignatureConfirmation Validation");
+                    log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.filter.LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE());
                     throw new XWSSecurityException("Failure in SignatureConfirmation Validation");
                 }
             }else if(scList.contains(signatureValue)){// match the Value in received message
                 //with the stored value
                 scList.remove(signatureValue);
             }else{
-                log.log(Level.SEVERE, "Failure in SignatureConfirmation Validation");
+                log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.filter.LogStringsMessages.WSS_1435_SIGNATURE_CONFIRMATION_VALIDATION_FAILURE());
                 throw new XWSSecurityException("Mismatch in SignatureConfirmation Element");
             }
         }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -196,10 +196,12 @@ public class JAXBFilterProcessingContext extends FilterProcessingContext{
         return secHeader;
     }
     
+    @Override
     protected SecurableSoapMessage getSecureMessage() {
         return null;
     }
     
+    @Override
     protected void setSecureMessage(SecurableSoapMessage msg) {
         
     }
@@ -217,6 +219,7 @@ public class JAXBFilterProcessingContext extends FilterProcessingContext{
     /**
      * @return the SOAPMessage from the context
      */
+    @Override
     public SOAPMessage getSOAPMessage() {
         /*try{
             return getJAXWSMessage().readAsSOAPMessage();
@@ -228,6 +231,7 @@ public class JAXBFilterProcessingContext extends FilterProcessingContext{
         throw new UnsupportedOperationException();
     }
     
+    @Override
     public  void copy(ProcessingContext ctxx1, ProcessingContext ctxx2)
             throws XWSSecurityException {
         if(ctxx2 instanceof JAXBFilterProcessingContext){

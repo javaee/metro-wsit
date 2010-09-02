@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,12 +40,9 @@ import com.sun.xml.ws.security.opt.api.NamespaceContextInfo;
 import com.sun.xml.ws.security.opt.api.PolicyBuilder;
 import com.sun.xml.ws.security.opt.api.SecurityElementWriter;
 import com.sun.xml.ws.security.opt.api.TokenValidator;
-import com.sun.xml.ws.security.opt.impl.incoming.processor.BSTProcessor;
-import com.sun.xml.ws.security.opt.impl.util.XMLStreamReaderFactory;
 import com.sun.xml.wss.impl.FilterProcessingContext;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.io.OutputStream;
 
@@ -54,8 +51,6 @@ import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.stream.buffer.XMLStreamBufferException;
 import com.sun.xml.stream.buffer.XMLStreamBufferMark;
 import com.sun.xml.stream.buffer.stax.StreamReaderBufferCreator;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLInputFactory;
 
 import com.sun.xml.wss.impl.MessageConstants;
@@ -75,7 +70,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
-import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLStreamReader;
 import org.jvnet.staxex.XMLStreamReaderEx;
 import org.jvnet.staxex.Base64Data;

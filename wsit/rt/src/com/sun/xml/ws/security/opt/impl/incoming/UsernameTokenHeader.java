@@ -65,6 +65,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.logging.Level;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 import java.util.logging.Logger;
 
 /**
@@ -140,7 +141,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                     context.getExtraneousProperties(), filter.getUsername(), filter.getPasswordDigest(),
                     filter.getNonce(), filter.getCreated());
             if(!authenticated){
-                log.log(Level.SEVERE, "WSS1408.failed.sender.authentication");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1408_FAILED_SENDER_AUTHENTICATION());
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Authentication of Username Password Token Failed",
@@ -174,7 +175,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
             authenticated = context.getSecurityEnvironment().authenticateUser(context.getExtraneousProperties(),
                     filter.getUsername(), filter.getPassword());
             if(!authenticated){
-                log.log(Level.SEVERE, "WSS1408.failed.sender.authentication");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1408_FAILED_SENDER_AUTHENTICATION());
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Authentication of Username Password Token Failed",

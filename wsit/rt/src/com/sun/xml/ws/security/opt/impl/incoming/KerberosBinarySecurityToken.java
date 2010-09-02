@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -68,7 +68,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.SecretKey;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -94,8 +93,7 @@ public class KerberosBinarySecurityToken implements com.sun.xml.ws.security.opt.
     
     private AuthenticationTokenPolicy.KerberosTokenBinding ktPolicy = null;
     private HashMap<String,String> nsDecls;
-    private byte [] bstValue = null;
-    private SecretKey secretKey = null;
+    private byte [] bstValue = null;    
     
     private static final Logger logger = Logger.getLogger(LogDomainConstants.IMPL_OPT_DOMAIN,
             LogDomainConstants.IMPL_OPT_DOMAIN_BUNDLE);

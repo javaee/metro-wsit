@@ -118,6 +118,7 @@ import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.security.cert.CertificateEncodingException;
 import javax.crypto.SecretKey;
 import javax.security.auth.Subject;
@@ -190,7 +191,7 @@ public class KeySelectorImpl extends KeySelector {
             }
 
             if (isBSP && list.size() > 1) {
-                logger.log(Level.SEVERE, "BSP Violation of R5402: KeyInfo MUST have exactly one child");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1350_ILLEGAL_BSP_VIOLATION_KEY_INFO());
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "BSP Violation of R5402: KeyInfo MUST have exactly one child", null);
             }
@@ -328,7 +329,7 @@ public class KeySelectorImpl extends KeySelector {
 
                 resolveIssuerSerial(context, issuerName, serialNumber, xis.getId(), purpose);
             } else {
-                logger.log(Level.SEVERE, "WSS1308.unsupported.reference.mechanism");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1308_UNSUPPORTED_REFERENCE_MECHANISM());
                 KeySelectorException xwsse = new KeySelectorException(
                         "Key reference mechanism not supported");
                 //throw xwsse;
@@ -658,16 +659,15 @@ public class KeySelectorImpl extends KeySelector {
                 }
 
             } else {
-                logger.log(Level.SEVERE, "WSS1307.unsupported.directref.mechanism",
-                        new Object[]{valueType});
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1307_UNSUPPORTED_DIRECTREF_MECHANISM(new Object[]{valueType}));
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                         "unsupported directreference ValueType " + valueType, null);
             }
         } catch (XWSSecurityException ex) {
-            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1377_ERROR_IN_RESOLVING_KEYINFO(), ex);
             throw new KeySelectorException(ex);
         } catch (URIReferenceException ex) {
-            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1377_ERROR_IN_RESOLVING_KEYINFO(), ex);
             throw new KeySelectorException(ex);
         }
 
@@ -836,7 +836,7 @@ public class KeySelectorImpl extends KeySelector {
                     }
                 } else {
                     String message = "EncryptedKeySHA1 reference not correct";
-                    logger.log(Level.SEVERE, "WSS1306:unsupported.KeyIdentifier.Reference.Type.encountered", new Object[]{message});
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1306_UNSUPPORTED_KEY_IDENTIFIER_REFERENCE_TYPE(), new Object[]{message});
                     throw new KeySelectorException(message);
                 }
             } else if (MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE.equals(valueType) ||
@@ -887,10 +887,10 @@ public class KeySelectorImpl extends KeySelector {
                 returnKey = null;
             }
         } catch (XWSSecurityException ex) {
-            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1377_ERROR_IN_RESOLVING_KEYINFO(), ex);
             throw new KeySelectorException(ex);
         } catch (URIReferenceException ex) {
-            logger.log(Level.SEVERE, "WSS1377.error.in.resolving.keyinfo", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1377_ERROR_IN_RESOLVING_KEYINFO(), ex);
             throw new KeySelectorException(ex);
         }
         return returnKey;
@@ -928,13 +928,14 @@ public class KeySelectorImpl extends KeySelector {
         try {
             salt = Base64.decode(decodedSalt);
         } catch (Base64DecodingException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0144_UNABLETO_DECODE_BASE_64_DATA(ex), ex);
+            throw new XWSSecurityException("exception during decoding the salt ");
         }
         String password = null;
         try {
             password = wssContext.getSecurityEnvironment().authenticateUser(wssContext.getExtraneousProperties(), token.getUsernameValue());
         } catch (XWSSecurityException ex) {
-            logger.log(Level.SEVERE, null, ex);
+             throw new XWSSecurityException("exception during retrieving the password using the username");
         }
         if (password == null) {
             throw new XWSSecurityException("Password retrieved from UsernameToken is null");
@@ -953,7 +954,8 @@ public class KeySelectorImpl extends KeySelector {
                 try {
                     verifySignature = pdk.generate160BitKey(password, iterations, salt);
                 } catch (UnsupportedEncodingException ex) {
-                    logger.log(Level.SEVERE, null, ex);
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1381_ERROR_GENERATING_160_BITKEY(), ex);
+                    throw new XWSSecurityException("error during generating 160 bit key ");
                 }
                 untBinding.setSecretKey(verifySignature);
                 sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));
@@ -967,7 +969,8 @@ public class KeySelectorImpl extends KeySelector {
                 try {
                     decSignature = pdk.generate160BitKey(password, iterations, salt);
                 } catch (UnsupportedEncodingException ex) {
-                    logger.log(Level.SEVERE, null, ex);
+                   logger.log(Level.SEVERE, LogStringsMessages.WSS_1381_ERROR_GENERATING_160_BITKEY(), ex);
+                   throw new XWSSecurityException("error during generating 160 bit key ");
                 }
                 byte[] keyof128Bits = new byte[16];
                 for (int i = 0; i < 16; i++) {
@@ -982,7 +985,8 @@ public class KeySelectorImpl extends KeySelector {
             try {
                 verifySignature = pdk.generate160BitKey(password, iterations, salt);
             } catch (UnsupportedEncodingException ex) {
-                logger.log(Level.SEVERE, null, ex);
+               logger.log(Level.SEVERE, LogStringsMessages.WSS_1381_ERROR_GENERATING_160_BITKEY(), ex);
+               throw new XWSSecurityException("error during generating 160 bit key ");
             }
             untBinding.setSecretKey(verifySignature);
             sKey = untBinding.getSecretKey(SecurityUtil.getSecretKeyAlgorithm(algo));
@@ -995,7 +999,8 @@ public class KeySelectorImpl extends KeySelector {
             try {
                 key = pdk.generate160BitKey(password, iterations, salt);
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(KeySelectorImpl.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1381_ERROR_GENERATING_160_BITKEY(), ex);
+                throw new XWSSecurityException("error during generating 160 bit key ");
             }
             byte[] sKeyof16ByteLength = new byte[16];
             for (int i = 0; i < 16; i++) {
@@ -1052,7 +1057,7 @@ public class KeySelectorImpl extends KeySelector {
                                 context.getExtraneousProperties(), ski);
                     }
                 } else if (content instanceof String) {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "X509SubjectName child element of X509Data is not yet supported by our implementation");
                 } else if (content instanceof X509IssuerSerial) {
@@ -1071,7 +1076,7 @@ public class KeySelectorImpl extends KeySelector {
                     }
 
                 } else {
-                    logger.log(Level.SEVERE, "WSS1312.unsupported.keyinfo");
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1312_UNSUPPORTED_KEYINFO());
                     throw new KeySelectorException(
                             "Unsupported child element of X509Data encountered");
                 }
@@ -1086,7 +1091,7 @@ public class KeySelectorImpl extends KeySelector {
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "WSS1314.illegal.x509.data", e.getMessage());
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1314_ILLEGAL_X_509_DATA(e.getMessage()), e.getMessage());
             throw new KeySelectorException(e);
         }
         return null;//Should never come here.
@@ -1119,7 +1124,7 @@ public class KeySelectorImpl extends KeySelector {
             }
 
             if (she == null) {
-                logger.log(Level.SEVERE, "WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1304_FC_SECURITY_TOKEN_UNAVAILABLE());
                 throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                         "Referenced Security Token could not be retrieved",
@@ -1148,7 +1153,7 @@ public class KeySelectorImpl extends KeySelector {
                 return she;
             }
         } catch (URIReferenceException ure) {
-            logger.log(Level.SEVERE, "WSS1304.FC_SECURITY_TOKEN_UNAVAILABLE", ure);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1304_FC_SECURITY_TOKEN_UNAVAILABLE(), ure);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                     "Referenced Security Token could not be retrieved",
@@ -1156,7 +1161,7 @@ public class KeySelectorImpl extends KeySelector {
         }
 
         if (logger.isLoggable(Level.SEVERE)) {
-            logger.log(Level.SEVERE, "WSS1305.UnSupported.security.token");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1305_UN_SUPPORTED_SECURITY_TOKEN());
         }
         throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_UNSUPPORTED_SECURITY_TOKEN, "A Unsupported token was provided ", null);
     }

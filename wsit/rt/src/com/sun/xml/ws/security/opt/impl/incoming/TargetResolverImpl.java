@@ -50,6 +50,7 @@ import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.verifier.TargetResolver;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,9 @@ public class TargetResolverImpl implements TargetResolver {
             }
             if (targetInPolicy != null && targetInPolicy.equals("BinarySecurityToken") && !found) {
                 if (!containsSTRTransform(actualTarget, inferredTargets)) {
-                    throw new XWSSecurityException("Policy verification error:" +
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
+                     log.log(Level.SEVERE, LogStringsMessages.WSS_0814_POLICY_VERIFICATION_ERROR_MISSING_TARGET(targetInPolicy, policyType));
+                     throw new XWSSecurityException("Policy verification error:" +
                             "Missing target " + targetInPolicy + " for " + policyType);
                 }
                 continue;
@@ -114,8 +117,8 @@ public class TargetResolverImpl implements TargetResolver {
                 //check if the message has the element
 
                 if (presentInMessage(targetInPolicy)) {
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
-                    log.log(Level.SEVERE, "Missing target : " + targetInPolicy + " for " + policyType);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0814_POLICY_VERIFICATION_ERROR_MISSING_TARGET(targetInPolicy, policyType));
                     if (isEndorsing) {
                         throw new XWSSecurityException("Policy verification error:" +
                                 "Missing target " + targetInPolicy + " for Endorsing " + policyType);
