@@ -7,7 +7,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,7 +51,6 @@ import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 import com.sun.xml.ws.security.opt.impl.message.ETHandler;
-import com.sun.xml.wss.impl.AlgorithmSuite;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo;
 import com.sun.xml.wss.impl.MessageConstants;

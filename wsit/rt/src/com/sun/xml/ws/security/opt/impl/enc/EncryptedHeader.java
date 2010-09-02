@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -44,7 +44,6 @@ import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.impl.crypto.SSEData;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secext11.EncryptedHeaderType;
-import com.sun.xml.ws.security.secext11.ObjectFactory;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.AttributeNS;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
