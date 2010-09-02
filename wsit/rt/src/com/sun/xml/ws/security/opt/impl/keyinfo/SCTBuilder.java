@@ -34,7 +34,6 @@
  * holder.
  */
 package com.sun.xml.ws.security.opt.impl.keyinfo;
-import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.api.reference.DirectReference;

@@ -76,7 +76,7 @@ public class UsernameTokenBuilder extends TokenBuilder {
         if (MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType)) {
             UsernameToken unToken = createUsernameToken(binding, binding.getUsernameToken());
             if (unToken == null) {
-                logger.log(Level.SEVERE, "Username Token is NULL");
+                logger.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0280_FAILED_CREATE_USERNAME_TOKEN());
                 throw new XWSSecurityException("Username Token is NULL");
             }
             DirectReference dr = buildDirectReference(unToken.getId(), MessageConstants.USERNAME_STR_REFERENCE_NS);

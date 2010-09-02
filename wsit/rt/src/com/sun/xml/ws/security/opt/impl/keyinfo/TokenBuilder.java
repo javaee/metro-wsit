@@ -115,7 +115,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             if (token instanceof BinarySecurityToken) {
                 return (BinarySecurityToken) token;
             }
-            logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1854_TWO_TOKENS_WITH_SAME_ID());
             throw new XWSSecurityException("Found two tokens with same Id attribute");
         }
         BinarySecurityToken bst;
@@ -149,7 +149,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             if (token instanceof UsernameToken) {
                 return (UsernameToken) token;
             }
-            logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1854_TWO_TOKENS_WITH_SAME_ID());
             throw new XWSSecurityException("Found two tokens with same Id attribute");
         }
         unToken.setId(id);
@@ -184,7 +184,7 @@ public abstract class TokenBuilder implements com.sun.xml.ws.security.opt.api.ke
             if (token instanceof BinarySecurityToken) {
                 return (BinarySecurityToken) token;
             }
-            logger.log(Level.SEVERE, "Found two tokens with same Id attribute");
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1854_TWO_TOKENS_WITH_SAME_ID());
             throw new XWSSecurityException("Found two tokens with same Id attribute");
         }
         BinarySecurityToken bst;

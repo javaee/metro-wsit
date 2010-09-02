@@ -7,7 +7,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -75,6 +75,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import com.sun.xml.ws.security.secext10.ObjectFactory;
+import com.sun.xml.wss.logging.impl.crypto.LogStringsMessages;
 import static com.sun.xml.wss.impl.MessageConstants.WSSE_BINARY_SECURITY_TOKEN_LNAME;
 import static com.sun.xml.wss.impl.MessageConstants.WSSE_NS;
 import static com.sun.xml.wss.logging.LogDomainConstants.CRYPTO_IMPL_LOGGER;
@@ -196,7 +197,7 @@ public class BinarySecurityToken implements com.sun.xml.ws.security.opt.api.keyi
         try {
             return Base64.decode(bst.getValue());
         } catch (Base64DecodingException ex) {
-            CRYPTO_IMPL_LOGGER.log(Level.SEVERE,"WSS1209.bst.base64decode.error",ex);
+            CRYPTO_IMPL_LOGGER.log(Level.SEVERE,LogStringsMessages.WSS_1243_BST_DECODING_ERROR(),ex);
             return null;
         }
     }
