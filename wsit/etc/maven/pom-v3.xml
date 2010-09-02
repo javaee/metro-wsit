@@ -69,6 +69,7 @@
     <modules>
         <module>webservices-api-osgi</module>
         <module>webservices-osgi</module>
+        <module>webservices-extra-jdk-packages</module>
         <!--module>woodstox-osgi</module-->
     </modules>
 </project>
