@@ -162,7 +162,7 @@ public class Participant<T> implements ParticipantIF<T> {
      * @param parameters T
      */
    public void rollback(T parameters) {
-      if(WSATHelper.isDebugEnabled()) debug("rollback parameters:" + parameters);
+      if(WSATHelper.isDebugEnabled()) debug("rollback parameters:" + parameters, true);
       CoordinatorIF<T> coordinatorPort = null;
       byte[] tid = null;
       try {
@@ -293,11 +293,15 @@ public class Participant<T> implements ParticipantIF<T> {
    }
 
    private void log(String msg) {
-       System.out.println("participant:"+msg);
+    //   System.out.println("participant:"+msg);
 //todoremove        WseeWsatLogger.logWSATParticipant(msg);
    }
 
    private void debug(String message) {
+       debug(message, false);
+   }
+
+   private void debug(String message, boolean isWithStack) {
       WSATHelper.getInstance().debug("Participant:" + message);
    }
 

@@ -41,10 +41,13 @@ import com.sun.xml.ws.tx.at.common.TxLogger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 import java.util.logging.Level;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
@@ -129,6 +132,10 @@ public class TransactionImportManager implements TransactionImportWrapper {
     private final MethodInfo<?> release;
     private final MethodInfo<XATerminator> getXATerminator;
     private final MethodInfo<Integer> getTransactionRemainingTimeout;
+    private final MethodInfo<Xid> getXid;
+    private final MethodInfo<Transaction> getTransaction;
+    private final MethodInfo<byte[]> enlistResourceReturnBQual;
+    private final MethodInfo<Map> getForeignRecoveryContexts;
 
     private TransactionImportManager() {
         this(TransactionManagerImpl.getInstance().getTransactionManager());
@@ -154,11 +161,32 @@ public class TransactionImportManager implements TransactionImportWrapper {
                 new Class<?>[]{},
                 int.class,
                 Integer.class);
+        this.getXid = new MethodInfo<Xid>(
+                "getXid",
+                new Class<?>[]{},
+                Xid.class);
+        this.getTransaction = new MethodInfo<Transaction>(
+                "getTransaction",
+                new Class<?>[]{Xid.class},
+                Transaction.class);
+        this.enlistResourceReturnBQual = new MethodInfo<byte[]>(
+                "enlistResourceReturnBQual",
+                new Class<?>[]{XAResource.class},
+                byte[].class,
+                byte[].class);
+        this.getForeignRecoveryContexts = new MethodInfo<Map>(
+                "getForeignRecoveryContexts",
+                new Class<?>[]{},
+                Map.class);
         MethodInfo<?>[] requiredMethods = new MethodInfo<?>[]{
             recreate,
             release,
             getXATerminator,
-            getTransactionRemainingTimeout
+            getTransactionRemainingTimeout,
+            getXid,
+            getTransaction,
+            enlistResourceReturnBQual,
+            getForeignRecoveryContexts
         };
 
         int remainingMethodsToFind = requiredMethods.length;
@@ -217,7 +245,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
     public int getTransactionRemainingTimeout() throws SystemException {
         final String METHOD = "getTransactionRemainingTimeout";
         int result = 0;
-
         try {
             result = getTransactionRemainingTimeout.invoke(javaeeTM);
         } catch (IllegalStateException ise) {
@@ -227,7 +254,24 @@ public class TransactionImportManager implements TransactionImportWrapper {
 //todoreadd                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), ise);
             }
         }
-
         return result;
+    }
+
+    //todo exception handling....
+    public Xid getXid() throws SystemException {
+        return getXid.invoke(javaeeTM);
+    }
+
+    public Transaction getTransaction(Xid xid) {
+        return getTransaction.invoke(javaeeTM, xid);
+    }
+
+    public byte[] enlistResourceReturnBQual(XAResource xar)
+            throws javax.transaction.RollbackException, IllegalStateException, SystemException {
+        return enlistResourceReturnBQual.invoke(javaeeTM, xar);
+    }
+
+    public Map getForeignRecoveryContexts() {
+        return getForeignRecoveryContexts.invoke(javaeeTM);
     }
 }

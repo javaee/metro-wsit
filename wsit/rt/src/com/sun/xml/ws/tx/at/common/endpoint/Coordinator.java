@@ -56,13 +56,13 @@ import javax.xml.ws.WebServiceContext;
  * This is the common implementation for wsat10 and wsat11 Coordinators endpoints.
  */
 public class Coordinator<T> implements CoordinatorIF<T> {
-    @javax.annotation.Resource
-    private WebServiceContext m_context;
-    private WSATVersion<T> m_version;
+    
+    private WebServiceContext context;
+    private WSATVersion<T> version;
 
     public Coordinator(WebServiceContext m_context, WSATVersion<T> m_version) {
-        this.m_context = m_context;
-        this.m_version = m_version;
+        this.context = m_context;
+        this.version = m_version;
     }
 
     /**
@@ -129,7 +129,7 @@ public class Coordinator<T> implements CoordinatorIF<T> {
     public void replayOperation(T parameters) {
 //todoremove          if(isDebugEnabled()) WseeWsatLogger.logReplayOperationEntered(parameters);
         Xid xidFromWebServiceContextHeaderList = getXid();
-        String wsatTid = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(m_context);
+        String wsatTid = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(context);
 //todoremove          if(isDebugEnabled())  WseeWsatLogger.logReplayOperation(xidFromWebServiceContextHeaderList);
         try {
             getTransactionServices().replayCompletion(
@@ -155,11 +155,11 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @return WSATXAResource
      */
      WSATXAResource createWSATXAResourceForXidFromReplyTo(Xid xid) {
-        HeaderList headerList = (HeaderList) m_context.getMessageContext().get(
+        HeaderList headerList = (HeaderList) context.getMessageContext().get(
                         com.sun.xml.ws.developer.JAXWSProperties.INBOUND_HEADER_LIST_PROPERTY);
         WSEndpointReference wsReplyTo = headerList.getReplyTo(AddressingVersion.W3C, SOAPVersion.SOAP_12);
         EndpointReference replyTo = wsReplyTo.toSpec();
-        return new WSATXAResource(m_version.getVersion(), replyTo, xid, true);
+        return new WSATXAResource(version.getVersion(), replyTo, xid, true);
     }
 
     /**
@@ -167,8 +167,8 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @return Xid
      */
     Xid getXid() {
-        Xid xid= getWSATHelper().getXidFromWebServiceContextHeaderList(m_context);
-        String bqual = getWSATHelper().getBQualFromWebServiceContextHeaderList(m_context);
+        Xid xid= getWSATHelper().getXidFromWebServiceContextHeaderList(context);
+        String bqual = getWSATHelper().getBQualFromWebServiceContextHeaderList(context);
         return new XidImpl(xid.getFormatId(), xid.getGlobalTransactionId(), bqual.getBytes());
     }
 
@@ -181,7 +181,7 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @return WSATHelper for version
      */
     protected WSATHelper getWSATHelper() {
-        return m_version.getWSATHelper();
+        return version.getWSATHelper();
     }
 
 }

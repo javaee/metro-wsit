@@ -50,14 +50,6 @@ public class WSCBuilderFactoryImpl extends WSCBuilderFactory {
     }
 
     public RegistrationProxyBuilder newRegistrationProxyBuilder() {
-//        final ClassLoader classLoader = WSCBuilderFactoryImpl.class.getClassLoader();
-  //      System.out.println("-------> WSCBuilderFactoryImpl.class.getClassLoader():"+
-    //            classLoader);
-    //    try {
-    //        final Class<?> loadClass = classLoader.loadClass(RegistrationProxyBuilderImpl.class.getName());
-    //    } catch (ClassNotFoundException ex) {
-    //        Logger.getLogger(WSCBuilderFactoryImpl.class.getName()).log(Level.SEVERE, null, ex);
-    //    }
         return new RegistrationProxyBuilderImpl();
     }
 

@@ -33,82 +33,70 @@
 * only if the new code is made subject to such option by the copyright
 * holder.
 */
+
 package com.sun.xml.ws.tx.at.internal;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.Arrays;
-
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
- * Xid implementation used for persisting branch state.
- * Wrapper over  XidImpl to override semantics of hashCode and equals
+ *
+ * @author paulparkinson
  */
-public class BranchXidImpl implements Xid, Externalizable {
+/**
+ * NoOp XAResource implemented in order to insure onePhase optimization is not
+ *  used for WS-AT transactions
+ * @author paulparkinson
+ */
+class WSATNoOpXAResource implements XAResource {
 
-  private Xid delegate;
-  
-  public BranchXidImpl() {
-  }
+    public WSATNoOpXAResource() {
+    }
 
-  public BranchXidImpl(Xid xid) {
-    this.delegate = xid;
-  }
-  
-  public byte[] getBranchQualifier() {
-    return delegate.getBranchQualifier();
-  }
+    public void commit(Xid xid, boolean bln) throws XAException {
+        debug("commit");
+    }
 
-  public int getFormatId() {
-    return delegate.getFormatId();
-  }
+    public void end(Xid xid, int i) throws XAException {
+        debug("end");
+    }
 
-  public byte[] getGlobalTransactionId() {
-    return delegate.getGlobalTransactionId();
-  }
+    public void forget(Xid xid) throws XAException {
+    }
 
-  public Xid getDelegate() {
-    return delegate;
-  }
-  
-  // 
-  // Object
-  //
-  
-  public boolean equals(Object o) { //todo return this branchqual type check
-  //  if (!(o instanceof BranchXidImpl)) return false;
-  //  BranchXidImpl that = (BranchXidImpl) o;
-    if (!(o instanceof Xid)) return false;
-    Xid that = (Xid) o;
-        final boolean formatId = getFormatId() == that.getFormatId();
-        final boolean txid = Arrays.equals(getGlobalTransactionId(), that.getGlobalTransactionId());
-        final boolean bqual = Arrays.equals(getBranchQualifier(), that.getBranchQualifier());
-    return formatId
-        && txid
-        && bqual;
-  }
-  
-  public int hashCode() {
-    return delegate.hashCode();
-  }
-  
-  public String toString() {
-    return "BranchXidImpl:" + delegate.toString();
-  }
-  
-  //
-  // Externalizable
-  //
-  
-  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    delegate = (Xid) in.readObject();
-  }
+    public int getTransactionTimeout() throws XAException {
+        return 30000; //todo make -1
+    }
 
-  public void writeExternal(ObjectOutput out) throws IOException {
-    out.writeObject(delegate);
-  }
+    public boolean isSameRM(XAResource xar) throws XAException {
+        return false;
+    }
+
+    public int prepare(Xid xid) throws XAException {
+        debug("prepare");
+        return XAResource.XA_OK;
+    }
+
+    public Xid[] recover(int i) throws XAException {
+        return new Xid[]{};
+    }
+
+    public void rollback(Xid xid) throws XAException {
+        debug("rollback");
+    }
+
+    public boolean setTransactionTimeout(int i) throws XAException {
+        return true;
+    }
+
+    public void start(Xid xid, int i) throws XAException {
+        debug("start");
+    }
+
+
+  private void debug(String msg) {
+    //  System.out.println("wsatnoopxaresource debug:"+msg);
+    }
 
 }

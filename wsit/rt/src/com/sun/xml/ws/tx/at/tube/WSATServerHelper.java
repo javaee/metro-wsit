@@ -107,10 +107,13 @@ public class WSATServerHelper implements WSATServer {
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
-        boolean notRegisterred = true; //TransactionIdHelper.getInstance().getXid(tid.getBytes()) == null;
-        try {
-          Xid foreignXid = WSATHelper.getTransactionServices().importTransaction((int) timeout, tid.getBytes());
-          if(notRegisterred) {
+        boolean isRegistered = false; //TransactionIdHelper.getInstance().getXid(tid.getBytes()) == null;
+        try { //todo if foreignXid is not null then notRegisterred should be false
+          Xid foreignXid = 
+                  WSATHelper.getTransactionServices().importTransaction(
+                  (int) timeout, tid.getBytes());
+          if(foreignXid!=null) isRegistered = true;
+          if(!isRegistered) {
               register(headers, builder, cc, foreignXid, timeout);
           }
         } catch (WSATException e) {

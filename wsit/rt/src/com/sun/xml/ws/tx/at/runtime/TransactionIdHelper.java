@@ -35,6 +35,7 @@
 */
 package com.sun.xml.ws.tx.at.runtime;
 
+import java.security.NoSuchAlgorithmException;
 import javax.transaction.xa.Xid;
 
 
@@ -43,7 +44,16 @@ import javax.transaction.xa.Xid;
  * 
  */
 public abstract class TransactionIdHelper {
-  private static TransactionIdHelper singleton = new TransactionIdHelperImpl();
+  private static TransactionIdHelper singleton;
+
+  static {
+    try {
+      singleton = new TransactionIdHelperImpl();
+    } catch (NoSuchAlgorithmException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
   
   /**
    * Returns the TransactionIdHelper instance.

@@ -41,12 +41,14 @@ import java.util.Map;
 
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
+import com.sun.xml.ws.tx.at.WSATConstants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.tx.at.WSATHelper;
 
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
@@ -54,6 +56,7 @@ import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+import javax.transaction.xa.Xid;
 
 
 public class WSATClientHelper implements WSATClient {
@@ -84,21 +87,35 @@ public class WSATClientHelper implements WSATClient {
     }
 
     public boolean doHandleResponse(Map<String, Object> map) {
-//todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logInboundApplicationMessage();
-       Transaction transaction = getWSATTransactionFromMap(map);
-       if (transaction != null && !resume(transaction)) return false;
-        return true;
+       return resumeAndClearXidTxMap(map);
     }
 
     public void doHandleException(Map<String, Object> map) {
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logInboundApplicationMessage();
-       Transaction transaction = getWSATTransactionFromMap(map);
-       if (transaction != null) resume(transaction);
+       resumeAndClearXidTxMap(map);
+    }
+
+    private boolean resumeAndClearXidTxMap(Map<String, Object> map) {
+        //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logInboundApplicationMessage();
+        Xid xid = getWSATXidFromMap(map);
+        if (xid != null) {
+            WSATHelper.getInstance().removeFromXidToTransactionMap(xid);
+        }
+        Transaction transaction = getWSATTransactionFromMap(map);
+        if (transaction != null && !resume(transaction)) {
+            return false;
+        }
+        return true;
     }
 
    private Transaction getWSATTransactionFromMap(Map map) {
-      Transaction transaction = (Transaction)map.get("wsat.transaction");
+      Transaction transaction = (Transaction)map.get(WSATConstants.WSAT_TRANSACTION);
       return transaction;
+   }
+
+   private Xid getWSATXidFromMap(Map map) {
+      Xid xid = (Xid)map.get(WSATConstants.WSAT_TRANSACTION_XID);
+      return xid;
    }
 
    /**
@@ -167,15 +184,15 @@ public class WSATClientHelper implements WSATClient {
         List<Header> headers = new ArrayList<Header>();
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logSuspendSuccessfulInClientSideHandler(suspendedTransaction, Thread.currentThread());
-
-        String txId = "wsattesttxid";
+        String txId = null;
+        Xid xid = null;
         try {
-            txId = TransactionManagerImpl.getInstance().getTransaction().toString(); //todoremoveWSATTubeHelper.getWSATTxIdForTransaction(suspendedTransaction);
+            xid = TransactionImportManager.getInstance().getXid();
+            txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         } catch (SystemException ex) {
             Logger.getLogger(WSATClientHelper.class.getName()).log(Level.SEVERE, null, ex);
         }
-        long ttl = 30000; //todoremove
-
+        long ttl = 0;
         try {
             ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout(); //todoremove verify if this call is from inbound only suspendedTransaction.getTimeToLiveMillis();
             //todoremove         if (WSATHelper.isDebugEnabled())
@@ -185,14 +202,20 @@ public class WSATClientHelper implements WSATClient {
         }
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logWSATInfoInClientSideHandler(txId, ttl, suspendedTransaction, Thread.currentThread());
-        WSCBuilderFactory builderFactory = WSCBuilderFactory.newInstance(transactionalAttribute.getVersion());
-        WSATCoordinationContextBuilder builder  = builderFactory.newWSATCoordinationContextBuilder();
-        CoordinationContextIF cc = builder.txId(txId).expires(ttl).soapVersion(transactionalAttribute.getSoapVersion()).mustUnderstand(true).build();
-        Header coordinationHeader = Headers.create(cc.getJAXBRIContext(),cc.getDelegate());
+        WSCBuilderFactory builderFactory =
+                WSCBuilderFactory.newInstance(transactionalAttribute.getVersion());
+        WSATCoordinationContextBuilder builder  =
+                builderFactory.newWSATCoordinationContextBuilder();
+        CoordinationContextIF cc =
+                builder.txId(txId).expires(ttl).soapVersion(transactionalAttribute.getSoapVersion()).mustUnderstand(true).build();
+        Header coordinationHeader =
+                Headers.create(cc.getJAXBRIContext(),cc.getDelegate());
         headers.add(coordinationHeader);
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logOutboundApplicationMessageTransactionAfterAddingContext(suspendedTransaction);
-        Transaction suspendedTransaction = suspend(map);
+        Transaction suspendedTransaction = suspend(map); //note suspension moved after context creation
+        map.put(WSATConstants.WSAT_TRANSACTION_XID, xid);
+        WSATHelper.getInstance().putToXidToTransactionMap(xid, suspendedTransaction);
         return headers;
     }
 
@@ -208,8 +231,7 @@ public class WSATClientHelper implements WSATClient {
 //todoremove                     WSATTubeHelper.getTransactionHelper().getTransactionManager();
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logAboutToSuspendInClientSideHandler(clientTransactionManager, Thread.currentThread());
-           TransactionManagerImpl.transaction = suspendedTransaction; //todo temporary hack REMOVE
-           map.put("wsat.transaction", suspendedTransaction);
+           map.put(WSATConstants.WSAT_TRANSACTION, suspendedTransaction);
 //todoremove             if (WSATHelper.isDebugEnabled())
 //todoremove                 WseeWsatLogger.logSuspendedInClientSideHandler(suspendedTransaction, Thread.currentThread());
          } catch (SystemException e) {

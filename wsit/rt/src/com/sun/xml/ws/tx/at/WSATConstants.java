@@ -118,4 +118,7 @@ public interface WSATConstants {
     public static final String WSAT11_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+_WSAT+"/RegistrationRequesterPortType11";
     //  TM
     public static final String TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT = "com.sun.xml.ws.tx.foreignContext";
+    // tube request map storage
+    public static final String WSAT_TRANSACTION = "wsat.transaction";
+    public static final String WSAT_TRANSACTION_XID = "wsat.transaction.xid";
 }

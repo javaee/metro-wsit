@@ -45,6 +45,7 @@ import com.sun.xml.ws.tx.at.internal.TransactionServicesImpl;
 import com.sun.xml.ws.tx.at.common.*;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 import com.sun.xml.ws.tx.at.common.client.ParticipantProxyBuilder;
+import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.tx.at.tube.WSATTubeHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import javax.transaction.Transaction;
 
 /**
  * This singleton serves not only as a helper and utility but as the core of the WS-AT resource manager and
@@ -94,22 +96,19 @@ public class WSATHelper<T> {
     private Map<WSATXAResource, ParticipantIF<T>> m_durableParticipantPortMap = new HashMap<WSATXAResource, ParticipantIF<T>>();
     private final Object m_durableParticipantPortMapLock = new Object();
     private Map<Xid, WSATXAResource> m_durableParticipantXAResourceMap = new HashMap<Xid, WSATXAResource>();
+ 
     private final Object m_durableParticipantXAResourceMapLock = new Object();
 
     private Map<Xid, ParticipantIF<T>> m_volatileParticipantPortMap = new HashMap<Xid, ParticipantIF<T>>();
     private final Object m_volatileParticipantPortMapLock = new Object();
     private Map<Xid, WSATSynchronization> m_volatileParticipantSynchronizationMap = new HashMap<Xid, WSATSynchronization>();
     private final Object m_volatileParticipantSynchronizationMapLock = new Object();
-    //todo perhaps base this on tx timeout or something else as default?
     private final int m_waitForReplyTimeout =
             new Integer(System.getProperty("com.sun.xml.ws.tx.at.reply.timeout", "120"));
     private final boolean m_isUseLocalServerAddress =
             Boolean.valueOf(System.getProperty("com.sun.xml.ws.tx.at.use.local.server.address", "false"));
-//todoremove     private static final AuthenticatedSubject _kernelId = (AuthenticatedSubject)
-//todoremove             AccessController.doPrivileged(PrivilegedActions.getKernelIdentityAction());
-//todoremove     private static final RuntimeAccess _runtimeAccess = ManagementService.getRuntimeAccess(_kernelId);
     protected WSATVersion<T> builderFactory;
-//todoremove     private final static DebugLogger debugWSAT = DebugLogger.getDebugLogger("DebugWSAT");
+    private Map<Xid, Transaction> m_xidToTransactionMap = new HashMap<Xid, Transaction>();
 
     WSATHelper WSATVersion(WSATVersion builderFactory) {
         this.builderFactory = builderFactory;
@@ -162,7 +161,7 @@ public class WSATHelper<T> {
      * @return boolean true if the status was set successfully
      */
     public boolean setDurableParticipantStatus(Xid xid, String status) {
-        WSATXAResource wsatXAResourceLock;
+        WSATXAResource wsatXAResourceLock = null;
         synchronized (m_durableParticipantXAResourceMapLock) {
             wsatXAResourceLock = getDurableParticipantXAResourceMap().get(new BranchXidImpl(xid));
         }
@@ -436,7 +435,7 @@ public class WSATHelper<T> {
      * Return the host and port the WS-AT endpoints are deployed to or the frontend as the case may be
      * @return String URL with host and port  
      */
-    String getHostAndPort() {
+    String getHostAndPort() { //todo
         boolean isSSLRequired = WSATTubeHelper.isSSLRequired();
         return "http://localhost:8080/";
 //todoremove         return m_isUseLocalServerAddress?
@@ -466,7 +465,7 @@ public class WSATHelper<T> {
      * @param context WebServiceContext
      * @return WLXid found in WebServiceContext or fault
      */
-    public Xid /**todoremove WLXid */  getXidFromWebServiceContextHeaderList(WebServiceContext context) {
+    public Xid getXidFromWebServiceContextHeaderList(WebServiceContext context) {
         String txId = getWSATTidFromWebServiceContextHeaderList(context);
         return TransactionIdHelper.getInstance().wsatid2xid(txId);
     }
@@ -475,7 +474,7 @@ public class WSATHelper<T> {
      * Used by getXidFromWebServiceContextHeaderList in WSATHelper and replayOperation of Coordinator service
      *
      * @param context WebServiceContext
-     * @return WS-AT Txid StringØ
+     * @return WS-AT Txid String
      */
     public String getWSATTidFromWebServiceContextHeaderList(WebServiceContext context) {
         javax.xml.ws.handler.MessageContext messageContext = context.getMessageContext();
@@ -504,6 +503,7 @@ public class WSATHelper<T> {
         if (!headers.hasNext())
             throw new WebServiceException("branchqual does not exist in header"); //WSATFaultFactory.throwContextRefusedFault();
         String bqual = headers.next().getStringContent();
+        if(bqual!=null) bqual = bqual.replaceAll("&#044;", ",");
         if (isDebugEnabled())
             debug("WSATHelper.getBQualFromWebServiceContextHeaderList returning bqual:" + bqual + " on thread:" + Thread.currentThread());
  //todo log rather than generic debug, ie if (isDebugEnabled()) WseeWsatLogger.logWSATTxIdInHeader(bqual, Thread.currentThread());
@@ -533,6 +533,18 @@ public class WSATHelper<T> {
 
     public Map<Xid, ParticipantIF<T>> getVolatileParticipantPortMap() {
         return m_volatileParticipantPortMap;
+    }
+
+    public void putToXidToTransactionMap(Xid xid, Transaction transaction) {
+        m_xidToTransactionMap.put(new XidImpl(xid), transaction);
+    }
+
+    public Transaction getFromXidToTransactionMap(Xid xid) {
+        return m_xidToTransactionMap.get(xid);
+    }
+
+    public void removeFromXidToTransactionMap(Xid xid) {
+        m_xidToTransactionMap.remove(xid);
     }
 
     public void debug(String msg) {

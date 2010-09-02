@@ -38,17 +38,23 @@ package com.sun.xml.ws.tx.at.internal;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.WSATException;
+import com.sun.xml.ws.tx.at.WSATHelper;
+import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.transaction.*;
+import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 
 public class TransactionServicesImpl implements TransactionServices {
     private static TransactionServices INSTANCE;
+    static List<Xid> importedXids = new ArrayList<Xid>(); //todo leak cleanup in rollback and commit
 
 
     public static TransactionServices getInstance() {
@@ -60,16 +66,22 @@ public class TransactionServicesImpl implements TransactionServices {
         return new byte[]{'a'};
     }
 
-    public byte[] enlistResource(XAResource resource, Xid xid) throws WSATException {
-        try {
-            TransactionManagerImpl.transaction.enlistResource(resource); //todo temp hack until gettx api is ready REMOVE
-        } catch (Exception ex) {
-            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
-            throw new WSATException(ex);
-        } 
-        return new byte[]{'a'};
-    }
 
+  public byte[] enlistResource(XAResource resource, Xid xid)
+          throws WSATException {
+    WSATGatewayRM wsatgw = WSATGatewayRM.getInstance();
+    if (wsatgw == null) throw new WSATException("WS-AT gateway not deployed.");
+    Transaction transaction = WSATHelper.getInstance().getFromXidToTransactionMap(xid);
+    try {
+       return wsatgw.registerWSATResource(xid, resource, transaction);
+    } catch (IllegalStateException e) {
+      throw new WSATException(e);
+    } catch (RollbackException e) {
+      throw new WSATException(e);
+    } catch (SystemException e) {
+      throw new WSATException(e);
+    }
+  }
     public void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException {
         log("regsync");
     }
@@ -79,21 +91,47 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public Xid importTransaction(int timeout, byte[] tId) throws WSATException {
+        final XidImpl xidImpl = new XidImpl(tId);
+        if(importedXids.contains(xidImpl)) return xidImpl;
+        TransactionImportManager.getInstance().recreate(xidImpl, timeout);
+        importedXids.add(xidImpl);
         //todo getterminator and infect - then getTx and return txid (temporarily use hashcode)
         return new XidImpl(1, new byte[]{'a'}, new byte[]{'a'});
     }
 
     public String prepare(byte[] tId) throws WSATException {
         log("prepare");
-        return WSATConstants.PREPARED;
+        final XidImpl xidImpl = new XidImpl(tId);
+        int vote;
+        try {
+            vote = TransactionImportManager.getInstance().getXATerminator().prepare(xidImpl);
+        } catch (XAException ex) {
+            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            throw new WSATException(ex);
+        }
+        return vote==XAResource.XA_OK?WSATConstants.PREPARED:WSATConstants.READONLY;
     }
 
     public void commit(byte[] tId) throws WSATException {
         log("commit");
+        final XidImpl xidImpl = new XidImpl(tId);
+        try {
+            TransactionImportManager.getInstance().getXATerminator().commit(xidImpl, false);
+        } catch (XAException ex) {
+            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            throw new WSATException(ex);
+        }
     }
 
     public void rollback(byte[] tId) throws WSATException {
         log("rollback");
+        final XidImpl xidImpl = new XidImpl(tId);
+        try {
+            TransactionImportManager.getInstance().getXATerminator().rollback(xidImpl);
+        } catch (XAException ex) {
+            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            throw new WSATException(ex);
+        }
     }
 
     public void replayCompletion(String tId, XAResource xaResource) throws WSATException {
@@ -116,7 +154,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     private void log(String msg){
-        System.out.println("txservicesimpl:"+msg);
+     //   System.out.println("txservicesimpl:"+msg);
     }
 
 }

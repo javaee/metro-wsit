@@ -114,6 +114,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException xaException
      */
     public int prepare(Xid xid) throws XAException {
+        WSATHelper.getInstance().debug("prepare xid:"+xid);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPrepare(m_epr.toString(), m_xid);
         getWSATHelper().prepare(m_epr, m_xid, this);
         try {
@@ -180,6 +181,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException xaException
      */
     public void commit(Xid xid, boolean onePhase) throws XAException {
+        WSATHelper.getInstance().debug("commit xid:"+xid+" onePhase:"+onePhase);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommit(m_epr.toString(), m_xid);
         getWSATHelper().commit(m_epr, m_xid, this);
         try {
@@ -235,6 +237,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException
      */
     public void rollback(Xid xid) throws XAException {
+        WSATHelper.getInstance().debug("rollback xid:"+xid);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollback(m_epr.toString(), m_xid);
         getWSATHelper().rollback(m_epr, m_xid, this);
         try {
@@ -363,6 +366,11 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @param bqual byte[]
      */
     public void setBranchQualifier(byte[] bqual){
+//todoremove         m_xid = new XidImpl(m_xid.getFormatId(), m_xid.getGlobalTransactionId(), bqual);
+    }
+
+    public void setXid(Xid xid){
+        m_xid = xid;
 //todoremove         m_xid = new XidImpl(m_xid.getFormatId(), m_xid.getGlobalTransactionId(), bqual);
     }
 

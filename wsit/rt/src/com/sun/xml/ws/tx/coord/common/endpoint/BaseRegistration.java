@@ -39,11 +39,15 @@ import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.*;
 import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.EndpointReferenceBuilder;
 import com.sun.xml.ws.tx.coord.common.RegistrationIF;
 import com.sun.xml.ws.tx.coord.common.WSCUtil;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.transaction.SystemException;
 
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
@@ -60,17 +64,25 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
         this.context = context;
         this.version = version;
     }
+    
     public BaseRegisterResponseType<T,P> registerOperation(BaseRegisterType<T,K> parameters) {
  //todoremove        if (WSATHelper.isDebugEnabled())
  //todoremove            WseeWsatLogger.logRegisterOperationEntered(parameters);
         String txId = WSATHelper.getInstance().getWSATTidFromWebServiceContextHeaderList(context);
+        System.out.println("-------->txid:"+txId);
         Xid xidFromWebServiceContextHeaderList = TransactionIdHelper.getInstance().wsatid2xid(txId);
  //todoremove        checkIssuedTokenAtApplicationLevel(txId);
         byte[] bqual = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
         BaseRegisterResponseType<T,P> registerResponseType =
                 createRegisterResponseType(xidFromWebServiceContextHeaderList, bqual);
-    //todoremove     if (WSATHelper.isDebugEnabled())
-     //todoremove        WseeWsatLogger.logRegisterOperationExited(registerResponseType);
+        try {
+            //todoremove     if (WSATHelper.isDebugEnabled())
+            //todoremove        WseeWsatLogger.logRegisterOperationExited(registerResponseType);
+            TransactionManagerImpl.getInstance().getTransactionManager().suspend();
+        } catch (SystemException ex) {
+            ex.printStackTrace();
+            Logger.getLogger(BaseRegistration.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return registerResponseType;
     }
 

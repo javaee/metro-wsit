@@ -51,7 +51,8 @@ public class WSCUtil {
 
     public static Element referenceElementBranchQual(String branchQual) {
         Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants._WSAT +":"+WSATConstants.BRANCHQUAL);
-        ele.setTextContent(branchQual);
+        branchQual = branchQual.replaceAll(",", "&#044;");
+        ele.setTextContent(branchQual.trim()); 
         return ele;
     }
 
