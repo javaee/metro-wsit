@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: webservices-extra-jdk-packages
 Bundle-SymbolicName: com.sun.xml.ws.webservices-extra-jdk-packages
 Fragment-Host: system.bundle;extension:=framework
-Export-Package: org.jcp.dsig.xml.internal,org.jcp.dsig.xml.internal.do
+Export-Package: org.jcp.xml.dsig.internal,org.jcp.xml.dsig.internal.do
  m,com.sun.org.apache.xml.internal.security,com.sun.org.apache.xml.int
  ernal.security.algorithms,com.sun.org.apache.xml.internal.security.al
  gorithms.implementations,com.sun.org.apache.xml.internal.security.c14
