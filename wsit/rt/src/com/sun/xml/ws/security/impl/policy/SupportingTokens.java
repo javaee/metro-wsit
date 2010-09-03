@@ -141,7 +141,7 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
                 }else{
                     if(!assertion.isOptional()){
                         if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SupportingTokens"});
+                            logger.log(Level.SEVERE,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion, "SecurityContextToken"));
                         }
                         if(isServer){
                             throw new UnsupportedPolicyAssertion("Policy assertion "+
@@ -164,7 +164,7 @@ public class SupportingTokens extends PolicyAssertion implements com.sun.xml.ws.
                 }else{
                     if(!assertion.isOptional()){
                         if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SupportingTokens"});
+                            logger.log(Level.SEVERE,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion, "SecurityContextToken"));
                         }
                         if(isServer){
                             throw new UnsupportedPolicyAssertion("Policy assertion "+

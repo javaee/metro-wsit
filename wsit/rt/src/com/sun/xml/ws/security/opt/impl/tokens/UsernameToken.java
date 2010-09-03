@@ -7,7 +7,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -70,6 +70,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 /**
  * Representation of UsernameToken SecurityHeaderElement
@@ -166,7 +167,7 @@ public class UsernameToken extends UsernameTokenType
         } else if (MessageConstants.PASSWORD_DIGEST_NS.equals(passwordType)) {
             this.passwordType =  MessageConstants.PASSWORD_DIGEST_NS;
         } else {
-            log.log(Level.SEVERE, "WSS0306.invalid.passwd.type",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0306_INVALID_PASSWD_TYPE(MessageConstants.PASSWORD_TEXT_NS, MessageConstants.PASSWORD_DIGEST_NS),
                     new Object[] {
                 MessageConstants.PASSWORD_TEXT_NS,
                 MessageConstants.PASSWORD_DIGEST_NS});
@@ -192,7 +193,7 @@ public class UsernameToken extends UsernameTokenType
     private void setNonceEncodingType(String nonceEncodingType) {
         
         if (!MessageConstants.BASE64_ENCODING_NS.equals(nonceEncodingType)) {
-            log.log(Level.SEVERE,"WSS0307.nonce.enctype.invalid");
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0307_NONCE_ENCTYPE_INVALID());
             throw new RuntimeException("Nonce encoding type invalid");
         }
         this.nonceEncodingType = MessageConstants.BASE64_ENCODING_NS;
@@ -328,15 +329,14 @@ public class UsernameToken extends UsernameTokenType
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
             random.nextBytes(decodedNonce);
         } catch (NoSuchAlgorithmException e) {
-            log.log(Level.SEVERE, "WSS0310.no.such.algorithm",
-                    new Object[] {e.getMessage()});
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0310_NO_SUCH_ALGORITHM(e.getMessage()),new Object[] {e.getMessage()});
             throw new RuntimeException(
                     "No such algorithm found" + e.getMessage());
         }
         if (MessageConstants.BASE64_ENCODING_NS == nonceEncodingType)
             this.nonceValue = Base64.encode(decodedNonce);
         else {
-            log.log(Level.SEVERE, "WSS0389.unrecognized.nonce.encoding", nonceEncodingType);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0389_UNRECOGNIZED_NONCE_ENCODING(nonceEncodingType), nonceEncodingType);
             throw new RuntimeException(
                     "Unrecognized encoding: " + nonceEncodingType);
         }
@@ -373,7 +373,7 @@ public class UsernameToken extends UsernameTokenType
         try {
             utf8Bytes = utf8String.getBytes("utf-8");
         } catch (UnsupportedEncodingException uee) {
-            log.log(Level.SEVERE, "WSS0390.unsupported.charset.exception");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0390_UNSUPPORTED_CHARSET_EXCEPTION());
             throw new SecurityTokenException(uee);
         }
         
@@ -393,8 +393,7 @@ public class UsernameToken extends UsernameTokenType
             MessageDigest sha = MessageDigest.getInstance("SHA-1");
             hash = sha.digest(bytesToHash);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0311.passwd.digest.couldnot.be.created",
-                    new Object[] {e.getMessage()});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0311_PASSWD_DIGEST_COULDNOT_BE_CREATED(e.getMessage()), new Object[] {e.getMessage()});
             throw new SecurityTokenException(
                     "Password Digest could not be created. " + e.getMessage());
         }

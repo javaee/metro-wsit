@@ -45,8 +45,6 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.impl.policy.LogStringsMessages;
 import com.sun.xml.ws.security.impl.policy.Trust10;
 import com.sun.xml.ws.security.impl.policy.Trust13;
-import com.sun.xml.ws.security.impl.policyconv.IntegrityAssertionProcessor;
-import com.sun.xml.ws.security.impl.policyconv.XWSSPolicyContainer;
 import com.sun.xml.ws.security.policy.AsymmetricBinding;
 import com.sun.xml.ws.security.policy.AlgorithmSuite;
 import com.sun.xml.ws.security.policy.Binding;
@@ -232,7 +230,7 @@ public class XWSSPolicyGenerator {
                 mp = _policyContainer.getMessagePolicy(false);
             }
         }catch(PolicyGenerationException ex){
-            logger.log(Level.SEVERE,""+effectivePolicy,ex);
+            logger.log(Level.SEVERE,LogStringsMessages.SP_0113_UNABLE_TO_DIGEST_POLICY(effectivePolicy),ex);
             throw new PolicyException("Unable to digest SecurityPolicy ");
         }
         //try{

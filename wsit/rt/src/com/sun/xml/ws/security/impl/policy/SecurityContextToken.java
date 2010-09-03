@@ -153,7 +153,7 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
                 } else{
                     if(!assertion.isOptional()){
                         if(logger.getLevel() == Level.SEVERE){
-                            logger.log(Level.SEVERE,"SP0100.invalid.security.assertion",new Object[]{assertion,"SecurityContextToken"});
+                            logger.log(Level.SEVERE,LogStringsMessages.SP_0100_INVALID_SECURITY_ASSERTION(assertion, "SecurityContextToken"));
                         }
                         if(isServer){
                             throw new UnsupportedPolicyAssertion("Policy assertion "+

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,7 +54,6 @@ import com.sun.xml.ws.security.opt.crypto.dsig.keyinfo.KeyInfo;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy;
-import com.sun.xml.wss.impl.policy.mls.EncryptionPolicy.FeatureBinding;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.impl.policy.mls.Target;
 
@@ -75,9 +74,9 @@ import com.sun.xml.ws.security.opt.api.reference.KeyIdentifier;
 import com.sun.xml.ws.security.opt.api.reference.Reference;
 import com.sun.xml.ws.security.opt.impl.attachment.AttachmentSetImpl;
 import com.sun.xml.ws.security.opt.impl.attachment.EncryptedAttachment;
-import com.sun.xml.ws.security.opt.impl.crypto.AttachmentData;
 import com.sun.xml.wss.impl.policy.mls.EncryptionTarget;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.impl.crypto.LogStringsMessages;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 /**
@@ -282,7 +281,7 @@ public class ETHandler {
         SecuredMessage message = context.getSecuredMessage();
         AttachmentSet as = message.getAttachments();
         if(as != null && as.isEmpty()){
-            logger.log(Level.WARNING, "No attachment part present in the message to be secured");
+            logger.log(Level.WARNING, LogStringsMessages.WSS_1244_NO_ATTACHMENT_FOUND());
             return;
         }
         String dataEncAlg =  SecurityUtil.getDataEncryptionAlgo(context);
