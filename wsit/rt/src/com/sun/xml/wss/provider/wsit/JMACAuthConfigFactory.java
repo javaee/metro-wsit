@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,6 +37,7 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -438,13 +439,13 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
                 entries.add(new EntryInfo(classname, null));
 
             } catch (IOException ex) {
-                Logger.getLogger(JMACAuthConfigFactory.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0062_ERROR_LOAD_DEFAULT_PROVIDERS(), ex);
                 throw new WebServiceException(ex);
             } finally {
                 try {
                     is.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(JMACAuthConfigFactory.class.getName()).log(Level.WARNING, null, ex);
+                    logger.log(Level.WARNING, LogStringsMessages.WSITPVD_0062_ERROR_LOAD_DEFAULT_PROVIDERS(), ex);
                 }
             }
         } else {
@@ -543,7 +544,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
                         "Cannot load AuthConfigProvider: " + className, ex); 
                 } else if (logger.isLoggable(Level.WARNING)) {
                     logger.log(Level.WARNING,
-                        "jmac.factory_unable_to_load_provider",
+                        LogStringsMessages.WSITPVD_0060_JMAC_JMAC_FACTORY_UNABLETO_LOAD_PROVIDER(className),
                          new String [] { className, ex.toString() });
                 }
 	    }
@@ -678,7 +679,7 @@ public class JMACAuthConfigFactory extends AuthConfigFactory {
 	} catch (Exception e) {
             if (logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING,
-                    "jmac.factory_auth_config_loader_failure");
+                    LogStringsMessages.WSITPVD_0061_JMAC_AUTHCONFIG_LOADER_FAILURE());
             }
 	}
 

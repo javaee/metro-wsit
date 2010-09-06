@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,6 +45,7 @@ import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
@@ -138,7 +139,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 status = AuthStatus.SUCCESS;
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "ws.error_validate_request", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0053_ERROR_VALIDATE_REQUEST(), e);
             WebServiceException wse = new WebServiceException("Cannot validate request for", e);
             //set status for audit
             status = AuthStatus.SEND_FAILURE;
@@ -168,7 +169,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 } catch (PrivilegedActionException pae) {
                     Throwable cause = pae.getCause();
                     if (cause instanceof AuthException) {
-                        logger.log(Level.SEVERE, "ws.error_next_pipe", cause);
+                        logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0055_WS_ERROR_NEXT_PIPE(), cause);
                     }
                     Packet response = helper.getFaultResponse(validatedRequest, info.getResponsePacket(), cause);
                     return doReturnWith(response);
@@ -197,7 +198,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                 info.setResponsePacket(response);
                 response = processResponse(info, sAC, serverSubject);
             } catch (Exception ex) {
-                Logger.getLogger(ServerSecurityTube.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0057_ERROR_PROCESS_RESPONSE(), ex);
             }
         }
 
@@ -232,7 +233,7 @@ public class ServerSecurityTube extends AbstractFilterTubeImpl {
                     logger.log(Level.INFO, "ws.error_secure_response", e);
                 }
             } else {
-                logger.log(Level.SEVERE, "ws.error_secure_response", e);
+                logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0054_ERROR_SECURE_RESPONSE(), e);
             }
             return helper.makeFaultResponse(info.getResponsePacket(), e);
         }

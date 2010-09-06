@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,6 +55,7 @@ import com.sun.xml.ws.api.pipe.PipeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterPipeImpl;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 
 /**
  * This pipe is used to do 196 security
@@ -163,7 +164,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 	    }
 	} catch(Exception e) {
 
-	    logger.log(Level.SEVERE,"ws.error_validate_request", e);
+	    logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0053_ERROR_VALIDATE_REQUEST(), e);
 
 	    WebServiceException wse = new WebServiceException
 		("Cannot validate request for", e);
@@ -194,7 +195,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 			response = next.process(validatedRequest);
 		    } catch (Exception e) {
 			if (e instanceof AuthException){
-			    logger.log(Level.SEVERE,"ws.error_next_pipe", e);
+			    logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0055_WS_ERROR_NEXT_PIPE(), e);
 			}
 			response = helper.getFaultResponse
 			    (validatedRequest,info.getResponsePacket(),e);
@@ -211,7 +212,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 		    } catch (PrivilegedActionException pae) {
 		        Throwable cause = pae.getCause();
 			if (cause instanceof AuthException){
-			    logger.log(Level.SEVERE,"ws.error_next_pipe", cause);
+			    logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0055_WS_ERROR_NEXT_PIPE(), cause);
 			}
 			response = helper.getFaultResponse
 			    (validatedRequest,info.getResponsePacket(),cause);
@@ -228,7 +229,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 		response = helper.getFaultResponse
 		    (validatedRequest,info.getResponsePacket(),wse);
 
-		logger.log(Level.SEVERE,"",wse);
+		logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0056_NULL_RESPONSE(),wse);
 
 	    }
 
@@ -267,7 +268,7 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 		    logger.log(Level.INFO, "ws.error_secure_response", e);
 		}
 	    } else {
-		logger.log(Level.SEVERE, "ws.error_secure_response", e);
+		    logger.log(Level.SEVERE, LogStringsMessages.WSITPVD_0054_ERROR_SECURE_RESPONSE(), e);
 	    }
     
 	    return helper.makeFaultResponse(info.getResponsePacket(),e);

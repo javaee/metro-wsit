@@ -39,6 +39,7 @@ package com.sun.xml.wss.saml.assertion.saml11.jaxb20;
 
 import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.ConditionsType;
 import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
 import com.sun.xml.wss.util.DateUtils;
@@ -140,7 +141,7 @@ public class Conditions extends ConditionsType
                 notBeforeField = DateUtils.stringToDate(super.getNotBefore().toString());
             }
         } catch (ParseException ex) {
-            Logger.getLogger(Conditions.class.getName()).log(Level.SEVERE, null, ex);
+           log.log(Level.SEVERE, LogStringsMessages.WSS_0430_SAML_GET_NOT_BEFORE_DATE_OR_GET_NOT_ON_OR_AFTER_DATE_PARSE_FAILED(), ex);
         }
             return notBeforeField;
         }
@@ -154,7 +155,7 @@ public class Conditions extends ConditionsType
                 notOnOrAfterField = DateUtils.stringToDate(super.getNotOnOrAfter().toString());
             }
         } catch (ParseException ex) {
-            Logger.getLogger(Conditions.class.getName()).log(Level.SEVERE, null, ex);
+           log.log(Level.SEVERE, LogStringsMessages.WSS_0430_SAML_GET_NOT_BEFORE_DATE_OR_GET_NOT_ON_OR_AFTER_DATE_PARSE_FAILED(), ex);
         }
         return notOnOrAfterField;
     }

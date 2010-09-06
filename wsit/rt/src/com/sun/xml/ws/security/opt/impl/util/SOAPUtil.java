@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,8 +46,6 @@ package com.sun.xml.ws.security.opt.impl.util;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.wss.impl.WssSoapFaultException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import com.sun.xml.ws.security.opt.api.keyinfo.BinarySecurityToken;
 import com.sun.xml.wss.XWSSecurityException;
@@ -64,7 +62,6 @@ import javax.xml.soap.SOAPConstants;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPFault;
-import javax.xml.ws.WebServiceException;
 import javax.xml.ws.soap.SOAPFaultException;
 
 /**

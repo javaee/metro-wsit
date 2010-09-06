@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,13 @@ package com.sun.xml.wss.saml.util;
 
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
-import com.sun.xml.ws.security.opt.impl.dsig.DSigResolver;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.dsig.WSSPolicyConsumerImpl;
+import com.sun.xml.wss.logging.saml.LogStringsMessages;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType;
 import java.text.ParseException;
@@ -112,7 +112,7 @@ public class SAMLUtil {
         
         int nodeListLength = nodeList.getLength();
         if (nodeListLength == 0) {
-                logger.log(Level.SEVERE,"WSS001.SAML_ASSERTION_NOT_FOUND",new Object[] {assertionId});
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_001_SAML_ASSERTION_NOT_FOUND(assertionId));
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                     "Referenced Security Token could not be retrieved",
@@ -130,7 +130,7 @@ public class SAMLUtil {
                 return assertion;
             }
         }
-            logger.log(Level.SEVERE,"WSS001.SAML_ASSERTION_NOT_FOUND",new Object[] {assertionId});
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_001_SAML_ASSERTION_NOT_FOUND(assertionId));
         throw SecurableSoapMessage.newSOAPFaultException(
                 MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                 "Referenced Security Token could not be retrieved",
@@ -157,7 +157,7 @@ public class SAMLUtil {
                 DocumentBuilder builder = factory.newDocumentBuilder();
                 document = builder.newDocument();
             } catch (Exception ex) {
-                logger.log(Level.SEVERE, "WSS002.failed.create.document", ex);
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_002_FAILED_CREATE_DOCUMENT(), ex);
                 throw new XWSSecurityException("Unable to create Document : " + ex.getMessage());
             }
             result = new DOMResult(document);
@@ -189,7 +189,7 @@ public class SAMLUtil {
             m.marshal(element, result);            
             
         } catch (Exception ex) {
-            logger.log(Level.SEVERE,"WSS003.failedto.marshal", ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_003_FAILEDTO_MARSHAL(), ex);
             throw new XWSSecurityException("Not able to Marshal " + element.getClass().getName() + 
                 ", got exception: " + ex.getMessage());
         }
@@ -265,7 +265,7 @@ public class SAMLUtil {
 
         if(SAMLVersion == null){
             XWSSecurityRuntimeException ex  =new XWSSecurityRuntimeException("SAML Version should be set in the callback handler when using saml assertion reader");
-            logger.log(Level.SEVERE, "SAML Version is not set in the saml callback", ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_004_SAML_VERSION_NOT_SET(), ex);
             throw ex;
         }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -56,6 +56,7 @@ import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import javax.xml.bind.JAXBElement;
 
 /**
@@ -151,7 +152,7 @@ public class ClientSecurityPipe extends AbstractFilterPipeImpl
 
 	} catch(Exception e) {
 
-	    log.log(Level.SEVERE,"ws.error_secure_request", e);
+	    log.log(Level.SEVERE,LogStringsMessages.WSITPVD_0058_ERROR_SECURE_REQUEST(), e);
 	    
 	    throw new WebServiceException(
 		  "Cannot secure request",e);

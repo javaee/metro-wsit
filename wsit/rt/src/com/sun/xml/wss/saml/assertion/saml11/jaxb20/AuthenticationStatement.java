@@ -1,5 +1,5 @@
 /*
- * $Id: AuthenticationStatement.java,v 1.3 2010-03-20 12:32:09 kumarjayanti Exp $
+ * $Id: AuthenticationStatement.java,v 1.4 2010-09-06 08:39:54 sm228678 Exp $
  */
 
 /*
@@ -170,7 +170,7 @@ public class AuthenticationStatement extends AuthenticationStatementType
                 instantDate = DateUtils.stringToDate(super.getAuthenticationInstant().toString());
             }
         } catch (ParseException ex) {
-            Logger.getLogger(AuthenticationStatement.class.getName()).log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, null, ex);
         }
         return instantDate;
     }

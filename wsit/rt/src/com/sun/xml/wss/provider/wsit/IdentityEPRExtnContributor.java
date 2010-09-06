@@ -56,6 +56,7 @@ import com.sun.xml.wss.impl.MessageConstants;
 
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -125,13 +126,13 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
                     }
                 }
             } catch (CertificateException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
                 throw new RuntimeException(ex);
             } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
                 throw new RuntimeException(ex);
             } catch (XWSSecurityException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
                 throw new RuntimeException(ex);
             }
         }       

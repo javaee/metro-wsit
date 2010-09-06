@@ -1,11 +1,11 @@
 /*
- * $Id: SubjectConfirmationData.java,v 1.1 2010-03-20 12:33:30 kumarjayanti Exp $
+ * $Id: SubjectConfirmationData.java,v 1.2 2010-09-06 08:39:53 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -45,6 +45,7 @@ import com.sun.xml.wss.saml.SAMLException;
 
 
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.saml.internal.saml20.jaxb20.SubjectConfirmationDataType;
 import com.sun.xml.wss.saml.util.SAML20JAXBUtil;
 import com.sun.xml.wss.util.DateUtils;
@@ -190,7 +191,7 @@ public class SubjectConfirmationData extends SubjectConfirmationDataType
                 try {
                     notBeforeDate = DateUtils.stringToDate(super.getNotBefore().toString());
                 } catch (ParseException ex) {
-                    Logger.getLogger(SubjectConfirmationData.class.getName()).log(Level.SEVERE, null, ex);
+                   log.log(Level.SEVERE, LogStringsMessages.WSS_0430_SAML_GET_NOT_BEFORE_DATE_OR_GET_NOT_ON_OR_AFTER_DATE_PARSE_FAILED(), ex);
                 }
             }
         }
@@ -203,7 +204,7 @@ public class SubjectConfirmationData extends SubjectConfirmationDataType
                 try {
                     notOnOrAfterDate = DateUtils.stringToDate(super.getNotOnOrAfter().toString());
                 } catch (ParseException ex) {
-                    Logger.getLogger(SubjectConfirmationData.class.getName()).log(Level.SEVERE, null, ex);
+                   log.log(Level.SEVERE,LogStringsMessages.WSS_0430_SAML_GET_NOT_BEFORE_DATE_OR_GET_NOT_ON_OR_AFTER_DATE_PARSE_FAILED(), ex);
                 }
             }
         }
