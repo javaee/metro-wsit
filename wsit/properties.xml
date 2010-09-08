@@ -92,7 +92,7 @@
     <property name="jaxb.spec.version" value="2.2.1"/>
     <property name="jaxb.release.version" value="2.2.2"/>
     <property name="jaxb.release.context.url" value="2.2.2"/>
-    <property name="jaxb.osgi.dependency.version" value="2.2.2-promoted-b92"/>
+    <property name="jaxb.osgi.dependency.version" value="2.2.2-promoted-b94"/>
 
     <!-- END: RELEASE SECTION -->
 
