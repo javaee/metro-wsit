@@ -396,7 +396,7 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$TX_MODULE_ROOT" -n "WS-TX 
 #
 MODULE_ROOT="$TX_MODULE_ROOT/wstx-api"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m "$MODULE_ROOT" -n "WS-TX API" -i "wstx-api" -P "wstx-project" -p ./poms/wstx-api-pom.xml
-SRC_ARTIFACTS="com/sun/xml/ws/tx/at/api"
+SRC_ARTIFACTS="com/sun/xml/ws/api/tx"
 TEST_ARTIFACTS="$SRC_ARTIFACTS"
 TEST_RESOURCES=""
 source ./move-sources.sh $COPY_ONLY_FLAG $VERBOSE $FORCE_RM_FLAG $MODULE_ROOT $SRC_ARTIFACTS $TEST_ARTIFACTS $TEST_RESOURCES
