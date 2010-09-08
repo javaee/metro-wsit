@@ -42,7 +42,7 @@ import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContext;
 import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContextManager;
 import com.sun.xml.ws.tx.at.WSATException;
 import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.CoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.RegistrationIF;

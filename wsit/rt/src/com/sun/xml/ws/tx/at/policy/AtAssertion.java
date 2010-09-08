@@ -38,7 +38,7 @@ package com.sun.xml.ws.tx.at.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.api.tx.at.WsatNamespace;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 

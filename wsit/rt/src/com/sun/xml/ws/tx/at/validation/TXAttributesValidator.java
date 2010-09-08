@@ -35,7 +35,7 @@
 */
 package com.sun.xml.ws.tx.at.validation;
 
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 
 import javax.xml.ws.WebServiceException;
 import java.util.HashSet;

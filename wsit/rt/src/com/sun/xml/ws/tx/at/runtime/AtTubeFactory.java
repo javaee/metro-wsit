@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.tx.at.api.TransactionalFeature;
+import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 import com.sun.xml.ws.tx.at.tube.WSATClientTube;
 import com.sun.xml.ws.tx.at.tube.WSATServerTube;
 import javax.xml.namespace.QName;

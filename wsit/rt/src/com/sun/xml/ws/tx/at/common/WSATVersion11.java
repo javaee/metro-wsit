@@ -38,7 +38,7 @@ package com.sun.xml.ws.tx.at.common;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 import com.sun.xml.ws.tx.at.common.client.ParticipantProxyBuilder;
 import com.sun.xml.ws.tx.at.v11.client.CoordinatorProxyBuilderImpl;

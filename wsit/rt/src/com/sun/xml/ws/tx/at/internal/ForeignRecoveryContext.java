@@ -35,7 +35,7 @@
 */
 package com.sun.xml.ws.tx.at.internal;
 
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;

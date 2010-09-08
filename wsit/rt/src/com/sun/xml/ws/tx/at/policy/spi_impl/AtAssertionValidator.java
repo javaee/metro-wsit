@@ -37,7 +37,7 @@ package com.sun.xml.ws.tx.at.policy.spi_impl;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
-import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.api.tx.at.WsatNamespace;
 import com.sun.xml.ws.tx.at.policy.AtAlwaysCapability;
 import com.sun.xml.ws.tx.at.policy.AtAssertion;
 

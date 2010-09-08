@@ -37,7 +37,7 @@ package com.sun.xml.ws.tx.coord.v10.endpoint;
 
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.coord.common.EndpointReferenceBuilder;
 import com.sun.xml.ws.tx.coord.common.endpoint.BaseRegistration;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;

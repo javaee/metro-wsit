@@ -46,7 +46,7 @@ import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.policy.AtPolicyCreator;
 import com.sun.xml.ws.tx.at.policy.EjbTransactionType;

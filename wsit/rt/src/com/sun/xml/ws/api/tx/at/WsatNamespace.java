@@ -33,7 +33,7 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.sun.xml.ws.tx.at.api;
+package com.sun.xml.ws.api.tx.at;
 
 import java.util.ArrayList;
 import java.util.List;

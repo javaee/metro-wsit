@@ -40,7 +40,7 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.tx.at.WSATConstants;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 
 

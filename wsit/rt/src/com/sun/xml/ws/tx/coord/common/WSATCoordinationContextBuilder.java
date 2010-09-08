@@ -37,7 +37,7 @@ package com.sun.xml.ws.tx.coord.common;
 
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 
 
 public abstract class WSATCoordinationContextBuilder {

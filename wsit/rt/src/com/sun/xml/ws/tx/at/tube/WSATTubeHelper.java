@@ -41,8 +41,8 @@ import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.api.Transactional;
-import com.sun.xml.ws.tx.at.api.TransactionalFeature;
+import com.sun.xml.ws.api.tx.at.Transactional;
+import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 
 import javax.transaction.Transaction;
 

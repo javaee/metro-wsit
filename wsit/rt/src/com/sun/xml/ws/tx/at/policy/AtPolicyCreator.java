@@ -38,17 +38,17 @@ package com.sun.xml.ws.tx.at.policy;
 import java.util.Arrays;
 import com.sun.xml.ws.policy.AssertionSet;
 import com.sun.xml.ws.policy.Policy;
-import com.sun.xml.ws.tx.at.api.Transactional;
-import com.sun.xml.ws.tx.at.api.Transactional.TransactionFlowType;
-import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.api.tx.at.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional.TransactionFlowType;
+import com.sun.xml.ws.api.tx.at.WsatNamespace;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.xml.ws.tx.at.api.Transactional.TransactionFlowType.*;
-import static com.sun.xml.ws.tx.at.api.WsatNamespace.*;
+import static com.sun.xml.ws.api.tx.at.Transactional.TransactionFlowType.*;
+import static com.sun.xml.ws.api.tx.at.WsatNamespace.*;
 
 /**
  *

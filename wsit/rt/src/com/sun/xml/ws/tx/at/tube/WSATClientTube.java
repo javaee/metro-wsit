@@ -48,7 +48,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.tx.at.WSATConstants;
-import com.sun.xml.ws.tx.at.api.TransactionalFeature;
+import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 
 import javax.xml.namespace.QName;
 import java.util.*;

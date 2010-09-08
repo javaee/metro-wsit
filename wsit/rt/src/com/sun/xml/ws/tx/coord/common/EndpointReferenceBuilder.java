@@ -38,7 +38,7 @@ package com.sun.xml.ws.tx.coord.common;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.wsaddressing.W3CEndpointReference;

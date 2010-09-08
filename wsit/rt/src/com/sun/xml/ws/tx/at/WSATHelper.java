@@ -39,7 +39,7 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.internal.BranchXidImpl;
 import com.sun.xml.ws.tx.at.internal.TransactionServicesImpl;
 import com.sun.xml.ws.tx.at.common.*;

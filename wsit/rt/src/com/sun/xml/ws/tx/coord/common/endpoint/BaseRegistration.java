@@ -38,7 +38,7 @@ package com.sun.xml.ws.tx.coord.common.endpoint;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.*;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.coord.common.EndpointReferenceBuilder;
 import com.sun.xml.ws.tx.coord.common.RegistrationIF;

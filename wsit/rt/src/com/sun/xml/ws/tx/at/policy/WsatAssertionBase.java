@@ -39,7 +39,7 @@ package com.sun.xml.ws.tx.at.policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import java.util.Collection;
 import javax.xml.namespace.QName;
 

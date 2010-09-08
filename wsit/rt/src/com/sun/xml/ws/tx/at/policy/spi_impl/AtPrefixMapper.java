@@ -36,7 +36,7 @@
 package com.sun.xml.ws.tx.at.policy.spi_impl;
 
 import com.sun.xml.ws.policy.spi.PrefixMapper;
-import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.api.tx.at.WsatNamespace;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

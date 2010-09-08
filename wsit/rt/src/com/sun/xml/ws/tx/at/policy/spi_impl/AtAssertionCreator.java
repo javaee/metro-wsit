@@ -40,7 +40,7 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.spi.AssertionCreationException;
 import com.sun.xml.ws.policy.spi.PolicyAssertionCreator;
-import com.sun.xml.ws.tx.at.api.WsatNamespace;
+import com.sun.xml.ws.api.tx.at.WsatNamespace;
 import com.sun.xml.ws.tx.at.policy.AtAlwaysCapability;
 import com.sun.xml.ws.tx.at.policy.AtAssertion;
 import java.util.Collection;

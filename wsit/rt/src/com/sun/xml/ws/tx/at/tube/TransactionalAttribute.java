@@ -36,7 +36,7 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 
 public class TransactionalAttribute {
   private boolean enabled;

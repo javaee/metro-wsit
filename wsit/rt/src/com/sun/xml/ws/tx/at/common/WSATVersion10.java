@@ -39,7 +39,7 @@ import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
 import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 import com.sun.xml.ws.tx.at.common.client.ParticipantProxyBuilder;
 import com.sun.xml.ws.tx.at.v10.client.CoordinatorProxyBuilderImpl;

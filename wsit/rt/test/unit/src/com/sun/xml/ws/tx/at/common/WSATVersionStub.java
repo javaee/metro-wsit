@@ -46,7 +46,7 @@ import com.sun.xml.ws.tx.coord.common.EndpointReferenceBuilder;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.developer.MemberSubmissionAddressingFeature;
-import com.sun.xml.ws.tx.at.api.Transactional;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import javax.xml.ws.WebServiceFeature;
 
 /**
