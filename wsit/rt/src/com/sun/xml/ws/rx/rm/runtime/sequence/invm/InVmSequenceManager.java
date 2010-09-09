@@ -424,7 +424,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         }
 
         state.setBackingStore(sequenceDataBs);
-        InVmSequenceData data = InVmSequenceData.loadReplica(null, state); // TODO HA time sync.
+        InVmSequenceData data = InVmSequenceData.loadReplica(this, state); // TODO HA time sync.
         return (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
     }
 

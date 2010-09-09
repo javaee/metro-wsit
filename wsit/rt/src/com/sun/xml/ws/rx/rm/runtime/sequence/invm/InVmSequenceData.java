@@ -1,5 +1,6 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
@@ -97,11 +98,11 @@ final class InVmSequenceData implements SequenceData {
     private final SequenceDataPojo data;
     private final TimeSynchronizer timeSynchronizer;
 
-    public static InVmSequenceData newInstace(TimeSynchronizer timeSynchronizer, SequenceDataPojo data) {
+    public static InVmSequenceData newInstace(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
         return new InVmSequenceData(timeSynchronizer, data);
     }
 
-    public static InVmSequenceData loadReplica(TimeSynchronizer timeSynchronizer, SequenceDataPojo data) {
+    public static InVmSequenceData loadReplica(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
 
         InVmSequenceData replica = new InVmSequenceData(timeSynchronizer, data);
         replica.initLocalCache();
@@ -109,7 +110,10 @@ final class InVmSequenceData implements SequenceData {
         return replica;
     }
 
-    private InVmSequenceData(TimeSynchronizer timeSynchronizer, SequenceDataPojo data) {
+    private InVmSequenceData(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
+        assert timeSynchronizer != null;
+        assert data != null;
+
         this.timeSynchronizer = timeSynchronizer;
         this.data = data;
 
