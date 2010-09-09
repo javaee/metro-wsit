@@ -91,31 +91,32 @@ public interface WSATConstants {
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_DURABLE_2PC = WSAT10_NS_URI + "/" + DURABLE_2PC;
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_VOLATILE_2PC = WSAT10_NS_URI + "/" + VOLATILE_2PC;
     static final String WLA_WSAT_NS_URI = "http://com.sun.xml.ws.tx.at/ws/2008/10/wsat";
-    static final String _WSAT = "wsat-wsat";
+    static final String WSAT_WSAT = "wsat-wsat";
+    static final String WSAT_CONTEXT_ROOT = "__wstx-services";
     static final String TXID = "txId";
-    static final QName TXID_QNAME = new QName(WLA_WSAT_NS_URI, TXID, _WSAT);
+    static final QName TXID_QNAME = new QName(WLA_WSAT_NS_URI, TXID, WSAT_WSAT);
     static final String BRANCHQUAL = "branchQual";
-    static final QName BRANCHQUAL_QNAME = new QName(WLA_WSAT_NS_URI, BRANCHQUAL, _WSAT); 
+    static final QName BRANCHQUAL_QNAME = new QName(WLA_WSAT_NS_URI, BRANCHQUAL, WSAT_WSAT);
     static final String ROUTING = "routing";
-    static final QName ROUTING_QNAME = new QName(WLA_WSAT_NS_URI, ROUTING, _WSAT);
+    static final QName ROUTING_QNAME = new QName(WLA_WSAT_NS_URI, ROUTING, WSAT_WSAT);
     // outbound endpoints
-    public static final String WSAT_COORDINATORPORTTYPEPORT = "/"+_WSAT+"/CoordinatorPortType";
-    public static final String WSAT_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+_WSAT+"/RegistrationPortTypeRPC";
+    public static final String WSAT_COORDINATORPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/CoordinatorPortType";
+    public static final String WSAT_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/RegistrationPortTypeRPC";
     // inbound endpoints
-    public static final String WSAT_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+_WSAT+"/RegistrationRequesterPortType";
+    public static final String WSAT_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/RegistrationRequesterPortType";
     //RegistrationRequesterPortTypeRPC";
-    public static final String WSAT_PARTICIPANTPORTTYPEPORT = "/"+_WSAT+"/ParticipantPortType";
+    public static final String WSAT_PARTICIPANTPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/ParticipantPortType";
     // logger                                                     
     public static final String DEBUG_WSAT = "DebugWSAT";
 
     static final String WSAT11_NS_URI = "http://docs.oasis-open.org/ws-tx/wsat/2006/06";
     static final String WSAT11_DURABLE_2PC = WSAT11_NS_URI + "/" + DURABLE_2PC;
     static final String WSAT11_VOLATILE_2PC = WSAT11_NS_URI + "/" + VOLATILE_2PC;
-    public static final String WSAT11_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+_WSAT+"/RegistrationPortTypeRPC11";
-    public static final String WSAT11_PARTICIPANTPORTTYPEPORT = "/"+_WSAT+"/ParticipantPortType11";
-    public static final String WSAT11_COORDINATORPORTTYPEPORT = "/"+_WSAT+"/CoordinatorPortType11";
+    public static final String WSAT11_REGISTRATIONCOORDINATORPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/RegistrationPortTypeRPC11";
+    public static final String WSAT11_PARTICIPANTPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/ParticipantPortType11";
+    public static final String WSAT11_COORDINATORPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/CoordinatorPortType11";
     // inbound endpoints
-    public static final String WSAT11_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+_WSAT+"/RegistrationRequesterPortType11";
+    public static final String WSAT11_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/RegistrationRequesterPortType11";
     //  TM
     public static final String TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT = "com.sun.xml.ws.tx.foreignContext";
     // tube request map storage

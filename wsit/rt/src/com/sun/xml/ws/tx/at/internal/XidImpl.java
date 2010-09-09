@@ -60,7 +60,7 @@ public class XidImpl implements Xid {
         this.branchQual = branchQual;
     }
 
-    XidImpl(byte[] globalTransactionId) {
+    public XidImpl(byte[] globalTransactionId) {
         this(1234, globalTransactionId, new byte[]{});
     }
 

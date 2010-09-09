@@ -69,12 +69,9 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
  //todoremove        if (WSATHelper.isDebugEnabled())
  //todoremove            WseeWsatLogger.logRegisterOperationEntered(parameters);
         String txId = WSATHelper.getInstance().getWSATTidFromWebServiceContextHeaderList(context);
-        System.out.println("-------->txid:"+txId);
         Xid xidFromWebServiceContextHeaderList = TransactionIdHelper.getInstance().wsatid2xid(txId);
- //todoremove        checkIssuedTokenAtApplicationLevel(txId);
-        byte[] bqual = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
-        BaseRegisterResponseType<T,P> registerResponseType =
-                createRegisterResponseType(xidFromWebServiceContextHeaderList, bqual);
+        Xid xid = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
+        BaseRegisterResponseType<T,P> registerResponseType = createRegisterResponseType(xid);
         try {
             //todoremove     if (WSATHelper.isDebugEnabled())
             //todoremove        WseeWsatLogger.logRegisterOperationExited(registerResponseType);
@@ -98,7 +95,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      * @param parameters RegisterType
      * @param xid        Xid
      */
-     byte[] processRegisterTypeAndEnlist(BaseRegisterType<T,K> parameters, Xid xid) {
+     Xid processRegisterTypeAndEnlist(BaseRegisterType<T,K> parameters, Xid xid) {
         if (parameters == null) WSATFaultFactory.throwInvalidParametersFault();
         String protocolIdentifier = parameters.getProtocolIdentifier();
         if(parameters.isDurable()) {
@@ -108,9 +105,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
             return null;
         } else {
 //todoremove             WseeWsatLogger.logUnknownParticipantIdentifier(protocolIdentifier);
-            throw new WebServiceException("unknown participant identifier:"+protocolIdentifier);
-//   todo         WSATFaultFactory.throwContextRefusedFault();
-//            return null; //this is actually unreachable
+            throw new WebServiceException("Unknown participant identifier:"+protocolIdentifier);
         }
 
     }
@@ -123,11 +118,11 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      * @param xid Xid
      * @return RegisterResponseType
      */
-    BaseRegisterResponseType<T,P> createRegisterResponseType(Xid xid, byte[] bqual) {
+    BaseRegisterResponseType<T,P> createRegisterResponseType(Xid xid) {
         BaseRegisterResponseType<T,P> registerResponseType = newRegisterResponseType();
         String coordinatorHostAndPort = getCoordinatorAddress();
         String txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
-        String branchQual = new String(bqual);
+        String branchQual = new String(xid.getBranchQualifier());
         EndpointReferenceBuilder<T> builder = getEndpointReferenceBuilder();
         T endpointReference =
                 builder.address(coordinatorHostAndPort).referenceParameter(
@@ -148,14 +143,14 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      * @param xid              Xid
      * @param epr              EndpointReferenceType obtained from RegisterType parameters provided to registerOperation
      */
-    private byte[] enlistResource(Xid xid, T epr) {
+    private Xid enlistResource(Xid xid, T epr) {
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logEnlistResource(epr, xid);
         WSATXAResource wsatXAResource = new WSATXAResource(version,epr, xid);
         try {
-            byte bqual[] = getTransactionServices().enlistResource(wsatXAResource, xid);
-            wsatXAResource.setBranchQualifier(bqual);
-            return bqual;
+            Xid xidFromEnlist = getTransactionServices().enlistResource(wsatXAResource, xid);
+            wsatXAResource.setBranchQualifier(xidFromEnlist.getBranchQualifier());
+            return xidFromEnlist;
         } catch (WSATException e) {
             e.printStackTrace();  //todo logging
             throw new WebServiceException(e);

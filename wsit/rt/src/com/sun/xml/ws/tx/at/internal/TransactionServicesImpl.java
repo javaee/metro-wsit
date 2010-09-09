@@ -62,12 +62,16 @@ public class TransactionServicesImpl implements TransactionServices {
         return INSTANCE;
     }
 
+   private TransactionServicesImpl() {  //todo use MaintenanceTaskExecutor
+     ForeignRecoveryContextManager.getInstance().start();
+   }
+
     public byte[] getGlobalTransactionId() {
         return new byte[]{'a'};
     }
 
 
-  public byte[] enlistResource(XAResource resource, Xid xid)
+  public Xid enlistResource(XAResource resource, Xid xid)
           throws WSATException {
     WSATGatewayRM wsatgw = WSATGatewayRM.getInstance();
     if (wsatgw == null) throw new WSATException("WS-AT gateway not deployed.");
@@ -95,8 +99,7 @@ public class TransactionServicesImpl implements TransactionServices {
         if(importedXids.contains(xidImpl)) return xidImpl;
         TransactionImportManager.getInstance().recreate(xidImpl, timeout);
         importedXids.add(xidImpl);
-        //todo getterminator and infect - then getTx and return txid (temporarily use hashcode)
-        return new XidImpl(1, new byte[]{'a'}, new byte[]{'a'});
+        return null;
     }
 
     public String prepare(byte[] tId) throws WSATException {

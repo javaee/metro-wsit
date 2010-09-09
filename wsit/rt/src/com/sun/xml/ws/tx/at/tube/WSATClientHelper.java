@@ -42,12 +42,15 @@ import java.util.Map;
 import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.tx.at.WSATConstants;
+
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.tx.at.WSATHelper;
 
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
@@ -179,19 +182,12 @@ public class WSATClientHelper implements WSATClient {
      *         true otherwise
      */
     private List<Header> processTransactionalRequest(TransactionalAttribute transactionalAttribute, Map map) {
-      //  Transaction suspendedTransaction = suspend(map);
-//todoremove        if (suspendedTransaction==null) return null;
         List<Header> headers = new ArrayList<Header>();
-//todoremove         if (WSATHelper.isDebugEnabled())
-//todoremove             WseeWsatLogger.logSuspendSuccessfulInClientSideHandler(suspendedTransaction, Thread.currentThread());
         String txId = null;
-        Xid xid = null;
-        try {
-            xid = TransactionImportManager.getInstance().getXid();
-            txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
-        } catch (SystemException ex) {
-            Logger.getLogger(WSATClientHelper.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        //todo get cluster/servername, make this unique
+        String s = UUID.randomUUID().toString().replace("urn:","").replaceAll("uuid:","").trim();
+        Xid xid = new XidImpl(1234,new String(""+System.currentTimeMillis()).getBytes(), new byte[]{});
+        txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         long ttl = 0;
         try {
             ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout(); //todoremove verify if this call is from inbound only suspendedTransaction.getTimeToLiveMillis();

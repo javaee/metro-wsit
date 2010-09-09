@@ -42,11 +42,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:wsat="http://schemas.xmlsoap.org/ws/2004/10/wsat"
     xmlns:wscoor="http://schemas.xmlsoap.org/ws/2004/10/wscoor"
+    xmlns:wsat11="http://docs.oasis-open.org/ws-tx/wsat/2006/06"
+    xmlns:wscoor11="http://docs.oasis-open.org/ws-tx/wscoor/2006/06"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.ibm.com/webservices/xsd/javaee_web_services_1_2.xsd">
     <webservice-description>
-        <display-name>WSATCoordinator</display-name>
+        <display-name>WS-AT1.0</display-name>
         <webservice-description-name>WSATCoordinator</webservice-description-name>
-        <wsdl-file>WEB-INF/wsdl/wsat.wsdl</wsdl-file>
+        <wsdl-file>WEB-INF/wsdls/wsat10/wsat.wsdl</wsdl-file>
         <port-component>
             <port-component-name>ParticipantPortTypeImpl</port-component-name>
             <wsdl-service>wsat:WSATCoordinator</wsdl-service>
@@ -67,9 +69,9 @@
         </port-component>
     </webservice-description>
     <webservice-description>
-        <display-name>Coordinator</display-name>
+        <display-name>WS-C10</display-name>
         <webservice-description-name>Coordinator</webservice-description-name>
-        <wsdl-file>WEB-INF/wsdl/wscoor.wsdl</wsdl-file>
+        <wsdl-file>WEB-INF/wsdls/wsc10/wscoor.wsdl</wsdl-file>
         <port-component>
             <port-component-name>RegistrationPortTypeImpl</port-component-name>
             <wsdl-service>wscoor:Coordinator</wsdl-service>
@@ -86,6 +88,53 @@
             <service-endpoint-interface>com.sun.xml.ws.tx.coord.v10.types.RegistrationRequesterPortTypePort</service-endpoint-interface>
             <service-impl-bean>
                 <servlet-link>RegistrationRequesterPortTypeImpl</servlet-link>
+            </service-impl-bean>
+        </port-component>
+    </webservice-description>
+
+    <webservice-description>
+        <display-name>WS-AT11</display-name>
+        <webservice-description-name>WSATCoordinator11</webservice-description-name>
+        <wsdl-file>WEB-INF/wsdls/wsat11/wstx-wsat-1.1-wsdl-200702.wsdl</wsdl-file>
+        <port-component>
+            <port-component-name>ParticipantPortTypePortImpl</port-component-name>
+            <wsdl-service>wsat11:WSATCoordinator11</wsdl-service>
+            <wsdl-port>wsat11:ParticipantPort</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.at.v11.types.ParticipantPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>ParticipantPortTypeImpl11</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>CoordinatorPortTypePortImpl</port-component-name>
+            <wsdl-service>wsat11:WSAT11Service</wsdl-service>
+            <wsdl-port>wsat11:CoordinatorPort</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.at.v11.types.CoordinatorPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>CoordinatorPortTypeImpl11</servlet-link>
+            </service-impl-bean>
+        </port-component>
+    </webservice-description>
+    <webservice-description>
+        <display-name>WS-C11</display-name>
+        <webservice-description-name>Coordinator11</webservice-description-name>
+        <wsdl-file>WEB-INF/wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl</wsdl-file>
+        <port-component>
+            <port-component-name>RegistrationPortTypeRPCPortImpl</port-component-name>
+            <wsdl-service>wscoor11:RegistrationService_V11</wsdl-service>
+            <wsdl-port>wscoor11:RegistrationPort</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.coord.v11.types.RegistrationPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>RegistrationPortTypeImpl11</servlet-link>
+            </service-impl-bean>
+        </port-component>
+        <port-component>
+            <port-component-name>RegistrationRequesterPortTypePortImpl</port-component-name>
+            <wsdl-service>wscoor11:RegistrationService_V11</wsdl-service>
+            <wsdl-port>wscoor11:RegistrationRequesterPort</wsdl-port>
+            <service-endpoint-interface>com.sun.xml.ws.tx.coord.v11.types.RegistrationRequesterPortType</service-endpoint-interface>
+            <service-impl-bean>
+                <servlet-link>RegistrationRequesterPortTypeImpl11</servlet-link>
             </service-impl-bean>
         </port-component>
     </webservice-description>

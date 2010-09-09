@@ -44,13 +44,15 @@ import com.sun.xml.ws.tx.at.WSATHelper;
 public class WSCUtil {
 
     public static Element referenceElementTxId(String txId) {
-        Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants._WSAT +":"+WSATConstants.TXID);
+        Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants.WSAT_WSAT +":"+WSATConstants.TXID);
         ele.setTextContent(txId);
         return ele;
     }
 
     public static Element referenceElementBranchQual(String branchQual) {
-        Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants._WSAT +":"+WSATConstants.BRANCHQUAL);
+        Element ele =
+                DOMUtil.createDom().createElementNS(
+                        WSATConstants.WLA_WSAT_NS_URI,WSATConstants.WSAT_WSAT +":"+WSATConstants.BRANCHQUAL);
         branchQual = branchQual.replaceAll(",", "&#044;");
         ele.setTextContent(branchQual.trim()); 
         return ele;
@@ -58,7 +60,7 @@ public class WSCUtil {
 
     public static Element referenceElementRoutingInfo() {
         String routingInfo = WSATHelper.getInstance().getRoutingAddress();
-        Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants._WSAT +":"+WSATConstants.ROUTING);
+        Element ele = DOMUtil.createDom().createElementNS(WSATConstants.WLA_WSAT_NS_URI,WSATConstants.WSAT_WSAT +":"+WSATConstants.ROUTING);
         ele.setTextContent(routingInfo);
         return ele;
     }

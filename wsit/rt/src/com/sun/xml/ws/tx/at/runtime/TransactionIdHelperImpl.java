@@ -115,7 +115,7 @@ class TransactionIdHelperImpl extends TransactionIdHelper {
 //this is very basic XidImpl, not as complex as original
     return new XidImpl(Integer.parseInt(formatIdString, 16),
                        stringToByteArray(gtridString),
-                       (bqualString != null) ? stringToByteArray(bqualString) : null);
+                       (bqualString != null) ? stringToByteArray(bqualString) : new byte[]{});
   }
 
 

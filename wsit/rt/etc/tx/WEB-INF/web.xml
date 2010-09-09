@@ -82,38 +82,66 @@
         <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <description>WS-Coordination1.1 registerResponse service endpoint</description>
+        <display-name>WSCoord1.1 RegisterResponse</display-name>
+        <servlet-name>RegistrationRequesterPortTypeImpl11</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-Coordination1.1 register RPC service endpoint</description>
+        <display-name>WSCoord1.1 Register RPC</display-name>
+        <servlet-name>RegistrationPortTypeImpl11</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction1.1 Coordinator service endpoint</description>
+        <display-name>WSAT1.1 Coordinator</display-name>
+        <servlet-name>CoordinatorPortTypeImpl11</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>WS-AtomicTransaction1.1 participant service endpoint</description>
+        <display-name>WSAT1.1 Participant</display-name>
+        <servlet-name>ParticipantPortTypeImpl11</servlet-name>
+        <servlet-class>org.glassfish.webservices.JAXWSServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
         <url-pattern>/RegistrationRequesterPortType</url-pattern>
     </servlet-mapping>
-    <!--servlet-mapping>
-        <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
-        <url-pattern>/wscoor/coordinator/registerResponse/__container$publishing$subctx/*</url-pattern>
-    </servlet-mapping-->
     <servlet-mapping>
         <servlet-name>RegistrationPortTypeImpl</servlet-name>
         <url-pattern>/RegistrationPortTypeRPC</url-pattern>
     </servlet-mapping>
-    <!--servlet-mapping>
-        <servlet-name>RegistrationPortTypeImpl</servlet-name>
-        <url-pattern>/wscoor/coordinator/synchRegister/__container$publishing$subctx/*</url-pattern>
-    </servlet-mapping-->
     <servlet-mapping>
         <servlet-name>CoordinatorPortTypeImpl</servlet-name>
         <url-pattern>/CoordinatorPortType</url-pattern>
     </servlet-mapping>
-    <!--servlet-mapping>
-        <servlet-name>CoordinatorPortTypeImpl</servlet-name>
-        <url-pattern>/wsat/coordinator/__container$publishing$subctx/*</url-pattern>
-    </servlet-mapping-->
     <servlet-mapping>
         <servlet-name>ParticipantPortTypeImpl</servlet-name>
         <url-pattern>/ParticipantPortType</url-pattern>
     </servlet-mapping>
-    <!-- servlet-mapping>
-        <servlet-name>ParticipantPortTypeImpl</servlet-name>
-        <url-pattern>/wsat/2pc/__container$publishing$subctx/*</url-pattern>
-    </servlet-mapping -->
+    <servlet-mapping>
+        <servlet-name>RegistrationRequesterPortTypeImpl11</servlet-name>
+        <url-pattern>/RegistrationRequesterPortType11</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegistrationPortTypeImpl11</servlet-name>
+        <url-pattern>/RegistrationPortTypeRPC11</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CoordinatorPortTypeImpl11</servlet-name>
+        <url-pattern>/CoordinatorPortType11</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ParticipantPortTypeImpl11</servlet-name>
+        <url-pattern>/ParticipantPortType11</url-pattern>
+    </servlet-mapping>
     <resource-ref>
         <res-ref-name>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationRequesterPortTypePortImpl/m_context</res-ref-name>
         <res-type>javax.xml.ws.WebServiceContext</res-type>
@@ -140,7 +168,7 @@
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
         <injection-target>
-            <injection-target-class>com.sun.xml.ws.tx.coord.v10.endpoint.CoordinatorPortTypePortImpl</injection-target-class>
+            <injection-target-class>com.sun.xml.ws.tx.at.v10.endpoint.CoordinatorPortTypePortImpl</injection-target-class>
             <injection-target-name>m_context</injection-target-name>
         </injection-target>
     </resource-ref>
@@ -151,6 +179,47 @@
         <res-sharing-scope>Shareable</res-sharing-scope>
         <injection-target>
             <injection-target-class>com.sun.xml.ws.tx.at.v10.endpoint.ParticipantPortTypePortImpl</injection-target-class>
+            <injection-target-name>m_context</injection-target-name>
+        </injection-target>
+    </resource-ref>
+
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationRequesterPortImpl/m_context</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationRequesterPortImpl</injection-target-class>
+            <injection-target-name>m_context</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationPortImpl/m_context</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationPortImpl</injection-target-class>
+            <injection-target-name>m_context</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.at.v11.endpoint.CoordinatorPortImpl/m_context</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.at.v11.endpoint.CoordinatorPortImpl</injection-target-class>
+            <injection-target-name>m_context</injection-target-name>
+        </injection-target>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>com.sun.xml.ws.tx.at.v11.endpoint.ParticipantPortImpl/m_context</res-ref-name>
+        <res-type>javax.xml.ws.WebServiceContext</res-type>
+        <res-auth>Container</res-auth>
+        <res-sharing-scope>Shareable</res-sharing-scope>
+        <injection-target>
+            <injection-target-class>com.sun.xml.ws.tx.at.v11.endpoint.ParticipantPortImpl</injection-target-class>
             <injection-target-name>m_context</injection-target-name>
         </injection-target>
     </resource-ref>

@@ -62,7 +62,7 @@ public interface TransactionServices {
      * @return byte[] branchqual to use for 
      * @throws WSATException any error during enlist as WSAT GatewayRM
      */
-  byte[] enlistResource(XAResource resource, Xid xid) throws WSATException;
+   Xid enlistResource(XAResource resource, Xid xid) throws WSATException;
 
     /**
      * Called by Registration service to register a volatile participant

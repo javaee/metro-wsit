@@ -36,7 +36,7 @@
  holder.
 -->
 <sun-web-app error-url="">
-  <context-root>wsat-wsat</context-root>
+  <context-root>__wstx-services</context-root>
   <servlet>
     <servlet-name>RegistrationPortTypeImpl</servlet-name>
     <webservice-endpoint>
@@ -86,6 +86,59 @@
         <localpart>Coordinator</localpart>
       </service-qname>
       <servlet-impl-class>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationRequesterPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+
+  <servlet>
+    <servlet-name>RegistrationPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationPortTypeRPCPortImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationPortTypeRPC11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wscoor/2006/06</namespaceURI>
+        <localpart>RegistrationService_V11</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>CoordinatorPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>CoordinatorPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/CoordinatorPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wsat/2006/06</namespaceURI>
+        <localpart>WSAT11Service</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v11.endpoint.CoordinatorPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>ParticipantPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>ParticipantPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/ParticipantPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wsat/2006/06</namespaceURI>
+        <localpart>WSAT11Service</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v11.endpoint.ParticipantPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>RegistrationRequesterPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationRequesterPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationRequesterPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wscoor/2006/06</namespaceURI>
+        <localpart>RegistrationService_V11</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationRequesterPortImpl</servlet-impl-class>
       <debugging-enabled>true</debugging-enabled>
     </webservice-endpoint>
   </servlet>

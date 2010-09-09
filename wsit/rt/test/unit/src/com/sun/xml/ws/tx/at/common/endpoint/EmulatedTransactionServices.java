@@ -37,6 +37,7 @@ package com.sun.xml.ws.tx.at.common.endpoint;
 
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.WSATException;
+import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 
 import javax.transaction.Synchronization;
@@ -60,9 +61,10 @@ public class EmulatedTransactionServices implements TransactionServices {
             return new byte[0];
         }
 
-        public byte[] enlistResource(XAResource resource, Xid xid) throws WSATException //enlist XAResource (this is essentially the WSAT participant EPR wrapper)
+        public Xid enlistResource(XAResource resource, Xid xid) throws WSATException //enlist XAResource (this is essentially the WSAT participant EPR wrapper)
         {
-            return new byte[]{};
+            return new XidImpl(1234, new byte[]{'1','2','3','4','5','6','7','8','9'},
+                    new byte[]{'1','2','3','4','5','6','7','8','9'});
         }
 
         public void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException {

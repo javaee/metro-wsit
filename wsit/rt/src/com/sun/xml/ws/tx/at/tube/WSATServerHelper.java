@@ -37,6 +37,7 @@ package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.tx.at.WSATConstants;
+import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContext;
 import com.sun.xml.ws.tx.at.internal.ForeignRecoveryContextManager;
@@ -107,13 +108,14 @@ public class WSATServerHelper implements WSATServer {
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
-        boolean isRegistered = false; //TransactionIdHelper.getInstance().getXid(tid.getBytes()) == null;
-        try { //todo if foreignXid is not null then notRegisterred should be false
-          Xid foreignXid = 
-                  WSATHelper.getTransactionServices().importTransaction(
+        boolean isRegistered = false;
+        Xid foreignXid = null;
+        try {
+            foreignXid = WSATHelper.getTransactionServices().importTransaction(
                   (int) timeout, tid.getBytes());
           if(foreignXid!=null) isRegistered = true;
           if(!isRegistered) {
+              foreignXid = new XidImpl(tid.getBytes());
               register(headers, builder, cc, foreignXid, timeout);
           }
         } catch (WSATException e) {

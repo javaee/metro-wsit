@@ -167,9 +167,9 @@ public class WSATGatewayRM implements XAResource {
    * @throws SystemException from enlistResource
    * @throws RollbackException from enlistResource
    * @throws IllegalStateException from enlistResource
-   * @return byte[] branch qualifier
+   * @return Xid xid
    */
-  public byte[] registerWSATResource(Xid xidd, XAResource wsatResource, Transaction tx)
+  public Xid registerWSATResource(Xid xidd, XAResource wsatResource, Transaction tx)
       throws IllegalStateException, RollbackException, SystemException {
     // enlist each WSAT resource, specifically each endpoint, as a separate branch alias
   //  Transaction tx = getTransaction(xid);
@@ -204,7 +204,7 @@ public class WSATGatewayRM implements XAResource {
         debug("registerWSATResource() xid=" + currentXid + " currentBQual=" + String.valueOf(currentBQual) +
                 " bqual="+ String.valueOf(bqual));
     }
-    return bqual;
+    return currentXid;
   }
 
 

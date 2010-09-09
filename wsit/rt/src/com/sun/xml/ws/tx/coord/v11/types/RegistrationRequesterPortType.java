@@ -54,7 +54,7 @@ public interface RegistrationRequesterPortType {
      * 
      * @param parameters
      */
-    @WebMethod(operationName = "RegisterResponseOperation", action = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06/RegisterResponse")
+    @WebMethod(operationName = "RegisterResponse", action = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06/RegisterResponse")
     @Oneway
     public void registerResponse(
         @WebParam(name = "RegisterResponseOperation", targetNamespace = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06", partName = "parameters")

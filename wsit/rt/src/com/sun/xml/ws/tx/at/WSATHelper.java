@@ -166,7 +166,6 @@ public class WSATHelper<T> {
             wsatXAResourceLock = getDurableParticipantXAResourceMap().get(new BranchXidImpl(xid));
         }
         if (wsatXAResourceLock == null) {
-//todoremove             WseeWsatLogger.logXidNotInDurableResourceMap(xid, status);
             return false;
         }
         synchronized (wsatXAResourceLock) {
@@ -251,15 +250,25 @@ public class WSATHelper<T> {
             throws XAException {
 //todoremove         if (isDebugEnabled()) WseeWsatLogger.logAboutToSendPrepare(xid, Thread.currentThread());
         synchronized (m_durableParticipantXAResourceMapLock) {
-            BranchXidImpl branchXid = new BranchXidImpl(xid);
-            getDurableParticipantXAResourceMap().put(branchXid, wsatXAResource); //place in map first
+            putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
 //todoremove         if (isDebugEnabled()) WseeWsatLogger.logDurableParticipantXAResourcePlacedInCacheFromPrepare(xid);
         ParticipantIF<T> port = getDurableParticipantPort(epr, xid, wsatXAResource);
         T notification = builderFactory.newNotificationBuilder().build();
         port.prepare(notification);
 //todoremove         if (isDebugEnabled()) WseeWsatLogger.logPrepareSent(xid, Thread.currentThread());
-    } 
+    }
+
+    private void putInDurableParticipantXAResourceMap(WSATXAResource wsatXAResource, Xid xid) {
+        //todo this is GF specific to strip trailing pad
+        byte[] xidBqual = xid.getBranchQualifier();
+        byte[] bqual  = new byte[xidBqual.length - 1];
+        System.arraycopy(xidBqual, 0, bqual, 0, bqual.length);
+
+        Xid xidImpl = new XidImpl(xid.getFormatId(), xid.getGlobalTransactionId(), bqual);
+        BranchXidImpl branchXid = new BranchXidImpl(xidImpl);
+        getDurableParticipantXAResourceMap().put(branchXid, wsatXAResource); //place in map first
+    }
 
     /**
      * Unlike rollback, Xids are not added to the durable participant XAResource map during commit as prepare must always be
@@ -291,8 +300,7 @@ public class WSATHelper<T> {
             throws XAException {
  //todoremove        if (isDebugEnabled()) WseeWsatLogger.logAboutToSendRollback(xid, Thread.currentThread());
         synchronized (m_durableParticipantXAResourceMapLock) {
-            BranchXidImpl branchXid = new BranchXidImpl(xid);
-            getDurableParticipantXAResourceMap().put(branchXid, wsatXAResource);
+            putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
 //todoremove         if (isDebugEnabled()) WseeWsatLogger.logRollbackParticipantXAResourcePlacedInCache(xid);
         T notification = builderFactory.newNotificationBuilder().build();
@@ -378,8 +386,7 @@ public class WSATHelper<T> {
             throw xaException;
         }
         synchronized (m_durableParticipantXAResourceMapLock) { //redundant for runtime case, required for recovery
-            BranchXidImpl branchXid = new BranchXidImpl(xid);
-            getDurableParticipantXAResourceMap().put(branchXid, wsatXAResource);
+            putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
 	    synchronized (m_durableParticipantPortMapLock) {
             getDurableParticipantPortMap().put(wsatXAResource, participantPort);
@@ -540,7 +547,8 @@ public class WSATHelper<T> {
     }
 
     public Transaction getFromXidToTransactionMap(Xid xid) {
-        return m_xidToTransactionMap.get(xid);
+        Transaction transaction = m_xidToTransactionMap.get(xid);
+        return transaction;
     }
 
     public void removeFromXidToTransactionMap(Xid xid) {
