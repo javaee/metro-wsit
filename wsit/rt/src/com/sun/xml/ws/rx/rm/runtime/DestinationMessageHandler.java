@@ -39,6 +39,7 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.RxRuntimeException;
+import com.sun.xml.ws.rx.rm.faults.WsrmRequiredException;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.DuplicateMessageRegistrationException;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
@@ -76,11 +77,16 @@ class DestinationMessageHandler implements MessageHandler {
      * Once the message is registered and ack information processed, the message
      * is placed into a delivery queue and delivery callback is invoked
      */
-    public void registerMessage(@NotNull ApplicationMessage inMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException {
+    public void registerMessage(@NotNull ApplicationMessage inMessage) throws DuplicateMessageRegistrationException, UnknownSequenceException, WsrmRequiredException {
         assert sequenceManager != null;
         assert inMessage != null;
 
-        final Sequence inboundSequence = sequenceManager.getSequence(inMessage.getSequenceId());
+        final String inboundSequenceId = inMessage.getSequenceId();
+        if (inboundSequenceId == null) {
+            throw new WsrmRequiredException();
+        }
+        final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
+        
 
         // register and possibly store message in the unacked message sequence queue
         inboundSequence.registerMessage(inMessage, true); // TODO this may not be always needed in case of AtMostOnce delivery
