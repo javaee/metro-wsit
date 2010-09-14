@@ -38,9 +38,8 @@ package com.sun.xml.ws.tx.at.internal;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +51,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import javax.xml.ws.WebServiceException;
 
 
 /**
@@ -63,20 +63,20 @@ import javax.transaction.xa.Xid;
  * Gateway XAResource for managing outbound WS-AT transaction branches.
  */
 public class WSATGatewayRM implements XAResource {
-  private static WSATGatewayRM singleton;
 
+  private static WSATGatewayRM singleton;
   private String resourceRegistrationName; // JTA resource registration name
   private Map<Xid, BranchRecord> branches; // xid to Branch
   private List<Xid> pendingXids; // collection of Xids
   private final Object currentXidLock = new Object();
-  private byte[] currentBQual; //todo existance of currentXid actually makes this unnecessary
   private Xid currentXid;
+  static boolean isReady = false;
+  public static final boolean isWSATRecoveryEnabled = new Boolean(System.getProperty("wsat.recovery.enabled", "false")) ;
+  public static final String txlogdir = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogs/";
+  private static final String txlogdirinbound = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogsinbound/";
 
   static {
-      create("server"); 
-  }
-  
-  private WSATGatewayRM() {
+      create("server");
   }
 
   private WSATGatewayRM(String serverName) {
@@ -86,61 +86,87 @@ public class WSATGatewayRM implements XAResource {
   }
 
   public static synchronized WSATGatewayRM getInstance() {
+    if(singleton==null) {
+        create("server");
+    }
+    while(!isReady) {
+        try {
+            System.out.println("WSATGatewayRM is not ready to receive requests as recovery logs are being read");
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     return singleton;
   }
 
     /**
      * Called as part of WSATTransactionService start
      * @param serverName this server's name
-     * @param store PersistentStore to be used
      * @return the WSATGatewayRM singleton that WSATTransactionService will call stop on during stop/shutdown
      * @throws SystemException if there is any issue while registerResourceWithTM
-     * @throws PersistentStoreException if there is any issue with initStore or recoverPendingBranches
      */
   public static synchronized WSATGatewayRM create(String serverName)
   {
     if (singleton == null) {
       singleton = new WSATGatewayRM(serverName);
-      singleton.initStore();
-      singleton.recoverPendingBranches();
-      singleton.registerResourceWithTM();
+      if(isWSATRecoveryEnabled) {
+        singleton.initStore();
+        singleton.recoverPendingBranches();
+      }
     }
+    isReady = true;
     return singleton;
   }
 
     /**
      * Called for create of WSATGatewayRM
-     * @throws PersistentStoreException persistentStoreException
      */
-  private void initStore()  {
-  }
+    private void initStore() {
+        File file = new File(txlogdir);
+        file.mkdirs();
+        file = new File(txlogdirinbound);
+        file.mkdirs();
+    }
 
     /**
      * Called for create of WSATGatewayRM
-     * @throws PersistentStoreException persistentStoreException
      */
   private void recoverPendingBranches() {
- /**   if (WSATHelper.isDebugEnabled())
-        debug("recoverPendingBranches()");
-    PersistentStoreConnection.Cursor cursor = storeConn.createCursor(0);
-    PersistentStoreRecord rec;
-    while ((rec = cursor.next()) != null) {
-      BranchRecord branch = (BranchRecord) rec.getData();
-      branch.setStoreHandle(rec.getHandle());
-      branches.put(branch.getXid(), branch);
-      pendingXids.addAll(branch.getAllXids());
-      if (WSATHelper.isDebugEnabled())
-          debug("recovered: " + branch);
-    }*/
+    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() outbound");
+    FileInputStream fis = null;
+    ObjectInputStream in = null;
+      File[] files = new File(txlogdir).listFiles();
+      if(files!=null) for (int i=0;i<files.length;i++) {
+       try {
+        fis = new FileInputStream(files[i]);
+        in = new ObjectInputStream(fis);
+        BranchRecord branch = (BranchRecord) in.readObject();
+        //branches.put(branch.getXid(), branch);
+        //pendingXids.addAll(branch.getAllXids());
+        branch.commit(branch.getXid(), false);
+        in.close();
+       } catch (Throwable e) {
+            throw new WebServiceException("Failure while recovering WS-AT transaction logs", e);
+       }
+      }
+    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() inbound");
+     fis = null;
+     in = null;
+     files = new File(txlogdirinbound).listFiles();
+     if(files!=null) for (int i=0;i<files.length;i++) {
+       try {
+        fis = new FileInputStream(files[i]);
+        in = new ObjectInputStream(fis);
+        ForeignRecoveryContext frc = (ForeignRecoveryContext) in.readObject();
+        ForeignRecoveryContextManager.getInstance().add(frc, true);
+        in.close();
+       } catch (Throwable e) {
+            throw new WebServiceException("Failure while recovering WS-AT transaction logs inbound", e);
+       }
+      }
   }
 
-    /**
-     * Called for create of WSATGatewayRM
-     * @throws SystemException systemException
-     */
-  private void registerResourceWithTM() {
-   // getTM().registerDynamicResource(resourceRegistrationName, this);
-  }
 
   public void stop() {
     try {
@@ -160,16 +186,14 @@ public class WSATGatewayRM implements XAResource {
    * assumed that the XAResource parameter wraps a WS-AT endpoint. Invoked in
    * the outbound case.
    *
-   * @param xid
-   *          The current, superior transaction id.
-   * @param wsatResource
-   *          The foreign WS-AT resource.
+   * @param xid The current, superior transaction id.
+   * @param wsatResource The foreign WS-AT resource.
    * @throws SystemException from enlistResource
    * @throws RollbackException from enlistResource
    * @throws IllegalStateException from enlistResource
    * @return Xid xid
    */
-  public Xid registerWSATResource(Xid xidd, XAResource wsatResource, Transaction tx)
+  public Xid registerWSATResource(Xid xid, XAResource wsatResource, Transaction tx)
       throws IllegalStateException, RollbackException, SystemException {
     // enlist each WSAT resource, specifically each endpoint, as a separate branch alias
   //  Transaction tx = getTransaction(xid);
@@ -179,30 +203,22 @@ public class WSATGatewayRM implements XAResource {
 
     /** this is all moved after enlist due to changing xid in GF
     BranchRecord branch = getOrCreateBranch(xid);
-     //todo this temporarily removed, this could an issue/inefficiency if a subordinate incorrectly registers twice
+    //todo this temporarily removed, this could an issue/inefficiency if a subordinate incorrectly registers twice
     XAResource resource = branch.exists(wsatResource);
     if (resource!=null) {
       return ((WSATXAResource)resource).getXid().getBranchQualifier();
     }
     branch.addSubordinate(wsatResource);
      */
-    // enlist resource branch alias
-    byte[] bqual;
     synchronized(currentXidLock) {
-   //   String branchName = branch.getBranchName(wsatResource) + WSATHelper.assignUUID();
-   //   tx.enlistResource(this, branchName);
       tx.enlistResource(this);
-      bqual = currentBQual;
-      currentBQual = null;
-      //todo this is a mismatch/overwrite as the as the bqual is set in BaseRegistration, yet the xid is set here,
       // this is again due to changing xid in GF
       ((WSATXAResource)wsatResource).setXid(currentXid);
       BranchRecord branch = getOrCreateBranch(currentXid);
-      branch.addSubordinate(currentXid, wsatResource);
+      branch.addSubordinate(currentXid, ((WSATXAResource)wsatResource));
       tx.enlistResource(new WSATNoOpXAResource());
       if (WSATHelper.isDebugEnabled())
-        debug("registerWSATResource() xid=" + currentXid + " currentBQual=" + String.valueOf(currentBQual) +
-                " bqual="+ String.valueOf(bqual));
+        debug("registerWSATResource() xid=" + currentXid);
     }
     return currentXid;
   }
@@ -218,14 +234,9 @@ public class WSATGatewayRM implements XAResource {
      */
     public void start(Xid xid, int flags) throws XAException {
     currentXid = xid;
-    debug("start currentXid:"+currentXid);
-    debug("start xid:"+xid);
-    debug("start currentXid bqual:"+currentXid.getBranchQualifier());
-    debug("start currentXid formatid:"+currentXid.getFormatId());
-    debug("start currentXid gtrid:"+currentXid.getGlobalTransactionId());
-    currentBQual = currentXid.getBranchQualifier();
+    debug("start currentXid:"+currentXid+" xid:"+xid);
     if (WSATHelper.isDebugEnabled())
-        debug("start() xid=" + xid + ", flags=" + flags + ", currentBQual=" + String.valueOf(currentBQual));
+        debug("start() xid=" + xid + ", flags=" + flags);
     switch (flags) {
     case XAResource.TMNOFLAGS:
       getOrCreateBranch(xid);
@@ -280,7 +291,6 @@ public class WSATGatewayRM implements XAResource {
       branch.commit(xid, onePhase);
     } finally {
       deleteBranchIfNecessary(branch);
-      // TODO - increment statistics
     }
   }
 
@@ -296,7 +306,6 @@ public class WSATGatewayRM implements XAResource {
       branch.rollback(xid);
     } finally {
       deleteBranchIfNecessary(branch);
-      // TODO - increment statistics
     }
   }
 
@@ -399,48 +408,44 @@ public class WSATGatewayRM implements XAResource {
     /**
      * Called after prepare in order to persist branch record.
      * @param branch BranchRecord
-     * @throws PersistentStoreException persistentStoreException from PersistentStoreTransaction commit
+     * @throws IOException from log write
      */
-  private void persistBranchRecord(BranchRecord branch) {
- /**   if (WSATHelper.isDebugEnabled())
-        debug("persist branch record " + branch);
-    PersistentStoreTransaction ptx = store.begin();
-    PersistentHandle handle = storeConn.create(ptx, branch, STORE_NO_FLAGS);
-    ptx.commit();
-    branch.setStoreHandle(handle);
-    branch.setLogged(true); */
+  private void persistBranchRecord(BranchRecord branch) throws IOException {
+    if(!isWSATRecoveryEnabled) return;
+    if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
+    FileOutputStream fos = null;
+    ObjectOutputStream out = null;
+    fos = new FileOutputStream(txlogdir + branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier());
+    out = new ObjectOutputStream(fos);
+    out.writeObject(branch);
+    out.close();
+    branch.setLogged(true);
   }
 
     /**
      * Called after rollback, commit, and forget in order to delete branch record.
      * @param branch BranchRecord
-     * @throws PersistentStoreException persistentStoreException from PersistentStoreTransaction.commit
      */
   private void releaseBranchRecord(BranchRecord branch) {
-/**    if (WSATHelper.isDebugEnabled())
-        debug("release branch record " + branch);
-    PersistentHandle handle = branch.getStoreHandle();
-    if (handle == null) return;
-    PersistentStoreTransaction ptx = store.begin();
-    storeConn.delete(ptx, handle, STORE_NO_FLAGS);
-    ptx.commit();
-    branch.setStoreHandle(null);
-    branch.setLogged(false); */
+    if (WSATHelper.isDebugEnabled())   debug("release branch record " + branch);
+    //todo delete
+    new File(txlogdir + branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier()); //todo this may well work but test/verify
+    branch.setLogged(false);
   }
 
   private void persistBranchIfNecessary(BranchRecord branch) throws XAException {
-/**    try {
+    try {
       synchronized(branch) {
         if (!branch.isLogged()) {
           persistBranchRecord(branch);
           pendingXids.addAll(branch.getAllXids());
         }
       }
-    } catch(PersistentStoreException pse) {
+    } catch(IOException pse) {
       debug("error persisting branch " + branch + ": " + pse.toString());
-      WseeWsatLogger.logErrorPersistingBranchRecord(branch.toString(), pse);
+   //   WseeWsatLogger.logErrorPersistingBranchRecord(branch.toString(), pse);
       JTAHelper.throwXAException(XAException.XAER_RMERR, "Error persisting branch " + branch, pse);
-    } */
+    }
   }
 
   private boolean deleteBranchIfNecessary(BranchRecord branch) throws XAException {
@@ -495,14 +500,13 @@ public class WSATGatewayRM implements XAResource {
   }
 
   private void debug(String msg) {
-   //   System.out.println("wsatgatewayrm debug:"+msg);
- /**   if (WSATHelper.isDebugEnabled()) {
-      debugWSAT.debug("[WSATGatewayRM] " + resourceRegistrationName + " msg:" + msg);
+    if (WSATHelper.isDebugEnabled()) {
+   //   debugWSAT.debug
+      System.out.println("[WSATGatewayRM] " + resourceRegistrationName + " msg:" + msg);
     }
- */ }
+  }
 
-
-  private final class BranchObjectHandler { // implements ObjectHandler {
+    private final class BranchObjectHandler { // implements ObjectHandler {
     private static final int VERSION = 1;
 
     public Object readObject(ObjectInput in) throws ClassNotFoundException, IOException {

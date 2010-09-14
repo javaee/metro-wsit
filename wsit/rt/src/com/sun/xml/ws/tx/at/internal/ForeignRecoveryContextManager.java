@@ -42,6 +42,10 @@ import com.sun.xml.ws.tx.at.common.WSATVersion;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
+import javax.xml.ws.WebServiceException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,11 +93,7 @@ public class ForeignRecoveryContextManager {
      * Start this recovery thread
      */
     void start() {
-//        workManager = WorkManagerFactory.getInstance().getSystem();
-//        if (workManager == null) throw new AssertionError("WorkManager not initialized");
-//        timerManager = TimerManagerFactory.getTimerManagerFactory().getDefaultTimerManager();
-//        if (timerManager == null) throw new AssertionError("TimerManager not initialized");
-//        timerManager.schedule(new ContextTimerListener(), REPLAY_TIMER_INTERVAL_MS, REPLAY_TIMER_INTERVAL_MS);
+        new Thread(new ContextRunnable()).start();
     }
 
     /**
@@ -113,7 +113,24 @@ public class ForeignRecoveryContextManager {
         recoveredContexts.put(context.getXid(), new RecoveryContextWorker(context, isRecovery?-1:0));
     }
 
-    //for testing only
+    synchronized void persist(Xid xid) {
+        if (false && WSATGatewayRM.isWSATRecoveryEnabled) {  //todo
+            ForeignRecoveryContextManager.RecoveryContextWorker contextWorker = recoveredContexts.get(xid);
+//    if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
+            FileOutputStream fos = null;
+            ObjectOutputStream out = null;
+            try {
+                fos = new FileOutputStream(WSATGatewayRM.txlogdir + xid.getGlobalTransactionId() + xid.getBranchQualifier());
+                out = new ObjectOutputStream(fos);
+                out.writeObject(contextWorker);
+                out.close();
+            } catch (Throwable e) {
+                throw new WebServiceException("Unable to persist log for inbound transaction Xid:" + xid, e);
+            }
+        }
+    }
+
+        //for testing only
     Map<Xid, RecoveryContextWorker> getRecoveredContexts() {
         return recoveredContexts;
     }
@@ -126,9 +143,20 @@ public class ForeignRecoveryContextManager {
         recoveredContexts.remove(fxid);
     }
 
-    private class ContextTimerListener { //todoremove implements TimerListener {
+    private class ContextRunnable implements Runnable {
 
-        public void timerExpired(Timer timer) {
+        public void run() {
+           while(true) {
+               doRun();
+               try {
+                   Thread.sleep(5 * 60 * 1000);
+               } catch (InterruptedException e) {
+                   e.printStackTrace();  
+               }
+           }
+        }
+
+        public void doRun() {
             List<RecoveryContextWorker> replayList = new ArrayList<RecoveryContextWorker>();
             synchronized (ForeignRecoveryContextManager.this) {
                 for (RecoveryContextWorker rc : recoveredContexts.values()) {
@@ -169,6 +197,7 @@ public class ForeignRecoveryContextManager {
                 }
             }
         }
+
     }
 
     private class RecoveryContextWorker { //todoremoveextends WorkAdapter {

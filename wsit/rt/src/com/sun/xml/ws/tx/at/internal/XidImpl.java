@@ -35,6 +35,7 @@
 */
 package com.sun.xml.ws.tx.at.internal;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import javax.transaction.xa.Xid;
 
@@ -42,8 +43,8 @@ import javax.transaction.xa.Xid;
  *
  * @author paulparkinson
  */
-public class XidImpl implements Xid {
-    //todo error if gtrid is null
+public class XidImpl implements Xid, Serializable {
+
     int formatId;
     byte[] globalTransactionId;
     byte[] branchQual;

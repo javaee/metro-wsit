@@ -105,6 +105,7 @@ public class TransactionServicesImpl implements TransactionServices {
     public String prepare(byte[] tId) throws WSATException {
         log("prepare");
         final XidImpl xidImpl = new XidImpl(tId);
+        ForeignRecoveryContextManager.getInstance().persist(xidImpl);
         int vote;
         try {
             vote = TransactionImportManager.getInstance().getXATerminator().prepare(xidImpl);

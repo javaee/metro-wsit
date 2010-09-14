@@ -149,6 +149,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
         WSATXAResource wsatXAResource = new WSATXAResource(version,epr, xid);
         try {
             Xid xidFromEnlist = getTransactionServices().enlistResource(wsatXAResource, xid);
+            wsatXAResource.setXid(xidFromEnlist);
             wsatXAResource.setBranchQualifier(xidFromEnlist.getBranchQualifier());
             return xidFromEnlist;
         } catch (WSATException e) {

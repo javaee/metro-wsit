@@ -35,16 +35,14 @@
 */
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.xml.ws.tx.at.WSATHelper;
+import com.sun.xml.ws.tx.at.WSATXAResource;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
@@ -83,10 +81,11 @@ public class BranchRecord implements Externalizable {
 
   /**
    * Adds the specified WS-AT resource to the gateway branch record.
+   * @param xid Xid used for key
    * @param wsatResource WSATXAResource
    * @return RegisteredResource that contains (WSAT)XAResource provided
    */
-  public synchronized RegisteredResource addSubordinate(Xid xid, XAResource wsatResource) {
+  public synchronized RegisteredResource addSubordinate(Xid xid, WSATXAResource wsatResource) {
     debug("addSubordindate xid:"+xid+" wsatResource:"+wsatResource);
     RegisteredResource rr = new RegisteredResource(wsatResource);
     registeredResources.put(xid, rr);
@@ -234,6 +233,7 @@ public class BranchRecord implements Externalizable {
    * Returns the WS-AT resource branch index based from the value embedded in
    * the branch qualifier
    *
+   * @param xid Xid of resource
    * @return the branch index, or -1 if bqual does not represent a WS-AT
    *         resource
    */
@@ -242,8 +242,7 @@ public class BranchRecord implements Externalizable {
     int endPos = bqual.indexOf(branchAliasSuffix);
     if (endPos == -1) return -1;
     String s = bqual.substring(0, endPos);
-    int index = Integer.parseInt(s);
-    return index;
+    return Integer.parseInt(s);
   }
 
   /**
@@ -255,13 +254,7 @@ public class BranchRecord implements Externalizable {
    *           qualifier.
    */
   private synchronized RegisteredResource getRegisteredResource(Xid xid) throws XAException {
-/**    int index = getResourceIndex(xid);
-    if (index == -1) {
-      JTAHelper.throwXAException(XAException.XAER_NOTA,
-              "This may be expected during rollback if client and web service are collocated, Xid=" + xid);
-    }
-    RegisteredResource registeredResource = registeredResources.get(index);
-*/    RegisteredResource registeredResource = registeredResources.get(xid);
+    RegisteredResource registeredResource = registeredResources.get(xid);
     if (registeredResource == null) {
       JTAHelper.throwXAException(XAException.XAER_NOTA, "Xid=" + xid);
     }
@@ -269,7 +262,7 @@ public class BranchRecord implements Externalizable {
       boolean isRegisteredBranch =
               Arrays.equals(registeredResource.getBranchXid().getBranchQualifier(), xid.getBranchQualifier());
       if (!isRegisteredBranch) {
-/**        if (WSATHelper.getInstance().isDebugEnabled()) {
+        if (WSATHelper.getInstance().isDebugEnabled()) {
           byte[] branchQualifier = registeredResource.getBranchXid().getBranchQualifier();
           if (branchQualifier == null) branchQualifier = new byte[0];
           WSATHelper.getInstance().debug("WSAT Branch registered branchId:\t[" + new String(branchQualifier) + "] ");
@@ -278,7 +271,7 @@ public class BranchRecord implements Externalizable {
           WSATHelper.getInstance().debug(
                   "WSAT Branch branchId used to identify a registered resource:\t[" + new String(branchQualifier) + "] ");
         }
- */       debug("prepare() xid=" + xid + " returning XA_RDONLY");
+        debug("prepare() xid=" + xid + " returning XA_RDONLY");
         JTAHelper.throwXAException(XAException.XAER_NOTA, "xid=" + xid);
       }
     }
@@ -291,9 +284,9 @@ public class BranchRecord implements Externalizable {
 
   synchronized Collection<Xid> getAllXids() {
     Collection<Xid> xids = new ArrayList<Xid>();
-//    xids.add(globalXid);
-    for (int i=0; i<registeredResources.size(); i++) {
-      xids.add(registeredResources.get(i).getBranchXid());
+    Iterator<RegisteredResource> resourceIterator = registeredResources.values().iterator();
+    while(resourceIterator.hasNext()) {
+      xids.add(resourceIterator.next().getBranchXid());
     }
     return xids;
   }
@@ -334,7 +327,7 @@ public class BranchRecord implements Externalizable {
     private static final int STATE_READONLY = 3;
     private static final int STATE_COMPLETED = 4;
 
-    private XAResource resource;
+    private WSATXAResource resource;
     private int vote=-1;
     private int state;
     private BranchXidImpl branchXid;
@@ -345,7 +338,7 @@ public class BranchRecord implements Externalizable {
     RegisteredResource() {
     }
 
-    RegisteredResource(XAResource wsatResource) {
+    RegisteredResource(WSATXAResource wsatResource) {
       this.resource = wsatResource;
       this.state = STATE_ACTIVE;
     }
@@ -356,7 +349,7 @@ public class BranchRecord implements Externalizable {
     }
 
     private void setBranchXid(Xid xid) {
-        branchXid = new BranchXidImpl(xid);
+        branchXid = new BranchXidImpl(new XidImpl(xid));
     }
 
    /**
@@ -519,13 +512,19 @@ public class BranchRecord implements Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
       branchXid = new BranchXidImpl();
       branchXid.readExternal(in);
-      resource = (XAResource) in.readObject();
+      resource = (WSATXAResource) in.readObject();
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
-      branchXid.writeExternal(out);
-      out.writeObject(resource);
+      resource.setXid(new XidImpl(resource.getXid()));
+      new BranchXidImpl(resource.getXid()).writeExternal(out);
+        try{
+            out.writeObject(resource);       
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
+
 
   } // RegisteredResource
 
@@ -555,10 +554,15 @@ public class BranchRecord implements Externalizable {
 
     // RegisteredResources
     out.writeInt(registeredResources.size());
-
+   /**
     for (int i=0; i<registeredResources.size(); i++) {
-      RegisteredResource rr = (RegisteredResource) registeredResources.get(i);
+      RegisteredResource rr = registeredResources.get(i);
       rr.writeExternal(out);
+    }
+    */
+    Iterator<RegisteredResource> resourceIterator = registeredResources.values().iterator();
+    while(resourceIterator.hasNext()) {
+        resourceIterator.next().writeExternal(out);
     }
   }
 
