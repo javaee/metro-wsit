@@ -54,8 +54,21 @@
 
     <target name="main" depends="dist"
         description="Create the wsit tool and runtime jars and installers."/>
-    
-    <target name="bundle" depends="init, compile"
+
+    <target name="osgi-extra-jdk-packages" depends="init"
+            description="Creates the OSGi system fragment bundle webservices-extra-jdk-packages.jar.
+                         That bundle makes it possible to access internal JDK 6 packages used by Metro.">
+        <mkdir dir="${v3.build.dir}"/>
+        <mkdir dir="${build.dir}/extra-jdk-packages"/>
+        <!-- webservices-extra-jdk-packages.jar needs to contain at least one file -->
+        <!-- besides the manifest, otherwise the jar signer tool will bail out -->
+        <touch file="${build.dir}/extra-jdk-packages/empty" verbose="false"/>
+        <jar destfile="${v3.build.dir}/webservices-extra-jdk-packages.jar"
+             basedir="${build.dir}/extra-jdk-packages"
+             manifest="etc/bnd/webservices-extra-jdk-packages.bnd"/>
+    </target>
+
+    <target name="bundle" depends="init, compile, osgi-extra-jdk-packages"
             description="Create the Metro OSGi bundle for GlassFish V3.">
         <taskdef resource="aQute/bnd/ant/taskdef.properties"
                  classpath="${bnd.jar}"/>
@@ -90,8 +103,6 @@
              failok="false"
              output="${v3.build.dir}/webservices-api-osgi.jar"
              files="${build.dir}/bnd/webservices-api.bnd"/>
-        <jar destfile="${v3.build.dir}/webservices-extra-jdk-packages.jar"
-             manifest="etc/bnd/webservices-extra-jdk-packages.bnd"/>
         <bnd classpath="lib/runtime/woodstox.jar, lib/runtime/jsr173_api.jar"
              failok="false"
              output="${v3.build.dir}/woodstox-osgi.jar"
