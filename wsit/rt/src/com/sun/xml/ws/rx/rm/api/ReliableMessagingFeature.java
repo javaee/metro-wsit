@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.api;
 
 import com.sun.xml.ws.api.FeatureConstructor;
+import com.sun.xml.ws.api.ha.StickyFeature;
 import javax.xml.ws.WebServiceFeature;
 import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
@@ -45,7 +46,7 @@ import org.glassfish.gmbal.ManagedData;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 @ManagedData
-public class ReliableMessagingFeature extends WebServiceFeature {
+public class ReliableMessagingFeature extends WebServiceFeature implements StickyFeature {
 
     public static final String ID = "http://docs.oasis-open.org/ws-rx/wsrm/";
     /**
