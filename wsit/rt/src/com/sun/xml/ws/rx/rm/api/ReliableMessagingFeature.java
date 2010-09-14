@@ -42,6 +42,12 @@ import org.glassfish.gmbal.ManagedAttribute;
 import org.glassfish.gmbal.ManagedData;
 
 /**
+ * Reliable messaging feature is an implementation of {@link WebServiceFeature}
+ * that configures Metro Reliable Messaging runtime functionality.
+ * <p />
+ * Since there is a lot to configure in Reliable Messaging domain, to build create
+ * an instance of {@code ReliableMessagingFeature}, use a convenience
+ * {@link ReliableMessagingFeatureBuilder} builder class.
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
