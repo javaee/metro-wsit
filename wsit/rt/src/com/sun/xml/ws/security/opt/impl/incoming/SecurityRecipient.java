@@ -1190,7 +1190,7 @@ public final class SecurityRecipient {
                     securityContext.getDecryptedAttachmentSet().add(as);
                 }
             } catch (XMLStreamException ex) {
-                logger.log(Level.SEVERE,com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1380_ERROR_DECRYPTING_ENCRYPTED_DATA(),ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1615_ERROR_DECRYPTING_ENCRYPTED_DATA(),ex);
                 throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
             }
         } else if (she instanceof EncryptedKey) {
@@ -1212,7 +1212,7 @@ public final class SecurityRecipient {
                             payLoadWsuId = ed.getId();
                             handlePayLoadED(ed);
                         } catch (XMLStreamException ex) {
-                            logger.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1380_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1615_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
                             throw new XWSSecurityException("Error occurred while parsing EncryptedData" + ex);
                         }
                         ek.getPendingReferenceList().remove(payLoadWsuId);
@@ -1577,7 +1577,7 @@ public final class SecurityRecipient {
                                 edAlgos.put(ed.getId(), ed.getEncryptionAlgorithm());
                                 bufferedHeaders.set(i, she);
                             } catch (XMLStreamException ex) {
-                                logger.log(Level.SEVERE,com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1380_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
+                                logger.log(Level.SEVERE,LogStringsMessages.WSS_1615_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
                                 throw new XWSSecurityException("Error occurred while decrypting EncryptedData with ID " + ed.getId(), ex);
                             }
                         } else {
@@ -1724,10 +1724,10 @@ public final class SecurityRecipient {
 
             return gsh;
         } catch (XMLStreamException ex) {
-            logger.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1380_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1615_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
             throw new XWSSecurityException("Error occurred while decrypting EncryptedData ", ex);
         } catch (XMLStreamBufferException ex) {
-            logger.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1380_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1615_ERROR_DECRYPTING_ENCRYPTED_DATA(), ex);
             throw new XWSSecurityException("Error occurred while decrypting EncryptedData", ex);
         }
     }

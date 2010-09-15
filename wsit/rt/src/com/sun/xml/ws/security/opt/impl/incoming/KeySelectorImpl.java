@@ -164,7 +164,7 @@ public class KeySelectorImpl extends KeySelector {
     public KeySelectorResult select(KeyInfo keyInfo, Purpose purpose, AlgorithmMethod method, XMLCryptoContext context) throws KeySelectorException {
         if (keyInfo == null) {
             if (logger.getLevel() == Level.SEVERE) {
-                logger.log(Level.SEVERE, "WSS1317.keyinfo.null");
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1317_KEYINFO_NULL());
             }
             throw new KeySelectorException("Null KeyInfo object!");
         }

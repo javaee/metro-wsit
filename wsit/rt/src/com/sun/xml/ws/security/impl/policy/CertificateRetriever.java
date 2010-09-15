@@ -61,7 +61,6 @@ import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
-import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -91,10 +90,8 @@ import java.security.cert.Certificate;
 public class CertificateRetriever {
 
     protected TubeConfiguration pipeConfig = null;
-    protected static final Logger log =
-            Logger.getLogger(
-            LogDomainConstants.WSIT_PVD_DOMAIN,
-            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
+    protected static final Logger log = Logger.getLogger(Constants.WS_SECURITY_POLICY_DOMAIN,
+                                    Constants.WS_SECURITY_POLICY_DOMAIN_BUNDLE);
     private String location = null;
     private String password = null;
     private String alias = null;

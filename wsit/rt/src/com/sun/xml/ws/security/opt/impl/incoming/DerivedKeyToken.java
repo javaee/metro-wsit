@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -122,7 +122,7 @@ public class DerivedKeyToken implements SecurityHeaderElement, NamespaceContextI
                 inferredKB = (WSSPolicy) pc.getSecurityContext().getInferredKB();
                 pc.getSecurityContext().setInferredKB(null);
             } catch (XMLStreamException ex) {
-                Logger.getLogger(DerivedKeyToken.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1855_XML_STREAM_READER_ERROR(), ex);
             }
         }
         if (pc.getAlgorithmSuite() != null) {

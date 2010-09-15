@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,8 +51,6 @@ import java.security.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKey;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Random;
 
 import com.sun.xml.wss.impl.misc.Base64;
@@ -103,7 +101,7 @@ public class PasswordDerivedKey {
         try {
             md = java.security.MessageDigest.getInstance("SHA1");
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(PasswordDerivedKey.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
         }
         md.reset();
         md.update(input);
@@ -154,8 +152,7 @@ public class PasswordDerivedKey {
         if (testAlgorithm(algorithm)) {
             keySpec = new SecretKeySpec(keyof128length, algorithm);
         } else {
-            System.out.println("This Derived Key procedure doesnot support " +
-                    algorithm);
+            throw new RuntimeException("This Derived Key procedure doesnot support " +algorithm);
         }
         return (SecretKey) keySpec;
 
