@@ -107,8 +107,7 @@ public class WSITClientAuthModule implements ClientAuthModule {
     }
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
-        if (subject == null) {
-            // log
+        if (subject == null) {           
             log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
             throw new AuthException(LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
         }
@@ -126,7 +125,7 @@ public class WSITClientAuthModule implements ClientAuthModule {
         try {
             principals.clear();
         } catch (UnsupportedOperationException uoe) {
-            // log
+           log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), uoe);
         }
         
         Iterator pi = privateCredentials.iterator();
@@ -136,9 +135,9 @@ public class WSITClientAuthModule implements ClientAuthModule {
                         (Destroyable)pi.next();
                 dstroyable.destroy();
             } catch (DestroyFailedException dfe) {
-                // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), dfe);
             } catch (ClassCastException cce) {
-                // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), cce);
             }
         }
         
@@ -149,9 +148,9 @@ public class WSITClientAuthModule implements ClientAuthModule {
                         (Destroyable)qi.next();
                 dstroyable.destroy();
             } catch (DestroyFailedException dfe) {
-                // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), dfe);
             } catch (ClassCastException cce) {
-                // log
+                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), cce);
             }
         }
     }

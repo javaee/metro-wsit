@@ -69,12 +69,19 @@ import com.sun.xml.ws.security.secconv.WSSCVersion;
 import com.sun.xml.ws.security.trust.WSTrustVersion;
 import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.jaxws.impl.logging.LogDomainConstants;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Ashutosh.Shahi@sun.com
  */
 public class PolicyResolverImpl implements PolicyResolver {
+    
+    protected static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSS_JAXWS_IMPL_DOMAIN,
+            LogDomainConstants.WSS_JAXWS_IMPL_DOMAIN_BUNDLE);
 
     private WSDLBoundOperation cachedOperation = null;
     private HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap = null;

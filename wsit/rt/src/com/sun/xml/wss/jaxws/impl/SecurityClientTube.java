@@ -409,8 +409,7 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
                     if ((new QName(wsscVer.getNamespaceURI(), "RenewNeeded")).equals(fault.getFaultCodeAsQName())) {
                         renewSCT(ctx, ret);
                     }
-                    //log.log(Level.SEVERE,
-                    //        LogStringsMessages.WSSTUBE_0034_FAULTY_RESPONSE_MSG(fault));
+                    log.log(Level.SEVERE,LogStringsMessages.WSSTUBE_0034_FAULTY_RESPONSE_MSG(fault));
                     throw new SOAPFaultException(fault);
                 }
                 msg = Messages.create(soapMessage);

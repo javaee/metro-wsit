@@ -75,13 +75,21 @@ import com.sun.xml.wss.impl.ProcessingContextImpl;
 import com.sun.xml.wss.impl.policy.PolicyAlternatives;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author vbkumarjayanti
  */
 class AlternativesBasedPolicyResolver implements PolicyResolver {
+    protected static final Logger log =
+            Logger.getLogger(
+            LogDomainConstants.WSIT_PVD_DOMAIN,
+            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
 
     private WSDLBoundOperation cachedOperation = null;
     //private PolicyAttributes pa = null;
@@ -254,7 +262,7 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
                     }
                 } catch (SOAPException sx) {
                     //sx.printStackTrace();
-                    //log error
+                    log.log(Level.WARNING, LogStringsMessages.WSITPVD_0065_ERROR_RESOLVING_ALTERNATIVES(), sx);
                 }
             }
             return new PolicyAlternatives(mps);

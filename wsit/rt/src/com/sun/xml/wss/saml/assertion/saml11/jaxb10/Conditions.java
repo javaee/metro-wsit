@@ -1,11 +1,11 @@
 /*
- * $Id: Conditions.java,v 1.3 2010-03-20 12:33:23 kumarjayanti Exp $
+ * $Id: Conditions.java,v 1.4 2010-09-16 10:07:59 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,6 +43,7 @@ import com.sun.xml.wss.saml.SAMLException;
 import com.sun.xml.bind.util.ListImpl;
 
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.saml.internal.saml11.jaxb10.ConditionsType;
 import com.sun.xml.wss.saml.internal.saml11.jaxb10.impl.ConditionsTypeImpl;
 import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
@@ -134,7 +135,7 @@ public class Conditions extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl
                 notBeforeField = DateUtils.stringToDate(super.getNotBefore().toString());
             }
         } catch (ParseException ex) {
-            Logger.getLogger(Conditions.class.getName()).log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, null, ex);
         }
             return notBeforeField;
         }
@@ -148,7 +149,7 @@ public class Conditions extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl
                 notOnOrAfterField = DateUtils.stringToDate(super.getNotOnOrAfter().toString());
             }
         } catch (ParseException ex) {
-            Logger.getLogger(Conditions.class.getName()).log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0430_SAML_GET_NOT_BEFORE_DATE_OR_GET_NOT_ON_OR_AFTER_DATE_PARSE_FAILED(), ex);
         }
             return notOnOrAfterField;
         }

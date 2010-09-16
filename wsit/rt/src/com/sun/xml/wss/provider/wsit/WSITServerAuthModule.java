@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -108,8 +108,7 @@ public class WSITServerAuthModule implements ServerAuthModule {
     }
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
-        if (subject == null) {
-                // log
+        if (subject == null) {               
                 log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
                 throw new AuthException(LogStringsMessages.WSITPVD_0037_NULL_SUBJECT());
          }
@@ -127,7 +126,7 @@ public class WSITServerAuthModule implements ServerAuthModule {
          try {
             principals.clear();
          } catch (UnsupportedOperationException uoe) {
-            // log
+           log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), uoe);
          }
 
          Iterator pi = privateCredentials.iterator();
@@ -137,9 +136,9 @@ public class WSITServerAuthModule implements ServerAuthModule {
                                (Destroyable)pi.next();
                 dstroyable.destroy(); 
             } catch (DestroyFailedException dfe) {
-               // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), dfe);
             } catch (ClassCastException cce) {
-               // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), cce);
             }  
          }
 
@@ -150,9 +149,9 @@ public class WSITServerAuthModule implements ServerAuthModule {
                                (Destroyable)qi.next();
                 dstroyable.destroy(); 
             } catch (DestroyFailedException dfe) {
-               // log
+               log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), dfe);
             } catch (ClassCastException cce) {
-               // log
+              log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0064_ERROR_CLEAN_SUBJECT(), cce);
             }   
          }
     }

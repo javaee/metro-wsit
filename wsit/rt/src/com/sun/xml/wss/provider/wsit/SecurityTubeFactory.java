@@ -72,6 +72,8 @@ import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
 
+import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
+import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -80,8 +82,15 @@ import java.util.Map;
 import javax.security.auth.message.config.AuthConfigFactory;
 import com.sun.xml.xwss.XWSSClientTube;
 import com.sun.xml.xwss.XWSSServerTube;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
+
+    private static final Logger log =
+        Logger.getLogger(
+        LogDomainConstants.WSIT_PVD_DOMAIN,
+        LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
 
     private static final String SERVLET_CONTEXT_CLASSNAME = "javax.servlet.ServletContext";
     //Added for Security Pipe Unification with JSR 196 on GlassFish
@@ -163,7 +172,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                 return securityTube;
 
             } else {
-                //TODO: Log a FINE message indicating could not use Unified Tube.
+                log.log(Level.FINE, "cannot not use Unified Tube.");
                 //return PipeAdapter.adapt(new SecurityServerPipe(context, context.getAdaptedTubelineHead()));
                 return new SecurityServerTube(context, context.getTubelineHead());
             }
@@ -386,7 +395,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                 final Class<?> contextClass = Class.forName(SERVLET_CONTEXT_CLASSNAME);
                 ctxt = container.getSPI(contextClass);
             } catch (ClassNotFoundException e) {
-            //log here that the ServletContext was not found
+                log.log(Level.WARNING, LogStringsMessages.WSITPVD_0066_SERVLET_CONTEXT_NOTFOUND(), e);
             }
         }
         String serverName = "server";

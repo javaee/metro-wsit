@@ -158,7 +158,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
                     reader = readHeader(identityElement);
 
                 } catch (CertificateEncodingException ex) {
-                    log.log(Level.SEVERE, null, ex);
+                    log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
                     throw new RuntimeException(ex);
                 }
                 return reader;
@@ -184,7 +184,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
             m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
             m.marshal(idElem, xbr);
         } catch (JAXBException je) {
-            log.log(Level.SEVERE, null, je);
+            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), je);
             throw new XMLStreamException(je);
         }
         return xbr.getXMLStreamBuffer().readAsXMLStreamReader();

@@ -246,22 +246,22 @@ public class SecurityServerTube extends SecurityTubeBase {
                 Constructor ctor = contextDelegate.getConstructor(new Class[]{WebServiceContextDelegate.class});
                 packet.webServiceContextDelegate = (WebServiceContextDelegate) ctor.newInstance(new Object[]{current});
             } catch (InstantiationException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             } catch (IllegalArgumentException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             } catch (InvocationTargetException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE,LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             } catch (NoSuchMethodException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             } catch (SecurityException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
                 throw new RuntimeException(ex);
             }
         }
