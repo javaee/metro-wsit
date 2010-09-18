@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -76,7 +76,7 @@ public class UsernameTokenBuilder extends TokenBuilder {
         if (MessageConstants.DIRECT_REFERENCE_TYPE.equals(referenceType)) {
             UsernameToken unToken = createUsernameToken(binding, binding.getUsernameToken());
             if (unToken == null) {
-                logger.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0280_FAILED_CREATE_USERNAME_TOKEN());
+                logger.log(Level.SEVERE, LogStringsMessages.WSS_1856_NULL_USERNAMETOKEN());
                 throw new XWSSecurityException("Username Token is NULL");
             }
             DirectReference dr = buildDirectReference(unToken.getId(), MessageConstants.USERNAME_STR_REFERENCE_NS);
