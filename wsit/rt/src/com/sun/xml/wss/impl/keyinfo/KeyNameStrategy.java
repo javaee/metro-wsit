@@ -1,11 +1,11 @@
 /*
- * $Id: KeyNameStrategy.java,v 1.3 2010-03-20 13:01:26 kumarjayanti Exp $
+ * $Id: KeyNameStrategy.java,v 1.4 2010-09-18 20:35:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,6 +51,7 @@ import com.sun.xml.wss.XWSSecurityException;
 
 import com.sun.xml.wss.core.KeyInfoHeaderBlock;
 import com.sun.xml.wss.core.SecurityTokenReference;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 public class KeyNameStrategy extends KeyInfoStrategy {
 
@@ -75,7 +76,7 @@ public class KeyNameStrategy extends KeyInfoStrategy {
         throws XWSSecurityException {
 
         log.log(Level.SEVERE,
-                "WSS0703.unsupported.operation"); 
+                LogStringsMessages.WSS_0703_UNSUPPORTED_OPERATION());
         throw new UnsupportedOperationException(
             "A ds:KeyName can't be put under a wsse:SecurityTokenReference");
     }
@@ -92,7 +93,7 @@ public class KeyNameStrategy extends KeyInfoStrategy {
 
     public void setCertificate(X509Certificate cert) {
         log.log(Level.SEVERE,
-                "WSS0705.unsupported.operation");
+                LogStringsMessages.WSS_0705_UNSUPPORTED_OPERATION());
         throw new UnsupportedOperationException(
             "Setting a certificate is not a supported operation for ds:KeyName strategy");
     }

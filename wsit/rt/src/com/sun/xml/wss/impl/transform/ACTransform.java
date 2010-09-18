@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -52,6 +52,7 @@ import com.sun.xml.wss.impl.c14n.Canonicalizer;
 import com.sun.xml.wss.impl.c14n.CanonicalizerFactory;
 import com.sun.xml.wss.impl.c14n.MimeHeaderCanonicalizer;
 import com.sun.xml.wss.impl.dsig.AttachmentData;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -144,10 +145,10 @@ public class ACTransform extends TransformService {
             if(is != null)  return new OctetStreamData(is);
             return null;
         }catch(javax.xml.crypto.dsig.TransformException te){
-            logger.log(Level.SEVERE,"WSS1319.aco.transform.error",te);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1319_ACO_TRANSFORM_ERROR(),te);
             throw te;
         }catch(Exception ex){
-            logger.log(Level.SEVERE,"WSS1319.aco.transform.error",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1319_ACO_TRANSFORM_ERROR(),ex);
             throw new javax.xml.crypto.dsig.TransformException(ex.getMessage());
         }
     }
@@ -161,10 +162,10 @@ public class ACTransform extends TransformService {
             try{
                 return  canonicalize((AttachmentData)data, null);
             }catch(javax.xml.crypto.dsig.TransformException tex) {
-                logger.log(Level.SEVERE,"WSS1319.aco.transform.error",tex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1319_ACO_TRANSFORM_ERROR(),tex);
                 throw tex;
             }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1319.aco.transform.error",ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1319_ACO_TRANSFORM_ERROR(),ex);
                 throw new RuntimeException(ex);
             }
         }else{

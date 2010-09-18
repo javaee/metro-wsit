@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,11 +54,10 @@ import com.sun.xml.wss.logging.LogDomainConstants;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
-import com.sun.xml.wss.XWSSecurityException;
 
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivilegedAction;
 import java.security.cert.CertificateEncodingException;
 
 /**
@@ -88,10 +87,10 @@ public class DigestCertSelector implements CertSelector {
             try {
                 thumbPrintIdentifier = MessageDigest.getInstance(this.algorithm).digest(cert.getEncoded());
             } catch ( NoSuchAlgorithmException ex ) {
-                log.log(Level.SEVERE, "WSS0708.no.digest.algorithm");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0708_NO_DIGEST_ALGORITHM(),ex);
                 throw new RuntimeException("Digest algorithm SHA-1 not found");
             } catch ( CertificateEncodingException ex) {
-                log.log(Level.SEVERE, "WSS0709.error.getting.rawContent");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0709_ERROR_GETTING_RAW_CONTENT(),ex);
                 throw new RuntimeException("Error while getting certificate's raw content");
             }
         

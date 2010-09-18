@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,6 +47,7 @@ import com.sun.xml.wss.impl.XMLUtil;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.logging.LogDomainConstants;
 
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.io.OutputStream;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -138,7 +139,7 @@ public class DOMSTRTransform extends TransformService {
                 cmSpi.init(cs);
                 cmSpi.marshalParams(new DOMStructure(c14nElem), context);
             } catch (Exception e) {
-                logger.log(Level.SEVERE,"WSS1321.str_marshal.transform.error",e);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1321_STR_MARSHAL_TRANSFORM_ERROR(),e);
                 throw new MarshalException(e);
             }
         }
@@ -200,7 +201,7 @@ public class DOMSTRTransform extends TransformService {
             CanonicalizationMethod cm = new STRC14NMethod(cmSpi);
             this.params = new STRTransformParameterSpec( cm);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE,"WSS1320.str_un.transform.error",e);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1320_STR_UN_TRANSFORM_ERROR(),e);
             throw new MarshalException(e);
         }
         

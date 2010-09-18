@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,6 +50,7 @@ import javax.xml.crypto.dsig.TransformService;
 import com.sun.xml.wss.impl.c14n.Canonicalizer;
 import com.sun.xml.wss.impl.c14n.CanonicalizerFactory;
 import com.sun.xml.wss.impl.dsig.AttachmentData;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -124,10 +125,10 @@ public class ACOTransform extends TransformService {
             
             return null;
         }catch(javax.xml.crypto.dsig.TransformException te){
-            logger.log(Level.SEVERE,"WSS1318.ac.transform.error",te);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1318_AC_TRANSFORM_ERROR(),te);
             throw te;
         }catch(Exception ex){
-            logger.log(Level.SEVERE,"WSS1318.ac.transform.error",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1318_AC_TRANSFORM_ERROR(),ex);
             throw new javax.xml.crypto.dsig.TransformException(ex.getMessage());
         }
     }

@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -107,9 +107,9 @@ import com.sun.xml.ws.security.trust.elements.BinarySecret;
 import javax.security.auth.Subject;
 import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
-import com.sun.xml.ws.security.secconv.WSSecureConversationException;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 
 public class KeyResolver {
@@ -171,7 +171,7 @@ public class KeyResolver {
                 if(kiHB.containsSecurityTokenReference()){
                     SecurityTokenReference sectr = kiHB.getSecurityTokenReference(0);
                 } else {
-                    log.log(Level.SEVERE, "WSS0335.unsupported.referencetype");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0335_UNSUPPORTED_REFERENCETYPE());
                     throw new XWSSecurityException("Unsupported reference type under EncryptedKey");
                 }
                 //Default algo
@@ -196,15 +196,15 @@ public class KeyResolver {
                     }
                     returnKey = new SecretKeySpec(bs.getRawValue(), algo);
                 } else {
-                    log.log(Level.SEVERE, "WSS0339.unsupported.keyinfo");
+                    log.log(Level.SEVERE,LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO());
                     throw new XWSSecurityException("Unsupported wst:BinarySecret Type");
                 }
                 
-            } else {
-                log.log(Level.SEVERE, "WSS0339.unsupported.keyinfo");
+            } else {               
                 XWSSecurityException xwsse =
                         new XWSSecurityException(
                         "Support for processing information in the given ds:KeyInfo is not present");
+                 log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO(),xwsse);
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         xwsse.getMessage(),

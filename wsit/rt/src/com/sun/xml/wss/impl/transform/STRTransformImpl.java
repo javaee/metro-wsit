@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -39,6 +39,7 @@ package com.sun.xml.wss.impl.transform;
 
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
@@ -79,7 +80,7 @@ public class STRTransformImpl {
             }
             return null;
         }catch(Exception ex){
-            logger.log(Level.SEVERE,"WSS1322.str_transform",ex);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1322_STR_TRANSFORM(),ex);
         }
         return null;
     }
@@ -103,7 +104,7 @@ public class STRTransformImpl {
                 Document doc = factory.newDocumentBuilder().parse(((OctetStreamData)data).getOctetStream());
                 toNodeSet(doc,nodeSet);
             }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1322.str_transform",ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1322_STR_TRANSFORM(),ex);
                 throw new javax.xml.crypto.dsig.TransformException(ex.getMessage());
                 
             }

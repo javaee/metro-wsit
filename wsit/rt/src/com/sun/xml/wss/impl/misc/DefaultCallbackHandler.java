@@ -107,6 +107,7 @@ import com.sun.xml.wss.impl.callback.ValidatorExtension;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.policy.mls.PrivateKeyBinding;
+import com.sun.xml.wss.logging.impl.misc.LogStringsMessages;
 import com.sun.xml.wss.util.XWSSUtil;
 import java.net.URL;
 import java.security.AccessController;
@@ -378,7 +379,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
 
             } else {
-                log.log(Level.SEVERE, "WSS1500.invalid.usernameHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1500_INVALID_USERNAME_HANDLER());
                 throw new UnsupportedCallbackException(null, "Username Handler Not Configured");
             }
         }
@@ -415,7 +416,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
 
             } else {
-                log.log(Level.SEVERE, "WSS1525.invalid.passwordHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1525_INVALID_PASSWORD_HANDLER());
                 throw new UnsupportedCallbackException(null, "Password Handler Not Configured");
             }
         }
@@ -453,7 +454,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 cb.setValidator(pwValidator);
             }
         } else {
-            log.log(Level.SEVERE, "WSS1503.unsupported.requesttype");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1503_UNSUPPORTED_REQUESTTYPE());
             throw new UnsupportedCallbackException(null, "Unsupported Request Type for Password Validation");
         }
     }
@@ -531,7 +532,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                             getCertificateFromTrustStoreForSAML(request.getPublicKey(), cb.getRuntimeProperties());
                     request.setX509Certificate(cert);
                 } else {
-                    log.log(Level.SEVERE, "WSS1504.unsupported.callbackType");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1504_UNSUPPORTED_CALLBACK_TYPE());
                     throw unsupported;
                 }
 
@@ -558,12 +559,12 @@ public class DefaultCallbackHandler implements CallbackHandler {
                                 getPrivateKey(cb.getRuntimeProperties(), alias);
                         request.setPrivateKey(privKey);
                     } catch (Exception e) {
-                        log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
                         throw new RuntimeException(e);
                     }
 
                 } else {
-                    log.log(Level.SEVERE, "WSS1504.unsupported.callbackType");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1504_UNSUPPORTED_CALLBACK_TYPE());
                     throw unsupported;
                 }
 
@@ -605,7 +606,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     PrivateKey privKey = getPrivateKeyFromKeyStore(request.getPublicKey(), cb.getRuntimeProperties());
                     request.setPrivateKey(privKey);
                 } else {
-                    log.log(Level.SEVERE, "WSS1504.unsupported.callbackType");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1504_UNSUPPORTED_CALLBACK_TYPE());
                     throw unsupported;
                 }
 
@@ -628,7 +629,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                                 request.setX509Certificate(cert);
                             }
                         } catch (Exception e) {
-                            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
                             throw new RuntimeException(e);
                         }
                     }
@@ -641,11 +642,11 @@ public class DefaultCallbackHandler implements CallbackHandler {
                                 getCertificateFromTrustStoreForSAML(request.getPublicKey(), cb.getRuntimeProperties());
                         request.setX509Certificate(cert);
                     } catch (Exception e) {
-                        log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
                         throw new RuntimeException(e);
                     }
                 } else if (cb.getRequest() instanceof EncryptionKeyCallback.AliasSymmetricKeyRequest) {
-                    log.log(Level.SEVERE, "WSS1504.unsupported.callbackType");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1504_UNSUPPORTED_CALLBACK_TYPE());
                     throw unsupported;
                 }
 
@@ -671,12 +672,12 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     } else if ((samlBinding.getAuthorityBinding() != null) && (samlBinding.getAssertionId() != null)) {
                         locateSAMLAssertion(samlBinding, dp.getRuntimeProperties());
                     } else {
-                        log.log(Level.SEVERE, "WSS1506.invalid.SAMLPolicy");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1506_INVALID_SAML_POLICY());
                         throw new UnsupportedCallbackException(null, "SAML Assertion not present in the Policy");
                     }
                 }
             } else {
-                log.log(Level.SEVERE, "WSS1504.unsupported.callbackType");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1504_UNSUPPORTED_CALLBACK_TYPE());
                 throw unsupported;
             }
         }
@@ -730,7 +731,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlBinding.setAssertionId(sc.getAssertionId());
                 samlBinding.setSAMLVersion(sc.getSAMLVersion());
             } else {
-                log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1507_NO_SAML_CALLBACK_HANDLER());
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
             }
 
@@ -758,7 +759,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 pkBinding.setPrivateKey(request.getPrivateKey());
 
             } else {
-                log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1507_NO_SAML_CALLBACK_HANDLER());
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
             }
         }
@@ -794,7 +795,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     }
                 }
             } catch (SAMLAssertionValidator.SAMLValidationException e) {
-                log.log(Level.SEVERE, "WSS1508.failed.validateSAMLAssertion", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1508_FAILED_VALIDATE_SAML_ASSERTION(), e);
                 throw new RuntimeException(e);
             }
         }
@@ -827,7 +828,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 samlBinding.setAssertion(sc.getAssertionReader());
                 samlBinding.setSAMLVersion(sc.getSAMLVersion());
             } else {
-                log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1507_NO_SAML_CALLBACK_HANDLER());
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
             }
 
@@ -852,7 +853,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 pkBinding.setPrivateKey(request.getPrivateKey());
 
             } else {
-                log.log(Level.SEVERE, "WSS1507.no.SAMLCallbackHandler");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1507_NO_SAML_CALLBACK_HANDLER());
                 throw new UnsupportedCallbackException(null, "A Required SAML Callback Handler was not specified in configuration : Cannot Populate SAML Assertion");
             }
         }
@@ -909,7 +910,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1509.failed.init.truststore", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1509_FAILED_INIT_TRUSTSTORE(), e);
             throw new RuntimeException(e);
         }
     }
@@ -972,7 +973,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1510.failed.init.keystore", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1510_FAILED_INIT_KEYSTORE(), e);
             throw new RuntimeException(e);
         }
     }
@@ -1018,7 +1019,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
             throw new RuntimeException(e);
         }
         //now search in CertStore if present
@@ -1037,7 +1038,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 certs = certStore.getCertificates(selector);
             } catch (CertStoreException ex) {
-                log.log(Level.SEVERE, "WSS1530.exception.in.certstore.lookup", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1530_EXCEPTION_IN_CERTSTORE_LOOKUP(), ex);
                 throw new RuntimeException(ex);
             }
             if (certs.size() > 0) {
@@ -1089,7 +1090,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 try {
                     certs = certStore.getCertificates(selector);
                 } catch (CertStoreException ex) {
-                    log.log(Level.SEVERE, "WSS1530.exception.in.certstore.lookup", ex);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1530_EXCEPTION_IN_CERTSTORE_LOOKUP(), ex);
                     throw new RuntimeException(ex);
                 }
                 if (certs.size() > 0) {
@@ -1115,7 +1116,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
             throw new RuntimeException(e);
         }
 
@@ -1165,7 +1166,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -1216,7 +1217,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -1255,7 +1256,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -1292,7 +1293,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     try {
                         certs = certStore.getCertificates(selector);
                     } catch (CertStoreException ex) {
-                        log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", ex);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), ex);
                         throw new RuntimeException(ex);
                     }
                     if (certs.size() > 0) {
@@ -1310,7 +1311,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         try {
                             aliases = trustStore.aliases();
                         } catch (KeyStoreException ex) {
-                            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", ex);
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), ex);
                             throw new RuntimeException(ex);
                         }
                         while (aliases.hasMoreElements()) {
@@ -1319,7 +1320,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                             try {
                                 thisCertificate = trustStore.getCertificate(currAlias);
                             } catch (KeyStoreException ex) {
-                                log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", ex);
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), ex);
                                 throw new RuntimeException(ex);
                             }
                             if ((thisCertificate instanceof X509Certificate) && selector.match(thisCertificate)) {
@@ -1343,7 +1344,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     try {
                         aliases = trustStore.aliases();
                     } catch (KeyStoreException ex) {
-                        log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", ex);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), ex);
                         throw new RuntimeException(ex);
                     }
                     while (aliases.hasMoreElements()) {
@@ -1364,13 +1365,13 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 thisCertificate = (X509Certificate) trustStore.getCertificate(currentAlias);
             } catch (KeyStoreException ex) {
-                log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), ex);
                 throw new RuntimeException(ex);
             }
             req.setX509Certificate(thisCertificate);
             return;
         } else {
-            log.log(Level.SEVERE, "WSS1511.failed.locate.peerCertificate");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1511_FAILED_LOCATE_PEER_CERTIFICATE());
             throw new RuntimeException("An Error occurred while locating PEER Entity certificate in TrustStore");
         }
     }
@@ -1414,10 +1415,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
                     try {
                         selector = (AliasSelector) this.keystoreCertSelectorClass.newInstance();
                     } catch (IllegalAccessException ex) {
-                        log.log(Level.SEVERE, "WSS1532.exception.instantiating.aliasselector", ex);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1532_EXCEPTION_INSTANTIATING_ALIASSELECTOR(), ex);
                         throw new RuntimeException(ex);
                     } catch (InstantiationException ex) {
-                        log.log(Level.SEVERE, "WSS1532.exception.instantiating.aliasselector", ex);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_1532_EXCEPTION_INSTANTIATING_ALIASSELECTOR(), ex);
                         throw new RuntimeException(ex);
                     }
                     uniqueAlias = selector.select(context);
@@ -1453,12 +1454,12 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         getPrivateKey(context, uniqueAlias));
             } else {
 
-                log.log(Level.SEVERE, "WSS1512.failed.locate.certificate.privatekey");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1512_FAILED_LOCATE_CERTIFICATE_PRIVATEKEY());
                 throw new RuntimeException("An Error occurred while locating default certificate and privateKey in KeyStore");
 
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
     }
@@ -1495,7 +1496,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                         expired = calendarFormatter2.parse(utcTimestampRequest.getExpired());
                     }
                 } catch (java.text.ParseException ipe) {
-                    log.log(Level.SEVERE, "WSS1513.exception.validate.timestamp", ipe);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1513_EXCEPTION_VALIDATE_TIMESTAMP(), ipe);
                     throw new TimestampValidationCallback.TimestampValidationException(ipe.getMessage());
                 }
             }
@@ -1527,7 +1528,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         Date currentTime =
                 getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
         if (expires.before(currentTime)) {
-            log.log(Level.SEVERE, "WSS1514.error.aheadCurrentTime");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1514_ERROR_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The current time is ahead of the expiration time in Timestamp");
         }
@@ -1543,7 +1544,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         Date current = getFreshnessAndSkewAdjustedDate(maxClockSkew, timestampFreshnessLimit);
 
         if (created.before(current)) {
-            log.log(Level.SEVERE, "WSS1515.error.currentTime");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1515_ERROR_CURRENT_TIME());
             log.log(Level.SEVERE, "Creation time:" + created);
             log.log(Level.SEVERE, "Current time:" + current);
             throw new TimestampValidationCallback.TimestampValidationException(
@@ -1554,7 +1555,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         Date currentTime =
                 getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, true);
         if (currentTime.before(created)) {
-            log.log(Level.SEVERE, "WSS1516.error.creationAheadCurrent.time");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1516_ERROR_CREATION_AHEAD_CURRENT_TIME());
             throw new TimestampValidationCallback.TimestampValidationException(
                     "The creation time is ahead of the current time.");
         }
@@ -1611,10 +1612,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 certificate.checkValidity();
             } catch (CertificateExpiredException e) {
-                log.log(Level.SEVERE, "WSS1517.X509.expired", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1517_X_509_EXPIRED(), e);
                 throw new CertificateValidationCallback.CertificateValidationException("X509Certificate Expired", e);
             } catch (CertificateNotYetValidException e) {
-                log.log(Level.SEVERE, "WSS1527.X509.notValid", e);
+                log.log(Level.SEVERE,LogStringsMessages.WSS_1517_X_509_EXPIRED(), e);
                 throw new CertificateValidationCallback.CertificateValidationException("X509Certificate Not Yet Valid", e);
             }
 
@@ -1623,7 +1624,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 if (isTrustedSelfSigned(certificate, getTrustStore(this.runtimeProps))) {
                     return true;
                 } else {
-                    log.log(Level.SEVERE, "WSS1533.X509.SelfSignedCertificate.notValid");
+                    log.log(Level.SEVERE,LogStringsMessages.WSS_1533_X_509_SELF_SIGNED_CERTIFICATE_NOT_VALID());
                     throw new CertificateValidationCallback.CertificateValidationException("Validation of self signed certificate failed");
                 }
             }
@@ -1704,14 +1705,14 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 certValidator = CertPathValidator.getInstance("PKIX");
 
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS1518.failedto.validate.certificate", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1518_FAILEDTO_VALIDATE_CERTIFICATE(), e);
                 throw new CertificateValidationCallback.CertificateValidationException(e.getMessage(), e);
             }
 
             try {
                 certValidator.validate(certPath, parameters);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS1518.failedto.validate.certificate", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1518_FAILEDTO_VALIDATE_CERTIFICATE(), e);
                 throw new CertificateValidationCallback.CertificateValidationException(e.getMessage(), e);
             }
             return true;
@@ -1737,7 +1738,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
                 return false;
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS1518.failedto.validate.certificate", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1518_FAILEDTO_VALIDATE_CERTIFICATE(), e);
                 throw new CertificateValidationCallback.CertificateValidationException(e.getMessage(), e);
             }
         }
@@ -1812,7 +1813,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
             throw new RuntimeException(e);
         }
         //now search in CertStore if present
@@ -1831,7 +1832,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 certs = certStore.getCertificates(selector);
             } catch (CertStoreException ex) {
-                log.log(Level.SEVERE, "WSS1530.exception.in.certstore.lookup", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1530_EXCEPTION_IN_CERTSTORE_LOOKUP(), ex);
                 throw new RuntimeException(ex);
             }
             if (certs.size() > 0) {
@@ -1885,7 +1886,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -1952,7 +1953,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 log.log(Level.FINE, "LoadClass: could not load class " + classname, e);
             }
         }
-        log.log(Level.SEVERE, "WSS1521.error.getting.userClass");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_1521_ERROR_GETTING_USER_CLASS());
         throw new XWSSecurityException("Could not find User Class " + classname);
     }
 
@@ -1965,7 +1966,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
         try {
             ret = Long.valueOf(lng);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1522.error.getting.longValue", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1522_ERROR_GETTING_LONG_VALUE(), e);
             throw new XWSSecurityException(e);
         }
         return ret;
@@ -2026,7 +2027,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
 
 
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1523.error.getting.newInstance.CallbackHandler", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1523_ERROR_GETTING_NEW_INSTANCE_CALLBACK_HANDLER(), e);
             throw new XWSSecurityException(e);
         }
 //        if (this.certstoreHandler != null) {
@@ -2082,7 +2083,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1526.failedto.getcertificate", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1526_FAILEDTO_GETCERTIFICATE(), e);
             throw new RuntimeException(e);
         }
         if (certStore != null) {
@@ -2100,7 +2101,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 certs = certStore.getCertificates(selector);
             } catch (CertStoreException ex) {
-                log.log(Level.SEVERE, "WSS1530.exception.in.certstore.lookup", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1530_EXCEPTION_IN_CERTSTORE_LOOKUP(), ex);
                 throw new RuntimeException(ex);
             }
             if (certs.size() > 0) {
@@ -2137,7 +2138,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 }
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS1505.failedto.getkey", e);
+            log.log(Level.SEVERE,LogStringsMessages.WSS_1505_FAILEDTO_GETKEY(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -2153,7 +2154,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 String ret = url.replace("$WSIT_HOME", wsitHome);
                 return ret;
             } else {
-                log.log(Level.SEVERE, "WSS1524.unableto.resolve.URI.WSIT_HOME.notset");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1524_UNABLETO_RESOLVE_URI_WSIT_HOME_NOTSET());
                 throw new RuntimeException("The following config URL: " + url + " in the WSDL could not be resolved because System Property WSIT_HOME was not set");
             }
         } else {
@@ -2178,16 +2179,16 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 this.keyPassword = this.keyPwd.toCharArray();
             }
         } catch (java.lang.InstantiationException ex) {
-            log.log(Level.SEVERE, "WSS1528.failed.initialize.key.password", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1528_FAILED_INITIALIZE_KEY_PASSWORD(), ex);
             throw new RuntimeException(ex);
         } catch (java.io.IOException e) {
-            log.log(Level.SEVERE, "WSS1528.failed.initialize.key.password", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1528_FAILED_INITIALIZE_KEY_PASSWORD(), e);
             throw new RuntimeException(e);
         } catch (java.lang.IllegalAccessException ie) {
-            log.log(Level.SEVERE, "WSS1528.failed.initialize.key.password", ie);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1528_FAILED_INITIALIZE_KEY_PASSWORD(), ie);
             throw new RuntimeException(ie);
         } catch (javax.security.auth.callback.UnsupportedCallbackException ue) {
-            log.log(Level.SEVERE, "WSS1528.failed.initialize.key.password", ue);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1528_FAILED_INITIALIZE_KEY_PASSWORD(), ue);
             throw new RuntimeException(ue);
         }
     }
@@ -2289,14 +2290,14 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 this.keystoreHandler.handle(cbs);
                 keyStore = cb.getKeystore();
                 if (keyStore == null) {
-                    log.log(Level.SEVERE, "No KeyStore set in KeyStorCallback  by CallbackHandler");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1534_NO_KEYSTORE_SET_IN_KEYSTORECALLBACK_CALLBACKHANDLER());
                     throw new XWSSecurityRuntimeException("No KeyStore set in KeyStorCallback  by CallbackHandler");
                 }
             } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1535_ERROR_KEYSTORE_USING_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (UnsupportedCallbackException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1535_ERROR_KEYSTORE_USING_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             }
         }
@@ -2331,10 +2332,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 this.certstoreHandler.handle(callbacks);
                 this.certStore = cb.getCertStore();
             } catch (UnsupportedCallbackException ex) {
-                log.log(Level.SEVERE, "WSS1529.exception.in.certstore.callback", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1529_EXCEPTION_IN_CERTSTORE_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (IOException ex) {
-                log.log(Level.SEVERE, "WSS1529.exception.in.certstore.callback", ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1529_EXCEPTION_IN_CERTSTORE_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             }
         }
@@ -2356,14 +2357,14 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 this.truststoreHandler.handle(cbs);
                 trustStore = cb.getKeystore();
                 if (trustStore == null) {
-                    log.log(Level.SEVERE, "No TrustStore set in KeyStorCallback  by CallbackHandler");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1536_NO_TRUSTSTORE_SET_IN_TRUSTSTORECALLBACK());
                     throw new XWSSecurityRuntimeException("No TrustStore set in KeyStorCallback  by CallbackHandler");
                 }
             } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1537_ERROR_TRUSTSTORE_USING_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (UnsupportedCallbackException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1537_ERROR_TRUSTSTORE_USING_CALLBACK(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             }
         }
@@ -2388,10 +2389,10 @@ public class DefaultCallbackHandler implements CallbackHandler {
                 this.keystoreHandler.handle(cbs);
                 privKey = cb.getKey();
             } catch (IOException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1538_ERROR_GETTING_PRIVATE_KEY(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (UnsupportedCallbackException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1538_ERROR_GETTING_PRIVATE_KEY(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             }
 
@@ -2399,18 +2400,18 @@ public class DefaultCallbackHandler implements CallbackHandler {
             try {
                 privKey = (PrivateKey) keyStore.getKey(alias, this.keyPassword);
             } catch (KeyStoreException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1538_ERROR_GETTING_PRIVATE_KEY(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (NoSuchAlgorithmException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1538_ERROR_GETTING_PRIVATE_KEY(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             } catch (UnrecoverableKeyException ex) {
-                log.log(Level.SEVERE, null, ex);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1538_ERROR_GETTING_PRIVATE_KEY(), ex);
                 throw new XWSSecurityRuntimeException(ex);
             }
         }
         if (privKey == null) {
-            log.log(Level.SEVERE, "PrivateKey returned by PrivateKeyCallback was Null");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_1539_PRIVATE_KEY_NULL_ERROR());
             throw new XWSSecurityRuntimeException("PrivateKey returned by PrivateKeyCallback was Null");
         }
         return privKey;

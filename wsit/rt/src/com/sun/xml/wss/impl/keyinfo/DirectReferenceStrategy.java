@@ -1,11 +1,11 @@
 /*
- * $Id: DirectReferenceStrategy.java,v 1.3 2010-03-20 13:01:26 kumarjayanti Exp $
+ * $Id: DirectReferenceStrategy.java,v 1.4 2010-09-18 20:35:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,6 +54,7 @@ import java.security.cert.X509Certificate;
 import com.sun.xml.wss.core.reference.DirectReference;
 import com.sun.xml.wss.core.KeyInfoHeaderBlock;
 import com.sun.xml.wss.core.SecurityTokenReference;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 public class DirectReferenceStrategy extends KeyInfoStrategy {
 
@@ -145,7 +146,7 @@ public class DirectReferenceStrategy extends KeyInfoStrategy {
             if (cert == null) {
                 log.log(
                         Level.SEVERE,
-                        "WSS0185.filterparameter.not.set",
+                        LogStringsMessages.WSS_0185_FILTERPARAMETER_NOT_SET( "subjectkeyidentifier"),
                         new Object[] { "subjectkeyidentifier"});
                 throw new XWSSecurityException(
                         "No certificate specified and no default found.");

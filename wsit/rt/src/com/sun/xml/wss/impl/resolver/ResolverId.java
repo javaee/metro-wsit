@@ -1,11 +1,11 @@
 /*
- * $Id: ResolverId.java,v 1.3 2010-03-20 12:35:33 kumarjayanti Exp $
+ * $Id: ResolverId.java,v 1.4 2010-09-18 20:35:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -66,6 +66,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.dsig.NamespaceContextImpl;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -137,7 +138,7 @@ public class ResolverId extends ResourceResolverSpi {
             selectedElem = getElementById(doc, id);
          } catch (TransformerException e) {
             log.log(Level.SEVERE,
-                    "WSS0603.xpathapi.transformer.exception",
+                    LogStringsMessages.WSS_0603_XPATHAPI_TRANSFORMER_EXCEPTION(e.getMessage()),
                     e.getMessage());
             throw new ResourceResolverException("empty", e, uri, BaseURI);
          }
@@ -145,7 +146,7 @@ public class ResolverId extends ResourceResolverSpi {
 
       if (selectedElem == null) {
           log.log(Level.SEVERE,
-                  "WSS0604.cannot.find.element");
+                  LogStringsMessages.WSS_0604_CANNOT_FIND_ELEMENT());
           throw new ResourceResolverException("empty", uri, BaseURI);
       }
       Set resultSet = dereferenceSameDocumentURI(selectedElem);
@@ -234,7 +235,7 @@ public class ResolverId extends ResourceResolverSpi {
         } catch (XPathExpressionException ex) {
             //TODO: this logstring is not in this package
             log.log(Level.SEVERE,
-                    "WSS0375.error.apache.xpathAPI",
+                    LogStringsMessages.WSS_0375_ERROR_APACHE_XPATH_API(id, ex.getMessage()),
                     new Object[] {id, ex.getMessage()});
             throw new XWSSecurityRuntimeException(ex);
         }
@@ -256,7 +257,7 @@ public class ResolverId extends ResourceResolverSpi {
             } catch (XPathExpressionException ex) {
                 //TODO: this logstring is not in this package
                 log.log(Level.SEVERE,
-                        "WSS0375.error.apache.xpathAPI",
+                        LogStringsMessages.WSS_0375_ERROR_APACHE_XPATH_API(id, ex.getMessage()),
                         new Object[] {id, ex.getMessage()});
                 throw new XWSSecurityRuntimeException(ex);
             }

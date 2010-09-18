@@ -7,7 +7,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -48,6 +48,7 @@ import com.sun.xml.wss.core.KeyInfoHeaderBlock;
 import com.sun.xml.wss.core.SecurityTokenReference;
 import com.sun.xml.wss.impl.SecurableSoapMessage;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,14 +83,14 @@ public class BinarySecretStrategy extends KeyInfoStrategy {
 
     public void insertKey(SecurityTokenReference tokenRef, SecurableSoapMessage secureMsg) throws XWSSecurityException {
         log.log(Level.SEVERE,
-                "WSS0703.unsupported.operation"); 
+                LogStringsMessages.WSS_0703_UNSUPPORTED_OPERATION());
         throw new UnsupportedOperationException(
             "A ds:BinarySecret can't be put under a wsse:SecurityTokenReference");
     }
 
     public void setCertificate(X509Certificate cert) {
         log.log(Level.SEVERE,
-                "WSS0705.unsupported.operation");
+                LogStringsMessages.WSS_0705_UNSUPPORTED_OPERATION());
         throw new UnsupportedOperationException(
             "Setting a certificate is not a supported operation for ds:BinarySecret strategy");
     }

@@ -1,11 +1,11 @@
 /*
- * $Id: KeyIdentifierStrategy.java,v 1.3 2010-03-20 13:01:26 kumarjayanti Exp $
+ * $Id: KeyIdentifierStrategy.java,v 1.4 2010-09-18 20:35:47 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -60,6 +60,7 @@ import com.sun.xml.wss.core.reference.KeyIdentifier;
 import com.sun.xml.wss.core.reference.SamlKeyIdentifier;
 import com.sun.xml.wss.core.reference.X509SubjectKeyIdentifier;
 import com.sun.xml.wss.core.reference.EncryptedKeySHA1Identifier;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 public class KeyIdentifierStrategy extends KeyInfoStrategy {
     
@@ -112,7 +113,7 @@ public class KeyIdentifierStrategy extends KeyInfoStrategy {
         KeyIdentifier keyIdentifier = getKeyIdentifier(secureMsg);
         if (keyIdentifier == null) {
             log.log(Level.SEVERE,
-                    "WSS0701.cannot.locate.certificate",
+                    LogStringsMessages.WSS_0701_CANNOT_LOCATE_CERTIFICATE(alias),
                     alias);
             throw new XWSSecurityException(
                     "Unable to locate certificate for the alias '" + alias + "'");
@@ -130,7 +131,7 @@ public class KeyIdentifierStrategy extends KeyInfoStrategy {
         
         if (keyIdentifier == null) {
             log.log(Level.SEVERE,
-                    "WSS0701.cannot.locate.certificate",
+                     LogStringsMessages.WSS_0701_CANNOT_LOCATE_CERTIFICATE(alias),
                     alias);
             throw new XWSSecurityException(
                     "Unable to locate certificate for the alias '" + alias + "'");
@@ -159,7 +160,7 @@ public class KeyIdentifierStrategy extends KeyInfoStrategy {
                         X509SubjectKeyIdentifier.getSubjectKeyIdentifier(cert);
                 if (subjectKeyIdentifier == null) {
                     log.log(Level.SEVERE,
-                            "WSS0702.no.subject.keyidentifier",
+                            LogStringsMessages.WSS_0702_NO_SUBJECT_KEYIDENTIFIER(alias),
                             alias);
                     throw new XWSSecurityException(
                             "The found certificate does not contain subject key identifier X509 extension");
@@ -173,7 +174,7 @@ public class KeyIdentifierStrategy extends KeyInfoStrategy {
                         X509ThumbPrintIdentifier.getThumbPrintIdentifier(cert);
                 if (thumbPrintIdentifier == null) {
                     log.log(Level.SEVERE,
-                            "WSS0702.no.subject.keyidentifier",
+                            LogStringsMessages.WSS_0702_NO_SUBJECT_KEYIDENTIFIER(alias),
                             alias);
                     throw new XWSSecurityException(
                             "Error while calculating thumb print identifier");

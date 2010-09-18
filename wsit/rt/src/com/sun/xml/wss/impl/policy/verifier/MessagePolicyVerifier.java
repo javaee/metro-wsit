@@ -75,7 +75,7 @@ import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.impl.policy.mls.WSSPolicy;
 import com.sun.xml.wss.impl.policy.spi.PolicyVerifier;
 import com.sun.xml.wss.logging.LogDomainConstants;
-import com.sun.xml.wss.logging.impl.opt.LogStringsMessages;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -126,7 +126,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
             if ((inferredSecurityPolicy != null) && (inferredSecurityPolicy.size() > 0)) {
                 //this could be a plain SSL scenario
                 if (!checkAllowExtraTimestamp(inferredSecurityPolicy)) {
-                    log.log(Level.SEVERE, "WSS0805.policy.null");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0805_POLICY_NULL());
                     throw new PolicyViolationException("ERROR: Policy for the service could not be obtained");
                 }
             }
@@ -183,7 +183,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 }
                 if(!found){
                     if (MessageConstants.debug) {
-                        log.log(Level.WARNING, "Timestamp not found in message but occurs in configured policy");
+                        log.log(Level.WARNING, LogStringsMessages.WSS_0276_INVALID_POLICY_NO_TIMESTAMP_SEC_HEADER());
                     }
                     // commenting for now, uncomment once this is corrected in SecurityPolicy
                     /*throw new XWSSecurityException("Policy Verification error:"
@@ -280,7 +280,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                     return;
             }
             if(pol == null){
-                    log.log(Level.SEVERE, "WSS0268.error.policy.verification");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0268_ERROR_POLICY_VERIFICATION());
                 throw new XWSSecurityException("Policy verification error:" +
                         "Missing Signature Element");
                 }
@@ -296,7 +296,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                         return;
                     }
                     if(pol == null){
-                        log.log(Level.SEVERE, "WSS0268.error.policy.verification");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0268_ERROR_POLICY_VERIFICATION());
                         throw new XWSSecurityException("Policy verification error:" +
                                 "Missing Signature Element - perhaps a second supporting signature or " +
                                 "Incorrect Key types or references were used in Signature");
@@ -312,12 +312,12 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 
                 inferredSecurityPolicy.remove(pol);
                 if(!isKBTrue){
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                     throw new XWSSecurityException("Policy verification error: " +
                             "Incorrect Key types or references were used in Signature");
                 }
                 if(!isTBTrue){
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                     throw new XWSSecurityException("Policy verification error: " +
                             "One or more Signed Parts could not be validated");
                 }
@@ -329,7 +329,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                     //check to see for the case when no Signature Target present in message
                     //The incoming message will not have Signature policy in that case.
                     if (checkTargetPresence(actualPol)) {
-                        log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                         throw new XWSSecurityException("Signature Policy verification error: Looking for a Signature Element " + " in Security header, but found " + pol + ".");
                     }
                 } else {
@@ -340,7 +340,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
             EncryptionPolicy actualEncryptionPolicy = (EncryptionPolicy)actualPol;
             WSSPolicy pol = getFirstPrimaryPolicy(inferredSecurityPolicy, false, 0);
             if(pol == null){
-                log.log(Level.SEVERE, "WSS0269.error.Encryptionpolicy.verification");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0269_ERROR_ENCRYPTIONPOLICY_VERIFICATION());
                 throw new XWSSecurityException("Encryption Policy verification error:" +
                         "Missing encryption element");
             }
@@ -356,12 +356,12 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 
                 inferredSecurityPolicy.remove(pol);
                 if(!isKBTrue){
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                     throw new XWSSecurityException("Encryption Policy verification error: " +
                             "Incorrect Key types or references were used in encryption");
                 }
                 if(!isTBTrue){
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                     throw new XWSSecurityException("Policy verification error: " +
                             "One or more encrypted parts could not be validated");
                 }
@@ -398,7 +398,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 //check to see for the case when no Encryption Target present in message
                 //The incoming message will not have Encryption policy in that case.
                 if(checkTargetPresence(actualPol)){
-                    log.log(Level.SEVERE, "WSS0206.policy.violation.exception");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0206_POLICY_VIOLATION_EXCEPTION());
                     throw new XWSSecurityException("Encryption Policy verification error: Looking for an Encryption Element "
                             + " in Security header, but found " +  pol +  ".");
                 }
@@ -841,7 +841,7 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 return true;
             }
         } catch (PolicyGenerationException ex) {
-            log.log(Level.SEVERE, null, ex);
+            //ignore
         }
 
         return false;
