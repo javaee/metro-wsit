@@ -1,11 +1,11 @@
 /*
- * $Id: SecurityAnnotator.java,v 1.3 2010-03-20 12:33:40 kumarjayanti Exp $
+ * $Id: SecurityAnnotator.java,v 1.4 2010-09-19 15:18:29 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -56,6 +56,7 @@ import com.sun.xml.wss.impl.configuration.DynamicApplicationContext;
 import com.sun.xml.wss.impl.filter.DumpFilter;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 /**
  * This class exports a static Security Service for Securing an Outbound SOAPMessage.
@@ -128,7 +129,7 @@ public class SecurityAnnotator {
                           handler.getCallbackHandler());
 
             } catch (Exception e) {
-               log.log(Level.SEVERE, "WSS0237.failed.DynamicPolicyCallback", e);
+               log.log(Level.SEVERE, LogStringsMessages.WSS_0237_FAILED_DYNAMIC_POLICY_CALLBACK(), e);
                throw new XWSSecurityException (e);
             }
 
@@ -141,7 +142,7 @@ public class SecurityAnnotator {
             if (result instanceof WSSPolicy) {
                 HarnessUtil.processWSSPolicy (fpContext);
             } else if ( result != null ) {
-                log.log(Level.SEVERE, "WSS0260.invalid.DSP");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0260_INVALID_DSP());
                 throw new XWSSecurityException ("Invalid dynamic security policy returned by callback handler");
             }
 
@@ -151,7 +152,7 @@ public class SecurityAnnotator {
         } else if (policy instanceof WSSPolicy) {
             HarnessUtil.processWSSPolicy (fpContext);
         } else {
-            log.log(Level.SEVERE, "WSS0251.invalid.SecurityPolicyInstance");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0251_INVALID_SECURITY_POLICY_INSTANCE());
             throw new XWSSecurityException ("SecurityPolicy instance should be of type: " +
                                             "WSSPolicy OR MessagePolicy OR DynamicSecurityPolicy");
         }

@@ -1,11 +1,11 @@
 /**
- * $Id: SecurableSoapMessage.java,v 1.4 2010-03-20 12:33:44 kumarjayanti Exp $
+ * $Id: SecurableSoapMessage.java,v 1.5 2010-09-19 15:18:29 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,7 +50,6 @@ import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
 
 import javax.xml.soap.Name;
-import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPPart;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPHeader;
@@ -82,6 +81,7 @@ import com.sun.xml.wss.core.SecurityHeader;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import org.w3c.dom.Node;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.util.NodeListImpl;
 
 public final class SecurableSoapMessage extends SOAPMessage {
@@ -122,7 +122,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
     public void init(SOAPMessage soapMessage) throws XWSSecurityException {
         this.soapMessage = soapMessage;
         if(log.isLoggable(Level.FINEST)){
-        log.log(Level.FINEST, "WSS0100.createFor.creating.impl", this.getClass().getName());
+        log.log(Level.FINEST, LogStringsMessages.WSS_0100_CREATE_FOR_CREATING_IMPL(this.getClass().getName()) );
         }
     }
     
@@ -132,7 +132,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         try {
             envelope = getSOAPPart().getEnvelope();
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0399.soap.envelope.exception", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0399_SOAP_ENVELOPE_EXCEPTION(), e);
             throw new XWSSecurityException(e);
         }
         
@@ -157,7 +157,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 return getSOAPPart().getEnvelope().addHeader();
             
         } catch (SOAPException e) {
-            log.log(Level.SEVERE, "WSS0369.soap.exception", e.getMessage());
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0369_SOAP_EXCEPTION(e.getMessage()));
             throw new XWSSecurityException(e);
         }
         
@@ -269,7 +269,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 wsseSecurity = null;
             }
         } catch (XWSSecurityException e) {
-            log.log(Level.SEVERE, "WSS0370.error.deleting.secheader", e.getMessage());
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0370_ERROR_DELETING_SECHEADER(), e.getMessage());
         }
     }
     
@@ -283,7 +283,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 wsseSecurity.removeAttributeNS(this.getEnvelope().getNamespaceURI(), "mustUnderstand");
             }
         } catch (XWSSecurityException e) {
-            log.log(Level.SEVERE, "WSS0370.error.deleting.secheader", e.getMessage());
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0370_ERROR_DELETING_SECHEADER(), e.getMessage());
         }
     }
     
@@ -307,7 +307,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY,
                 "Error while processing Security Header",
                 she));
-        log.log(Level.SEVERE, "WSS0370.error.processing.secheader", she);
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0370_ERROR_PROCESSING_SECHEADER(), she);
         throw she;
     }
     
@@ -367,7 +367,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
             body.addFault(faultCodeName, sfe.getFaultString());
             // TODO RFE add "actor" and throwable info to "detail"
         } catch (SOAPException e) {
-            log.log(Level.SEVERE, "WSS0371.error.generate.fault", e.getMessage());
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0371_ERROR_GENERATE_FAULT(e.getMessage()));
             throw new XWSSecurityException(e);
         }
         
@@ -381,7 +381,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
         try {
             return soapMessage.getSOAPBody();
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0398.soap.body.exception", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0398_SOAP_BODY_EXCEPTION(), e);
             throw new SOAPException(e);
         }
     }
@@ -572,7 +572,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 result = (SOAPElement) elements.item(0);
         } catch (Exception e) {
             log.log(Level.SEVERE,
-                    "WSS0374.error.apache.xpathAPI",
+                    LogStringsMessages.WSS_0374_ERROR_APACHE_XPATH_API(id, e.getMessage()),
                     new Object[] {id, e.getMessage()});
                     throw new XWSSecurityException(e);
         }
@@ -647,13 +647,13 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 
             } catch (Exception e) {
                 log.log(Level.SEVERE,
-                        "WSS0375.error.apache.xpathAPI",
+                         LogStringsMessages.WSS_0375_ERROR_APACHE_XPATH_API(id, e.getMessage()),
                         new Object[] {id, e.getMessage()});
                         throw new XWSSecurityException(e);
             }
             
             if (elems == null || elems.getLength() == 0) {
-                log.log(Level.SEVERE, "WSS0285.error.NoElement");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0285_ERROR_NO_ELEMENT());
                 throw new XWSSecurityException(
                         "No elements exist with Id/WsuId: " + id);
             }
@@ -669,7 +669,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
             }                        
             
             if (elems.getLength() > 1) {
-                log.log(Level.SEVERE, "WSS0286.invalid.NoofElements");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0286_INVALID_NOOF_ELEMENTS());
                 throw new XWSSecurityException(
                         "More than one element exists with Id/WsuId: " + id);
             }
@@ -748,7 +748,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                 }
             
         } catch (Exception se) {
-            log.log(Level.SEVERE, "WSS0287.error.extracting.attachmentpart", se);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0287_ERROR_EXTRACTING_ATTACHMENTPART(), se);
             throw new XWSSecurityException(se);
         }
         
@@ -867,7 +867,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                     }
                 }
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0288.failed.getMessageParts.Qname", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0288_FAILED_GET_MESSAGE_PARTS_QNAME(), e);
                 throw new XWSSecurityRuntimeException(e);
             }
             if (retValue == null || ((NodeList)retValue).getLength() == 0) throwFault = true;
@@ -891,7 +891,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                     value,
                     this.getNSContext());*/
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0289.failed.getMessageParts.XPath", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0289_FAILED_GET_MESSAGE_PARTS_X_PATH(), e);
                 throw new XWSSecurityRuntimeException(e);
             }
             if (retValue == null || ((NodeList)retValue).getLength() == 0) throwFault = true;
@@ -903,7 +903,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
                     retValue = getAttachmentPart(value);
                     if (retValue == null) throwFault = true;
                 } catch (Exception se) {
-                    log.log(Level.SEVERE, "WSS0290.failed.getMessageParts.URI", se);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0290_FAILED_GET_MESSAGE_PARTS_URI(), se);
                     throw new XWSSecurityException("No message part can be identified by the Target: " + value);
                 }
             }
@@ -923,13 +923,13 @@ public final class SecurableSoapMessage extends SOAPMessage {
     
     public  AttachmentPart getAttachment(SOAPElement element)
     throws SOAPException {
-        log.log(Level.SEVERE, "WSS0291.unsupported.operation.getAttachment");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0291_UNSUPPORTED_OPERATION_GET_ATTACHMENT());
         throw new UnsupportedOperationException("Operation Not Supported");
         //soapMessage.getAttachment(element);
     }
     
     public void removeAttachments(MimeHeaders hdrs) {
-        log.log(Level.SEVERE, "WSS0292.unsupported.operation.removeAttachment");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0292_UNSUPPORTED_OPERATION_REMOVE_ATTACHMENT());
         throw new UnsupportedOperationException("Operation Not Supported");
         //soapMessage.removeAttachments(hdrs);
     }

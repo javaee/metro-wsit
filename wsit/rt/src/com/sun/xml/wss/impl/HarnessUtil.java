@@ -1,11 +1,11 @@
 /*
- * $Id: HarnessUtil.java,v 1.5 2010-03-20 12:33:41 kumarjayanti Exp $
+ * $Id: HarnessUtil.java,v 1.6 2010-09-19 15:18:29 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -72,6 +72,7 @@ import com.sun.xml.ws.api.message.Message;
 
 import com.sun.xml.wss.impl.callback.DynamicPolicyCallback;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import org.w3c.dom.NodeList;
 
 public abstract class HarnessUtil {
@@ -129,7 +130,7 @@ public abstract class HarnessUtil {
         }else if(PolicyTypeUtil.isMandatoryTargetPolicy(policy)) {
             return;
         } else {
-            log.log(Level.SEVERE, "WSS0801.illegal.securitypolicy");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0801_ILLEGAL_SECURITYPOLICY());
             throw new XWSSecurityException("Invalid WSSPolicy Type");
         }
     }
@@ -272,7 +273,7 @@ public abstract class HarnessUtil {
         if (fpContext.getSecurityPolicy() instanceof WSSPolicy) {
             processWSSPolicy(fpContext);
         } else {
-            log.log(Level.SEVERE, "WSS0801.illegal.securitypolicy");
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0801_ILLEGAL_SECURITYPOLICY());
             throw new XWSSecurityException("Invalid SecurityPolicy Type");
         }
     }
@@ -298,20 +299,20 @@ public abstract class HarnessUtil {
         StaticPolicyContext staticContext = context.getPolicyContext();
         
         if (message == null && jaxWsMessage == null) {
-            log.log(Level.SEVERE, "WSS0803.soapmessage.notset");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0803_SOAPMESSAGE_NOTSET());
             throw new XWSSecurityException(
                     "javax.xml.soap.SOAPMessage parameter not set in the ProcessingContext");
         }
         
         if (handler == null) {
-            log.log(Level.SEVERE, "WSS0804.callback.handler.notset");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0804_CALLBACK_HANDLER_NOTSET());
             throw new XWSSecurityException(
                     "SecurityEnvironment/javax.security.auth.callback.CallbackHandler implementation not set in the ProcessingContext");
         }
         
         if (policy == null && !isInboundMessage) {
             if(log.isLoggable(Level.WARNING)){
-            log.log(Level.WARNING, "WSS0805.policy.null");
+            log.log(Level.WARNING, LogStringsMessages.WSS_0805_POLICY_NULL());
             }
         }
         
@@ -333,14 +334,14 @@ public abstract class HarnessUtil {
         try {
             body = message.getSOAPBody();
         } catch (SOAPException se) {
-            log.log(Level.SEVERE, "WSS0807.no.body.element", se);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0807_NO_BODY_ELEMENT(), se);
             throw new XWSSecurityException(se);
         }
         
         if (body != null) {
             firstChild = body.getFirstChild();
         } else {
-            log.log(Level.SEVERE, "WSS0808.no.body.element.operation");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0808_NO_BODY_ELEMENT_OPERATION());
             throw new XWSSecurityException(
                     "No body element identifying an operation is found");
         }
@@ -405,7 +406,7 @@ public abstract class HarnessUtil {
      */
     static void throwWssSoapFault(String message) throws WssSoapFaultException {
         XWSSecurityException xwsse = new XWSSecurityException(message);
-        log.log(Level.SEVERE, "WSS0809.fault.WSSSOAP", xwsse);
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0809_FAULT_WSSSOAP(), xwsse);
         throw SecurableSoapMessage.newSOAPFaultException(
                 MessageConstants.WSSE_INVALID_SECURITY,
                 message,
@@ -429,7 +430,7 @@ public abstract class HarnessUtil {
         } catch (UnsupportedCallbackException ex) {
             //ok to ignore this since not all callback-handlers will implement this
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0237.failed.DynamicPolicyCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0237_FAILED_DYNAMIC_POLICY_CALLBACK(), e);
             throw new XWSSecurityException(e);
         }
     }

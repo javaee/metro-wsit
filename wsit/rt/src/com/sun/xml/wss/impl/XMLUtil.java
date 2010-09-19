@@ -83,6 +83,7 @@ import com.sun.org.apache.xml.internal.security.keys.content.keyvalues.RSAKeyVal
 import com.sun.xml.wss.impl.misc.Base64;
 //import com.sun.org.apache.xpath.internal.XPathAPI;
 import com.sun.xml.wss.*;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.net.MalformedURLException;
 
 public class XMLUtil {
@@ -320,7 +321,7 @@ public class XMLUtil {
     
     public static String resolveXPath(Node element) throws Exception {
         if (element.getOwnerDocument() == null) {
-            logger.log(Level.SEVERE,"WSS0424.null.OwnerDocument.element");            
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_0424_NULL_OWNER_DOCUMENT_ELEMENT());
             throw new Exception(
             "Element does not have an owner document");
         }
@@ -619,7 +620,7 @@ public class XMLUtil {
             dsaPkSpec.getY());
             
         } catch (Exception e) {
-            logger.log(Level.SEVERE,"WSS0426.failed.DSAKeyValue", e);
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_0426_FAILED_DSA_KEY_VALUE(), e);
             throw new XWSSecurityException(e);
         }
     }
@@ -639,7 +640,7 @@ public class XMLUtil {
             );
             
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "WSS0293.failed.RSAKeyValue", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_0293_FAILED_RSA_KEY_VALUE(), e);
             throw new XWSSecurityException(e);
         }
     }
@@ -653,7 +654,7 @@ public class XMLUtil {
             x509Data.addCertificate(cert);
             return x509Data;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "WSS0294.failed.X509Data", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_0294_FAILED_X_509_DATA(), e);
             throw new XWSSecurityException(e);
         }
     }
@@ -752,7 +753,7 @@ public class XMLUtil {
         try {
             return Base64.decode(encodedData);
         } catch (Base64DecodingException e) {
-            logger.log(Level.SEVERE, "WSS0427.unableto.decode.base64", e);
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_0427_UNABLETO_DECODE_BASE_64(), e);
             throw new XWSSecurityException(
             "Unable to decode Base64 encoded data",
             e);

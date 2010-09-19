@@ -1,5 +1,5 @@
 /*
- * $Id: NewSecurityRecipient.java,v 1.6 2010-08-11 06:55:19 kumarjayanti Exp $
+ * $Id: NewSecurityRecipient.java,v 1.7 2010-09-19 15:18:29 sm228678 Exp $
  */
 
 /*
@@ -63,6 +63,7 @@ import com.sun.xml.wss.*;
 import com.sun.xml.wss.impl.policy.PolicyAlternatives;
 import com.sun.xml.wss.impl.policy.PolicyUtils;
 import com.sun.xml.wss.impl.policy.SecurityPolicy;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 /**
  * This class exports a static Security Service for Verifying/Validating Security in an Inbound SOAPMessage.
@@ -82,7 +83,7 @@ public class NewSecurityRecipient {
         try { 
             sFactory = SOAPFactory.newInstance();            
         } catch(Exception ex) {
-            log.log(Level.SEVERE, "WSS0397.soap.factory.exception", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0397_SOAP_FACTORY_EXCEPTION(), ex);
             throw new RuntimeException(ex);
         }
     }
@@ -164,7 +165,7 @@ public class NewSecurityRecipient {
                 return;
             }
         }catch (Exception ex) {
-            log.log(Level.SEVERE, "WSS0370.error.deleting.secheader", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0307_NONCE_ENCTYPE_INVALID(), ex);
             throw new XWSSecurityException(ex);
         }
 
@@ -198,7 +199,7 @@ public class NewSecurityRecipient {
             fpContext.getSecurableSoapMessage().deleteSecurityHeader();
             fpContext.getSOAPMessage().saveChanges();
         }catch (Exception ex) {
-            log.log(Level.SEVERE, "WSS0370.error.deleting.secheader", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0370_ERROR_DELETING_SECHEADER(), ex);
             throw new XWSSecurityException(ex);
         }
     }
@@ -245,7 +246,7 @@ public class NewSecurityRecipient {
                     sFactory.createName(MessageConstants.XENC_REFERENCE_LIST_LNAME,
                     MessageConstants.XENC_PREFIX, MessageConstants.XENC_NS));
                 }catch(Exception e){
-                    log.log(Level.SEVERE, "WSS0252.failedto.getChildElement", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0252_FAILEDTO_GET_CHILD_ELEMENT(), e);
                     throw new XWSSecurityException(e);
                 }
                 if(iter.hasNext()){
@@ -259,7 +260,7 @@ public class NewSecurityRecipient {
                 EncryptionFilter.process(fpContext);
             }  else {
                 if (!HarnessUtil.isSecondaryHeaderElement(current)) {
-                    log.log(Level.SEVERE, "WSS0204.illegal.header.block", elementName);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0204_ILLEGAL_HEADER_BLOCK(elementName));
                     HarnessUtil.throwWssSoapFault("Unrecognized header block: " + elementName);
                 }
             }
@@ -292,14 +293,14 @@ public class NewSecurityRecipient {
             if (policy != null) {
                 if (PolicyTypeUtil.messagePolicy(policy)) {
                     if (!((MessagePolicy)policy).isEmpty()) {
-                        log.log(Level.SEVERE, "WSS0253.invalid.Message");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0253_INVALID_MESSAGE());
                         throw new XWSSecurityException(
                                 "Message does not conform to configured policy: " +
                                 "No Security Header found in incoming message");
                         
                     }
                 } else {
-                    log.log(Level.SEVERE, "WSS0253.invalid.Message");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0253_INVALID_MESSAGE());
                     throw new XWSSecurityException(
                             "Message does not conform to configured policy: " +
                             "No Security Header found in incoming message");

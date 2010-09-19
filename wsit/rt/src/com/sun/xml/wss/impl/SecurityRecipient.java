@@ -1,11 +1,11 @@
 /*
- * $Id: SecurityRecipient.java,v 1.5 2010-03-20 12:33:44 kumarjayanti Exp $
+ * $Id: SecurityRecipient.java,v 1.6 2010-09-19 15:18:29 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -84,6 +84,7 @@ import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.*;
 import com.sun.xml.wss.impl.policy.mls.Target;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 /**
  * This class exports a static Security Service for Verifying/Validating Security in an Inbound SOAPMessage.
@@ -242,7 +243,7 @@ public class SecurityRecipient {
                 } else if (result instanceof WSSPolicy) {
                     HarnessUtil.processWSSPolicy(fpContext);
                 } else if ( result != null ) {
-                    log.log(Level.SEVERE, "WSS0260.invalid.DSP");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0260_INVALID_DSP());
                     throw new XWSSecurityException("Invalid dynamic security policy returned by callback handler");
                 }
                 
@@ -262,7 +263,7 @@ public class SecurityRecipient {
                 processApplicationSecurityConfiguration(fpContext);
                 checkForExtraSecurity(fpContext);
             } else {
-                log.log(Level.SEVERE,"WSS0251.invalid.SecurityPolicyInstance");
+                log.log(Level.SEVERE,LogStringsMessages.WSS_0251_INVALID_SECURITY_POLICY_INSTANCE());
                 throw new XWSSecurityException("SecurityPolicy instance should be of type: " +
                         "WSSPolicy OR MessagePolicy OR DynamicSecurityPolicy " +
                         "OR ApplicationSecurityConfiguration");
@@ -281,7 +282,7 @@ public class SecurityRecipient {
             fpContext.getSOAPMessage().saveChanges();          
 
         }catch (Exception ex) {
-            log.log(Level.SEVERE, "WSS0370.error.deleting.secheader",ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0370_ERROR_DELETING_SECHEADER(),ex);
             throw new XWSSecurityException(ex);
         }
     }
@@ -313,7 +314,7 @@ public class SecurityRecipient {
                                 false);
                     }
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS0256.failed.configure.ASC", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0256_FAILED_CONFIGURE_ASC(), e);
                     throw new XWSSecurityException(e);
                 }
             policy = resolveMP(fpContext,configuration);
@@ -331,11 +332,11 @@ public class SecurityRecipient {
                                 //ignore
                             }
                         }
-                        log.log(Level.SEVERE, "WSS0261.invalid.Message.policyset");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0261_INVALID_MESSAGE_POLICYSET());
                         throw new XWSSecurityException("Message does not conform to configured policy : [ " +
                                 buf.toString() + "] policy set is not present in Receiver requirements.");
                     } else {
-                        log.log(Level.SEVERE, "WSS0262.invalid.Message.policytype");
+                        log.log(Level.SEVERE,LogStringsMessages.WSS_0262_INVALID_MESSAGE_POLICYTYPE());
                         throw new XWSSecurityException("Message does not conform to configured policy : " +
                                 policy.getType() + " is not present in Receiver requirements.");
                     }
@@ -365,7 +366,7 @@ public class SecurityRecipient {
                                 ppCount++;
                             }
                         } catch (Exception e) {
-                            log.log(Level.SEVERE, "WSS0257.failedto.append.SecurityPolicy.MessagePolicy", e);
+                            log.log(Level.SEVERE,LogStringsMessages.WSS_0257_FAILEDTO_APPEND_SECURITY_POLICY_MESSAGE_POLICY(), e);
                             throw new XWSSecurityException(e);
                         }
                     }
@@ -426,7 +427,7 @@ public class SecurityRecipient {
                     dpCallback, fpContext.getSecurityEnvironment().getCallbackHandler());
             
             if (!(PolicyTypeUtil.messagePolicy(dpCallback.getSecurityPolicy()))) {
-                log.log(Level.SEVERE, "WSS0271.failedto.resolve.policy");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0271_FAILEDTO_RESOLVE_POLICY());
                 throw new XWSSecurityException("Policy has to resolve to MessagePolicy");
             } else {
                 mPolicy = (MessagePolicy) dpCallback.getSecurityPolicy();
@@ -714,7 +715,7 @@ public class SecurityRecipient {
                 }
             }catch(XWSSecurityException ex){
                 if(!inferred && mandatory){
-                    log.log(Level.SEVERE, "WSS0272.failedto.derefer.targets");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0272_FAILEDTO_DEREFER_TARGETS());
                     throw ex;
                 }
                 continue;
@@ -753,7 +754,7 @@ public class SecurityRecipient {
                     return;
                 }
             }
-            log.log(Level.SEVERE, "WSS0263.invalid.Message.policy");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0263_INVALID_MESSAGE_POLICY());
             throw new XWSSecurityException("Message does not conform to configured policy");
         }
     }
@@ -788,7 +789,7 @@ public class SecurityRecipient {
                 return;
             }
         }catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0273.failedto.process.policy", e);
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0273_FAILEDTO_PROCESS_POLICY(), e);
             throw new RuntimeException(e);
         }
 
@@ -809,7 +810,7 @@ public class SecurityRecipient {
                     //ignore
                 }
             }
-            log.log(Level.SEVERE, "WSS0253.invalid.Message");
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0253_INVALID_MESSAGE());
             throw new XWSSecurityException("Message does not conform to configured policy [ " + buf.toString()
             + "]:  No Security Header found");
         }
@@ -833,7 +834,7 @@ public class SecurityRecipient {
             try {
                 wssPolicy = (WSSPolicy) policy.get(idx);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0270.failedto.get.SecurityPolicy.MessagePolicy");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0270_FAILEDTO_GET_SECURITY_POLICY_MESSAGE_POLICY());
                 throw new XWSSecurityException(e);
             }
             
@@ -870,7 +871,7 @@ public class SecurityRecipient {
                             }
 
                             if (fpContext.isPrimaryPolicyViolation()) {
-                                log.log(Level.SEVERE, "WSS0265.error.primary.policy");
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_0265_ERROR_PRIMARY_POLICY());
                                 throw new XWSSecurityException(fpContext.getPVE());
                             }
 
@@ -927,7 +928,7 @@ public class SecurityRecipient {
                             }
 
                             if (fpContext.isPrimaryPolicyViolation()) {
-                                log.log(Level.SEVERE, "WSS0265.error.primary.policy");
+                                log.log(Level.SEVERE, LogStringsMessages.WSS_0265_ERROR_PRIMARY_POLICY());
                                 throw new XWSSecurityException(fpContext.getPVE());
                             }
 
@@ -959,7 +960,7 @@ public class SecurityRecipient {
         }
         
         if ( buf != null) {
-            log.log(Level.SEVERE, "WSS0258.invalid.requirements");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0258_INVALID_REQUIREMENTS());
             throw new XWSSecurityException("More Receiver requirements [ " + buf + " ] specified"+
                     " than present in the message");
         }
@@ -978,13 +979,13 @@ public class SecurityRecipient {
         
         NodeList uList = securityHeader.getElementsByTagNameNS(MessageConstants.WSSE_NS, MessageConstants.USERNAME_TOKEN_LNAME);
         if(uList.getLength() >1){
-            log.log(Level.SEVERE, "WSS0259.invalid.SEC.username");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0259_INVALID_SEC_USERNAME());
             throw  new XWSSecurityException("More than one wsse:UsernameToken element present in security header");
         }
         
         NodeList tList = securityHeader.getElementsByTagNameNS(MessageConstants.WSU_NS, MessageConstants.TIMESTAMP_LNAME);
         if(tList.getLength() >1){
-            log.log(Level.SEVERE, "WSS0274.invalid.SEC.Timestamp");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0274_INVALID_SEC_TIMESTAMP());
             throw  new XWSSecurityException("More than one wsu:Timestamp element present in security header");
         }
         
@@ -997,7 +998,7 @@ public class SecurityRecipient {
                 try {
                     wssPolicy = (WSSPolicy) secPolicy.get(idx);
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS0270.failedto.get.SecurityPolicy.MessagePolicy");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0270_FAILEDTO_GET_SECURITY_POLICY_MESSAGE_POLICY());
                     throw new XWSSecurityException(e);
                 }
                 if(PolicyTypeUtil.authenticationTokenPolicy(wssPolicy)){
@@ -1005,7 +1006,7 @@ public class SecurityRecipient {
                     WSSPolicy fb = (WSSPolicy)atp.getFeatureBinding();
                     if(PolicyTypeUtil.usernameTokenPolicy(fb)){
                         if(uList.getLength() == 0){
-                            log.log(Level.SEVERE, "WSS0275.invalid.policy.NoUsername.SecHeader");
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_0275_INVALID_POLICY_NO_USERNAME_SEC_HEADER());
                             throw new XWSSecurityException(
                                     "Message does not conform to configured policy: " +
                                     "wsse:UsernameToken element not found in security header");
@@ -1017,7 +1018,7 @@ public class SecurityRecipient {
                     }
                 }else if(PolicyTypeUtil.timestampPolicy(wssPolicy)){
                     if(tList.getLength() == 0){
-                        log.log(Level.SEVERE, "WSS0276.invalid.policy.NoTimestamp.SecHeader");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0276_INVALID_POLICY_NO_TIMESTAMP_SEC_HEADER());
                         throw new XWSSecurityException(
                                 "Message does not conform to configured policy: " +
                                 "wsu:Timestamp element not found in security header");
@@ -1034,7 +1035,7 @@ public class SecurityRecipient {
         }
         
         if(uList.getLength() > unpCount){
-            log.log(Level.SEVERE, "WSS0259.invalid.SEC.username");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0259_INVALID_SEC_USERNAME());
             throw  new XWSSecurityException("Message does not conform to configured policy: " +
                     "Additional wsse:UsernameToken element found in security header");
         }
@@ -1077,7 +1078,7 @@ public class SecurityRecipient {
                 SOAPElement current = (SOAPElement) nextNode;
                 if (!HarnessUtil.isSecondaryHeaderElement(current)) {
                     //System.out.println("----------" +current.getLocalName());
-                    log.log(Level.SEVERE, "WSS0277.invalid.AddtionalSEC.Message.policy");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0277_INVALID_ADDTIONAL_SEC_MESSAGE_POLICY());
                     throw new XWSSecurityException(
                             "Message does not conform to configured policy (found " + current.getLocalName() +") : " +
                             "Additional security than required found");
@@ -1105,7 +1106,7 @@ public class SecurityRecipient {
                 _UT = current.getLocalName().equals(MessageConstants.USERNAME_TOKEN_LNAME);
                 _TS = current.getLocalName().equals(MessageConstants.TIMESTAMP_LNAME);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0278.failedto.get.localName");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0278_FAILEDTO_GET_LOCAL_NAME());
                 throw new XWSSecurityRuntimeException(e);
             }
         }
@@ -1124,7 +1125,7 @@ public class SecurityRecipient {
                         throwFault = true;
                     }
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS0279.failed.check.secSecurity", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0279_FAILED_CHECK_SEC_SECURITY(), e);
                     throw new XWSSecurityRuntimeException(e);
                 }
         
@@ -1139,12 +1140,12 @@ public class SecurityRecipient {
                         throwFault = true;
                     }
                 } catch (Exception e) {
-                    log.log(Level.SEVERE, "WSS0279.failed.check.secSecurity", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0279_FAILED_CHECK_SEC_SECURITY(), e);
                     throw new XWSSecurityRuntimeException(e);
                 }
         
         if (throwFault)
-            log.log(Level.SEVERE, "WSS0277.invalid.AddtionalSEC.Message.policy");
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0277_INVALID_ADDTIONAL_SEC_MESSAGE_POLICY());
             throw new XWSSecurityException("Message does not conform to configured policy: " +
                     "Additional security [ " + buf.toString() + "] than required found");
     }
@@ -1202,7 +1203,7 @@ public class SecurityRecipient {
                     SOAPFactory.newInstance().createName(MessageConstants.XENC_REFERENCE_LIST_LNAME,
                     MessageConstants.XENC_PREFIX, MessageConstants.XENC_NS));
                 }catch(Exception e){
-                    log.log(Level.SEVERE, "WSS0360.error.creating.rlhb", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0360_ERROR_CREATING_RLHB(e));
                     throw new XWSSecurityException(e);
                 }
                 if(iter.hasNext()){
@@ -1219,7 +1220,7 @@ public class SecurityRecipient {
                 processed = true;
             }  else {
                 if (!HarnessUtil.isSecondaryHeaderElement(current)) {
-                    log.log(Level.SEVERE, "WSS0204.illegal.header.block", elementName);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0204_ILLEGAL_HEADER_BLOCK(elementName));
                     HarnessUtil.throwWssSoapFault("Unrecognized header block: " + elementName);
                 }
             }
@@ -1253,14 +1254,14 @@ public class SecurityRecipient {
             if (policy != null) {
                 if (PolicyTypeUtil.messagePolicy(policy)) {
                     if (!((MessagePolicy)policy).isEmpty()) {
-                        log.log(Level.SEVERE, "WSS0253.invalid.Message");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0253_INVALID_MESSAGE());
                         throw new XWSSecurityException(
                                 "Message does not conform to configured policy: " +
                                 "No Security Header found in incoming message");
                         
                     }
                 } else {
-                    log.log(Level.SEVERE, "WSS0253.invalid.Message");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0253_INVALID_MESSAGE());
                     throw new XWSSecurityException(
                             "Message does not conform to configured policy: " +
                             "No Security Header found in incoming message");
