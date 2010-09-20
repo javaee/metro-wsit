@@ -1,6 +1,6 @@
 
 /*
- * $Id: SignatureProcessor.java,v 1.16 2010-08-31 07:15:41 sm228678 Exp $
+ * $Id: SignatureProcessor.java,v 1.17 2010-09-20 07:17:13 sm228678 Exp $
  */
 
 /*
@@ -972,7 +972,7 @@ public class SignatureProcessor{
                     optionalReqList.add(signatureTarget);
                 }
             }catch(Exception ex){
-                logger.log(Level.SEVERE,"WSS1302.reflist_error",ex);
+                logger.log(Level.SEVERE,LogStringsMessages.WSS_1302_REFLIST_ERROR(),ex);
                 if(requiredTarget){
                     logger.log(Level.SEVERE, LogStringsMessages.WSS_1339_INVALID_RECEIVER_REQUIREMENTS());
                     throw new XWSSecurityException("Receiver requirement for SignatureTarget "+
@@ -1330,9 +1330,8 @@ public class SignatureProcessor{
             }
             return coreValidity;
             
-        }catch (Exception e) {
-            //log here
-            logger.log(Level.SEVERE,"Exception occurred during signature verification"+e.getMessage());
+        }catch (Exception e) {           
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1338_ERROR_VERIFY()+e.getMessage());
             throw new XWSSecurityException(e);
         }
     }

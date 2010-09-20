@@ -39,14 +39,18 @@
  */
 package com.sun.xml.wss.impl.misc;
 
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.wss.NonceManager;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.io.Serializable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
+import org.glassfish.ha.store.api.BackingStoreConfiguration;
 import org.glassfish.ha.store.api.BackingStoreException;
+import org.glassfish.ha.store.api.BackingStoreFactory;
 
 /**
  *
@@ -55,57 +59,82 @@ import org.glassfish.ha.store.api.BackingStoreException;
 public class HANonceManager extends NonceManager {
 
     private Long maxNonceAge;
-    private BackingStore<String, MyPojo> backingStore = null;
-    private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();    
+    private BackingStore<String, HAPojo> backingStore = null;
+    private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public HANonceManager(BackingStore<String, MyPojo> backingStore, final long maxNonceAge) {
-        this.backingStore = backingStore;
+    public HANonceManager(final long maxNonceAge) {
         this.maxNonceAge = maxNonceAge;
-        singleThreadScheduledExecutor.scheduleAtFixedRate(new HANM(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
 
-    }
-
-    public boolean validateNonce(String nonce, MyPojo created) throws NonceException {
-        try {          
-            MyPojo value = null;
-            try {
-                value = backingStore.load(nonce, null);
-            } catch (Exception ex) {
-            }
-            if (value != null) {
-                final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
-                LOGGER.log(Level.WARNING, message);
-                throw new NonceManager.NonceException(message);
-            } else {
-                backingStore.save(nonce, created, true);
-                LOGGER.log(Level.INFO, " nonce saved ");
-            }
+        try {
+            final BackingStoreConfiguration<String, HANonceManager.HAPojo> bsConfig = HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", String.class, HANonceManager.HAPojo.class);
+            //maxNonceAge is in milliseconds so convert it into seconds
+            bsConfig.getVendorSpecificSettings().put("max.idle.timeout.in.seconds", maxNonceAge / 1000L);
+            bsConfig.setClassLoader(ClassLoader.getSystemClassLoader());
+            //not sure whether this statement required or not ?
+            bsConfig.getVendorSpecificSettings().put(BackingStoreConfiguration.START_GMS, true);
+            final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
+            backingStore = bsFactory.createBackingStore(bsConfig);
+            //System.out.println("conf is : " + bsConfig);
         } catch (BackingStoreException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
-        return true;
+
+        singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
     }
+
+    public HANonceManager(BackingStore<String, HAPojo> backingStore, final long maxNonceAge) {
+        this.backingStore = backingStore;
+        this.maxNonceAge = maxNonceAge;      
+
+        singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
+    }
+
 
     @Override
     public boolean validateNonce(String nonce, String created) throws NonceException {
         byte[] data = created.getBytes();
-        MyPojo pojo = new MyPojo();
+        HAPojo pojo = new HAPojo();
         pojo.setData(data);
-        return this.validateNonce(nonce, pojo);
+        try {
+            HAPojo value = null;
+            try {
+                value = HighAvailabilityProvider.INSTANCE.loadFrom(backingStore, nonce, null);
+            } catch (Exception ex) {
+                LOGGER.log(Level.WARNING, " exception during load command ");
+            }
+            if (value != null) {
+                final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
+                LOGGER.log(Level.WARNING, LogStringsMessages.WSS_0815_NONCE_REPEATED_ERROR(nonce));
+                throw new NonceManager.NonceException(message);
+            } else {
+                HighAvailabilityProvider.INSTANCE.saveTo(backingStore, nonce, pojo, true);
+                LOGGER.log(Level.INFO, " nonce " + nonce + " saved ");
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+            return false;
+        }
+        return true;
+    //return this.validateNonce(nonce, pojo);
     }
 
-    public class HANM implements Runnable {
+    public class nonceCleanupTask implements Runnable {
 
         public void run() {
             try {
                 int removed = backingStore.removeExpired(maxNonceAge);
+                System.out.println("removed no. of entries = " + removed);                
             } catch (BackingStoreException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    static public class MyPojo implements Serializable {
+    public void remove(String key) throws BackingStoreException{
+        backingStore.remove(key);
+    }
+
+    static public class HAPojo implements Serializable {
 
         byte[] data;
 

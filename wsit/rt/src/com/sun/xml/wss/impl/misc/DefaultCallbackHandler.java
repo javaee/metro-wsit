@@ -2275,7 +2275,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             return getKeyStoreUsingCallback(runtimeProps);
         } finally {
             if (this.keyStore == null) {
-                log.log(Level.SEVERE, "Could not locate KeyStore, check keystore assertion in WSIT configuration");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_1540_KEYSTORE_NOT_FOUND_CHECK_CONFIG());
                 throw new XWSSecurityRuntimeException("Could not locate KeyStore, check keystore assertion in WSIT configuration");
             }
         }

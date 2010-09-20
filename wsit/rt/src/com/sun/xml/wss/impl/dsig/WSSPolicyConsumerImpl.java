@@ -837,7 +837,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
                         }
                         nodes = (NodeList)xpathExpr.evaluate((Object)secureMessage.getSOAPPart(),XPathConstants.NODESET);
                     }catch(XPathExpressionException xpe){
-                        logger.log(Level.SEVERE,"WSS1371.failed.resolve.XPath"+expr,xpe);
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1371_FAILED_RESOLVE_X_PATH()+expr,xpe);
                         throw new XWSSecurityException(xpe);
                     }
                 }
@@ -1025,7 +1025,7 @@ attribute.getNamespaceURI().equals(MessageConstants.NAMESPACES_NS)) {
 
         if (references.isEmpty()) {
             if(logger.isLoggable(Level.WARNING)){
-            logger.log(Level.WARNING, "WSS1375.no.signedparts");
+            logger.log(Level.WARNING, LogStringsMessages.WSS_1375_NO_SIGNEDPARTS());
             }
         }
 

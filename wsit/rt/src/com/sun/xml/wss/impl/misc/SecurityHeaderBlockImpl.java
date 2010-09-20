@@ -1,11 +1,11 @@
 /*
- * $Id: SecurityHeaderBlockImpl.java,v 1.3 2010-03-20 12:32:42 kumarjayanti Exp $
+ * $Id: SecurityHeaderBlockImpl.java,v 1.4 2010-09-20 07:17:12 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,6 +65,7 @@ import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.XWSSecurityException;
 
 import com.sun.xml.wss.core.SecurityHeaderBlock;
+import com.sun.xml.wss.logging.LogStringsMessages;
 
 /**
  * @author XWS-Security Development Team
@@ -95,7 +96,7 @@ public abstract class SecurityHeaderBlockImpl extends SOAPElementExtension imple
                     "http://schemas.xmlsoap.org/ws/2003/06/utility");
         } catch (SOAPException e) {
             log.log(Level.SEVERE,
-                    "WSS0654.soap.exception",
+                    LogStringsMessages.WSS_0654_SOAP_EXCEPTION(e.getMessage()),
                     e.getMessage());
         }
 
@@ -145,7 +146,7 @@ public abstract class SecurityHeaderBlockImpl extends SOAPElementExtension imple
                         new Object[] {element});
         } catch (Exception e) {
                 log.log(Level.SEVERE,
-                        "WSS0655.error.creating.headerblock");  
+                        LogStringsMessages.WSS_0655_ERROR_CREATING_HEADERBLOCK(e.getMessage()));
                 throw new XWSSecurityException(e);
         }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.6 2010-09-18 20:35:47 sm228678 Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.7 2010-09-20 07:17:13 sm228678 Exp $
  */
 
 /*
@@ -95,6 +95,7 @@ import com.sun.xml.wss.impl.callback.TimestampValidationCallback;
 import com.sun.xml.wss.saml.Assertion;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 import com.sun.xml.wss.impl.configuration.DynamicApplicationContext;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import com.sun.xml.wss.util.XWSSUtil;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -221,15 +222,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.DefaultPrivKeyCertRequest"),
                     new Object[]{"SignatureKeyCallback.DefaultPrivKeyCertRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         defaultCert = privKeyRequest.getX509Certificate();
 
         if (defaultCert == null) {
-            log.log(Level.SEVERE, "WSS0218.cannot.locate.default.cert");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0218_CANNOT_LOCATE_DEFAULT_CERT());
             throw new XWSSecurityException(
                     "Unable to locate a default certificate");
         }
@@ -256,9 +257,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.DefaultPrivKeyCertRequest"),
                     new Object[]{"SignatureKeyCallback.DefaultPrivKeyCertRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         return privKeyRequest;
@@ -279,9 +280,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callback);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.AliasPrivKeyCertRequest"),
                     new Object[]{"SignatureKeyCallback.AliasPrivKeyCertRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         return request;
@@ -306,15 +307,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.DefaultPrivKeyCertRequest"),
                     new Object[]{"SignatureKeyCallback.DefaultPrivKeyCertRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         defaultPrivKey = privKeyRequest.getPrivateKey();
 
         if (defaultPrivKey == null) {
-            log.log(Level.SEVERE, "WSS0219.cannot.locate.default.privkey");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0219_CANNOT_LOCATE_DEFAULT_PRIVKEY());
             throw new XWSSecurityException(
                     "Unable to locate a default certificate");
         }
@@ -337,9 +338,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("EncryptionKeyCallback.AliasSymmetricKeyRequest"),
                         new Object[]{"EncryptionKeyCallback.AliasSymmetricKeyRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             symmetricKey = symmKeyRequest.getSymmetricKey();
@@ -354,16 +355,16 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.AliasSymmetricKeyRequest"),
                         new Object[]{"DecryptionKeyCallback.AliasSymmetricKeyRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE,LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             symmetricKey = symmKeyRequest.getSymmetricKey();
         }
 
         if (symmetricKey == null) {
-            log.log(Level.SEVERE, "WSS0220.cannot.locate.symmetrickey.for.decrypt");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0220_CANNOT_LOCATE_SYMMETRICKEY_FOR_DECRYPT());
             throw new XWSSecurityException(
                     "Could not locate the symmetric key for alias '" + alias + "'");
         }
@@ -393,9 +394,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.AliasPrivKeyCertRequest"),
                         new Object[]{"SignatureKeyCallback.AliasPrivKeyCertRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             cert = certRequest.getX509Certificate();
@@ -415,9 +416,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("EncryptionKeyCallback.AliasX509CertificateRequest"),
                         new Object[]{"EncryptionKeyCallback.AliasX509CertificateRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             cert = certRequest.getX509Certificate();
@@ -425,7 +426,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         if (cert == null) {
             String val = forSigning ? "Signature" : "Key Encryption";
-            log.log(Level.SEVERE, "WSS0221.cannot.locate.cert", new Object[]{val});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0221_CANNOT_LOCATE_CERT(val), new Object[]{val});
             throw new XWSSecurityException(
                     "Unable to locate certificate for the alias '" + alias + "'");
         }
@@ -451,9 +452,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } catch (UnsupportedCallbackException e1) {
             //ignore;
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureVerificationKeyCallback.PublicKeyBasedRequest"),
                         new Object[]{"SignatureVerificationKeyCallback.PublicKeyBasedRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             return pubKeyReq.getX509Certificate();
@@ -470,9 +471,9 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } catch (UnsupportedCallbackException e1) {
             //ignore;
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("EncryptionKeyCallback.PublicKeyBasedRequest"),
                         new Object[]{"EncryptionKeyCallback.PublicKeyBasedRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             return pubKeyReq.getX509Certificate();
@@ -501,15 +502,15 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.AliasPrivKeyCertRequest"),
                     new Object[]{"SignatureKeyCallback.AliasPrivKeyCertRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         privKey = privKeyRequest.getPrivateKey();
 
         if (privKey == null) {
-            log.log(Level.SEVERE, "WSS0222.cannot.locate.privkey", new Object[]{alias});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0222_CANNOT_LOCATE_PRIVKEY(alias), new Object[]{alias});
             throw new XWSSecurityException(
                     "Unable to locate private key for the alias " + alias);
         }
@@ -543,16 +544,16 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.ThumbprintBasedRequest"),
                     new Object[]{"DecryptionKeyCallback.ThumbprintBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         privateKey = privKeyRequest.getPrivateKey();
 
         if (privateKey == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0222.cannot.locate.privkey", new Object[]{identifier});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0222_CANNOT_LOCATE_PRIVKEY(identifier), new Object[]{identifier});
             throw new XWSSecurityException(
                     "No Matching private key for " + Base64.encode(identifier) + " thumb print identifier found");
         }
@@ -582,16 +583,16 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.X509SubjectKeyIdentifierBasedRequest"),
                     new Object[]{"DecryptionKeyCallback.X509SubjectKeyIdentifierBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         privateKey = privKeyRequest.getPrivateKey();
 
         if (privateKey == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0222.cannot.locate.privkey", new Object[]{keyIdentifier});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0222_CANNOT_LOCATE_PRIVKEY(keyIdentifier), new Object[]{keyIdentifier});
             throw new XWSSecurityException(
                     "No Matching private key for " + Base64.encode(keyIdentifier) + " subject key identifier found");
         }
@@ -628,14 +629,14 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"DecryptionKeyCallback.X509IssuerSerialBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         privateKey = privKeyRequest.getPrivateKey();
 
         if (privateKey == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0222.cannot.locate.privkey",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0222_CANNOT_LOCATE_PRIVKEY(serialNumber + ":" + issuerName),
                     new Object[]{serialNumber + ":" + issuerName});
             throw new XWSSecurityException(
                     "No Matching private key for serial number " + serialNumber + " and issuer name " + issuerName + " found");
@@ -684,7 +685,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"SignatureVerificationKeyCallback.ThumbprintBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
 
         }
@@ -724,7 +725,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"SignatureVerificationKeyCallback.X509SubjectKeyIdentifierBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
 
         }
@@ -772,7 +773,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"SignatureVerificationKeyCallback.X509IssuerSerialBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         cert = certRequest.getX509Certificate();
@@ -1039,13 +1040,13 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"DecryptionKeyCallback.X509CertificateBasedRequest"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         privateKey = privateKeyRequest.getPrivateKey();
 
         if (privateKey == null) {
-            log.log(Level.SEVERE, "WSS0222.cannot.locate.privkey", new Object[]{"given certificate"});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0222_CANNOT_LOCATE_PRIVKEY("given certificate"), new Object[]{"given certificate"});
             throw new XWSSecurityException(
                     "Could not retrieve private Key matching the given certificate");
         }
@@ -1074,7 +1075,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } catch (Exception e) {
                 log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                         new Object[]{"SignatureKeyCallback.PublicKeyBasedPrivKeyCertRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             return req.getPrivateKey();
@@ -1091,7 +1092,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } catch (Exception e) {
                 log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                         new Object[]{"DecryptionKeyCallback.PublicKeyBasedPrivKeyRequest"});
-                log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
             }
             return req.getPrivateKey();
@@ -1320,7 +1321,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (Exception e) {
             log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
                     new Object[]{"UsernameCallback"});
-            log.log(Level.SEVERE, "WSS0217.callbackhandler.handle.exception.log", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
         }
         return usernameCallback.getUsername();

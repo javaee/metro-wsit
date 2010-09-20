@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,6 +47,7 @@ package com.sun.xml.wss.impl.misc;
 
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -91,19 +92,19 @@ public  class ReflectionUtil {
             
             return resultClass.cast(result);
         } catch (IllegalArgumentException e) {
-            log.log(Level.SEVERE, "WSS0810.method.invocation.failed" , e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0810_METHOD_INVOCATION_FAILED() , e);
             throw e;
         } catch (InvocationTargetException e) {
-            log.log(Level.SEVERE, "WSS0810.method.invocation.failed" , e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0810_METHOD_INVOCATION_FAILED() , e);
             throw new XWSSecurityRuntimeException(e);
         } catch (IllegalAccessException e) {
-            log.log(Level.SEVERE, "WSS0810.method.invocation.failed" , e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0810_METHOD_INVOCATION_FAILED() , e);
             throw new XWSSecurityRuntimeException(e);
         } catch (SecurityException e) {
-            log.log(Level.SEVERE, "WSS0810.method.invocation.failed" , e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0810_METHOD_INVOCATION_FAILED() , e);
             throw e;
         } catch (NoSuchMethodException e) {
-            log.log(Level.SEVERE, "WSS0810.method.invocation.failed" , e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0810_METHOD_INVOCATION_FAILED() , e);
             throw new XWSSecurityRuntimeException(e);
         }
     }

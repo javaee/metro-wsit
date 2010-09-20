@@ -1,10 +1,10 @@
 /*
- * $Id: NonceCache.java,v 1.4 2010-07-21 09:28:51 m_potociar Exp $
+ * $Id: NonceCache.java,v 1.5 2010-09-20 07:17:12 sm228678 Exp $
  */
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.impl.MessageConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,10 +93,9 @@ public class NonceCache extends TimerTask {
 
     @SuppressWarnings("unchecked")
     public boolean validateAndCacheNonce(String nonce, String created) throws NonceException {
-        if (nonceCache.containsKey(nonce) || oldNonceCache.containsKey(nonce)) {
-            final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
-            log.log(Level.WARNING, message);
-            throw new NonceManager.NonceException(message);
+        if (nonceCache.containsKey(nonce) || oldNonceCache.containsKey(nonce)) {            
+            log.log(Level.WARNING, LogStringsMessages.WSS_0815_NONCE_REPEATED_ERROR(nonce));
+            throw new NonceManager.NonceException(LogStringsMessages.WSS_0815_NONCE_REPEATED_ERROR(nonce));
         }
 
         if (log.isLoggable(Level.FINE)) {

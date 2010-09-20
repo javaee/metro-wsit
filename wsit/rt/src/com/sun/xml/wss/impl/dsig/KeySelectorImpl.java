@@ -857,7 +857,7 @@ public class KeySelectorImpl extends KeySelector{
                     }
                     else {
                         String message = " Cannot Resolve URI " + uri;
-                        logger.log(Level.SEVERE,"WSS1307.unsupported.directref.mechanism", new Object[] {message});
+                        logger.log(Level.SEVERE,LogStringsMessages.WSS_1307_UNSUPPORTED_DIRECTREF_MECHANISM(message), new Object[] {message});
                         KeySelectorException xwsse =  new KeySelectorException(message);
                         //throw xwsse;
                         throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,xwsse.getMessage(),xwsse);

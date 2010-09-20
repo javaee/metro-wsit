@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -109,6 +109,7 @@ import com.sun.xml.ws.security.trust.GenericToken;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.impl.policy.MLSPolicy;
+import com.sun.xml.wss.logging.impl.crypto.LogStringsMessages;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,7 +153,7 @@ public class SecurityUtil {
             return keyGen.generateKey();
         } catch (Exception e) {
             log.log(Level.SEVERE,
-                    "WSS1208.failedto.generate.random.symmetrickey",
+                    LogStringsMessages.WSS_1208_FAILEDTO_GENERATE_RANDOM_SYMMETRICKEY(e.getMessage()),
                     new Object[] {e.getMessage()});
             throw new XWSSecurityException(
                     "Unable to Generate Symmetric Key", e);
@@ -777,7 +778,7 @@ public class SecurityUtil {
         try {
             ret = Long.valueOf(lng);
         }catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0719.error.getting.longValue");
+            log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0719_ERROR_GETTING_LONG_VALUE());
             throw new XWSSecurityException(e);
         }
         return ret; 
