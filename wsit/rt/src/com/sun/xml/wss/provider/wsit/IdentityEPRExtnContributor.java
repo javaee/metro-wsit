@@ -47,7 +47,7 @@ import com.sun.xml.stream.buffer.XMLStreamBufferResult;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.addressing.WSEndpointReference.EPRExtension;
 import com.sun.xml.ws.api.server.EndpointReferenceExtensionContributor;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
+import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.ws.security.impl.policy.PolicyUtil;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secext10.BinarySecurityTokenType;

@@ -37,8 +37,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.sun.xml.ws.security.impl.policy;
+package com.sun.xml.ws.security.opt.impl.util;
 
+import com.sun.xml.ws.security.impl.policy.*;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;

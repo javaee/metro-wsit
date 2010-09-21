@@ -68,7 +68,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.kerberos.KerberosContext;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
+import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.policy.Token;

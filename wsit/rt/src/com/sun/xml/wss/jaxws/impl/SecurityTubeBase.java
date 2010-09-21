@@ -79,7 +79,7 @@ import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
+import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.policy.KeyStore;
 import com.sun.xml.ws.security.policy.TrustStore;

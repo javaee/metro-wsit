@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.7 2010-09-20 07:17:13 sm228678 Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.8 2010-09-21 06:45:05 sm228678 Exp $
  */
 
 /*
@@ -627,7 +627,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.X509IssuerSerialBasedRequest"),
                     new Object[]{"DecryptionKeyCallback.X509IssuerSerialBasedRequest"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -669,7 +669,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 return cert;
             }
         } catch (Base64DecodingException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0816_BASE_64_DECODING_ERROR(), ex);
             throw new XWSSecurityException(ex);
         } 
 
@@ -683,7 +683,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureVerificationKeyCallback.ThumbprintBasedRequest"),
                     new Object[]{"SignatureVerificationKeyCallback.ThumbprintBasedRequest"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -693,7 +693,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         if (cert == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0221.cannot.locate.cert", new Object[]{identifier});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0221_CANNOT_LOCATE_CERT(identifier), new Object[]{identifier});
             throw new XWSSecurityException("No Matching public key for " + Base64.encode(identifier) + " thumb print identifier found");
         }
         return cert;
@@ -709,7 +709,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 return cert;
             }
         } catch (Base64DecodingException ex) {
-            log.log(Level.SEVERE, null, ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0816_BASE_64_DECODING_ERROR(), ex);
             throw new XWSSecurityException(ex);
         } 
 
@@ -723,7 +723,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureVerificationKeyCallback.X509SubjectKeyIdentifierBasedRequest"),
                     new Object[]{"SignatureVerificationKeyCallback.X509SubjectKeyIdentifierBasedRequest"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -733,7 +733,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         if (cert == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0221.cannot.locate.cert", new Object[]{keyIdentifier});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0221_CANNOT_LOCATE_CERT(keyIdentifier), new Object[]{keyIdentifier});
             throw new XWSSecurityException("No Matching public key for " + Base64.encode(keyIdentifier) + " subject key identifier found");
         }
         return cert;
@@ -771,7 +771,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureVerificationKeyCallback.X509IssuerSerialBasedRequest"),
                     new Object[]{"SignatureVerificationKeyCallback.X509IssuerSerialBasedRequest"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -780,7 +780,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
 
         if (cert == null) {
             // not found so throw an exception
-            log.log(Level.SEVERE, "WSS0221.cannot.locate.cert", new Object[]{serialNumber + ":" + issuerName});
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0221_CANNOT_LOCATE_CERT(serialNumber + ":" + issuerName), new Object[]{serialNumber + ":" + issuerName});
             throw new XWSSecurityException(
                     "No Matching public key for serial number " + serialNumber + " and issuer name " + issuerName + " found");
         }
@@ -796,7 +796,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0223.failed.certificate.validation");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0223_FAILED_CERTIFICATE_VALIDATION());
             throw newSOAPFaultException(
                     MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                     "Certificate validation failed",
@@ -851,16 +851,16 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             lc.login();
             return lc.getSubject();
         } catch (InstantiationException ex) {
-            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0817_KEYSTORE_LOGIN_MODULE_LOGIN_ERROR() , ex);
             throw new XWSSecurityRuntimeException(ex);
         } catch (IllegalAccessException ex) {
-            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0817_KEYSTORE_LOGIN_MODULE_LOGIN_ERROR(), ex);
             throw new XWSSecurityRuntimeException(ex);
         } catch (XWSSecurityException ex) {
-            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0817_KEYSTORE_LOGIN_MODULE_LOGIN_ERROR(), ex);
             throw new XWSSecurityRuntimeException(ex);
         } catch (LoginException ex) {
-            log.log(Level.SEVERE, "exception during keystore.login.module login", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0817_KEYSTORE_LOGIN_MODULE_LOGIN_ERROR(), ex);
             throw new XWSSecurityRuntimeException(ex);
         }
     }
@@ -1038,7 +1038,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.X509CertificateBasedRequest"),
                     new Object[]{"DecryptionKeyCallback.X509CertificateBasedRequest"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -1073,7 +1073,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("SignatureKeyCallback.PublicKeyBasedPrivKeyCertRequest"),
                         new Object[]{"SignatureKeyCallback.PublicKeyBasedPrivKeyCertRequest"});
                 log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
@@ -1090,7 +1090,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 callbackHandler.handle(callbacks);
             } catch (Exception e) {
-                log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("DecryptionKeyCallback.PublicKeyBasedPrivKeyRequest"),
                         new Object[]{"DecryptionKeyCallback.PublicKeyBasedPrivKeyRequest"});
                 log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
                 throw new XWSSecurityException(e);
@@ -1100,7 +1100,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
     }
 
     public Subject getSubject() {
-        log.log(Level.SEVERE, "WSS0224.unsupported.AssociatedSubject");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0224_UNSUPPORTED_ASSOCIATED_SUBJECT());
         throw new UnsupportedOperationException(
                 "This environment does not have an associated Subject");
     }
@@ -1133,11 +1133,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } else if (adapter != null) {
                 result = adapter.authenticate(getSubject(context), username, passwordDigest, nonce, created, context);
             } else {
-                log.log(Level.SEVERE, "WSS0295.password.val.not.config.username.val");
+                log.log(Level.SEVERE,LogStringsMessages.WSS_0295_PASSWORD_VAL_NOT_CONFIG_USERNAME_VAL());
                 throw new XWSSecurityException("Error: No PasswordValidator Configured for UsernameToken Validation");
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0225.error.PasswordValidationCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0225_FAILED_PASSWORD_VALIDATION_CALLBACK(), e);
             throw new XWSSecurityException(e);
         }
         if (log.isLoggable(Level.FINE)) {
@@ -1167,11 +1167,11 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             } else if (adapter != null) {
                 result = adapter.authenticate(getSubject(context), username, password, context);
             } else {
-                log.log(Level.SEVERE, "WSS0295.password.val.not.config.username.val");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0295_PASSWORD_VAL_NOT_CONFIG_USERNAME_VAL());
                 throw new XWSSecurityException("Error: No PasswordValidator Configured for UsernameToken Validation");
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0225.error.PasswordValidationCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0225_FAILED_PASSWORD_VALIDATION_CALLBACK(), e);
             throw new XWSSecurityException(e);
         }
         return result;
@@ -1198,7 +1198,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 }
             } 
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0225.error.PasswordValidationCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0225_FAILED_PASSWORD_VALIDATION_CALLBACK(), e);
             throw new XWSSecurityException(e);
         }
         return request.getPassword();
@@ -1222,7 +1222,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 try {
                     created = calendarFormatter2.parse(creationTime);
                 } catch (java.text.ParseException ex) {
-                    log.log(Level.SEVERE, "WSS0226.failed.Validating.DefaultCreationTime", ex);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0226_FAILED_VALIDATING_DEFAULT_CREATION_TIME(), ex);
                     throw new XWSSecurityException(ex);
                     
                 }
@@ -1233,7 +1233,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         Date current = getFreshnessAndSkewAdjustedDate(maxClockSkew, timestampFreshnessLimit);
 
         if (created.before(current)) {
-            log.log(Level.SEVERE, "WSS0227.invalid.older.CreationTime");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0227_INVALID_OLDER_CREATION_TIME());
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,  "The creation time is older than " +
                     " currenttime - timestamp-freshness-limit - max-clock-skew", null);
         }
@@ -1241,7 +1241,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         Date currentTime =
                 getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, true);
         if (currentTime.before(created)) {
-            log.log(Level.SEVERE, "WSS0228.invalid.ahead.CreationTime");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0228_INVALID_AHEAD_CREATION_TIME());
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                     "The creation time is ahead of the current time.", null);
         }
@@ -1280,7 +1280,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (UnsupportedCallbackException e) {
             unSupported = true;
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0226.failed.Validating.DefaultCreationTime");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0226_FAILED_VALIDATING_DEFAULT_CREATION_TIME());
             throw new XWSSecurityException(e);
         }
         
@@ -1292,21 +1292,21 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             timestampValidationCallback.getResult();
         } catch (TimestampValidationCallback.TimestampValidationException e) {
-            log.log(Level.SEVERE, "WSS0229.failed.Validating.TimeStamp", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0229_FAILED_VALIDATING_TIME_STAMP(), e);
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
         }
     }
 
     //TODO implement this using callbacks
     public boolean validateSamlIssuer(String issuer) {
-        log.log(Level.SEVERE, "WSS0230.unsupported.Validating.SAMLIssuer");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0230_UNSUPPORTED_VALIDATING_SAML_ISSUER());
         throw new UnsupportedOperationException("SAML Issuer Validation not yet supported");
     }
 
     //TODO implement this using callbacks
     public boolean validateSamlUser(
             String user, String domain, String format) {
-        log.log(Level.SEVERE, "WSS0231.unsupported.Validating.SAMLUser");
+        log.log(Level.SEVERE, LogStringsMessages.WSS_0231_UNSUPPORTED_VALIDATING_SAML_USER());
         throw new UnsupportedOperationException("SAML User Validation not yet supported");
     }
 
@@ -1319,7 +1319,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0216.callbackhandler.handle.exception",
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0216_CALLBACKHANDLER_HANDLE_EXCEPTION("UsernameCallback"),
                     new Object[]{"UsernameCallback"});
             log.log(Level.SEVERE, LogStringsMessages.WSS_0217_CALLBACKHANDLER_HANDLE_EXCEPTION_LOG(), e);
             throw new XWSSecurityException(e);
@@ -1336,7 +1336,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0225.failed.PasswordValidationCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0225_FAILED_PASSWORD_VALIDATION_CALLBACK(), e);
             throw new XWSSecurityException(e.getMessage(), e);
         }
         return passwordCallback.getPassword();
@@ -1359,7 +1359,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                     try {
                         expires = calendarFormatter2.parse(expirationTime);
                     } catch (java.text.ParseException e) {
-                        log.log(Level.SEVERE, "WSS0394.error.parsing.expirationtime");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0394_ERROR_PARSING_EXPIRATIONTIME());
                         throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
                     }
                 }
@@ -1369,7 +1369,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             Date currentTime =
                     getGMTDateWithSkewAdjusted(new GregorianCalendar(), maxClockSkew, false);
             if (expires.before(currentTime)) {
-                log.log(Level.SEVERE, "WSS0393.current.ahead.of.expires");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0393_CURRENT_AHEAD_OF_EXPIRES());
                 throw SOAPUtil.newSOAPFaultException(MessageConstants.WSU_MESSAGE_EXPIRED,"The current time is ahead of the expiration time in Timestamp",null);
             }
         }
@@ -1388,7 +1388,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throws XWSSecurityException {
         if (expiresBeforeCreated(created, expires)) {
             XWSSecurityException xwsse = new XWSSecurityException("Message expired!");
-            log.log(Level.SEVERE, "WSS0232.expired.Message");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0232_EXPIRED_MESSAGE());
             throw newSOAPFaultException(
                     MessageConstants.WSU_MESSAGE_EXPIRED,
                     "Message expired!",
@@ -1414,7 +1414,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         } catch (UnsupportedCallbackException e) {
             unSupported = true;    
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0229.failed.Validating.TimeStamp", e);
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0229_FAILED_VALIDATING_TIME_STAMP(), e);
             throw new XWSSecurityException(e);
         }
 
@@ -1428,7 +1428,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         try {
             timestampValidationCallback.getResult();
         } catch (TimestampValidationCallback.TimestampValidationException e) {
-            log.log(Level.SEVERE, "WSS0229.failed.Validating.TimeStamp", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0229_FAILED_VALIDATING_TIME_STAMP(), e);
             throw SOAPUtil.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN, e.getMessage(), e);
         }
     }
@@ -1502,7 +1502,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                         expires = calendarFormatter2.parse(expirationTime);
                     }
                 } catch (java.text.ParseException xpe) {
-                    log.log(Level.SEVERE, "WSS0233.invalid.expire.before.creation", xpe);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0233_INVALID_EXPIRE_BEFORE_CREATION(), xpe);
                     throw new XWSSecurityException(xpe.getMessage());
                 }
             }
@@ -1541,7 +1541,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             Callback[] callbacks = new Callback[]{dynamicCallback};
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0234.failed.Validate.SAMLAssertion", e);
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0234_FAILED_VALIDATE_SAML_ASSERTION(), e);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
                     "Validation failed for SAML Assertion ", e);
@@ -1567,12 +1567,12 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             Callback[] callbacks = new Callback[]{dynamicCallback};
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0235.failed.locate.SAMLAssertion", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0235_FAILED_LOCATE_SAML_ASSERTION(), e);
             throw new XWSSecurityException(e);
         }
         Element assertion = samlPolicy.getAssertion();
         if (assertion == null) {
-            log.log(Level.SEVERE, "WSS0236.null.SAMLAssertion");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0236_NULL_SAML_ASSERTION());
             throw new XWSSecurityException("SAML Assertion not set into Policy by CallbackHandler");
         }
 
@@ -1592,7 +1592,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             Callback[] callbacks = new Callback[]{dynamicCallback};
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0237.failed.DynamicPolicyCallback", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0237_FAILED_DYNAMIC_POLICY_CALLBACK(), e);
             throw new XWSSecurityException(e);
         }
         return (AuthenticationTokenPolicy.SAMLAssertionBinding) dynamicCallback.getSecurityPolicy();
@@ -1607,7 +1607,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         BigInteger minor = ((com.sun.xml.wss.saml.Assertion) assertion).getMinorVersion();
 
         if (major.intValue() != 1) {
-            log.log(Level.SEVERE, "WSS0404.saml.invalid.version");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0404_SAML_INVALID_VERSION());
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                     "Major version is not 1 for SAML Assertion:" + ((com.sun.xml.wss.saml.Assertion) assertion).getAssertionID(),
@@ -1616,7 +1616,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
         }
 
         if ((minor.intValue() != 0) && (minor.intValue() != 1)) {
-            log.log(Level.SEVERE, "WSS0404.saml.invalid.version");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0404_SAML_INVALID_VERSION());
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                     "Minor version is not 0/1 for SAML Assertion:" + ((com.sun.xml.wss.saml.Assertion) assertion).getAssertionID(),
@@ -1659,7 +1659,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             Callback[] callbacks = new Callback[]{dynamicCallback};
             callbackHandler.handle(callbacks);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0234.failed.Validate.SAMLAssertion", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0234_FAILED_VALIDATE_SAML_ASSERTION(), e);
             throw SOAPUtil.newSOAPFaultException(
                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
                     "Validation failed for SAML Assertion ", e);
@@ -1765,7 +1765,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                 log.log(Level.FINE, "LoadClass: could not load class " + classname, e);
             }
         }
-        log.log(Level.SEVERE, "WSS1521.error.getting.userClass");
+        log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.misc.LogStringsMessages.WSS_1521_ERROR_GETTING_USER_CLASS());
         throw new XWSSecurityException("Could not find User Class " + classname);
     }
        

@@ -86,7 +86,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.xml.bind.JAXBElement;
 import com.sun.xml.wss.impl.misc.DefaultSecurityEnvironmentImpl;
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
+import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.ws.security.policy.IssuedToken;
 import com.sun.xml.ws.security.policy.SecureConversationToken;
 

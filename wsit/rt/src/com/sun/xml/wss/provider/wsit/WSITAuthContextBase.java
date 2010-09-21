@@ -124,7 +124,7 @@ import com.sun.xml.ws.api.policy.ModelUnmarshaller;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.rx.mc.api.McProtocolVersion;
 import com.sun.xml.ws.rx.rm.api.RmProtocolVersion;
-import com.sun.xml.ws.security.impl.policy.CertificateRetriever;
+import com.sun.xml.ws.security.opt.impl.util.CertificateRetriever;
 import com.sun.xml.wss.jaxws.impl.ClientTubeConfiguration;
 import com.sun.xml.wss.jaxws.impl.ServerTubeConfiguration;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
