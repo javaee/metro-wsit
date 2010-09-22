@@ -1,5 +1,5 @@
 /*
- * $Id: HarnessUtil.java,v 1.6 2010-09-19 15:18:29 sm228678 Exp $
+ * $Id: HarnessUtil.java,v 1.7 2010-09-22 07:15:26 sm228678 Exp $
  */
 
 /*
@@ -118,7 +118,7 @@ public abstract class HarnessUtil {
                         AuthenticationTokenFilter.processSamlToken(fpContext);
                     }
                 }catch(Exception ex){
-                    //ignore it
+                   log.log(Level.WARNING, ex.getMessage());
                 }
             }else if (PolicyTypeUtil.x509CertificateBinding(authPolicy)) {
                 AuthenticationTokenFilter.processX509Token(fpContext);

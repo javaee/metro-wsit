@@ -37,6 +37,8 @@
 
 package com.sun.xml.wss.impl.filter;
 
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.security.opt.api.SecurityElement;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -45,6 +47,8 @@ import com.sun.xml.ws.security.opt.impl.message.GSHeaderElement;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.crypto.Data;
 import java.util.HashMap;
 import com.sun.xml.wss.saml.SAMLException;
@@ -59,15 +63,20 @@ import com.sun.xml.wss.impl.keyinfo.KeyIdentifierStrategy;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy;
 
 import com.sun.xml.wss.impl.MessageConstants;
-import com.sun.xml.wss.saml.util.SAMLUtil;
 import javax.xml.bind.JAXBElement;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import org.w3c.dom.Element;
 
 /*
  *
  */
 public class ExportSamlAssertionFilter {
+    private static XMLStreamReader reader;
+    private static MutableXMLStreamBuffer buffer;
+    private static String id;
+    private static String version;
     
     /* (non-Javadoc)
      */
@@ -124,10 +133,25 @@ public class ExportSamlAssertionFilter {
         JAXBElement element = null;
         
         if (assertionElement == null) {
-            XMLStreamReader reader = resolvedPolicy.getAssertionReader();
+            reader = resolvedPolicy.getAssertionReader();
             if (reader != null) {
-                _assertion = SAMLUtil.createSAMLAssertion(reader, resolvedPolicy.getSAMLVersion());
-                element = SAMLUtil.element;
+                try {
+                    reader.next(); //start document , so move to next event
+                    id = reader.getAttributeValue(null, "AssertionID");
+                    if (id == null) {
+                        id = reader.getAttributeValue(null, "ID");
+                    }
+                    version = reader.getAttributeValue(null, "Version");
+                    buffer = new MutableXMLStreamBuffer();
+                    StreamWriterBufferCreator bCreator = new StreamWriterBufferCreator(buffer);
+                    XMLStreamWriter writer_tmp = (XMLStreamWriter) bCreator;
+                    while (!(XMLStreamReader.END_DOCUMENT == reader.getEventType())) {
+                       com.sun.xml.ws.security.opt.impl.util.StreamUtil.writeCurrentEvent(reader, writer_tmp);
+                       reader.next();                       
+                    }
+                } catch (XMLStreamException ex) {
+                    Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         } else {
             try {
@@ -154,9 +178,9 @@ public class ExportSamlAssertionFilter {
             }
         }
         
-        if ((_assertion == null) && (_authorityBinding == null)) {
+        if ((_assertion == null) && (_authorityBinding == null) && reader == null) {
             throw new XWSSecurityException(
-                    "None of SAML Assertion, SAML AuthorityBinding information was set into " +
+                    "None of SAML Assertion,SAML Assertion Reader or  SAML AuthorityBinding information was set into " +
                     " the Policy by the CallbackHandler");
         }
         
@@ -169,21 +193,13 @@ public class ExportSamlAssertionFilter {
                     } else {
                         ((com.sun.xml.wss.saml.assertion.saml11.jaxb10.Assertion)_assertion).toElement(securityHeader);
                     }
-                } else{
-                    if(assertionElement != null){
-                        she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
-                    }else {
-                        she = new GSHeaderElement(element, ((JAXBFilterProcessingContext)context).getSOAPVersion());
-                        //with the above constructor setId() is not happening , so set explicitely
-                        she.setId(_assertion.getAssertionID());
-                    }
-                    
-                    if(optSecHeader.getChildElement(she.getId()) == null){
+                } else {
+                    she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext) context).getSOAPVersion());
+                    if (optSecHeader.getChildElement(she.getId()) == null) {
                         optSecHeader.add(she);
-                    } else{
+                    } else {
                         return;
                     }
-                    
                 }
                 HashMap tokenCache = context.getTokenCache();
                 //assuming unique IDs
@@ -191,17 +207,11 @@ public class ExportSamlAssertionFilter {
             } else if (_assertion.getVersion() != null){
                 if(!isOptimized){
                     ((com.sun.xml.wss.saml.assertion.saml20.jaxb20.Assertion)_assertion).toElement(securityHeader);
-                } else{
-                    if(assertionElement != null){
-                        she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext)context).getSOAPVersion());
-                    }else {
-                        she = new GSHeaderElement(element, ((JAXBFilterProcessingContext)context).getSOAPVersion());
-                        //with the above constructor setId() is not happening , so set explicitely
-                        she.setId(_assertion.getAssertionID());
-                    }
-                    if(optSecHeader.getChildElement(she.getId()) == null){
+                } else {
+                    she = new GSHeaderElement(assertionElement, ((JAXBFilterProcessingContext) context).getSOAPVersion());
+                    if (optSecHeader.getChildElement(she.getId()) == null) {
                         optSecHeader.add(she);
-                    } else{
+                    } else {
                         return;
                     }
                 }
@@ -217,28 +227,46 @@ public class ExportSamlAssertionFilter {
                             " in Policy");
                 }
             }
+        } else {
+            she = new GSHeaderElement(buffer);
+            she.setId(id);  // set the ID again to bring it to top 
+            if (optSecHeader.getChildElement(she.getId()) == null) {
+                optSecHeader.add(she);
+            } else {
+                return;
+            }
         }
         
         if (null != resolvedPolicy.getSTRID()) {
             //generate and export an STR into the Header with the given ID
-            if ((_assertion == null) && (null == resolvedPolicy.getAssertionId())) {
+            if ((_assertion == null) && (null == resolvedPolicy.getAssertionId()) && reader == null) {
                 throw new XWSSecurityException(
-                        "None of SAML Assertion, SAML Assertion Id information was set into " +
+                        "None of SAML Assertion, SAML Assertion Reader or SAML Assertion Id information was set into " +
                         " the Policy by the CallbackHandler");
             }
             
             String assertionId = resolvedPolicy.getAssertionId();
             if (_assertion != null) {
-                assertionId = ((com.sun.xml.wss.saml.Assertion)_assertion).getAssertionID();
+                assertionId = ((com.sun.xml.wss.saml.Assertion) _assertion).getAssertionID();
+            } else {
+                assertionId = (id != null) ? id : assertionId ;
             }
             if(!isOptimized){
                 SecurityTokenReference tokenRef = new SecurityTokenReference(secureMessage.getSOAPPart());
                 tokenRef.setWsuId(resolvedPolicy.getSTRID());
                 // set wsse11:TokenType to SAML1.1 or SAML2.0
-                if(_assertion.getVersion() != null){
+                if(_assertion != null && _assertion.getVersion() != null){
                     tokenRef.setTokenType(MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE);
-                }else{
-                    tokenRef.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
+                } else {
+                    if (reader != null) {                        
+                        if (version == "2.0") {
+                            tokenRef.setTokenType(MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE);
+                        } else {
+                            tokenRef.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
+                        }
+                    } else {
+                        tokenRef.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
+                    }
                 }
                 
                 if (_authorityBinding != null) {
@@ -253,20 +281,36 @@ public class ExportSamlAssertionFilter {
                 WSSElementFactory elementFactory = new WSSElementFactory(optContext.getSOAPVersion());
                 com.sun.xml.ws.security.opt.impl.reference.KeyIdentifier ref = elementFactory.createKeyIdentifier();
                 ref.setValue(assertionId);
-                if(_assertion.getVersion() != null){
+                if(_assertion != null && _assertion.getVersion() != null){
                     ref.setValueType(MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE);
                 } else{
-                    ref.setValueType(MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE);
+                    if (reader != null) {                        
+                        if (version == "2.0") {
+                            ref.setValueType(MessageConstants.WSSE_SAML_v2_0_KEY_IDENTIFIER_VALUE_TYPE);
+                        } else {
+                            ref.setValueType(MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE);
+                        }
+                    } else {
+                        ref.setValueType(MessageConstants.WSSE_SAML_KEY_IDENTIFIER_VALUE_TYPE);
+                    }
                 }
                 com.sun.xml.ws.security.opt.impl.keyinfo.SecurityTokenReference secTokRef = elementFactory.createSecurityTokenReference(ref);
                 String strId = resolvedPolicy.getSTRID();
                 secTokRef.setId(strId);
                 if("true".equals(optContext.getExtraneousProperty("EnableWSS11PolicySender"))){
                     // set wsse11:TokenType to SAML1.1 or SAML2.0
-                    if(_assertion.getVersion() != null){
+                    if(_assertion != null && _assertion.getVersion() != null){
                         secTokRef.setTokenType(MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE);
                     }else{
+                       if (reader != null) {                        
+                        if (version == "2.0") {
+                            secTokRef.setTokenType(MessageConstants.WSSE_SAML_v2_0_TOKEN_TYPE);
+                        } else {
+                            secTokRef.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
+                        }
+                    } else {
                         secTokRef.setTokenType(MessageConstants.WSSE_SAML_v1_1_TOKEN_TYPE);
+                    }
                     }
                     ((NamespaceContextEx)optContext.getNamespaceContext()).addWSS11NS();
                 }

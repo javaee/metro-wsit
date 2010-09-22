@@ -38,6 +38,7 @@ package com.sun.xml.ws.security.opt.impl.message;
 
 import com.sun.xml.security.core.xenc.ReferenceList;
 import com.sun.xml.security.core.xenc.ReferenceType;
+import com.sun.xml.stream.buffer.XMLStreamBuffer;
 import com.sun.xml.ws.security.opt.api.SecurityElementWriter;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.impl.util.DOMUtil;
@@ -53,8 +54,6 @@ import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
 
 import com.sun.xml.ws.api.SOAPVersion;
-import com.sun.xml.wss.saml.util.SAML20JAXBUtil;
-import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
 
 /**
  *
@@ -66,6 +65,7 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
     private String id="";
     private SOAPVersion soapVersion = SOAPVersion.SOAP_11;
     private Element domElement = null;
+    private XMLStreamBuffer buffer;
     public GSHeaderElement(JAXBElement el, SOAPVersion sv ){
         this.element = el;
         this.soapVersion = sv;
@@ -93,6 +93,10 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
             if(id == null || id.equals(""))
                 id = domElement.getAttribute("ID");
         }
+    }
+
+    public GSHeaderElement(XMLStreamBuffer buffer){
+       this.buffer = buffer;
     }
     
     public String getId() {
@@ -144,7 +148,9 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
     public void writeTo(javax.xml.stream.XMLStreamWriter streamWriter) throws javax.xml.stream.XMLStreamException {
         try{
             Marshaller writer =  getMarshaller();
-            if(element != null){
+            if(buffer != null){
+                buffer.writeToXMLStreamWriter(streamWriter);
+            }else if(element != null){
                 writer.marshal(element,streamWriter);
             }else if(domElement != null){
                 DOMUtil.serializeNode(domElement,streamWriter);
@@ -225,15 +231,7 @@ public class GSHeaderElement implements SecurityHeaderElement, SecurityElementWr
         writeTo(streamWriter);
     }
     
-    private Marshaller getMarshaller() throws javax.xml.bind.JAXBException {
-        if (element != null ) {
-            String nsURI = element.getName() != null ? element.getName().getNamespaceURI(): null;
-            if (nsURI != null && nsURI.contains("SAML:2.0")) {
-                return SAML20JAXBUtil.createMarshaller(soapVersion);
-            } else if(nsURI != null && nsURI.contains("SAML:1.0")){
-                return SAMLJAXBUtil.createMarshaller(soapVersion);
-            }
-        }
+    private Marshaller getMarshaller() throws javax.xml.bind.JAXBException {      
         return JAXBUtil.createMarshaller(soapVersion);
     }
 }
