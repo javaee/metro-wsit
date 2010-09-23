@@ -51,7 +51,6 @@ import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
-import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.AliasSelector;
 import com.sun.xml.wss.SecurityEnvironment;
 import com.sun.xml.wss.XWSSConstants;
@@ -62,6 +61,8 @@ import com.sun.xml.wss.impl.WssSoapFaultException;
 import com.sun.xml.wss.impl.callback.KeyStoreCallback;
 import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.jaxws.impl.TubeConfiguration;
+import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -91,8 +92,8 @@ import java.security.cert.Certificate;
 public class CertificateRetriever {
 
     protected TubeConfiguration pipeConfig = null;
-    protected static final Logger log = Logger.getLogger(Constants.WS_SECURITY_POLICY_DOMAIN,
-                                    Constants.WS_SECURITY_POLICY_DOMAIN_BUNDLE);
+    private static Logger log = Logger.getLogger(LogDomainConstants.WSS_API_DOMAIN,
+            LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     private String location = null;
     private String password = null;
     private String alias = null;
@@ -135,11 +136,11 @@ public class CertificateRetriever {
                         try {
                             bstValue = Base64.decode(StreamUtil.getCV(reader));
                         } catch (Base64DecodingException ex) {
-                            log.log(Level.WARNING, "error occured while trying to get certificate from Identity extension");
+                            log.log(Level.WARNING, LogStringsMessages.WSS_0819_ERROR_GETTING_CERTIFICATE_EPRIDENTITY(),ex);
                         //throw new RuntimeException(ex);
                         }
                     } else {
-                        log.log(Level.WARNING, "error occured while trying to get certificate from Identity extension");
+                        log.log(Level.WARNING, LogStringsMessages.WSS_0819_ERROR_GETTING_CERTIFICATE_EPRIDENTITY());
                     //throw new RuntimeException("error reading the xml stream");
                     }
                     return bstValue;
@@ -173,22 +174,22 @@ public class CertificateRetriever {
             keyStore.load(fis, password.toCharArray());
             cs = keyStore.getCertificate(alias);
             if (cs == null) {
-                log.log(Level.WARNING, "certificate not found corrosponding to the alias = " + alias);
+                log.log(Level.WARNING, LogStringsMessages.WSS_0821_CERTIFICATE_NOT_FOUND_FOR_ALIAS(alias));
             }
         } catch (FileNotFoundException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (IOException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (NoSuchAlgorithmException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (CertificateException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (KeyStoreException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } finally {
             keyStore = null;
@@ -205,7 +206,7 @@ public class CertificateRetriever {
             cert = (X509Certificate) fact.generateCertificate(new ByteArrayInputStream(bstValue));
             return cert;
         } catch (CertificateException ex) {
-            log.log(Level.SEVERE, "error while generating certificate", ex);
+            log.log(Level.SEVERE, "error while constructing the certificate from bst value ", ex);
             throw new RuntimeException(ex);
         }
     }
@@ -258,14 +259,14 @@ public class CertificateRetriever {
             com.sun.xml.wss.AliasSelector as = (AliasSelector) aliasSelectorClass.newInstance();
             String myAlias = as.select(new java.util.HashMap());//passing empty map as runtime properties is not available here;
             if (myAlias == null) {
-                log.log(Level.WARNING, "alias retrieved using the aliasSelector is null");
+                log.log(Level.WARNING, LogStringsMessages.WSS_0823_ALIAS_NOTFOUND_FOR_ALIAS_SELECTOR());
             }
             return myAlias;
         } catch (InstantiationException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (IllegalAccessException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         }
     }
@@ -302,23 +303,23 @@ public class CertificateRetriever {
             X509Certificate cert = null;
             cert = (X509Certificate) ((ksc.getKeystore() != null) ? (ksc.getKeystore().getCertificate(alias)) : null);
             if (cert == null && alias != null) {
-                log.log(Level.WARNING, "certificate not found corrosponding to the alias =  " + alias);
+                log.log(Level.WARNING, LogStringsMessages.WSS_0821_CERTIFICATE_NOT_FOUND_FOR_ALIAS(alias));
             }
             return cert;
         } catch (IOException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (UnsupportedCallbackException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (InstantiationException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING,LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (IllegalAccessException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         } catch (KeyStoreException ex) {
-            log.log(Level.WARNING, "unable to put the certificate in EPR Identity ", ex);
+            log.log(Level.WARNING, LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
             return null;
         }
     }
@@ -344,11 +345,9 @@ public class CertificateRetriever {
                     }
                 }
             }
-        } catch (PolicyException ex) {
-            log.log(Level.WARNING, null, ex);
+        } catch (PolicyException ex) {            
             throw new RuntimeException(ex);
-        } catch (IllegalArgumentException ex) {
-            log.log(Level.WARNING, null, ex);
+        } catch (IllegalArgumentException ex) {           
             throw new RuntimeException(ex);
         }
     }
@@ -394,13 +393,13 @@ public class CertificateRetriever {
         } catch (WssSoapFaultException ex) {
             //log.log(Level.WARNING, "exception during validating the server certificate");
         } catch (XWSSecurityException ex) {
-            log.log(Level.SEVERE, "exception during validating the server certificate", ex);
+            log.log(Level.SEVERE,LogStringsMessages.WSS_0820_ERROR_VALIDATE_CERTIFICATE_EPRIDENTITY(), ex);
         }
         if (valid) {
-            log.log(Level.INFO, "The certificate found in the server wsdl or by server cert property is valid, so using it");
+            log.log(Level.INFO, LogStringsMessages.WSS_0824_USING_SERVER_CERTIFICATE_FROM_EPR_IDENTITY());
             ctx.getExtraneousProperties().put(XWSSConstants.SERVER_CERTIFICATE_PROPERTY, serverCert);
         } else {
-            log.log(Level.WARNING, "Could not validate the server certificate, so not using it");
+            log.log(Level.WARNING, LogStringsMessages.WSS_0822_ERROR_VALIDATING_SERVER_CERTIFICATE());
         }
         return valid;
     }
@@ -412,13 +411,13 @@ public class CertificateRetriever {
         } catch (WssSoapFaultException ex) {
             //log.log(Level.WARNING, "exception during validating the server certificate");
         } catch (XWSSecurityException ex) {
-            log.log(Level.SEVERE, "exception during the validation of the server certificate", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0820_ERROR_VALIDATE_CERTIFICATE_EPRIDENTITY(), ex);
         }
         if (valid) {
-            log.log(Level.INFO, "The certificate found in the server wsdl or by server cert property is valid, so using it");
+            log.log(Level.INFO,LogStringsMessages.WSS_0824_USING_SERVER_CERTIFICATE_FROM_EPR_IDENTITY());
             config.getOtherOptions().put("Identity", serverCert);
         } else {
-            log.log(Level.WARNING, "Could not validate the server certificate, not using it");
+            log.log(Level.WARNING, LogStringsMessages.WSS_0822_ERROR_VALIDATING_SERVER_CERTIFICATE());
         }
         return valid;
     }

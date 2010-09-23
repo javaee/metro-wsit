@@ -55,8 +55,7 @@ import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.impl.MessageConstants;
 
 import com.sun.xml.wss.impl.misc.SecurityUtil;
-import com.sun.xml.wss.provider.wsit.logging.LogDomainConstants;
-import com.sun.xml.wss.provider.wsit.logging.LogStringsMessages;
+import com.sun.xml.wss.logging.LogDomainConstants;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -81,11 +80,9 @@ import javax.xml.stream.XMLStreamReader;
 public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContributor {
 
     private Certificate cs = null;
-    QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-    protected static final Logger log =
-            Logger.getLogger(
-            LogDomainConstants.WSIT_PVD_DOMAIN,
-            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
+    QName ID_QNAME = null;
+    private static Logger log = Logger.getLogger(LogDomainConstants.WSS_API_DOMAIN,
+            LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
 
     public IdentityEPRExtnContributor() {
     }
@@ -126,13 +123,14 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
                     }
                 }
             } catch (CertificateException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
+                log.log(Level.SEVERE,com.sun.xml.wss.logging.LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
+
                 throw new RuntimeException(ex);
             } catch (IOException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
+                log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
                 throw new RuntimeException(ex);
             } catch (XWSSecurityException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
+                log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
                 throw new RuntimeException(ex);
             }
         }       
@@ -158,13 +156,14 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
                     reader = readHeader(identityElement);
 
                 } catch (CertificateEncodingException ex) {
-                    log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), ex);
+                    log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), ex);
                     throw new RuntimeException(ex);
                 }
                 return reader;
             }
 
             public QName getQName() {
+                ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
                 return ID_QNAME;
             }
         };
@@ -184,7 +183,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
             m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
             m.marshal(idElem, xbr);
         } catch (JAXBException je) {
-            log.log(Level.SEVERE, LogStringsMessages.WSITPVD_0063_ERROR_EPR_IDENTITY_EXTENTION(), je);
+            log.log(Level.SEVERE, com.sun.xml.wss.logging.LogStringsMessages.WSS_0818_ERROR_PUTTING_CERTIFICATE_EPRIDENTITY(), je);
             throw new XMLStreamException(je);
         }
         return xbr.getXMLStreamBuffer().readAsXMLStreamReader();
