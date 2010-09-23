@@ -162,9 +162,8 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
                 return reader;
             }
 
-            public QName getQName() {
-                ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                return ID_QNAME;
+            public QName getQName() {               
+                return new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
             }
         };
     }
