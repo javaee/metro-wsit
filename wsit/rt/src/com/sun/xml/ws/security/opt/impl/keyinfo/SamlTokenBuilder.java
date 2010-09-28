@@ -37,6 +37,8 @@
 package com.sun.xml.ws.security.opt.impl.keyinfo;
 
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
+import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.stream.buffer.stax.StreamWriterBufferCreator;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.api.keyinfo.BuilderResult;
 import com.sun.xml.ws.security.opt.impl.enc.JAXBEncryptedKey;
@@ -53,12 +55,12 @@ import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.wss.impl.policy.mls.PrivateKeyBinding;
 import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
 
-import com.sun.xml.wss.saml.util.SAMLUtil;
 import java.security.Key;
 import java.util.HashMap;
 import java.util.logging.Level;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 import org.w3c.dom.Element;
 
 /**
@@ -69,6 +71,10 @@ public class SamlTokenBuilder extends TokenBuilder{
     
     private AuthenticationTokenPolicy.SAMLAssertionBinding keyBinding = null;
     private boolean forSign = false;
+    private String id;
+    private String version;
+    private MutableXMLStreamBuffer buffer;
+    private XMLStreamReader reader;
     /** Creates a new instance of SamlTokenProcessor */
     public SamlTokenBuilder(JAXBFilterProcessingContext context,AuthenticationTokenPolicy.SAMLAssertionBinding samlBinding,boolean forSign) {
         super(context);
@@ -88,19 +94,34 @@ public class SamlTokenBuilder extends TokenBuilder{
         SecurityHeaderElement she = null;
         
         Element samlAssertion = keyBinding.getAssertion();
-        try {
-            if (samlAssertion == null) {
-                XMLStreamReader reader = keyBinding.getAssertionReader();
-                if (reader != null) {
-                    samlAssertion = SAMLUtil.createSAMLAssertion(reader);
+        if (samlAssertion == null) {
+             reader = keyBinding.getAssertionReader();
+            if (reader != null) {
+                try {
+                    reader.next(); //start document , so move to next event
+                    id = reader.getAttributeValue(null, "AssertionID");
+                    if (id == null) {
+                        id = reader.getAttributeValue(null, "ID");
+                    }
+                    version = reader.getAttributeValue(null, "Version");
+                    buffer = new MutableXMLStreamBuffer();
+                    StreamWriterBufferCreator bCreator = new StreamWriterBufferCreator(buffer);
+                    XMLStreamWriter writer_tmp = (XMLStreamWriter) bCreator;
+                    while (!(XMLStreamReader.END_DOCUMENT == reader.getEventType())) {
+                        com.sun.xml.ws.security.opt.impl.util.StreamUtil.writeCurrentEvent(reader, writer_tmp);
+                        reader.next();
+                    }
+                } catch (XMLStreamException ex) {
+                   throw new XWSSecurityException(ex);
                 }
             }
-        } catch (XMLStreamException ex) {
-            // Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
-            // ignore the exception
         }
+
         if (samlAssertion != null) {
             she = new GSHeaderElement(samlAssertion);
+        }else if (reader != null) {
+            she = new GSHeaderElement(buffer);
+            she.setId(id);  // set the ID again to bring it to top            
         }
         JAXBEncryptedKey ek = null;
         String asID = "";
@@ -119,13 +140,15 @@ public class SamlTokenBuilder extends TokenBuilder{
             }else{
                 she.setId(asID);
             }
-        }else{
-            she = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
-            if(she == null){
+        }else {
+            if (she == null) {
+                she = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
+            }
+            if (she == null) {
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1811_NULL_SAML_ASSERTION());
                 throw new XWSSecurityException("SAML Assertion is NULL");
             }
-            asID = she.getId();
+            id = asID = she.getId();
         }
         if(logger.isLoggable(Level.FINEST)){
             logger.log(Level.FINEST, "SAML Assertion id:"+asID);
@@ -147,9 +170,12 @@ public class SamlTokenBuilder extends TokenBuilder{
         }else{
             //Key key = null;
             //key = KeyResolver.resolveSamlAssertion(context.getSecurableSoapMessage(), samlBinding.getAssertion(), true, context, assertionID);
-            
-            SecurityHeaderElement assertion = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
-            samlkey = ((SAMLAssertion)assertion).getKey();
+            if (she == null) {
+                SecurityHeaderElement assertion = (SecurityHeaderElement) context.getExtraneousProperty(MessageConstants.INCOMING_SAML_ASSERTION);
+                samlkey = ((SAMLAssertion) assertion).getKey();
+            } else {
+                samlkey = ((SAMLAssertion) she).getKey();
+            }
             /*
             x509Cert = context.getSecurityEnvironment().getCertificate(
                     context.getExtraneousProperties() ,(PublicKey)key, false);

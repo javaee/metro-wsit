@@ -47,8 +47,6 @@ import com.sun.xml.ws.security.opt.impl.message.GSHeaderElement;
 import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.crypto.Data;
 import java.util.HashMap;
 import com.sun.xml.wss.saml.SAMLException;
@@ -130,8 +128,7 @@ public class ExportSamlAssertionFilter {
         Assertion _assertion = null;
         Element assertionElement = resolvedPolicy.getAssertion();
         Element _authorityBinding = resolvedPolicy.getAuthorityBinding();
-        JAXBElement element = null;
-        
+                
         if (assertionElement == null) {
             reader = resolvedPolicy.getAssertionReader();
             if (reader != null) {
@@ -150,7 +147,7 @@ public class ExportSamlAssertionFilter {
                        reader.next();                       
                     }
                 } catch (XMLStreamException ex) {
-                    Logger.getLogger(ExportSamlAssertionFilter.class.getName()).log(Level.SEVERE, null, ex);
+                   throw new XWSSecurityException(ex);
                 }
             }
         } else {
@@ -227,7 +224,7 @@ public class ExportSamlAssertionFilter {
                             " in Policy");
                 }
             }
-        } else {
+        } else if(reader != null) {
             she = new GSHeaderElement(buffer);
             she.setId(id);  // set the ID again to bring it to top 
             if (optSecHeader.getChildElement(she.getId()) == null) {
