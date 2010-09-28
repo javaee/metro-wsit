@@ -211,10 +211,10 @@ public class KeyResolver {
                         xwsse);
             }
         }catch(WssSoapFaultException wsse){
-            log.log(Level.SEVERE, "WSS0284.WSS.SOAP.Fault.Exception", wsse);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0284_WSS_SOAP_FAULT_EXCEPTION(), wsse);
             throw wsse;
         }catch (XWSSecurityException xwsse) {
-            log.log(Level.SEVERE, "WSS0284.WSS.SOAP.Fault.Exception", xwsse);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0284_WSS_SOAP_FAULT_EXCEPTION(), xwsse);
             throw SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_SECURITY_TOKEN_UNAVAILABLE,
                     xwsse.getMessage(),
@@ -223,7 +223,7 @@ public class KeyResolver {
         
         if (returnKey == null) {
             log.log(Level.SEVERE,
-                    "WSS0600.illegal.token.reference");
+                    LogStringsMessages.WSS_0600_ILLEGAL_TOKEN_REFERENCE());
             XWSSecurityException xwsse =
                     new XWSSecurityException(
                     "Referenced security token could not be retrieved");
@@ -249,7 +249,7 @@ public class KeyResolver {
             
             //TODO: expensive conversion happening
             if (samlAssertion == null) {
-                log.log(Level.SEVERE,"WSS0235.failed.locate.SAMLAssertion");
+                log.log(Level.SEVERE,LogStringsMessages.WSS_0235_FAILED_LOCATE_SAML_ASSERTION());
                 throw new XWSSecurityException("Cannot Locate SAML Assertion");
             }
             
@@ -258,7 +258,7 @@ public class KeyResolver {
                 //verify the signature inside the SAML assertion
                 if ( nl.getLength() == 0 ) {
                     XWSSecurityException e = new XWSSecurityException("Unsigned SAML Assertion encountered");
-                    log.log(Level.SEVERE, "WSS1309.saml.signature.verify.failed", e);
+                    log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1309_SAML_SIGNATURE_VERIFY_FAILED(), e);
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_INVALID_SECURITY,
                             "Exception during Signature verfication in SAML Assertion",
@@ -276,7 +276,7 @@ public class KeyResolver {
                 
                 try {
                     if ( !SignatureProcessor.verifySignature(elem, context)) {
-                        log.log(Level.SEVERE, "WSS1310.saml.signature.invalid");
+                        log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1310_SAML_SIGNATURE_INVALID());
                         throw SecurableSoapMessage.newSOAPFaultException(
                                 MessageConstants.WSSE_FAILED_AUTHENTICATION,
                                 "SAML Assertion has invalid Signature",
@@ -284,7 +284,7 @@ public class KeyResolver {
                                 "SAML Assertion has invalid Signature"));
                     }
                 } catch (XWSSecurityException ex) {
-                    log.log(Level.SEVERE, "WSS1310.saml.signature.invalid");
+                    log.log(Level.SEVERE, com.sun.xml.wss.logging.impl.dsig.LogStringsMessages.WSS_1310_SAML_SIGNATURE_INVALID());
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_FAILED_AUTHENTICATION,
                             "SAML Assertion has invalid Signature",
@@ -304,7 +304,7 @@ public class KeyResolver {
             context.getSamlIdVSKeyCache().put(assertionID, key);
             return key;
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0238.failed.Resolve.SAMLAssertion");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0238_FAILED_RESOLVE_SAML_ASSERTION());
             throw new XWSSecurityException(e);
         }
     }
@@ -326,7 +326,7 @@ public class KeyResolver {
                 inferredEncryptionPolicy = (EncryptionPolicy)context.getInferredSecurityPolicy().get(i);
             }
         } catch(Exception e){
-            log.log(Level.SEVERE, "WSS0239.failed.process.SecurityTokenReference", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0239_FAILED_PROCESS_SECURITY_TOKEN_REFERENCE(), e);
             throw new XWSSecurityException(e);
         }
         // Do a case analysis based on the type of refElement.
@@ -435,7 +435,7 @@ public class KeyResolver {
                         returnKey = secretKey;
                 } else{
                     String message = "EncryptedKeySHA1 reference not correct";
-                    log.log(Level.SEVERE, "WSS0240.invalid.EncryptedKeySHA1.reference");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0240_INVALID_ENCRYPTED_KEY_SHA_1_REFERENCE());
                     throw new XWSSecurityException(message);
                 }
                 
@@ -601,7 +601,7 @@ public class KeyResolver {
                     context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     
                 } catch(Exception e){
-                    log.log(Level.SEVERE, "WSS0241.unable.set.EKSHA1.OnContext", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0241_UNABLETO_SET_EKSHA_1_ON_CONTEXT(), e);
                     throw new XWSSecurityException(e);
                 }
                 if(isWSITRecipient){
@@ -637,7 +637,7 @@ public class KeyResolver {
                         token = resolveToken(sctId, context, secureMsg);
                     }
                     if(token == null){
-                        log.log(Level.SEVERE, "WSS0242.unableto.locate.SCT");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0242_UNABLETO_LOCATE_SCT());
                         throw new XWSSecurityException("SCT Token with Id "+sctId+ "not found");
                     }else{
                         tokenCache.put(sctId, token);
@@ -664,7 +664,7 @@ public class KeyResolver {
                     returnKey = new SecretKeySpec(proofKey, encAlgo);
                     
                 } else {
-                    log.log(Level.SEVERE, "WSS0243.invalid.valueType.NonSCTToken");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0243_INVALID_VALUE_TYPE_NON_SCT_TOKEN());
                     throw new XWSSecurityException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");
                 }
                 
@@ -712,7 +712,7 @@ public class KeyResolver {
                         String encEkSha1 = Base64.encode(ekSha1);
                         context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     } catch(Exception e){
-                        log.log(Level.SEVERE,"WSS0241.unableto.set.EKSHA1.OnContext", e);
+                        log.log(Level.SEVERE,LogStringsMessages.WSS_0241_UNABLETO_SET_EKSHA_1_ON_CONTEXT(), e);
                         throw new XWSSecurityException(e);
                     }
                     if(isWSITRecipient){
@@ -759,14 +759,14 @@ public class KeyResolver {
                         } else if(PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {
                             //already set - do nothing
                         } else{
-                            log.log(Level.SEVERE, "WSS0244.invalid.level.DKT");
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_0244_INVALID_LEVEL_DKT());
                             throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                         }
                     }
                     returnKey = resolveDKT(context, (DerivedKeyTokenHeaderBlock)token);
                 } else {
                     String message = " Cannot Resolve URI " + uri;
-                    log.log(Level.SEVERE,"WSS0337.unsupported.directref.mechanism",
+                    log.log(Level.SEVERE,LogStringsMessages.WSS_0337_UNSUPPORTED_DIRECTREF_MECHANISM(message),
                             new Object[] {message});
                     XWSSecurityException xwsse = new XWSSecurityException(message);
                     throw SecurableSoapMessage.newSOAPFaultException(
@@ -776,7 +776,7 @@ public class KeyResolver {
             } else {
                 log.log(
                         Level.SEVERE,
-                        "WSS0337.unsupported.directref.mechanism",
+                        LogStringsMessages.WSS_0337_UNSUPPORTED_DIRECTREF_MECHANISM(((DirectReference)refElement).getValueType()),
                         new Object[] {((DirectReference)refElement).getValueType()});
                 XWSSecurityException xwsse =
                         new XWSSecurityException(
@@ -816,7 +816,7 @@ public class KeyResolver {
             }
         } else {
             log.log(
-                    Level.SEVERE, "WSS0338.unsupported.reference.mechanism");
+                    Level.SEVERE, LogStringsMessages.WSS_0338_UNSUPPORTED_REFERENCE_MECHANISM());
             XWSSecurityException xwsse =
                     new XWSSecurityException(
                     "Key reference mechanism not supported");
@@ -858,7 +858,7 @@ public class KeyResolver {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE,
-                    "WSS0601.illegal.key.value",
+                    LogStringsMessages.WSS_0601_UNSUPPORTED_KEYINFO_WSS_0601_ILLEGAL_KEY_VALUE(e.getMessage()),
                     e.getMessage());
             throw new XWSSecurityException(e);
         }
@@ -887,7 +887,7 @@ public class KeyResolver {
                             context.getExtraneousProperties(), x509Data.itemSKI(0).getSKIBytes());
                 }
             } else if (x509Data.containsSubjectName()) {
-                log.log(Level.SEVERE, "WSS0339.unsupported.keyinfo");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO());
                 throw new XWSSecurityException(
                         "X509SubjectName child element of X509Data is not yet supported by our implementation");
             } else if (x509Data.containsIssuerSerial()) {
@@ -906,7 +906,7 @@ public class KeyResolver {
                 }
                 
             } else {
-                log.log(Level.SEVERE, "WSS0339.unsupported.keyinfo");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO());
                 throw new XWSSecurityException(
                         "Unsupported child element of X509Data encountered");
             }
@@ -919,7 +919,7 @@ public class KeyResolver {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE,
-                    "WSS0602.illegal.x509.data",
+                    LogStringsMessages.WSS_0602_ILLEGAL_X_509_DATA(e.getMessage()),
                     e.getMessage());
             throw new XWSSecurityException(e);
         }
@@ -930,7 +930,7 @@ public class KeyResolver {
         try {
             return Base64.decode(encodedData);
         } catch (Base64DecodingException e) {
-            log.log(Level.SEVERE, "WSS0144.unableto.decode.base64.data" ,e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0144_UNABLETO_DECODE_BASE_64_DATA(e.getMessage()) ,e);
             throw new XWSSecurityException(
                     "Unable to decode Base64 encoded data",
                     e);
@@ -962,7 +962,7 @@ public class KeyResolver {
             cache.put(uri, token);
             return token;
         }catch(Exception ex){
-            log.log(Level.SEVERE, "WSS0245.failed.resolve.SecurityToken", ex);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0245_FAILED_RESOLVE_SECURITY_TOKEN(), ex);
             throw new XWSSecurityException(ex);
         }
     }
@@ -1008,7 +1008,7 @@ public class KeyResolver {
                 return null;
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "WSS0238.failed.Resolve.SAMLAssertion", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0238_FAILED_RESOLVE_SAML_ASSERTION(), e);
             throw new XWSSecurityException(e);
         }
         
@@ -1070,7 +1070,7 @@ public class KeyResolver {
         }       
                 
         if (ctx == null) {
-            log.log(Level.SEVERE, "WSS0246.unableto.locate.SecureConversationSession");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0246_UNABLETO_LOCATE_SECURE_CONVERSATION_SESSION());
             throw new XWSSecurityException("Could not locate SecureConversation session for Id:" + scId);
         }                
         
@@ -1119,14 +1119,14 @@ public class KeyResolver {
                 inferredEncryptionPolicy = (EncryptionPolicy)context.getInferredSecurityPolicy().get(i);
             }
         } catch(Exception e){
-            log.log(Level.SEVERE, "WSS0247.failed.resolve.DerivedKeyToken");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0247_FAILED_RESOLVE_DERIVED_KEY_TOKEN());
             throw new XWSSecurityException(e);
         }
         
         
         SecurityTokenReference sectr = token.getDerivedKeyElement();
         if (sectr == null) {
-            log.log(Level.SEVERE, "WSS0248.null.STR");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0248_NULL_STR());
             throw new XWSSecurityException("Invalid DerivedKey Token encountered, no STR found");
         }
         ReferenceElement refElement = sectr.getReference();
@@ -1154,7 +1154,7 @@ public class KeyResolver {
                     String encEkSha1 = Base64.encode(ekSha1);
                     context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                 } catch(Exception e){
-                    log.log(Level.SEVERE, "WSS0241.unableto.set.EKSHA1.OnContext", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0241_UNABLETO_SET_EKSHA_1_ON_CONTEXT(), e);
                     throw new XWSSecurityException(e);
                 }
                 
@@ -1187,7 +1187,7 @@ public class KeyResolver {
                     //handling for SecurityContext Token
                     secret = resolveSCT(context, (SecurityContextTokenImpl)secToken, false);
                 } else {
-                    log.log(Level.SEVERE, "WSS0243.invalid.valueType.NonSCTToken");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0243_INVALID_VALUE_TYPE_NON_SCT_TOKEN());
                     throw new XWSSecurityException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");
                 }
                 
@@ -1203,11 +1203,11 @@ public class KeyResolver {
                     //handling for SecurityContext Token
                     secret = resolveSCT(context, (SecurityContextTokenImpl)secToken, false);
                 } else {
-                    log.log(Level.SEVERE, "WSS0249.unsupported.TokenType.DKT");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0249_UNSUPPORTED_TOKEN_TYPE_DKT());
                     throw new XWSSecurityException("Unsupported TokenType " + secToken + " under DerivedKeyToken");
                 }
             } else{
-                log.log(Level.SEVERE, "WSS0249.unsupported.TokenType.DKT");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0249_UNSUPPORTED_TOKEN_TYPE_DKT());
                 throw new XWSSecurityException("Unsupported TokenType " + secToken + " under DerivedKeyToken");
             }
         } else if (refElement instanceof KeyIdentifier) {
@@ -1234,11 +1234,11 @@ public class KeyResolver {
                         encKey = secretKey;
                         secret = encKey.getEncoded();
                     } else{
-                        log.log(Level.SEVERE, "WSS0240.invalid.EncryptedKeySHA1.reference");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0240_INVALID_ENCRYPTED_KEY_SHA_1_REFERENCE());
                         throw new XWSSecurityException("EncryptedKeySHA1 reference not correct");
                     }
                 } else{
-                    log.log(Level.SEVERE, "WSS0240.invalid.EncryptedKeySHA1.reference");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0240_INVALID_ENCRYPTED_KEY_SHA_1_REFERENCE());
                     String message = "EncryptedKeySHA1 reference not correct";
                     throw new XWSSecurityException(message);
                 }
@@ -1261,11 +1261,11 @@ public class KeyResolver {
                 }
                 secret = encKey.getEncoded();
             } else{
-                log.log(Level.SEVERE, "WSS0282.unsupported.KeyIdentifier.Reference.DKT");
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0282_UNSUPPORTED_KEY_IDENTIFIER_REFERENCE_DKT());
                 throw new XWSSecurityException("Unsupported KeyIdentifier Reference " + keyId + " under DerivedKeyToken");
             }
         } else{
-            log.log(Level.SEVERE, "WSS0283.unsupported.ReferenceType.DKT");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0283_UNSUPPORTED_REFERENCE_TYPE_DKT());
             throw new XWSSecurityException("Unsupported ReferenceType " + refElement + " under DerivedKeyToken");
         }
         long length = token.getLength();
@@ -1279,13 +1279,13 @@ public class KeyResolver {
         try {
             returnKey = dkt.generateSymmetricKey(jceAlgo);
         } catch (InvalidKeyException ex) {
-            log.log(Level.SEVERE, "WSS0247.failed.resolve.DerivedKeyToken");
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0247_FAILED_RESOLVE_DERIVED_KEY_TOKEN());
             throw new XWSSecurityException(ex);
         } catch (UnsupportedEncodingException ex) {
-            log.log(Level.SEVERE, "WSS0247.failed.resolve.DerivedKeyToken");
+            log.log(Level.SEVERE,  LogStringsMessages.WSS_0247_FAILED_RESOLVE_DERIVED_KEY_TOKEN());
             throw new XWSSecurityException(ex);
         } catch (NoSuchAlgorithmException ex) {
-            log.log(Level.SEVERE, "WSS0247.failed.resolve.DerivedKeyToken");
+            log.log(Level.SEVERE,  LogStringsMessages.WSS_0247_FAILED_RESOLVE_DERIVED_KEY_TOKEN());
             throw new XWSSecurityException(ex);
         }
         return returnKey;
@@ -1311,7 +1311,7 @@ public class KeyResolver {
                 inferredSignaturePolicy = (SignaturePolicy)context.getInferredSecurityPolicy().get(i);
             }
         } catch(Exception e){
-            log.log(Level.SEVERE, "WSS0250.failed.process.STR", e);
+            log.log(Level.SEVERE, LogStringsMessages.WSS_0250_FAILED_PROCESS_STR(), e);
             throw new XWSSecurityException(e);
         }
         // Do a case analysis based on the type of refElement.
@@ -1404,7 +1404,7 @@ public class KeyResolver {
                     if(ekSha1RefValue.equals(keyRefValue))
                         returnKey = secretKey;
                 } else{
-                    log.log(Level.SEVERE, "WSS0240.invalid.EncryptedKeySHA1.reference");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0240_INVALID_ENCRYPTED_KEY_SHA_1_REFERENCE());
                     String message = "EncryptedKeySHA1 reference not correct";
                     throw new XWSSecurityException(message);
                 }
@@ -1562,7 +1562,7 @@ public class KeyResolver {
                     String encEkSha1 = Base64.encode(ekSha1);
                     context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                 } catch(Exception e){
-                    log.log(Level.SEVERE, "WSS0241.unableto.set.EKSHA1.OnContext", e);
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0241_UNABLETO_SET_EKSHA_1_ON_CONTEXT(), e);
                     throw new XWSSecurityException(e);
                 }
                 if(isWSITRecipient){
@@ -1592,7 +1592,7 @@ public class KeyResolver {
                         token = resolveToken(sctId, context, secureMsg);
                     }
                     if(token == null){
-                        log.log(Level.SEVERE, "WSS0242.unableto.locate.SCT");
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0242_UNABLETO_LOCATE_SCT());
                         throw new XWSSecurityException("SCT Token with Id "+sctId+ "not found");
                     }else{
                         tokenCache.put(sctId, token);
@@ -1619,7 +1619,7 @@ public class KeyResolver {
                     returnKey = new SecretKeySpec(proofKey, encAlgo);
                     
                 } else {
-                    log.log(Level.SEVERE, "WSS0243.invalid.valueType.NonSCTToken");
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_0243_INVALID_VALUE_TYPE_NON_SCT_TOKEN());
                     throw new XWSSecurityException("Incorrect ValueType: " + MessageConstants.SCT_VALUETYPE + ", specified for a Non SCT Token");
                 }
                 
@@ -1666,7 +1666,7 @@ public class KeyResolver {
                         String encEkSha1 = Base64.encode(ekSha1);
                         context.setExtraneousProperty(MessageConstants.EK_SHA1_VALUE, encEkSha1);
                     } catch(Exception e){
-                        log.log(Level.SEVERE, "WSS0241.unableto.set.EKSHA1.OnContext", e);
+                        log.log(Level.SEVERE, LogStringsMessages.WSS_0241_UNABLETO_SET_EKSHA_1_ON_CONTEXT(), e);
                         throw new XWSSecurityException(e);
                     }
                     if(isWSITRecipient){
@@ -1711,14 +1711,14 @@ public class KeyResolver {
                         if(inferredKB == null){
                             inferredSignaturePolicy.setKeyBinding(dtkBinding);
                         } else{
-                            log.log(Level.SEVERE, "WSS0244.invalid.level.DKT");
+                            log.log(Level.SEVERE, LogStringsMessages.WSS_0244_INVALID_LEVEL_DKT());
                             throw new XWSSecurityException("A derived Key Token should be a top level key binding");
                         }
                     }
                     returnKey = resolveDKT(context, (DerivedKeyTokenHeaderBlock)token);
                 } else {
                     String message = " Cannot Resolve URI " + uri;
-                    log.log(Level.SEVERE,"WSS0337.unsupported.directref.mechanism",
+                    log.log(Level.SEVERE,LogStringsMessages.WSS_0337_UNSUPPORTED_DIRECTREF_MECHANISM(message),
                             new Object[] {message});
                     XWSSecurityException xwsse = new XWSSecurityException(message);
                     throw SecurableSoapMessage.newSOAPFaultException(
@@ -1728,7 +1728,7 @@ public class KeyResolver {
             } else {
                 log.log(
                         Level.SEVERE,
-                        "WSS0337.unsupported.directref.mechanism",
+                        LogStringsMessages.WSS_0337_UNSUPPORTED_DIRECTREF_MECHANISM(((DirectReference)refElement).getValueType()),
                         new Object[] {((DirectReference)refElement).getValueType()});
                 XWSSecurityException xwsse =
                         new XWSSecurityException(
@@ -1762,7 +1762,7 @@ public class KeyResolver {
             }
         } else {
             log.log(
-                    Level.SEVERE, "WSS0338.unsupported.reference.mechanism");
+                    Level.SEVERE, LogStringsMessages.WSS_0338_UNSUPPORTED_REFERENCE_MECHANISM());
             XWSSecurityException xwsse =
                     new XWSSecurityException(
                     "Key reference mechanism not supported");
