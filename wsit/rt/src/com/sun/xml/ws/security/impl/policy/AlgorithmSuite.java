@@ -62,8 +62,7 @@ public class AlgorithmSuite extends com.sun.xml.ws.policy.PolicyAssertion implem
     private AssertionFitness fitness = AssertionFitness.IS_VALID;
     private AlgorithmSuiteValue value;
     private HashSet<String> props = new HashSet<String>();
-    private boolean populated = false;
-    private boolean isValid = true;
+    private boolean populated = false;    
     private SecurityPolicyVersion spVersion;
     private String signatureAlgo = null;
     /**

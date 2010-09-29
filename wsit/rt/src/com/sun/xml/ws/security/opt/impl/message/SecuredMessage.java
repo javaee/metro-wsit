@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,8 +62,7 @@ import com.sun.xml.ws.api.message.Header;
  */
 public class SecuredMessage {
 
-    ArrayList headers;
-    Message msg;
+    ArrayList headers;    
     SOAPBody body = null;
     boolean isOneWay = false;
     SecurityElement securedBody = null;
@@ -84,7 +83,7 @@ public class SecuredMessage {
     public SecuredMessage(Message msg, SecurityHeader sh) {
         HeaderList hl = msg.getHeaders();
         headers = new ArrayList(hl);
-        this.msg = msg;
+        //this.msg = msg;
         this.body = new SOAPBody(msg);
         attachments = msg.getAttachments();
         this.sh = sh;
@@ -295,13 +294,13 @@ public class SecuredMessage {
     }
 
     public void replaceBody(SecurityElement she) {
-        msg = null;
+        //msg = null;
         securedBody = she;
         body = null;
     }
 
     public void replaceBody(SOAPBody sb) {
-        msg = null;
+        //msg = null;
         body = sb;
         securedBody = null;
     }

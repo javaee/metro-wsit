@@ -1,5 +1,5 @@
 /*
- * $Id: SignatureTarget.java,v 1.5 2010-08-04 12:14:39 sm228678 Exp $
+ * $Id: SignatureTarget.java,v 1.6 2010-09-29 13:56:43 sm228678 Exp $
  */
 
 /*
@@ -196,7 +196,7 @@ public class SignatureTarget extends Target implements Cloneable {
     /**
      * This class represents a Transform that can appear on a SignatureTarget.
      */
-    public static class Transform {
+    public static class Transform implements Cloneable{
         
         String _transform = "";
         

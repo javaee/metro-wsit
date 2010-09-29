@@ -193,10 +193,8 @@ public class ServerSecurityPipe extends AbstractFilterPipeImpl {
 		    try {
 			// proceed to invoke the endpoint
 			response = next.process(validatedRequest);
-		    } catch (Exception e) {
-			if (e instanceof AuthException){
-			    logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0055_WS_ERROR_NEXT_PIPE(), e);
-			}
+		    } catch (Exception e) {			
+			logger.log(Level.SEVERE,LogStringsMessages.WSITPVD_0055_WS_ERROR_NEXT_PIPE(), e);			
 			response = helper.getFaultResponse
 			    (validatedRequest,info.getResponsePacket(),e);
 		    }

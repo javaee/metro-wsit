@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -64,14 +64,13 @@ import java.util.Set;
  *
  * @author K.Venugopal@sun.com
  */
-public class HeaderWrapper implements com.sun.xml.ws.api.message.Header  {
+public class HeaderWrapper implements com.sun.xml.ws.api.message.Header  {   
     
-    private SecurityHeader sh;
     private SecurityElement se;
     private com.sun.xml.ws.api.message.Header header = null;
     /** Creates a new instance of HeaderWrapper */
     public HeaderWrapper(SecurityHeader sh) {
-        this.sh = sh;
+        //this.sh = sh;
     }
     
     public HeaderWrapper(SecurityElement se) {

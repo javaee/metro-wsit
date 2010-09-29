@@ -71,8 +71,7 @@ import javax.xml.ws.WebServiceException;
  */
 public class WSITAuthConfigProvider implements AuthConfigProvider {
 
-    //Map properties = null;
-    String id = null;
+    //Map properties = null;    
     String description = "WSIT AuthConfigProvider";
     
     //ClientAuthConfig clientConfig = null;

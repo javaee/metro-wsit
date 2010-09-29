@@ -71,8 +71,7 @@ public class SamlTokenBuilder extends TokenBuilder{
     
     private AuthenticationTokenPolicy.SAMLAssertionBinding keyBinding = null;
     private boolean forSign = false;
-    private String id;
-    private String version;
+    private String id;    
     private MutableXMLStreamBuffer buffer;
     private XMLStreamReader reader;
     /** Creates a new instance of SamlTokenProcessor */
@@ -103,7 +102,7 @@ public class SamlTokenBuilder extends TokenBuilder{
                     if (id == null) {
                         id = reader.getAttributeValue(null, "ID");
                     }
-                    version = reader.getAttributeValue(null, "Version");
+                    //version = reader.getAttributeValue(null, "Version");
                     buffer = new MutableXMLStreamBuffer();
                     StreamWriterBufferCreator bCreator = new StreamWriterBufferCreator(buffer);
                     XMLStreamWriter writer_tmp = (XMLStreamWriter) bCreator;

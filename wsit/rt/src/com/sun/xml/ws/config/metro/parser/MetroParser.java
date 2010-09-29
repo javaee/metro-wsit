@@ -77,9 +77,9 @@ public class MetroParser {
     // Pulls together the results of MetroWsParser and WsParser
 
     public static void parse(final Container container) {
-        final URL metroWs = findConfigFile(METRO_WEBSERVICES_NAME, container);
+        findConfigFile(METRO_WEBSERVICES_NAME, container);
 
-        final URL metro = findConfigFile(WEBSERVICES_NAME, container);
+        findConfigFile(WEBSERVICES_NAME, container);
     }
 
     private static URL findConfigFile(final String configFileName, final Container container)

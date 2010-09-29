@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -253,7 +253,7 @@ public class Signature implements SecurityHeaderElement,NamespaceContextInfo, Se
                             try{
                                 signatureValue = Base64.decode(tmp);
                             }catch(Base64DecodingException dec){
-                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1708_BASE_64_DECODING_ERROR(id));
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1708_BASE_64_DECODING_ERROR(id), dec);
                                 throw new XWSSecurityException("Error occurred while decoding signatureValue for Signature with ID"+id);
                             }
                         }

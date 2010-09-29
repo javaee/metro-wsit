@@ -137,7 +137,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     private CallbackHandler handler = null;
     
     //****************Variables passed to Context CTOR********
-    String operation = null;
+    //String operation = null;
     //Subject subject = null;
     //Map map = null;
     WeakReference<WSEndpoint> endPoint =  null;
@@ -151,7 +151,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     @SuppressWarnings("unchecked")
     public WSITServerAuthContext(String operation, Subject subject, Map<Object, Object> map, CallbackHandler callbackHandler) {
         super(map);
-        this.operation = operation;
+        //this.operation = operation;
         //this.subject = subject;
         //this.map = map;
         endPoint = new WeakReference((WSEndpoint)map.get("ENDPOINT"));

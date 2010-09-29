@@ -1,5 +1,5 @@
 /*
- * $Id: Assertion.java,v 1.4 2010-03-20 12:33:24 kumarjayanti Exp $
+ * $Id: Assertion.java,v 1.5 2010-09-29 13:56:38 sm228678 Exp $
  */
 
 /*
@@ -119,7 +119,7 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb10.impl
     
     private Element signedAssertion = null;
     private String version = null;
-    private Element processedAssertionElement = null;
+    //private Element processedAssertionElement = null;
     private List<Object> statementList = null;
     private JAXBContext jc;
     private String canonicalizationMethod = CanonicalizationMethod.EXCLUSIVE;

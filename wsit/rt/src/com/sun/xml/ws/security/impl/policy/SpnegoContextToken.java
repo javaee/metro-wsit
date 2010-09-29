@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -59,7 +59,7 @@ public class SpnegoContextToken extends PolicyAssertion implements com.sun.xml.w
     
     private boolean populated = false;
     private PolicyAssertion rdKey = null;
-    Boolean requiredDerivedKeys = false;
+    //Boolean requiredDerivedKeys = false;
     private String id;
     private Issuer issuer = null;
     private AssertionFitness fitness = AssertionFitness.IS_VALID;

@@ -112,7 +112,6 @@ public class EncryptedKey implements SecurityHeaderElement, NamespaceContextInfo
     private WSSPolicy inferredKB = null;
     private boolean ignoreEKSHA1 = false;
     private boolean emPresent = false;
-    private HashMap<String,String> ekSha1s = null;
     /** Creates a new instance of EncryptedKey */
     @SuppressWarnings("unchecked")
     public EncryptedKey(XMLStreamReader reader,JAXBFilterProcessingContext pc, HashMap nsDecls) throws XMLStreamException, XWSSecurityException {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -58,9 +58,7 @@ public class RsaToken  extends PolicyAssertion implements com.sun.xml.ws.securit
     private SecurityPolicyVersion spVersion = SecurityPolicyVersion.SECURITYPOLICY200507;
     private final QName itQname;
     private String includeToken;
-    private String id = null;
-    private boolean isServer = false;
-    
+    private String id = null;    
     /** Creates a new instance of RsaToken */
     public RsaToken() {
         id= PolicyUtil.randomUUID();

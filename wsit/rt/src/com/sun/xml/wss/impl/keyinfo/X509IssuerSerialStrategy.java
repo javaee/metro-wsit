@@ -1,5 +1,5 @@
 /*
- * $Id: X509IssuerSerialStrategy.java,v 1.3 2010-03-20 13:01:25 kumarjayanti Exp $
+ * $Id: X509IssuerSerialStrategy.java,v 1.4 2010-09-29 13:56:39 sm228678 Exp $
  */
 
 /*
@@ -65,8 +65,7 @@ public class X509IssuerSerialStrategy extends KeyInfoStrategy {
 
     X509Certificate cert = null;
 
-    String alias = null;
-    boolean forSigning;
+    String alias = null;    
 
     public X509IssuerSerialStrategy(){
         
@@ -74,7 +73,7 @@ public class X509IssuerSerialStrategy extends KeyInfoStrategy {
     
     public X509IssuerSerialStrategy(String alias, boolean forSigning) {
         this.alias = alias;
-        this.forSigning = forSigning;
+        //this.forSigning = forSigning;
         this.cert = null;
     }
 

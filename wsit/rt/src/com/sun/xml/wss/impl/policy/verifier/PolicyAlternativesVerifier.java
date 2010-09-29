@@ -53,17 +53,16 @@ import java.util.logging.Logger;
  * @author vbkumarjayanti
  */
 public class PolicyAlternativesVerifier implements PolicyVerifier {
-    private ProcessingContext ctx = null;
-    private TargetResolver targetResolver;
+    private ProcessingContext ctx = null;   
     
-    private static Logger log = Logger.getLogger(
+    private static final  Logger log = Logger.getLogger(
             LogDomainConstants.WSS_API_DOMAIN,
             LogDomainConstants.WSS_API_DOMAIN_BUNDLE);
     
     /** Creates a new instance of MessagePolicyVerifier */
     public PolicyAlternativesVerifier(ProcessingContext ctx, TargetResolver targetResolver) {
         this.ctx = ctx;
-        this.targetResolver = targetResolver;
+        //this.targetResolver = targetResolver;
     }
 
     public void verifyPolicy(SecurityPolicy recvdPolicy, SecurityPolicy configPolicy) throws PolicyViolationException {

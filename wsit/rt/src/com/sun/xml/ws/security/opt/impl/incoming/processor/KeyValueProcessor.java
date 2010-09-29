@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -81,14 +81,13 @@ public class KeyValueProcessor {
     private static final String ENCRYPTED_KEY = "EncryptedKey";
     private static final String KEY_VALUE = "KeyValue";
     private static final String EXPONENT = "Exponent";
-    private static final String MODULUS = "Modulus";
+    private static final String MODULUS = "Modulus";    
     
-    private JAXBFilterProcessingContext pc = null;
     private XMLStreamWriter canonWriter = null;
     
     /** Creates a new instance of KeyValueProcessor */
     public KeyValueProcessor(JAXBFilterProcessingContext pc,XMLStreamWriter writer) {
-        this.pc = pc;
+        //this.pc = pc;
         this.canonWriter = writer;
     }
     /**

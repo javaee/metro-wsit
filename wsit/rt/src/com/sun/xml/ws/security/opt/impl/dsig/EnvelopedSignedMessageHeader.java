@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -61,15 +61,14 @@ import org.jcp.xml.dsig.internal.DigesterOutputStream;
 public class EnvelopedSignedMessageHeader implements SecurityHeaderElement,SecurityElementWriter{
     private Reference ref = null;
     private SecurityHeaderElement she = null;
-    private StAXEXC14nCanonicalizerImpl stAXC14n = null;
-    private JAXBSignatureHeaderElement jse = null;
+    private StAXEXC14nCanonicalizerImpl stAXC14n = null;    
     private String id = "";
     private NamespaceContextEx nsContext = null;
     /** Creates a new instance of EnvelopedSignedMessageHeader */
     public EnvelopedSignedMessageHeader(SecurityHeaderElement she,Reference ref,JAXBSignatureHeaderElement jse,NamespaceContextEx nsContext) {
         this.she = she;
         this.ref = ref;
-        this.jse = jse;
+        //this.jse = jse;
         this.nsContext = nsContext;
         stAXC14n = new StAXEXC14nCanonicalizerImpl();
     }

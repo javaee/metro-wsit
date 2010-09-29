@@ -96,17 +96,15 @@ public class XWSSPolicyGenerator {
     SignaturePolicy _csSP = null;
     XWSSPolicyContainer _policyContainer = null;
     Binding _binding;
-    Policy effectivePolicy = null;
-    int id = 1;
+    Policy effectivePolicy = null;    
     boolean isServer = false;
     boolean isIncoming = false;
     private PolicyAssertion wssAssertion = null;
     private WSSAssertion wss11 = null;
     private Trust10 trust10 = null;
-    private Trust13 trust13 = null;
-    private AlgorithmSuite algSuite = null;
+    private Trust13 trust13 = null;    
     //true if signed by primary signature
-    private boolean signBody = false;
+    //private boolean signBody = false;
     
     //true if encrypted by primary encryption policy
     private boolean encryptBody = false;

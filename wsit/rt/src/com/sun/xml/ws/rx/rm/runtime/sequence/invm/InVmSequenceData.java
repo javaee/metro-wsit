@@ -273,7 +273,7 @@ final class InVmSequenceData implements SequenceData {
      * This method must be called from within a data write lock only.
      */
     private void addUnackedMessageNumber(long messageNumber, boolean received) {
-        final Long newUnackedInstance = new Long(messageNumber);
+        final Long newUnackedInstance = Long.valueOf(messageNumber);
 
         data.getAllUnackedMessageNumbers().add(newUnackedInstance);
         if (received) {

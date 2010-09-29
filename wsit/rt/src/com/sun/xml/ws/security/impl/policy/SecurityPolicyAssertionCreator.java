@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -240,10 +240,8 @@ public class SecurityPolicyAssertionCreator implements PolicyAssertionCreator{
         
     }
     @SuppressWarnings("unchecked")
-    private Constructor getConstructor(Class cl) throws NoSuchMethodException{
-        Constructor [] cList = cl.getConstructors();
+    private Constructor getConstructor(Class cl) throws NoSuchMethodException{       
         return cl.getConstructor(com.sun.xml.ws.policy.sourcemodel.AssertionData.class,java.util.Collection.class,com.sun.xml.ws.policy.AssertionSet.class);
-    }
-    
+    }  
     
 }

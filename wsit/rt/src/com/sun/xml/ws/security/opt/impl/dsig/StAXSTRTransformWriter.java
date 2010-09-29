@@ -77,8 +77,7 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
     private boolean first = true;
     private String directReferenceValue = "";
     private XMLCryptoContext xMLCryptoContext;
-    private String strId = "";
-    private JAXBFilterProcessingContext filterContext ;    
+    private String strId = "";        
     
     /** Creates a new instance of StAXEnvelopedTransformWriter */
     public StAXSTRTransformWriter(XMLStreamWriter writer,Data data,XMLCryptoContext xMLCryptoContext) {
@@ -90,7 +89,7 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
             ns = ((StreamWriterData)data).getNamespaceContext();
         }
         this.xMLCryptoContext = xMLCryptoContext;
-        filterContext = (JAXBFilterProcessingContext) xMLCryptoContext.get(MessageConstants.WSS_PROCESSING_CONTEXT);
+        //filterContext = (JAXBFilterProcessingContext) xMLCryptoContext.get(MessageConstants.WSS_PROCESSING_CONTEXT);
     }
     
     public StAXSTRTransformWriter(Data data,XMLCryptoContext xMLCryptoContext,String refId) {
@@ -102,7 +101,7 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
         }
         this.xMLCryptoContext = xMLCryptoContext;
         this.strId = refId;
-        filterContext = (JAXBFilterProcessingContext) xMLCryptoContext.get(MessageConstants.WSS_PROCESSING_CONTEXT);        
+        //filterContext = (JAXBFilterProcessingContext) xMLCryptoContext.get(MessageConstants.WSS_PROCESSING_CONTEXT);
     }
     
     public NamespaceContextEx getNamespaceContext() {

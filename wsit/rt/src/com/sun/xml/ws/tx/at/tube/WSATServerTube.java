@@ -88,8 +88,7 @@ import java.util.Set;
 
 public class WSATServerTube extends AbstractFilterTubeImpl implements WSATConstants {
     private static final String  WSATATTRIBUTE = ".wsee.wsat.attribute";
-    ServerTubelineAssemblyContext m_context;
-    boolean isTransactionalAnnotationPresent;
+    ServerTubelineAssemblyContext m_context;    
     private WSDLPort m_port;
     private TransactionalFeature m_transactionalFeature;
     WSATServer m_wsatServerHelper = new WSATServerHelper();

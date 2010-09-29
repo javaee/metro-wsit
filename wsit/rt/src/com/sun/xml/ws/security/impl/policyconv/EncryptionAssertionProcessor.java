@@ -53,15 +53,14 @@ import javax.xml.namespace.QName;
 public class EncryptionAssertionProcessor {
     private AlgorithmSuite algorithmSuite = null;
     private boolean bodyEncrypted = false;
-    private boolean encryptAttachments = false;
-    private boolean enforce = false;
+    private boolean encryptAttachments = false;    
     private HashSet<Header> encryptedParts = new HashSet<Header>();
     //  private EncryptionTargetCreator etc =null;
     private EncryptionTargetCreator etCreator = null;
     /** Creates a new instance of EncryptionAssertionProcessor */
     public EncryptionAssertionProcessor(AlgorithmSuite algorithmSuite,boolean enforce) {
         this.algorithmSuite = algorithmSuite;
-        this.enforce = enforce;
+        //this.enforce = enforce;
         this.etCreator = new EncryptionTargetCreator(algorithmSuite,enforce);
     }
     
