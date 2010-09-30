@@ -359,7 +359,7 @@ public abstract class WSITAuthContextBase  {
             QName serviceName = pipeConfig.getWSDLPort().getOwner().getName();
             QName portName = pipeConfig.getWSDLPort().getName();
             //Review: will this take care of EndpointPolicySubject
-            PolicyMerger policyMerge = PolicyMerger.getMerger();
+            //PolicyMerger policyMerge = PolicyMerger.getMerger();
             PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.

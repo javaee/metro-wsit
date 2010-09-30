@@ -53,7 +53,7 @@
  * limitations under the License.
  */
 /*
- * $Id: URI.java,v 1.1 2010-03-20 12:32:45 kumarjayanti Exp $
+ * $Id: URI.java,v 1.2 2010-09-30 12:01:18 sm228678 Exp $
  */
 package com.sun.xml.wss.impl.misc;
 
@@ -403,7 +403,7 @@ public class URI implements Serializable
 
       // if we get to this point, we need to resolve relative path
       // RFC 2396 5.2 #6
-      String path = new String();
+      String path = "";
       String basePath = p_base.getPath();
 
       // 6a - get all but the last segment of the base URI path

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,9 +51,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import javax.xml.namespace.QName;
@@ -64,7 +62,7 @@ import javax.xml.namespace.QName;
  */
 public class SecurityContextToken extends PolicyAssertion implements com.sun.xml.ws.security.policy.SecurityContextToken, SecurityAssertionValidator{
     private String id;
-    private List<String> tokenRefType;
+    //private List<String> tokenRefType;
     private boolean populated = false;
     private String tokenType;
     private PolicyAssertion rdKey = null;
@@ -90,11 +88,13 @@ public class SecurityContextToken extends PolicyAssertion implements com.sun.xml
     }
     
     public Iterator getTokenRefernceType() {
-        if ( tokenRefType != null ) {
+        //this check is not necessary as tokenRefType is always null
+        /*if ( tokenRefType != null ) {
             return tokenRefType.iterator();
         } else {
             return Collections.emptyList().iterator();
-        }
+        }*/
+        return Collections.emptyList().iterator();
     }
     
     public boolean isRequireDerivedKeys() {

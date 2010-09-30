@@ -220,10 +220,8 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                 for (int j = 0; j < inferredSecurityPolicy.size(); j++) {
                     WSSPolicy pol = (WSSPolicy) inferredSecurityPolicy.get(j);
                     if (PolicyTypeUtil.samlTokenPolicy(pol)) {
-                        AuthenticationTokenPolicy.SAMLAssertionBinding actual =
-                                (SAMLAssertionBinding) actualPol.getFeatureBinding();
-                        AuthenticationTokenPolicy.SAMLAssertionBinding inferred =
-                                (SAMLAssertionBinding) pol;
+                        //AuthenticationTokenPolicy.SAMLAssertionBinding actual = (SAMLAssertionBinding) actualPol.getFeatureBinding();
+                        //AuthenticationTokenPolicy.SAMLAssertionBinding inferred = (SAMLAssertionBinding) pol;
                         inferredSecurityPolicy.remove(pol);
                         found = true;
                         break;

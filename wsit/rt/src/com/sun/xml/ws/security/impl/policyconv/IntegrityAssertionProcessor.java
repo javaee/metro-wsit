@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -51,23 +51,19 @@ import javax.xml.namespace.QName;
  *
  * @author K.Venugopal@sun.com
  */
-public class IntegrityAssertionProcessor {
+public class IntegrityAssertionProcessor {   
     
-    private AlgorithmSuite algorithmSuite = null;
-    private boolean contentOnly = false;
-    
-    
+    private boolean contentOnly = false; 
     private boolean seenBody = false;
     private boolean seenAttachments = false;
     private HashSet<Header> signParts  = new HashSet<Header>();
-    private boolean allHeaders = false;
-    private boolean ENFORCE = false;
+    private boolean allHeaders = false;    
     private SignatureTargetCreator targetCreator = null;
     
     /** Creates a new instance of IntegrityAssertionProcessor */
     
     public IntegrityAssertionProcessor(AlgorithmSuite algorithmSuite, boolean contentOnly) {
-        this.algorithmSuite = algorithmSuite;
+        //this.algorithmSuite = algorithmSuite;
         this.contentOnly = contentOnly;
         targetCreator = new SignatureTargetCreator(false,algorithmSuite,contentOnly);
     }

@@ -50,8 +50,7 @@ import javax.xml.namespace.QName;
  *
  * @author K.Venugopal@sun.com
  */
-public class EncryptionAssertionProcessor {
-    private AlgorithmSuite algorithmSuite = null;
+public class EncryptionAssertionProcessor {    
     private boolean bodyEncrypted = false;
     private boolean encryptAttachments = false;    
     private HashSet<Header> encryptedParts = new HashSet<Header>();
@@ -59,7 +58,7 @@ public class EncryptionAssertionProcessor {
     private EncryptionTargetCreator etCreator = null;
     /** Creates a new instance of EncryptionAssertionProcessor */
     public EncryptionAssertionProcessor(AlgorithmSuite algorithmSuite,boolean enforce) {
-        this.algorithmSuite = algorithmSuite;
+        //this.algorithmSuite = algorithmSuite;
         //this.enforce = enforce;
         this.etCreator = new EncryptionTargetCreator(algorithmSuite,enforce);
     }

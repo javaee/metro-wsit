@@ -729,7 +729,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
             QName serviceName = tubeConfig.getWSDLPort().getOwner().getName();
             QName portName = tubeConfig.getWSDLPort().getName();
             //Review: will this take care of EndpointPolicySubject
-            PolicyMerger policyMerge = PolicyMerger.getMerger();
+            //PolicyMerger policyMerge = PolicyMerger.getMerger();
             PolicyMapKey endpointKey = PolicyMap.createWsdlEndpointScopeKey(serviceName, portName);
             //createWsdlEndpointScopeKey(serviceName,portName);
             //Review:Will getEffectivePolicy return null or empty policy ?.

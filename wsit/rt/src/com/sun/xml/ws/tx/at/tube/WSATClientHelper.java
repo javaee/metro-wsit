@@ -43,7 +43,6 @@ import com.sun.xml.ws.api.message.Header;
 import com.sun.xml.ws.api.message.Headers;
 import com.sun.xml.ws.tx.at.WSATConstants;
 
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.sun.xml.ws.tx.at.WSATHelper;
@@ -55,6 +54,7 @@ import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
+import java.util.UUID;
 
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
