@@ -58,19 +58,78 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 /**
- * Transmits standalone protocol messages over the wire. Provides also some additional utility mehtods for creating and
- * unmarshalling JAXWS {@link Message} and {@link Header} objects.
+ * Transmits standalone protocol messages over the wire. Provides also some additional 
+ * utility methods for creating and unmarshalling JAXWS {@link Message} and {@link Header}
+ * objects.
  *
  * <b>
- * WARNING: This class is a private utility class used by WS-RX implementation. Any usage outside
- * the intedned scope is strongly discouraged. The API exposed by this class may be changed, replaced
- * or removed without any advance notice.
+ * WARNING: This class is a private utility class used by WS-RX implementation. 
+ * Any usage outside the intended scope is strongly discouraged. The API exposed
+ * by this class may be changed, replaced or removed without any advance notice.
  * </b>
  *
- * @author Marek Potociar (marek.potociar at sun.com)
+ * @author Marek Potociar (marek.potociar at oracle.com)
  */
 public final class Communicator {
 
+    public static final class Builder {
+
+        private final String name;
+        private Tube tubelineHead;
+        private SecureConversationInitiator scInitiator;
+        private AddressingVersion addressingVersion = AddressingVersion.W3C;
+        private SOAPVersion soapVersion = SOAPVersion.SOAP_12;
+        private JAXBRIContext jaxbContext;
+
+        private Builder(String name) {
+            this.name = name;
+        }
+
+        public Builder addressingVersion(AddressingVersion value) {
+            this.addressingVersion = value;
+
+            return this;
+        }
+
+        public Builder jaxbContext(JAXBRIContext value) {
+            this.jaxbContext = value;
+
+            return this;
+        }
+
+        public Builder secureConversationInitiator(SecureConversationInitiator value) {
+            this.scInitiator = value;
+
+            return this;
+        }
+
+        public Builder soapVersion(SOAPVersion value) {
+            this.soapVersion = value;
+
+            return this;
+        }
+
+        public Builder tubelineHead(Tube value) {
+            this.tubelineHead = value;
+
+            return this;
+        }
+
+        public Communicator build() {
+            if (tubelineHead == null) {
+                throw new IllegalStateException("Cannot create communicator instance: tubeline head has not been set.");
+            }
+            if (jaxbContext == null) {
+                throw new IllegalStateException("Cannot create communicator instance: JAXB context has not been set.");
+            }
+
+            return new Communicator(name, tubelineHead, scInitiator, addressingVersion, soapVersion, jaxbContext);
+        }
+    }
+
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
     // TODO P2 introduce an inner builder class
     private static final Logger LOGGER = Logger.getLogger(Communicator.class);
     public final QName soapMustUnderstandAttributeName;
@@ -84,13 +143,13 @@ public final class Communicator {
     private FiberExecutor fiberExecutor;
     private volatile EndpointAddress destinationAddress;
 
-    public Communicator(
-            String name,
-            Tube tubeline,
-            SecureConversationInitiator scInitiator,
-            AddressingVersion addressingVersion,
-            SOAPVersion soapVersion,
-            JAXBRIContext jaxbContext) {
+    private Communicator(
+            @NotNull String name,
+            @NotNull Tube tubeline,
+            @Nullable SecureConversationInitiator scInitiator,
+            @NotNull AddressingVersion addressingVersion,
+            @NotNull SOAPVersion soapVersion,
+            @NotNull JAXBRIContext jaxbContext) {
         this.destinationAddress = null;
         this.fiberExecutor = new FiberExecutor(name, tubeline);
         this.scInitiator = scInitiator;
@@ -165,7 +224,7 @@ public final class Communicator {
     }
 
     /**
-     * Creates a new empty request packet with an empty message thatt has WS-A action set
+     * Creates a new empty request packet with an empty message that has WS-A action set
      *
      * @return a new empty request packet
      */
@@ -174,14 +233,17 @@ public final class Communicator {
     }
 
     /**
-     * TODO javadoc
+     * Creates new response packet based for the supplied request packet
+     * with the provided response WS-Addressing action set.
      *
-     * @param requestPacket
-     * @param responseWsaAction
-     * @return
+     * @param requestPacket original request the newly created response belongs to
+     * @param responseWsaAction WS-Addressing action header value to be set
+     * @param isClientResponse determines whether the response is technically a client request
+     *
+     * @return newly created response packet
      */
     public Packet createResponsePacket(@NotNull Packet requestPacket, Object jaxbElement, String responseWsaAction, boolean isClientResponse) {
-        assert requestPacket != null: "Request packet must not be 'null' when creating a response";
+        assert requestPacket != null : "Request packet must not be 'null' when creating a response";
         if (!isClientResponse) { // server side response
             return requestPacket.createServerResponse(
                     Messages.create(jaxbContext, jaxbElement, soapVersion),
@@ -198,11 +260,13 @@ public final class Communicator {
     }
 
     /**
-     * TODO javadoc
+     * Creates new response packet based for the supplied request packet
+     * with the provided response WS-Addressing action set.
      *
-     * @param requestPacket
-     * @param responseWsaAction
-     * @return
+     * @param requestPacket original request the newly created response belongs to
+     * @param responseWsaAction WS-Addressing action header value to be set
+     *
+     * @return newly created response packet
      */
     public Packet createResponsePacket(Packet requestPacket, Message message, String responseWsaAction) {
         if (requestPacket != null) { // server side response
@@ -217,11 +281,13 @@ public final class Communicator {
     }
 
     /**
-     * TODO javadoc
+     * Creates an empty (no SOAP body payload) new response packet based for the
+     * supplied request packet with the provided response WS-Addressing action set.
      *
-     * @param requestPacket
-     * @param responseWsaAction
-     * @return
+     * @param requestPacket original request the newly created response belongs to
+     * @param responseWsaAction WS-Addressing action header value to be set
+     *
+     * @return newly created empty (no SOAP body payload) response packet
      */
     public Packet createEmptyResponsePacket(Packet requestPacket, String responseWsaAction) {
         if (requestPacket != null) { // server side response
@@ -235,6 +301,13 @@ public final class Communicator {
         }
     }
 
+    /**
+     * Creates a null (no message) response packet based for the supplied request packet.
+     *
+     * @param requestPacket original request the newly created response belongs to
+     *
+     * @return newly created null (no message) response packet
+     */
     public Packet createNullResponsePacket(Packet requestPacket) {
         if (requestPacket.transportBackChannel != null) {
             requestPacket.transportBackChannel.close();
@@ -332,7 +405,7 @@ public final class Communicator {
 
     /**
      * Sends the request {@link Packet} and returns the corresponding response {@link Packet}.
-     * This method should be used for Req-Resp MEP
+     * This method should be used for Req-Res MEP
      *
      * @param request {@link Packet} containing the message to be send
      * @return response {@link Message} wrapped in a response {@link Packet} received
@@ -346,7 +419,7 @@ public final class Communicator {
     }
 
     /**
-     * Asynchroneously sends the request {@link Packet}
+     * Asynchronously sends the request {@link Packet}
      *
      * @param request {@link Packet} containing the message to be send
      * @param completionCallbackHandler completion callback handler to process the response.
@@ -380,7 +453,7 @@ public final class Communicator {
      * @return destination endpoint reference or {@code null} in case the destination address has
      *         not been specified when constructing this {@link Communicator} instance.
      */
-    public 
+    public
     @Nullable
     EndpointAddress getDestinationAddress() {
         return destinationAddress;

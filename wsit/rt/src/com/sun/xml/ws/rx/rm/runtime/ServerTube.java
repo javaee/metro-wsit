@@ -83,11 +83,11 @@ public class ServerTube extends AbstractFilterTubeImpl {
     private static final Logger LOGGER = Logger.getLogger(ServerTube.class);
     private static final Level PROTOCOL_FAULT_LOGGING_LEVEL = Level.WARNING;
     /**
-     * TODO javadoc
+     * Property that is exposing current sequence identifier through the message context
      */
     private static final String SEQUENCE_PROPERTY = "com.sun.xml.ws.sequence";
     /**
-     * TODO javadoc
+     * Property that is exposing current message number through the message context
      */
     private static final String MESSAGE_NUMBER_PROPERTY = "com.sun.xml.ws.messagenumber";
     //
@@ -111,15 +111,15 @@ public class ServerTube extends AbstractFilterTubeImpl {
             throw new RxRuntimeException(LocalizationMessages.WSRM_1140_NO_ADDRESSING_VERSION_ON_ENDPOINT());
         }
 
-        RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
+        RuntimeContext.Builder rcBuilder = RuntimeContext.builder(
                 configuration,
-                new Communicator(
-                "rm-server-tube-communicator",
-                super.next,
-                null,
-                configuration.getAddressingVersion(),
-                configuration.getSoapVersion(),
-                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())));
+                Communicator.builder("rm-server-tube-communicator")
+                .tubelineHead(super.next)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build()
+        );
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(

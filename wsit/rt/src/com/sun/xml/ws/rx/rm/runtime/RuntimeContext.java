@@ -52,7 +52,7 @@ import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
  */
 public final class RuntimeContext {
 
-    public static Builder getBuilder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
+    public static Builder builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
         return new Builder(configuration, communicator);
     }
 

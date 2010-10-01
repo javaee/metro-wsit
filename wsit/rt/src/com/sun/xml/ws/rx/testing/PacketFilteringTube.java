@@ -72,15 +72,14 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(tubelineHead);
         this.isClientSide = true;
 
-        RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
+        RuntimeContext.Builder rcBuilder = RuntimeContext.builder(
                 configuration,
-                new Communicator(
-                "packet-filtering-tube-communicator",
-                super.next,
-                null,
-                configuration.getAddressingVersion(),
-                configuration.getSoapVersion(),
-                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())));
+                Communicator.builder("packet-filtering-client-tube-communicator")
+                .tubelineHead(super.next)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build());
 
         this.rc = rcBuilder.build();
 
@@ -91,15 +90,14 @@ class PacketFilteringTube extends AbstractFilterTubeImpl {
         super(tubelineHead);
         this.isClientSide = false;
 
-        RuntimeContext.Builder rcBuilder = RuntimeContext.getBuilder(
+        RuntimeContext.Builder rcBuilder = RuntimeContext.builder(
                 configuration,
-                new Communicator(
-                "packet-filtering-tube-communicator",
-                super.next,
-                null,
-                configuration.getAddressingVersion(),
-                configuration.getSoapVersion(),
-                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())));
+                Communicator.builder("packet-filtering-server-tube-communicator")
+                .tubelineHead(super.next)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build());
 
         this.rc = rcBuilder.build();
 

@@ -115,15 +115,15 @@ final class ClientTube extends AbstractFilterTubeImpl {
             scInitiator = context.getScInitiator();
         }
 
-        this.rc = RuntimeContext.getBuilder(
+        this.rc = RuntimeContext.builder(
                 configuration,
-                new Communicator(
-                "rm-client-tube-communicator",
-                super.next,
-                scInitiator,
-                configuration.getAddressingVersion(),
-                configuration.getSoapVersion(),
-                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))).build();
+                Communicator.builder("rm-client-tube-communicator")
+                .tubelineHead(super.next)
+                .secureConversationInitiator(scInitiator)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build()).build();
 
         DeliveryQueueBuilder outboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
                 rc.configuration,

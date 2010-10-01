@@ -79,14 +79,13 @@ public class McClientTube extends AbstractFilterTubeImpl implements WsmcRuntimeP
 
         this.configuration = configuration;
 
-        this.communicator = new Communicator(
-                "McClientTubeCommunicator",
-                tubelineHead,
-                null,
-                configuration.getAddressingVersion(),
-                configuration.getSoapVersion(),
-                configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()));
-
+        this.communicator = Communicator.builder("mc-client-tube-communicator")
+                .tubelineHead(super.next)
+                .addressingVersion(configuration.getAddressingVersion())
+                .soapVersion(configuration.getSoapVersion())
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build();
+        
         final String wsmcAnonymousAddress = configuration.getRuntimeVersion().getAnonymousAddress(UUID.randomUUID().toString());
         this.wsmcAnonymousEndpointReference = new WSEndpointReference(wsmcAnonymousAddress, configuration.getAddressingVersion());
         this.wsmcAnnonymousReplyToHeader = wsmcAnonymousEndpointReference.createHeader(configuration.getAddressingVersion().replyToTag);
