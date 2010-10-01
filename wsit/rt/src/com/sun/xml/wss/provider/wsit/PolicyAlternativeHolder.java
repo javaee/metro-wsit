@@ -54,8 +54,7 @@ public class PolicyAlternativeHolder {
     protected static final Logger log =
             Logger.getLogger(
             LogDomainConstants.WSIT_PVD_DOMAIN,
-            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);
-    private AssertionSet alternative;
+            LogDomainConstants.WSIT_PVD_DOMAIN_BUNDLE);    
     private HashMap<WSDLBoundOperation, SecurityPolicyHolder> outMessagePolicyMap = null;
     private HashMap<WSDLBoundOperation, SecurityPolicyHolder> inMessagePolicyMap = null;
     private HashMap<String, SecurityPolicyHolder> outProtocolPM = null;
@@ -73,7 +72,7 @@ public class PolicyAlternativeHolder {
     private String uuid;
 
     public PolicyAlternativeHolder(AssertionSet assertions, SecurityPolicyVersion sv, Policy bpMSP) {
-        this.alternative = assertions;
+        //this.alternative = assertions;
         this.spVersion = sv;
         this.bpMSP = bpMSP;
         uuid = UUID.randomUUID().toString();

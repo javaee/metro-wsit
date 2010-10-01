@@ -1,11 +1,11 @@
 /*
- * $Id: Assertion.java,v 1.1 2010-03-20 12:33:28 kumarjayanti Exp $
+ * $Id: Assertion.java,v 1.2 2010-10-01 06:47:34 sm228678 Exp $
  */
 
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,7 +47,6 @@ import com.sun.xml.wss.saml.util.SAMLUtil;
 import com.sun.xml.wss.saml.internal.saml20.jaxb20.AssertionType;
 import com.sun.xml.wss.saml.internal.saml20.jaxb20.NameIDType;
 import java.util.GregorianCalendar;
-import java.util.logging.Level;
 import javax.xml.bind.JAXBElement;
 
 import javax.xml.datatype.DatatypeFactory;
@@ -125,7 +124,7 @@ public class Assertion extends AssertionType implements com.sun.xml.wss.saml.Ass
     private NameIDType issuerValue = null;
     private java.math.BigInteger majorValue = null;
     private java.math.BigInteger minorValue = null;
-    private Element processedAssertionElement = null;
+    //private Element processedAssertionElement = null;
     private List<Object> statementList = null;
     private String canonicalizationMethod = CanonicalizationMethod.EXCLUSIVE;
     private JAXBContext jc;

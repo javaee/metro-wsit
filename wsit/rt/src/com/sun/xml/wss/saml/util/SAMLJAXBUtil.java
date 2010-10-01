@@ -57,7 +57,7 @@ import javax.xml.ws.WebServiceException;
 public class SAMLJAXBUtil {
 
     /** Creates a new instance of SAMLJAXBUtil */
-    public static JAXBContext jaxbContext;
+    static JAXBContext jaxbContext;
     public static final WSSNamespacePrefixMapper prefixMapper11 = new WSSNamespacePrefixMapper();
     public static final WSSNamespacePrefixMapper prefixMapper12 = new WSSNamespacePrefixMapper(true);
 

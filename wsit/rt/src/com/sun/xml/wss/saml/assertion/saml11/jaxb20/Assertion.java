@@ -2,7 +2,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -67,7 +67,6 @@ import com.sun.xml.wss.impl.misc.Base64;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AttributeStatementType;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AuthenticationStatementType;
 import com.sun.xml.wss.saml.internal.saml11.jaxb20.AuthorizationDecisionStatementType;
-import com.sun.xml.wss.saml.internal.saml11.jaxb20.StatementAbstractType;
 import com.sun.xml.wss.saml.util.SAMLJAXBUtil;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -122,7 +121,7 @@ public class Assertion  extends com.sun.xml.wss.saml.internal.saml11.jaxb20.Asse
     private Element signedAssertion = null;
     private String version = null;
     private String canonicalizationMethod = CanonicalizationMethod.EXCLUSIVE;    
-    private Element processedAssertionElement = null;
+    //private Element processedAssertionElement = null;
     private List<Object> statementList = null;
      private JAXBContext jc;
     /**

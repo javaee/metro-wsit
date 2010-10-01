@@ -377,11 +377,11 @@ public final class RegStoreFileParser {
         throws IOException {
         String nextLine = reader.readLine();
         String line = (nextLine != null)? nextLine.trim():null;
-        if (line.equals("}")) {
+        if (line != null && line.equals("}")) {
             return null;
         }
         Map<String, String> properties = new HashMap<String, String>();
-        while (!line.equals("}")) {
+        while (line != null && !line.equals("}")) {
             properties.put(line.substring(0, line.indexOf(SEP)),
                 line.substring(line.indexOf(SEP) + 1, line.length()));
             line = reader.readLine().trim();
@@ -396,7 +396,7 @@ public final class RegStoreFileParser {
             new ArrayList<RegistrationContext>();
         String nextLine = reader.readLine();
         String line = (nextLine != null)? nextLine.trim():null;
-        while (!line.equals("}")) {
+        while (line != null && !line.equals("}")) {
             if (line.startsWith(CON_ENTRY)) {
                 EntryInfo conEntry = readConEntry(reader);
                 className = conEntry.getClassName();
@@ -417,7 +417,7 @@ public final class RegStoreFileParser {
         String description = null;
         String nextLine = reader.readLine();
         String line = (nextLine != null)? nextLine.trim():null;
-        while (!line.equals("}")) {
+        while (line != null && !line.equals("}")) {
             String value = line.substring(line.indexOf(SEP) + 1,
                 line.length());
             if (line.startsWith(LAYER)) {
