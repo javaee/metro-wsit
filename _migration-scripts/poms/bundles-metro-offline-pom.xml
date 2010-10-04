@@ -44,52 +44,30 @@
         <version>2.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.sun.xml.ws</groupId>
     <artifactId>@module.id@</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>@module.name@</name>
-    <description>
-        This module contains the compilation of all additional classes required
-        for running Metro outside JavaEE container
-    </description>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
+                        <!-- this is used for inheritance merges -->
                         <phase>package</phase>
+                        <!-- append to the packaging phase. -->
                         <goals>
-                            <goal>shade</goal>
+                            <goal>attached</goal>
+                            <!-- goals == mojos -->
                         </goals>
-                        <configuration>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.sun.grizzly:grizzly-framework-http</include>
-                                    <include>com.sun.net.httpserver:http</include>
-                                    <include>javax.security.auth.message:jmac</include>
-                                    <include>javax.annotation:jsr250-api</include>
-                                    <include>javax.mail:mail</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/gfprobe-provider.xml</exclude>
-                                        <exclude>com/sun/grizzly/**</exclude>
-                                        <exclude>com/sun/org/**</exclude>
-                                        <exclude>org/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -98,25 +76,66 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sun.grizzly</groupId>
-            <artifactId>grizzly-framework-http</artifactId>
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.net.httpserver</groupId>
-            <artifactId>http</artifactId>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.security.auth.message</groupId>
-            <artifactId>jmac</artifactId>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-extra-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-extra</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-rt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.tools.ws</groupId>
+            <artifactId>webservices-tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wstx-services</artifactId>
+            <type>war</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-api-osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-extra-jdk-packages</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctc.wstx</groupId>
+            <artifactId>woodstox-osgi</artifactId>
         </dependency>
     </dependencies>
-
 </project>

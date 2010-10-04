@@ -201,6 +201,10 @@
                     </executions>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.2-beta-5</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>2.1.0</version>
@@ -671,6 +675,12 @@
                 <artifactId>wstx-asl</artifactId>
                 <version>3.2.1</version>
             </dependency>
+            <dependency>
+                <groupId>com.ctc.wstx</groupId>
+                <artifactId>woodstox-osgi</artifactId>
+                <version>3.2.1.1</version>
+            </dependency>
+
 
             <!-- Testing -->
             <dependency>

@@ -97,6 +97,11 @@ if [ ! -n "$NO_EXPORT" ] ; then
     EXPORTED_DIR=tools
     cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d $EXPORTED_DIR wsit/wsit/$EXPORTED_DIR
 
+    cd `dirname $EXPORTED_MASTER_ROOT`
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_MASTER_ROOT` wsit/wsit/LICENSE.txt
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_MASTER_ROOT` wsit/wsit/CDDLv1.0.1.txt
+    cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $EXPORTED_MASTER_ROOT` wsit/wsit/CDDLv1.0.1.html
+
     popd
 fi
 
@@ -115,11 +120,9 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $NEW_PROJECT_ROOT -n "Metro 
 
 source ./migrate-wsit-sources.sh
 
-# Exporting license & adding license maintenance tools
-echo "Exporting license & adding license maintenance tools..."
+# Adding license maintenance tools
+echo "Adding license maintenance tools..."
 pushd .
-cd `dirname $NEW_PROJECT_ROOT`
-cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d `basename $NEW_PROJECT_ROOT` wsit/wsit/LICENSE.txt
 
 cd $NEW_PROJECT_ROOT
 cvs -d :pserver:guest@cvs.dev.java.net:/cvs -z 9 $CVS_QUIET export -f -R -r HEAD -d legal wsit/_migration-scripts/metro-legal
@@ -185,13 +188,20 @@ MODULE_NAME=webservices-extra-jdk-packages
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Extra JDK 6 packages required by Metro Web Services OSGi bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 mkdir -p $MODULE_ROOT/src/main/resources/
+touch $MODULE_ROOT/src/main/resources/empty
 
-MODULE_NAME=metro-bundle
+MODULE_NAME=metro-offline
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
 source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Offline Zipped Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
-mkdir -p $MODULE_ROOT/src/main/resources/install-scripts/
-mv $EXPORTED_ROOT/etc/metro-on-*.xml $MODULE_ROOT/src/main/resources/install-scripts/
+mkdir -p $MODULE_ROOT/src/main/resources/
+mv $EXPORTED_ROOT/CDDLv1.0.1.html $MODULE_ROOT/src/main/resources/LICENSE.html
+mv $EXPORTED_ROOT/CDDLv1.0.1.txt $MODULE_ROOT/src/main/resources/LICENSE.txt
+mv $EXPORTED_ROOT/etc/metro-on-*.xml $MODULE_ROOT/src/main/resources/
 mv $EXPORTED_ROOT/etc/readme.html $MODULE_ROOT/src/main/resources/
+
+mkdir -p $MODULE_ROOT/src/main/assembly/
+cp ./poms/bundles-${MODULE_NAME}-assembly.xml $MODULE_ROOT/src/main/assembly/assembly.xml
+
 echo "TODO: Finish metro zip bundle module"
 
 # Migrating etc/* data
@@ -199,7 +209,6 @@ echo "Migrations data from etc/ directory"
 ensureDir "$NEW_PROJECT_ROOT/etc"
 mv $EXPORTED_ROOT/etc/schemas $NEW_PROJECT_ROOT/etc/
 mv $EXPORTED_ROOT/etc/sql $NEW_PROJECT_ROOT/etc/
-echo "TODO: migrate etc/bnd files"
 
 # Migrating E2E tests
 echo "Migrating E2E tests"
@@ -217,5 +226,4 @@ mv $EXPORTED_ROOT/samples $NEW_PROJECT_ROOT/samples
 
 # Migrating Metro release notes
 echo "Migrating Metro release notes"
-
-echo "TODO: migrate status notes"
+mv $EXPORTED_ROOT/status-notes $NEW_PROJECT_ROOT/status-notes
