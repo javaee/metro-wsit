@@ -64,19 +64,17 @@ public abstract class BaseProxyBuilder<T, B extends BaseProxyBuilder<T,B>> {
 
     /**
      * Add feature to be enabled on the proxy built by this builder.
-     * @param feature
-     * @return
+     * @param feature WebServiceFeature
      */
-    public B feature(WebServiceFeature feature){
-        if(feature == null) return (B)this;
+    public void feature(WebServiceFeature feature){
+        if(feature == null) return;
         if(features == null) features = new ArrayList<WebServiceFeature>();
         features.add(feature);
-        return (B)this;
    }
 
     /**
      * specifiy the wsa:to and endpoint reference parameters of the proxy built by this builder
-     * @param to
+     * @param to EndpointReference
      * @return
      */
     public B to(EndpointReference to) {
@@ -113,7 +111,6 @@ public abstract class BaseProxyBuilder<T, B extends BaseProxyBuilder<T,B>> {
 
     /**
      * specify credential providers required by webservice security runtime.
-     * @param credentialProvider
      * @return
      
     public B credentialProvider(CredentialProvider credentialProvider){
@@ -123,7 +120,7 @@ public abstract class BaseProxyBuilder<T, B extends BaseProxyBuilder<T,B>> {
         return (B) this;
    }*///todoremove 
 
-    protected WebServiceFeature[] getEnabledFeatures(){
+    protected WebServiceFeature[] getEnabledFeatures() {
         return features.toArray(new WebServiceFeature[0]);
     }
 

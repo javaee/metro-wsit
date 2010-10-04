@@ -35,11 +35,8 @@
  */
 package com.sun.xml.ws.tx.at.common;
 
-import com.sun.xml.ws.tx.at.common.TxLogger;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 
 import javax.naming.Context;
@@ -65,8 +62,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     private static final String USER_TRANSACTION_JNDI_NAME = "java:comp/UserTransaction";
     //
     private static final TransactionManagerImpl singleton = new TransactionManagerImpl();
-
-    public static Transaction transaction; //todo temporary hack REMOVE
     
     static public TransactionManagerImpl getInstance() {
         return singleton;
@@ -94,7 +89,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         javaeeSynchReg = (TransactionSynchronizationRegistry) jndiLookup(TXN_SYNC_REG_JNDI_NAME);
     }
 
-    public TransactionManager getTransactionManager() { //todo should not be public
+    public TransactionManager getTransactionManager() {
         return javaeeTM;
     }
 
@@ -148,49 +143,12 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
         return javaeeSynchReg.getTransactionKey();
     }
 
-    //todo delete this
-    private static final TransactionSynchronizationRegistry tempjavaeeSynchReg =
-            new TransactionSynchronizationRegistry(){
-        Map map = new HashMap();
-
-        public Object getTransactionKey() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public void putResource(Object o, Object o1) {
-            map.put(o, o1);
-        }
-
-        public Object getResource(Object o) {
-            return map.get(o);
-        }
-
-        public void registerInterposedSynchronization(Synchronization s) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public int getTransactionStatus() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public void setRollbackOnly() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public boolean getRollbackOnly() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-    };
-
     public void putResource(final Object object, final Object object0) {
-        tempjavaeeSynchReg.putResource(object, object0);
-        //todo use sync of/on obtained tx instead of metrolevel cache javaeeSynchReg.putResource(object, object0);
+        javaeeSynchReg.putResource(object, object0);
     }
 
     public Object getResource(final Object object) {
-        return tempjavaeeSynchReg.getResource(object);
-        //todo use sync of/on obtained tx instead of metrolevel cache return javaeeSynchReg.getResource(object);
+        return javaeeSynchReg.getResource(object);
     }
 
     public void registerInterposedSynchronization(final Synchronization synchronization) {
@@ -198,8 +156,6 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     }
 
     public void registerSynchronization(final Synchronization sync) {
-        final String METHOD = "registerSynchronization";
-
         if (sync == null) {
             return;
         }
@@ -252,7 +208,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
     static private Method servletPostInvokeTxMethod = null;
 
     private void initServletMethods() {
-        if (initialized == false) {
+        if (!initialized) {
             initialized = true;
             servletPreInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPreInvokeTx", null);
             servletPostInvokeTxMethod = getMethod(javaeeTM.getClass(), "servletPostInvokeTx", boolean.class);
@@ -271,7 +227,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * Note: this method is a no-op when invoked on an EJB.
      */
     public void servletPreInvokeTx() {
-        final String METHOD = "servletPreInvokeTx";
+   //     final String METHOD = "servletPreInvokeTx";
         initServletMethods();
         if (servletPreInvokeTxMethod != null) {
             try {
@@ -294,7 +250,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * @param suspend indicate whether the delisting is due to suspension or transaction completion(commmit/rollback)
      */
     public void servletPostInvokeTx(Boolean suspend) {
-        final String METHOD = "servletPostInvokeTx";
+ //       final String METHOD = "servletPostInvokeTx";
         initServletMethods();
         if (servletPostInvokeTxMethod != null) {
             try {

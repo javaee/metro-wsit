@@ -67,7 +67,7 @@ public class WSATServerHelper implements WSATServer {
             CoordinationContextBuilder ccBuilder =
                     CoordinationContextBuilder.headers(headers,tx.getVersion());
             if(ccBuilder != null) {
-                processIncomingTransaction(headers, ccBuilder);
+                processIncomingTransaction(ccBuilder);
             } else {
                 if(tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
             }
@@ -100,31 +100,30 @@ public class WSATServerHelper implements WSATServer {
      * //Request messages
      * //    MUST include a wsa:MessageID header.
      * //    MUST include a wsa:ReplyTo header.
+     * @param builder CoordinationContextBuilder
      */
-    private void processIncomingTransaction(
-            HeaderList headers, CoordinationContextBuilder builder) {
+    private void processIncomingTransaction(CoordinationContextBuilder builder) {
         if(WSATHelper.isDebugEnabled())debug("in processingIncomingTransaction");
         //we either need to fast suspend immediately and resume after register as we are doing or move this after register
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
         boolean isRegistered = false;
-        Xid foreignXid = null;
+        Xid foreignXid;
         try {
             foreignXid = WSATHelper.getTransactionServices().importTransaction(
                   (int) timeout, tid.getBytes());
           if(foreignXid!=null) isRegistered = true;
           if(!isRegistered) {
               foreignXid = new XidImpl(tid.getBytes());
-              register(headers, builder, cc, foreignXid, timeout);
+              register(builder, cc, foreignXid, timeout);
           }
         } catch (WSATException e) {
             throw new WebServiceException(e);
         }
     }
 
-    private void register(
-            HeaderList headers, CoordinationContextBuilder builder, CoordinationContextIF cc, Xid foreignXid, long timeout)
+    private void register(CoordinationContextBuilder builder, CoordinationContextIF cc, Xid foreignXid, long timeout)
     {
        String participantId = TransactionIdHelper.getInstance().xid2wsatid(foreignXid);
        Transactional.Version version = builder.getVersion();
@@ -157,7 +156,6 @@ public class WSATServerHelper implements WSATServer {
         } else {
             log("Sending fault. Context refused registerResponseType is null");
             throw new WebServiceException("Sending fault. Context refused registerResponseType is null");
-//        todo    WSATFaultFactory.throwContextRefusedFault();
         }
 //todoremove         TransactionHelper.getTransactionHelper().getTransactionManager().forceResume(suspendedTx);
 //todoremove         if(WSATHelper.isDebugEnabled()) debug("Returned from registerOperation call resumed tx:" + suspendedTx);

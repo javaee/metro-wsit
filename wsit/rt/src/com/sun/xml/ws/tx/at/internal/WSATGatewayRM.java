@@ -71,7 +71,7 @@ public class WSATGatewayRM implements XAResource {
   private final Object currentXidLock = new Object();
   private Xid currentXid;
   static boolean isReady = false;
-  public static final boolean isWSATRecoveryEnabled = new Boolean(System.getProperty("wsat.recovery.enabled", "false")) ;
+  public static final boolean isWSATRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "false"));
   public static final String txlogdir = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogs/";
   private static final String txlogdirinbound = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogsinbound/";
 
@@ -79,7 +79,7 @@ public class WSATGatewayRM implements XAResource {
       create("server");
   }
 
-  private WSATGatewayRM(String serverName) {
+  WSATGatewayRM(String serverName) {
     this.resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
     this.branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
     this.pendingXids = Collections.synchronizedList(new ArrayList<Xid>());
@@ -122,17 +122,17 @@ public class WSATGatewayRM implements XAResource {
     /**
      * Called for create of WSATGatewayRM
      */
-    private void initStore() {
-        File file = new File(txlogdir);
-        file.mkdirs();
-        file = new File(txlogdirinbound);
-        file.mkdirs();
+   void initStore() {
+//        File file = new File(txlogdir);
+//        file.mkdirs();
+//        file = new File(txlogdirinbound);
+//        file.mkdirs();
     }
 
     /**
      * Called for create of WSATGatewayRM
      */
-  private void recoverPendingBranches() {
+    void recoverPendingBranches() {
     if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() outbound");
     FileInputStream fis = null;
     ObjectInputStream in = null;
@@ -415,13 +415,14 @@ public class WSATGatewayRM implements XAResource {
     if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
     FileOutputStream fos = null;
     ObjectOutputStream out = null;
-    fos = new FileOutputStream(txlogdir + branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier());
+    fos = new FileOutputStream(txlogdir + counter++);//branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier());
     out = new ObjectOutputStream(fos);
     out.writeObject(branch);
     out.close();
     branch.setLogged(true);
   }
-
+    
+  private volatile int counter = 0;
     /**
      * Called after rollback, commit, and forget in order to delete branch record.
      * @param branch BranchRecord
@@ -429,7 +430,7 @@ public class WSATGatewayRM implements XAResource {
   private void releaseBranchRecord(BranchRecord branch) {
     if (WSATHelper.isDebugEnabled())   debug("release branch record " + branch);
     //todo delete
-    new File(txlogdir + branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier()); //todo this may well work but test/verify
+    new File(txlogdir + counter);//"branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier()); //todo this may well work but test/verify
     branch.setLogged(false);
   }
 

@@ -105,10 +105,7 @@ public class WSATClientHelper implements WSATClient {
             WSATHelper.getInstance().removeFromXidToTransactionMap(xid);
         }
         Transaction transaction = getWSATTransactionFromMap(map);
-        if (transaction != null && !resume(transaction)) {
-            return false;
-        }
-        return true;
+        return !(transaction != null && !resume(transaction));
     }
 
    private Transaction getWSATTransactionFromMap(Map map) {
@@ -181,7 +178,7 @@ public class WSATClientHelper implements WSATClient {
      * @return false if there are any issues with suspend or message header creation (namely SOAPException),
      *         true otherwise
      */
-    private List<Header> processTransactionalRequest(TransactionalAttribute transactionalAttribute, Map map) {
+    private List<Header> processTransactionalRequest(TransactionalAttribute transactionalAttribute, Map<String, Object> map) {
         List<Header> headers = new ArrayList<Header>();
         String txId = null;
         //todo get cluster/servername, make this unique
@@ -220,7 +217,7 @@ public class WSATClientHelper implements WSATClient {
      *
      * @return Transaction not null if suspend is successful
      */
-    private Transaction suspend(Map map) {
+    private Transaction suspend(Map<String, Object> map) {
         Transaction suspendedTransaction = null;
        try {
            suspendedTransaction = TransactionManagerImpl.getInstance().getTransactionManager().suspend();

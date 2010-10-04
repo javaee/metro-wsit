@@ -36,7 +36,7 @@
 package com.sun.xml.ws.tx.at.common.endpoint;
 
 import junit.framework.TestCase;
-import com.sun.xml.ws.tx.internal.XidStub;
+import com.sun.xml.ws.tx.at.internal.XidStub;
 import com.sun.xml.ws.tx.at.*;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.at.common.WSATVersionStub;

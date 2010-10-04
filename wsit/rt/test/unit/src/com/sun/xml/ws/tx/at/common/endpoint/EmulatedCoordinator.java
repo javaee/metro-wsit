@@ -40,7 +40,7 @@ import com.sun.xml.ws.tx.at.*;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.at.common.WSATVersionStub;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
-import com.sun.xml.ws.tx.internal.XidStub;
+import com.sun.xml.ws.tx.at.internal.XidStub;
 
 import javax.transaction.xa.Xid;
 import javax.xml.ws.WebServiceContext;

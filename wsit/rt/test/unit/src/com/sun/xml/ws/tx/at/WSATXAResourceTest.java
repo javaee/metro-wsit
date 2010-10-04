@@ -42,7 +42,7 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import com.sun.xml.ws.tx.internal.XidStub;
+import com.sun.xml.ws.tx.at.internal.XidStub;
 import com.sun.xml.ws.developer.MemberSubmissionEndpointReference;
 import com.sun.xml.ws.tx.coord.common.EndpointReferenceBuilder;
 import com.sun.xml.ws.util.DOMUtil;
