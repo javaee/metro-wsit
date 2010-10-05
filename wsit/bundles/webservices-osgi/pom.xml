@@ -108,8 +108,10 @@
                         <Private-Package>
                             javanet.staxutils.*
                         </Private-Package>
-                        <Embed-Dependency>*;inline=META-INF/jaxrpc/ToolPlugin.xml</Embed-Dependency>
-                        <Embed-Dependency>*;inline=META-INF/services/**</Embed-Dependency>
+                        <Embed-Dependency>
+                            webservices-rt;inline=META-INF/metro-default.xml,
+                            *;inline=META-INF/services/**
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
