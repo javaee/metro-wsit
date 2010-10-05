@@ -1,0 +1,359 @@
+<?xml version="1.0"?>
+
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+<!--
+ $Id: build.xml,v 1.13 2010-10-05 12:02:29 m_potociar Exp $
+-->
+
+<!--
+  =======================================================================
+    PriceQuote sample build file
+  =======================================================================
+-->
+<project name="pricequote" default="main" basedir=".">
+
+    <property name="name" value="${ant.project.name}"/>
+
+    <property name="version" value="1.0"/>
+
+    <property name="src.dir" value="src"/>
+    <property name="etc.dir" value="etc"/>
+    <property name="lib.dir" value="../../dist/image/metro/lib"/>
+
+    <property name="certs.dir" value="${etc.dir}/certs"/>
+    <property name="build.dir" value="build"/>
+    <property name="build.classes" value="${build.dir}/classes"/>
+    <property name="build.war" value="${build.dir}/war"/>
+
+    <property name="endpoint" value="http://localhost:8080/${name}/retailer"/>
+    <property name="pid" value="10"/>
+
+    <property name="war.name" value="${name}"/>
+
+    <tstamp>
+        <format property="now" pattern="MM/dd/yyyy hh:mm aa" unit="hour" locale="en_US"/>
+    </tstamp>
+    <property name="build.id" value="${now}(${user.name})"/>
+
+    <property environment="env"/>
+    <property name="debug" value="true"/>
+    <property name="keep" value="true"/>
+    <property name="optimize" value="false"/>
+    <property name="verbose" value="false"/>
+    <property name="fork" value="false"/>
+    <property name="log" value="false"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="lib" includes="*.jar"/>
+        <pathelement location="${java.home}/lib/tools.jar"/>
+        <pathelement location="etc"/>
+        <pathelement location="etc/sts"/>
+    </path>
+
+    <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
+        <classpath refid="classpath"/>
+    </taskdef>
+
+    <target name="prepare" description="prepare the build">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.classes}"/>
+        <mkdir dir="${build.war}"/>
+    </target>
+
+    <target name="clean" description="clean the build directory">
+        <delete dir="${build.dir}" includeEmptyDirs="true"/>
+    </target>
+
+    <macrodef name="wsimport-macro">
+        <attribute name="binding"/>
+        <attribute name="wsdl"/>
+        <attribute name="dir"/>
+        <sequential>
+            <echo message="@{wsdl}"/>
+            <wsimport
+                    fork="${fork}"
+                    debug="${debug}"
+                    verbose="${verbose}"
+                    extension="${extension}"
+                    keep="${keep}"
+                    destdir="${build.classes}"
+                    wsdl="@{wsdl}">
+                <binding dir="${basedir}/etc" includes="@{binding}"/>
+                <depends dir="${basedir}/etc" includes="@{wsdl}"/>
+            </wsimport>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="compile-macro">
+        <attribute name="dir"/>
+        <sequential>
+            <javac
+                    fork="${fork}"
+                    srcdir="src/pricequote/@{dir}"
+                    source="1.5"
+                    destdir="${build.classes}"
+                    debug="${debug}"
+                    includes="**/*.java">
+                <classpath>
+                    <path refid="classpath"/>
+                </classpath>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <target name="create-war">
+        <copy file="etc/manifest" todir="${build.dir}"/>
+        <updateManifestWithVersion file="${build.dir}/manifest"/>
+        <war warfile="${build.war}/${war.name}.war" webxml="etc/web.xml" manifest="${build.dir}/manifest">
+            <webinf dir="etc" includes="sun-jaxws.xml"/>
+
+            <zipfileset
+                    dir="etc"
+                    includes="wholesaler.wsdl, retailer.wsdl"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/sts"
+                    includes="sts.wsdl, custom-sts.xml, sts_schema.xsd"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/images"
+                    includes="*.jpg"
+                    prefix="images"/>
+
+            <lib dir="${build.dir}" includes="${name}-client.jar"/>
+            <lib dir="lib" includes="standard.jar, jstl.jar"/>
+
+            <classes dir="${build.classes}" excludes="**/WCF*.class"/>
+            <classes dir="etc/sts" includes="wsit-client.xml"/>
+            <classes dir="etc/sts" includes="client-security-env.properties"/>
+        </war>
+    </target>
+
+    <target name="create-wcf-war">
+        <copy file="etc/manifest" todir="${build.dir}"/>
+        <updateManifestWithVersion file="${build.dir}/manifest"/>
+        <war warfile="${build.war}/${war.name}-wcf.war" webxml="etc/wcf/web.xml" manifest="${build.dir}/manifest">
+            <webinf dir="etc/wcf" includes="sun-jaxws.xml"/>
+
+            <zipfileset
+                    dir="etc/wcf"
+                    includes="wholesaler.wsdl"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/sts/wcf"
+                    includes="sts.wsdl, sts_schema.xsd"
+                    prefix="WEB-INF/wsdl"/>
+
+            <zipfileset
+                    dir="etc/images"
+                    includes="*.jpg"
+                    prefix="images"/>
+
+            <classes dir="${build.classes}" includes="**/wcf/**, **/WCF*/**"/>
+        </war>
+    </target>
+
+    <target name="deploy">
+        <antcall target="deploy-glassfish"/>
+        <antcall target="deploy-tomcat"/>
+    </target>
+
+    <target name="deploy-glassfish" unless="tomcat">
+        <copy file="${build.war}/${war.name}.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
+        <copy file="${build.war}/${war.name}-wcf.war" todir="${env.AS_HOME}/domains/domain1/autodeploy"/>
+    </target>
+
+    <target name="deploy-tomcat" if="tomcat">
+        <copy file="${build.war}/${war.name}.war" todir="${env.CATALINA_HOME}/webapps"/>
+        <copy file="${build.war}/${war.name}-wcf.war" todir="${env.CATALINA_HOME}/webapps"/>
+    </target>
+
+    <target name="retailer-server">
+        <wsimport-macro binding="retailer-server-binding.xml" wsdl="etc/retailer.wsdl" dir="server"/>
+        <compile-macro dir="retailer/server"/>
+    </target>
+
+    <target name="wholesaler-server">
+        <wsimport-macro binding="wholesaler-server-binding.xml" wsdl="etc/wholesaler.wsdl" dir="server"/>
+        <compile-macro dir="wholesaler/server"/>
+    </target>
+
+    <target name="wholesaler-wcf-server">
+        <wsimport-macro binding="wcf/wholesaler-server-binding.xml" wsdl="etc/wcf/wholesaler.wsdl" dir="wcf"/>
+        <compile-macro dir="wholesaler/wcf"/>
+    </target>
+
+    <target name="server" depends="prepare, retailer-server, wholesaler-server, wholesaler-wcf-server, create-war, create-wcf-war, deploy"/>
+
+    <target name="retailer-client">
+        <wsimport-macro binding="retailer-client-binding.xml" wsdl="etc/retailer.wsdl" dir="client"/>
+        <compile-macro dir="retailer/client"/>
+    </target>
+
+    <target name="wholesaler-client">
+        <wsimport-macro binding="wholesaler-client-binding.xml" wsdl="etc/wholesaler.wsdl" dir="client"/>
+        <compile-macro dir="wholesaler/client"/>
+    </target>
+
+    <target name="make-client-jar">
+        <jar file="${build.dir}/${name}-client.jar">
+            <fileset dir="${build.classes}" includes="**/client/*.class, *.java"/>
+        </jar>
+    </target>
+
+    <target name="client" depends="prepare, retailer-client, wholesaler-client, make-client-jar"/>
+
+    <target name="util" depends="prepare">
+        <compile-macro dir="util"/>
+    </target>
+
+    <target name="main" depends="client, util, server"/>
+
+    <macrodef name="run-macro">
+        <attribute name="classname"/>
+        <element name="options" optional="yes"/>
+        <sequential>
+            <java
+                    fork="true"
+                    classname="@{classname}">
+                <jvmarg value="-Dcom.sun.xml.ws.transport.http.client.HttpTransportPipe.dump=${log}"/>
+                <jvmarg value="-Dendpoint=${endpoint}"/>
+                <jvmarg value="-Dpid=${pid}"/>
+                <jvmarg value="-Dverbose=${verbose}"/>
+                <jvmarg value="-DWSIT_HOME=${env.WSIT_HOME}"/>
+                <options/>
+                <classpath>
+                    <path refid="classpath"/>
+                    <pathelement location="${build.classes}"/>
+                </classpath>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="run">
+        <run-macro classname="pricequote.retailer.client.RetailerClient">
+            <options>
+                <jvmarg value="-Dsts.wsdlLocation=http://localhost:8080/${name}/sts"/>
+                <jvmarg value="-Dsts.namespace=http://tempuri.org/"/>
+                <jvmarg value="-Dsts.serviceName=SecurityTokenService"/>
+                <jvmarg value="-Dsts.portName=CustomBinding_ISecurityTokenService"/>
+            </options>
+        </run-macro>
+    </target>
+
+    <target name="rund">
+        <run-macro classname="pricequote.retailer.client.RetailerClient">
+            <options>
+                <jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
+            </options>
+        </run-macro>
+    </target>
+
+    <target name="install-wsit">
+        <antcall target="install-glassfish"/>
+        <antcall target="install-tomcat"/>
+    </target>
+
+    <target name="install-tomcat" if="tomcat">
+        <copy todir="${env.CATALINA_HOME}/shared/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="${lib.dir}" includes="webservices*.jar" excludes="*javadocs*.jar"/>
+        </copy>
+    </target>
+
+    <target name="install-glassfish" unless="tomcat">
+        <copy todir="${env.AS_HOME}/lib" overwrite="true" verbose="${verbose}">
+            <fileset dir="${lib.dir}" includes="webservices*.jar" excludes="*javadocs*.jar"/>
+        </copy>
+    </target>
+
+    <target name="setup-demo">
+        <antcall target="update-encryption-jars"/>
+        <antcall target="copy-certs"/>
+    </target>
+
+    <target name="update-encryption-jars">
+        <copy todir="${env.JAVA_HOME}/jre/lib/security" overwrite="true">
+            <fileset dir="${certs.dir}" includes="US_export_policy.jar, local_policy.jar"/>
+        </copy>
+    </target>
+
+    <target name="copy-certs">
+        <mkdir dir="${env.WSIT_HOME}/xws-security/etc"/>
+        <copy todir="${env.WSIT_HOME}/xws-security/etc" overwrite="true">
+            <fileset dir="${certs.dir}" includes="*.jks, *.properties"/>
+        </copy>
+    </target>
+
+    <macrodef name="updateManifestWithVersion">
+        <attribute name="file"/>
+        <sequential>
+            <manifest mode="update" file="@{file}">
+                <attribute name="Build-Id" value="${build.id}"/>
+            </manifest>
+        </sequential>
+    </macrodef>
+
+    <target name="dist">
+        <echo>Checking out stand-alone version of readme.html ...</echo>
+        <cvs command="update -r 1.8 readme.html"/>
+        <copy todir="../../dist/wsit-pricequote">
+            <fileset dir="../.." includes="dist/image/**"/>
+            <fileset dir="../.." defaultexcludes="true">
+                <include name="samples/pricequote/build/**"/>
+                <exclude name="samples/pricequote/build/**/*.java"/>
+                <include name="samples/pricequote/etc/**"/>
+                <exclude name="samples/pricequote/etc/images/**"/>
+                <exclude name="samples/pricequote/etc/**/*binding*"/>
+                <exclude name="samples/pricequote/etc/**/*jaxws*"/>
+                <exclude name="samples/pricequote/etc/**/wsit-client-*.xml"/>
+                <exclude name="samples/pricequote/etc/**/*wsdl*"/>
+                <include name="samples/pricequote/build.xml"/>
+                <include name="samples/pricequote/readme.html"/>
+                <include name="samples/pricequote/lib/**"/>
+            </fileset>
+        </copy>
+        <echo>Creating the zip bundle ...</echo>
+        <zip destfile="wsit-pricequote.zip" basedir="../../dist" includes="wsit-pricequote/**"/>
+        <cvs command="update -r 1.9 readme.html"/>
+        <echo>Rolling back to the correct version of readme.html.</echo>
+    </target>
+</project>

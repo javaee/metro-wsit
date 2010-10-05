@@ -1,0 +1,3 @@
+
+
+ XC_IPingService.ping(new Holder("2"), new Holder("sun"), new Holder("Passed!"));

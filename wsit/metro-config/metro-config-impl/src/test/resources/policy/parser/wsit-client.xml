@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+
+<!--
+	***** Straw man WSDL file for Stage 2 of WS-Policy interop test *****
+	====================================================================  
+	The Effective Policy calculation at the four scope levels is very similar, 
+	and each should result in 2 Alternatives. Each of the two Alternatives, 
+	one with XXXPolicyTestAssertion1 and one with XXXPolicyTestAssertion2 (where
+	XXX are Service, Endpoint, Operation and Message), they also have 
+	specific marker values unique to the level. More particularly:
+	
+	Service:  (MyService): marker = 5
+	Endpoint: (MyPort): marker = 4
+	Operation: (MyOperation): marker = 3
+	Message:
+	   Input: (MyInput): marker = 2
+	   Output:(MyOutput): marker = 1
+	   Fault: (MyFault):  marker = 0
+	
+	In addition, each level should have one XXXPolicyTestAssertion1 with
+	a marker value of 6, and two XXXPolicyTestAssertion2 with marker 
+	values of 7 and 8.	
+	
+	There are also lots of other Policies scattered throughout which should
+	never appear in any of the Effective Policies, making sure that cross
+	contamination is not occuring in the calculation. These are all 
+	tagged with a marker value of 9. There are also various branches in the
+	WSDL which are placed there to make sure there is no cross contamination
+	from them, as they all have marker 9 policies attached.
+	====================================================================  
+-->
+<wsdl:definitions targetNamespace="http://ws-policy.tests" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:intf="http://ws-policy.tests" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns="http://schemas.xmlsoap.org/wsdl" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+	<wsp:UsingPolicy wsdl:Required="true" />
+	<!--
+		Dummy Assertion scattered throughout as a "spoiler", i.e. the marker value of 9 
+		should NEVER appear in any of the Effective Policies calculated.
+	-->
+	<wsp:Policy wsu:Id="Dummy1-9">
+		<intf:PolicyTestAssertion1 marker="9" />
+	</wsp:Policy>
+
+	<!--
+		Message level assertions.  
+	-->
+	<wsp:Policy wsu:Id="Message1-6">
+		<intf:MessagePolicyTestAssertion1 marker="6" />
+	</wsp:Policy>
+	<wsp:Policy wsu:Id="Message2-7">
+		<intf:MessagePolicyTestAssertion2 marker="7" />
+	</wsp:Policy>
+	<wsp:Policy wsu:Id="Message2-Aggregate">
+		<intf:MessagePolicyTestAssertion2 marker="8" />
+		<wsp:PolicyReference wsp:URI="#Message2-7" />
+	</wsp:Policy>
+
+	<!--
+		Operation level assertions.  
+	-->
+	<wsp:Policy wsu:Id="Operation1-6">
+		<intf:OperationPolicyTestAssertion1 marker="6" />
+	</wsp:Policy>
+
+	<wsp:Policy wsu:Id="Operation2-7">
+		<intf:OperationPolicyTestAssertion2 marker="7" />
+	</wsp:Policy>
+	<wsp:Policy wsu:Id="Operation2-Aggregate">
+		<intf:OperationPolicyTestAssertion2 marker="8" />
+		<wsp:PolicyReference wsp:URI="#Operation2-7" />
+	</wsp:Policy>
+
+	<!--
+		Endpoint level assertions.  
+	-->
+	<wsp:Policy wsu:Id="Endpoint2-7">
+		<intf:EndpointPolicyTestAssertion2 marker="7" />
+	</wsp:Policy>
+
+	<wsp:Policy wsu:Id="Endpoint2-Aggregate">
+		<intf:EndpointPolicyTestAssertion2 marker="8" />
+		<wsp:PolicyReference wsp:URI="#Endpoint2-7" />
+	</wsp:Policy>
+
+	<!--
+		Service level assertions.  
+
+		This policy expression is replaced by the externally defined expression in ExternalPolicy.xml -->
+		<wsp:Policy wsu:Id="Service1-6">
+			<intf:ServicePolicyTestAssertion1 marker="6" />
+		</wsp:Policy>
+
+	<!-- -->
+
+	<wsp:Policy wsu:Id="Service2-7">
+		<intf:ServicePolicyTestAssertion2 marker="7" />
+	</wsp:Policy>
+	<wsp:Policy wsu:Id="Service2-Aggregate">
+		<intf:ServicePolicyTestAssertion2 marker="8" />
+		<wsp:PolicyReference wsp:URI="#Service2-7" />
+	</wsp:Policy>
+
+	<wsdl:types>
+		<schema elementFormDefault="qualified" targetNamespace="http://ws-policy.tests" xmlns="http://www.w3.org/2001/XMLSchema">
+			<element name="SimpleRequest">
+				<complexType>
+					<sequence>
+						<element name="request" nillable="true" type="xsd:string" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="SimpleResponse">
+				<complexType>
+					<sequence>
+						<element name="response" nillable="true" type="xsd:string" />
+					</sequence>
+				</complexType>
+			</element>
+		</schema>
+	</wsdl:types>
+	
+	<wsdl:message name="MyRequestMessage">	
+		<wsp:PolicyReference wsp:URI="#Message2-Aggregate" />				
+		<wsdl:part name="parameters" element="intf:SimpleRequest" />
+	</wsdl:message>
+	
+	<wsdl:message name="MyResponseMessage">
+		<wsp:PolicyReference wsp:URI="#Message2-Aggregate" />				
+		<wsdl:part name="parameters" element="intf:SimpleResponse" />
+	</wsdl:message>
+	
+	<wsdl:message name="MyFaultMessage">
+		<wsp:PolicyReference wsp:URI="#Message2-Aggregate"/>				
+		<wsdl:part name="parameters" element="intf:SimpleFault" />
+	</wsdl:message>
+
+	<wsdl:message name="AnotherRequestMessage">
+		<wsp:PolicyReference wsp:URI="#Dummy1-9"/>				
+		<wsdl:part name="parameters" element="intf:SimpleRequest" />
+	</wsdl:message>
+	
+	<wsdl:message name="AnotherResponseMessage">
+		<wsp:PolicyReference wsp:URI="#Dummy1-9"/>				
+		<wsdl:part name="parameters" element="intf:SimpleResponse" />
+	</wsdl:message>
+	
+	<wsdl:message name="AnotherFaultMessage">
+		<wsp:PolicyReference wsp:URI="#Dummy1-9"/>				
+		<wsdl:part name="parameters" element="intf:SimpleFault" />
+	</wsdl:message>
+
+	<wsdl:portType name="MyPortType" wsp:PolicyURIs="#Endpoint2-Aggregate">
+		<wsdl:operation name="MyOperation">
+			<wsp:Policy>
+				<wsp:PolicyReference wsp:URI="#Operation2-Aggregate"/>							
+				<wsp:PolicyReference wsp:URI="#Operation1-6"/>	
+			</wsp:Policy>
+			<wsdl:input name="MyInput" message="intf:MyRequestMessage" wsp:PolicyURIs="#Message1-6" />
+			<wsdl:output name="MyOutput" message="intf:MyResponseMessage" wsp:PolicyURIs="#Message1-6" />
+			<wsdl:fault name="MyFault" message="intf:MyFaultMessage" wsp:PolicyURIs="#Message1-6" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+
+	<wsdl:portType name="AnotherPortType" wsp:PolicyURIs="#Dummy1-9">
+		<wsdl:operation name="AnotherOperation">
+			<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+			<wsdl:input name="AnotherInput" message="intf:AnotherRequestMessage" wsp:PolicyURIs="#Dummy1-9" />
+			<wsdl:output name="AnotherOutput" message="intf:AnotherResponseMessage" wsp:PolicyURIs="#Dummy1-9" />
+			<wsdl:fault name="AnotherFault" message="intf:AnotherFaultMessage" wsp:PolicyURIs="#Dummy1-9" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="MyBinding" type="intf:MyPortType">
+		<wsp:Policy wsu:Id="Endpoint1-6">
+			<intf:EndpointPolicyTestAssertion1 marker="6" />
+		</wsp:Policy>
+		<wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="MyOperation">
+			<wsp:Policy>
+				<wsp:ExactlyOne>
+					<intf:OperationPolicyTestAssertion1 marker="3" />
+					<intf:OperationPolicyTestAssertion2 marker="3" />
+				</wsp:ExactlyOne>
+			</wsp:Policy>
+
+			<wsdlsoap:operation soapAction="" />
+			<wsdl:input name="MyInput">
+				<wsp:Policy>
+					<wsp:ExactlyOne>
+						<intf:MessagePolicyTestAssertion1 marker="2" />
+						<intf:MessagePolicyTestAssertion2 marker="2" />
+					</wsp:ExactlyOne>
+				</wsp:Policy>
+				<wsdlsoap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output name="MyOutput">
+				<wsp:Policy>
+					<wsp:ExactlyOne>
+						<intf:MessagePolicyTestAssertion1 marker="1" />
+						<intf:MessagePolicyTestAssertion2 marker="1" />
+					</wsp:ExactlyOne>
+				</wsp:Policy>
+				<wsdlsoap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="MyFault">
+				<wsp:Policy>
+					<wsp:ExactlyOne>
+						<intf:MessagePolicyTestAssertion1 marker="0" />
+						<intf:MessagePolicyTestAssertion2 marker="0" />
+					</wsp:ExactlyOne>
+				</wsp:Policy>
+				<wsdlsoap:body use="literal" />
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:binding name="AnotherBinding" type="intf:AnotherPortType">
+		<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+		<wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="AnotherOperation">
+			<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+			<wsdlsoap:operation soapAction="" />
+			<wsdl:input name="AnotherInput">
+				<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+				<wsdlsoap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output name="AnotherOutput">
+				<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+				<wsdlsoap:body use="literal" />
+			</wsdl:output>
+			<wsdl:fault name="AnotherFault">
+				<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+				<wsdlsoap:body use="literal" />
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="AnotherService">
+		<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+		<wsdl:port name="MyPort" binding="intf:MyBinding">
+			<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+			<wsdlsoap:address location="http://localhost:8080/services/AnotherServiceMyPort" />
+		</wsdl:port>
+
+		<wsdl:port name="AnotherPort" binding="intf:AnotherBinding">
+			<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+			<wsdlsoap:address location="http://localhost:8080/services/AnotherServiceAnotherPort" />
+		</wsdl:port>
+	</wsdl:service>
+
+	<wsdl:service name="MyService">
+		<wsp:Policy>
+			<wsp:ExactlyOne>
+				<intf:ServicePolicyTestAssertion1 marker="5" />
+				<intf:ServicePolicyTestAssertion2 marker="5" />
+			</wsp:ExactlyOne>
+			<wsp:PolicyReference wsp:URI="#Service2-Aggregate" />
+			<wsp:PolicyReference wsp:URI="#Service1-6" />
+
+		</wsp:Policy>
+
+		<wsdl:port name="MyPort" binding="intf:MyBinding">
+			<wsp:Policy>
+				<wsp:ExactlyOne>
+					<intf:EndpointPolicyTestAssertion1 marker="4" />
+					<intf:EndpointPolicyTestAssertion2 marker="4" />
+				</wsp:ExactlyOne>
+			</wsp:Policy>
+			<wsdlsoap:address location="http://localhost:9080/services/MyServiceMyPort" />
+		</wsdl:port>
+
+		<wsdl:port name="AnotherPort" binding="intf:AnotherBinding">
+			<wsp:PolicyReference wsp:URI="#Dummy1-9" />
+			<wsdlsoap:address location="http://localhost:9080/services/MyServiceAnotherPort" />
+		</wsdl:port>
+
+	</wsdl:service>
+		
+</wsdl:definitions>

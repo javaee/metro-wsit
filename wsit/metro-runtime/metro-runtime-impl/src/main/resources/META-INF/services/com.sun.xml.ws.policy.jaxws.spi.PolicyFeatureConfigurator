@@ -1,0 +1,4 @@
+com.sun.xml.ws.addressing.policy.AddressingFeatureConfigurator
+com.sun.xml.ws.encoding.policy.MtomFeatureConfigurator
+com.sun.xml.ws.encoding.policy.FastInfosetFeatureConfigurator
+com.sun.xml.ws.encoding.policy.SelectOptimalEncodingFeatureConfigurator

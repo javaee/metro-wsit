@@ -1,0 +1,73 @@
+/*
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License).  You may not use this file except in
+ * compliance with the License.
+ * 
+ * You can obtain a copy of the license at
+ * https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ * 
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at https://glassfish.dev.java.net/public/CDDLv1.0.html.
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * you own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ * 
+ * Copyright 2007 Sun Microsystems Inc. All Rights Reserved
+ */
+
+import java.util.Iterator;
+import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.Name;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPBodyElement;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.Text;
+import javax.xml.ws.Dispatch;
+import javax.xml.ws.Service;
+import javax.xml.ws.soap.SOAPBinding;
+
+QName echoServiceName = echoService.getServiceName();
+String targetNamespace = echoServiceName.getNamespaceURI();
+
+MessageFactory messageFactory = MessageFactory.newInstance();
+SOAPFactory soapFactory = SOAPFactory.newInstance();
+
+SOAPMessage message = messageFactory.createMessage();
+SOAPBody messageBody = message.getSOAPBody();
+
+Name bodyName = soapFactory.createName("echo", "disp", targetNamespace);
+SOAPBodyElement messageEcho = messageBody.addBodyElement(bodyName);
+Name arg0 = soapFactory.createName("arg0");
+SOAPElement messageEchoArg0 = messageEcho.addChildElement(arg0);
+messageEchoArg0.addTextNode("Hello");
+
+Service service = Service.create(echoServiceName);
+QName portName = new QName(targetNamespace, "EchoPort");
+service.addPort(portName, SOAPBinding.SOAP11HTTP_BINDING, echoPortAddress.toString());
+Dispatch dispatch = service.createDispatch(portName, SOAPMessage.class, Service.Mode.MESSAGE);
+
+SOAPMessage response = dispatch.invoke(message);
+
+assertNotNull(response);
+SOAPBody responseBody = response.getSOAPBody();
+assertNotNull(responseBody);
+Iterator elements = responseBody.getChildElements();
+SOAPElement responseElement = elements.next();
+assertFalse(elements.hasNext());
+elements = responseElement.getChildElements();
+SOAPElement returnElement = elements.next();
+assertFalse(elements.hasNext());
+elements = returnElement.getChildElements();
+Text textNode = elements.next();
+assertFalse(elements.hasNext());
+String result = textNode.getTextContent();
+assertEquals("Helloellolloloo", result);

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Implementation-Title: Web Services Interoperable Technologies
+Implementation-Version: 1.0
+Implementation-Vendor: Sun Microsystems, Inc.
+Implementation-Vendor-Id: com.sun
+Class-Path: webservices-rt.jar webservices-api.jar javaee.jar webservices-tools_ja.jar webservices-tools_zh.jar webservices-tools_fr.jar webservices-tools_de.jar webservices-tools_es.jar webservices-tools_it.jar webservices-tools_sw.jar webservices-tools_ko.jar webservices-tools_zh_TW.jar
+Main-Class: com.sun.tools.ws.WsImport
+

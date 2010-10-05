@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sun-web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Application Server 9.0 Servlet 2.5//EN" "http://www.sun.com/software/appserver/dtds/sun-web-app_2_5-0.dtd">
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+
+ Contributor(s):
+
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+<sun-web-app error-url="">
+  <context-root>__wstx-services</context-root>
+  <servlet>
+    <servlet-name>RegistrationPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationPortTypeRPC</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
+        <localpart>Coordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationPortTypeRPCPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>CoordinatorPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>CoordinatorPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/CoordinatorPortType</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
+        <localpart>WSATCoordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v10.endpoint.CoordinatorPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>ParticipantPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>ParticipantPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/ParticipantPortType</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wsat</namespaceURI>
+        <localpart>WSATCoordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v10.endpoint.ParticipantPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>RegistrationRequesterPortTypeImpl</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationRequesterPortTypeImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationRequesterPortType</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://schemas.xmlsoap.org/ws/2004/10/wscoor</namespaceURI>
+        <localpart>Coordinator</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v10.endpoint.RegistrationRequesterPortTypePortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+
+  <servlet>
+    <servlet-name>RegistrationPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationPortTypeRPCPortImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationPortTypeRPC11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wscoor/2006/06</namespaceURI>
+        <localpart>RegistrationService_V11</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>CoordinatorPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>CoordinatorPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/CoordinatorPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wsat/2006/06</namespaceURI>
+        <localpart>WSAT11Service</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v11.endpoint.CoordinatorPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>ParticipantPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>ParticipantPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/ParticipantPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wsat/2006/06</namespaceURI>
+        <localpart>WSAT11Service</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.at.v11.endpoint.ParticipantPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+  <servlet>
+    <servlet-name>RegistrationRequesterPortTypeImpl11</servlet-name>
+    <webservice-endpoint>
+      <port-component-name>RegistrationRequesterPortTypePortImpl</port-component-name>
+      <endpoint-address-uri>/RegistrationRequesterPortType11</endpoint-address-uri>
+      <service-qname>
+        <namespaceURI>http://docs.oasis-open.org/ws-tx/wscoor/2006/06</namespaceURI>
+        <localpart>RegistrationService_V11</localpart>
+      </service-qname>
+      <servlet-impl-class>com.sun.xml.ws.tx.coord.v11.endpoint.RegistrationRequesterPortImpl</servlet-impl-class>
+      <debugging-enabled>true</debugging-enabled>
+    </webservice-endpoint>
+  </servlet>
+</sun-web-app>

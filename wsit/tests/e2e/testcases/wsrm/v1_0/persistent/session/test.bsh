@@ -1,0 +1,24 @@
+RMDemoService service = new RMDemoService();
+
+RMDemo port = service.getRMDemoPort();
+RMDemo anotherPort = service.getRMDemoPort();
+
+for (i = 0 ; i <2; i++) {
+     port.addString("String " + i);
+}
+
+for (i = 0 ; i <2; i++) {
+     anotherPort.addString("AnotherString " + i);
+}
+
+
+
+assertEquals(port.getResult().trim(),"String 0 String 1");
+assertEquals(anotherPort.getResult().trim(),"AnotherString 0 AnotherString 1");
+
+((Closeable)port).close();
+((Closeable)anotherPort).close();
+
+
+
+

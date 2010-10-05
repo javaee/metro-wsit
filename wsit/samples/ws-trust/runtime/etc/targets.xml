@@ -1,0 +1,602 @@
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+
+<property file="build.properties"/>
+<!--<property file="../build.properties"/>-->
+<property name="lib.sample.home" value="${basedir}/../lib"/>
+<property name="build.home" value="${basedir}/../build"/>
+<property name="build.classes.home" value="${build.home}/classes"/>
+<property name="build.war.home" value="${build.home}/war"/>
+<property name="build.lib.home" value="${build.home}/lib"/>
+<!--target name="copy-am-files">   
+        <echo message="Copying AM Files"/>
+        <copy file="${basedir}/../../am/AMConfig.properties"
+                tofile="${build.classes.home}/AMConfig.properties" />
+        <mkdir dir="${build.lib.home}"/>
+        <copy file="${basedir}/../../am/amclientsdk.jar"
+            tofile="${build.lib.home}/amclientsdk.jar" />
+        <copy file="${basedir}/../../am/jaas.jar"
+            tofile="${build.lib.home}/jaas.jar" />
+        <copy file="${basedir}/../../am/jdk_logging.jar"
+            tofile="${build.lib.home}/jdk_logging.jar" />
+</target-->
+
+<target name="setup-tc" if="tomcat.home">
+    <echo message="In setup-TC in targets.xml"/>
+    <mkdir dir="${build.home}"/>
+    <mkdir dir="${build.classes.home}"/>
+    <mkdir dir="${build.war.home}"/>
+    <echo>TC</echo>
+    &tomcat;
+</target>
+
+<target name="setup-glassfish" if="glassfish.home">
+    <echo message="In setup-Glassfish in targets.xml"/>
+    <mkdir dir="${build.home}"/>
+    <mkdir dir="${build.classes.home}"/>
+    <mkdir dir="${build.war.home}"/>
+    <echo>GlassFish</echo>
+    &glassfish;
+</target>
+
+<target name="server" depends="setup-tc, setup-glassfish, compile-callbacks">	
+    <antcall target="clean" />
+    <antcall target="compile-callbacks" />
+    <antcall target="build-server-wsdl" />
+    <antcall target="create-server-war" />
+    <antcall target="deploy-server" />
+</target>
+
+<target name="build-server-java" depends="setup-tc, setup-glassfish">
+    <apt
+        fork="true"
+        debug="${debug}"
+    	verbose="${verbose}"
+    	destdir="${build.classes.home}"
+    	sourcedestdir="${build.classes.home}"
+    	sourcePath="${basedir}/${sample.name}">
+        <classpath>
+        <path refid="jaxws.classpath"/>
+            <pathelement location="${basedir}/src/${sample.name}"/>
+        </classpath>
+        <option key="r" value="${build.home}"/>
+        <option key="verbose" value="${verbose}"/>
+        <source dir="${basedir}/src/${sample.name}">
+            <include name="**/server/*.java"/>
+	    <include name="**/common/*.java"/>
+            <include name="**/${ant.project.name}/server/*.java"/>
+        </source>
+    </apt>
+    <!-- copy handlers descriptor file -->
+    <copy todir="${build.classes.home}">
+        <fileset dir="${basedir}/src/${sample.name}">
+            <include name="**/server/**/*.xml"/>
+        </fileset>
+    </copy>
+</target>
+
+<target name="server-j2se" depends="setup-tc, setup-glassfish">
+
+    <antcall target="clean" />
+    <antcall target="build-server-java" />
+    <java fork="true" classname="${j2se.sei}">
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+        </classpath>
+        <jvmarg value="-Djavax.xml.ws.EndpointFactory=com.sun.xml.ws.transport.http.server.EndpointFactoryImpl"/>
+    </java>
+
+</target>
+
+<target name="build-server-wsdl" depends="setup-tc">
+    <echo message="In build-server-wsdl in targets.xml"/>
+    <echo> server wsdl is : ${server.wsdl}</echo>
+	<wsimport
+        fork="false"
+        debug="${debug}"
+        verbose="${verbose}"
+        keep="${keep}"
+        destdir="${build.classes.home}"
+        extension="${extension}"
+        wsdl="${basedir}/${server.wsdl}">
+        <binding dir="${basedir}" includes="${server.binding}"/>
+        <jvmarg value="-Dhttp.proxyHost=${http.proxyHost}"/>
+        <jvmarg value="-Dhttp.proxyPort=${http.proxyPort}"/>
+        <jvmarg value="-Dhttps.proxyHost=${https.proxyHost}"/>
+        <jvmarg value="-Dhttps.proxyPort=${https.proxyPort}"/>
+    </wsimport>
+    <echo message="In javac in build-server-wsdl in targets.xml"/>
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${basedir}"
+        destdir="${build.classes.home}"
+        includes="**/server/**">
+    	<classpath>
+    	    <path refid="jaxws.classpath"/>
+    	</classpath>
+    </javac>
+</target>
+
+<target name="create-server-war">
+    <echo message="In create-server-war in targets.xml"/>
+    <war warfile="${build.war.home}/jaxws-${ant.project.name}.war" webxml="../../etc/service/web.xml">
+	<webinf dir="../../etc/service" includes="sun-jaxws.xml"/>
+	<zipfileset
+            dir="etc/service"
+            includes="PingService.wsdl, *.xsd"
+            prefix="WEB-INF/wsdl"/>
+         <zipfileset
+            dir="../../etc/service"
+            includes="wsit-server.xml"
+            prefix="WEB-INF/classes"/>
+	<classes dir="${build.classes.home}"/>
+    </war>
+</target>
+
+  <!--Tomcat -->
+  <target name="check-if-server-deployed-tom" if="tomcat.home">
+    <echo message="Checking for deployed webapp at context path /${server.path}"/>
+    <condition property="tom.webapp.deployed">
+      <http url="http://${endpoint.host}:${endpoint.port}/${server.path}/"/>
+    </condition>
+    <echo message="${tom.webapp.deployed}" />
+  </target>
+
+ <target name="undeploy-tomcat-proper" if="webapp.deployed">
+      <echo message="Undeploying existing webapp at ${path}"/>
+      <undeploy-catalina url="http://${endpoint.host}:${endpoint.port}/manager/" username="${username}" password="${password}" path="/${path}"/>
+  </target>
+                                                                                                                          
+  <target name="undeploy-tomcat-war-present" if="war.present">
+      <echo message="Undeploying existing webapp at ${path}"/>
+      <undeploy-catalina url="http://${endpoint.host}:${endpoint.port}/manager/" username="${username}" password="${password}" path="/${path}"/>
+  </target>
+                                                                                                                          
+  <target name="undeploy-server-tomcat" if="tomcat.home">
+   <echo message="Undeploying existing webapp at ${server.path}"/>
+    <condition  property="war.present">
+        <available file="${tomcat.home}/webapps/jaxws-${ant.project.name}.war" />
+    </condition>
+    <!--antcall target="undeploy-tomcat-war-present" /-->
+    <!--<condition property="webapp.deployed">
+      <http url="http://${endpoint.host}:${endpoint.port}/${path}/"/>
+    </condition>
+    <antcall target="undeploy-tomcat-proper" />-->
+ </target>
+
+<target name="deploy-server-tc" depends="check-if-server-deployed-tom, undeploy-server-tomcat" if="tomcat.home">
+
+    <echo message="Deploying war for ${ant.project.name} to tomcat"/>
+
+<!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
+            path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}.war"/-->
+     <copy file="${build.war.home}/jaxws-${ant.project.name}.war" todir="${tomcat.home}/webapps"/>
+</target>
+
+<!--Glassfish -->
+<target name="deploy-server-glassfish" if="glassfish.home">
+    <copy file="${build.war.home}/jaxws-${ant.project.name}.war"
+        todir="${glassfish.home}/domains/${domain}/autodeploy"/>
+</target>
+
+<target name="deploy-server" depends="deploy-server-tc, deploy-server-glassfish"/>
+
+<target name="sts" depends="setup-tc, compile-callbacks">	
+    <antcall target="compile-callbacks" />
+    <antcall target="build-sts-wsdl" />
+    <antcall target="create-sts-war" />
+    <antcall target="deploy-sts" />
+</target>
+
+<target name="build-sts-wsdl" depends="setup-tc, setup-glassfish">
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${basedir}"
+        destdir="${build.classes.home}"
+        includes="**/sts/**">
+    	<classpath>
+    	    <path refid="jaxws.classpath"/>
+    	</classpath>
+    </javac>
+</target>
+
+<!--target name="create-sts-war">
+    <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war" webxml="../../etc/sts/web.xml">
+	<webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
+	<zipfileset
+            dir="etc/sts"
+            includes="sts.wsdl, *.xsd"
+            prefix="WEB-INF/wsdl"/>
+	<classes dir="${build.classes.home}" includes="**/sts/**, **/com/**, **/common/**"/>
+    </war>
+</target-->
+
+<target name="create-sts-war">
+        <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
+                webxml="../../etc/sts/web.xml">
+                <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
+                <zipfileset
+                           dir="etc/sts"
+                           includes="sts.wsdl, *.xsd"
+                           prefix="WEB-INF/wsdl"/>
+                <zipfileset
+                           dir="../../etc/sts"
+                           includes="wsit-server.xml"
+                           prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/sts/services"
+                            includes="com.sun.xml.ws.api.security.trust.STSAttributeProvider"
+                            prefix="WEB-INF/classes/META-INF/services"/>
+                <classes dir="${build.classes.home}" includes="**/sts/**,
+                        **/com/**, **/common/**"/>
+        </war>
+   </target>
+
+<!--target name="create-sts-war">
+        <antcall target="copy-am-files" />
+        <war warfile="${build.war.home}/jaxws-${ant.project.name}-sts.war"
+                webxml="../../etc/sts/web.xml">
+                <webinf dir="../../etc/sts" includes="sun-jaxws.xml"/>
+                <zipfileset
+                           dir="etc/sts"
+                           includes="sts.wsdl, *.xsd"
+                           prefix="WEB-INF/wsdl"/>
+                <zipfileset
+                           dir="../../etc/sts"
+                           includes="wsit-server.xml"
+                           prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/sts/services"
+                            includes="com.sun.*"
+                            prefix="WEB-INF/classes/META-INF/services"/>
+                <classes dir="${build.classes.home}" includes="**/sts/**,
+                        **/com/**, **/common/**, AMConfig.properties"/>
+                <lib dir="${build.lib.home}" />
+        </war>
+</target-->
+
+<target name="deploy-sts-tc" depends="check-if-sts-deployed-tom, undeploy-sts-tomcat" if="tomcat.home">
+
+    <echo message="Deploying war for ${ant.project.name}-sts to tomcat"/>
+
+<!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
+            path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}.war"/-->
+     <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war" todir="${tomcat.home}/webapps"/>
+</target>
+
+ <target name="check-if-sts-deployed-tom" if="tomcat.home">
+    <echo message="Checking for deployed webapp at context path /${sts.path}"/>
+    <condition property="tom.webapp.deployed">
+      <http url="http://${sts.host}:${sts.port}/${sts.path}/"/>
+    </condition>
+    <echo message="${tom.webapp.deployed}" />
+  </target>
+  
+   <target name="undeploy-sts-tomcat" if="tomcat.home">
+   <echo message="Undeploying existing webapp at ${sts.path}"/>
+    <condition  property="war.present">
+        <available file="${tomcat.home}/webapps/jaxws-${ant.project.name}-sts.war" />
+    </condition>
+    <!--antcall target="undeploy-tomcat-war-present" /-->
+    <!--<condition property="webapp.deployed">
+      <http url="http://${endpoint.host}:${endpoint.port}/${path}/"/>
+    </condition>
+    <antcall target="undeploy-tomcat-proper" />-->
+ </target>
+
+<target name="deploy-sts-glassfish" if="glassfish.home">
+    <copy file="${build.war.home}/jaxws-${ant.project.name}-sts.war"
+        todir="${glassfish.home}/domains/${domain}/autodeploy"/>
+</target>
+
+<target name="deploy-sts" depends="deploy-sts-tc, deploy-sts-glassfish"/>
+
+<target name="mysts" depends="setup-tc, compile-callbacks">
+    <antcall target="compile-callbacks" />
+    <antcall target="build-mysts-wsdl" />
+    <antcall target="create-mysts-war" />
+    <antcall target="deploy-mysts" />
+</target>
+
+<target name="build-mysts-wsdl" depends="setup-tc, setup-glassfish">
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${basedir}"
+        destdir="${build.classes.home}"
+        includes="**/sts/**">
+    	<classpath>
+    	    <path refid="jaxws.classpath"/>
+    	</classpath>
+    </javac>
+</target>
+
+<target name="create-mysts-war">
+        <war warfile="${build.war.home}/jaxws-${ant.project.name}-mysts.war"
+                webxml="../../etc/mysts/web.xml">
+                <webinf dir="../../etc/mysts" includes="sun-jaxws.xml"/>
+                <zipfileset
+                           dir="etc/mysts"
+                           includes="sts.wsdl, *.xsd"
+                           prefix="WEB-INF/wsdl"/>
+                <zipfileset
+                           dir="../../etc/mysts"
+                           includes="wsit-server.xml"
+                           prefix="WEB-INF/classes"/>
+                <zipfileset
+                            dir="../../etc/mysts/services"
+                            includes="com.sun.xml.ws.api.security.trust.STSAttributeProvider"
+                            prefix="WEB-INF/classes/META-INF/services"/>
+                <classes dir="${build.classes.home}" includes="**/sts/**,
+                        **/com/**, **/common/**"/>
+        </war>
+   </target>
+
+<target name="deploy-mysts-tc" depends="check-if-mysts-deployed-tom, undeploy-mysts-tomcat" if="tomcat.home">
+
+    <echo message="Deploying war for ${ant.project.name}-mysts to tomcat"/>
+
+<!--deploy-catalina url="http://localhost:8080/manager" username="${username}" password="${password}"
+            path="/${path}" war="file:${build.war.home}/jaxws-${ant.project.name}.war"/-->
+     <copy file="${build.war.home}/jaxws-${ant.project.name}-mysts.war" todir="${tomcat.home}/webapps"/>
+</target>
+
+ <target name="check-if-mysts-deployed-tom" if="tomcat.home">
+    <echo message="Checking for deployed webapp at context path /${mysts.path}"/>
+    <condition property="tom.webapp.deployed">
+      <http url="http://${mysts.host}:${mysts.port}/${mysts.path}/"/>
+    </condition>
+    <echo message="${tom.webapp.deployed}" />
+  </target>
+
+   <target name="undeploy-mysts-tomcat" if="tomcat.home">
+   <echo message="Undeploying existing webapp at ${mysts.path}"/>
+    <condition  property="war.present">
+        <available file="${tomcat.home}/webapps/jaxws-${ant.project.name}-mysts.war" />
+    </condition>
+    <!--antcall target="undeploy-tomcat-war-present" /-->
+    <!--<condition property="webapp.deployed">
+      <http url="http://${endpoint.host}:${endpoint.port}/${path}/"/>
+    </condition>
+    <antcall target="undeploy-tomcat-proper" />-->
+ </target>
+
+<target name="deploy-mysts-glassfish" if="glassfish.home">
+    <copy file="${build.war.home}/jaxws-${ant.project.name}-mysts.war"
+        todir="${glassfish.home}/domains/${domain}/autodeploy"/>
+</target>
+
+<target name="deploy-mysts" depends="deploy-mysts-tc, deploy-mysts-glassfish"/>
+
+    <target name="compile-callbacks" depends="setup-tc, setup-glassfish" >
+        <javac
+            fork="true"
+            debug="${debug}"
+            srcdir="${basedir}/.."
+            destdir="${build.classes.home}"
+            includes="common/*.java">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+    </target>
+
+<target name="generate-client" depends="setup-tc, setup-glassfish" >
+    <wsimport
+        fork="false"
+        debug="${debug}"
+        verbose="${verbose}"
+        extension="${extension}"
+        keep="${keep}"
+        destdir="${build.classes.home}"
+        wsdl="${client.wsdl}">
+        <binding dir="${basedir}" includes="${client.binding}"/>
+    </wsimport>
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${build.classes.home}"
+        destdir="${build.classes.home}"
+        includes="**/client/**">
+        <classpath>
+            <pathelement location="${build.classes.home}"/>
+            <path refid="jaxws.classpath"/>
+        </classpath>
+    </javac>
+</target>
+
+<target name="client" depends="generate-client, compile-callbacks">
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${basedir}"
+        destdir="${build.classes.home}"
+        includes="**/client/**">
+        <classpath>
+            <pathelement location="${build.classes.home}"/>
+            <path refid="jaxws.classpath"/>
+        </classpath>
+    </javac>
+</target>
+
+<target name="run-tc-s1" if="tomcat.home">
+   <mkdir dir="${build.classes.home}/META-INF/services"/>
+   <copy file="${basedir}/../../etc/com.sun.xml.ws.policy.PlugfestPolicyMap" todir="${build.classes.home}/META-INF/services"/>
+   <copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/>
+   <java fork="true" classname="${client}">
+        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
+        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
+        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
+        <sysproperty key="service.url" value="${service.url}"/>
+        <sysproperty key="javax.net.ssl.keyStore" value="${javax.net.ssl.keyStore}"/>
+        <sysproperty key="javax.net.ssl.keyStoreType" value="${javax.net.ssl.keyStoreType}"/>
+        <sysproperty key="javax.net.ssl.keyStorePassword" value="${javax.net.ssl.keyStorePassword}"/>
+       <sysproperty key="javax.net.ssl.trustStore" value="${javax.net.ssl.trustStore}"/>
+       <sysproperty key="javax.net.ssl.trustStoreType" value="${javax.net.ssl.trustStoreType}"/>
+       <sysproperty key="javax.net.ssl.trustStorePassword" value="${javax.net.ssl.trustStorePassword}"/>
+       <sysproperty key="javax.net.debug" value="ssl, handshake" />
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+            <pathelement location="${build.classes.home}/../"/>
+        </classpath>
+        <!--
+        <jvmarg value="-Xdebug"/>
+        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009"/>
+        -->  
+    </java>  
+</target>
+
+<target name="run-tc" if="tomcat.home">
+   <mkdir dir="${build.classes.home}/META-INF/services"/>
+   <!--copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/-->
+   <java fork="true" classname="${client}">
+        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
+        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
+        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
+        <sysproperty key="service.url" value="${service.url}"/>
+        <sysproperty key="sts.host" value="${sts.host}"/>
+        <sysproperty key="sts.port" value="${sts.port}"/>
+        <sysproperty key="sts.url" value="${sts.url}"/>
+        <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+            <pathelement location="${build.classes.home}/../"/>
+        </classpath>
+        <jvmarg value="-DWSIT_HOME=${tomcat.home}"/>
+        <!--
+        <jvmarg value="-Xdebug"/>
+        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9009"/>
+        -->
+    </java>  
+</target>
+
+<target name="run-glassfish" if="glassfish.home">
+   <mkdir dir="${build.classes.home}/META-INF/services"/>
+   <!--copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/-->
+   <java fork="true" classname="${client}">
+        <sysproperty key="glassfish.home" value="${glassfish.home}"/>
+        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
+        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
+        <sysproperty key="service.url" value="${service.url}"/>
+        <sysproperty key="sts.host" value="${sts.host}"/>
+        <sysproperty key="sts.port" value="${sts.port}"/>
+        <sysproperty key="sts.url" value="${sts.url}"/>
+        <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+            <pathelement location="${build.classes.home}/../"/>            
+        </classpath>
+        <jvmarg value="-DWSIT_HOME=${glassfish.home}"/>
+    </java>  
+</target>
+
+<target name="run" depends="setup-tc, run-tc, setup-glassfish, run-glassfish"/>
+
+<target name="run-s1" depends="setup-tc, run-tc-s1"/>
+
+<target name="rundebug-tc">
+   <mkdir dir="${build.classes.home}/META-INF/services"/>
+   <copy file="${basedir}/../../etc/javax.security.auth.callback.CallbackHandler.client" tofile="${build.classes.home}/META-INF/services/javax.security.auth.callback.CallbackHandler"/>
+   <java fork="true" classname="${client}">
+        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
+        <sysproperty key="endpoint.host" value="${endpoint.host}"/>
+        <sysproperty key="endpoint.port" value="${endpoint.port}"/>
+        <sysproperty key="service.url" value="${service.url}"/>
+        <sysproperty key="sts.host" value="${sts.host}"/>
+        <sysproperty key="sts.port" value="${sts.port}"/>
+        <sysproperty key="sts.url" value="${sts.url}"/>
+          <sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+            <pathelement location="${build.classes.home}/../"/>
+        </classpath>
+        <jvmarg value="-Xdebug"/>
+        <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"/>
+    </java>  
+</target>
+
+<target name="rundebug" depends="rundebug-tc" />
+
+<target name="dispatch-client" depends="setup-tc, setup-glassfish">
+    <javac
+        fork="true"
+        debug="${debug}"
+        srcdir="${basedir}/src/${sample.name}"
+        destdir="${build.classes.home}"
+        includes="**/client/**,**/common/**">
+        <classpath refid="jaxws.classpath"/>
+    </javac>
+</target>
+
+<target name="run-dispatch-tc" if="tomcat.home">
+    <java fork="true" classname="${client}">
+        <sysproperty key="tomcat.home" value="${tomcat.home}"/>
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+        </classpath>
+    </java>
+</target>
+
+<target name="run-dispatch-glassfish" if="glassfish.home">
+    <java fork="true" classname="${client}">
+        <sysproperty key="glassfish.home" value="${glassfish.home}"/>
+        <classpath>
+            <path refid="jaxws.classpath"/>
+            <pathelement location="${build.classes.home}"/>
+        </classpath>
+       <jvmarg value="-Dhttp.proxyHost=${http.proxyHost}"/>
+        <jvmarg value="-Dhttp.proxyPort=${http.proxyPort}"/> 
+    </java>
+</target>
+
+<target name="run-dispatch" depends="run-dispatch-tc, run-dispatch-glassfish"/>
+
+<target name="clean">
+    <delete dir="${build.home}" includeEmptyDirs="true" />
+</target>
+
+<target name="help">
+    <echo message="server:       Builds and deploy the service endpoint WAR"/>
+    <echo message="sts   :       Builds and deploy the security token service WAR"/>
+    <echo message="client:       Builds the client"/>
+    <echo message="run:          Runs the client"/>
+</target>

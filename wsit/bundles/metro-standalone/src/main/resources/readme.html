@@ -1,0 +1,187 @@
+<html>
+    <title>@product.name@</title>
+    <body>
+        <h1>@product.name@</h1>
+
+        <p><tt>Release Date: @release.date@</tt></p>
+        <div style="float:right">
+            <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.zip"><img alt="Download @product.name@" src="https://metro.dev.java.net/@release.context.url@/download.png" border=0/></a>
+        </div>
+
+        <a name="downloading"></a>
+        <h2>Downloading @product.name@</h2>
+        <p>
+            Unless you have already done so, please download the 
+            <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.zip">@product.name@ ZIP archive</a>.
+            Once downloaded, you can expand it by executing following shell command:
+        </p>
+        <pre>unzip metro-@release.underscore.version@.zip</pre>
+        <p>
+            On Windows or Mac, you may as well just double-click the zip file to expand it.
+        </p>
+
+        <p>
+            The expanded <tt>metro</tt> directory contains following <tt>ant</tt> files:
+        </p>
+        <ul>
+            <li><tt>metro-on-glassfish.xml</tt></li>
+            <li><tt>metro-on-tomcat.xml</tt></li>
+            <li>and <tt>metro-on-glassfish-v3.xml</tt>, an experimental stand-alone GlassFish v3 installer</li>
+
+        </ul>
+        <p>
+            These files are used to install the Metro binaries into the respective web containers.
+            The installation procedure is explained in <a href="#installing">the next section</a>.
+        </p>
+
+        <a name="installing"></a>
+        <h2>Installing @product.name@</h2>
+
+        <a name="gfv3"></a>
+        <h3>GlassFish v3</h3>
+        <p>
+            GlassFish v3 bundles Metro by default. Should you want to replace the default Metro version by a
+            more up-to-date release of Metro please check the Update Center for GlassFish v3.
+            Follow these steps to install @product.name@ into GlassFish v3 using the GlassFish v3 Update Ceter:
+        </p>
+        <ul>
+            <li>Stop GlassFish v3 instance (if it is running)</li>
+            <li>
+                Start the Update Tool - on the command prompt change to the directory where GlassFish v3
+                was installed, then <code>bin</code> directory and run <code>updatetool.exe</code> (Windows)
+                or <code>./updatetool</code> (Unix).
+            </li>
+            <li>Click Available Add-ons</li>
+            <li>Select Metro Web Services Stack for GlassFish</li>
+            <li>Click Install</li>
+            <li>Accept the license</li>
+            <li>Start GlassFish v3 again</li>
+        </ul>
+        <p>
+            In case you don't have an internet access or want to experiment with an unofficial build or release of Metro
+            not available on the official GlassFish v3 update center, you may try the experimental standalone GlassFish v3
+            installer. To stop GlassFish v3 instance, install @product.name@ using the standalone installer on top of it
+            and restart the GlassFish v3 instance, execute the following commands:
+        </p>
+        <pre>
+asadmin stop-domain <i>&lt;domain-name&gt;</i>
+ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish-v3.xml install
+asadmin start-domain <i>&lt;domain-name&gt;</i>
+        </pre>
+
+        <a name="gfv2"></a>
+        <h3>GlassFish v2</h3>
+        <p>
+            GlassFish v2 bundles Metro. However you may want to replace the default Metro version by this
+            more up-to-date release. To do that, you must pass the name of the GlassFish v2 top-level directory
+            into <tt>ant</tt>. In our instructions bellow, that information is passed as an <tt>ant</tt> property
+            value on the command line. To stop GlassFish v2 instance, install @product.name@ on top of it and restart
+            the GlassFish v2 instance again execute the following commands:
+        </p>
+        <pre>
+asadmin stop-domain <i>&lt;domain-name&gt;</i>
+ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml install
+asadmin start-domain <i>&lt;domain-name&gt;</i>
+        </pre> 
+        <p>
+            This process creates a backup copy of the original Metro installation, copies the @product.name@ jar files
+            into your GlassFish v2 installation's <tt>lib</tt> directory and makes the necessary classpath alterations
+            in the domain configuration file: <tt>domain.xml</tt>.
+            It will also update the classpath for the utility script files: <tt>wsimport</tt> and <tt>wsgen</tt>.
+        </p>
+
+        <a name="tomcat"></a>
+        <h3>Tomcat</h3>
+        <p>
+            The installation process for Tomcat is very similar to that of <a href="#gfv2">GlassFish v2</a>. Again, the top-level
+            directory of the Tomcat installation is passed as an argument to the <tt>ant</tt> command.
+            To shutdown Tomcat, change directories, invoke <tt>ant</tt>, and restart Tomcat by executing
+            these commands:
+        </p>
+        <pre>
+catalina.sh stop
+ant -Dtomcat.home=&lt;TOMCAT_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-tomcat.xml install
+catalina.sh start
+        </pre>
+
+        <p>
+            For Tomcat, the installation process copies the two Metro jar files into Tomcat's <tt>shared/lib</tt>
+            directory. No Tomcat configuration files are modified.
+        </p>
+
+
+        <a name="updating"></a>
+        <h2>Updating to @product.name@</h2>
+        <p>
+            Once a version of Metro web services stack has been installed on a web container, it can be updated
+            with a new version of the Metro binaries. To update your Metro installation to @product.name@, follow
+            the same steps used for the initial install, shown <a href="#installing">above</a>. 
+        </p>
+        <p>
+            Note that for GlassFish v2, the second and subsequent installs only update the Metro binaries;
+            no configuration files are modified.
+        </p>
+
+
+        <a name="uninstalling"></a>
+        <h2>Uninstalling Metro</h2>
+        <p>
+            To remove the Metro binaries and configuration changes from your web container, the steps are almost
+            identical to the ones in the installation process. The following steps will restore your web container
+            to the state before Metro installation:
+
+            <h3>GlassFish v3</h3>
+            Use the Update Tool to remove Metro Web Services from GlassFish.
+
+            <h3>GlassFish v2</h3>
+            <pre>
+asadmin stop-domain domain1
+ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glassfish.xml uninstall
+asadmin start-domain domain1
+            </pre>
+
+            <h3>Tomcat</h3>
+            <pre>
+catalina.sh stop
+ant -Dtomcat.home=&lt;TOMCAT_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-tomcat.xml uninstall
+catalina.sh start
+            </pre>
+
+        <h2>Release Notes</h2>
+        <p>
+            @product.name@ release consists of following components:
+        </p>
+        <ul>
+            <li>WSIT @wsit.release.version@ - <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/status-notes/status-notes-@release.dash.version@-FCS.html">Browse the WSIT release notes online.</a></li>
+            <li>JAX-WS RI @jaxws.release.version@ - <a href="https://jax-ws.dev.java.net/@jaxws.release.context.url@/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
+            <li>JAXB RI @jaxb.release.version@ - <a href="https://jaxb.dev.java.net/@jaxb.release.context.url@/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
+        </ul>
+
+    <h2>Users Guide</h2>
+    <p>
+        We have created a <a href="https://metro.dev.java.net/@release.context.url@/guide/">snapshot of Metro Users Guide</a> 
+        at the time of this Metro release. You may also wish to consult <a href="https://metro.dev.java.net/guide/">the latest version</a>
+        of the Metro Users Gude.
+    </p>
+
+    <h2>Technical Support</h2>
+    <p>
+        Please <a href="mailto:users-subscribe@metro.dev.java.net?subject=subscribe">subscribe to the users list</a>
+        and send comments/feedbacks/opinions to <a href="mailto:users@metro.dev.java.net">the list</a>. Additionally,
+        we encourage you to report any bugs you might find while using Metro through our
+        <a href="https://metro.dev.java.net/use/issue-tracker.html">Metro issue trackers</a>.
+    </p>
+
+    <h2>Workspace Snapshot</h2>
+    <p>
+        If you'd like to hack the source code starting from the final release version, download
+        <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.src.zip">the workspace snapshot zip bundle</a>.
+        It contains all the CVS control files, making it ideal for submitting patches, checking diff,
+        and etc.
+    </p>
+    <div style="background-color: rgb(255,255,102);">
+        This component is released under the <b><a href="https://glassfish.dev.java.net/public/CDDL+GPL.html">Common Development and Distribution License (CDDL) version 1.0 + GNU General Public License (GPL) version 2</a></b>.
+        You must agree to these licenses as part of installation before viewing and/or using the code.
+    </div>
+</body>
+</html>

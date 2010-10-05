@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ 
+ Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ 
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+ 
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+ 
+ Contributor(s):
+ 
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+<wsdl:definitions targetNamespace="http://tempuri.org/" 
+                  xmlns:tns="http://tempuri.org/" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"  
+                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
+                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" 
+                  xmlns:wsap="http://www.w3.org/2006/05/addressing/wsdl" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/">
+    
+    <wsp:Policy wsu:Id="FSClientPolicy"
+      xmlns:sc="http://schemas.sun.com/2006/03/wss/client" 
+      xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" 
+      xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
+                <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="bob"></sc:TrustStore>
+   
+                 <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client"
+                    endpoint="http://localhost:8080/jaxws-fs-sts/sts"
+                    metadata="http://localhost:8080/jaxws-fs-sts/sts/mex">
+                </tc:PreconfiguredSTS>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+    
+    <wsp:Policy wsu:Id="STSClientKeystorePolicy" 
+      xmlns:sc="http://schemas.sun.com/2006/03/wss/client" 
+      xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" 
+      xmlns:scc="http://schemas.sun.com/ws/2006/05/sc/client" >
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!--sunsp:DisableStreamingSecurity xmlns:sunsp="http://schemas.sun.com/2006/03/wss/client"></sunsp:DisableStreamingSecurity-->
+                <sc:KeyStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-keystore.jks" type="JKS" alias="alice" storepass="changeit"></sc:KeyStore>
+                <sc:TrustStore wspp:visibility="private" location="$WSIT_HOME/xws-security/etc/client-truststore.jks" type="JKS" storepass="changeit" peeralias="wssip"></sc:TrustStore>
+           
+                 <sc:CallbackHandlerConfiguration xmlns:sc="http://schemas.sun.com/2006/03/wss/client">
+                    <sc:CallbackHandler  name="usernameHandler"  classname="common.SampleUsernamePasswordCallbackHandler"/> 
+                    <sc:CallbackHandler  name="passwordHandler"  classname="common.SampleUsernamePasswordCallbackHandler"/>
+                </sc:CallbackHandlerConfiguration>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://xmlsoap.org/DAB/Imports">
+            <xsd:import schemaLocation="Service_schema.xsd" namespace="http://xmlsoap.org/DAB"/>
+        </xsd:schema>
+    </wsdl:types>
+       
+    <wsdl:message name="DABRequest">
+            <wsdl:part name="Department" element="q:Department" xmlns:q="http://xmlsoap.org/DAB"/>
+        </wsdl:message>
+        <wsdl:message name="DABResponse">
+            <wsdl:part name="AccountBalance" element="q:AccountBalance" xmlns:q="http://xmlsoap.org/DAB"/>
+    </wsdl:message>
+    
+    <wsdl:message name="ISecurityTokenService_IssueToken_InputMessage">
+		<wsdl:part name="rstMessage" element="q1:MessageBody" xmlns:q1="http://schemas.message.com/Message"/>
+	</wsdl:message>
+	<wsdl:message name="ISecurityTokenService_IssueToken_OutputMessage">
+		<wsdl:part name="IssueTokenResult" element="q2:MessageBody" xmlns:q2="http://schemas.message.com/Message"/>
+    </wsdl:message>
+
+    <wsdl:portType name="IFinancialService">
+            <wsdl:operation name="getAccountBalance">
+                <wsdl:input wsap:Action="http://xmlsoap.org/DAB" name="DABRequest" message="tns:DABRequest"/>
+                <wsdl:output wsap:Action="http://xmlsoap.org/DAB" name="DABResponse" message="tns:DABResponse"/>
+            </wsdl:operation>
+    </wsdl:portType>
+    
+    <wsdl:portType name="ISecurityTokenService">
+        <wsdl:operation name="IssueToken">
+            <wsdl:input wsap:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue" message="tns:ISecurityTokenService_IssueToken_InputMessage"/>
+	    <wsdl:output wsap:Action="http://schemas.xmlsoap.org/ws/2005/02/trust/RSTR/Issue" message="tns:ISecurityTokenService_IssueToken_OutputMessage"/>
+	</wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="IFinancialService_Binding" type="tns:IFinancialService">
+		<wsp:PolicyReference URI="#FSClientPolicy"/>
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="getAccountBalance">
+			<soap:operation soapAction="http://xmlsoap.org/DAB" style="document"/>
+			<wsdl:input name="DABRequest">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="DABResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+    <wsdl:binding name="ISecurityTokenService_Binding" type="tns:ISecurityTokenService">
+		<wsp:PolicyReference URI="#STSClientKeystorePolicy"/>
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="IssueToken">
+			<soap:operation soapAction="http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+   <wsdl:service name="SecurityTokenService">
+		<wsdl:port name="ISecurityTokenService_Port" binding="tns:ISecurityTokenService_Binding">
+			<soap:address location="http://localhost:8080/jaxws-sts/sts"/>
+		</wsdl:port>
+    </wsdl:service>
+
+   <wsdl:service name="FinancialService">
+		<wsdl:port name="IFinancialService_Port" binding="tns:IFinancialService_Binding">
+			<soap:address location="http://localhost:8080/jaxws-fs/simple"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
+
+

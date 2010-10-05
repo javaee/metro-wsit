@@ -1,0 +1,373 @@
+<?xml version="1.0"?>
+
+<!--
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+ Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+
+ The contents of this file are subject to the terms of either the GNU
+ General Public License Version 2 only ("GPL") or the Common Development
+ and Distribution License("CDDL") (collectively, the "License").  You
+ may not use this file except in compliance with the License. You can obtain
+ a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
+ or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ language governing permissions and limitations under the License.
+
+ When distributing the software, include this License Header Notice in each
+ file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
+ Sun designates this particular file as subject to the "Classpath" exception
+ as provided by Sun in the GPL Version 2 section of the License file that
+ accompanied this code.  If applicable, add the following below the License
+ Header, with the fields enclosed by brackets [] replaced by your own
+ identifying information: "Portions Copyrighted [year]
+ [name of copyright owner]"
+
+ Contributor(s):
+
+ If you wish your version of this file to be governed by only the CDDL or
+ only the GPL Version 2, indicate your decision by adding "[Contributor]
+ elects to include this software in this distribution under the [CDDL or GPL
+ Version 2] license."  If you don't indicate a single choice of license, a
+ recipient has the option to distribute your version of this file under
+ either the CDDL, the GPL Version 2 or to extend the choice of license to
+ its licensees as provided above.  However, if you add GPL Version 2 code
+ and therefore, elected the GPL Version 2 license, then the option applies
+ only if the new code is made subject to such option by the copyright
+ holder.
+-->
+
+<project name="WSIT e2e tests" default="main" basedir=".">
+    <property file="${basedir}/build.properties"/>
+    <import file="properties.xml"/>
+
+    <path id="harness.classpath">
+        <fileset dir="${test.lib.dir}" includes="*.jar"/>
+    </path>
+
+    <!-- invokes e2e tests -->
+    <macrodef name="run-tests">
+        <!--
+            These are the default args that are passed to the harness which mean that
+            the tests will be using the dist image of the wsit workspace , run the tests
+            using local transport and recursively scan for all the sub dirs under testcases
+
+            Please modify these options if you wish to test the harness in different
+            modes
+            For more information on the different command line options
+            refer to docs/index.html
+        -->
+        <element name="arguments" />
+        <sequential>
+            <antcall target="prepare"/>
+
+            <!-- BEGIN: Emma code coverage specific stuff -->
+            <emma enabled="${emma.enabled}" >
+                <instr
+                    destdir="${out.instr.dir}"	
+                    metadatafile="${coverage.dir}/metadata.emma"
+                    merge="true"
+                >
+                    <instrpath>
+                        <fileset dir="${wsit.image}/lib" includes="*.jar" />
+                    </instrpath>
+
+                    <filter includes="com.sun.xml.ws.addressing.*"/>
+                    <filter includes="com.sun.xml.ws.api.tx*"/>
+                    <filter includes="com.sun.xml.ws.assembler.*"/>
+                    <filter includes="com.sun.xml.ws.encoding.*"/>
+                    <filter includes="com.sun.xml.ws.message.*"/>
+                    <filter includes="com.sun.xml.ws.mex.*"/>
+                    <filter includes="com.sun.xml.ws.policy.*"/>
+                    <filter includes="com.sun.xml.ws.rm.*"/>
+                    <filter includes="com.sun.xml.ws.runtime.*"/>
+                    <filter includes="com.sun.xml.ws.security.*"/>
+                    <filter includes="com.sun.xml.ws.transport.*"/>
+                    <filter includes="com.sun.xml.ws.tx.*"/>
+
+                    <filter includes="com.sun.xml.wss.jaxws.*"/>
+                    <filter includes="com.sun.xml.wss.provider.*"/>
+                </instr>
+            </emma>
+            <!-- END: Emma code coverage specific stuff -->
+
+            <java jar="${test.lib.dir}/harness.jar" fork="true">
+                <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
+                <!--sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
+                <sysproperty key="com.sun.xml.ws.transport.local.LocalTransportTube.dump" value="true"/-->
+
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.dump.client.after" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.dump.endpoint.before" value="true"/-->
+                <!--sysproperty key="com.sun.xml.wss.provider.wsit.SecurityTubeFactory.dump.client.after" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.assembler.jaxws.TransportTubeFactory.dump.client.before" value="true"/-->
+                <!--sysproperty key="com.sun.xml.ws.rx.rm.runtime.RmTubeFactory.client.after" value="true"/-->
+                
+                <!-- DO NOT REMOVE OR SET TO FALSE -->
+                <sysproperty key="com.sun.xml.ws.monitoring.client" value="true"/>
+
+
+                <jvmarg value="-Xmx512m" />
+
+                <arg value="-report" />
+                <arg path="${logs.dir}" />
+
+                <!-- BEGIN: Emma code coverage specific stuff -->
+                <arg value="-cp:override" />
+                <arg pathref="instr.override.path" />
+                <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
+                <jvmarg value="-Demma.coverage.out.merge=true" />
+                <!-- END: Emma code coverage specific stuff -->
+
+                <arguments />
+                <arg line="${args}"/>
+            </java>
+
+            <mkdir dir="${logs.dir}/junit-reports" />
+            <junitreport todir="${logs.dir}/junit-reports">
+                <fileset dir="${logs.dir}" includes="*.xml" />
+                <report format="frames" todir="${logs.dir}/junit-reports"/>
+            </junitreport>
+
+            <!-- BEGIN: Emma code coverage specific stuff -->
+            <emma enabled="${emma.enabled}" >
+                <report sourcepath="${wsit.sources}" >
+                    <fileset dir="${coverage.dir}" >
+                        <include name="*.emma" />
+                    </fileset>
+
+                    <txt outfile="${coverage.dir}/coverage.txt" />
+                    <html outfile="${coverage.dir}/coverage.html" />
+                    <xml outfile="${coverage.dir}/coverage.xml" />
+                </report>
+            </emma>
+            <!-- END: Emma code coverage specific stuff -->
+
+        </sequential>
+    </macrodef>
+
+    <!-- BEGIN: Emma code coverage specific stuff -->
+    <path id="emma.lib" >
+        <pathelement location="${emma.dir}/emma.jar" />
+        <pathelement location="${emma.dir}/emma_ant.jar" />
+    </path>
+
+    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+
+    <target name="emma" description="turns on EMMA's on-the-fly instrumentation mode" >
+        <property name="emma.enabled" value="true" />
+        <path id="instr.override.path">
+            <pathelement location="${out.instr.dir}" />
+            <path refid="emma.lib" />
+        </path>
+    </target>
+
+    <target name="setup-emma-remote" description="internal: overrides remote setup for emma">
+        <property name="wsit.image" value="${basedir}/wsit-image/metro"/>
+        <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
+    </target>
+
+    <target name="setup-emma-local" description="internal: overrides local setup for emma">
+        <property name="wsit.image" value="${wsit.dir}/dist/image/metro"/>
+        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+    </target>
+
+    <target name="setup-emma-v3" description="internal: overrides GlassFish v3 setup for emma">
+        <property name="wsit.image" value="${wsit.dir}/dist/image/metro/for_v3"/>
+        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+    </target>
+
+    <!--target name="emma_report" description="just creates a report from metadata files" >
+        <emma>
+            <report sourcepath="${wsit.sources}" >
+                <fileset dir="${coverage.dir}" >
+                    <include name="*.emma" />
+                </fileset>
+
+                <txt outfile="${coverage.dir}/coverage.txt" />
+                <html outfile="${coverage.dir}/coverage.html" />
+            </report>
+        </emma>
+    </target-->
+    <!-- END: Emma code coverage specific stuff -->
+
+
+    <target name="prepare">
+        <mkdir dir="${out.instr.dir}" />
+        <mkdir dir="${logs.dir}/junit-reports" />
+        <mkdir dir="${logs.dir}"/>
+    </target>
+
+    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+        <mkdir dir="wsit-image"/>
+        <mkdir dir="wsit-image/runtime"/>
+
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
+             dest="wsit-image/metro.zip"/>
+        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
+
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+             dest="wsit-image/webservices-src.zip"/>
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+             dest="wsit-image/webservices-tools-src.zip"/>
+        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
+    </target>
+
+    <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+        <mkdir dir="wsit-image"/>
+        <mkdir dir="wsit-image/runtime"/>
+
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
+             dest="wsit-image/metro.zip"/>
+        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
+
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+             dest="wsit-image/webservices-src.zip"/>
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+             dest="wsit-image/webservices-tools-src.zip"/>
+        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
+    </target>
+
+    <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
+        <mkdir dir="tmp/test-harness"/>
+        <get src="http://hudson.sfbay/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+             dest="tmp/test-harness.zip"/>
+        <unzip src="tmp/test-harness.zip" dest="tmp"/>
+        <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/test-harness" includes="*.zip, *.jar"/>
+        </copy>
+        <copy todir="${test.docs.dir}" overwrite="true" verbose="${verbose}">
+            <fileset dir="tmp/test-harness" includes="*.html, *.png"/>
+        </copy>
+        <delete dir="tmp" includeemptydirs="true"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="${logs.dir}"/>
+        <delete dir="${out.instr.dir}"/>
+        <delete dir="${coverage.dir}"/>
+    </target>
+
+    <target name="main-hudson-no-get">
+        <property name="noget" value="true"/>
+        <antcall target="main-hudson"/>
+    </target>
+
+    <target name="main-hudson"
+            description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
+            depends="setup-emma-remote, get-wsit-hudson">
+
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="wsit-image/metro" />
+                <arg value="-transport" />
+                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="main-bleedingedge-hudson"
+            description="Invoke unit test from Hudson. This downloads WSIT (wsit-javanet-bleedingedge) from Hudson, as opposed to test the local one"
+            depends="setup-emma-remote, get-wsit-bleedingedge-hudson">
+
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="wsit-image/metro" />
+                <arg value="-transport" />
+                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="debug-v3"
+            description="Run all tests with the Metro libraries for GlassFish v3"
+            depends="setup-emma-v3">
+
+        <run-tests>
+            <arguments>
+                <jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:metrov3-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="main-v3"
+            description="Run all tests with the Metro libraries for GlassFish v3"
+            depends="setup-emma-v3">
+
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:metrov3-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="debug"
+            description="Runs the e2e tests on the entire workspace in a debug mode"
+            depends="setup-emma-local">
+
+        <run-tests>
+            <arguments>
+                <jvmarg value="-Xdebug"/>
+                <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,address=8000"/>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="profile"
+            description="Runs the e2e tests on the entire workspace in a profile mode"
+            depends="setup-emma-local">
+
+        <run-tests>
+            <arguments>
+                <jvmarg value="-agentpath:/tmp/NBProfiler17444.link/deployed/jdk15/mac/libprofilerinterface.jnilib=/tmp/NBProfiler17444.link,5140"/>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="main"
+            description="Runs the e2e tests on the entire workspace"
+            depends="setup-emma-local">
+
+        <run-tests>
+            <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${wsit.image}" />
+                <arg value="-transport" />
+                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+</project>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!--
+ Copyright (c) 2005 Sun Microsystems, Inc.
+ All rights reserved. 
+-->
+<!-- adding binding so that object classes are generated elsewhere than org.xmlsoap.ping.* -->
+
+<jxb:bindings version="1.0"
+          xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <jxb:bindings schemaLocation="http://localhost:8080/jaxws-ping/simple?xsd=1" node="/xs:schema">
+        <jxb:schemaBindings>
+            <jxb:package name="simple.schema.client"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+</jxb:bindings>
+
+

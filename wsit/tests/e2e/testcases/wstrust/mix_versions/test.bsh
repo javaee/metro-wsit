@@ -1,0 +1,5 @@
+
+
+            customBinding_IPingServiceContract2.ping("Hello from SUN for mix versions test!");
+         //   stub.ping(new Ping());
+            assertTrue(true);

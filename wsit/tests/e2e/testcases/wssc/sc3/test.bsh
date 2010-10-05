@@ -1,0 +1,3 @@
+
+
+ XDC_NODK_IPingService.ping(new Holder("3"), new Holder("sun"), new Holder("Passed!"));

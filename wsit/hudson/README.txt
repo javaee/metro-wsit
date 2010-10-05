@@ -1,0 +1,1 @@
+Place all hudson job scripts into this folder

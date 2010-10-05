@@ -1,0 +1,2 @@
+com.sun.xml.ws.security.addressing.policy.WsawAddressingPrefixMapper
+com.sun.xml.ws.security.impl.policy.SecurityPrefixMapper
