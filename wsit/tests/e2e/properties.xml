@@ -42,7 +42,7 @@
     <property name="test.docs.dir" value="${basedir}/docs"/>
     <property name="test.src.dir" value="${basedir}/src"/>
     <property name="test.etc.dir" value="${basedir}/etc"/>
-    <property name="wsit.dir" value="${basedir}/../../"/>
+    <property name="metro.dir" value="${basedir}/../../"/>
     <property name="verbose" value="false"/>
     <property name="logs.dir" value="${basedir}/logs"/>
     <property environment="env" />

@@ -68,7 +68,7 @@
                     merge="true"
                 >
                     <instrpath>
-                        <fileset dir="${wsit.image}/lib" includes="*.jar" />
+                        <fileset dir="${metro.image}/lib" includes="*.jar" />
                     </instrpath>
 
                     <filter includes="com.sun.xml.ws.addressing.*"/>
@@ -129,7 +129,7 @@
 
             <!-- BEGIN: Emma code coverage specific stuff -->
             <emma enabled="${emma.enabled}" >
-                <report sourcepath="${wsit.sources}" >
+                <report sourcepath="${metro.sources}" >
                     <fileset dir="${coverage.dir}" >
                         <include name="*.emma" />
                     </fileset>
@@ -161,23 +161,23 @@
     </target>
 
     <target name="setup-emma-remote" description="internal: overrides remote setup for emma">
-        <property name="wsit.image" value="${basedir}/wsit-image/metro"/>
-        <property name="wsit.sources" value="${basedir}/wsit-image/webservices-src.zip"/>
+        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
-    <target name="setup-emma-local" description="internal: overrides local setup for emma">
-        <property name="wsit.image" value="${wsit.dir}/dist/image/metro"/>
-        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+    <target name="setup-emma-local" description="internal: overrides local setup for emma" depends="prepare-local">
+        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.sources" value="${metro.dir}/rt/src"/>
     </target>
 
     <target name="setup-emma-v3" description="internal: overrides GlassFish v3 setup for emma">
-        <property name="wsit.image" value="${wsit.dir}/dist/image/metro/for_v3"/>
-        <property name="wsit.sources" value="${wsit.dir}/rt/src"/>
+        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.sources" value="${metro.dir}/rt/src"/>
     </target>
 
     <!--target name="emma_report" description="just creates a report from metadata files" >
         <emma>
-            <report sourcepath="${wsit.sources}" >
+            <report sourcepath="${metro.sources}" >
                 <fileset dir="${coverage.dir}" >
                     <include name="*.emma" />
                 </fileset>
@@ -189,6 +189,21 @@
     </target-->
     <!-- END: Emma code coverage specific stuff -->
 
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="metro-image"/>
+        <delete dir="${logs.dir}"/>
+        <delete dir="${out.instr.dir}"/>
+        <delete dir="${coverage.dir}"/>
+    </target>
+
+    <target name="prepare-local" description="Prepares local copy of the Metro bundle">
+        <mkdir dir="metro-image" />
+        <unzip src="${metro.dir}/bundles/metro-standalone/target/metro.zip" dest="metro-image" />
+
+        <mkdir dir="metro-image/runtime" />
+        <copy file="lib/jaxws-local-transport.jar" todir="metro-image/runtime" />
+    </target>
 
     <target name="prepare">
         <mkdir dir="${out.instr.dir}" />
@@ -197,35 +212,35 @@
     </target>
 
     <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <mkdir dir="wsit-image"/>
-        <mkdir dir="wsit-image/runtime"/>
+        <mkdir dir="metro-image"/>
+        <mkdir dir="metro-image/runtime"/>
 
         <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
-             dest="wsit-image/metro.zip"/>
-        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
+             dest="metro-image/metro.zip"/>
+        <unzip src="metro-image/metro.zip" dest="metro-image"/>
 
         <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="wsit-image/webservices-src.zip"/>
+             dest="metro-image/webservices-src.zip"/>
         <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="wsit-image/webservices-tools-src.zip"/>
+             dest="metro-image/webservices-tools-src.zip"/>
         <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
-             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
+             dest="metro-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
     <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <mkdir dir="wsit-image"/>
-        <mkdir dir="wsit-image/runtime"/>
+        <mkdir dir="metro-image"/>
+        <mkdir dir="metro-image/runtime"/>
 
         <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
-             dest="wsit-image/metro.zip"/>
-        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
+             dest="metro-image/metro.zip"/>
+        <unzip src="metro-image/metro.zip" dest="metro-image"/>
 
         <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="wsit-image/webservices-src.zip"/>
+             dest="metro-image/webservices-src.zip"/>
         <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="wsit-image/webservices-tools-src.zip"/>
+             dest="metro-image/webservices-tools-src.zip"/>
         <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
-             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
+             dest="metro-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
     <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
@@ -242,13 +257,6 @@
         <delete dir="tmp" includeemptydirs="true"/>
     </target>
 
-    <target name="clean">
-        <delete dir="build"/>
-        <delete dir="${logs.dir}"/>
-        <delete dir="${out.instr.dir}"/>
-        <delete dir="${coverage.dir}"/>
-    </target>
-
     <target name="main-hudson-no-get">
         <property name="noget" value="true"/>
         <antcall target="main-hudson"/>
@@ -263,9 +271,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="wsit-image/metro" />
+                <arg path="metro-image/metro" />
                 <arg value="-transport" />
-                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -279,9 +287,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="wsit-image/metro" />
+                <arg path="metro-image/metro" />
                 <arg value="-transport" />
-                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -297,9 +305,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:metrov3-image" />
-                <arg path="${wsit.image}" />
+                <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -313,9 +321,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:metrov3-image" />
-                <arg path="${wsit.image}" />
+                <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -331,9 +339,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="${wsit.image}" />
+                <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -348,9 +356,9 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="${wsit.image}" />
+                <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -364,9 +372,10 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="${wsit.image}" />
+                <arg path="${metro.image}" />
+                <!--arg path="${metro.dir}/../../metro-old/dist/image/metro" /-->
                 <arg value="-transport" />
-                <arg path="../../lib/runtime/jaxws-local-transport.jar" />
+                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
