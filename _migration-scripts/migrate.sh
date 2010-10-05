@@ -140,30 +140,30 @@ ensureDir $BUNDLES_MODULE_ROOT
 
 MODULE_NAME=wsit-api
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Interoperability Technology API Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Interoperability Technology API Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=wsit-impl
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Interoperability Technology Implementation Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Interoperability Technology Implementation Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=webservices-api-osgi
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services API OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=webservices-osgi
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Runtime OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 mkdir -p $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
 cp $EXPORTED_RT_ROOT/toolPlugin/ToolPlugin.xml $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
 
 MODULE_NAME=webservices-api
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices API non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services API non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=webservices-rt
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 mkdir -p $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
 mv $EXPORTED_RT_ROOT/toolPlugin/ToolPlugin.xml $MODULE_ROOT/src/main/resources/META-INF/jaxrpc/
@@ -171,18 +171,18 @@ mv $EXPORTED_RT_ROOT/etc/META-INF/MANIFEST.MF $MODULE_ROOT/src/main/resources/ME
 
 MODULE_NAME=webservices-tools
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Tools non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Tools non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 mkdir -p $MODULE_ROOT/src/main/resources/META-INF/
 mv $EXPORTED_ROOT/tools/etc/META-INF/MANIFEST.MF $MODULE_ROOT/src/main/resources/META-INF/
 
 MODULE_NAME=webservices-extra-api
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra API non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Extra API non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=webservices-extra
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Extra Runtime non-OSGi Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 
 MODULE_NAME=webservices-extra-jdk-packages
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
@@ -190,9 +190,9 @@ source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Extra JDK 6
 mkdir -p $MODULE_ROOT/src/main/resources/
 touch $MODULE_ROOT/src/main/resources/empty
 
-MODULE_NAME=metro-offline
+MODULE_NAME=metro-standalone
 MODULE_ROOT="$BUNDLES_MODULE_ROOT/$MODULE_NAME"
-source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Webservices Offline Zipped Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
+source ./setup-module.sh $VERBOSE $FORCE_RM_FLAG -m $MODULE_ROOT -n "Metro Web Services Standalone Zipped Bundle" -i "$MODULE_NAME" -P "bundles" -p "./poms/bundles-${MODULE_NAME}-pom.xml"
 mkdir -p $MODULE_ROOT/src/main/resources/
 mv $EXPORTED_ROOT/CDDLv1.0.1.html $MODULE_ROOT/src/main/resources/LICENSE.html
 mv $EXPORTED_ROOT/CDDLv1.0.1.txt $MODULE_ROOT/src/main/resources/LICENSE.txt

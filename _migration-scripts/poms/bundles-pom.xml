@@ -61,6 +61,6 @@
         <module>wsit-api</module>
         <module>wsit-impl</module>
 
-        <module>metro-offline</module>
+        <module>metro-standalone</module>
     </modules>
 </project>
