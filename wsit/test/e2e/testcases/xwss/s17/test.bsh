@@ -1,7 +1,0 @@
-
-
- pingPort.ping("Hello");
-
- pingPort.ping("Hello again");
-
- pingPort.ping("Goodbye");

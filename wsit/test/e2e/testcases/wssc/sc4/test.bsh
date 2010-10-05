@@ -1,3 +1,0 @@
-
-
- XSDC_IPingService.ping(new Holder("4"), new Holder("sun"), new Holder("Passed!"));

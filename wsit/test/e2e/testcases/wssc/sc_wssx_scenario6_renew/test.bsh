@@ -1,4 +1,0 @@
-customBinding_IPingServiceContract3.ping("Hello from SUN for wssx secureconversation scenario4 for renewal binding!");
-Thread.currentThread().sleep(7000);
-customBinding_IPingServiceContract3.ping("Hello from SUN for wssx secureconversation scenario4 for renewal binding!");
-

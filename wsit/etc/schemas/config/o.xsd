@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:ws-policy="http://www.w3.org/ns/ws-policy" xmlns:m="http://metro.dev.java.net/xmlns/metro-webservices">
-    <xs:import namespace="http://metro.dev.java.net/xmlns/metro-webservices" schemaLocation="metro-webservices.xsd"/>
-    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
-    <xs:import namespace="http://www.w3.org/ns/ws-policy" schemaLocation="ws-policy.xsd"/>
-    <xs:attribute name="Id" type="xs:ID"/>
-</xs:schema>

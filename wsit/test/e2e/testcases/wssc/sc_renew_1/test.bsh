@@ -1,3 +1,0 @@
-XC_IPingService.ping(new Holder("2"), new Holder("sun"), new Holder("Passed!"));
-Thread.currentThread().sleep(7000);
-XC_IPingService.ping(new Holder("3"), new Holder("sun"), new Holder("Passed!"));
