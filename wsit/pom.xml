@@ -656,9 +656,9 @@
                 <version>20040917</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.stream.buffer</groupId>
-                <artifactId>streambuffer</artifactId>
-                <version>1.0</version>
+                  <groupId>com.sun.xml.stream.buffer</groupId>
+                  <artifactId>streambuffer</artifactId>
+                  <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>javax.transaction</groupId>
@@ -706,8 +706,8 @@
         <glassfish.version>3.1-SNAPSHOT</glassfish.version>
 
         <jaxb.spec.version>2.2.1</jaxb.spec.version>
-        <jaxb.api.version>2.2.2-promoted-b92</jaxb.api.version>
-        <jaxb.ri.version>2.2.2-promoted-b92</jaxb.ri.version>
+        <jaxb.api.version>2.2.2-promoted-b94</jaxb.api.version>
+        <jaxb.ri.version>2.2.2-promoted-b94</jaxb.ri.version>
 
         <jaxws.spec.version>2.2</jaxws.spec.version>
         <jaxws.api.version>2.2.2-SNAPSHOT</jaxws.api.version>
