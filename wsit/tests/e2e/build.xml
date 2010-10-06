@@ -289,7 +289,7 @@
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
-                <arg path="metro-image/metro" />
+                <arg path="${metro.image}" />
                 <arg value="-transport" />
                 <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
