@@ -241,8 +241,10 @@
 
         <delete dir="tmp" includeemptydirs="true"/>
 
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.2/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
              dest="${test.lib.dir}/jaxws-local-transport.jar"/>
+        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
+             dest="${test.lib.dir}/jaxws-local-transport.src.zip"/>
         
         <cvs command="ci -m 'Updating test harness and/or local transport libs' lib" />
     </target>
