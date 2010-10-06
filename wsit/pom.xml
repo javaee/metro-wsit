@@ -156,8 +156,8 @@
         <url>https://wsit.dev.java.net/source/browse/wsit/metro</url>
     </scm>
     <organization>
-        <name>Sun Microsystems, Inc</name>
-        <url>http://www.sun.com/</url>
+        <name>Oracle Corporation</name>
+        <url>http://www.oracle.com/</url>
     </organization>
 
     <build>
