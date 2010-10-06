@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,22 +34,28 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport;
+package com.sun.xml.ws.api.transport.tcp;
 
-import com.sun.xml.ws.config.metro.dev.SimpleFeatureReader;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.ws.WebServiceException;
-import javax.xml.ws.WebServiceFeature;
+import com.sun.xml.ws.api.transport.tcp.SelectOptimalTransportFeature.Transport;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 
 /**
+ * OptimizedTransport annotation
  *
- * @author Fabian Ritzmann
+ * @author Alexey Stashok
  */
-public class TcpTransportFeatureReader extends SimpleFeatureReader {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@WebServiceFeatureAnnotation(id = SelectOptimalTransportFeature.ID, bean = SelectOptimalTransportFeature.class)
+public @interface SelectOptimalTransport {
+    /**
+     * Specifies if this feature is enabled or disabled.
+     */
+    boolean enabled() default true;
 
-    @Override
-    protected TcpTransportFeature createFeature(boolean enabled) {
-        return new TcpTransportFeature(enabled);
-    }
-
+    Transport transport() default Transport.TCP;
 }

@@ -34,7 +34,7 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport;
+package com.sun.xml.ws.api.transport.tcp;
 
 import com.sun.xml.ws.api.FeatureConstructor;
 import javax.xml.ws.WebServiceFeature;

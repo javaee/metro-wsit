@@ -34,25 +34,43 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport;
+package com.sun.xml.ws.api.transport.tcp;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import javax.xml.ws.spi.WebServiceFeatureAnnotation;
+import com.sun.xml.ws.api.FeatureConstructor;
+import javax.xml.ws.WebServiceFeature;
+import org.glassfish.gmbal.ManagedAttribute;
+import org.glassfish.gmbal.ManagedData;
 
 /**
- * TcpTransport annotation
+ * TCP transport {@link javax.xml.ws.WebServiceFeature}
  *
  * @author Alexey Stashok
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = TcpTransportFeature.ID, bean = TcpTransportFeature.class)
-public @interface TcpTransport {
+@ManagedData
+public class TcpTransportFeature extends WebServiceFeature {
+
+    public static final String ID = "com.sun.xml.ws.transport.TcpTransportFeature";
+
     /**
-     * Specifies if this feature is enabled or disabled.
+     * This constructor is here to satisfy JAX-WS specification requirements
      */
-    boolean enabled() default true;
+    public TcpTransportFeature() {
+        this(true);
+    }
+
+    /**
+     * This constructor is here to satisfy JAX-WS specification requirements
+     */
+    @FeatureConstructor({
+        "enabled"
+    })
+    public TcpTransportFeature(boolean enabled) {
+        super.enabled = enabled;
+    }
+
+    @Override
+    @ManagedAttribute
+    public String getID() {
+        return ID;
+    }
 }

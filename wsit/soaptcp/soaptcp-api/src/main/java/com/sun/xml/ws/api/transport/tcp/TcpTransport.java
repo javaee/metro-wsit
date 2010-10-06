@@ -34,9 +34,8 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport;
+package com.sun.xml.ws.api.transport.tcp;
 
-import com.sun.xml.ws.transport.SelectOptimalTransportFeature.Transport;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,18 +43,16 @@ import java.lang.annotation.Target;
 import javax.xml.ws.spi.WebServiceFeatureAnnotation;
 
 /**
- * OptimizedTransport annotation
+ * TcpTransport annotation
  *
  * @author Alexey Stashok
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@WebServiceFeatureAnnotation(id = SelectOptimalTransportFeature.ID, bean = SelectOptimalTransportFeature.class)
-public @interface SelectOptimalTransport {
+@WebServiceFeatureAnnotation(id = TcpTransportFeature.ID, bean = TcpTransportFeature.class)
+public @interface TcpTransport {
     /**
      * Specifies if this feature is enabled or disabled.
      */
     boolean enabled() default true;
-
-    Transport transport() default Transport.TCP;
 }

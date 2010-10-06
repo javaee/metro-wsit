@@ -49,7 +49,7 @@ import com.sun.xml.ws.policy.SimpleAssertion;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.sourcemodel.AssertionData;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
-import com.sun.xml.ws.transport.TcpTransportFeature;
+import com.sun.xml.ws.api.transport.tcp.TcpTransportFeature;
 import com.sun.xml.ws.transport.tcp.wsit.TCPConstants;
 import java.util.Arrays;
 import java.util.Collection;

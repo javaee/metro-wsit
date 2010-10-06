@@ -44,7 +44,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyFeatureConfigurator;
-import com.sun.xml.ws.transport.TcpTransportFeature;
+import com.sun.xml.ws.api.transport.tcp.TcpTransportFeature;
 import java.util.Collection;
 import java.util.LinkedList;
 import javax.xml.namespace.QName;

@@ -93,7 +93,7 @@ class MetroWsParser {
             nameToReader.put(NamespaceVersion.v1_5.asQName(XmlToken.Policy),
                     instantiateFeatureReader("com.sun.xml.ws.policy.config.PolicyFeatureReader"));
             nameToReader.put(TCP_TRANSPORT_ELEMENT_NAME,
-                    instantiateFeatureReader("com.sun.xml.ws.transport.TcpTransportFeatureReader"));
+                    instantiateFeatureReader("com.sun.xml.ws.transport.tcp.dev.TcpTransportFeatureReader"));
             nameToReader.put(TUBELINE_ELEMENT_NAME,
                     instantiateFeatureReader("com.sun.xml.ws.runtime.config.TubelineFeatureReader"));
             // TODO move ServiceFinder to istack

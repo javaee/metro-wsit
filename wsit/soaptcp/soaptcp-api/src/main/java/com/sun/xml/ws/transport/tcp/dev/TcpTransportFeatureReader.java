@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -34,43 +34,20 @@
  * holder.
  */
 
-package com.sun.xml.ws.transport;
+package com.sun.xml.ws.transport.tcp.dev;
 
-import com.sun.xml.ws.api.FeatureConstructor;
-import javax.xml.ws.WebServiceFeature;
-import org.glassfish.gmbal.ManagedAttribute;
-import org.glassfish.gmbal.ManagedData;
+import com.sun.xml.ws.api.transport.tcp.TcpTransportFeature;
+import com.sun.xml.ws.config.metro.dev.SimpleFeatureReader;
 
 /**
- * TCP transport {@link javax.xml.ws.WebServiceFeature}
  *
- * @author Alexey Stashok
+ * @author Fabian Ritzmann
  */
-@ManagedData
-public class TcpTransportFeature extends WebServiceFeature {
-
-    public static final String ID = "com.sun.xml.ws.transport.TcpTransportFeature";
-
-    /**
-     * This constructor is here to satisfy JAX-WS specification requirements
-     */
-    public TcpTransportFeature() {
-        this(true);
-    }
-
-    /**
-     * This constructor is here to satisfy JAX-WS specification requirements
-     */
-    @FeatureConstructor({
-        "enabled"
-    })
-    public TcpTransportFeature(boolean enabled) {
-        super.enabled = enabled;
-    }
+public class TcpTransportFeatureReader extends SimpleFeatureReader {
 
     @Override
-    @ManagedAttribute
-    public String getID() {
-        return ID;
+    protected TcpTransportFeature createFeature(boolean enabled) {
+        return new TcpTransportFeature(enabled);
     }
+
 }
