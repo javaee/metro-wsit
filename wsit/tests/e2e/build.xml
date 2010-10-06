@@ -210,7 +210,7 @@
 
     <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="metro-image"/>
-        <get src="http://sysifos-sol.czech.sun.com/hudson/view/Metro-trunk/job/metro-main-trunk/lastSuccessfulBuild/artifact/bundles/metro-standalone/target/metro.zip"
+        <get src="http://sysifos-sol.czech.sun.com/hudson/job/metro-main-trunk/lastSuccessfulBuild/artifact/bundles/metro-standalone/target/metro.zip"
              dest="metro-image/metro.zip"/>
         <unzip src="metro-image/metro.zip" dest="metro-image"/>
     </target>
@@ -281,8 +281,7 @@
         <antcall target="main-hudson"/>
     </target>
 
-    <target name="main-hudson"
-            description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
+    <target name="main-hudson" description="Invoke Metro E2E tests based on a last successful Metro build from Hudson."
             depends="setup-emma-remote, get-wsit-hudson">
 
         <run-tests>
