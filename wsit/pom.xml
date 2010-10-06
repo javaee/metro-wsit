@@ -702,16 +702,19 @@
     </distributionManagement>
 
     <properties>
-        <grizzly.version>1.0.31</grizzly.version>
         <glassfish.version>3.1-SNAPSHOT</glassfish.version>
+        <grizzly.version>1.0.31</grizzly.version>
 
-        <jaxb.spec.version>2.2.1</jaxb.spec.version>
         <jaxb.api.version>2.2.2-promoted-b94</jaxb.api.version>
         <jaxb.ri.version>2.2.2-promoted-b94</jaxb.ri.version>
+        <jaxb.spec.version>2.2.1</jaxb.spec.version>
 
-        <jaxws.spec.version>2.2</jaxws.spec.version>
         <jaxws.api.version>2.2.2-SNAPSHOT</jaxws.api.version>
+        <jaxws.ri.release.version>2.2.2</jaxws.ri.release.version>
         <jaxws.ri.version>2.2.2-SNAPSHOT</jaxws.ri.version>
+        <jaxws.spec.version>2.2</jaxws.spec.version>
+        
+        <metro.release.version>2.1</metro.release.version>
         
         <policy.version>2.2.2-SNAPSHOT</policy.version>
 
