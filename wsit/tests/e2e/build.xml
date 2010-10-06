@@ -200,9 +200,6 @@
     <target name="prepare-local" description="Prepares local copy of the Metro bundle">
         <mkdir dir="metro-image" />
         <unzip src="${metro.dir}/bundles/metro-standalone/target/metro.zip" dest="metro-image" />
-
-        <mkdir dir="metro-image/runtime" />
-        <copy file="lib/jaxws-local-transport.jar" todir="metro-image/runtime" />
     </target>
 
     <target name="prepare">
@@ -213,39 +210,14 @@
 
     <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="metro-image"/>
-        <mkdir dir="metro-image/runtime"/>
-
-        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
+        <get src="http://sysifos-sol.czech.sun.com/hudson/view/Metro-trunk/job/metro-main-trunk/lastSuccessfulBuild/artifact/bundles/metro-standalone/target/metro.zip"
              dest="metro-image/metro.zip"/>
         <unzip src="metro-image/metro.zip" dest="metro-image"/>
-
-        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="metro-image/webservices-src.zip"/>
-        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="metro-image/webservices-tools-src.zip"/>
-        <get src="http://hudson.sfbay/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
-             dest="metro-image/runtime/jaxws-local-transport.jar"/>
     </target>
 
-    <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <mkdir dir="metro-image"/>
-        <mkdir dir="metro-image/runtime"/>
-
-        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
-             dest="metro-image/metro.zip"/>
-        <unzip src="metro-image/metro.zip" dest="metro-image"/>
-
-        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="metro-image/webservices-src.zip"/>
-        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="metro-image/webservices-tools-src.zip"/>
-        <get src="http://hudson.sfbay/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
-             dest="metro-image/runtime/jaxws-local-transport.jar"/>
-    </target>
-
-    <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
+    <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
         <mkdir dir="tmp/test-harness"/>
-        <get src="http://hudson.sfbay/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
              dest="tmp/test-harness.zip"/>
         <unzip src="tmp/test-harness.zip" dest="tmp"/>
         <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
@@ -255,6 +227,9 @@
             <fileset dir="tmp/test-harness" includes="*.html, *.png"/>
         </copy>
         <delete dir="tmp" includeemptydirs="true"/>
+
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.2/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+             dest="${test.lib.dir}/jaxws-local-transport.jar"/>
     </target>
 
     <target name="main-hudson-no-get">
@@ -273,23 +248,7 @@
                 <arg value="-cp:wsit-image" />
                 <arg path="metro-image/metro" />
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
-            </arguments>
-        </run-tests>
-    </target>
-
-    <target name="main-bleedingedge-hudson"
-            description="Invoke unit test from Hudson. This downloads WSIT (wsit-javanet-bleedingedge) from Hudson, as opposed to test the local one"
-            depends="setup-emma-remote, get-wsit-bleedingedge-hudson">
-
-        <run-tests>
-            <arguments>
-                <arg value="-r" />
-                <arg path="${testcases}" />
-                <arg value="-cp:wsit-image" />
-                <arg path="metro-image/metro" />
-                <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -307,7 +266,7 @@
                 <arg value="-cp:metrov3-image" />
                 <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -323,7 +282,7 @@
                 <arg value="-cp:metrov3-image" />
                 <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -341,7 +300,7 @@
                 <arg value="-cp:wsit-image" />
                 <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -358,7 +317,7 @@
                 <arg value="-cp:wsit-image" />
                 <arg path="${metro.image}" />
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
@@ -373,9 +332,8 @@
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />
                 <arg path="${metro.image}" />
-                <!--arg path="${metro.dir}/../../metro-old/dist/image/metro" /-->
                 <arg value="-transport" />
-                <arg path="metro-image/runtime/jaxws-local-transport.jar" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
             </arguments>
         </run-tests>
     </target>
