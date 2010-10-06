@@ -151,9 +151,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/metro</connection>
+        <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/wsit</connection>
         <tag>HEAD</tag>
-        <url>https://wsit.dev.java.net/source/browse/wsit/metro</url>
+        <url>https://wsit.dev.java.net/source/browse/wsit/wsit</url>
     </scm>
     <organization>
         <name>Oracle Corporation</name>
