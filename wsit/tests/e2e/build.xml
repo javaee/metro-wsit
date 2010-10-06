@@ -215,21 +215,36 @@
         <unzip src="metro-image/metro.zip" dest="metro-image"/>
     </target>
 
-    <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
-        <mkdir dir="tmp/test-harness"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
-             dest="tmp/test-harness.zip"/>
-        <unzip src="tmp/test-harness.zip" dest="tmp"/>
+
+    <target name="overwrite-test-harness-lib" unless="test.harness.uptodate">
+        <echo message="Test harness not up-to-date, updating..." />
+
         <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
             <fileset dir="tmp/test-harness" includes="*.zip, *.jar"/>
         </copy>
         <copy todir="${test.docs.dir}" overwrite="true" verbose="${verbose}">
             <fileset dir="tmp/test-harness" includes="*.html, *.png"/>
         </copy>
+    </target>
+
+    <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
+        <mkdir dir="tmp/test-harness"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+             dest="tmp/test-harness.zip"/>
+        <unzip src="tmp/test-harness.zip" dest="tmp"/>
+
+        <uptodate property="test.harness.uptodate"
+            srcfile="tmp/test-harness/harness-lib.jar"
+            targetfile="${test.lib.dir}/harness-lib.jar"/>
+
+        <antcall target="overwrite-test-harness-lib"/>
+
         <delete dir="tmp" includeemptydirs="true"/>
 
         <get src="http://hudson.sfbay.sun.com/job/jaxws-ri-2.2.2/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
              dest="${test.lib.dir}/jaxws-local-transport.jar"/>
+        
+        <cvs command="ci -m 'Updating test harness and/or local transport libs' lib" />
     </target>
 
     <target name="main-hudson-no-get">
