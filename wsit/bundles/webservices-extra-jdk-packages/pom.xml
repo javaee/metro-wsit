@@ -77,7 +77,7 @@
                 </executions>
                 <configuration>
                     <instructions>                        
-                        <Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
+                        <Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
                     </instructions>
                 </configuration>
             </plugin>
