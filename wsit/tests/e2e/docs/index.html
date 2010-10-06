@@ -1,5 +1,5 @@
 
-<html xmlns:d="jelly:define" xmlns:jsl="jelly:jsl" xmlns:j="jelly:core" xmlns:l="layout" xmlns:x="jelly:xml">
+<html xmlns:d="jelly:define" xmlns:jsl="jelly:jsl" xmlns:j="jelly:core" xmlns:l="layout" xmlns:x="jelly:xml" xmlns:jsl="jelly:jsl" xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:x="jelly:xml" xmlns:l="layout">
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1"> 
     <title>Metro Test Harness User Guide</title> 
@@ -38,7 +38,7 @@
   </head> 
   <body>         
     <h1>JAX-WS/Tango Test Harness User Guide</h1> 
-    <div align="right">$Id: index.html,v 1.1 2010-10-05 12:23:03 m_potociar Exp $</div>      
+    <div align="right">$Id: index.html,v 1.2 2010-10-06 14:48:50 m_potociar Exp $</div>      
     <h2>Table of contents</h2> 
     <ol>             
       <li>
@@ -161,7 +161,15 @@
           </li> 
           <ol> </ol>    
           <li>
+            <a href="#Specifying_test_requirements_from_the_Container">Specifying test requirements from the Container</a>
+          </li> 
+          <ol> </ol>    
+          <li>
             <a href="#Specifying_verbatim_wsimport_options">Specifying verbatim wsimport options</a>
+          </li> 
+          <ol> </ol>    
+          <li>
+            <a href="#Specifying_test_specific_options">Specifying test specific options</a>
           </li> 
           <ol> </ol>  
         </ol>    
@@ -608,6 +616,7 @@ testdir/
  |   +- mascot.jpeg
  +- AddNumbers.wsdl         (optional WSDL that represents service)
  +- **/*.java               (Java code that implements service)
+ +- web.xml                 (optional web.xml file, if specified used for packaging the war)     
 </pre>              
     <a name="Test_Descriptor"></a>
     <h3>
@@ -642,10 +651,24 @@ testdir/
   ...
 &lt;/descriptor&gt;
 </pre>              
+    <a name="Specifying_test_requirements_from_the_Container"></a>
+    <h4>
+      <a name="Specifying_test_requirements_from_the_Container">
+        <a href="#Specifying_test_requirements_from_the_Container">2.2.2.</a>  Specifying test requirements from the Container
+      </a>
+    </h4>   
+    <p>If your test relies on a certain capability from the container, Specify such requirements in "uses" attribute. Harness checks the capabilities of the container to continue with running the test or skipping it. Supported values are "servlet30", "servlet","ri","multi-endpoint","skip-lwhs". 
+    <p>Please use this option with caution, so that tests can retain its generality. 
+    <pre>
+&lt;descriptor uses="servlet30"&gt;
+    &lt;description&gt;this test runs only on servlet 3.0 based container&lt;/description&gt;
+    ....
+&lt;/despcriptor&gt;
+      </pre>              
     <a name="Specifying_verbatim_wsimport_options"></a>
     <h4>
       <a name="Specifying_verbatim_wsimport_options">
-        <a href="#Specifying_verbatim_wsimport_options">2.2.2.</a>  Specifying verbatim wsimport options
+        <a href="#Specifying_verbatim_wsimport_options">2.2.3.</a>  Specifying verbatim wsimport options
       </a>
     </h4>   
     <p>If your test requires a certain wsimport command line options, you can specify verbatim by using the nested
@@ -658,7 +681,24 @@ testdir/
    &lt;description&gt;this is a very useful test that tests stuff&lt;/description&gt;
    &lt;wsimport-client&gt;-abc -def -ghi&lt;/wsimport-client&gt;
 &lt;/despcriptor&gt;
-</pre>                   
+</pre>              
+    <a name="Specifying_test_specific_options"></a>
+    <h4>
+      <a name="Specifying_test_specific_options">
+        <a href="#Specifying_test_specific_options">2.2.4.</a>  Specifying test specific options
+      </a>
+    </h4>   
+    <p>If your test special configuration from the default harness behavior,
+      <tt>test-options</tt> is the place to specify those.
+      <pre>Supported Options are:
+    -noPackage : to not use the default harness behavior of specifying -p option to wsimport.</pre> 
+      <pre>
+&lt;descriptor&gt;
+   &lt;description&gt;this is a very useful test that tests stuff&lt;/description&gt;
+   &lt;test-options&gt;-noPackage&lt;/test-options&gt;
+&lt;/despcriptor&gt;
+</pre> 
+                      
     <a name="Client_Test_Scripts"></a>
     <h3>
       <a name="Client_Test_Scripts">
@@ -729,13 +769,14 @@ helloPort.sayHelloTo("duke");
       <pre>injected ports: addNumbersPort</pre> 
     
     <p>The only exception to this "don't create your ports" rule is when you need
-      <tt>Dispatch</tt> objects, where you'd need to use the pre-defined variable "endpointAddress" 
-      <span style="color:red; font-weight:bold">(not fully cooked. Feedback welcome)</span>  : 
-      <pre class="script">
+      <tt>Dispatch</tt> objects, where you'd need to use the pre-defined variable "Address", for ex: helloPortAddress 
+      <span style="color:red; font-weight:bold">(not fully cooked. Feedback welcome)</span>  :
+    
+    <p>Junit based tests can use System property to access the endpoint address, for ex: System.getProperty("helloPortAddress")  
+    <pre class="script">
 // create dispatch
 helloService.addPort(new QName("foo","bar"), javax.xml.ws.soap.SOAPBinding.SOAP11HTTP_BINDING, endpointAddress);
-</pre>  
-                 
+</pre>               
     <a name="More_on_Script_Execution_Environment"></a>
     <h4>
       <a name="More_on_Script_Execution_Environment">
@@ -889,7 +930,8 @@ class FooBarSgervice {
     <p>Those three attributes can be combined, and they can be specified either on &lt;descript&gt; element (in which case the entire test is subject to the constraints), or on individual &lt;client&gt; element (in which case only that client test is subject to the constraints.)
     <p>See
       <a href="https://istack-commons.dev.java.net/source/browse/istack-commons/istack-commons/test/src/com/sun/istack/test/VersionNumber.java?only_with_tag=HEAD&amp;view=markup">this document</a> for more formal definition of what can be a valid version number, and how they are ordered.
-                 
+    
+    <p>Similarly, Junit based tests can specify version requirements by using annotation @com.sun.xml.ws.test.VersionRequirement(since="2.1.*", until="2.2",excludeFrom="") on the TestClass.              
     <a name="Resources"></a>
     <h3>
       <a name="Resources">

@@ -219,33 +219,60 @@
     <target name="overwrite-test-harness-lib" unless="test.harness.uptodate">
         <echo message="Test harness not up-to-date, updating..." />
 
+        <mkdir dir="tmp/test-harness"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+             dest="tmp/test-harness.zip"/>
+        <unzip src="tmp/test-harness.zip" dest="tmp"/>
+        
         <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
             <fileset dir="tmp/test-harness" includes="*.zip, *.jar"/>
         </copy>
         <copy todir="${test.docs.dir}" overwrite="true" verbose="${verbose}">
             <fileset dir="tmp/test-harness" includes="*.html, *.png"/>
         </copy>
+        <copy file="tmp/test-harness-build-number.txt" todir="${test.lib.dir}" overwrite="true" verbose="${verbose}" />
+
     </target>
 
-    <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
-        <mkdir dir="tmp/test-harness"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
-             dest="tmp/test-harness.zip"/>
-        <unzip src="tmp/test-harness.zip" dest="tmp"/>
-
-        <uptodate property="test.harness.uptodate"
-            srcfile="tmp/test-harness/harness-lib.jar"
-            targetfile="${test.lib.dir}/harness-lib.jar"/>
-
-        <antcall target="overwrite-test-harness-lib"/>
-
-        <delete dir="tmp" includeemptydirs="true"/>
+    <target name="overwrite-local-transport-lib" unless="local.transport.uptodate">
+        <echo message="Local transport not up-to-date, updating..." />
 
         <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
              dest="${test.lib.dir}/jaxws-local-transport.jar"/>
         <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
              dest="${test.lib.dir}/jaxws-local-transport.src.zip"/>
-        
+
+        <copy file="tmp/local-transport-build-number.txt" todir="${test.lib.dir}" overwrite="true" verbose="${verbose}" />
+    </target>
+
+    <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
+        <mkdir dir="tmp"/>
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/buildNumber"
+             dest="tmp/test-harness-build-number.txt"/>
+        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/buildNumber"
+             dest="tmp/local-transport-build-number.txt"/>
+
+        <loadfile property="test.harness.hudson" srcfile="tmp/test-harness-build-number.txt" />
+        <loadfile property="test.harness.local" srcfile="lib/test-harness-build-number.txt" />
+
+        <loadfile property="local.transport.hudson" srcfile="tmp/local-transport-build-number.txt" />
+        <loadfile property="local.transport.local" srcfile="lib/local-transport-build-number.txt" />
+
+        <echo message="Test harness version: hudson=${test.harness.hudson}, local=${test.harness.local}" />
+        <echo message="Local transport version: hudson=${local.transport.hudson}, local=${local.transport.local}" />
+
+        <condition property="test.harness.uptodate" >
+            <equals arg1="${test.harness.hudson}" arg2="${test.harness.local}" trim="true" />
+        </condition>
+
+        <condition property="local.transport.uptodate" >
+            <equals arg1="${local.transport.hudson}" arg2="${local.transport.local}" trim="true" />
+        </condition>
+
+        <antcall target="overwrite-test-harness-lib"/>
+        <antcall target="overwrite-local-transport-lib"/>
+
+        <delete dir="tmp" verbose="${verbose}" includeemptydirs="true"/>
         <cvs command="ci -m 'Updating test harness and/or local transport libs' lib" />
     </target>
 
