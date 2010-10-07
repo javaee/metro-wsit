@@ -173,21 +173,25 @@
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>jaxr-api</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>webservices-rt</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>webservices-extra</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.sun.tools.ws</groupId>
             <artifactId>webservices-tools</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
