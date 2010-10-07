@@ -38,7 +38,6 @@ package com.sun.xml.ws.security.impl.policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.spi.PolicyAssertionValidator;
 import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
-import com.sun.xml.ws.security.policy.SecurityAssertionValidator;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.ArrayList;
