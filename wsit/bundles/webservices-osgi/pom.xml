@@ -118,6 +118,7 @@
                                     org.apache.coyote;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
+                                    org.jvnet.mimepull.*;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
                                     *
                                 </Import-Package>
