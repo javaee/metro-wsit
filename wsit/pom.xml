@@ -458,7 +458,7 @@
             <dependency>
                 <groupId>org.glassfish.ha</groupId>
                 <artifactId>ha-api</artifactId>
-                <version>${glassfish.version}</version>
+                <version>3.1.3</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.net.httpserver</groupId>
@@ -702,7 +702,7 @@
     </distributionManagement>
 
     <properties>
-        <glassfish.version>3.1-SNAPSHOT</glassfish.version>
+        <glassfish.version>3.1-b23</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
 
         <jaxb.api.version>2.2.2-promoted-b94</jaxb.api.version>
@@ -716,7 +716,7 @@
         
         <metro.release.version>2.1</metro.release.version>
         
-        <policy.version>2.2.2-SNAPSHOT</policy.version>
+        <policy.version>2.2.2-b01</policy.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
