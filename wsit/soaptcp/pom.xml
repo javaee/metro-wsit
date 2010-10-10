@@ -55,7 +55,6 @@
     <modules>
         <module>soaptcp-api</module>
         <module>soaptcp-impl</module>
-        <module>legacy-dependencies/gfv2-deployment</module>
     </modules>
     
     <!--dependencies></dependencies-->

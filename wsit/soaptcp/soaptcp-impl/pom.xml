@@ -124,7 +124,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>gfv2-deployment</artifactId>
-            <version>${project.version}</version>
+            <version>2.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
