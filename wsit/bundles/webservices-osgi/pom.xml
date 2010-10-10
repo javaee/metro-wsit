@@ -66,9 +66,10 @@
                         <configuration>
                             <instructions>
                                 <Export-Package>
-                                    com.sun.tools.ws.spi.*;version=${jaxws.ri.release.version},
-                                    com.sun.tools.ws.util.xml;version=${jaxws.ri.release.version},
+                                    com.sun.istack.ws.*;version=${jaxws.ri.release.version},
+                                    com.sun.tools.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.xml.messaging.saaj.*;version=1.3,
+                                    com.sun.xml.registry.*;version=1.0,
                                     com.sun.xml.rpc.plugins;version=${metro.release.version},
                                     com.sun.xml.rpc.security;version=${metro.release.version},
                                     com.sun.xml.rpc.*;version=1.1.2,
@@ -106,6 +107,8 @@
                                     com.sun.enterprise.webservice.monitoring;resolution:=optional,
                                     com.sun.mail.util;resolution:=optional,
                                     com.sun.msv.*;resolution:=optional,
+                                    com.sun.org.apache.xml.internal.serialize;resolution:=optional,
+                                    com.sun.xml.bind.api.impl;resolution:=optional,
                                     com.sun.xml.bind.serializer;resolution:=optional,
                                     com.sun.xml.bind.validator;resolution:=optional,
                                     com.sun.xml.rpc.*;resolution:=optional,
@@ -118,19 +121,64 @@
                                     org.apache.coyote;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
-                                    org.jvnet.mimepull.*;resolution:=optional,
+                                    org.jvnet.mimepull;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
                                     *
                                 </Import-Package>
                                 <Private-Package>
-                                    com.sun.istack.ws.*;version=${jaxws.ri.release.version},
-                                    com.sun.tools.ws.*;version=${jaxws.ri.release.version},
-                                    com.sun.xml.registry.*;version=1.0,
                                     com.sun.xml.stream.*,
                                     com.sun.xml.xwss.*;version=${metro.release.version},
                                     javanet.staxutils.*
                                 </Private-Package>
-                                <DynamicImport-Package>org.glassfish.flashlight.provider</DynamicImport-Package>
+                                <DynamicImport-Package>
+                                    org.glassfish.flashlight.provider
+                                </DynamicImport-Package>
+                                <!--
+                                    Missing exports compared to old:
+                                        com.sun.istack.ws; version=0.0.0
+                                        com.sun.tools.resourcegen; version=0.0.0
+                                        com.sun.tools.ws; version=0.0.0
+                                        com.sun.tools.ws.ant; version=0.0.0
+                                        com.sun.tools.ws.api; version=0.0.0
+                                        com.sun.tools.ws.api.wsdl; version=0.0.0
+                                        com.sun.tools.ws.processor; version=0.0.0
+                                        com.sun.tools.ws.processor.generator; version=0.0.0
+                                        com.sun.tools.ws.processor.model; version=0.0.0
+                                        com.sun.tools.ws.processor.model.exporter; version=0.0.0
+                                        com.sun.tools.ws.processor.model.java; version=0.0.0
+                                        com.sun.tools.ws.processor.model.jaxb; version=0.0.0
+                                        com.sun.tools.ws.processor.modeler; version=0.0.0
+                                        com.sun.tools.ws.processor.modeler.annotation; version=0.0.0
+                                        com.sun.tools.ws.processor.modeler.wsdl; version=0.0.0
+                                        com.sun.tools.ws.processor.util; version=0.0.0
+                                        com.sun.tools.ws.resources; version=0.0.0
+                                        com.sun.tools.ws.util; version=0.0.0
+                                        com.sun.tools.ws.wscompile; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document.http; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document.jaxws; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document.mime; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document.schema; version=0.0.0
+                                        com.sun.tools.ws.wsdl.document.soap; version=0.0.0
+                                        com.sun.tools.ws.wsdl.framework; version=0.0.0
+                                        com.sun.tools.ws.wsdl.parser; version=0.0.0
+                                        com.sun.xml.registry; version=0.0.0
+                                        com.sun.xml.registry.common; version=0.0.0
+                                        com.sun.xml.registry.common.tools; version=0.0.0
+                                        com.sun.xml.registry.common.tools.bindings_v3; version=0.0.0
+                                        com.sun.xml.registry.common.tools.resources; version=0.0.0
+                                        com.sun.xml.registry.common.util; version=0.0.0
+                                        com.sun.xml.registry.service; version=0.0.0
+                                        com.sun.xml.registry.uddi; version=0.0.0
+                                        com.sun.xml.registry.uddi.bindings_v2_2; version=0.0.0
+                                        com.sun.xml.registry.uddi.infomodel; version=0.0.0
+                                        WEB-INF.wsdl; version=0.0.0
+                                        WEB-INF.wsdls; version=0.0.0
+                                        WEB-INF.wsdls.wsat10; version=0.0.0
+                                        WEB-INF.wsdls.wsat11; version=0.0.0
+                                        WEB-INF.wsdls.wsc10; version=0.0.0
+                                        WEB-INF.wsdls.wsc11; version=0.0.0
+                                -->
                             </instructions>
                             <unpackBundle>true</unpackBundle>
                         </configuration>
@@ -194,6 +242,39 @@
             <artifactId>webservices-tools</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
+        </dependency>
+
+        <!--
+            Declaring OSGi dependecies:
+            GF application client module somehow creates it's HK2 classpath using
+            (also) the declared webservices-osgi maven module dependencies. Although
+            this project does not really need these dependencies to build itself,
+            not declaring these dependencies in webservices-osgi causes that GF
+            appclient module cannot load some classes (e.g. mimepull) which makes
+            some CTS smoke tests to fail
+        -->
+
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>webservices-api-osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>webservices-extra-jdk-packages</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctc.wstx</groupId>
+            <artifactId>woodstox-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet</groupId>
+            <artifactId>mimepull</artifactId>
         </dependency>
     </dependencies>
 </project>
