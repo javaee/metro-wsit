@@ -47,7 +47,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -71,7 +70,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     private final long maxMessageBufferSize;
     private final @NotNull BlockingQueue<ApplicationMessage> postponedMessageQueue;
     //
-    private final AtomicBoolean isClosed;
+    private volatile boolean isClosed;
 
     public InOrderDeliveryQueue(@NotNull Postman postman, @NotNull Callback deliveryCallback, @NotNull Sequence sequence, long maxMessageBufferSize) {
         assert postman != null;
@@ -86,7 +85,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
         this.maxMessageBufferSize = maxMessageBufferSize;
         this.postponedMessageQueue = new PriorityBlockingQueue<ApplicationMessage>(32, MSG_ID_COMPARATOR);
 
-        this.isClosed = new AtomicBoolean(false);
+        this.isClosed = false;
     }
 
     public void put(ApplicationMessage message) {
@@ -103,14 +102,14 @@ class InOrderDeliveryQueue implements DeliveryQueue {
     }
     public void onSequenceAcknowledgement() {
 //        LOGGER.info(Thread.currentThread().getName() + " onSequenceAcknowledgement");
-        if (!isClosed.get()) {
+        if (!isClosed) {
             tryDelivery();
         }
     }
     
     private void tryDelivery() {
 //        LOGGER.info(Thread.currentThread().getName() + " postponedMessageQueue.size() = " + postponedMessageQueue.size());
-        if (isClosed.get()) {
+        if (isClosed) {
             throw new RxRuntimeException(LocalizationMessages.WSRM_1160_DELIVERY_QUEUE_CLOSED());
         }
 
@@ -145,7 +144,7 @@ class InOrderDeliveryQueue implements DeliveryQueue {
 
     public void close() {
 //        LOGGER.info(Thread.currentThread().getName() + " close");
-        isClosed.set(true);
+        isClosed = true;
     }
 
     private boolean isDeliverable(ApplicationMessage message) {
