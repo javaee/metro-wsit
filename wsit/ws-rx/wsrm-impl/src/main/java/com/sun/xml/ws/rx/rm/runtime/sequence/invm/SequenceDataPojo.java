@@ -168,4 +168,70 @@ class SequenceDataPojo implements Serializable {
             HighAvailabilityProvider.saveTo(backingStore, sequenceId, this, false);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SequenceDataPojo other = (SequenceDataPojo) obj;
+        if ((this.sequenceId == null) ? (other.sequenceId != null) : !this.sequenceId.equals(other.sequenceId)) {
+            return false;
+        }
+        if ((this.boundSecurityTokenReferenceId == null) ? (other.boundSecurityTokenReferenceId != null) : !this.boundSecurityTokenReferenceId.equals(other.boundSecurityTokenReferenceId)) {
+            return false;
+        }
+        if (this.expirationTime != other.expirationTime) {
+            return false;
+        }
+        if (this.state != other.state) {
+            return false;
+        }
+        if (this.ackRequestedFlag != other.ackRequestedFlag) {
+            return false;
+        }
+        if (this.lastMessageNumber != other.lastMessageNumber) {
+            return false;
+        }
+        if (this.lastActivityTime != other.lastActivityTime) {
+            return false;
+        }
+        if (this.lastAcknowledgementRequestTime != other.lastAcknowledgementRequestTime) {
+            return false;
+        }
+        if (this.allUnackedMessageNumbers != other.allUnackedMessageNumbers && (this.allUnackedMessageNumbers == null || !this.allUnackedMessageNumbers.equals(other.allUnackedMessageNumbers))) {
+            return false;
+        }
+        if (this.receivedUnackedMessageNumbers != other.receivedUnackedMessageNumbers && (this.receivedUnackedMessageNumbers == null || !this.receivedUnackedMessageNumbers.equals(other.receivedUnackedMessageNumbers))) {
+            return false;
+        }
+        if (this.unackedNumberToCorrelationIdMap != other.unackedNumberToCorrelationIdMap && (this.unackedNumberToCorrelationIdMap == null || !this.unackedNumberToCorrelationIdMap.equals(other.unackedNumberToCorrelationIdMap))) {
+            return false;
+        }
+        if (this.inbound != other.inbound) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + (this.sequenceId != null ? this.sequenceId.hashCode() : 0);
+        hash = 61 * hash + (this.boundSecurityTokenReferenceId != null ? this.boundSecurityTokenReferenceId.hashCode() : 0);
+        hash = 61 * hash + (int) (this.expirationTime ^ (this.expirationTime >>> 32));
+        hash = 61 * hash + (this.state != null ? this.state.hashCode() : 0);
+        hash = 61 * hash + (this.ackRequestedFlag ? 1 : 0);
+        hash = 61 * hash + (int) (this.lastMessageNumber ^ (this.lastMessageNumber >>> 32));
+        hash = 61 * hash + (int) (this.lastActivityTime ^ (this.lastActivityTime >>> 32));
+        hash = 61 * hash + (int) (this.lastAcknowledgementRequestTime ^ (this.lastAcknowledgementRequestTime >>> 32));
+        hash = 61 * hash + (this.allUnackedMessageNumbers != null ? this.allUnackedMessageNumbers.hashCode() : 0);
+        hash = 61 * hash + (this.receivedUnackedMessageNumbers != null ? this.receivedUnackedMessageNumbers.hashCode() : 0);
+        hash = 61 * hash + (this.unackedNumberToCorrelationIdMap != null ? this.unackedNumberToCorrelationIdMap.hashCode() : 0);
+        hash = 61 * hash + (this.inbound ? 1 : 0);
+        return hash;
+    }
 }
