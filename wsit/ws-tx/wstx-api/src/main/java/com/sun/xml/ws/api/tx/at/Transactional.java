@@ -58,7 +58,7 @@ public @interface Transactional {
         WSAT10("wsat10", WsatNamespace.WSAT200410),
         WSAT11("wsat11", WsatNamespace.WSAT200606),
         WSAT12("wsat12", WsatNamespace.WSAT200606),
-        DEFAULT("wsat", null);
+        DEFAULT("wsat", WsatNamespace.WSAT200606);
 
         public final QName qname;
         public final WsatNamespace namespaceVersion;
@@ -75,7 +75,7 @@ public @interface Transactional {
 
         public static Version forNamespaceVersion(WsatNamespace nsVersion) {
             for (Version version : Version.values()) {
-                if (version == WSAT11) {
+                if (version == WSAT11 || version == DEFAULT) {
                     continue; // return WSAT12 for this namespace
                 }
 
@@ -88,7 +88,7 @@ public @interface Transactional {
 
         public static Version forNamespaceUri(String ns) {
             for (Version version : Version.values()) {
-                if (version == WSAT11) {
+                if (version == WSAT11 || version == DEFAULT) {
                     continue; // return WSAT12 for this namespace
                 }
 
