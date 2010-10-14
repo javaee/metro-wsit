@@ -37,6 +37,7 @@
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
 import com.sun.xml.ws.commons.NamedThreadFactory;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,9 +65,15 @@ public final class Postman {
     }
 
     public void deliver(final ApplicationMessage message, final Callback deliveryCallback) {
+        final HaContext.State state = HaContext.currentState();
         executor.execute(new Runnable() {
             public void run() {
-                deliveryCallback.deliver(message);
+                final HaContext.State oldState = HaContext.initFrom(state);
+                try {
+                    deliveryCallback.deliver(message);
+                } finally {
+                    HaContext.initFrom(oldState);
+                }
             }
         });
     }

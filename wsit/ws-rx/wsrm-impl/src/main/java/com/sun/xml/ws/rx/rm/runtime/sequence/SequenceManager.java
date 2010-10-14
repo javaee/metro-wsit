@@ -82,7 +82,7 @@ public interface SequenceManager extends TimeSynchronizer {
     public Sequence closeSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
-     * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been alrady established,
+     * Creates a new outbound sequence object with a given Id. It is assumed that RM handshake has been already established,
      * thus no RM handshake is performed.
      * 
      * @param sequenceId identifier of the new sequence
@@ -156,7 +156,7 @@ public interface SequenceManager extends TimeSynchronizer {
      * Binds two sequences together. This method is mainly intended to be used for 
      * binding together request and response sequences.
      * 
-     * @param referenceSequenceId a reference sequence indentifier to which the other sequence shall be bound.
+     * @param referenceSequenceId a reference sequence identifier to which the other sequence shall be bound.
      * @param boundSequenceId a bound sequence identifier
      * 
      * @throws UnknownSequenceException in case any of the sequence identifiers does not represent a valid sequence
@@ -166,7 +166,7 @@ public interface SequenceManager extends TimeSynchronizer {
     /**
      * Retrieves a sequence previously bound to the reference sequence
      * 
-     * @param referenceSequenceId a reference sequence indentifier to which the other sequence has been bound.
+     * @param referenceSequenceId a reference sequence identifier to which the other sequence has been bound.
      * 
      * @return bound sequence or {@code null} in case no sequence is bound to the reference sequence
      * 
@@ -175,16 +175,20 @@ public interface SequenceManager extends TimeSynchronizer {
     public Sequence getBoundSequence(String referenceSequenceId) throws UnknownSequenceException;
 
     /**
-     * <p>
      * Terminates all sequences that became expired in the meantime and removes all
-     * previously terminated sequences that were terminated sooner than a precofigured
+     * previously terminated sequences that were terminated sooner than a pre-configured
      * period of time.
-     * </p>
+     * <p />
      *
-     * <p>
-     * This maintenance method is intedned to be called externally by a {@link SequenceMaintenanceTask}
+     * This maintenance method is intended to be called externally by a {@link SequenceMaintenanceTask}
      * instance associated with this {@code SequenceManager}.
-     * </p>
      */
     public void onMaintenance();
+
+    /**
+     * Instructs the {@link SequenceManager} instance to invalidate it's local 
+     * cache. This prevents stale data being used and ensures that fresh data are 
+     * loaded from the RM HA backing stores.
+     */
+    public void invalidateCache();
 }

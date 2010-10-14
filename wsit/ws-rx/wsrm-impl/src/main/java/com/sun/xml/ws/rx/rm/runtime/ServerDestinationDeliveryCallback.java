@@ -38,6 +38,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
@@ -77,54 +78,66 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Packet response) {
-            /**
-             * This if clause is a part of the RM-JCaps private contract. JCaps may decide
-             * that the request it received should be resent and thus it should not be acknowledged.
-             *
-             * For more information, see documentation of RM_ACK_PROPERTY_KEY constant field.
-             */
-            String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
-            if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
-                rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
-            } else {
-                LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
-                RedeliveryTaskExecutor.INSTANCE.register(
-                        request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                        TimeUnit.MILLISECONDS,
-                        rc.destinationMessageHandler);
-                return;
-            }
-
             try {
-                if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
-                    AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
-                    if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
-                        // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
-                        response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
-                        rc.protocolHandler.appendAcknowledgementHeaders(response,ackData);
-                    }
-
-                    resumeParentFiber(response);
+                HaContext.initFrom(response);
+                /**
+                 * This if clause is a part of the RM-JCaps private contract. JCaps may decide
+                 * that the request it received should be resent and thus it should not be acknowledged.
+                 *
+                 * For more information, see documentation of RM_ACK_PROPERTY_KEY constant field.
+                 */
+                String rmAckPropertyValue = String.class.cast(response.invocationProperties.remove(RM_ACK_PROPERTY_KEY));
+                if (rmAckPropertyValue == null || Boolean.parseBoolean(rmAckPropertyValue)) {
+                    rc.destinationMessageHandler.acknowledgeApplicationLayerDelivery(request);
                 } else {
-                    JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
-                    rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
-                    rc.sourceMessageHandler.putToDeliveryQueue(message);
+                    LOGGER.finer(String.format("Value of the '%s' property is '%s'. The request has not been acknowledged.", RM_ACK_PROPERTY_KEY, rmAckPropertyValue));
+                    RedeliveryTaskExecutor.INSTANCE.register(
+                            request,
+                            rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                            TimeUnit.MILLISECONDS,
+                            rc.destinationMessageHandler);
+                    return;
                 }
 
-                // TODO handle RM faults
-            } catch (DuplicateMessageRegistrationException ex) {
-                onCompletion(ex);
+                try {
+                    if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
+                        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
+                        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+                            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+                            response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
+                            rc.protocolHandler.appendAcknowledgementHeaders(response, ackData);
+                        }
+
+                        resumeParentFiber(response);
+                    } else {
+                        JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
+                        rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
+                        rc.sourceMessageHandler.putToDeliveryQueue(message);
+                    }
+
+                    // TODO handle RM faults
+                } catch (DuplicateMessageRegistrationException ex) {
+                    onCompletion(ex);
+                }
+            } finally {
+                HaContext.clear();
             }
         }
 
         public void onCompletion(Throwable error) {
             if (Utilities.isResendPossible(error)) {
-                RedeliveryTaskExecutor.INSTANCE.register(
-                        request,
-                        rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
-                        TimeUnit.MILLISECONDS,
-                        rc.destinationMessageHandler);
+                try {
+                    HaContext.initFrom(request.getPacket());
+
+                    RedeliveryTaskExecutor.INSTANCE.register(
+                            request,
+                            rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(request.getNextResendCount(), rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
+                            TimeUnit.MILLISECONDS,
+                            rc.destinationMessageHandler);
+
+                } finally {
+                    HaContext.clear();
+                }
             } else {
                 resumeParentFiber(error);
             }
@@ -152,5 +165,4 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
         rc.communicator.sendAsync(message.getPacket().copy(true), responseCallback);
     }
-
 }

@@ -1,7 +1,10 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
@@ -58,28 +61,36 @@ final class InVmSequenceData implements SequenceData {
             }
         }
         
-        private BackingStore<String, ApplicationMessageState> unackedMesagesBs;
+        private BackingStore<StickyKey, ApplicationMessageState> unackedMesagesBs;
 
         public UnackedMessageReplicationManager(String sequenceId) {
             this.unackedMesagesBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                     HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY),
                     sequenceId + "_UNACKED_MESSAGES_BS",
-                    String.class,
+                    StickyKey.class,
                     ApplicationMessageState.class);
         }
 
         public ApplicationMessage load(String key) {
-            ApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, key, null);
+            ApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, new StickyKey(key), null);
             return state.toMessage();
         }
 
-        public String save(String key, ApplicationMessage value, boolean isNew) {
+        public void save(final String key, final ApplicationMessage value, final boolean isNew) {
             ApplicationMessageState ams = new ApplicationMessageState(value);
-            return HighAvailabilityProvider.saveTo(unackedMesagesBs, key, ams, isNew);
+            HaInfo haInfo = HaContext.currentHaInfo();
+            if (haInfo != null) {
+                HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), ams, isNew);
+            } else {
+                final StickyKey stickyKey = new StickyKey(key);
+                final String replicaId = HighAvailabilityProvider.saveTo(unackedMesagesBs, stickyKey, ams, isNew);
+
+                HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+            }
         }
 
         public void remove(String key) {
-            HighAvailabilityProvider.removeFrom(unackedMesagesBs, key);
+            HighAvailabilityProvider.removeFrom(unackedMesagesBs, new StickyKey(key));
         }
 
         public void close() {
@@ -121,7 +132,7 @@ final class InVmSequenceData implements SequenceData {
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
             rm = new UnackedMessageReplicationManager(data.getSequenceId());
         }
-        this.messageStore = HighlyAvailableMap.newInstance(new HashMap<String, ApplicationMessage>(), rm);
+        this.messageStore = HighlyAvailableMap.create(new HashMap<String, ApplicationMessage>(), rm);
     }
 
     private void lockRead() {

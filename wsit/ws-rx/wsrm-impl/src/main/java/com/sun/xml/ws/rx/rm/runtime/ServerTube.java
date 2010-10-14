@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.runtime.dev.Session;
 import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.rx.RxException;
@@ -159,6 +160,11 @@ public class ServerTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet request) {
         LOGGER.entering();
         try {
+            HaContext.initFrom(request);
+            if (HaContext.failoverDetected()) {
+                rc.sequenceManager().invalidateCache();
+            }
+            
             String wsaAction = rc.communicator.getWsaAction(request);
             if (rc.rmVersion.protocolVersion.isProtocolAction(wsaAction)) { // protocol message
                 return doReturnWith(processProtocolMessage(request, wsaAction));
@@ -169,19 +175,16 @@ public class ServerTube extends AbstractFilterTubeImpl {
             request.keepTransportBackChannelOpen();
 
             JaxwsApplicationMessage message = new JaxwsApplicationMessage(request, request.getMessage().getID(rc.addressingVersion, rc.soapVersion));
-
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
+            rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
             validateSecurityContextTokenId(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket());
-
-            rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
-            rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
-
             if (!hasSession(request)) { // security did not set session - we must do it
                 setSession(message.getSequenceId(), request);
             }
             exposeSequenceDataToUser(message);
 
+            rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
             try {
                 rc.destinationMessageHandler.registerMessage(message);
             } catch (DuplicateMessageRegistrationException ex) {
@@ -207,8 +210,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
         } catch (RxRuntimeException ex) {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
-
         } finally {
+            HaContext.clear();
             LOGGER.exiting();
         }
     }

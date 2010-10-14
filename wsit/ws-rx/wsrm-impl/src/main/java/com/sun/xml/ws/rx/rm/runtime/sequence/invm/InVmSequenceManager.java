@@ -35,9 +35,12 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
@@ -80,7 +83,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
     /**
      * Sequence data POJo backing store
      */
-    private final BackingStore<String, SequenceDataPojo> sequenceDataBs;
+    private final BackingStore<StickyKey, SequenceDataPojo> sequenceDataBs;
     /**
      * Internal in-memory map of bound sequences
      */
@@ -122,7 +125,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
 
         final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-        this.boundSequences = HighlyAvailableMap.newInstanceForBs(
+        this.boundSequences = HighlyAvailableMap.create(
                 new HashMap<String, String>(),
                 HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
@@ -133,9 +136,9 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.sequenceDataBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
                 uniqueEndpointId + "_SEQUENCE_DATA_BS",
-                String.class,
+                StickyKey.class,
                 SequenceDataPojo.class);
-        this.sequences = HighlyAvailableMap.newInstance(new HashMap<String, AbstractSequence>(), this);
+        this.sequences = HighlyAvailableMap.create(new HashMap<String, AbstractSequence>(), this);
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
@@ -248,6 +251,10 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      * {@inheritDoc}
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
+        if (sequenceId == null) {
+            throw new UnknownSequenceException("[null-sequence-identifier]");
+        }
+
         try {
             dataLock.readLock().lock();
             Sequence sequence = sequences.get(sequenceId);
@@ -271,6 +278,9 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      * {@inheritDoc}
      */
     public boolean isValid(String sequenceId) {
+        if (sequenceId == null) {
+            return false;
+        }
         try {
             dataLock.readLock().lock();
             Sequence s = sequences.get(sequenceId);
@@ -281,6 +291,9 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
     }
 
     private Sequence tryTerminateSequence(String sequenceId) {
+        if (sequenceId == null) {
+            return null;
+        }
         try {
             dataLock.writeLock().lock();
             final Sequence sequence = sequences.get(sequenceId);
@@ -417,8 +430,13 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         return sequence.getState() == Sequence.State.TERMINATING;
     }
 
+    public void invalidateCache() {
+        this.sequences.invalidateCache();
+        this.boundSequences.invalidateCache();
+    }
+
     public AbstractSequence load(String key) {
-        SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, key, null);
+        SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, new StickyKey(key), null);
         if (state == null) {
             return null;
         }
@@ -428,18 +446,27 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         return (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
     }
 
-    public String save(String key, AbstractSequence value, boolean isNew) {
+    public void save(String key, AbstractSequence value, boolean isNew) {
         SequenceData _data = value.getData();
         if (!(_data instanceof InVmSequenceData)) {
             throw new IllegalArgumentException("Unsupported sequence data class: " + _data.getClass().getName());
         }
 
         InVmSequenceData data = (InVmSequenceData) _data;
-        return HighAvailabilityProvider.saveTo(sequenceDataBs, key, data.getSequenceStatePojo(), isNew);
+
+        HaInfo haInfo = HaContext.currentHaInfo();
+        if (haInfo != null) {
+            HighAvailabilityProvider.saveTo(sequenceDataBs, new StickyKey(key, haInfo.getKey()), data.getSequenceStatePojo(), isNew);
+        } else {
+            final StickyKey stickyKey = new StickyKey(key);
+            final String replicaId = HighAvailabilityProvider.saveTo(sequenceDataBs, stickyKey, data.getSequenceStatePojo(), isNew);
+
+            HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+        }
     }
 
     public void remove(String key) {
-        HighAvailabilityProvider.removeFrom(sequenceDataBs, key);
+        HighAvailabilityProvider.removeFrom(sequenceDataBs, new StickyKey(key));
     }
 
     public void close() {

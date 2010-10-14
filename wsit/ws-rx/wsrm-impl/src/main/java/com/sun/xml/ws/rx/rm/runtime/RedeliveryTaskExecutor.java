@@ -37,6 +37,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.commons.DelayedTaskManager;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.commons.ha.HaContext;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -60,10 +61,17 @@ enum RedeliveryTaskExecutor {
             LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s", message.getMessageNumber(), message.getSequenceId(), delay, timeUnit.toString().toLowerCase()));
         }
 
+        final HaContext.State state = HaContext.currentState();
+
         return delayedTaskManager.register(new DelayedTaskManager.DelayedTask() {
 
             public void run(DelayedTaskManager manager) {
-                messageHandler.putToDeliveryQueue(message);
+                final HaContext.State oldState = HaContext.initFrom(state);
+                try {
+                    messageHandler.putToDeliveryQueue(message);
+                } finally {
+                    HaContext.initFrom(oldState);
+                }
             }
 
             public String getName() {

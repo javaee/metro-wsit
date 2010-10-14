@@ -39,6 +39,8 @@ import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.ha.HaInfo;
+import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
@@ -58,12 +60,21 @@ public final class RuntimeContext {
 
     public static final class Builder {
 
-        private final @NotNull RmConfiguration configuration;
-        private final @NotNull Communicator communicator;
-
-        private @Nullable SequenceManager sequenceManager;
-        private @Nullable SourceMessageHandler sourceMessageHandler;
-        private @Nullable DestinationMessageHandler destinationMessageHandler;
+        private final 
+        @NotNull
+        RmConfiguration configuration;
+        private final 
+        @NotNull
+        Communicator communicator;
+        private 
+        @Nullable
+        SequenceManager sequenceManager;
+        private 
+        @Nullable
+        SourceMessageHandler sourceMessageHandler;
+        private 
+        @Nullable
+        DestinationMessageHandler destinationMessageHandler;
 
         public Builder(@NotNull RmConfiguration configuration, @NotNull Communicator communicator) {
             assert configuration != null;
@@ -108,6 +119,7 @@ public final class RuntimeContext {
     final SourceMessageHandler sourceMessageHandler;
     final DestinationMessageHandler destinationMessageHandler;
 
+    @SuppressWarnings("LeakingThisInConstructor")
     private RuntimeContext(
             RmConfiguration configuration,
             SequenceManager sequenceManager,

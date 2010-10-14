@@ -36,6 +36,7 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
+import com.sun.xml.ws.rx.rm.runtime.RuntimeContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

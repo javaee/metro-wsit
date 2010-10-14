@@ -152,7 +152,6 @@ class SourceMessageHandler implements MessageHandler {
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException {
         assert sequenceManager != null;
 
-
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(String.format("Putting a message with number [ %d ] to the delivery queue of a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
         }

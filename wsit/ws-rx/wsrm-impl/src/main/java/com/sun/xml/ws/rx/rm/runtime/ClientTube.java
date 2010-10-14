@@ -50,6 +50,7 @@ import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.dev.WsmcRuntimeProvider;
 import com.sun.xml.ws.rx.mc.dev.ProtocolMessageHandler;
@@ -87,7 +88,6 @@ import java.util.logging.Level;
  */
 final class ClientTube extends AbstractFilterTubeImpl {
     //
-
     private static final Logger LOGGER = Logger.getLogger(ClientTube.class);
     private static final Lock INIT_LOCK = new ReentrantLock();
     //
@@ -172,6 +172,11 @@ final class ClientTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet request) {
         LOGGER.entering();
         try {
+            HaContext.initFrom(request);
+            if (HaContext.failoverDetected()) {
+                rc.sequenceManager().invalidateCache();
+            }
+
             try {
                 INIT_LOCK.lock();
                 if (outboundSequenceId.value == null) { // RM session not initialized yet - need to synchronize
@@ -204,6 +209,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
             LOGGER.logSevereException(ex);
             return doThrow(ex);
         } finally {
+            HaContext.clear();
             LOGGER.exiting();
         }
     }
@@ -376,15 +382,17 @@ final class ClientTube extends AbstractFilterTubeImpl {
             rc.sequenceManager().terminateSequence(outboundSequenceId.value);
         }
 
-        try {
-            waitForInboundSequenceStateChange(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout(), Sequence.State.TERMINATING);
-        } catch (RuntimeException ex) {
-            LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
-        } finally {
-            if (rc.sequenceManager().isValid(inboundSequenceId)) {
-                try {
-                    rc.sequenceManager().terminateSequence(inboundSequenceId);
-                } catch (UnknownSequenceException ignored) { /* ignored - most likely terminated externally in the meanwhile */ }
+        if (inboundSequenceId != null) {
+            try {
+                waitForInboundSequenceStateChange(inboundSequenceId, rc.configuration.getRmFeature().getCloseSequenceOperationTimeout(), Sequence.State.TERMINATING);
+            } catch (RuntimeException ex) {
+                LOGGER.warning(LocalizationMessages.WSRM_1103_RM_SEQUENCE_NOT_TERMINATED_NORMALLY(), ex);
+            } finally {
+                if (rc.sequenceManager().isValid(inboundSequenceId)) {
+                    try {
+                        rc.sequenceManager().terminateSequence(inboundSequenceId);
+                    } catch (UnknownSequenceException ignored) { /* ignored - most likely terminated externally in the meanwhile */ }
+                }
             }
         }
     }

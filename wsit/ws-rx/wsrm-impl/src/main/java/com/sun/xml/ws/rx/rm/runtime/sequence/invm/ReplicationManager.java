@@ -6,7 +6,7 @@ interface ReplicationManager<K extends Serializable, V> {
 
     V load(K key);
 
-    String save(K key, V value, boolean isNew);
+    void save(K key, V value, boolean isNew);
 
     void remove(K key);
 

@@ -444,4 +444,8 @@ public final class PersistentSequenceManager implements SequenceManager {
         // sequence is removed from the sequence storage
         return sequence.getState() == Sequence.State.TERMINATING;
     }
+
+    public void invalidateCache() {
+        // do nothing
+    }
 }

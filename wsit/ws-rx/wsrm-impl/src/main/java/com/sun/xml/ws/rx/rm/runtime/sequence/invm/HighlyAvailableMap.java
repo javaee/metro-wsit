@@ -36,7 +36,10 @@
 
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.commons.ha.StickyKey;
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,8 +60,8 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
             return null;
         }
 
-        public String save(K key, V value, boolean isNew) {
-            return "";
+        public void save(K key, V value, boolean isNew) {
+            // noop
         }
 
         public void remove(K key) {
@@ -86,8 +89,8 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
             return HighAvailabilityProvider.loadFrom(backingStore, key, null);
         }
 
-        public String save(K key, V value, boolean isNew) {
-            return HighAvailabilityProvider.saveTo(backingStore, key, value, isNew);
+        public void save(K key, V value, boolean isNew) {
+            HighAvailabilityProvider.saveTo(backingStore, key, value, isNew);
         }
 
         public void remove(K key) {
@@ -103,14 +106,55 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
         }
     }
 
+    private static final class StickyReplicationManager<K extends Serializable, V extends Serializable> implements ReplicationManager<K, V> {
+
+        private final BackingStore<StickyKey, V> backingStore;
+
+        public StickyReplicationManager(BackingStore<StickyKey, V> backingStore) {
+            this.backingStore = backingStore;
+        }
+
+        public V load(K key) {
+            return HighAvailabilityProvider.loadFrom(backingStore, new StickyKey(key), null);
+        }
+
+        public void save(final K key, final V value, final boolean isNew) {
+            HaInfo haInfo = HaContext.currentHaInfo();
+            if (haInfo != null) {
+                HighAvailabilityProvider.saveTo(backingStore, new StickyKey(key, haInfo.getKey()), value, isNew);
+            } else {
+                final StickyKey stickyKey = new StickyKey(key);
+                final String replicaId = HighAvailabilityProvider.saveTo(backingStore, stickyKey, value, isNew);
+
+                HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+            }
+        }
+
+        public void remove(K key) {
+            HighAvailabilityProvider.removeFrom(backingStore, new StickyKey(key));
+        }
+
+        public void close() {
+            HighAvailabilityProvider.close(backingStore);
+        }
+
+        public void destroy() {
+            HighAvailabilityProvider.destroy(backingStore);
+        }
+    }
+
     private final Map<K, V> localMap;
     private final ReplicationManager<K, V> replicationManager;
 
-    public static <K extends Serializable, V extends Serializable> HighlyAvailableMap<K, V> newInstanceForBs(Map<K, V> wrappedMap, BackingStore<K, V> backingStore) {
+    public static <K extends Serializable, V extends Serializable> HighlyAvailableMap<K, V> create(Map<K, V> wrappedMap, BackingStore<K, V> backingStore) {
         return new HighlyAvailableMap<K, V>(wrappedMap, new SimpleReplicationManager<K, V>(backingStore));
     }
 
-    public static <K extends Serializable, V> HighlyAvailableMap<K, V> newInstance(Map<K, V> wrappedMap, ReplicationManager<K, V> replicationManager) {
+    public static <K extends Serializable, V extends Serializable> HighlyAvailableMap<K, V> createSticky(Map<K, V> wrappedMap, BackingStore<StickyKey, V> backingStore) {
+        return new HighlyAvailableMap<K, V>(wrappedMap, new StickyReplicationManager<K, V>(backingStore));
+    }
+
+    public static <K extends Serializable, V> HighlyAvailableMap<K, V> create(Map<K, V> wrappedMap, ReplicationManager<K, V> replicationManager) {
         if (replicationManager == null) {
             replicationManager = new NoopReplicationManager<K, V>();
         }
@@ -191,6 +235,10 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
     }
 
     public void clear() {
+        for (K key : localMap.keySet()) {
+            replicationManager.remove(key);            
+        }
+        
         localMap.clear();
     }
 
@@ -208,6 +256,10 @@ final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
 
     public Map<K, V> getLocalMapCopy() {
         return new HashMap<K, V>(localMap);
+    }
+
+    public void invalidateCache() {
+        localMap.clear();
     }
 
     public ReplicationManager<K, V> getReplicationManager() {

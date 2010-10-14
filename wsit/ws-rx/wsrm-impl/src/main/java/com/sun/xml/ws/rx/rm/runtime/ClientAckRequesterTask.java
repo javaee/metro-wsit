@@ -90,7 +90,7 @@ public class ClientAckRequesterTask implements DelayedTask {
         }
     }
 
-    private final void requestAcknowledgement() {
+    private void requestAcknowledgement() {
         Packet request = rc.communicator.createEmptyRequestPacket(rc.rmVersion.protocolVersion.ackRequestedAction, true);
         JaxwsApplicationMessage requestMessage = new JaxwsApplicationMessage(
                 request,

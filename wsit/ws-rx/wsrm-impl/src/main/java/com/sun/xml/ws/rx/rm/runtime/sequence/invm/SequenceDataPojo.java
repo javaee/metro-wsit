@@ -33,10 +33,12 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.commons.ha.StickyKey;
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -53,10 +55,11 @@ import org.glassfish.ha.store.api.BackingStore;
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-class SequenceDataPojo implements Serializable {
-    static final long serialVersionUID = -5024744406713321676L;
+class SequenceDataPojo implements Serializable /*Storeable*/ {
 
-    private transient BackingStore<String, SequenceDataPojo> backingStore;
+    static final long serialVersionUID = -5024744406713321676L;
+    //
+    private transient BackingStore<StickyKey, SequenceDataPojo> backingStore;
     //
     private String sequenceId;
     private String boundSecurityTokenReferenceId;
@@ -77,7 +80,13 @@ class SequenceDataPojo implements Serializable {
     protected SequenceDataPojo() {
     }
 
-    public SequenceDataPojo(String sequenceId, String boundSecurityTokenReferenceId, long expirationTime, boolean isInbound, BackingStore<String, SequenceDataPojo> bs) {
+    public SequenceDataPojo(
+            String sequenceId,
+            String boundSecurityTokenReferenceId,
+            long expirationTime,
+            boolean isInbound,
+            BackingStore<StickyKey, SequenceDataPojo> bs) {
+        
         this.sequenceId = sequenceId;
         this.boundSecurityTokenReferenceId = boundSecurityTokenReferenceId;
         this.expirationTime = expirationTime;
@@ -109,6 +118,7 @@ class SequenceDataPojo implements Serializable {
 
     public void setAckRequestedFlag(boolean ackRequestedFlag) {
         this.ackRequestedFlag = ackRequestedFlag;
+        dirty(Parameter.ackRequestedFlag);
     }
 
     public long getLastAcknowledgementRequestTime() {
@@ -117,6 +127,7 @@ class SequenceDataPojo implements Serializable {
 
     public void setLastAcknowledgementRequestTime(long lastAcknowledgementRequestTime) {
         this.lastAcknowledgementRequestTime = lastAcknowledgementRequestTime;
+        dirty(Parameter.lastAcknowledgementRequestTime);
     }
 
     public long getLastActivityTime() {
@@ -125,6 +136,7 @@ class SequenceDataPojo implements Serializable {
 
     public void setLastActivityTime(long lastActivityTime) {
         this.lastActivityTime = lastActivityTime;
+        dirty(Parameter.lastActivityTime);
     }
 
     public long getLastMessageNumber() {
@@ -133,6 +145,7 @@ class SequenceDataPojo implements Serializable {
 
     public void setLastMessageNumber(long lastMessageNumber) {
         this.lastMessageNumber = lastMessageNumber;
+        dirty(Parameter.lastMessageNumber);
     }
 
     public State getState() {
@@ -141,6 +154,7 @@ class SequenceDataPojo implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+        dirty(Parameter.state);
     }
 
     public Set<Long> getAllUnackedMessageNumbers() {
@@ -159,14 +173,23 @@ class SequenceDataPojo implements Serializable {
         return inbound;
     }
 
-    public void setBackingStore(BackingStore<String, SequenceDataPojo> backingStore) {
+    public void setBackingStore(BackingStore<StickyKey, SequenceDataPojo> backingStore) {
         this.backingStore = backingStore;
     }
 
     public void replicate() {
-        if (backingStore != null) {
-            HighAvailabilityProvider.saveTo(backingStore, sequenceId, this, false);
+        if (backingStore != null && dirty) {
+            HaInfo haInfo = HaContext.currentHaInfo();
+            if (haInfo != null) {
+                HighAvailabilityProvider.saveTo(backingStore, new StickyKey(sequenceId, haInfo.getKey()), this, false);
+            } else {
+                final StickyKey key = new StickyKey(sequenceId);
+                final String replicaId = HighAvailabilityProvider.saveTo(backingStore, key, this, false);
+
+                HaContext.updateHaInfo(new HaInfo(key.getHashKey(), replicaId, false));
+            }
         }
+        resetDirty();
     }
 
     @Override
@@ -234,4 +257,126 @@ class SequenceDataPojo implements Serializable {
         hash = 61 * hash + (this.inbound ? 1 : 0);
         return hash;
     }
+
+    private static enum Parameter {
+
+        sequenceId("sequenceId", 0),
+        boundSecurityTokenReferenceId("boundSecurityTokenReferenceId", 1),
+        expirationTime("expirationTime", 2),
+        //
+        state("state", 3),
+        ackRequestedFlag("ackRequestedFlag", 4),
+        lastMessageNumber("lastMessageNumber", 5),
+        lastActivityTime("lastActivityTime", 6),
+        lastAcknowledgementRequestTime("lastAcknowledgementRequestTime", 7),
+        //
+        allUnackedMessageNumbers("allUnackedMessageNumbers", 8),
+        receivedUnackedMessageNumbers("receivedUnackedMessageNumbers", 9),
+        //
+        unackedNumberToCorrelationIdMap("unackedNumberToCorrelationIdMap", 10),
+        inbound("inbound", 11);
+        //
+        public final String name;
+        public final int index;
+
+        private Parameter(String name, int index) {
+            this.name = name;
+            this.index = index;
+        }
+    }
+    private volatile boolean dirty = false;
+
+    private void dirty(Parameter p) {
+//        _storeable_dirtyStatus[p.index] = true;
+        dirty = true;
+    }
+
+    public void resetDirty() {
+        dirty = false;
+//        Arrays.fill(_storeable_dirtyStatus, false);
+    }
+//    //
+//    private static final String[] _storeable_attributeNames = new String[Parameter.values().length];
+//    //
+//    private long _storeable_version = 0;
+//    private long _storeable_lastAccessTime = 0;
+//    private long _storeable_maxIdleTime = 0;
+//    private boolean[] _storeable_dirtyStatus = new boolean[Parameter.values().length];
+//
+//    static {
+//        for (Parameter p : Parameter.values()) {
+//            _storeable_attributeNames[p.index] = p.name;
+//        }
+//    }
+//
+//    public String[] _storeable_getAttributeNames() {
+//        return Arrays.copyOf(_storeable_attributeNames, _storeable_attributeNames.length);
+//    }
+//
+//    public boolean[] _storeable_getDirtyStatus() {
+//        return Arrays.copyOf(_storeable_dirtyStatus, _storeable_dirtyStatus.length);
+//    }
+//
+//    public long _storeable_getLastAccessTime() {
+//        return _storeable_lastAccessTime;
+//    }
+//
+//    public long _storeable_getMaxIdleTime() {
+//        return _storeable_maxIdleTime;
+//    }
+//
+//    public long _storeable_getVersion() {
+//        return _storeable_version;
+//    }
+//
+//    public void _storeable_setLastAccessTime(long value) {
+//        _storeable_lastAccessTime = value;
+//    }
+//
+//    public void _storeable_setMaxIdleTime(long value) {
+//        _storeable_maxIdleTime = value;
+//    }
+//
+//    public void _storeable_setVersion(long value) {
+//        _storeable_version = value;
+//    }
+//
+//    public void _storeable_readState(InputStream is) throws IOException {
+//        ObjectInputStream ois = new ObjectInputStream(is);
+//
+//        SequenceDataPojo data;
+//        try {
+//            data = (SequenceDataPojo) ois.readObject();
+//        } catch (ClassNotFoundException ex) {
+//            throw new IOException("Unable to read SequenceDataPojo instance from stream", ex);
+//        }
+//
+//        this.sequenceId = data.sequenceId;
+//        this.boundSecurityTokenReferenceId = data.boundSecurityTokenReferenceId;
+//        this.expirationTime = data.expirationTime;
+//        //
+//        this.state = data.state;
+//        this.ackRequestedFlag = data.ackRequestedFlag;
+//        this.lastMessageNumber = data.lastMessageNumber;
+//        this.lastActivityTime = data.lastActivityTime;
+//        this.lastAcknowledgementRequestTime = data.lastAcknowledgementRequestTime;
+//        //
+//        this.allUnackedMessageNumbers = data.allUnackedMessageNumbers;
+//        this.receivedUnackedMessageNumbers = data.receivedUnackedMessageNumbers;
+//        //
+//        this.unackedNumberToCorrelationIdMap = data.unackedNumberToCorrelationIdMap;
+//        this.inbound = data.inbound;
+//        //
+//        //
+//        this._storeable_version = data._storeable_version;
+//        this._storeable_lastAccessTime = data._storeable_lastAccessTime;
+//        this._storeable_maxIdleTime = data._storeable_maxIdleTime;
+//
+//        resetDirty();
+//    }
+//
+//    public void _storeable_writeState(OutputStream os) throws IOException {
+//        ObjectOutputStream oos = new ObjectOutputStream(os);
+//        oos.writeObject(this);
+//    }
 }
