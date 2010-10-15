@@ -69,6 +69,7 @@
                                     <!--exclude>junit:junit</exclude-->
                                 </excludes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
