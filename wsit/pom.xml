@@ -508,12 +508,12 @@
             <dependency>
                 <groupId>javax.xml</groupId>
                 <artifactId>jaxr-api</artifactId>
-                <version>1.0_03</version>
+                <version>1.0_04</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.registry</groupId>
                 <artifactId>jaxr-impl</artifactId>
-                <version>1.0.6</version>
+                <version>1.0.8</version>
             </dependency>
             <dependency>
                 <groupId>javax.xml</groupId>
