@@ -50,7 +50,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 import javax.xml.namespace.QName;
 import static com.sun.xml.ws.security.impl.policy.Constants.*;
 /**
@@ -154,8 +153,8 @@ public class SecureConversationToken extends PolicyAssertion implements com.sun.
     
     public void setIncludeToken(String type) {
         Map<QName, String> attrs = this.getAttributes();
-        QName itQname = new QName(spVersion.namespaceUri, Constants.IncludeToken);
-        attrs.put(itQname,type);
+        QName tokenName = new QName(spVersion.namespaceUri, Constants.IncludeToken);
+        attrs.put(tokenName,type);
     }
     
     
