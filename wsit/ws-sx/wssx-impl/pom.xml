@@ -196,6 +196,11 @@
             <artifactId>wssx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>metro-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Provided scope -->
         <dependency>

@@ -54,6 +54,7 @@ import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.api.server.WebServiceContextDelegate;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
 import com.sun.xml.ws.policy.PolicyException;
@@ -229,199 +230,205 @@ public class SecurityServerTube extends SecurityTubeBase {
 //            cacheMessage(packet);
 //        }
 
-        Message msg = packet.getMessage();
-
-        isSCIssueMessage = false;
-        isSCCancelMessage = false;
-        isTrustMessage = false;
-        tmpPacket = null;
-        //String reqAction= null;
-
-        boolean thereWasAFault = false;
-
-
-        if (this.contextDelegate != null) {
-            try {
-                WebServiceContextDelegate current = packet.webServiceContextDelegate;
-                Constructor ctor = contextDelegate.getConstructor(new Class[]{WebServiceContextDelegate.class});
-                packet.webServiceContextDelegate = (WebServiceContextDelegate) ctor.newInstance(new Object[]{current});
-            } catch (InstantiationException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            } catch (IllegalAccessException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            } catch (IllegalArgumentException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            } catch (InvocationTargetException ex) {
-                log.log(Level.SEVERE,LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            } catch (NoSuchMethodException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            } catch (SecurityException ex) {
-                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
-                throw new RuntimeException(ex);
-            }
-        }
-
-        //Do Security Processing for Incoming Message
-        //---------------INBOUND SECURITY VERIFICATION----------
-        ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
-
-        PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(policyAlternatives,
-                cachedOperation, tubeConfig, addVer, false, rmVer, mcVer);
-        ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
-        ctx.setExtraneousProperty("SessionManager", sessionManager);
         try {
-            if (!optimized) {
-                SOAPMessage soapMessage = msg.readAsSOAPMessage();
-                soapMessage = verifyInboundMessage(soapMessage, ctx);
-                msg = Messages.create(soapMessage);
+            HaContext.initFrom(packet);
+            
+            Message msg = packet.getMessage();
+            isSCIssueMessage = false;
+            isSCCancelMessage = false;
+            isTrustMessage = false;
+            tmpPacket = null;
+            //String reqAction= null;
+
+            boolean thereWasAFault = false;
+
+
+            if (this.contextDelegate != null) {
+                try {
+                    WebServiceContextDelegate current = packet.webServiceContextDelegate;
+                    Constructor ctor = contextDelegate.getConstructor(new Class[]{WebServiceContextDelegate.class});
+                    packet.webServiceContextDelegate = (WebServiceContextDelegate) ctor.newInstance(new Object[]{current});
+                } catch (InstantiationException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                } catch (IllegalAccessException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                } catch (IllegalArgumentException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                } catch (InvocationTargetException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                } catch (NoSuchMethodException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                } catch (SecurityException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0036_ERROR_INSTATIATE_WEBSERVICE_CONTEXT_DELEGATE(), ex);
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            //Do Security Processing for Incoming Message
+            //---------------INBOUND SECURITY VERIFICATION----------
+            ProcessingContext ctx = initializeInboundProcessingContext(packet/*, isSCIssueMessage, isTrustMessage*/);
+
+            PolicyResolver pr = PolicyResolverFactory.createPolicyResolver(policyAlternatives,
+                    cachedOperation, tubeConfig, addVer, false, rmVer, mcVer);
+            ctx.setExtraneousProperty(ProcessingContext.OPERATION_RESOLVER, pr);
+            ctx.setExtraneousProperty("SessionManager", sessionManager);
+            try {
+                if (!optimized) {
+                    SOAPMessage soapMessage = msg.readAsSOAPMessage();
+                    soapMessage = verifyInboundMessage(soapMessage, ctx);
+                    msg = Messages.create(soapMessage);
+                } else {
+                    msg = verifyInboundMessage(msg, ctx);
+                }
+            } catch (WssSoapFaultException ex) {
+                thereWasAFault = true;
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), ex);
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
+                if (sfe.getCause() == null) {
+                    sfe.initCause(ex);
+                }
+                msg = Messages.create(sfe, soapVersion);
+            } catch (XWSSecurityException xwse) {
+                thereWasAFault = true;
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+                if (sfe.getCause() == null) {
+                    sfe.initCause(xwse);
+                }
+                msg = Messages.create(sfe, soapVersion);
+
+            } catch (XWSSecurityRuntimeException xwse) {
+                thereWasAFault = true;
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+                if (sfe.getCause() == null) {
+                    sfe.initCause(xwse);
+                }
+                msg = Messages.create(sfe, soapVersion);
+
+            } catch (WebServiceException xwse) {
+                thereWasAFault = true;
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
+                if (sfe.getCause() == null) {
+                    sfe.initCause(xwse);
+                }
+                msg = Messages.create(sfe, soapVersion);
+
+            } catch (WSSecureConversationRuntimeException wsre) {
+                thereWasAFault = true;
+                log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), wsre);
+                QName faultCode = wsre.getFaultCode();
+                if (faultCode != null) {
+                    faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
+                }
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
+                msg = Messages.create(sfe, soapVersion);
+            } catch (SOAPException se) {
+                // internal error
+                // Log here because this catch is an internal error not logged by the callee
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
+                thereWasAFault = true;
+                SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
+                if (sfe.getCause() == null) {
+                    sfe.initCause(se);
+                }
+                msg = Messages.create(sfe, soapVersion);
+            }
+
+            Packet retPacket = null;
+            if (thereWasAFault) {
+                //retPacket = packet;
+                if (this.isAddressingEnabled()) {
+                    if (optimized) {
+                        packet.setMessage(((JAXBFilterProcessingContext) ctx).getPVMessage());
+                    }
+                    retPacket = packet.createServerResponse(
+                            msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
+                } else {
+                    packet.setMessage(msg);
+                    retPacket = packet;
+                }
+            }
+
+            packet.setMessage(msg);
+
+            if (isAddressingEnabled()) {
+                reqAction = getAction(packet);
+                if (wsscVer.getSCTRequestAction().equals(reqAction) || wsscVer.getSCTRenewRequestAction().equals(reqAction)) {
+                    isSCIssueMessage = true;
+                    if (wsscConfig != null) {
+                        packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, wsscConfig.iterator());
+                    }
+                } else if (wsscVer.getSCTCancelRequestAction().equals(reqAction)) {
+                    isSCCancelMessage = true;
+                } else if (wsTrustVer.getIssueRequestAction().equals(reqAction) ||
+                        wsTrustVer.getValidateRequestAction().equals(reqAction)) {
+                    isTrustMessage = true;
+                    //packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
+
+                    if (trustConfig != null) {
+                        packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, trustConfig.iterator());
+                    }
+
+                    //set the callbackhandler
+                    packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
+                    packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
+                    IssuedTokenContext ictx = ((ProcessingContextImpl) ctx).getTrustContext();
+                    if (ictx != null && ictx.getAuthnContextClass() != null) {
+                        packet.invocationProperties.put(WSTrustConstants.AUTHN_CONTEXT_CLASS, ictx.getAuthnContextClass());
+                    }
+                }
+
+                if (isSCIssueMessage) {
+                    List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
+                    if (!policies.isEmpty()) {
+                        packet.invocationProperties.put(SC_ASSERTION, policies.get(0));
+                    }
+                }
+            }
+
+            if (!isSCIssueMessage) {
+                cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
+                if (cachedOperation == null) {
+                    if (addVer != null) {
+                        cachedOperation = getWSDLOpFromAction(packet, true);
+                    }
+                }
+            }
+
+
+
+            if (!thereWasAFault) {
+
+                if (isSCIssueMessage || isSCCancelMessage) {
+                    //-------put application message on hold and invoke SC contract--------
+
+                    retPacket = invokeSecureConversationContract(
+                            packet, ctx, isSCIssueMessage, reqAction);
+                    tmpPacket = packet;
+                    return processResponse(retPacket);
+
+                } else {
+                    //--------INVOKE NEXT TUBE------------
+                    // Put the addressing headers as unread
+                    // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
+                    updateSCBootstrapCredentials(packet, ctx);
+                    tmpPacket = packet;
+                    return doInvoke(next, packet);
+                }
             } else {
-                msg = verifyInboundMessage(msg, ctx);
-            }
-        } catch (WssSoapFaultException ex) {
-            thereWasAFault = true;
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), ex);
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(ex, soapFactory, soapVersion);
-            if (sfe.getCause() == null) {
-                sfe.initCause(ex);
-            }
-            msg = Messages.create(sfe, soapVersion);
-        } catch (XWSSecurityException xwse) {
-            thereWasAFault = true;
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            if (sfe.getCause() == null) {
-                sfe.initCause(xwse);
-            }
-            msg = Messages.create(sfe, soapVersion);
-
-        } catch (XWSSecurityRuntimeException xwse) {
-            thereWasAFault = true;
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            if (sfe.getCause() == null) {
-                sfe.initCause(xwse);
-            }
-            msg = Messages.create(sfe, soapVersion);
-
-        } catch (WebServiceException xwse) {
-            thereWasAFault = true;
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), xwse);
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(xwse, soapFactory, soapVersion);
-            if (sfe.getCause() == null) {
-                sfe.initCause(xwse);
-            }
-            msg = Messages.create(sfe, soapVersion);
-
-        } catch (WSSecureConversationRuntimeException wsre) {
-            thereWasAFault = true;
-            log.log(Level.SEVERE, LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), wsre);
-            QName faultCode = wsre.getFaultCode();
-            if (faultCode != null) {
-                faultCode = new QName(wsscVer.getNamespaceURI(), faultCode.getLocalPart());
-            }
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(faultCode, wsre, soapFactory, soapVersion);
-            msg = Messages.create(sfe, soapVersion);
-        } catch (SOAPException se) {
-            // internal error
-            // Log here because this catch is an internal error not logged by the callee
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSSTUBE_0025_ERROR_VERIFY_INBOUND_MSG(), se);
-            thereWasAFault = true;
-            SOAPFaultException sfe = SOAPUtil.getSOAPFaultException(se, soapFactory, soapVersion);
-            if (sfe.getCause() == null) {
-                sfe.initCause(se);
-            }
-            msg = Messages.create(sfe, soapVersion);
-        }
-
-        Packet retPacket = null;
-        if (thereWasAFault) {
-            //retPacket = packet;
-            if (this.isAddressingEnabled()) {
-                if (optimized) {
-                    packet.setMessage(((JAXBFilterProcessingContext) ctx).getPVMessage());
-                }
-                retPacket = packet.createServerResponse(
-                        msg, this.addVer, this.soapVersion, this.addVer.getDefaultFaultAction());
-            } else {
-                packet.setMessage(msg);
-                retPacket = packet;
-            }
-        }
-
-        packet.setMessage(msg);
-
-        if (isAddressingEnabled()) {
-            reqAction = getAction(packet);
-            if (wsscVer.getSCTRequestAction().equals(reqAction) || wsscVer.getSCTRenewRequestAction().equals(reqAction)) {
-                isSCIssueMessage = true;
-                if (wsscConfig != null) {
-                    packet.invocationProperties.put(Constants.SUN_SECURE_SERVER_CONVERSATION_POLICY_NS, wsscConfig.iterator());
-                }
-            } else if (wsscVer.getSCTCancelRequestAction().equals(reqAction)) {
-                isSCCancelMessage = true;
-            } else if (wsTrustVer.getIssueRequestAction().equals(reqAction) ||
-                    wsTrustVer.getValidateRequestAction().equals(reqAction)) {
-                isTrustMessage = true;
-                //packet.getMessage().getHeaders().getTo(addVer, tubeConfig.getBinding().getSOAPVersion());
-
-                if (trustConfig != null) {
-                    packet.invocationProperties.put(Constants.SUN_TRUST_SERVER_SECURITY_POLICY_NS, trustConfig.iterator());
-                }
-
-                //set the callbackhandler
-                packet.invocationProperties.put(WSTrustConstants.SECURITY_ENVIRONMENT, secEnv);
-                packet.invocationProperties.put(WSTrustConstants.WST_VERSION, this.wsTrustVer);
-                IssuedTokenContext ictx = ((ProcessingContextImpl) ctx).getTrustContext();
-                if (ictx != null && ictx.getAuthnContextClass() != null) {
-                    packet.invocationProperties.put(WSTrustConstants.AUTHN_CONTEXT_CLASS, ictx.getAuthnContextClass());
-                }
+                return doReturnWith(retPacket);
             }
 
-            if (isSCIssueMessage) {
-                List<PolicyAssertion> policies = getInBoundSCP(packet.getMessage());
-                if (!policies.isEmpty()) {
-                    packet.invocationProperties.put(SC_ASSERTION, policies.get(0));
-                }
-            }
-        }
-
-        if (!isSCIssueMessage) {
-            cachedOperation = msg.getOperation(tubeConfig.getWSDLPort());
-            if (cachedOperation == null) {
-                if (addVer != null) {
-                    cachedOperation = getWSDLOpFromAction(packet, true);
-                }
-            }
-        }
-
-
-
-        if (!thereWasAFault) {
-
-            if (isSCIssueMessage || isSCCancelMessage) {
-                //-------put application message on hold and invoke SC contract--------
-
-                retPacket = invokeSecureConversationContract(
-                        packet, ctx, isSCIssueMessage, reqAction);
-                tmpPacket = packet;
-                return processResponse(retPacket);
-
-            } else {
-                //--------INVOKE NEXT TUBE------------
-                // Put the addressing headers as unread
-                // packet.invocationProperties.put(JAXWSAConstants.SERVER_ADDRESSING_PROPERTIES_INBOUND, null);
-                updateSCBootstrapCredentials(packet, ctx);
-                tmpPacket = packet;
-                return doInvoke(next, packet);
-            }
-        } else {
-            return doReturnWith(retPacket);
+        } finally {
+            HaContext.clear();
         }
     }
 
@@ -432,7 +439,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         //if (isTrustMessage){
         //  retPacket = addAddressingHeaders(tmpPacket, retPacket.getMessage(), wsTrustVer.getFinalResponseAction(reqAction));
         // }
-
+        
         if (retPacket.getMessage() == null) {
             return doReturnWith(retPacket);
         }
@@ -480,7 +487,7 @@ public class SecurityServerTube extends SecurityTubeBase {
         }
         resetCachedOperation();
         retPacket.setMessage(msg);
-        return doReturnWith(retPacket);
+        return doReturnWith(retPacket);        
     }
 
     @Override

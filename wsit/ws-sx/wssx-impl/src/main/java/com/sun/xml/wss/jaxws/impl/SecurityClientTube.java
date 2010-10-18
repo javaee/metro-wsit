@@ -64,6 +64,7 @@ import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
 import com.sun.xml.ws.api.security.CallbackHandlerFeature;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.developer.WSBindingProvider;
@@ -196,53 +197,59 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
 
     @Override
     public NextAction processRequest(Packet packet) {
-        //computing EPR related stuff
-        //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
-        if (wsitContext != null) {
-            WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
-            WSEndpointReference epr = bpr.getWSEndpointReference();
-            X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
-            if (x509Cert == null) {
-                if (epr != null) {
-                    WSEndpointReference.EPRExtension idExtn = null;
-                    XMLStreamReader xmlReader = null;
-                    try {
-                        QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
-                        idExtn = epr.getEPRExtension(ID_QNAME);
-                        if (idExtn != null) {
-                            xmlReader = idExtn.readAsXMLStreamReader();
-                            CertificateRetriever cr = new CertificateRetriever();
-                            //byte[] bstValue = cr.digestBST(xmlReader);
-                            byte[] bstValue = cr.getBSTFromIdentityExtension(xmlReader);
-                            X509Certificate certificate = null;
-                            if (bstValue != null) {
-                                certificate = cr.constructCertificate(bstValue);
-                            }
-                            if (certificate != null) {
-                                props.put(PipeConstants.SERVER_CERT, certificate);
-                                this.serverCert = certificate;
-                            }
-                        }
-                    } catch (XMLStreamException ex) {
-                        log.log(Level.WARNING, ex.getMessage());
-                    //throw new RuntimeException(ex);
-                    }
-                }
-            } else {
-                //log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
-                props.put(PipeConstants.SERVER_CERT, x509Cert);
-                this.serverCert = x509Cert;
-            }
-        }//done
+
         try {
-            packet = processClientRequestPacket(packet);
-        } catch (Throwable t) {
-            if (!(t instanceof WebServiceException)) {
-                t = new WebServiceException(t);
+            HaContext.initFrom(packet);
+            //computing EPR related stuff
+            //get certificate from EPR or from XWSSConstants.SERVER_CERTIFICATE_PROPERTY
+            if (wsitContext != null) {
+                WSBindingProvider bpr = (WSBindingProvider) wsitContext.getWrappedContext().getBindingProvider();
+                WSEndpointReference epr = bpr.getWSEndpointReference();
+                X509Certificate x509Cert = (X509Certificate) bpr.getRequestContext().get(XWSSConstants.SERVER_CERTIFICATE_PROPERTY);
+                if (x509Cert == null) {
+                    if (epr != null) {
+                        WSEndpointReference.EPRExtension idExtn = null;
+                        XMLStreamReader xmlReader = null;
+                        try {
+                            QName ID_QNAME = new QName("http://schemas.xmlsoap.org/ws/2006/02/addressingidentity", "Identity");
+                            idExtn = epr.getEPRExtension(ID_QNAME);
+                            if (idExtn != null) {
+                                xmlReader = idExtn.readAsXMLStreamReader();
+                                CertificateRetriever cr = new CertificateRetriever();
+                                //byte[] bstValue = cr.digestBST(xmlReader);
+                                byte[] bstValue = cr.getBSTFromIdentityExtension(xmlReader);
+                                X509Certificate certificate = null;
+                                if (bstValue != null) {
+                                    certificate = cr.constructCertificate(bstValue);
+                                }
+                                if (certificate != null) {
+                                    props.put(PipeConstants.SERVER_CERT, certificate);
+                                    this.serverCert = certificate;
+                                }
+                            }
+                        } catch (XMLStreamException ex) {
+                            log.log(Level.WARNING, ex.getMessage());
+                        //throw new RuntimeException(ex);
+                        }
+                    }
+                } else {
+                    //log.log(Level.INFO, "certificate is found by SERVER_CERTIFICATE_PROPERTY,so using it");
+                    props.put(PipeConstants.SERVER_CERT, x509Cert);
+                    this.serverCert = x509Cert;
+                }
+            }//done
+            try {
+                packet = processClientRequestPacket(packet);
+            } catch (Throwable t) {
+                if (!(t instanceof WebServiceException)) {
+                    t = new WebServiceException(t);
+                }
+                return doThrow(t);
             }
-            return doThrow(t);
+            return doInvoke(super.next, packet);
+        } finally {
+            HaContext.clear();
         }
-        return doInvoke(super.next, packet);
     }
 
     public Packet processClientRequestPacket(Packet packet) {
@@ -345,14 +352,19 @@ public class SecurityClientTube extends SecurityTubeBase implements SecureConver
     @Override
     public NextAction processResponse(Packet ret) {
         try {
-            ret = processClientResponsePacket(ret);
-        } catch (Throwable t) {
-            if (!(t instanceof WebServiceException)) {
-                t = new WebServiceException(t);
+            HaContext.initFrom(ret);
+            try {
+                ret = processClientResponsePacket(ret);
+            } catch (Throwable t) {
+                if (!(t instanceof WebServiceException)) {
+                    t = new WebServiceException(t);
+                }
+                return doThrow(t);
             }
-            return doThrow(t);
+            return doReturnWith(ret);
+        } finally {
+            HaContext.clear();
         }
-        return doReturnWith(ret);
     }
 
     public Packet processClientResponsePacket(Packet ret) {

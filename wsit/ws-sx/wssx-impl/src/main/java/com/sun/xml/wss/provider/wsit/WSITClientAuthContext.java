@@ -59,6 +59,7 @@ import com.sun.xml.ws.api.security.secconv.client.SCTokenConfiguration;
 import com.sun.xml.ws.api.security.trust.WSTrustException;
 import com.sun.xml.ws.api.security.trust.client.IssuedTokenManager;
 import com.sun.xml.ws.api.security.trust.client.STSIssuedTokenConfiguration;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.developer.WSBindingProvider;
 import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.model.wsdl.WSDLPortImpl;
@@ -268,43 +269,47 @@ public class WSITClientAuthContext extends WSITAuthContextBase
     public AuthStatus secureRequest(MessageInfo messageInfo, Subject clientSubject) throws AuthException {
 
         try {
+            try {
+                Packet packet = getRequestPacket(messageInfo);
+                HaContext.initFrom(packet);
+                // Add Action header to trust message
+                boolean isTrustMsg = false;
+                if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
+                    isTrustMsg = true;
+                    String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
+                    HeaderList headers = packet.getMessage().getHeaders();
+                    headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
+                }
 
-            Packet packet = getRequestPacket(messageInfo);
-            // Add Action header to trust message
-            boolean isTrustMsg = false;
-            if ("true".equals(packet.invocationProperties.get(WSTrustConstants.IS_TRUST_MESSAGE))) {
-                isTrustMsg = true;
-                String action = (String) packet.invocationProperties.get(WSTrustConstants.TRUST_ACTION);
-                HeaderList headers = packet.getMessage().getHeaders();
-                headers.fillRequestAddressingHeaders(packet, addVer, soapVersion, false, action);
+                //set the isTrustProperty into MessageInfo
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> msgInfoMap = messageInfo.getMap();
+                msgInfoMap.put("IS_TRUST_MSG", Boolean.valueOf(isTrustMsg));
+
+                // keep the message
+                //Message msg = packet.getMessage();
+
+                //invoke the SCPlugin here
+                invokeSCPlugin(packet);
+
+                //secure the outbound request here
+                Packet ret = secureRequest(packet, clientSubject, false);
+
+                //put the modified packet back
+                setRequestPacket(messageInfo, ret);
+
+            } catch (XWSSecurityException e) {
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(), e);
+                throw new WebServiceException(
+                        LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(),
+                        getSOAPFaultException(e));
             }
 
-            //set the isTrustProperty into MessageInfo
-            @SuppressWarnings("unchecked")
-            Map<Object, Object> msgInfoMap = messageInfo.getMap();
-            msgInfoMap.put("IS_TRUST_MSG", Boolean.valueOf(isTrustMsg));
-
-            // keep the message
-            //Message msg = packet.getMessage();
-
-            //invoke the SCPlugin here
-            invokeSCPlugin(packet);
-
-            //secure the outbound request here
-            Packet ret = secureRequest(packet, clientSubject, false);
-
-            //put the modified packet back
-            setRequestPacket(messageInfo, ret);
-
-        } catch (XWSSecurityException e) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(), e);
-            throw new WebServiceException(
-                    LogStringsMessages.WSITPVD_0050_ERROR_SECURE_REQUEST(),
-                    getSOAPFaultException(e));
+            return AuthStatus.SEND_SUCCESS;
+        } finally {
+            HaContext.clear();
         }
-
-        return AuthStatus.SEND_SUCCESS;
     }
 
     public Packet secureRequest(
@@ -387,9 +392,10 @@ public class WSITClientAuthContext extends WSITAuthContextBase
             MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
 
         try {
-            Packet ret = getResponsePacket(messageInfo);
-
-            // Not required, commeting
+            try {
+                Packet ret = getResponsePacket(messageInfo);
+                HaContext.initFrom(ret);
+                // Not required, commeting
 //            if (!optimized) {
 //                try {
 //                    SOAPMessage sm = ret.getMessage().readAsSOAPMessage();
@@ -402,26 +408,29 @@ public class WSITClientAuthContext extends WSITAuthContextBase
 //                            LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
 //                }
 //            }
-            ret = validateResponse(ret, clientSubject, serviceSubject);
-            resetCachedOperation(ret);
+                ret = validateResponse(ret, clientSubject, serviceSubject);
+                resetCachedOperation(ret);
 
-            Boolean trustMsgProp = (Boolean) messageInfo.getMap().get("IS_TRUST_MSG");
-            boolean isTrustMsg = (trustMsgProp != null) ? trustMsgProp.booleanValue() : false;
-            if (isTrustMsg) {
-                //String action = getAction(ret);
-                getAction(ret);
+                Boolean trustMsgProp = (Boolean) messageInfo.getMap().get("IS_TRUST_MSG");
+                boolean isTrustMsg = (trustMsgProp != null) ? trustMsgProp.booleanValue() : false;
+                if (isTrustMsg) {
+                    //String action = getAction(ret);
+                    getAction(ret);
+                }
+
+                setResponsePacket(messageInfo, ret);
+
+            } catch (XWSSecurityException ex) {
+                log.log(Level.SEVERE,
+                        LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
+                throw new WebServiceException(
+                        LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(),
+                        getSOAPFaultException(ex));
             }
-
-            setResponsePacket(messageInfo, ret);
-
-        } catch (XWSSecurityException ex) {
-            log.log(Level.SEVERE,
-                    LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(), ex);
-            throw new WebServiceException(
-                    LogStringsMessages.WSITPVD_0033_ERROR_VALIDATE_RESPONSE(),
-                    getSOAPFaultException(ex));
+            return AuthStatus.SUCCESS;
+        } finally {
+            HaContext.clear();
         }
-        return AuthStatus.SUCCESS;
     }
 
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {

@@ -54,6 +54,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLFault;
 import com.sun.xml.ws.api.model.wsdl.WSDLOperation;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.api.server.WSEndpoint;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.security.message.stream.LazyStreamBasedMessage;
 import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyAssertion;
@@ -240,38 +241,42 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
     
     @SuppressWarnings("unchecked")
     public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject) throws AuthException {
+        try {
+            Packet packet = getRequestPacket(messageInfo);
+            HaContext.initFrom(packet);
+            Packet ret = null;
 
-        Packet packet = getRequestPacket(messageInfo);
-        Packet ret = null;
-
-        // Not required, commenting
+            // Not required, commenting
 //        if (!optimized) {
 //            cacheMessage(packet);
 //        }
-        
-        try {
-            ret = validateRequest(packet, clientSubject, serviceSubject, messageInfo.getMap());
-        }catch (XWSSecurityException ex) {
-            throw getSOAPFaultException(ex);
+
+            try {
+                ret = validateRequest(packet, clientSubject, serviceSubject, messageInfo.getMap());
+            } catch (XWSSecurityException ex) {
+                throw getSOAPFaultException(ex);
+            }
+
+            if (messageInfo.getMap().get("THERE_WAS_A_FAULT") != null) {
+                setResponsePacket(messageInfo, ret);
+                return AuthStatus.SEND_FAILURE;
+            }
+
+            boolean isSCMessage = ((messageInfo.getMap().get("IS_SC_ISSUE") != null) ||
+                    (messageInfo.getMap().get("IS_SC_CANCEL") != null));
+            if (isSCMessage) {
+
+                setResponsePacket(messageInfo, ret);
+                //this would cause skipping the application processing for now
+                return AuthStatus.SEND_SUCCESS;
+            }
+
+            setRequestPacket(messageInfo, ret);
+
+            return AuthStatus.SUCCESS;
+        } finally {
+            HaContext.clear();
         }
-        
-        if (messageInfo.getMap().get("THERE_WAS_A_FAULT") != null) {
-            setResponsePacket(messageInfo, ret);
-            return AuthStatus.SEND_FAILURE;
-        }
-        
-        boolean isSCMessage = ((messageInfo.getMap().get("IS_SC_ISSUE") != null) ||
-                (messageInfo.getMap().get("IS_SC_CANCEL") != null));
-        if (isSCMessage) {
-            
-            setResponsePacket(messageInfo, ret);
-            //this would cause skipping the application processing for now
-            return AuthStatus.SEND_SUCCESS;
-        }
-        
-        setRequestPacket(messageInfo, ret);
-        
-        return AuthStatus.SUCCESS;
     }
     
     @SuppressWarnings("unchecked")
@@ -280,25 +285,31 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         
         //TODO: this is the one that came from nextPipe.process
         //TODO: replace this with call to packetMessageInfo.getResponsePacket
-        Packet retPacket = getResponsePacket(messageInfo);
-       // if (isTrustMessage){
-         //   retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction((String)messageInfo.getMap().get("TRUST_REQUEST_ACTION")));
-       // }
-        Packet ret = null;
+
         try {
-            ret= secureResponse(retPacket, serviceSubject, messageInfo.getMap());
-        } catch (XWSSecurityException ex) {
-            //TODO: acutally rewrite the message in the packet to contain a fault here
-            throw getSOAPFaultException(ex);
+            Packet retPacket = getResponsePacket(messageInfo);
+            HaContext.initFrom(retPacket);
+            // if (isTrustMessage){
+            //   retPacket = addAddressingHeaders(packet, retPacket.getMessage(), wsTrustVer.getFinalResponseAction((String)messageInfo.getMap().get("TRUST_REQUEST_ACTION")));
+            // }
+            Packet ret = null;
+            try {
+                ret = secureResponse(retPacket, serviceSubject, messageInfo.getMap());
+            } catch (XWSSecurityException ex) {
+                //TODO: acutally rewrite the message in the packet to contain a fault here
+                throw getSOAPFaultException(ex);
+            }
+
+            setResponsePacket(messageInfo, ret);
+
+            if (messageInfo.getMap().get("THERE_WAS_A_FAULT") != null) {
+                return AuthStatus.SEND_FAILURE;
+            }
+
+            return AuthStatus.SUCCESS;
+        } finally {
+            HaContext.clear();
         }
-        
-        setResponsePacket(messageInfo, ret);
-        
-        if (messageInfo.getMap().get("THERE_WAS_A_FAULT") != null) {
-            return AuthStatus.SEND_FAILURE;
-        }
-        
-        return AuthStatus.SUCCESS;
     }
     
     public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
