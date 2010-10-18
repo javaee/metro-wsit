@@ -35,10 +35,12 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceDataLoader;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
+import java.util.HashMap;
 
 /**
  *
@@ -61,12 +63,13 @@ public class InVmSequenceDataLoader implements SequenceDataLoader {
         sdPojo.setLastAcknowledgementRequestTime(lastAcknowledgementRequestTime);
 
         return InVmSequenceData.newInstace(
+                sdPojo,
                 new TimeSynchronizer() {
 
                     public long currentTimeInMillis() {
                         return System.currentTimeMillis();
                     }
                 },
-                sdPojo);
+                new HashMap<String, ApplicationMessage>());
     }
 }

@@ -1,138 +1,49 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
-import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.istack.NotNull;
-import com.sun.xml.ws.api.ha.HaInfo;
-import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
-import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.sequence.*;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
-import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.State;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.glassfish.ha.store.annotations.StoreEntry;
-import org.glassfish.ha.store.api.BackingStore;
 
 @StoreEntry
 final class InVmSequenceData implements SequenceData {
-    private static final class UnackedMessageReplicationManager implements ReplicationManager<String, ApplicationMessage> {
-        private static class ApplicationMessageState implements Serializable {
-            private final byte[] data;
-            private final int nextResendCount;
-            private final String correlationId;
-            private final String wsaAction;
-            private final String sequenceId;
-            private final long messageNumber;
-
-            public ApplicationMessageState(ApplicationMessage _message) {
-                if (!(_message instanceof JaxwsApplicationMessage)) {
-                    throw new IllegalArgumentException("Unsupported message class: " + _message.getClass().getName());
-                }
-
-                JaxwsApplicationMessage message = (JaxwsApplicationMessage) _message;
-
-                this.data = message.toBytes();
-                this.nextResendCount = message.getNextResendCount();
-                this.correlationId = message.getCorrelationId();
-                this.wsaAction = message.getWsaAction();
-                this.sequenceId = message.getSequenceId();
-                this.messageNumber = message.getMessageNumber();
-            }
-
-            public ApplicationMessage toMessage() {
-                ByteArrayInputStream bais = new ByteArrayInputStream(data);
-
-                return JaxwsApplicationMessage.newInstance(
-                    bais,
-                    nextResendCount,
-                    correlationId,
-                    wsaAction,
-                    sequenceId,
-                    messageNumber);
-            }
-        }
-        
-        private BackingStore<StickyKey, ApplicationMessageState> unackedMesagesBs;
-
-        public UnackedMessageReplicationManager(String sequenceId) {
-            this.unackedMesagesBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
-                    HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY),
-                    sequenceId + "_UNACKED_MESSAGES_BS",
-                    StickyKey.class,
-                    ApplicationMessageState.class);
-        }
-
-        public ApplicationMessage load(String key) {
-            ApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, new StickyKey(key), null);
-            return state.toMessage();
-        }
-
-        public void save(final String key, final ApplicationMessage value, final boolean isNew) {
-            ApplicationMessageState ams = new ApplicationMessageState(value);
-            HaInfo haInfo = HaContext.currentHaInfo();
-            if (haInfo != null) {
-                HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), ams, isNew);
-            } else {
-                final StickyKey stickyKey = new StickyKey(key);
-                final String replicaId = HighAvailabilityProvider.saveTo(unackedMesagesBs, stickyKey, ams, isNew);
-
-                HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
-            }
-        }
-
-        public void remove(String key) {
-            HighAvailabilityProvider.removeFrom(unackedMesagesBs, new StickyKey(key));
-        }
-
-        public void close() {
-            HighAvailabilityProvider.close(unackedMesagesBs);
-        }
-
-        public void destroy() {
-            HighAvailabilityProvider.destroy(unackedMesagesBs);
-        }
-    }
 
     // lock used to synchronize the access to the lastMessageId and unackedMessageIdentifiersStorage variables
     private final ReadWriteLock dataLock = new ReentrantReadWriteLock();
     //
-    private final HighlyAvailableMap<String, ApplicationMessage> messageStore;
+    private final Map<String, ApplicationMessage> messageStore;
     private final SequenceDataPojo data;
     private final TimeSynchronizer timeSynchronizer;
 
-    public static InVmSequenceData newInstace(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
-        return new InVmSequenceData(timeSynchronizer, data);
+    public static InVmSequenceData newInstace(@NotNull SequenceDataPojo data, @NotNull TimeSynchronizer timeSynchronizer, Map<String, ApplicationMessage> messageStore) {
+        return new InVmSequenceData(data, timeSynchronizer, messageStore);
     }
 
-    public static InVmSequenceData loadReplica(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
+    public static InVmSequenceData loadReplica(@NotNull SequenceDataPojo data, @NotNull TimeSynchronizer timeSynchronizer, Map<String, ApplicationMessage> messageStore) {
 
-        InVmSequenceData replica = new InVmSequenceData(timeSynchronizer, data);
+        InVmSequenceData replica = new InVmSequenceData(data, timeSynchronizer, messageStore);
         replica.initLocalCache();
 
         return replica;
     }
 
-    private InVmSequenceData(@NotNull TimeSynchronizer timeSynchronizer, @NotNull SequenceDataPojo data) {
+    private InVmSequenceData(@NotNull final SequenceDataPojo data, @NotNull final TimeSynchronizer timeSynchronizer, @NotNull final Map<String, ApplicationMessage> messageStore) {
         assert timeSynchronizer != null;
         assert data != null;
 
         this.timeSynchronizer = timeSynchronizer;
         this.data = data;
 
-        ReplicationManager<String, ApplicationMessage> rm = null;
-        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
-            rm = new UnackedMessageReplicationManager(data.getSequenceId());
-        }
-        this.messageStore = HighlyAvailableMap.create(new HashMap<String, ApplicationMessage>(), rm);
+        this.messageStore = messageStore;
     }
 
     private void lockRead() {

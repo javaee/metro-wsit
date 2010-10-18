@@ -43,6 +43,7 @@ import com.sun.xml.ws.commons.MaintenanceTaskExecutor;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
+import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.RmConfiguration;
 import com.sun.xml.ws.rx.rm.runtime.delivery.DeliveryQueueBuilder;
 import com.sun.xml.ws.rx.rm.runtime.sequence.AbstractSequence;
@@ -88,6 +89,10 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      * Internal in-memory map of bound sequences
      */
     private final HighlyAvailableMap<String, String> boundSequences;
+    /**
+     * Internal in-memory map of unacknowledged messages
+     */
+    private final HighlyAvailableMap<String, ApplicationMessage> unackedMessageStore;
     /**
      * Inbound delivery queue builder
      */
@@ -139,6 +144,13 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
                 StickyKey.class,
                 SequenceDataPojo.class);
         this.sequences = HighlyAvailableMap.create(new HashMap<String, AbstractSequence>(), this);
+
+        UnackedMessageReplicationManager unackedMsgRM = null;
+        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+            unackedMsgRM = new UnackedMessageReplicationManager(uniqueEndpointId);
+        }
+
+        this.unackedMessageStore = HighlyAvailableMap.create(new HashMap<String, ApplicationMessage>(), unackedMsgRM);
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
@@ -204,7 +216,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         sequenceDataPojo.setLastActivityTime(currentTimeInMillis());
         sequenceDataPojo.setLastAcknowledgementRequestTime(0L);
 
-        SequenceData data = InVmSequenceData.newInstace(this, sequenceDataPojo);
+        SequenceData data = InVmSequenceData.newInstace(sequenceDataPojo, this, unackedMessageStore);
         return registerSequence(new OutboundSequence(data, this.outboundQueueBuilder, this));
     }
 
@@ -227,7 +239,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         sequenceDataPojo.setLastActivityTime(currentTimeInMillis());
         sequenceDataPojo.setLastAcknowledgementRequestTime(0L);
 
-        SequenceData data = InVmSequenceData.newInstace(this, sequenceDataPojo);
+        SequenceData data = InVmSequenceData.newInstace(sequenceDataPojo, this, unackedMessageStore);
         return registerSequence(new InboundSequence(data, this.inboundQueueBuilder, this));
     }
 
@@ -433,6 +445,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
     public void invalidateCache() {
         this.sequences.invalidateCache();
         this.boundSequences.invalidateCache();
+        this.unackedMessageStore.invalidateCache();
     }
 
     public AbstractSequence load(String key) {
@@ -442,7 +455,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         }
 
         state.setBackingStore(sequenceDataBs);
-        InVmSequenceData data = InVmSequenceData.loadReplica(this, state); // TODO HA time sync.
+        InVmSequenceData data = InVmSequenceData.loadReplica(state, this, unackedMessageStore); // TODO HA time sync.
         return (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
     }
 
