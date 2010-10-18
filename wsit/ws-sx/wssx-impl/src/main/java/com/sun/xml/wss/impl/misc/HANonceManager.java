@@ -39,7 +39,10 @@
  */
 package com.sun.xml.wss.impl.misc;
 
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
+import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.logging.LogStringsMessages;
 import java.io.Serializable;
@@ -59,14 +62,14 @@ import org.glassfish.ha.store.api.BackingStoreFactory;
 public class HANonceManager extends NonceManager {
 
     private Long maxNonceAge;
-    private BackingStore<String, HAPojo> backingStore = null;
+    private BackingStore<StickyKey, HAPojo> backingStore = null;
     private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
     public HANonceManager(final long maxNonceAge) {
         this.maxNonceAge = maxNonceAge;
 
         try {
-            final BackingStoreConfiguration<String, HANonceManager.HAPojo> bsConfig = HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", String.class, HANonceManager.HAPojo.class);
+            final BackingStoreConfiguration<StickyKey, HANonceManager.HAPojo> bsConfig = HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", StickyKey.class, HANonceManager.HAPojo.class);
             //maxNonceAge is in milliseconds so convert it into seconds
             bsConfig.getVendorSpecificSettings().put("max.idle.timeout.in.seconds", maxNonceAge / 1000L);
             bsConfig.setClassLoader(ClassLoader.getSystemClassLoader());
@@ -82,7 +85,7 @@ public class HANonceManager extends NonceManager {
         singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
     }
 
-    public HANonceManager(BackingStore<String, HAPojo> backingStore, final long maxNonceAge) {
+    public HANonceManager(BackingStore<StickyKey, HAPojo> backingStore, final long maxNonceAge) {
         this.backingStore = backingStore;
         this.maxNonceAge = maxNonceAge;      
 
@@ -98,17 +101,25 @@ public class HANonceManager extends NonceManager {
         try {
             HAPojo value = null;
             try {
-                value = HighAvailabilityProvider.INSTANCE.loadFrom(backingStore, nonce, null);
+                value = HighAvailabilityProvider.INSTANCE.loadFrom(backingStore, new StickyKey(nonce), null);
             } catch (Exception ex) {
-                LOGGER.log(Level.WARNING, " exception during load command ");
+                LOGGER.log(Level.WARNING, " exception during load command ", ex);
             }
             if (value != null) {
                 final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
                 LOGGER.log(Level.WARNING, LogStringsMessages.WSS_0815_NONCE_REPEATED_ERROR(nonce));
                 throw new NonceManager.NonceException(message);
             } else {
-                HighAvailabilityProvider.INSTANCE.saveTo(backingStore, nonce, pojo, true);
-                LOGGER.log(Level.INFO, " nonce " + nonce + " saved ");
+                HaInfo haInfo = HaContext.currentHaInfo();
+                if (haInfo != null) {
+                    HighAvailabilityProvider.INSTANCE.saveTo(backingStore, new StickyKey(nonce, haInfo.getKey()), pojo, true);
+                } else {
+                    final StickyKey stickyKey = new StickyKey(nonce);
+                    final String replicaId = HighAvailabilityProvider.saveTo(backingStore, stickyKey, pojo, true);
+                    HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+                }
+
+                LOGGER.log(Level.INFO, " nonce {0} saved ", nonce);
             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, null, ex);
@@ -131,7 +142,7 @@ public class HANonceManager extends NonceManager {
     }
 
     public void remove(String key) throws BackingStoreException{
-        backingStore.remove(key);
+        backingStore.remove(new StickyKey(key));
     }
 
     static public class HAPojo implements Serializable {

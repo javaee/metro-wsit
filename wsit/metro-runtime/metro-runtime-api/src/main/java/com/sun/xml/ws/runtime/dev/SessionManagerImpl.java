@@ -41,9 +41,12 @@
 
 package com.sun.xml.ws.runtime.dev;
 
+import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.security.secconv.WSSecureConversationRuntimeException;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
+import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
@@ -86,7 +89,7 @@ public class SessionManagerImpl extends SessionManager {
     private Map<String, SecurityContextTokenInfo> securityContextTokenInfoMap
             = new HashMap<String, SecurityContextTokenInfo>();
 
-    private final BackingStore<String, SecurityContextTokenInfo> sctBs;
+    private final BackingStore<StickyKey, SecurityContextTokenInfo> sctBs;
     
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl(WSEndpoint endpoint) {
@@ -94,7 +97,7 @@ public class SessionManagerImpl extends SessionManager {
         this.sctBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
                 endpoint.getServiceName() + ":" + endpoint.getPortName()+ "_SCT_BS",
-                String.class,
+                StickyKey.class,
                 SecurityContextTokenInfo.class);
         
     }
@@ -108,7 +111,7 @@ public class SessionManagerImpl extends SessionManager {
     public Session  getSession(String key) {
         Session session = sessionMap.get(key);
         if (session ==null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
-            SecurityContextTokenInfo sctInfo = HighAvailabilityProvider.loadFrom(sctBs, key, null);
+            SecurityContextTokenInfo sctInfo = HighAvailabilityProvider.loadFrom(sctBs, new StickyKey(key), null);
             session = new Session(this, key, null);
             session.setSecurityInfo(sctInfo);
             sessionMap.put(key, session);
@@ -137,14 +140,14 @@ public class SessionManagerImpl extends SessionManager {
     public void terminateSession(String key) {
         sessionMap.remove(key);
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
-            HighAvailabilityProvider.removeFrom(sctBs, key);
+            HighAvailabilityProvider.removeFrom(sctBs, new StickyKey(key));
         }
     }
 
     /**
      * Creates a Session with the given key, using a new instance
      * of the specified Class as a holder for user-defined data.  The
-     * specified Class must have a default ctor.
+     * specified Class must have a default constructor.
      *
      * @param key The Session key to be used.
      * @returns The new Session.. <code>null</code> if the given
@@ -183,7 +186,14 @@ public class SessionManagerImpl extends SessionManager {
 
         SecurityContextTokenInfo sctInfo = sess.getSecurityInfo();
         if (sctInfo != null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
-            HighAvailabilityProvider.saveTo(sctBs, key, (SecurityContextTokenInfo)sctInfo, true);
+            HaInfo haInfo = HaContext.currentHaInfo();
+            if (haInfo != null) {
+                HighAvailabilityProvider.saveTo(sctBs, new StickyKey(key, haInfo.getKey()), sctInfo, true);
+            } else {
+                final StickyKey stickyKey = new StickyKey(key);
+                final String replicaId = HighAvailabilityProvider.saveTo(sctBs, stickyKey, sctInfo, true);
+                HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+            }
         }
         return sess;
     }
