@@ -237,9 +237,9 @@
     <target name="overwrite-local-transport-lib" unless="local.transport.uptodate">
         <echo message="Local transport not up-to-date, updating..." />
 
-        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
              dest="${test.lib.dir}/jaxws-local-transport.jar"/>
-        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
              dest="${test.lib.dir}/jaxws-local-transport.src.zip"/>
 
         <copy file="tmp/local-transport-build-number.txt" todir="${test.lib.dir}" overwrite="true" verbose="${verbose}" />
@@ -249,7 +249,7 @@
         <mkdir dir="tmp"/>
         <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/buildNumber"
              dest="tmp/test-harness-build-number.txt"/>
-        <get src="http://hudson.sfbay/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/buildNumber"
+        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/buildNumber"
              dest="tmp/local-transport-build-number.txt"/>
 
         <loadfile property="test.harness.hudson" srcfile="tmp/test-harness-build-number.txt" />
