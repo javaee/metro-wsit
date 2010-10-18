@@ -223,6 +223,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
     }
 
     @Override
+    @SuppressWarnings("element-type-mismatch")
     public NextAction processRequest(Packet request) {
         try {
             LOGGER.entering();
@@ -406,7 +407,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         return request.createServerResponse(null, null, null, "");
     }
 
-    private final Packet createSoapFaultResponse(Packet request, SOAPVersion soapVersion, AddressingVersion av, String action, QName code, QName subcode, String faultReasonText, List<SoapFaultDetailEntry> detailEntries) {
+    private Packet createSoapFaultResponse(Packet request, SOAPVersion soapVersion, AddressingVersion av, String action, QName code, QName subcode, String faultReasonText, List<SoapFaultDetailEntry> detailEntries) {
         try {
             SOAPFault soapFault = soapVersion.saajSoapFactory.createFault();
 
