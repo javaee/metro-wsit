@@ -900,7 +900,7 @@ final class PersistentSequenceData implements SequenceData {
         }
     }
 
-    public ApplicationMessage retrieveMessage(String correlationId) {        
+    public ApplicationMessage retrieveMessage(String correlationId) {
 
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;

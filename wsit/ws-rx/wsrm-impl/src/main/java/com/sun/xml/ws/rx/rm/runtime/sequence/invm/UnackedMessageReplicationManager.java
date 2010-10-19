@@ -6,52 +6,31 @@ import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
+import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage.JaxwsApplicationMessageState;
 import org.glassfish.ha.store.api.BackingStore;
 
 final class UnackedMessageReplicationManager implements ReplicationManager<String, ApplicationMessage> {
 
-    private static class ApplicationMessageState implements Serializable {
-
-        private final byte[] data;
-        private final int nextResendCount;
-        private final String correlationId;
-        private final String wsaAction;
-        private final String sequenceId;
-        private final long messageNumber;
-
-        public ApplicationMessageState(ApplicationMessage _message) {
-            if (!(_message instanceof JaxwsApplicationMessage)) {
-                throw new IllegalArgumentException("Unsupported message class: " + _message.getClass().getName());
-            }
-            JaxwsApplicationMessage message = (JaxwsApplicationMessage) _message;
-            this.data = message.toBytes();
-            this.nextResendCount = message.getNextResendCount();
-            this.correlationId = message.getCorrelationId();
-            this.wsaAction = message.getWsaAction();
-            this.sequenceId = message.getSequenceId();
-            this.messageNumber = message.getMessageNumber();
-        }
-
-        public ApplicationMessage toMessage() {
-            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            return JaxwsApplicationMessage.newInstance(bais, nextResendCount, correlationId, wsaAction, sequenceId, messageNumber);
-        }
-    }
-    private BackingStore<StickyKey, ApplicationMessageState> unackedMesagesBs;
+    private BackingStore<StickyKey, JaxwsApplicationMessageState> unackedMesagesBs;
 
     public UnackedMessageReplicationManager(final String uniqueEndpointId) {
-        this.unackedMesagesBs = HighAvailabilityProvider.INSTANCE.createBackingStore(HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY), uniqueEndpointId + "_UNACKED_MESSAGES_BS", StickyKey.class, ApplicationMessageState.class);
+        this.unackedMesagesBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
+                HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY),
+                uniqueEndpointId + "_UNACKED_MESSAGES_BS",
+                StickyKey.class,
+                JaxwsApplicationMessageState.class);
     }
 
     public ApplicationMessage load(String key) {
-        ApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, new StickyKey(key), null);
+        JaxwsApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, new StickyKey(key), null);
         return state.toMessage();
     }
 
     public void save(final String key, final ApplicationMessage value, final boolean isNew) {
-        ApplicationMessageState ams = new ApplicationMessageState(value);
+        if (!(value instanceof JaxwsApplicationMessage)) {
+            throw new IllegalArgumentException("Unsupported application message type: " + value.getClass().getName());
+        }
+        JaxwsApplicationMessageState ams = ((JaxwsApplicationMessage) value).getState();
         HaInfo haInfo = HaContext.currentHaInfo();
         if (haInfo != null) {
             HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), ams, isNew);

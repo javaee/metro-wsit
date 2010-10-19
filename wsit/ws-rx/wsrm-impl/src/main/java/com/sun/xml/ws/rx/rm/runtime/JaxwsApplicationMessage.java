@@ -36,21 +36,12 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
-import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.rx.RxRuntimeException;
-import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import com.sun.xml.ws.rx.message.RxMessage;
+import com.sun.xml.ws.rx.message.jaxws.SerializableMessage;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
 /**
  * JAX-WS specific application message
@@ -58,12 +49,31 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class JaxwsApplicationMessage extends ApplicationMessageBase {
+    public static class JaxwsApplicationMessageState implements RxMessage.State {
 
-    private static final Logger LOGGER = Logger.getLogger(JaxwsApplicationMessage.class);
+        private final byte[] data;
+        private final int nextResendCount;
+        private final String correlationId;
+        private final String wsaAction;
+        private final String sequenceId;
+        private final long messageNumber;
+
+        private JaxwsApplicationMessageState(JaxwsApplicationMessage message) {
+            this.data = message.toBytes();
+            this.nextResendCount = message.getNextResendCount();
+            this.correlationId = message.getCorrelationId();
+            this.wsaAction = message.getWsaAction();
+            this.sequenceId = message.getSequenceId();
+            this.messageNumber = message.getMessageNumber();
+        }
+
+        public JaxwsApplicationMessage toMessage() {
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            return JaxwsApplicationMessage.newInstance(bais, nextResendCount, correlationId, wsaAction, sequenceId, messageNumber);
+        }
+    }
     //
-    private @Nullable Packet packet;
-    private @NotNull final Message message;
-    private @Nullable final String wsaAction;
+    private final SerializableMessage jaxwsMessage;
 
     public JaxwsApplicationMessage(@NotNull Packet packet, @NotNull String correlationId) {
         super(correlationId);
@@ -71,63 +81,35 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
         assert packet != null;
         assert packet.getMessage() != null;
 
-        this.packet = packet;
-        this.message = packet.getMessage();
-        this.wsaAction = null;
+        this.jaxwsMessage = new SerializableMessage(packet, null);
     }
 
-    private JaxwsApplicationMessage(int initialResendCounterValue, @NotNull String correlationId, @NotNull String wsaAction, @NotNull String sequenceId, long messageNumber, Message message) {
+    private JaxwsApplicationMessage(@NotNull SerializableMessage jaxwsMessage, int initialResendCounterValue, @NotNull String correlationId, @NotNull String sequenceId, long messageNumber) {
         super(initialResendCounterValue, correlationId, sequenceId, messageNumber, null);
 
-        assert message != null;
-
-        this.packet = null;
-        this.message = message;
-        this.wsaAction = wsaAction;
+        this.jaxwsMessage = jaxwsMessage;
     }
 
-    public @NotNull Message getJaxwsMessage() {
-        return message;
+    public 
+    @NotNull
+    Message getJaxwsMessage() {
+        return jaxwsMessage.getMessage();
     }
 
-    public @NotNull Packet getPacket() {
-        return packet;
+    public 
+    @NotNull
+    Packet getPacket() {
+        return jaxwsMessage.getPacket();
     }
 
     void setPacket(Packet newPacket) {
         // FIXME once this method is not needed, remove it and make packet attribute final
-        newPacket.setMessage(message);
-        this.packet = newPacket;
+        jaxwsMessage.setPacket(newPacket);
     }
 
     @Override
     public byte[] toBytes() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try {
-            if (message != null) {
-                XMLStreamWriter xsw = XMLStreamWriterFactory.create(baos, "UTF-8");
-                try {
-                    packet.getMessage().copy().writeTo(xsw);
-                } catch (XMLStreamException ex) {
-                    throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRM_1142_UNABLE_TO_SERIALIZE_MSG_TO_XML_STREAM(), ex));
-                } finally {
-                    try {
-                        xsw.close();
-                    } catch (XMLStreamException ex) {
-                        LOGGER.warning(LocalizationMessages.WSRM_1143_ERROR_CLOSING_XSW_AFTER_MSG_SERIALIZATION(), ex);
-                    }
-                }
-            }
-
-            return baos.toByteArray();
-        } finally {
-            try {
-                baos.close();
-            } catch (IOException ex) {
-                LOGGER.warning(LocalizationMessages.WSRM_1144_ERROR_CLOSING_BAOS_AFTER_MSG_SERIALIZATION(), ex);
-            }
-        }
+        return jaxwsMessage.toBytes();
     }
 
     /**
@@ -138,29 +120,16 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
      * @return WS-Addressing action header value
      */
     public String getWsaAction() {
-        return wsaAction;
+        return jaxwsMessage.getWsaAction();
+    }
+
+    public JaxwsApplicationMessageState getState() {
+        return new JaxwsApplicationMessageState(this);
     }
 
     public static JaxwsApplicationMessage newInstance(@NotNull InputStream dataStream, int initialResendCounterValue, @NotNull String correlationId, @NotNull String wsaAction, @NotNull String sequenceId, long messageNumber) {
-        try {
-            XMLStreamReader xsr = XMLStreamReaderFactory.create(null, dataStream, "UTF-8", true);
-            try {
-                Message m = Messages.create(xsr);
-                return new JaxwsApplicationMessage(initialResendCounterValue, correlationId, wsaAction, sequenceId, messageNumber, m);
-            } finally {
-                try {
-                    xsr.close();
-                } catch (XMLStreamException ex) {
-                    LOGGER.warning("Error closing XMLStreamReader after message was de-serialized from XML stream", ex);
-                }
-            }
-        } finally {
-            try {
-                dataStream.close();
-            } catch (IOException ex) {
-                LOGGER.warning("Error closing data input stream after message was de-serialized from bytes", ex);
-            }
-        }
+        SerializableMessage jaxwsMessage = SerializableMessage.newInstance(dataStream, wsaAction);
+        return new JaxwsApplicationMessage(jaxwsMessage, initialResendCounterValue, correlationId, sequenceId, messageNumber);
     }
 
     @Override
@@ -170,7 +139,7 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
         sb.append("messageNumber=[ ").append(this.getMessageNumber()).append(" ], ");
         sb.append("correlationId=[ ").append(this.getCorrelationId()).append(" ], ");
         sb.append("nextResendCount=[ ").append(this.getNextResendCount()).append(" ], ");
-        sb.append("wsaAction=[ ").append(this.wsaAction);
+        sb.append("wsaAction=[ ").append(this.jaxwsMessage.getWsaAction());
         sb.append(" ] }");
         return super.toString();
     }

@@ -30,4 +30,8 @@ class DummyAppMessage extends ApplicationMessageBase {
     public DummyAppMessage(String correlationId) {
         super(correlationId);
     }
+
+    public State getState() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

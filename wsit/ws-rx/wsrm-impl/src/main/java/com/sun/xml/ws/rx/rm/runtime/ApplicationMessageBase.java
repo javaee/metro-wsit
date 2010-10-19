@@ -37,6 +37,8 @@
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
+import com.sun.xml.ws.rx.RxException;
+import com.sun.xml.ws.rx.message.RxMessageBase;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,9 +46,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public abstract class ApplicationMessageBase implements ApplicationMessage {
+public abstract class ApplicationMessageBase extends RxMessageBase implements ApplicationMessage {
     
-    private @NotNull final String correlationId;
     private String sequenceId;
     private long messageNumber;
     private AcknowledgementData acknowledgementData;
@@ -61,11 +62,7 @@ public abstract class ApplicationMessageBase implements ApplicationMessage {
     }
 
     protected ApplicationMessageBase(int initialResendCounterValue, @NotNull String correlationId, String sequenceId, long messageNumber, AcknowledgementData acknowledgementData) {
-        if (correlationId == null) {
-            throw new NullPointerException("correlationId initialization parameter must not be 'null'");
-        }
-
-        this.correlationId = correlationId;
+        super(correlationId);
 
         this.resendCount = new AtomicInteger(initialResendCounterValue);
 
@@ -76,11 +73,6 @@ public abstract class ApplicationMessageBase implements ApplicationMessage {
 
     public AcknowledgementData getAcknowledgementData() {
         return acknowledgementData;
-    }
-
-    @NotNull
-    public String getCorrelationId() {
-        return this.correlationId;
     }
 
     public long getMessageNumber() {
@@ -103,9 +95,5 @@ public abstract class ApplicationMessageBase implements ApplicationMessage {
 
     public int getNextResendCount() {
         return resendCount.getAndIncrement();
-    }
-
-    public byte[] toBytes() {
-        return new byte[0];
     }
 }

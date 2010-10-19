@@ -35,6 +35,7 @@
  */
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.xml.ws.rx.message.RxMessage;
 import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
 
 /**
@@ -42,7 +43,7 @@ import com.sun.xml.ws.rx.rm.protocol.AcknowledgementData;
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
-public interface ApplicationMessage {
+public interface ApplicationMessage extends RxMessage {
 
     /**
      * Returns identifier of a sequence this message is associated with
@@ -67,13 +68,6 @@ public interface ApplicationMessage {
     public void setSequenceData(String sequenceId, long messageNumber);
 
     /**
-     * Returns correlation identifier by which this message can be referenced
-     *
-     * @return correlation identifier by which this message can be referenced
-     */
-    public String getCorrelationId();
-
-    /**
      * Returns acknowledgement data attached to the message
      *
      * @return acknowledgement data attached to the message
@@ -93,11 +87,4 @@ public interface ApplicationMessage {
      * @return number of the next resend attempt
      */
     public int getNextResendCount();
-
-    /**
-     * Returns {@code byte[]} representation of the message instance
-     * 
-     * @return {@code byte[]} representation of the message instance
-     */
-    public byte[] toBytes();
 }

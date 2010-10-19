@@ -130,6 +130,10 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
 
         try {
             ApplicationMessage lastAppMessage = new ApplicationMessageBase("") {
+
+                public State getState() {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
             };
             loadSequenceHeaderData(lastAppMessage, message);
             loadAcknowledgementData(lastAppMessage, message);
@@ -162,6 +166,10 @@ final class Wsrm200502ProtocolHandler extends WsrmProtocolHandler {
         final Message message = packet.getMessage();
 
         ApplicationMessage lastAppMessage = new ApplicationMessageBase("") {
+
+            public State getState() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         };
         try {
             rc.getOutboundSequence(data.getSequenceId()).registerMessage(lastAppMessage, false);
