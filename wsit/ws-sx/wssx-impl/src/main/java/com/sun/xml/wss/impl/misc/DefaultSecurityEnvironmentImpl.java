@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.2 2010-10-19 11:36:18 m_potociar Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.3 2010-10-19 12:14:05 sm228678 Exp $
  */
 
 /*
@@ -174,7 +174,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 maxNonceAge = SecurityUtil.toLong(mnaProperty);
             } catch (XWSSecurityException ex) {
-                log.log(Level.FINE, " Exception while converting maxNonceAge config property, Setting MaxNonceAge to Default value{0}", MessageConstants.MAX_NONCE_AGE);
+                log.log(Level.FINE, " Exception while converting maxNonceAge config property, Setting MaxNonceAge to Default value {0}", MessageConstants.MAX_NONCE_AGE);
                 maxNonceAge = MessageConstants.MAX_NONCE_AGE;
             }
         }
