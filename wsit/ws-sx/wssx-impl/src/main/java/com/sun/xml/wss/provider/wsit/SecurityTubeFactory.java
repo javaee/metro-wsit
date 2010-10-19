@@ -36,6 +36,7 @@
 package com.sun.xml.wss.provider.wsit;
 
 import com.sun.xml.ws.api.server.Container;
+import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import java.lang.reflect.InvocationTargetException;
@@ -47,6 +48,7 @@ import com.sun.xml.ws.security.encoding.LazyStreamCodec;
 import com.sun.xml.ws.api.pipe.Codec;
 import com.sun.xml.ws.api.pipe.Codecs;
 import com.sun.xml.ws.api.WSBinding;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.ClientPipeAssemblerContext;
@@ -64,6 +66,8 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.runtime.dev.SessionManager;
+import com.sun.xml.ws.security.impl.policy.SecurityFeatureConfigurator;
 import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.util.ServiceFinder;
@@ -84,6 +88,7 @@ import com.sun.xml.xwss.XWSSClientTube;
 import com.sun.xml.xwss.XWSSServerTube;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.ws.WebServiceFeature;
 
 public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyContextUpdater {
 
@@ -120,6 +125,10 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     }
 
     public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
+        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+            initHaBackingStores( context.getEndpoint());
+        }
+
         //TEMP: uncomment this ServerPipelineHook hook = context.getEndpoint().getContainer().getSPI(ServerPipelineHook.class);
         ServerPipelineHook[] hooks = getServerTubeLineHooks();
         ServerPipelineHook hook = null;       
@@ -189,6 +198,25 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
         }
 
         return context.getTubelineHead();
+    }
+
+    private void initHaBackingStores(final WSEndpoint endpoint) {
+        boolean wasNonceBsInitialized = false;
+        boolean wasScBsInitialized = false;
+
+        for (WebServiceFeature _feature : endpoint.getBinding().getFeatures()) {
+            if (_feature instanceof SecurityFeatureConfigurator.SecurityStickyFeature) {
+                SecurityFeatureConfigurator.SecurityStickyFeature feature = (SecurityFeatureConfigurator.SecurityStickyFeature) _feature;
+                if (!wasNonceBsInitialized && feature.isNonceManagerUsed()) {
+                    // TODO init Nonce manager HA BS
+                    wasNonceBsInitialized = true;
+                }
+                if (!wasScBsInitialized && feature.isScUsed()) {
+                    SessionManager.getSessionManager(endpoint); // this call initializes SCT backing store (if not initializes already
+                    wasScBsInitialized = true;
+                }
+            }
+        }
     }
 
     public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {

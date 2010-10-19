@@ -73,24 +73,42 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
      * This is used whenever we detect that NonceManager or SC was enabled.
      *
      */
-    private static final class MarkerStickyFeature extends WebServiceFeature implements StickyFeature {
-        private static final String ID = MarkerStickyFeature.class.getName();
+    public static final class SecurityStickyFeature extends WebServiceFeature implements StickyFeature {
+        public static final String ID = SecurityStickyFeature.class.getName();
+
+        private boolean nonceManagerUsed;
+        private boolean scUsed;
 
         @Override
         public String getID() {
             return ID;
         }
 
+        public boolean isNonceManagerUsed() {
+            return nonceManagerUsed;
+        }
+
+        public void nonceManagerUsed() {
+            this.nonceManagerUsed = true;
+        }
+
+        public boolean isScUsed() {
+            return scUsed;
+        }
+
+        public void scUsed() {
+            this.scUsed = true;
+        }
     }
 
     public Collection<WebServiceFeature> getFeatures(PolicyMapKey key, PolicyMap policyMap) throws PolicyException {
-        boolean stickinessDetected = false;
+        SecurityStickyFeature stickyFeature = null;
         final Collection<WebServiceFeature> features = new LinkedList<WebServiceFeature>();
         if ((key != null) && (policyMap != null)) {
             Policy policy = policyMap.getEndpointEffectivePolicy(key);
             if (policy != null) {
                 for (AssertionSet alternative : policy) {
-                    stickinessDetected = resolveStickiness(alternative.iterator());
+                    stickyFeature = resolveStickiness(alternative.iterator(), stickyFeature);
 
                     List<WebServiceFeature> singleAlternativeFeatures;
                     singleAlternativeFeatures = getFeatures(alternative);
@@ -101,8 +119,8 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
             } // end-if policy not null
         }
 
-        if (stickinessDetected) {
-           features.add(new MarkerStickyFeature());
+        if (stickyFeature != null) {
+           features.add(stickyFeature);
         }
 
         return features;
@@ -112,39 +130,50 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
      * NonceManager is used when there is sp:UsernameToken assertion in Policy of the Service with DigestAuthentication enabled.
      * SC feature is enabled by having a sp:SecureConversationToken in the Policy of the Service.
      */
+    private static final String SC_LOCAL_NAME = "SecureConversationToken";
+    private static final String NONCE_LOCAL_NAME = "UsernameToken";
     private static final Set<QName> STICKINESS_ENABLERS = Collections.unmodifiableSet(new HashSet(Arrays.asList(new QName[] {
-        new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, "SecureConversationToken"),
-        new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, "SecureConversationToken"),
+        new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, SC_LOCAL_NAME),
+        new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, SC_LOCAL_NAME),
 
-        new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, "UsernameToken"),
-        new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, "UsernameToken")
+        new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, NONCE_LOCAL_NAME),
+        new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, NONCE_LOCAL_NAME)
     })));
 
     /**
      *
      */
-    private boolean resolveStickiness(Iterator<PolicyAssertion> assertions) {
+    private SecurityStickyFeature resolveStickiness(Iterator<PolicyAssertion> assertions, SecurityStickyFeature currentFeature) {
         while(assertions.hasNext()) {
             final PolicyAssertion assertion = assertions.next();
             if (STICKINESS_ENABLERS.contains(assertion.getName())) {
-                return true;
+                if (currentFeature == null) {
+                    currentFeature = new SecurityStickyFeature();
+                }
+
+                if (SC_LOCAL_NAME.equals(assertion.getName().getLocalPart())) {
+                    currentFeature.scUsed();
+                }
+
+                if (NONCE_LOCAL_NAME.equals(assertion.getName().getLocalPart())) {
+                    currentFeature.nonceManagerUsed();
+                }
             }
 
-            if (assertion.hasParameters() && resolveStickiness(assertion.getParametersIterator())) {
-                return true;
+            if (assertion.hasParameters()) {
+                currentFeature = resolveStickiness(assertion.getParametersIterator(), currentFeature);
             }
 
-            if (assertion.hasNestedPolicy() && resolveStickiness(assertion.getNestedPolicy().getAssertionSet().iterator())) {
-                return true;
+            if (assertion.hasNestedPolicy()) {
+                currentFeature = resolveStickiness(assertion.getNestedPolicy().getAssertionSet().iterator(), currentFeature);
             }
         }
 
-        return false;
+        return currentFeature;
     }
 
     private List<WebServiceFeature> getFeatures(AssertionSet alternative) {
         // method will be useful in the future with unified config; do nothing for now
         return Collections.emptyList();
     }
-
 }
