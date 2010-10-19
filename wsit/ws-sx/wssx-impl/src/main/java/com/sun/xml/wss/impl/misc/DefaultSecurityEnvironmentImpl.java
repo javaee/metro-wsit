@@ -1,5 +1,5 @@
 /*
- * $Id: DefaultSecurityEnvironmentImpl.java,v 1.1 2010-10-05 11:42:12 m_potociar Exp $
+ * $Id: DefaultSecurityEnvironmentImpl.java,v 1.2 2010-10-19 11:36:18 m_potociar Exp $
  */
 
 /*
@@ -174,9 +174,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             try {
                 maxNonceAge = SecurityUtil.toLong(mnaProperty);
             } catch (XWSSecurityException ex) {
-                log.log(Level.FINE, 
-                        " Exception while converting maxNonceAge config property, Setting MaxNonceAge to Default value"
-                        + MessageConstants.MAX_NONCE_AGE);
+                log.log(Level.FINE, " Exception while converting maxNonceAge config property, Setting MaxNonceAge to Default value{0}", MessageConstants.MAX_NONCE_AGE);
                 maxNonceAge = MessageConstants.MAX_NONCE_AGE;
             }
         }
@@ -803,7 +801,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
                     e);
         }
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Certificate Validation called on certificate " + cert.getSubjectDN());
+            log.log(Level.FINE, "Certificate Validation called on certificate {0}", cert.getSubjectDN());
         }
         return certValCallback.getResult();
         
@@ -1141,7 +1139,7 @@ public class DefaultSecurityEnvironmentImpl implements SecurityEnvironment {
             throw new XWSSecurityException(e);
         }
         if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Username Authentication done for " + username);
+            log.log(Level.FINE, "Username Authentication done for {0}", username);
         }
         return result;
     }
