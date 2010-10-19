@@ -1,5 +1,6 @@
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.commons.ha.HaContext;

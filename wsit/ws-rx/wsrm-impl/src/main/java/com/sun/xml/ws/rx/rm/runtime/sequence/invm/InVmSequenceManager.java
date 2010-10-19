@@ -35,6 +35,8 @@
  */
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.xml.ws.rx.ha.HighlyAvailableMap;
+import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.ha.HaInfo;

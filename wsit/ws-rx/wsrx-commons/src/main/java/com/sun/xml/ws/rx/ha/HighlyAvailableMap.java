@@ -34,25 +34,27 @@
  * holder.
  */
 
-package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
+package com.sun.xml.ws.rx.ha;
 
-import com.sun.xml.ws.commons.ha.StickyKey;
-import com.sun.xml.ws.api.ha.HaInfo;
-import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
-import com.sun.xml.ws.commons.ha.HaContext;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sun.xml.ws.api.ha.HaInfo;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
+import com.sun.xml.ws.commons.ha.HaContext;
+import com.sun.xml.ws.commons.ha.StickyKey;
+
 import org.glassfish.ha.store.api.BackingStore;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
-final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
+public final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
 
     static final class NoopReplicationManager<K extends Serializable, V> implements ReplicationManager<K, V> {
 
