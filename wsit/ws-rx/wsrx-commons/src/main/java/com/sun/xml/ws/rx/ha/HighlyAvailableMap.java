@@ -56,7 +56,7 @@ import org.glassfish.ha.store.api.BackingStore;
  */
 public final class HighlyAvailableMap<K extends Serializable, V> implements Map<K, V> {
 
-    static final class NoopReplicationManager<K extends Serializable, V> implements ReplicationManager<K, V> {
+    public static final class NoopReplicationManager<K extends Serializable, V> implements ReplicationManager<K, V> {
 
         public V load(K key) {
             return null;
@@ -79,7 +79,7 @@ public final class HighlyAvailableMap<K extends Serializable, V> implements Map<
         }
     }
 
-    static final class SimpleReplicationManager<K extends Serializable, V extends Serializable> implements ReplicationManager<K, V> {
+    public static final class SimpleReplicationManager<K extends Serializable, V extends Serializable> implements ReplicationManager<K, V> {
 
         private final BackingStore<K, V> backingStore;
 
@@ -108,7 +108,7 @@ public final class HighlyAvailableMap<K extends Serializable, V> implements Map<
         }
     }
 
-    static final class StickyReplicationManager<K extends Serializable, V extends Serializable> implements ReplicationManager<K, V> {
+    public static final class StickyReplicationManager<K extends Serializable, V extends Serializable> implements ReplicationManager<K, V> {
 
         private final BackingStore<StickyKey, V> backingStore;
 
