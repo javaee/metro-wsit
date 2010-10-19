@@ -69,19 +69,18 @@ public class HANonceManager extends NonceManager {
         this.maxNonceAge = maxNonceAge;
 
         try {
-            final BackingStoreConfiguration<StickyKey, HANonceManager.HAPojo> bsConfig = HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", StickyKey.class, HANonceManager.HAPojo.class);
+            final BackingStoreConfiguration<StickyKey, HANonceManager.HAPojo> bsConfig =
+                    HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", StickyKey.class, HANonceManager.HAPojo.class);
             //maxNonceAge is in milliseconds so convert it into seconds
             bsConfig.getVendorSpecificSettings().put("max.idle.timeout.in.seconds", maxNonceAge / 1000L);
             bsConfig.setClassLoader(ClassLoader.getSystemClassLoader());
             //not sure whether this statement required or not ?
             bsConfig.getVendorSpecificSettings().put(BackingStoreConfiguration.START_GMS, true);
             final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-            backingStore = bsFactory.createBackingStore(bsConfig);
-            //System.out.println("conf is : " + bsConfig);
+            backingStore = bsFactory.createBackingStore(bsConfig);            
         } catch (BackingStoreException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0826_ERROR_INITIALIZE_BACKINGSTORE(), ex);
         }
-
         singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
     }
 
@@ -122,11 +121,10 @@ public class HANonceManager extends NonceManager {
                 LOGGER.log(Level.INFO, " nonce {0} saved ", nonce);
             }
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0825_ERROR_VALIDATE_NONCE(), ex);
             return false;
         }
-        return true;
-    //return this.validateNonce(nonce, pojo);
+        return true;    
     }
 
     public class nonceCleanupTask implements Runnable {
@@ -134,9 +132,9 @@ public class HANonceManager extends NonceManager {
         public void run() {
             try {
                 int removed = backingStore.removeExpired(maxNonceAge);
-                System.out.println("removed no. of entries = " + removed);                
+                LOGGER.log(Level.INFO, " removed {0} expired entries from backing store ",removed);
             } catch (BackingStoreException ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0827_ERROR_REMOVING_EXPIRED_ENTRIES(), ex);
             }
         }
     }

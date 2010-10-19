@@ -35,9 +35,11 @@
  */
 package com.sun.xml.wss;
 
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.wss.impl.misc.DefaultNonceManager;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
+import com.sun.xml.wss.impl.misc.HANonceManager;
 import com.sun.xml.wss.impl.misc.SecurityUtil;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.util.logging.Level;
@@ -169,14 +171,13 @@ public abstract class NonceManager {
             nonceMgr = (NonceManager) obj;
         }
 
-        /*if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
-        final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-        BackingStore<String, HANonceManager.MyPojo> backingStore = HighAvailabilityProvider.INSTANCE.createBackingStore(bsFactory, "HANonceManagerStore", String.class, HANonceManager.MyPojo.class);
-        nonceMgr = new HANonceManager(backingStore, maxNonceAge);
+        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+            nonceMgr = new HANonceManager(maxNonceAge);
         } else {
-        nonceMgr = new DefaultNonceManager();
-        }*/
+            nonceMgr = new DefaultNonceManager();
+        }
 
+        //is this check still needed ?
         if (nonceMgr == null) {
             nonceMgr = new DefaultNonceManager();
         }
