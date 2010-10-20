@@ -54,18 +54,20 @@ public enum McConfigurationFactory {
     INSTANCE;
 
     public McConfiguration createInstance(ServerTubelineAssemblyContext context) {
-        return createInstance(context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
+        final String uniqueEndpointId = context.getEndpoint().getServiceName() + "::" + context.getEndpoint().getPortName();
+        return createInstance(uniqueEndpointId, context.getWsdlPort(), context.getEndpoint().getBinding(), context.getWrappedContext().getEndpoint().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
     }
 
     public McConfiguration createInstance(ClientTubelineAssemblyContext context) {
-        return createInstance(context.getWsdlPort(), context.getBinding(), context.getWrappedContext().getBindingProvider().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
+        return createInstance(context.getAddress().getURI().toString(), context.getWsdlPort(), context.getBinding(), context.getWrappedContext().getBindingProvider().getManagedObjectManager(), HighAvailabilityProvider.INSTANCE);
     }
 
-    private McConfiguration createInstance(final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager, final HighAvailabilityProvider haProvider) {
+    private McConfiguration createInstance(final String uniqueEndpointId, final WSDLPort wsdlPort, final WSBinding binding, final ManagedObjectManager managedObjectManager, final HighAvailabilityProvider haProvider) {
 
         return new McConfigurationImpl(
                 binding.getFeature(ReliableMessagingFeature.class),
                 binding.getFeature(MakeConnectionSupportedFeature.class),
+                uniqueEndpointId,
                 binding.getSOAPVersion(),
                 binding.getAddressingVersion(),
                 PortUtilities.checkForRequestResponseOperations(wsdlPort),

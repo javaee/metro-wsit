@@ -51,10 +51,12 @@ import org.glassfish.gmbal.ManagedObjectManager;
 class McConfigurationImpl extends RxConfigurationBase implements McConfiguration {
     private final MakeConnectionSupportedFeature mcSupportedFeature;
     private final McRuntimeVersion runtimeVersion;
+    private final String uniqueEndpointId;
 
     McConfigurationImpl(
             final ReliableMessagingFeature rmFeature,
             final MakeConnectionSupportedFeature mcSupportedFeature,
+            final String uniqueEndpointId,
             final SOAPVersion soapVersion,
             final AddressingVersion addressingVersion,
             final boolean requestResponseDetected,
@@ -71,6 +73,7 @@ class McConfigurationImpl extends RxConfigurationBase implements McConfiguration
 
         this.mcSupportedFeature = mcSupportedFeature;
         this.runtimeVersion = (mcSupportedFeature != null) ? McRuntimeVersion.forProtocolVersion(mcSupportedFeature.getProtocolVersion()) : null;
+        this.uniqueEndpointId = uniqueEndpointId;
     }
 
     public MakeConnectionSupportedFeature getFeature() {
@@ -85,6 +88,11 @@ class McConfigurationImpl extends RxConfigurationBase implements McConfiguration
         return runtimeVersion;
     }
 
+    public String getUniqueEndpointId() {
+        checkState();
+
+        return uniqueEndpointId;
+    }
 
     private void checkState() {
         if (mcSupportedFeature == null || !mcSupportedFeature.isEnabled()) {

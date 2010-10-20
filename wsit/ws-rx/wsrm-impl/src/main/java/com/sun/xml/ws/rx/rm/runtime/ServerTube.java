@@ -43,6 +43,7 @@ import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.runtime.dev.Session;
@@ -119,8 +120,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
                 .addressingVersion(configuration.getAddressingVersion())
                 .soapVersion(configuration.getSoapVersion())
                 .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
-                .build()
-        );
+                .build());
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -164,7 +164,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             if (HaContext.failoverDetected()) {
                 rc.sequenceManager().invalidateCache();
             }
-            
+
             String wsaAction = rc.communicator.getWsaAction(request);
             if (rc.rmVersion.protocolVersion.isProtocolAction(wsaAction)) { // protocol message
                 return doReturnWith(processProtocolMessage(request, wsaAction));
@@ -259,12 +259,14 @@ public class ServerTube extends AbstractFilterTubeImpl {
                         rc.destinationMessageHandler.getAcknowledgementData(message.getSequenceId()),
                         request));
             }
-            if (rc.configuration.getRmFeature().isPersistenceEnabled() && _responseMessage instanceof JaxwsApplicationMessage) {
-                JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
-                if (jaxwsAppMsg.getPacket() == null) {
-                    // FIXME: loaded from DB without a valid packet - create one
-                    // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
-                    jaxwsAppMsg.setPacket(rc.communicator.createEmptyResponsePacket(request, jaxwsAppMsg.getWsaAction()));
+            if (rc.configuration.getRmFeature().isPersistenceEnabled() || HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+                if (_responseMessage instanceof JaxwsApplicationMessage) {
+                    JaxwsApplicationMessage jaxwsAppMsg = (JaxwsApplicationMessage) _responseMessage;
+                    if (jaxwsAppMsg.getPacket() == null) {
+                        // FIXME: loaded from DB without a valid packet - create one
+                        // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
+                        jaxwsAppMsg.setPacket(rc.communicator.createEmptyResponsePacket(request, jaxwsAppMsg.getWsaAction()));
+                    }
                 }
             }
             // retrieved response is not null

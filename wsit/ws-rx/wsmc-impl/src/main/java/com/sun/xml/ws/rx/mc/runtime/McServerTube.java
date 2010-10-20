@@ -1,27 +1,31 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
- * 
+ *
+ * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
- * may not use this file except in compliance with the License. You can obtain
- * a copy of the License at https://glassfish.dev.java.net/public/CDDL+GPL.html
- * or glassfish/bootstrap/legal/LICENSE.txt.  See the License for the specific
+ * may not use this file except in compliance with the License.  You can
+ * obtain a copy of the License at
+ * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+ * or packager/legal/LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at glassfish/bootstrap/legal/LICENSE.txt.
- * Sun designates this particular file as subject to the "Classpath" exception
- * as provided by Sun in the GPL Version 2 section of the License file that
- * accompanied this code.  If applicable, add the following below the License
- * Header, with the fields enclosed by brackets [] replaced by your own
- * identifying information: "Portions Copyrighted [year]
- * [name of copyright owner]"
- * 
+ * file and include the License file at packager/legal/LICENSE.txt.
+ *
+ * GPL Classpath Exception:
+ * Oracle designates this particular file as subject to the "Classpath"
+ * exception as provided by Oracle in the GPL Version 2 section of the License
+ * file that accompanied this code.
+ *
+ * Modifications:
+ * If applicable, add the following below the License Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
+ * "Portions Copyright [year] [name of copyright owner]"
+ *
  * Contributor(s):
- * 
  * If you wish your version of this file to be governed by only the CDDL or
  * only the GPL Version 2, indicate your decision by adding "[Contributor]
  * elects to include this software in this distribution under the [CDDL or GPL
@@ -50,20 +54,19 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
+import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
 import com.sun.xml.ws.api.message.Messages;
+import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.mc.dev.AdditionalResponses;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MakeConnectionElement;
 import com.sun.xml.ws.rx.mc.protocol.wsmc200702.MessagePendingElement;
+import com.sun.xml.ws.rx.message.jaxws.JaxwsMessage;
+import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.rx.util.FiberExecutor;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.Detail;
@@ -77,76 +80,6 @@ import org.w3c.dom.Node;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public class McServerTube extends AbstractFilterTubeImpl {
-
-    private static final class SoapFaultDetailEntry {
-
-        public SoapFaultDetailEntry(QName name, String value) {
-            this.name = name;
-            this.value = value;
-        }
-        public final QName name;
-        public final String value;
-    }
-
-    private static final class ResponseStorage {
-
-        final Map<String, Queue<Packet>> storage = new HashMap<String, Queue<Packet>>();
-        final ReentrantReadWriteLock storageLock = new ReentrantReadWriteLock();
-
-        void store(@NotNull Packet response, @NotNull String clientUID) {
-            if (!getClientQueue(clientUID).offer(response)) {
-                LOGGER.severe(LocalizationMessages.WSMC_0104_ERROR_STORING_RESPONSE(clientUID));
-            }
-        }
-
-        private Packet getPendingResponsePacket(@NotNull String clientUID) {
-            try {
-                storageLock.readLock().lock();
-
-                final Queue<Packet> clientQueue = storage.get(clientUID);
-                return (clientQueue == null) ? null : clientQueue.poll();
-            } finally {
-                storageLock.readLock().unlock();
-            }
-        }
-
-        private boolean hasPendingResponse(@NotNull String clientUID) {
-            try {
-                storageLock.readLock().lock();
-
-                final Queue<Packet> clientQueue = storage.get(clientUID);
-                return clientQueue != null && !clientQueue.isEmpty();
-            } finally {
-                storageLock.readLock().unlock();
-            }
-        }
-
-        private Queue<Packet> getClientQueue(@NotNull String clientUID) {
-            try {
-                storageLock.readLock().lock();
-                Queue<Packet> clientQueue = storage.get(clientUID);
-                if (clientQueue == null) {
-                    storageLock.readLock().unlock();
-
-                    try {
-                        storageLock.writeLock().lock();
-                        clientQueue = storage.get(clientUID);
-                        if (clientQueue == null) { // recheck
-                            clientQueue = new ConcurrentLinkedQueue<Packet>();
-                            storage.put(clientUID, clientQueue);
-                        }
-                        storageLock.readLock().lock();
-                    } finally {
-                        storageLock.writeLock().unlock();
-                    }
-                }
-
-                return clientQueue;
-            } finally {
-                storageLock.readLock().unlock();
-            }
-        }
-    }
 
     private static final class AppRequestProcessingCallback implements Fiber.CompletionCallback {
 
@@ -162,17 +95,22 @@ public class McServerTube extends AbstractFilterTubeImpl {
         }
 
         public void onCompletion(Packet response) {
-            LOGGER.finer(LocalizationMessages.WSMC_0105_STORING_RESPONSE(clientUID));
+            try {
+                LOGGER.finer(LocalizationMessages.WSMC_0105_STORING_RESPONSE(clientUID));
+                HaContext.initFrom(response);
 
-            storeResponse(response);
-            final AdditionalResponses additionalResponses = response.getSatellite(AdditionalResponses.class);
+                storeResponse(response);
+                final AdditionalResponses additionalResponses = response.getSatellite(AdditionalResponses.class);
 
-            if (additionalResponses != null) {
-                for (Packet additionalResponse : additionalResponses.getAdditionalResponsePacketQueue()) {
-                    storeResponse(additionalResponse);                   
+                if (additionalResponses != null) {
+                    for (Packet additionalResponse : additionalResponses.getAdditionalResponsePacketQueue()) {
+                        storeResponse(additionalResponse);
+                    }
+                } else {
+                    LOGGER.fine("Response packet did not contain any AdditionalResponses property set.");
                 }
-            } else {
-                LOGGER.fine("Response packet did not contain any AdditionalResponses property set.");
+            } finally {
+                HaContext.clear();
             }
         }
 
@@ -185,8 +123,10 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 final HeaderList headers = response.getMessage().getHeaders();
                 headers.remove(configuration.getAddressingVersion().toTag);
                 headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getRuntimeVersion().getAnonymousAddress(clientUID)));
+
+                JaxwsMessage responseMessage = new JaxwsMessage(response, headers.getMessageID(configuration.getAddressingVersion(), configuration.getSoapVersion())); // TODO correlation Id
+                responseStorage.store(responseMessage, clientUID);
             }
-            responseStorage.store(response, clientUID);
         }
     }
     //
@@ -195,13 +135,20 @@ public class McServerTube extends AbstractFilterTubeImpl {
     private final McConfiguration configuration;
     private final FiberExecutor fiberExecutor;
     private final ResponseStorage responseStorage;
+    private final Communicator communicator;
 
     McServerTube(McConfiguration configuration, Tube tubelineHead) {
         super(tubelineHead);
 
         this.configuration = configuration;
         this.fiberExecutor = new FiberExecutor("McServerTubeCommunicator", tubelineHead);
-        this.responseStorage = new ResponseStorage();
+        this.responseStorage = new ResponseStorage(configuration.getUniqueEndpointId());
+        this.communicator = Communicator.builder("mc-server-tube-communincator")
+                .soapVersion(configuration.getSoapVersion())
+                .addressingVersion(configuration.getAddressingVersion())
+                .tubelineHead(super.next)
+                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
+                .build();
     }
 
     McServerTube(McServerTube original, TubeCloner cloner) {
@@ -210,6 +157,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         this.configuration = original.configuration;
         this.fiberExecutor = original.fiberExecutor;
         this.responseStorage = original.responseStorage;
+        this.communicator = original.communicator;
     }
 
     @Override
@@ -227,6 +175,10 @@ public class McServerTube extends AbstractFilterTubeImpl {
     public NextAction processRequest(Packet request) {
         try {
             LOGGER.entering();
+            HaContext.initFrom(request);
+            if (HaContext.failoverDetected()) {
+                responseStorage.invalidateLocalCache();
+            }
 
             assert request.getMessage() != null : "Unexpected [null] message in the server-side Tube.processRequest()";
 
@@ -252,6 +204,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
             return super.doReturnWith(createEmptyResponse(requestCopy));
         } finally {
+            HaContext.clear();
             LOGGER.exiting();
         }
     }
@@ -347,7 +300,17 @@ public class McServerTube extends AbstractFilterTubeImpl {
             Packet response = null;
             if (selectionUID != null && responseStorage.hasPendingResponse(selectionUID)) {
                 LOGGER.finer(LocalizationMessages.WSMC_0110_PENDING_MESSAGE_FOUND_FOR_SELECTION_UUID(selectionUID));
-                response = responseStorage.getPendingResponsePacket(selectionUID);
+
+
+                JaxwsMessage message = responseStorage.getPendingResponse(selectionUID);
+                if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
+                    if (message.getPacket() == null) {
+                        // FIXME: loaded from DB without a valid packet - create one
+                        // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
+                        message.setPacket(communicator.createEmptyResponsePacket(request, message.getWsaAction()));
+                    }
+                }
+                response = message.getPacket();
             }
 
             if (response == null) {
