@@ -1,21 +1,22 @@
 <html>
-    <title>@product.name@</title>
+    <title>${product.name}</title>
     <body>
-        <h1>@product.name@</h1>
+        <h1>${product.name}</h1>
 
-        <p><tt>Release Date: @release.date@</tt></p>
+
+        <p><tt>Release Date: ${release.date}</tt></p>
         <div style="float:right">
-            <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.zip"><img alt="Download @product.name@" src="https://metro.dev.java.net/@release.context.url@/download.png" border=0/></a>
+            <a href="${download.link}"><img alt="Download ${product.name}" src="https://metro.dev.java.net/${metro.release.version}/download.png" border=0/></a>
         </div>
 
         <a name="downloading"></a>
-        <h2>Downloading @product.name@</h2>
+        <h2>Downloading ${product.name}</h2>
         <p>
             Unless you have already done so, please download the 
-            <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.zip">@product.name@ ZIP archive</a>.
+            <a href="${download.link}">${product.name} ZIP archive</a>.
             Once downloaded, you can expand it by executing following shell command:
         </p>
-        <pre>unzip metro-@release.underscore.version@.zip</pre>
+        <pre>unzip ${bundle.artifact.name}</pre>
         <p>
             On Windows or Mac, you may as well just double-click the zip file to expand it.
         </p>
@@ -26,7 +27,7 @@
         <ul>
             <li><tt>metro-on-glassfish.xml</tt></li>
             <li><tt>metro-on-tomcat.xml</tt></li>
-            <li>and <tt>metro-on-glassfish-v3.xml</tt>, an experimental stand-alone GlassFish v3 installer</li>
+            <li>and <tt>metro-on-glassfish-3.x.xml</tt>, an experimental stand-alone GlassFish 3.x installer</li>
 
         </ul>
         <p>
@@ -35,19 +36,19 @@
         </p>
 
         <a name="installing"></a>
-        <h2>Installing @product.name@</h2>
+        <h2>Installing ${product.name}</h2>
 
         <a name="gfv3"></a>
-        <h3>GlassFish v3</h3>
+        <h3>GlassFish 3.x</h3>
         <p>
-            GlassFish v3 bundles Metro by default. Should you want to replace the default Metro version by a
-            more up-to-date release of Metro please check the Update Center for GlassFish v3.
-            Follow these steps to install @product.name@ into GlassFish v3 using the GlassFish v3 Update Ceter:
+            GlassFish 3.x bundles Metro by default. Should you want to replace the default Metro version by a
+            more up-to-date release of Metro please check the Update Center for GlassFish 3.x.
+            Follow these steps to install ${product.name} into GlassFish 3.x using the GlassFish 3.x Update Ceter:
         </p>
         <ul>
-            <li>Stop GlassFish v3 instance (if it is running)</li>
+            <li>Stop GlassFish 3.x instance (if it is running)</li>
             <li>
-                Start the Update Tool - on the command prompt change to the directory where GlassFish v3
+                Start the Update Tool - on the command prompt change to the directory where GlassFish 3.x
                 was installed, then <code>bin</code> directory and run <code>updatetool.exe</code> (Windows)
                 or <code>./updatetool</code> (Unix).
             </li>
@@ -55,13 +56,13 @@
             <li>Select Metro Web Services Stack for GlassFish</li>
             <li>Click Install</li>
             <li>Accept the license</li>
-            <li>Start GlassFish v3 again</li>
+            <li>Start GlassFish 3.x again</li>
         </ul>
         <p>
-            In case you don't have an internet access or want to experiment with an unofficial build or release of Metro
-            not available on the official GlassFish v3 update center, you may try the experimental standalone GlassFish v3
-            installer. To stop GlassFish v3 instance, install @product.name@ using the standalone installer on top of it
-            and restart the GlassFish v3 instance, execute the following commands:
+            In case you don't have an Internet access or want to experiment with an unofficial build or release of Metro
+            not available on the official GlassFish 3.x update center, you may try the experimental standalone GlassFish 3.x
+            installer. To stop GlassFish 3.x instance, install ${product.name} using the standalone installer on top of it
+            and restart the GlassFish 3.x instance, execute the following commands:
         </p>
         <pre>
 asadmin stop-domain <i>&lt;domain-name&gt;</i>
@@ -75,7 +76,7 @@ asadmin start-domain <i>&lt;domain-name&gt;</i>
             GlassFish v2 bundles Metro. However you may want to replace the default Metro version by this
             more up-to-date release. To do that, you must pass the name of the GlassFish v2 top-level directory
             into <tt>ant</tt>. In our instructions bellow, that information is passed as an <tt>ant</tt> property
-            value on the command line. To stop GlassFish v2 instance, install @product.name@ on top of it and restart
+            value on the command line. To stop GlassFish v2 instance, install ${product.name} on top of it and restart
             the GlassFish v2 instance again execute the following commands:
         </p>
         <pre>
@@ -84,7 +85,7 @@ ant -Das.home=&lt;GF_INSTALL_DIR&gt; -f &lt;METRO_INSTALL_DIR&gt;/metro-on-glass
 asadmin start-domain <i>&lt;domain-name&gt;</i>
         </pre> 
         <p>
-            This process creates a backup copy of the original Metro installation, copies the @product.name@ jar files
+            This process creates a backup copy of the original Metro installation, copies the ${product.name} jar files
             into your GlassFish v2 installation's <tt>lib</tt> directory and makes the necessary classpath alterations
             in the domain configuration file: <tt>domain.xml</tt>.
             It will also update the classpath for the utility script files: <tt>wsimport</tt> and <tt>wsgen</tt>.
@@ -111,10 +112,10 @@ catalina.sh start
 
 
         <a name="updating"></a>
-        <h2>Updating to @product.name@</h2>
+        <h2>Updating to ${product.name}</h2>
         <p>
             Once a version of Metro web services stack has been installed on a web container, it can be updated
-            with a new version of the Metro binaries. To update your Metro installation to @product.name@, follow
+            with a new version of the Metro binaries. To update your Metro installation to ${product.name}, follow
             the same steps used for the initial install, shown <a href="#installing">above</a>. 
         </p>
         <p>
@@ -130,7 +131,7 @@ catalina.sh start
             identical to the ones in the installation process. The following steps will restore your web container
             to the state before Metro installation:
 
-            <h3>GlassFish v3</h3>
+            <h3>GlassFish 3.x</h3>
             Use the Update Tool to remove Metro Web Services from GlassFish.
 
             <h3>GlassFish v2</h3>
@@ -149,17 +150,17 @@ catalina.sh start
 
         <h2>Release Notes</h2>
         <p>
-            @product.name@ release consists of following components:
+            ${product.name} release consists of following components:
         </p>
         <ul>
-            <li>WSIT @wsit.release.version@ - <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/status-notes/status-notes-@release.dash.version@-FCS.html">Browse the WSIT release notes online.</a></li>
-            <li>JAX-WS RI @jaxws.release.version@ - <a href="https://jax-ws.dev.java.net/@jaxws.release.context.url@/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
-            <li>JAXB RI @jaxb.release.version@ - <a href="https://jaxb.dev.java.net/@jaxb.release.context.url@/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
+            <li>Metro/WSIT ${metro.release.version} - <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/status-notes/status-notes-${metro.release.version}-FCS.html">Browse the WSIT release notes online.</a></li>
+            <li>JAX-WS RI ${jaws.ri.release.version} - <a href="https://jax-ws.dev.java.net/${jaws.ri.release.version}/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
+            <li>JAXB RI ${jaxb.ri.release.version} - <a href="https://jaxb.dev.java.net/${jaxb.ri.release.version}/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
         </ul>
 
     <h2>Users Guide</h2>
     <p>
-        We have created a <a href="https://metro.dev.java.net/@release.context.url@/guide/">snapshot of Metro Users Guide</a> 
+        We have created a <a href="https://metro.dev.java.net/${metro.release.version}/guide/">snapshot of Metro Users Guide</a>
         at the time of this Metro release. You may also wish to consult <a href="https://metro.dev.java.net/guide/">the latest version</a>
         of the Metro Users Gude.
     </p>
@@ -175,9 +176,8 @@ catalina.sh start
     <h2>Workspace Snapshot</h2>
     <p>
         If you'd like to hack the source code starting from the final release version, download
-        <a href="https://metro.dev.java.net/@release.context.url@/metro-@release.underscore.version@.src.zip">the workspace snapshot zip bundle</a>.
-        It contains all the CVS control files, making it ideal for submitting patches, checking diff,
-        and etc.
+        <a href="https://metro.dev.java.net/${metro.release.version}/${src.bundle.artifact.name}">the workspace snapshot zip bundle</a>.
+        It contains all the CVS control files, making it ideal for submitting patches, checking diffs, etc.
     </p>
     <div style="background-color: rgb(255,255,102);">
         This component is released under the <b><a href="https://glassfish.dev.java.net/public/CDDL+GPL.html">Common Development and Distribution License (CDDL) version 1.0 + GNU General Public License (GPL) version 2</a></b>.

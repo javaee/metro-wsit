@@ -152,6 +152,7 @@
     </licenses>
     <scm>
         <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/wsit</connection>
+        <developerConnection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/wsit</developerConnection>
         <tag>HEAD</tag>
         <url>https://wsit.dev.java.net/source/browse/wsit/wsit</url>
     </scm>
@@ -163,15 +164,19 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- plugin>
+                <!--plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.0-beta-4</version>
+                    <version>1.0-beta-3</version>
                     <configuration>
+                        <revisionOnScmFailure>0</revisionOnScmFailure>
                         <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
                         <items>
                             <item>timestamp</item>
                         </items>
+                        <timestampFormat>{0,date,MM/dd/yyyy hh:mm aa}</timestampFormat>
+                        <doCheck>false</doCheck>
+                        <doUpdate>false</doUpdate>
                     </configuration>
                     <executions>
                         <execution>
@@ -261,7 +266,7 @@
                                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             </manifest>
                             <manifestEntries>
-                                <Build-Id>${project.version} ${buildNumber}</Build-Id>
+                                <Build-Id>${project.version} ${maven.build.timestamp}</Build-Id>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -716,6 +721,7 @@
 
         <jaxb.api.version>2.2.2-promoted-b95</jaxb.api.version>
         <jaxb.ri.version>2.2.2-promoted-b95</jaxb.ri.version>
+        <jaxb.ri.release.version>2.2.2</jaxb.ri.release.version>
         <jaxb.spec.version>2.2.1</jaxb.spec.version>
 
         <jaxws.api.version>2.2.2-SNAPSHOT</jaxws.api.version>
@@ -726,7 +732,10 @@
         <metro.release.version>2.1</metro.release.version>
         
         <policy.version>2.2.2-b01</policy.version>
+        
+        <java.net.m2.repository.metroRootUrl>http://download.java.net/maven/2/org/glassfish/metro</java.net.m2.repository.metroRootUrl>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSSZ</maven.build.timestamp.format>
     </properties>
 </project>

@@ -139,4 +139,14 @@
             <artifactId>woodstox-osgi</artifactId>
         </dependency>
     </dependencies>
+
+    <properties>
+        <maven.build.timestamp.format>MMMM dd, yyyy</maven.build.timestamp.format>
+
+        <product.name>Metro ${project.version}</product.name>
+        <release.date>${maven.build.timestamp}</release.date>
+        <bundle.artifact.name>${project.artifactId}-${project.version}.zip</bundle.artifact.name>
+        <src.bundle.artifact.name>${project.artifactId}-${project.version}.src.zip</src.bundle.artifact.name>
+        <download.link>${java.net.m2.repository.metroRootUrl}/${project.artifactId}/${project.version}/${bundle.artifact.name}</download.link>
+    </properties>
 </project>
