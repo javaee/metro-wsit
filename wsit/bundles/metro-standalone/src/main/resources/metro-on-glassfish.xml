@@ -125,13 +125,13 @@
         <echo message="Installing ${product.name} on ${as.home} ..."/>
 
         <copy todir="${as.lib.home}" overwrite="true">
-            <fileset dir="${basedir}/lib">
+            <fileset dir="lib">
                 <include name="webservices-rt.jar"/>
                 <include name="webservices-tools.jar"/>
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
-            <fileset dir="${basedir}/lib">
+            <fileset dir="lib">
                 <include name="webservices-api.jar"/>
                 <include name="jsr173_api.jar"/>
             </fileset>

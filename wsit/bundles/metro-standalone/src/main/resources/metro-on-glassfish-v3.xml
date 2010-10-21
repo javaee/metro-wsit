@@ -145,7 +145,7 @@
         <echo />
 
         <copy todir="${as.lib.home}" overwrite="true">
-            <fileset dir="${basedir}/osgi">
+            <fileset dir="osgi">
                 <include name="webservices-osgi.jar"/>
                 <include name="webservices-extra-jdk-packages.jar"/>
                 <include name="woodstox-osgi.jar"/>
@@ -153,7 +153,7 @@
             </fileset>  
         </copy>
         <copy todir="${as.lib.home}/endorsed" overwrite="true">
-            <fileset dir="${basedir}/osgi">
+            <fileset dir="osgi">
                 <include name="webservices-api-osgi.jar"/>
                 <include name="jaxb-api-osgi.jar"/>
             </fileset>
