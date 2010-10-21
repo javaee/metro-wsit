@@ -64,7 +64,7 @@ public class HANonceManager extends NonceManager {
     private Long maxNonceAge;
     private BackingStore<StickyKey, HAPojo> backingStore = null;
     private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-
+    private boolean isScheduled = false;
     public HANonceManager(final long maxNonceAge) {
         this.maxNonceAge = maxNonceAge;
 
@@ -81,19 +81,20 @@ public class HANonceManager extends NonceManager {
         } catch (BackingStoreException ex) {
             LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0826_ERROR_INITIALIZE_BACKINGSTORE(), ex);
         }
-        singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
-    }
+     }
 
     public HANonceManager(BackingStore<StickyKey, HAPojo> backingStore, final long maxNonceAge) {
         this.backingStore = backingStore;
-        this.maxNonceAge = maxNonceAge;      
-
-        singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
+        this.maxNonceAge = maxNonceAge;
     }
 
 
     @Override
     public boolean validateNonce(String nonce, String created) throws NonceException {
+        if(!isScheduled){
+            singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
+            isScheduled = true;
+        }
         byte[] data = created.getBytes();
         HAPojo pojo = new HAPojo();
         pojo.setData(data);
