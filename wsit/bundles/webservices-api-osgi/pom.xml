@@ -63,7 +63,7 @@
                 <executions>
                     <execution>
                         <id>unpack-sources</id>
-                        <phase>prepare-package</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -77,6 +77,7 @@
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                    <includes>javax\/jws\/*,javax\/xml\/ws\/*</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -88,7 +89,7 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
