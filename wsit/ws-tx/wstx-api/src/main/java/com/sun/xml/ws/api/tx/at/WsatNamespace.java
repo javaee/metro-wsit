@@ -56,8 +56,8 @@ public enum WsatNamespace {
     //
     public static List<String> namespacesList() {
         List<String> retVal = new ArrayList<String>(WsatNamespace.values().length);
-        for (WsatNamespace pns : WsatNamespace.values()) {
-            retVal.add(pns.toString());
+        for (WsatNamespace wsatNamespaceEnum : WsatNamespace.values()) {
+            retVal.add(wsatNamespaceEnum.namespace);
         }
         return retVal;
     }
