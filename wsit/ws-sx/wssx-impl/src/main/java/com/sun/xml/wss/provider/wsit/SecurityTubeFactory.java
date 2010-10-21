@@ -72,6 +72,8 @@ import com.sun.xml.ws.security.opt.impl.util.JAXBUtil;
 import com.sun.xml.ws.security.secconv.SecureConversationInitiator;
 import com.sun.xml.ws.util.ServiceFinder;
 import com.sun.xml.ws.util.ServiceConfigurationError;
+import com.sun.xml.wss.NonceManager;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
@@ -108,9 +110,12 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     private static final String GF_SERVER_SEC_PIPE = "com.sun.enterprise.webservice.CommonServerSecurityPipe";
 
     private static final boolean disable;
+    private static long maxNonceAge;
     static  {
        disable = Boolean.getBoolean("DISABLE_XWSS_SECURITY");
-    }
+       String maxNAge = System.getProperty("MAX_NONCE_AGE");
+       maxNonceAge = (maxNAge != null) ? Long.getLong(maxNAge) : MessageConstants.MAX_NONCE_AGE ;
+    }    
 
     public void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException {
         if (isSecurityEnabled(context.getPolicyMap(), context.getWsdlPort())) {
@@ -208,7 +213,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
             if (_feature instanceof SecurityFeatureConfigurator.SecurityStickyFeature) {
                 SecurityFeatureConfigurator.SecurityStickyFeature feature = (SecurityFeatureConfigurator.SecurityStickyFeature) _feature;
                 if (!wasNonceBsInitialized && feature.isNonceManagerUsed()) {
-                    // TODO init Nonce manager HA BS
+                    NonceManager.getInstance(maxNonceAge, endpoint);  //init the Nonce Manager HA BS
                     wasNonceBsInitialized = true;
                 }
                 if (!wasScBsInitialized && feature.isScUsed()) {
