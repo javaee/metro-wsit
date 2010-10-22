@@ -40,9 +40,6 @@
 
 package com.sun.xml.ws.tx.at.common;
 
-import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
-import com.sun.xml.ws.tx.at.common.TransactionImportWrapper;
-import com.sun.xml.ws.tx.at.common.TxLogger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -52,7 +49,6 @@ import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
