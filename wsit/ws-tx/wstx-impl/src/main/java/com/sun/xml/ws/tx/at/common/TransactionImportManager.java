@@ -139,8 +139,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
     private final MethodInfo<Integer> getTransactionRemainingTimeout;
     private final MethodInfo<Xid> getXid;
     private final MethodInfo<Transaction> getTransaction;
-    private final MethodInfo<byte[]> enlistResourceReturnBQual;
-    private final MethodInfo<Map> getForeignRecoveryContexts;
+    private final MethodInfo<Map> getRecoveryGTIDsAndIsCommit;
 
     private TransactionImportManager() {
         this(TransactionManagerImpl.getInstance().getTransactionManager());
@@ -174,13 +173,8 @@ public class TransactionImportManager implements TransactionImportWrapper {
                 "getTransaction",
                 new Class<?>[]{Xid.class},
                 Transaction.class);
-        this.enlistResourceReturnBQual = new MethodInfo<byte[]>(
-                "enlistResourceReturnBQual",
-                new Class<?>[]{XAResource.class},
-                byte[].class,
-                byte[].class);
-        this.getForeignRecoveryContexts = new MethodInfo<Map>(
-                "getForeignRecoveryContexts",
+        this.getRecoveryGTIDsAndIsCommit = new MethodInfo<Map>(
+                "getRecoveryGTIDsAndIsCommit",
                 new Class<?>[]{},
                 Map.class);
         MethodInfo<?>[] requiredMethods = new MethodInfo<?>[]{
@@ -190,8 +184,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
             getTransactionRemainingTimeout,
             getXid,
             getTransaction,
-            enlistResourceReturnBQual,
-            getForeignRecoveryContexts
+            getRecoveryGTIDsAndIsCommit
         };
 
         int remainingMethodsToFind = requiredMethods.length;
@@ -212,13 +205,13 @@ public class TransactionImportManager implements TransactionImportWrapper {
         }
 
         if (remainingMethodsToFind != 0) {
-            StringBuilder sb = new StringBuilder("Missing required extension methods detected on '" + TransactionManager.class.getName() + "' implementation '" + javaeeTM.getClass().getName() + "':\n");
+            StringBuilder sb =
+                    new StringBuilder("Missing required extension methods detected on '" + TransactionManager.class.getName() + "' implementation '" + javaeeTM.getClass().getName() + "':\n");
             for (MethodInfo mi : requiredMethods) {
                 if (mi.method == null) {
                     sb.append(mi.methodName).append("\n");
                 }
             }
-
             // TODO log and throw? error
         }
     }
@@ -271,12 +264,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
         return getTransaction.invoke(javaeeTM, xid);
     }
 
-    public byte[] enlistResourceReturnBQual(XAResource xar)
-            throws javax.transaction.RollbackException, IllegalStateException, SystemException {
-        return enlistResourceReturnBQual.invoke(javaeeTM, xar);
-    }
-
-    public Map getForeignRecoveryContexts() {
-        return getForeignRecoveryContexts.invoke(javaeeTM);
+    public Map<byte[], Boolean> getRecoveryGTIDsAndIsCommit(){
+        return getRecoveryGTIDsAndIsCommit.invoke(javaeeTM);
     }
 }

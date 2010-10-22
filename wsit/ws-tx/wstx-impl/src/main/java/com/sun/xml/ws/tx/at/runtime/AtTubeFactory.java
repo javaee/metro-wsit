@@ -44,6 +44,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.TubeFactory;
@@ -87,7 +88,7 @@ public final class AtTubeFactory implements TubeFactory {
      */
     public Tube createTube(ServerTubelineAssemblyContext context) {
         final TransactionalFeature feature = context.getEndpoint().getBinding().getFeature(TransactionalFeature.class);
-        if (isWSATPolicyEnabled(context.getPolicyMap(), context.getWsdlPort(), false)
+        if (isWSATPolicyEnabled(context.getPolicyMap(), context.getWsdlPort(), true)
                 || (feature != null && feature.isEnabled())) { //todo add the case where policy is enabled but annotation is NEVER
             return new WSATServerTube(context.getTubelineHead(), context, feature);
         } else {

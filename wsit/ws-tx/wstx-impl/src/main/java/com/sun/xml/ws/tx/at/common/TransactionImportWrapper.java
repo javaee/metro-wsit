@@ -109,9 +109,11 @@ public interface TransactionImportWrapper {
 
     public Transaction getTransaction(Xid xid);
 
-    byte[] enlistResourceReturnBQual(XAResource xar)
-            throws RollbackException, IllegalStateException, SystemException;
-
-    public Map getForeignRecoveryContexts();
+    /**
+     * Return a map of foreign recovery contexts (tid-to-iscommit) used for bottom-up recovery in WS-AtomicTransaction
+     *
+     * @return Map of objects used for WS-AT recovery 
+     */
+    public Map<byte[], Boolean> getRecoveryGTIDsAndIsCommit();
 
 }

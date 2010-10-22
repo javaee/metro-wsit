@@ -273,7 +273,7 @@ public class TransactionManagerImpl implements TransactionManager, TransactionSy
      * Returns 0 if any exceptions occur looking up remaining transaction timeout.
      */
     //todo perhaps just remove this and access TransactionImportManager directly
-    // as is done in other locations or coonsolidate this and TransactionImportManager
+    // as is done in other locations or consolidate this and TransactionImportManager
     public int getRemainingTimeout() {
         final String METHOD = "getRemainingTimeout";
         try {

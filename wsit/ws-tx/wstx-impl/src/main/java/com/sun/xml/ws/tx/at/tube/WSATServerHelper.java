@@ -68,7 +68,7 @@ public class WSATServerHelper implements WSATServer {
         if(WSATHelper.isDebugEnabled())
             debug("processRequest HeaderList:"+headers+
                     " TransactionalAttribute:"+tx+ " isEnabled:"+tx.isEnabled());
-        if (tx.isEnabled()) {
+   //     if (tx.isEnabled()) {
             CoordinationContextBuilder ccBuilder =
                     CoordinationContextBuilder.headers(headers,tx.getVersion());
             if(ccBuilder != null) {
@@ -76,7 +76,7 @@ public class WSATServerHelper implements WSATServer {
             } else {
                 if(tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
             }
-        }
+  //      }
     }
     
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
