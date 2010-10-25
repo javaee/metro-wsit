@@ -63,11 +63,11 @@
 
             <includes>
                 <include>javax.xml.stream:stax-api</include>
-                <include>javax.xml:webservices-api</include>
-                <include>javax.xml:webservices-extra-api</include>
-                <include>com.sun.xml.ws:webservices-extra</include>
-                <include>com.sun.xml.ws:webservices-rt</include>
-                <include>com.sun.tools.ws:webservices-tools</include>
+                <include>${project.groupId}:webservices-api</include>
+                <include>${project.groupId}:webservices-extra-api</include>
+                <include>${project.groupId}:webservices-extra</include>
+                <include>${project.groupId}:webservices-rt</include>
+                <include>${project.groupId}:webservices-tools</include>
                 <include>${project.groupId}:wstx-services</include>
             </includes>
         </dependencySet>
@@ -80,9 +80,9 @@
             <includes>
                 <include>javax.xml.bind:jaxb-api-osgi</include>
                 <include>com.sun.xml.bind:jaxb-osgi</include>
-                <include>javax.xml:webservices-api-osgi</include>
-                <include>com.sun.xml.ws:webservices-extra-jdk-packages</include>
-                <include>com.sun.xml.ws:webservices-osgi</include>
+                <include>${project.groupId}:webservices-api-osgi</include>
+                <include>${project.groupId}:webservices-extra-jdk-packages</include>
+                <include>${project.groupId}:webservices-osgi</include>
                 <include>com.ctc.wstx:woodstox-osgi</include>
             </includes>
         </dependencySet>
