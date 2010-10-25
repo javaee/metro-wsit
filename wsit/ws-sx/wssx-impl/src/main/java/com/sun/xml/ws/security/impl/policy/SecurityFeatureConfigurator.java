@@ -131,7 +131,7 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
      * SC feature is enabled by having a sp:SecureConversationToken in the Policy of the Service.
      */
     private static final String SC_LOCAL_NAME = "SecureConversationToken";
-    private static final String NONCE_LOCAL_NAME = "UsernameToken";
+    private static final String NONCE_LOCAL_NAME = "HashPassword";
     private static final Set<QName> STICKINESS_ENABLERS = Collections.unmodifiableSet(new HashSet(Arrays.asList(new QName[] {
         new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, SC_LOCAL_NAME),
         new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, SC_LOCAL_NAME),
