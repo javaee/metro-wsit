@@ -57,7 +57,7 @@ public enum RmAssertionNamespace {
     MICROSOFT_200702("http://schemas.microsoft.com/ws-rx/wsrmp/200702", "net35rmp"),
     METRO_200603("http://sun.com/2006/03/rm", "sunrmp"),
     METRO_CLIENT_200603("http://sun.com/2006/03/rm/client", "sunrmcp"),
-    METRO_200702("http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702", "metro");
+    METRO_200702("http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702", "metrormp");
     
     public static List<String> namespacesList() {
         List<String> retVal = new ArrayList<String>(RmAssertionNamespace.values().length);
