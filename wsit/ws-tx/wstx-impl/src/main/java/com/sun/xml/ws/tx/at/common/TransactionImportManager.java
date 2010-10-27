@@ -43,12 +43,12 @@ package com.sun.xml.ws.tx.at.common;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.logging.Level;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
@@ -122,20 +122,23 @@ public class TransactionImportManager implements TransactionImportWrapper {
         }
     }
     private static final TxLogger logger = TxLogger.getATLogger(TransactionImportManager.class);
-    private static final TransactionImportManager INSTANCE = new TransactionImportManager();
+    private static TransactionImportManager INSTANCE;
 
     public static TransactionImportManager getInstance() {
+        if(INSTANCE==null) INSTANCE = new TransactionImportManager();
         return INSTANCE;
+
     }
     //
-    private final TransactionManager javaeeTM;
+    static private TransactionManager javaeeTM;
     private final MethodInfo<?> recreate;
     private final MethodInfo<?> release;
     private final MethodInfo<XATerminator> getXATerminator;
     private final MethodInfo<Integer> getTransactionRemainingTimeout;
     private final MethodInfo<Xid> getXid;
     private final MethodInfo<Transaction> getTransaction;
-    private final MethodInfo<Map> getRecoveryGTIDsAndIsCommit;
+    private final MethodInfo<String> getTxLogLocation;
+    static private MethodInfo<?> registerRecoveryResourceHandler;
 
     private TransactionImportManager() {
         this(TransactionManagerImpl.getInstance().getTransactionManager());
@@ -169,10 +172,14 @@ public class TransactionImportManager implements TransactionImportWrapper {
                 "getTransaction",
                 new Class<?>[]{Xid.class},
                 Transaction.class);
-        this.getRecoveryGTIDsAndIsCommit = new MethodInfo<Map>(
-                "getRecoveryGTIDsAndIsCommit",
+        this.getTxLogLocation = new MethodInfo<String>(
+                "getTxLogLocation",
                 new Class<?>[]{},
-                Map.class);
+                String.class);
+        registerRecoveryResourceHandler = new MethodInfo<Void>(
+                "registerRecoveryResourceHandler",
+                new Class<?>[]{XAResource.class},
+                void.class);
         MethodInfo<?>[] requiredMethods = new MethodInfo<?>[]{
             recreate,
             release,
@@ -180,7 +187,8 @@ public class TransactionImportManager implements TransactionImportWrapper {
             getTransactionRemainingTimeout,
             getXid,
             getTransaction,
-            getRecoveryGTIDsAndIsCommit
+            getTxLogLocation,
+            registerRecoveryResourceHandler    
         };
 
         int remainingMethodsToFind = requiredMethods.length;
@@ -260,7 +268,11 @@ public class TransactionImportManager implements TransactionImportWrapper {
         return getTransaction.invoke(javaeeTM, xid);
     }
 
-    public Map<byte[], Boolean> getRecoveryGTIDsAndIsCommit(){
-        return getRecoveryGTIDsAndIsCommit.invoke(javaeeTM);
+    public String getTxLogLocation() {
+        return getTxLogLocation.invoke(javaeeTM);
+    }
+
+    public static void registerRecoveryResourceHandler(XAResource xaResource) {
+        registerRecoveryResourceHandler.invoke(javaeeTM, xaResource);
     }
 }

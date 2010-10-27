@@ -61,7 +61,7 @@ public class WSATGatewayRMTest extends TestCase {
     
     public void testInitStore() throws Exception {
         WSATGatewayRM testWSATGatewayRM = new WSATGatewayRM("unittestserver");
-        testWSATGatewayRM.initStore();
+        testWSATGatewayRM.initStore("testlocation");
     }
 
 

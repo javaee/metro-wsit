@@ -40,9 +40,7 @@
 
 package com.sun.xml.ws.tx.at.common;
 
-import java.util.Map;
 import javax.resource.spi.XATerminator;
-import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
@@ -108,12 +106,5 @@ public interface TransactionImportWrapper {
     public Xid getXid() throws SystemException;
 
     public Transaction getTransaction(Xid xid);
-
-    /**
-     * Return a map of foreign recovery contexts (tid-to-iscommit) used for bottom-up recovery in WS-AtomicTransaction
-     *
-     * @return Map of objects used for WS-AT recovery 
-     */
-    public Map<byte[], Boolean> getRecoveryGTIDsAndIsCommit();
 
 }

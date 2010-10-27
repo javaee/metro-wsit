@@ -53,6 +53,7 @@ import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
 import com.sun.xml.ws.api.tx.at.TransactionalFeature;
+import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.tube.WSATClientTube;
 import com.sun.xml.ws.tx.at.tube.WSATServerTube;
 import javax.xml.namespace.QName;
@@ -71,6 +72,7 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new tail of the client-side tubeline
      */
     public Tube createTube(ClientTubelineAssemblyContext context) {
+        WSATGatewayRM.create();
         final TransactionalFeature feature = context.getBinding().getFeature(TransactionalFeature.class);
         if (isWSATPolicyEnabled(context.getPolicyMap(), context.getWsdlPort(), false)
                 || (feature != null && feature.isEnabled())) { //todo add the case where policy is enabled but annotation is NEVER
@@ -87,6 +89,7 @@ public final class AtTubeFactory implements TubeFactory {
      * @return new head of the service-side tubeline
      */
     public Tube createTube(ServerTubelineAssemblyContext context) {
+        WSATGatewayRM.create();
         final TransactionalFeature feature = context.getEndpoint().getBinding().getFeature(TransactionalFeature.class);
         if (isWSATPolicyEnabled(context.getPolicyMap(), context.getWsdlPort(), true)
                 || (feature != null && feature.isEnabled())) { //todo add the case where policy is enabled but annotation is NEVER

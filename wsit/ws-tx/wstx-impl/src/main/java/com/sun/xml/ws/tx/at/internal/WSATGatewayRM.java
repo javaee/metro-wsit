@@ -42,6 +42,7 @@ package com.sun.xml.ws.tx.at.internal;
 
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
+import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 
 import java.io.*;
@@ -70,54 +71,48 @@ import javax.xml.ws.WebServiceException;
 public class WSATGatewayRM implements XAResource {
 
   private static WSATGatewayRM singleton;
-  private String resourceRegistrationName; // JTA resource registration name
-  private Map<Xid, BranchRecord> branches; // xid to Branch
-  private List<Xid> pendingXids; // collection of Xids
+  static private String resourceRegistrationName; // JTA resource registration name
+  static private Map<Xid, BranchRecord> branches; // xid to Branch
+  static private List<Xid> pendingXids; // collection of Xids
   private final Object currentXidLock = new Object();
   private Xid currentXid;
   static boolean isReady = false;
   public static final boolean isWSATRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "false"));
-  public static final String txlogdir = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogs/";
-  private static final String txlogdirinbound = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogsinbound/";
+  public static  String txlogdir = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogs/";
+  private static String txlogdirinbound = System.getProperty("wsat.recovery.logdir", ".") + "/wsatlogsinbound/";
 
   static {
       create("server");
   }
 
   WSATGatewayRM(String serverName) {
-    this.resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
-    this.branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
-    this.pendingXids = Collections.synchronizedList(new ArrayList<Xid>());
+    resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
+    branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
+    pendingXids = Collections.synchronizedList(new ArrayList<Xid>());
   }
 
   public static synchronized WSATGatewayRM getInstance() {
     if(singleton==null) {
         create("server");
     }
-    while(!isReady) {
-        try {
-            System.out.println("WSATGatewayRM is not ready to receive requests as recovery logs are being read");
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
     return singleton;
+  }
+
+  public static synchronized WSATGatewayRM create() {
+    return create("server");    
   }
 
     /**
      * Called as part of WSATTransactionService start
      * @param serverName this server's name
      * @return the WSATGatewayRM singleton that WSATTransactionService will call stop on during stop/shutdown
-     * @throws SystemException if there is any issue while registerResourceWithTM
      */
   public static synchronized WSATGatewayRM create(String serverName)
   {
     if (singleton == null) {
       singleton = new WSATGatewayRM(serverName);
       if(isWSATRecoveryEnabled) {
-        singleton.initStore();
-        singleton.recoverPendingBranches();
+        TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
       }
     }
     isReady = true;
@@ -127,7 +122,7 @@ public class WSATGatewayRM implements XAResource {
     /**
      * Called for create of WSATGatewayRM
      */
-   void initStore() {
+   void initStore(String txlogdir) {
 //        File file = new File(txlogdir);
 //        file.mkdirs();
 //        file = new File(txlogdirinbound);
@@ -315,6 +310,11 @@ public class WSATGatewayRM implements XAResource {
   }
 
   public Xid[] recover(int flag) throws XAException {
+    if(isWSATRecoveryEnabled) {
+        txlogdir = TransactionImportManager.getInstance().getTxLogLocation();
+        singleton.initStore(txlogdir);
+        singleton.recoverPendingBranches();
+    }
     if (WSATHelper.isDebugEnabled()) debug("recover() flag=" + flag);
     // return all pending Xids on first call, empty array otherwise
     if ((flag & XAResource.TMSTARTRSCAN) != 0) {
