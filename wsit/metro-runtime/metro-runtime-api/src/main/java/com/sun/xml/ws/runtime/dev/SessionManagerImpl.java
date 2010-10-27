@@ -234,14 +234,20 @@ public class SessionManagerImpl extends SessionManager {
         IssuedTokenContext ctx = issuedTokenContextMap.get(key);        
         if(ctx == null){
             // recovery of security context in case of crash
+            boolean recovered = false;
             Session session = getSession(key);            
             if (session != null) {
                 // recreate context info based on data stored in the session
                 SecurityContextTokenInfo sctInfo = session.getSecurityInfo();
-                ctx = sctInfo.getIssuedTokenContext();
-                // Add it to the Session Manager's local cache, after possible crash                
-                addSecurityContext(key, ctx);               
-            } else {                
+                if (sctInfo != null) {
+                    ctx = sctInfo.getIssuedTokenContext();
+                    // Add it to the Session Manager's local cache, after possible crash                
+                    addSecurityContext(key, ctx);               
+                    recovered = true;
+                }
+            }
+            
+            if (!recovered){                
                 throw new WebServiceException("Could not locate SecureConversation session for Id:" + key);
             }
         }        
