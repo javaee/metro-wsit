@@ -37,9 +37,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
@@ -48,13 +48,17 @@ import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage;
 import com.sun.xml.ws.rx.rm.runtime.JaxwsApplicationMessage.JaxwsApplicationMessageState;
+import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
 
 final class UnackedMessageReplicationManager implements ReplicationManager<String, ApplicationMessage> {
 
+    private static final Logger LOGGER = Logger.getLogger(UnackedMessageReplicationManager.class);
     private BackingStore<StickyKey, JaxwsApplicationMessageState> unackedMesagesBs;
+    private final String loggerProlog;
 
     public UnackedMessageReplicationManager(final String uniqueEndpointId) {
+        this.loggerProlog = "[" + uniqueEndpointId + "_UNACKED_MESSAGES_MANAGER]: ";
         this.unackedMesagesBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                 HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY),
                 uniqueEndpointId + "_UNACKED_MESSAGES_BS",
@@ -64,33 +68,65 @@ final class UnackedMessageReplicationManager implements ReplicationManager<Strin
 
     public ApplicationMessage load(String key) {
         JaxwsApplicationMessageState state = HighAvailabilityProvider.loadFrom(unackedMesagesBs, new StickyKey(key), null);
-        return state.toMessage();
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Message state loaded from unacked message backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
+        }
+
+        final JaxwsApplicationMessage message = state.toMessage();
+
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Message state converted to a unacked message: " + ((message == null) ? null : message.toString()));
+        }
+        return message;
     }
 
-    public void save(final String key, final ApplicationMessage value, final boolean isNew) {
-        if (!(value instanceof JaxwsApplicationMessage)) {
-            throw new IllegalArgumentException("Unsupported application message type: " + value.getClass().getName());
+    public void save(final String key, final ApplicationMessage _value, final boolean isNew) {
+        if (!(_value instanceof JaxwsApplicationMessage)) {
+            throw new IllegalArgumentException("Unsupported application message type: " + _value.getClass().getName());
         }
-        JaxwsApplicationMessageState ams = ((JaxwsApplicationMessage) value).getState();
+        JaxwsApplicationMessageState value = ((JaxwsApplicationMessage) _value).getState();
+
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Sending for replication unacked message with a key [" + key + "]: " + value.toString() + ", isNew=" + isNew);
+        }
+        
         HaInfo haInfo = HaContext.currentHaInfo();
         if (haInfo != null) {
-            HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), ams, isNew);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for unacked message state replication: " + HaContext.asString(haInfo));
+            }
+            
+            HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), value, isNew);
         } else {
             final StickyKey stickyKey = new StickyKey(key);
-            final String replicaId = HighAvailabilityProvider.saveTo(unackedMesagesBs, stickyKey, ams, isNew);
-            HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
-        }
+            final String replicaId = HighAvailabilityProvider.saveTo(unackedMesagesBs, stickyKey, value, isNew);
+            
+            haInfo = new HaInfo(stickyKey.getHashKey(), replicaId, false);
+            HaContext.updateHaInfo(haInfo);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "No HaInfo found, created new after unacked message state replication: " + HaContext.asString(haInfo));
+            }
+        }                       
     }
 
     public void remove(String key) {
         HighAvailabilityProvider.removeFrom(unackedMesagesBs, new StickyKey(key));
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Removed unacked message from the backing store for key [" + key + "]");
+        }
     }
 
     public void close() {
         HighAvailabilityProvider.close(unackedMesagesBs);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Closed unacked message backing store");
+        }
     }
 
     public void destroy() {
         HighAvailabilityProvider.destroy(unackedMesagesBs);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Destroyed unacked message backing store");
+        }
     }
 }

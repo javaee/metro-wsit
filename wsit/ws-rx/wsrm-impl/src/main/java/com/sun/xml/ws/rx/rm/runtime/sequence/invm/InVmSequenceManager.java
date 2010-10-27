@@ -70,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 
@@ -124,9 +125,12 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      * Actual number of concurrent inbound sequences
      */
     private final AtomicLong actualConcurrentInboundSequences;
+    //
+    private final String loggerProlog;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public InVmSequenceManager(String uniqueEndpointId, DeliveryQueueBuilder inboundQueueBuilder, DeliveryQueueBuilder outboundQueueBuilder, RmConfiguration configuration) {
+        this.loggerProlog = "[" + uniqueEndpointId + "_SEQUENCE_MANAGER]: ";
         this.uniqueEndpointId = uniqueEndpointId;
         this.inboundQueueBuilder = inboundQueueBuilder;
         this.outboundQueueBuilder = outboundQueueBuilder;
@@ -138,6 +142,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
 
         final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
         this.boundSequences = HighlyAvailableMap.create(
+                uniqueEndpointId + "_BOUND_SEQUENCE_MAP",
                 new HashMap<String, String>(),
                 HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
@@ -150,14 +155,14 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
                 uniqueEndpointId + "_SEQUENCE_DATA_BS",
                 StickyKey.class,
                 SequenceDataPojo.class);
-        this.sequences = HighlyAvailableMap.create(new HashMap<String, AbstractSequence>(), this);
+        this.sequences = HighlyAvailableMap.create(uniqueEndpointId + "_SEQUENCE_DATA_MAP", new HashMap<String, AbstractSequence>(), this);
 
         UnackedMessageReplicationManager unackedMsgRM = null;
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
             unackedMsgRM = new UnackedMessageReplicationManager(uniqueEndpointId);
         }
 
-        this.unackedMessageStore = HighlyAvailableMap.create(new HashMap<String, ApplicationMessage>(), unackedMsgRM);
+        this.unackedMessageStore = HighlyAvailableMap.create(uniqueEndpointId + "_UNACKED_MESSAGES_MAP", new HashMap<String, ApplicationMessage>(), unackedMsgRM);
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
@@ -453,47 +458,76 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.sequences.invalidateCache();
         this.boundSequences.invalidateCache();
         this.unackedMessageStore.invalidateCache();
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Local cache invalidated");
+        }        
     }
 
     public AbstractSequence load(String key) {
         SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, new StickyKey(key), null);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Sequence state data loaded from backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
+        }        
         if (state == null) {
             return null;
         }
 
         state.setBackingStore(sequenceDataBs);
         InVmSequenceData data = InVmSequenceData.loadReplica(state, this, unackedMessageStore); // TODO HA time sync.
-        return (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
+        final AbstractSequence sequence = (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Sequence state data for key [" + key + "] converted into sequence of class: " + sequence.getClass());
+        }
+        return sequence;
     }
 
-    public void save(String key, AbstractSequence value, boolean isNew) {
-        SequenceData _data = value.getData();
+    public void save(String key, AbstractSequence sequence, boolean isNew) {
+        SequenceData _data = sequence.getData();
         if (!(_data instanceof InVmSequenceData)) {
             throw new IllegalArgumentException("Unsupported sequence data class: " + _data.getClass().getName());
         }
 
-        InVmSequenceData data = (InVmSequenceData) _data;
+        SequenceDataPojo value = ((InVmSequenceData) _data).getSequenceStatePojo();
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Sending for replication sequence data with a key [" + key + "]: " + value.toString() + ", isNew=" + isNew);
+        }
 
         HaInfo haInfo = HaContext.currentHaInfo();
         if (haInfo != null) {
-            HighAvailabilityProvider.saveTo(sequenceDataBs, new StickyKey(key, haInfo.getKey()), data.getSequenceStatePojo(), isNew);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for sequence data replication: " + HaContext.asString(haInfo));
+            }
+            HighAvailabilityProvider.saveTo(sequenceDataBs, new StickyKey(key, haInfo.getKey()), value, isNew);
         } else {
             final StickyKey stickyKey = new StickyKey(key);
-            final String replicaId = HighAvailabilityProvider.saveTo(sequenceDataBs, stickyKey, data.getSequenceStatePojo(), isNew);
+            final String replicaId = HighAvailabilityProvider.saveTo(sequenceDataBs, stickyKey, value, isNew);
 
-            HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+            haInfo = new HaInfo(stickyKey.getHashKey(), replicaId, false);
+            HaContext.updateHaInfo(haInfo);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "No HaInfo found, created new after sequence data replication: " + HaContext.asString(haInfo));
+            }
         }
     }
 
     public void remove(String key) {
         HighAvailabilityProvider.removeFrom(sequenceDataBs, new StickyKey(key));
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Removed sequence data from the backing store for key [" + key + "]");
+        }        
     }
 
     public void close() {
         HighAvailabilityProvider.close(sequenceDataBs);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Closed sequence data backing store");
+        }
     }
 
     public void destroy() {
         HighAvailabilityProvider.destroy(sequenceDataBs);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(loggerProlog + "Destroyed sequence data backing store");
+        }
     }
 }

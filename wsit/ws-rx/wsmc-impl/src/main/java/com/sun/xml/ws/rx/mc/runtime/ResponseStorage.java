@@ -53,6 +53,7 @@ import com.sun.xml.ws.rx.message.jaxws.JaxwsMessage;
 import com.sun.xml.ws.rx.message.jaxws.JaxwsMessage.JaxwsMessageState;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 
@@ -60,78 +61,133 @@ final class ResponseStorage {
 
     private static final Logger LOGGER = Logger.getLogger(ResponseStorage.class);
 
-    private static final class PendingMessageReplicationManager implements ReplicationManager<String, JaxwsMessage> {
+    private static final class PendingMessageDataReplicationManager implements ReplicationManager<String, JaxwsMessage> {
 
-        private BackingStore<StickyKey, JaxwsMessageState> messageStateStore;
+        private final BackingStore<StickyKey, JaxwsMessageState> messageStateStore;
+        private final String loggerProlog;
 
-        public PendingMessageReplicationManager(final String uniqueEndpointId) {
+        public PendingMessageDataReplicationManager(final String endpointUid) {
             this.messageStateStore = HighAvailabilityProvider.INSTANCE.createBackingStore(
                     HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY),
-                    uniqueEndpointId + "_MC_PENDING_MESSAGE_STORE",
+                    endpointUid + "_MC_PENDING_MESSAGE_DATA_STORE",
                     StickyKey.class,
                     JaxwsMessageState.class);
+
+            this.loggerProlog = "[MC message data manager endpointUid: " + endpointUid + "]: ";
+
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Created pending message backing store");
+            }
         }
 
-        public JaxwsMessage load(String key) {
-            JaxwsMessageState state = HighAvailabilityProvider.loadFrom(messageStateStore, new StickyKey(key), null);
+        public JaxwsMessage load(final String key) {
+            final JaxwsMessageState state = HighAvailabilityProvider.loadFrom(messageStateStore, new StickyKey(key), null);
 
-            return state.toMessage();
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Message state loaded from pending message backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
+            }
+
+            final JaxwsMessage message = state.toMessage();
+
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Message state converted to a pending message: " + ((message == null) ? null : message.toString()));
+            }
+            return message;
         }
 
         public void save(final String key, final JaxwsMessage value, final boolean isNew) {
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Sending for replication pending message with a key [" + key + "]: " + value.toString() + ", isNew=" + isNew);
+            }
+
             JaxwsMessageState state = value.getState();
             HaInfo haInfo = HaContext.currentHaInfo();
             if (haInfo != null) {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for pending message state replication: " + HaContext.asString(haInfo));
+                }
+
                 HighAvailabilityProvider.saveTo(messageStateStore, new StickyKey(key, haInfo.getKey()), state, isNew);
             } else {
                 final StickyKey stickyKey = new StickyKey(key);
                 final String replicaId = HighAvailabilityProvider.saveTo(messageStateStore, stickyKey, state, isNew);
-                HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
+
+                haInfo = new HaInfo(stickyKey.getHashKey(), replicaId, false);
+                HaContext.updateHaInfo(haInfo);
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(loggerProlog + "No HaInfo found, created new after pending message state replication: " + HaContext.asString(haInfo));
+                }
             }
         }
 
         public void remove(String key) {
             HighAvailabilityProvider.removeFrom(messageStateStore, new StickyKey(key));
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Removed pending message from the backing store for key [" + key + "]");
+            }
         }
 
         public void close() {
             HighAvailabilityProvider.close(messageStateStore);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Closed pending message backing store");
+            }
         }
 
         public void destroy() {
             HighAvailabilityProvider.destroy(messageStateStore);
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Destroyed pending message backing store");
+            }
         }
     }
-    final HighlyAvailableMap<String, JaxwsMessage> pendingResponses;
-    final HighlyAvailableMap<String, PendingResponseIdentifiers> pendingResponseIdentifiers;
-    final ReentrantReadWriteLock storageLock = new ReentrantReadWriteLock();
+    //
+    private final ReentrantReadWriteLock storageLock = new ReentrantReadWriteLock();
+    //
+    private final HighlyAvailableMap<String, JaxwsMessage> pendingResponses;
+    private final HighlyAvailableMap<String, PendingResponseIdentifiers> pendingResponseIdentifiers;
+    private final String endpointUid;
+    //
 
-    public ResponseStorage(final String uniqueEndpointId) {
+    public ResponseStorage(final String endpointUid) {
         StickyReplicationManager<String, PendingResponseIdentifiers> responseIdentifiersManager = null;
-        PendingMessageReplicationManager responseManager = null;
+        PendingMessageDataReplicationManager responseManager = null;
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
             final BackingStoreFactory bsf = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
 
-            responseIdentifiersManager = new StickyReplicationManager<String, PendingResponseIdentifiers>(HighAvailabilityProvider.INSTANCE.createBackingStore(
+            responseIdentifiersManager = new StickyReplicationManager<String, PendingResponseIdentifiers>(
+                    endpointUid + "_MC_PENDING_MESSAGE_IDENTIFIERS_MAP_MANAGER",
+                    HighAvailabilityProvider.INSTANCE.createBackingStore(
                     bsf,
-                    uniqueEndpointId + "_MC_CLIENT_PENDING_MESSAGE_IDENTIFIERS",
+                    endpointUid + "_MC_PENDING_MESSAGE_IDENTIFIERS_STORE",
                     StickyKey.class,
                     PendingResponseIdentifiers.class));
-            
-            responseManager = new PendingMessageReplicationManager(uniqueEndpointId);
+
+            responseManager = new PendingMessageDataReplicationManager(endpointUid);
         }
-        this.pendingResponseIdentifiers = HighlyAvailableMap.create(new HashMap<String, PendingResponseIdentifiers>(), responseIdentifiersManager);
-        this.pendingResponses = HighlyAvailableMap.create(new HashMap<String, JaxwsMessage>(), responseManager);
+        this.pendingResponseIdentifiers = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_IDENTIFIERS_MAP", new HashMap<String, PendingResponseIdentifiers>(), responseIdentifiersManager);
+        this.pendingResponses = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_DATA_MAP", new HashMap<String, JaxwsMessage>(), responseManager);
+        this.endpointUid = endpointUid;
+
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Response storage initialized");
+        }
     }
 
-    void store(@NotNull JaxwsMessage response, @NotNull String clientUID) {
+    void store(@NotNull JaxwsMessage response, @NotNull final String clientUID) {
         try {
             storageLock.writeLock().lock();
+
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Storing new response for client UID: " + clientUID);
+            }
+
+            pendingResponses.put(response.getCorrelationId(), response);
+
             PendingResponseIdentifiers clientResponses = pendingResponseIdentifiers.get(clientUID);
             if (clientResponses == null) {
                 clientResponses = new PendingResponseIdentifiers();
             }
-            pendingResponses.put(response.getCorrelationId(), response);
             if (!clientResponses.offer(response.getCorrelationId())) {
                 LOGGER.severe(LocalizationMessages.WSMC_0104_ERROR_STORING_RESPONSE(clientUID));
             }
@@ -141,18 +197,37 @@ final class ResponseStorage {
         }
     }
 
-    public JaxwsMessage getPendingResponse(@NotNull String clientUID) {
+    public JaxwsMessage getPendingResponse(@NotNull final String clientUID) {
         try {
-            storageLock.readLock().lock();
+            storageLock.writeLock().lock();
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Retrieving stored pending response for client UID: " + clientUID);
+            }
+
             PendingResponseIdentifiers clientResponses = pendingResponseIdentifiers.get(clientUID);
             if (clientResponses != null && !clientResponses.isEmpty()) {
                 String messageId = clientResponses.poll();
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Found registered pending response with message id [" + messageId + "] for client UID: " + clientUID);
+                }
                 pendingResponseIdentifiers.put(clientUID, clientResponses);
-                return pendingResponses.remove(messageId);
+
+                final JaxwsMessage response = pendingResponses.remove(messageId);
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Retrieved and removed pending response message data for message id [" + messageId + "]: " + ((response == null) ? null : response.toString()));
+                }
+                if (response == null) {
+                    LOGGER.warning("[WSMC-HA] endpoint UID [" + endpointUid + "]: No penidng response message data found for message id [" + messageId + "]");
+                }
+
+                return response;
+            }
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: No pedning responses found for client UID: " + clientUID);
             }
             return null;
         } finally {
-            storageLock.readLock().unlock();
+            storageLock.writeLock().unlock();
         }
     }
 
@@ -160,13 +235,22 @@ final class ResponseStorage {
         try {
             storageLock.readLock().lock();
             PendingResponseIdentifiers clientResponses = pendingResponseIdentifiers.get(clientUID);
-            return clientResponses != null && !clientResponses.isEmpty();
+            final boolean result = clientResponses != null && !clientResponses.isEmpty();
+
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Pending responses avaliable for client UID [" + clientUID + "]: " + result);
+            }
+
+            return result;
         } finally {
             storageLock.readLock().unlock();
         }
     }
 
     void invalidateLocalCache() {
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Invalidation local caches for the response storage");
+        }
         pendingResponseIdentifiers.invalidateCache();
         pendingResponses.invalidateCache();
     }

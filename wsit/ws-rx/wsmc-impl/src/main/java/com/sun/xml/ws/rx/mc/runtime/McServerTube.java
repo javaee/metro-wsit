@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.mc.runtime;
 
 import com.sun.istack.NotNull;
@@ -125,7 +124,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
                 headers.remove(configuration.getAddressingVersion().toTag);
                 headers.add(Headers.create(configuration.getAddressingVersion().toTag, configuration.getRuntimeVersion().getAnonymousAddress(clientUID)));
 
-                JaxwsMessage responseMessage = new JaxwsMessage(response, headers.getMessageID(configuration.getAddressingVersion(), configuration.getSoapVersion())); // TODO correlation Id
+                JaxwsMessage responseMessage = new JaxwsMessage(response, headers.getMessageID(configuration.getAddressingVersion(), configuration.getSoapVersion()));
                 responseStorage.store(responseMessage, clientUID);
             }
         }
@@ -144,12 +143,7 @@ public class McServerTube extends AbstractFilterTubeImpl {
         this.configuration = configuration;
         this.fiberExecutor = new FiberExecutor("McServerTubeCommunicator", tubelineHead);
         this.responseStorage = new ResponseStorage(configuration.getUniqueEndpointId());
-        this.communicator = Communicator.builder("mc-server-tube-communincator")
-                .soapVersion(configuration.getSoapVersion())
-                .addressingVersion(configuration.getAddressingVersion())
-                .tubelineHead(super.next)
-                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
-                .build();
+        this.communicator = Communicator.builder("mc-server-tube-communincator").soapVersion(configuration.getSoapVersion()).addressingVersion(configuration.getAddressingVersion()).tubelineHead(super.next).jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())).build();
     }
 
     McServerTube(McServerTube original, TubeCloner cloner) {
@@ -299,19 +293,19 @@ public class McServerTube extends AbstractFilterTubeImpl {
             }
 
             Packet response = null;
-            if (selectionUID != null && responseStorage.hasPendingResponse(selectionUID)) {
+            
+            final JaxwsMessage pendingMessage = (selectionUID != null) ? responseStorage.getPendingResponse(selectionUID) : null;
+            if (pendingMessage != null) {
                 LOGGER.finer(LocalizationMessages.WSMC_0110_PENDING_MESSAGE_FOUND_FOR_SELECTION_UUID(selectionUID));
 
-
-                JaxwsMessage message = responseStorage.getPendingResponse(selectionUID);
                 if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
-                    if (message.getPacket() == null) {
+                    if (pendingMessage.getPacket() == null) {
                         // FIXME: loaded from DB without a valid packet - create one
                         // ...this is a workaround until JAX-WS RI API provides a mechanism how to (de)serialize whole Packet
-                        message.setPacket(communicator.createEmptyResponsePacket(request, message.getWsaAction()));
+                        pendingMessage.setPacket(communicator.createEmptyResponsePacket(request, pendingMessage.getWsaAction()));
                     }
                 }
-                response = message.getPacket();
+                response = pendingMessage.getPacket();
             }
 
             if (response == null) {

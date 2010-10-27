@@ -40,8 +40,10 @@
 
 package com.sun.xml.ws.commons.ha;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.message.Packet;
+import java.util.logging.Level;
 
 /**
  * Runtime HA context implemented using thread local state data
@@ -49,6 +51,7 @@ import com.sun.xml.ws.api.message.Packet;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public class HaContext {
+    private static final Logger LOGGER = Logger.getLogger(HaContext.class);
 
     /**
      * Internal state data of the HA context
@@ -61,6 +64,11 @@ public class HaContext {
             this.packet = packet;
             this.haInfo = haInfo;
         }
+
+        @Override
+        public String toString() {
+            return "HaState{" + "packet=" + packet + ", haInfo=" + haInfo + '}';
+        }                
     }
 
     private static final ThreadLocal<State> state = new ThreadLocal<State>() {
@@ -73,24 +81,30 @@ public class HaContext {
     };
 
     public static State initFrom(Packet packet) {
-        State old = state.get();
+        State oldState = state.get();        
 
         HaInfo haInfo = null;
         if (packet != null && packet.supports(Packet.HA_INFO)) {
             haInfo = (HaInfo) packet.get(Packet.HA_INFO);
         }
-
-        state.set(new State(packet, haInfo));
+        final State newState = new State(packet, haInfo);
+        state.set(newState);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[METRO-HA] : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + "with new "  + ((newState == null) ? null : newState.toString()));
+        }                    
         
-        return old;
+        return oldState;
     }
 
     public static State initFrom(State newState) {
-        State old = state.get();
+        State oldState = state.get();
 
         state.set(newState);
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[METRO-HA] : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + "with new "  + ((newState == null) ? null : newState.toString()));
+        }                    
 
-        return old;
+        return oldState;
     }
 
     public static State currentState() {
@@ -100,6 +114,10 @@ public class HaContext {
     public static void clear() {
         state.get().haInfo = null;
         state.get().packet = null;
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[METRO-HA] : Current HA state cleared");
+        }                    
+        
     }
 
     public static HaInfo currentHaInfo() {
@@ -111,11 +129,18 @@ public class HaContext {
         if (state.get().packet != null && state.get().packet.supports(Packet.HA_INFO)) {
             state.get().packet.put(Packet.HA_INFO, newValue);
         }
+        
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[METRO-HA] : HaInfo value updated: " + asString(newValue));
+        }                            
     }
 
     public static boolean failoverDetected() {
         final HaInfo haInfo = state.get().haInfo;
         return haInfo != null && haInfo.isFailOver();
     }
-
+    
+    public static String asString(HaInfo haInfo) {
+        return "HaInfo{hashableKey=" + haInfo.getKey() + ", replicaInstance=" + haInfo.getReplicaInstance() + ", isFailover=" + haInfo.isFailOver() + "}";
+    }
 }
