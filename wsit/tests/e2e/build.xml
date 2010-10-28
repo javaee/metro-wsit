@@ -95,6 +95,11 @@
             </emma>
             <!-- END: Emma code coverage specific stuff -->
 
+            <path id="ws.harness.override.path">
+                <pathelement location="${test.lib.dir}/transaction-api.jar" />
+                <path refid="instr.override.path" />
+            </path>
+
             <java jar="${test.lib.dir}/harness.jar" fork="true">
                 <sysproperty key="WSIT_HOME" value="${basedir}/misc"/>
                 <!--sysproperty key="com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump" value="true"/>
@@ -117,7 +122,7 @@
 
                 <!-- BEGIN: Emma code coverage specific stuff -->
                 <arg value="-cp:override" />
-                <arg pathref="instr.override.path" />
+                <arg pathref="ws.harness.override.path" />
                 <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
                 <jvmarg value="-Demma.coverage.out.merge=true" />
                 <!-- END: Emma code coverage specific stuff -->
