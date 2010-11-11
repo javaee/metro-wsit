@@ -80,6 +80,7 @@ import com.sun.xml.ws.util.ServiceConfigurationError;
 import com.sun.xml.wss.NonceManager;
 import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.XWSSecurityRuntimeException;
+import com.sun.xml.wss.impl.config.SecurityConfigProvider;
 import com.sun.xml.wss.jaxws.impl.SecurityClientTube;
 import com.sun.xml.wss.jaxws.impl.SecurityServerTube;
 
@@ -118,8 +119,11 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
     private static long maxNonceAge;
     static  {
        disable = Boolean.getBoolean("DISABLE_XWSS_SECURITY");
-       String maxNAge = System.getProperty("MAX_NONCE_AGE");
-       maxNonceAge = (maxNAge != null) ? Long.getLong(maxNAge) : MessageConstants.MAX_NONCE_AGE ;
+       maxNonceAge = SecurityConfigProvider.INSTANCE.getMaxNonceAge();
+       if(maxNonceAge == MessageConstants.MAX_NONCE_AGE){ //if max nonce age is not set in domain.xml
+           String maxNAge = System.getProperty("MAX_NONCE_AGE");
+           maxNonceAge = (maxNAge != null) ? Long.getLong(maxNAge) : MessageConstants.MAX_NONCE_AGE ;
+       } 
     }    
 
     public void prepareContext(ClientTubelineAssemblyContext context) throws WebServiceException {
