@@ -283,7 +283,6 @@
         <antcall target="overwrite-local-transport-lib"/>
 
         <delete dir="tmp" verbose="${verbose}" includeemptydirs="true"/>
-        <cvs command="ci -m 'Updating test harness and/or local transport libs' lib" />
     </target>
 
     <target name="main-hudson-no-get">
