@@ -340,6 +340,8 @@ public class McServerTube extends AbstractFilterTubeImpl {
 
     @Override
     public void preDestroy() {
+        responseStorage.dispose();
+        
         super.preDestroy();
     }
 

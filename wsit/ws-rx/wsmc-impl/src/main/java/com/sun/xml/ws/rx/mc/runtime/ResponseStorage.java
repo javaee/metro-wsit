@@ -254,4 +254,16 @@ final class ResponseStorage {
         pendingResponseIdentifiers.invalidateCache();
         pendingResponses.invalidateCache();
     }
+    
+    void dispose() {
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("[WSMC-HA] endpoint UID [" + endpointUid + "]: Disposing the response storage");
+        }
+        
+        pendingResponseIdentifiers.close();
+        pendingResponseIdentifiers.destroy();
+        
+        pendingResponses.close();
+        pendingResponses.destroy();
+    }
 }

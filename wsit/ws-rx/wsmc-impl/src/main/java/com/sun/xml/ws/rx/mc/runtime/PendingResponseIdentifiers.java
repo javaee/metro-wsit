@@ -68,4 +68,8 @@ class PendingResponseIdentifiers implements Serializable {
         return messageIdentifiers.offer(messageId);
     }
 
+    @Override
+    public String toString() {
+        return "PendingResponseIdentifiers{" + "messageIdentifiers=" + messageIdentifiers + '}';
+    }   
 }
