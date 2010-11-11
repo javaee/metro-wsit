@@ -240,8 +240,7 @@ public class WSSCPlugin {
                 skl = DEFAULT_KEY_SIZE;
             }
             if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
+                log.log(Level.FINE, LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, DEFAULT_KEY_SIZE));
             }
         }                
         
@@ -286,6 +285,7 @@ public class WSSCPlugin {
         }else{
             wsTrustVer = WSTrustVersion.WS_TRUST_10;
         }
+        this.packet = sctConfig.getPacket();
         //==============================
         // Get Required policy assertions
         //==============================        
@@ -297,8 +297,7 @@ public class WSSCPlugin {
                 skl = DEFAULT_KEY_SIZE;
             }
             if (log.isLoggable(Level.FINE)) {
-                log.log(Level.FINE,
-                        LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, this.DEFAULT_KEY_SIZE));
+                log.log(Level.FINE, LogStringsMessages.WSSC_1006_SYM_BIN_KEYSIZE(skl, DEFAULT_KEY_SIZE));
             }
         }                
         
@@ -371,7 +370,8 @@ public class WSSCPlugin {
             }
         }
         
-        reqPacket.setEndPointAddressString(endPointAddress);
+        //reqPacket.setEndPointAddressString(endPointAddress);
+        reqPacket.endpointAddress = packet.endpointAddress;
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1008_SET_EP_ADDRESS(endPointAddress));
@@ -494,6 +494,8 @@ public class WSSCPlugin {
         }else{
             wsTrustVer = WSTrustVersion.WS_TRUST_10;
         }
+        
+        this.packet = sctConfig.getPacket();
         //==============================
         // Create RequestSecurityToken
         //==============================
@@ -853,7 +855,7 @@ public class WSSCPlugin {
     }
     
     public SignaturePolicy getRenewSignaturePolicy(){
-        return this.renewSignaturePolicy;
+        return renewSignaturePolicy;
     }
     
     public AlgorithmSuite getAlgorithmSuite(){
