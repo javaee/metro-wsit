@@ -59,12 +59,12 @@ import java.util.Set;
 /**
  *
  * The <code>SessionManager</code> is used to obtain session information
- * This can be implemented using persisitent storage mechanisms or using transient storage
+ * This can be implemented using persistent storage mechanisms or using transient storage
  * Even if it is implemented using persistent storage the implementation should take care 
  * of backing by  a cache which will avoid the overhead of serialization and database 
  * operations
  * <p>
- * Additonally the <code>SessionManager</code> is responsible for managing the lifecycle
+ * Additionally the <code>SessionManager</code> is responsible for managing the life cycle
  * events for the sessions. It exposes methods to create and terminate the session
  * Periodically the <code>SessionManager</code> will  check for sessions who have been inactive for
  * a  predefined amount of time and then will terminate those sessions
@@ -78,7 +78,9 @@ import java.util.Set;
 @AMXMetadata(type="WSRMSCSessionManager")
 public abstract class SessionManager {
     private static final Logger LOGGER = Logger.getLogger(SessionManager.class);
-    private static Map<WSEndpoint, SessionManager> sessionManagers = new HashMap<WSEndpoint, SessionManager>();
+    
+    private static final Object LOCK = new Object();
+    private static final Map<WSEndpoint, SessionManager> SESSION_MANAGERS = new HashMap<WSEndpoint, SessionManager>();
      
     /**
      * Returns an existing session identified by the Key else null
@@ -171,10 +173,10 @@ public abstract class SessionManager {
     public abstract void addSecurityContext(String key, IssuedTokenContext itctx);
     
     public static void removeSessionManager(WSEndpoint endpoint){
-        synchronized (SessionManager.class) {
+        synchronized (LOCK) {
             try {
                 LOGGER.entering();
-                Object o = sessionManagers.remove(endpoint);
+                Object o = SESSION_MANAGERS.remove(endpoint);
                 LOGGER.config(String.format("removeSessionManager(%s): %s",
                                             endpoint, o));
                 if (o != null) {
@@ -195,10 +197,10 @@ public abstract class SessionManager {
      * @return The value of the <code>manager</code> field.
      */ 
     public static SessionManager getSessionManager(WSEndpoint endpoint) {
-        synchronized (SessionManager.class) {
+        synchronized (LOCK) {
             try {
                 LOGGER.entering();
-                SessionManager sm = sessionManagers.get(endpoint);
+                SessionManager sm = SESSION_MANAGERS.get(endpoint);
                 if (sm == null) {
                     ServiceFinder<SessionManager> finder = 
                         ServiceFinder.find(SessionManager.class);
@@ -207,7 +209,7 @@ public abstract class SessionManager {
                     } else {
                         sm = new SessionManagerImpl(endpoint);
                     }
-                    sessionManagers.put(endpoint, sm);
+                    SESSION_MANAGERS.put(endpoint, sm);
                     endpoint.getManagedObjectManager()
                         .registerAtRoot(sm, "RM_SC_SessionManager");
                     LOGGER.config(String.format("getSessionManager(%s): created: %s", endpoint, sm));
