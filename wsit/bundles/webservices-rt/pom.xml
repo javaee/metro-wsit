@@ -115,6 +115,12 @@
                                         <exclude>META-INF/jaxrpc/ToolPlugin.xml</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>com.sun.xml.ws:jaxws-rt</artifact>
+                                    <excludes>
+                                        <exclude>com/sun/xml/ws/util/version.properties</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
@@ -124,6 +130,12 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>        
+        </resources>
     </build>
 
     <dependencies>
@@ -241,8 +253,8 @@
             <artifactId>mimepull</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.codehaus.woodstox</groupId>
-          <artifactId>wstx-asl</artifactId>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-asl</artifactId>
         </dependency>
 
         <!-- Non-shaded dependencies -->
@@ -252,4 +264,10 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    
+    <properties>
+        <build.id>${maven.build.timestamp}</build.id>
+        <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS/${jaxws.spec.version}</build.version>
+        <major.version>${metro.release.version}</major.version>
+    </properties>    
 </project>
