@@ -217,4 +217,11 @@ public enum RmProtocolVersion {
         return wsrmFaultAction.equals(wsaAction);
     }
 
+    @Override
+    public String toString() {
+        return "RmProtocolVersion" + 
+                "{\n\tprotocolNamespaceUri=" + protocolNamespaceUri + 
+                ",\n\tpolicyNamespaceUri=" + policyNamespaceUri + 
+                "\n}";
+    }    
 }

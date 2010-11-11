@@ -734,4 +734,27 @@ public class ReliableMessagingFeature extends WebServiceFeature implements Stick
     public boolean isOfferElementGenerationDisabled() {
         return offerElementGenerationDisabled;
     }
+
+    @Override
+    public String toString() {
+        return "ReliableMessagingFeature" +
+                "{\n\tversion=" + version + 
+                ",\n\tdeliveryAssurance=" + deliveryAssurance + 
+                ",\n\torderedDelivery=" + orderedDelivery + 
+                ",\n\tsecurityBinding=" + securityBinding + 
+                ",\n\tdestinationBufferQuota=" + destinationBufferQuota + 
+                ",\n\tpersistenceEnabled=" + persistenceEnabled + 
+                ",\n\tmessageRetransmissionInterval=" + messageRetransmissionInterval + 
+                ",\n\tretransmissionBackoffAlgorithm=" + retransmissionBackoffAlgorithm + 
+                ",\n\tmaxMessageRetransmissionCount=" + maxMessageRetransmissionCount + 
+                ",\n\tmaxRmSessionControlMessageResendAttempts=" + maxRmSessionControlMessageResendAttempts + 
+                ",\n\tacknowledgementTransmissionInterval=" + acknowledgementTransmissionInterval + 
+                ",\n\tackRequestTransmissionInterval=" + ackRequestTransmissionInterval + 
+                ",\n\tsequenceInactivityTimeout=" + sequenceInactivityTimeout + 
+                ",\n\tcloseSequenceOperationTimeout=" + closeSequenceOperationTimeout + 
+                ",\n\tsequenceManagerMaintenancePeriod=" + sequenceManagerMaintenancePeriod + 
+                ",\n\tmaxConcurrentSessions=" + maxConcurrentSessions + 
+                ",\n\tofferElementGenerationDisabled=" + offerElementGenerationDisabled + 
+                "\n}";
+    }        
 }
