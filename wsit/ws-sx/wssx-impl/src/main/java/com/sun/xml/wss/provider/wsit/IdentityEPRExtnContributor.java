@@ -181,7 +181,7 @@ public class IdentityEPRExtnContributor extends EndpointReferenceExtensionContri
         JAXBElement<IdentityType> idElem =
                 (new com.sun.xml.security.core.ai.ObjectFactory()).createIdentity(identityElem);
         try {
-            JAXBContext context = JAXBUtil.getJAXBContext();
+            JAXBContext context = JAXBUtil.getCustomIdentityJAXBContext(); 
             Marshaller m = context.createMarshaller();
             m.setProperty("com.sun.xml.bind.xmlDeclaration", false);
             m.marshal(idElem, xbr);

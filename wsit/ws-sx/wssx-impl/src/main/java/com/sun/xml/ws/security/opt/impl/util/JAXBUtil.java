@@ -66,21 +66,27 @@ public class JAXBUtil {
     public static final WSSNamespacePrefixMapper prefixMapper11 = new WSSNamespacePrefixMapper();
     public static final WSSNamespacePrefixMapper prefixMapper12 = new WSSNamespacePrefixMapper(true);
     private static ThreadLocal<WeakReference<JAXBContext>> jc = new ThreadLocal<WeakReference<JAXBContext>>();
-    
+
     private static  JAXBContext jaxbContext;
+    private static JAXBContext customjaxbContext;
 
     static {
         initJAXBContext();
     }
-    
-    @SuppressWarnings("unchecked")
-    private static void initJAXBContext() {
+
+    public static JAXBContext getCustomIdentityJAXBContext() {
+        initCustomJAXBContext();
+        return customjaxbContext;
+    }
+
+    private static void initCustomJAXBContext() {
         try {
             //JAXB might access private class members by reflection so
             //make it JAXBContext privileged
             AccessController.doPrivileged(new PrivilegedExceptionAction() {
+
                 public Object run() throws Exception {
-                    jaxbContext = JAXBContext.newInstance(
+                    customjaxbContext = JAXBContext.newInstance(
                             "com.sun.xml.ws.security.opt.crypto.dsig:com.sun.xml.ws.security.opt.crypto.dsig.keyinfo:com.sun.xml.security.core.dsig:com.sun.xml.security.core.xenc:" +
                             "com.sun.xml.ws.security.opt.impl.keyinfo:com.sun.xml.ws.security.opt.impl.reference:" +
                             "com.sun.xml.ws.security.secext10:com.sun.xml.ws.security.wsu10:com.sun.xml.ws.security.secext11:" +
@@ -93,12 +99,33 @@ public class JAXBUtil {
             throw new WebServiceException(je);
         }
     }
-    
+
+    @SuppressWarnings("unchecked")
+    private static void initJAXBContext() {
+        try {
+            //JAXB might access private class members by reflection so
+            //make it JAXBContext privileged
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws Exception {
+                    jaxbContext = JAXBContext.newInstance(
+                            "com.sun.xml.ws.security.opt.crypto.dsig:com.sun.xml.ws.security.opt.crypto.dsig.keyinfo:com.sun.xml.security.core.dsig:com.sun.xml.security.core.xenc:" +
+                            "com.sun.xml.ws.security.opt.impl.keyinfo:com.sun.xml.ws.security.opt.impl.reference:" +
+                            "com.sun.xml.ws.security.secext10:com.sun.xml.ws.security.wsu10:com.sun.xml.ws.security.secext11:" +
+                            "com.sun.xml.ws.security.secconv.impl.bindings:" +
+                            "com.sun.xml.ws.security.secconv.impl.wssx.bindings:");
+                    return null;
+                }
+            });
+        }catch (Exception je) {
+            throw new WebServiceException(je);
+        }
+    }
+
     public static JAXBContext getJAXBContext(){
         return jaxbContext;
     }
-    
-    
+
+
     public static Marshaller createMarshaller(SOAPVersion soapVersion)throws JAXBException {
         try{
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -113,7 +140,7 @@ public class JAXBUtil {
         }catch(javax.xml.bind.PropertyException pe){
             throw new JAXBException("Error occurred while setting security marshaller properties",pe);
         }
-       
+
     }
 
     public static void setSEIJAXBContext(JAXBContext context){
@@ -123,5 +150,5 @@ public class JAXBUtil {
     public static JAXBContext getSEIJAXBContext(){
         return jc.get().get();
     }
-    
+
 }
