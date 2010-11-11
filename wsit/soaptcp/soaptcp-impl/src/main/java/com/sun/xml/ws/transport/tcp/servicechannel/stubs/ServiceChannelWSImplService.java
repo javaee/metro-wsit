@@ -40,7 +40,6 @@
 
 package com.sun.xml.ws.transport.tcp.servicechannel.stubs;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
@@ -55,7 +54,7 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.1
  * 
  */
-@WebServiceClient(name = "ServiceChannelWSImplService", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/", wsdlLocation = "file:/C:/Projects/WSIT/wsit/rt/etc/ServiceChannelWSImplService.wsdl")
+@WebServiceClient(name = "ServiceChannelWSImplService", targetNamespace = "http://servicechannel.tcp.transport.ws.xml.sun.com/")
 public class ServiceChannelWSImplService
     extends Service
 {
