@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.assembler.dev.TubelineAssemblyContext;
@@ -54,6 +53,7 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
+
     private Tube head;
     private Pipe adaptedHead;
     private List<Tube> tubes = new LinkedList<Tube>();
@@ -70,15 +70,15 @@ class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
     }
 
     boolean setTubelineHead(Tube newHead) {
-        if (newHead != head || newHead != adaptedHead) {
-            head = newHead;
-            tubes.add(head);
-            adaptedHead = null;
-
-            return true;
-        } else {
+        if (newHead == head || newHead == adaptedHead) {
             return false;
         }
+
+        head = newHead;
+        tubes.add(head);
+        adaptedHead = null;
+
+        return true;
     }
 
     public <T> T getImplementation(Class<T> type) {
