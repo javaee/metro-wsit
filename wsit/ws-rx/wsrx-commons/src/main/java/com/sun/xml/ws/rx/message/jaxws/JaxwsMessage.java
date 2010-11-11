@@ -70,6 +70,15 @@ public class JaxwsMessage extends RxMessageBase {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
             return JaxwsMessage.newInstance(bais,correlationId, wsaAction);
         }
+
+        @Override
+        public String toString() {
+            return "JaxwsMessageState" + 
+                    "{\n\twsaAction=" + wsaAction + 
+                    ",\n\tcorrelationId=" + correlationId + 
+                    ",\n\tdata=" + data + 
+                    "\n}";
+        }               
     }
     //
     private final SerializableMessage jaxwsMessage;
