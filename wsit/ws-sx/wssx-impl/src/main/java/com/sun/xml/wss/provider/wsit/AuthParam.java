@@ -47,6 +47,5 @@ package com.sun.xml.wss.provider.wsit;
  * <p> This is a marker interface for container-specific
  * authentication parameters.
  *
- * @version %I%, %G%
  */
 public interface AuthParam { }
