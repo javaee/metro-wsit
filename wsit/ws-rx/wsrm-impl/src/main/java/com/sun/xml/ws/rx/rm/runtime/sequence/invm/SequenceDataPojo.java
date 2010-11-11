@@ -263,6 +263,26 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
         return hash;
     }
 
+    @Override
+    public String toString() {
+        return "SequenceDataPojo"+ 
+                "{\n\tbackingStore=" + backingStore + 
+                ",\n\tsequenceId=" + sequenceId + 
+                ",\n\tboundSecurityTokenReferenceId=" + boundSecurityTokenReferenceId + 
+                ",\n\texpirationTime=" + expirationTime + 
+                ",\n\tstate=" + state + 
+                ",\n\tackRequestedFlag=" + ackRequestedFlag + 
+                ",\n\tlastMessageNumber=" + lastMessageNumber + 
+                ",\n\tlastActivityTime=" + lastActivityTime + 
+                ",\n\tlastAcknowledgementRequestTime=" + lastAcknowledgementRequestTime + 
+                ",\n\tallUnackedMessageNumbers=" + allUnackedMessageNumbers + 
+                ",\n\treceivedUnackedMessageNumbers=" + receivedUnackedMessageNumbers + 
+                ",\n\tunackedNumberToCorrelationIdMap=" + unackedNumberToCorrelationIdMap + 
+                ",\n\tinbound=" + inbound + 
+                ",\n\tdirty=" + dirty + 
+                "\n}";
+    }       
+
     private static enum Parameter {
 
         sequenceId("sequenceId", 0),

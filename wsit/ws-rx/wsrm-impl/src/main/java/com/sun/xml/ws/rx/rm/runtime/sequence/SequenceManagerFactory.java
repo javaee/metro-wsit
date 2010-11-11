@@ -83,4 +83,18 @@ public enum SequenceManagerFactory {
 
         return result;
     }
+    
+    /**
+     * Disposes the sequence manager properly and unregisters it from the ManagedOnjectManager
+     * 
+     * @param manager {@link SequenceManager} instance to be disposed
+     */
+    public void dispose(SequenceManager manager, RmConfiguration configuration) {        
+        manager.dispose();                
+        
+        ManagedObjectManager mom = configuration.getManagedObjectManager();
+        if (mom != null) {
+            mom.unregister(manager);
+        }
+    }
 }

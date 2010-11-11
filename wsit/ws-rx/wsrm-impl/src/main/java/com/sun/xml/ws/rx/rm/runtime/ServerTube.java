@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
@@ -120,12 +119,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         RuntimeContext.Builder rcBuilder = RuntimeContext.builder(
                 configuration,
-                Communicator.builder("rm-server-tube-communicator")
-                .tubelineHead(super.next)
-                .addressingVersion(configuration.getAddressingVersion())
-                .soapVersion(configuration.getSoapVersion())
-                .jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion()))
-                .build());
+                Communicator.builder("rm-server-tube-communicator").tubelineHead(super.next).addressingVersion(configuration.getAddressingVersion()).soapVersion(configuration.getSoapVersion()).jaxbContext(configuration.getRuntimeVersion().getJaxbContext(configuration.getAddressingVersion())).build());
         this.rc = rcBuilder.build();
 
         DeliveryQueueBuilder inboundQueueBuilder = DeliveryQueueBuilder.getBuilder(
@@ -406,8 +400,9 @@ public class ServerTube extends AbstractFilterTubeImpl {
         String boundSequenceId = rc.getBoundSequenceId(inboundSequence.getId());
 
         try {
-            final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
+            rc.sequenceManager().closeSequence(inboundSequence.getId());
 
+            final CloseSequenceResponseData.Builder responseBuilder = CloseSequenceResponseData.getBuilder(inboundSequence.getId());
             // override the final sequence acknowledgement data as this sequence is not closed yet, but is closing already
             Builder ackDataBuilder = AcknowledgementData.getBuilder(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));
 
@@ -418,12 +413,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
             return rc.protocolHandler.toPacket(responseBuilder.build(), request, false);
         } finally {
-            try {
-                rc.sequenceManager().closeSequence(inboundSequence.getId());
-            } finally {
-                if (boundSequenceId != null) {
-                    rc.sequenceManager().closeSequence(boundSequenceId);
-                }
+            if (boundSequenceId != null) {
+                rc.sequenceManager().closeSequence(boundSequenceId);
             }
         }
     }

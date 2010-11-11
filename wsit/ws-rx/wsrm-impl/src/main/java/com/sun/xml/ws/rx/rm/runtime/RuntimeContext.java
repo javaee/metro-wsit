@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.istack.NotNull;
@@ -49,7 +48,9 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManager;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import com.sun.xml.ws.commons.ScheduledTaskManager;
+import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceManagerFactory;
 import com.sun.xml.ws.rx.util.SuspendedFiberStorage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -121,6 +122,7 @@ public final class RuntimeContext {
     public final ScheduledTaskManager scheduledTaskManager;
     final SourceMessageHandler sourceMessageHandler;
     final DestinationMessageHandler destinationMessageHandler;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     @SuppressWarnings("LeakingThisInConstructor")
     private RuntimeContext(
@@ -148,8 +150,14 @@ public final class RuntimeContext {
     }
 
     public void close() {
-        scheduledTaskManager.shutdown();
-        communicator.close();
+        if (closed.compareAndSet(false, true)) {
+            scheduledTaskManager.shutdown();
+            communicator.close();
+
+            if (sequenceManager != null) {
+                SequenceManagerFactory.INSTANCE.dispose(sequenceManager, configuration);
+            }
+        }
     }
 
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException {

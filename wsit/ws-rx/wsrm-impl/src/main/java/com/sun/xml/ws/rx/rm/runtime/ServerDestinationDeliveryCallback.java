@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.message.Packet;
@@ -106,7 +105,7 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
 
                 try {
                     if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
-                        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
+                        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());                        
                         if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
                             // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
                             response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);

@@ -95,4 +95,14 @@ class RmConfigurationImpl extends RxConfigurationBase implements RmConfiguration
             throw new IllegalStateException("Reliable messaging feature is not enabled");
         }
     }
+
+    @Override
+    public String toString() {
+        return "RmConfigurationImpl" + 
+                "{\nrmFeature=" + rmFeature + 
+                ",\nruntimeVersion=" + runtimeVersion + 
+                "\n}";
+    }
+    
+    
 }

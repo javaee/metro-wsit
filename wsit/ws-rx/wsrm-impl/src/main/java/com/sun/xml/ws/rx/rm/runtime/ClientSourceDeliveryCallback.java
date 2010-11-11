@@ -37,13 +37,13 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.pipe.Fiber;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.ha.HaContext;
+import com.sun.xml.ws.rx.RxException;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.rm.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.rm.runtime.delivery.Postman;
@@ -72,15 +72,20 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
                 HaContext.initFrom(response);
 
                 if (response.getMessage() != null) {
-                    // TODO handle RM faults
                     JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                     rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                     rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
                     rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
+
+                    if (rc.configuration.getRuntimeVersion().protocolVersion.isFault(message.getWsaAction())) {
+                        // TODO handle RM faults
+                    }
                 }
 
                 resumeParentFiber(response);
+            } catch (RxRuntimeException ex) {
+                onCompletion(ex);
             } finally {
                 HaContext.clear();
             }
@@ -124,50 +129,48 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
         }
 
         public void onCompletion(Packet response) {
-            if (response.getMessage() != null) {
-                try {
-                    HaContext.initFrom(response);
+            try {
+                HaContext.initFrom(response);
 
-                    // TODO handle RM faults
+                if (response.getMessage() != null) {
+
                     JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
                     rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
                     rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
                     rc.destinationMessageHandler.processAcknowledgements(message.getAcknowledgementData());
 
+                    if (rc.configuration.getRuntimeVersion().protocolVersion.isFault(message.getWsaAction())) {
+                        // TODO handle RM faults
+                    }
+
                     if (message.getSequenceId() != null) {
-                        try {
-                            rc.destinationMessageHandler.registerMessage(message);
-                            rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
-                        } catch (DuplicateMessageRegistrationException ex) {
-                            onCompletion(ex);
-                        }
+                        rc.destinationMessageHandler.registerMessage(message);
+                        rc.destinationMessageHandler.putToDeliveryQueue(message); // resuming parent fiber there
                     } else {
                         // if the response message does not contain sequence headers, process it as a normal, non-RM message
                         resumeParentFiber(response);
                     }
 
-                } finally {
-                    HaContext.clear();
-                }
-            } else {
-                final int nextResendCount = request.getNextResendCount();
-                if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
-                    resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
-                    return;
-                }
-
-                try {
-                    HaContext.initFrom(request.getPacket());
+                } else {
+                    final int nextResendCount = request.getNextResendCount();
+                    if (!rc.configuration.getRmFeature().canRetransmitMessage(nextResendCount)) {
+                        resumeParentFiber(new RxRuntimeException((LocalizationMessages.WSRM_1159_MAX_MESSAGE_RESEND_ATTEMPTS_REACHED())));
+                        return;
+                    }
 
                     RedeliveryTaskExecutor.INSTANCE.register(
                             request,
                             rc.configuration.getRmFeature().getRetransmissionBackoffAlgorithm().getDelayInMillis(nextResendCount, rc.configuration.getRmFeature().getMessageRetransmissionInterval()),
                             TimeUnit.MILLISECONDS,
                             rc.sourceMessageHandler);
-                } finally {
-                    HaContext.clear();
                 }
+            } catch (RxRuntimeException ex) {
+                onCompletion(ex);
+            } catch (RxException ex) {
+                onCompletion(ex);
+            } finally {
+                HaContext.clear();
             }
         }
 
@@ -236,6 +239,8 @@ class ClientSourceDeliveryCallback implements Postman.Callback {
 
                 resumeParentFiber(response);
 
+            } catch (RxRuntimeException ex) {
+                onCompletion(ex);
             } finally {
                 HaContext.clear();
             }

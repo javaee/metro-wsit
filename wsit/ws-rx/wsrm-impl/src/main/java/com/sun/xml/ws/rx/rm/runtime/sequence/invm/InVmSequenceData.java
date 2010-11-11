@@ -179,7 +179,7 @@ final class InVmSequenceData implements SequenceData {
             unlockWrite();
         }
     }
-
+ 
     /**
      * {@inheritDoc}
      */
@@ -317,7 +317,8 @@ final class InVmSequenceData implements SequenceData {
 
     private void initLocalCache() {
         for (Long unackedMessageNumber : data.getReceivedUnackedMessageNumbers()) {
-            messageStore.get(data.getUnackedNumberToCorrelationIdMap().get(unackedMessageNumber));
+            final String correlationId = data.getUnackedNumberToCorrelationIdMap().get(unackedMessageNumber);
+            messageStore.get(correlationId);
         }
     }
 }

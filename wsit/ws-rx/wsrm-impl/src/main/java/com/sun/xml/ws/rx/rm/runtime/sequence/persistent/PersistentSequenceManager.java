@@ -88,11 +88,11 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     private final Map<String, String> boundSequences = new HashMap<String, String>();
     /**
-     * Inbound delivery queue bulder
+     * Inbound delivery queue builder
      */
     private final DeliveryQueueBuilder inboundQueueBuilder;
     /**
-     * Outbound delivery queue bulder
+     * Outbound delivery queue builder
      */
     private final DeliveryQueueBuilder outboundQueueBuilder;
     /**
@@ -452,5 +452,9 @@ public final class PersistentSequenceManager implements SequenceManager {
 
     public void invalidateCache() {
         // do nothing
+    }
+
+    public void dispose() {
+        // TODO should delete all endpoint related data?
     }
 }

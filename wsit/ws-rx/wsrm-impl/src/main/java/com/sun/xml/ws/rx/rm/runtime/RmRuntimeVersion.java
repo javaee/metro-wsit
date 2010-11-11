@@ -187,4 +187,9 @@ public enum RmRuntimeVersion {
     public JAXBRIContext getJaxbContext(AddressingVersion av) {
         return jaxbContextRepository.getJaxbContext(av);
     }
+
+    @Override
+    public String toString() {
+        return "RmRuntimeVersion{" + "protocolVersion=" + protocolVersion + '}';
+    }   
 }

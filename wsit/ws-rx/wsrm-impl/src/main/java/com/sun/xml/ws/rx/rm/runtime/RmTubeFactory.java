@@ -37,14 +37,15 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.TubeFactory;
 import com.sun.xml.ws.rx.rm.api.ReliableMessagingFeature;
+import java.util.logging.Level;
 import javax.xml.ws.WebServiceException;
 
 /**
@@ -56,6 +57,9 @@ import javax.xml.ws.WebServiceException;
  * @see ReliableMessagingFeature
  */
 public final class RmTubeFactory implements TubeFactory {
+
+    private static final Logger LOGGER = Logger.getLogger(RmTubeFactory.class);
+
     /**
      * Adds RM tube to the client-side tubeline, depending on whether RM is enabled or not.
      * 
@@ -66,7 +70,11 @@ public final class RmTubeFactory implements TubeFactory {
         RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(context);
 
         if (configuration.isReliableMessagingEnabled()) {
-             return new ClientTube(configuration, context);
+            if (LOGGER.isLoggable(Level.CONFIG)) {
+                LOGGER.config("Creating client-side RM tube with configuration: " + configuration.toString());
+            }
+
+            return new ClientTube(configuration, context);
         }
 
         return context.getTubelineHead();
@@ -82,7 +90,11 @@ public final class RmTubeFactory implements TubeFactory {
         RmConfiguration configuration = RmConfigurationFactory.INSTANCE.createInstance(context);
 
         if (configuration.isReliableMessagingEnabled()) {
-             return new ServerTube(configuration, context);
+            if (LOGGER.isLoggable(Level.CONFIG)) {
+                LOGGER.config("Creating endpoint-side RM tube with configuration: " + configuration.toString());
+            }
+
+            return new ServerTube(configuration, context);
         }
 
         return context.getTubelineHead();

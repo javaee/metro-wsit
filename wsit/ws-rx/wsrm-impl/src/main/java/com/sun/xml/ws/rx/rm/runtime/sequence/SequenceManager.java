@@ -196,4 +196,10 @@ public interface SequenceManager extends TimeSynchronizer {
      * loaded from the RM HA backing stores.
      */
     public void invalidateCache();
+    
+    /**
+     * Tells the {@link SequenceManager} that it is going to be disposed. An implementation
+     * of this interface can use the method to do the necessary resource cleanup.
+     */
+    public void dispose();
 }

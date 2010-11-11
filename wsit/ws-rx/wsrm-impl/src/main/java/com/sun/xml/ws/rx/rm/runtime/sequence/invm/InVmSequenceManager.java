@@ -463,6 +463,17 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         }        
     }
 
+    public void dispose() {
+        this.sequences.close();
+        this.sequences.destroy();
+        
+        this.boundSequences.close();
+        this.boundSequences.destroy();
+        
+        this.unackedMessageStore.close();
+        this.unackedMessageStore.destroy();
+    }
+
     public AbstractSequence load(String key) {
         SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, new StickyKey(key), null);
         if (LOGGER.isLoggable(Level.FINER)) {
@@ -474,7 +485,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
 
         state.setBackingStore(sequenceDataBs);
         InVmSequenceData data = InVmSequenceData.loadReplica(state, this, unackedMessageStore); // TODO HA time sync.
-        final AbstractSequence sequence = (state.isInbound()) ? new InboundSequence(data, this.outboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
+        final AbstractSequence sequence = (state.isInbound()) ? new InboundSequence(data, this.inboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Sequence state data for key [" + key + "] converted into sequence of class: " + sequence.getClass());
         }

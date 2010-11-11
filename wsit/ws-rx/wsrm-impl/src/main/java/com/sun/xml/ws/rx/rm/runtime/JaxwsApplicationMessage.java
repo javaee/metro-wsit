@@ -56,12 +56,12 @@ import java.io.InputStream;
 public class JaxwsApplicationMessage extends ApplicationMessageBase {
     public static class JaxwsApplicationMessageState implements RxMessage.State {
 
-        private final byte[] data;
+        private final String sequenceId;
+        private final long messageNumber;
         private final int nextResendCount;
         private final String correlationId;
         private final String wsaAction;
-        private final String sequenceId;
-        private final long messageNumber;
+        private final byte[] data;
 
         private JaxwsApplicationMessageState(JaxwsApplicationMessage message) {
             this.data = message.toBytes();
@@ -76,6 +76,18 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
             return JaxwsApplicationMessage.newInstance(bais, nextResendCount, correlationId, wsaAction, sequenceId, messageNumber);
         }
+
+        @Override
+        public String toString() {
+            return "JaxwsApplicationMessageState" + 
+                    "{\n\tsequenceId=" + sequenceId + 
+                    ",\n\tmessageNumber=" + messageNumber + 
+                    ",\n\tnextResendCount=" + nextResendCount + 
+                    ",\n\tcorrelationId=" + correlationId + 
+                    ",\n\twsaAction=" + wsaAction + 
+                    ",\n\tdata=" + data + 
+                    "\n}";
+        }        
     }
     //
     private final SerializableMessage jaxwsMessage;

@@ -67,6 +67,7 @@ import com.sun.xml.ws.rx.rm.protocol.wsrm200702.SequenceElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.TerminateSequenceElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.TerminateSequenceResponseElement;
 import com.sun.xml.ws.rx.rm.protocol.wsrm200702.UsesSequenceSTR;
+import com.sun.xml.ws.rx.rm.runtime.sequence.Sequence.AckRange;
 import com.sun.xml.ws.rx.rm.runtime.sequence.UnknownSequenceException;
 import com.sun.xml.ws.rx.util.Communicator;
 import java.math.BigInteger;
@@ -279,12 +280,17 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
         }
 
         // sequence acknowledgement header
-        if (ackData.containsSequenceAcknowledgementData()) {
+        if (ackData.getAcknowledgedSequenceId() != null) {
             SequenceAcknowledgementElement ackElement = new SequenceAcknowledgementElement();
             ackElement.setId(ackData.getAcknowledgedSequenceId());
 
-            for (Sequence.AckRange range : ackData.getAcknowledgedRanges()) {
-                ackElement.addAckRange(range.lower, range.upper);
+            final List<AckRange> ackedRanges = ackData.getAcknowledgedRanges();
+            if (ackedRanges.isEmpty()) {
+                ackElement.setNone(new SequenceAcknowledgementElement.None());
+            } else {
+                for (Sequence.AckRange range : ackedRanges) {
+                    ackElement.addAckRange(range.lower, range.upper);
+                }                
             }
 
             if (ackData.isFinalAcknowledgement()) {
@@ -368,7 +374,7 @@ final class Wsrm200702ProtocolHandler extends WsrmProtocolHandler {
     
     @Override
     public Packet createEmptyAcknowledgementResponse(AcknowledgementData ackData, Packet requestPacket) throws RxRuntimeException {
-        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+        if (ackData.getAckReqestedSequenceId() != null || ackData.getAcknowledgedSequenceId() != null) {
             // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
             Packet response = rc.communicator.createEmptyResponsePacket(requestPacket, rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
             response = rc.communicator.setEmptyResponseMessage(response, requestPacket, rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
