@@ -305,6 +305,12 @@ public final class HighlyAvailableMap<K extends Serializable, V> implements Map<
         @SuppressWarnings("unchecked")
         K _key = (K) key;
 
+        if (!localMap.containsKey(_key)) {
+            if (LOGGER.isLoggable(Level.FINER)) {
+                LOGGER.finer(loggerProlog + "Data for key ["+ key + "] not found in the local cache - consulting replication manager");
+            }                    
+            tryLoad(_key);
+        }
         V oldValue = localMap.remove(_key);
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Removing data for key ["+ key + "]: " + oldValue);
