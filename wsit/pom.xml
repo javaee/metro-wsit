@@ -79,11 +79,11 @@
         has its own codebase however WS-Policy related issues can be submitted into
         the Metro (WSIT) Issue tracker
     </description>
-    <url>https://metro.dev.java.net/</url>
+    <url>https://metro.java.net/</url>
     <!-- prerequisites -->
     <issueManagement>
-        <system>java.net</system>
-        <url>https://metro.dev.java.net/use/issue-tracker.html</url>
+        <system>jira</system>
+        <url>http://java.net/jira/browse/WSIT</url>
     </issueManagement>
     <!--ciManagement>
         <system>Hudson</system>
@@ -94,55 +94,55 @@
         <!-- General Metro Specific Mailing Lists -->
         <mailingList>
             <name>Metro Announcements</name>
-            <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=announce</archive>
-            <post>announce@metro.dev.java.net</post>
+            <archive>http://java.net/projects/metro/lists/announce/archive</archive>
+            <post>announce@metro.java.net</post>
         </mailingList>
         <mailingList>
             <name>Metro Users List</name>
-            <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=users</archive>
-            <post>metro@jersey.dev.java.net</post>
+            <archive>http://java.net/projects/metro/lists/users/archive</archive>
+            <post>users@metro.java.net</post>
         </mailingList>
         <mailingList>
             <name>Metro Developers List</name>
-            <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=dev</archive>
-            <post>dev@metro.dev.java.net</post>
+            <archive>http://java.net/projects/metro/lists/dev/archive</archive>
+            <post>dev@metro.java.net</post>
         </mailingList>
         <mailingList>
             <name>Metro Issues</name>
-            <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=issues</archive>
-            <post>issues@metro.dev.java.net</post>
+            <archive>http://java.net/projects/metro/lists/issues/archive</archive>
+            <post>issues@metro.java.net</post>
         </mailingList>
         <mailingList>
             <name>Metro Commits</name>
-            <archive>https://metro.dev.java.net/servlets/SummarizeList?listName=commits</archive>
-            <post>announce@metro.dev.java.net</post>
+            <archive>http://java.net/projects/metro/lists/commits/archive</archive>
+            <post>commits@metro.java.net</post>
         </mailingList>
 
         <!-- WSIT Specific Mailing Lists -->
         <mailingList>
             <name>WSIT Announcements</name>
-            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=announce</archive>
-            <post>announce@wsit.dev.java.net</post>
+            <archive>http://java.net/projects/wsit/lists/announce/archive</archive>
+            <post>announce@wsit.java.net</post>
         </mailingList>
         <mailingList>
             <name>WSIT Users List</name>
-            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=users</archive>
-            <post>wsit@jersey.dev.java.net</post>
+            <archive>http://java.net/projects/wsit/lists/users/archive</archive>
+            <post>users@wsit.java.net</post>
         </mailingList>
         <mailingList>
             <name>WSIT Developers List</name>
-            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=dev</archive>
-            <post>dev@wsit.dev.java.net</post>
+            <archive>http://java.net/projects/wsit/lists/dev/archive</archive>
+            <post>dev@wsit.java.net</post>
         </mailingList>
         <mailingList>
             <name>WSIT Issues</name>
-            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=issues</archive>
-            <post>issues@wsit.dev.java.net</post>
+            <archive>http://java.net/projects/wsit/lists/issues/archive</archive>
+            <post>issues@wsit.java.net</post>
         </mailingList>
         <mailingList>
             <name>WSIT Commits</name>
-            <archive>https://wsit.dev.java.net/servlets/SummarizeList?listName=commits</archive>
-            <post>announce@wsit.dev.java.net</post>
+            <archive>http://java.net/projects/wsit/lists/cvs/archive</archive>
+            <post>cvs@wsit.java.net</post>
         </mailingList>
     </mailingLists>
     <!--developers></developers-->
@@ -157,10 +157,10 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/wsit</connection>
-        <developerConnection>scm:cvs:pserver:guest@cvs.dev.java.net:/cvs:wsit/wsit</developerConnection>
+        <connection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/wsit~svn/trunk</developerConnection>
         <tag>HEAD</tag>
-        <url>https://wsit.dev.java.net/source/browse/wsit/wsit</url>
+        <url>http://java.net/projects/wsit/sources/svn/show/trunk</url>
     </scm>
     <organization>
         <name>Oracle Corporation</name>
@@ -170,19 +170,16 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!--plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>1.0-beta-3</version>
+                    <version>1.0-beta-4</version>
                     <configuration>
-                        <revisionOnScmFailure>0</revisionOnScmFailure>
-                        <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
-                        <items>
-                            <item>timestamp</item>
-                        </items>
-                        <timestampFormat>{0,date,MM/dd/yyyy hh:mm aa}</timestampFormat>
-                        <doCheck>false</doCheck>
-                        <doUpdate>false</doUpdate>
+                        <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+                        <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ssZ}</timestampFormat>
+                        <providerImplementations>
+                            <svn>javasvn</svn>
+                        </providerImplementations>                            
                     </configuration>
                     <executions>
                         <execution>
@@ -192,7 +189,7 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin-->
+                </plugin>                
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
@@ -274,7 +271,7 @@
                                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             </manifest>
                             <manifestEntries>
-                                <Build-Id>${project.version} ${maven.build.timestamp}</Build-Id>
+                                <Implementation-Build-Id>${scmBranch}-${buildNumber}, ${timestamp}</Implementation-Build-Id>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -341,6 +338,10 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -684,9 +685,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                  <groupId>com.sun.xml.stream.buffer</groupId>
-                  <artifactId>streambuffer</artifactId>
-                  <version>1.1</version>
+                <groupId>com.sun.xml.stream.buffer</groupId>
+                <artifactId>streambuffer</artifactId>
+                <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>javax.transaction</groupId>
