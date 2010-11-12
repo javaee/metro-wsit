@@ -372,11 +372,11 @@
     <!-- profiles /-->
 
     <modules>
+        <module>metro-cm</module>
         <module>metro-commons</module>
         <module>metro-config</module>
         <module>metro-runtime</module>
         <module>soaptcp</module>
-        <module>ws-cm</module>
         <module>ws-mex</module>
         <module>ws-rx</module>
         <module>ws-sx</module>

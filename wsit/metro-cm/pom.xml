@@ -41,13 +41,28 @@
 
 -->
 
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://java.sun.com/xml/ns/metro/management" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wscm="http://java.sun.com/xml/ns/metro/management">
-    <xs:import namespace="http://www.w3.org/ns/ws-policy" schemaLocation="wsp.xsd"/>
-    <xs:element name="Policies">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="wsp:PolicyAttachment"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-</xs:schema>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.glassfish.metro</groupId>
+        <artifactId>metro-project</artifactId>
+        <version>2.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>metro-cm-project</artifactId>
+    <packaging>pom</packaging>
+    <name>WS-ConfigurationManagement Project</name>
+
+    <!-- prerequisites -->
+
+    <modules>
+        <module>metro-cm-api</module>
+        <module>metro-cm-impl</module>
+    </modules>
+    
+    <!--dependencies></dependencies-->
+    <!--properties></properties-->
+</project>

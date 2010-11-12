@@ -110,7 +110,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>wscm-impl</artifactId>
+            <artifactId>metro-cm-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

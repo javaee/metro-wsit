@@ -103,13 +103,13 @@ class ManagedHttpMetadataPublisher extends HttpMetadataPublisher implements Endp
     }
 
     /**
-     * Returns true if the given query string is init-wscm. The case is ignored.
+     * Returns true if the given query string is init-cm. The case is ignored.
      *
      * @param query The query string. May be null.
-     * @return True if the query string is init-wscm. False otherwise.
+     * @return True if the query string is init-cm. False otherwise.
      */
     private boolean isInitQuery(String query) {
-        return query != null && query.toLowerCase().equals("init-wscm");
+        return query != null && query.toLowerCase().equals("init-cm");
     }
 
     /**

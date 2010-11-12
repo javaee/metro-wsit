@@ -48,21 +48,65 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.glassfish.metro</groupId>
-        <artifactId>metro-project</artifactId>
+        <artifactId>metro-cm-project</artifactId>
         <version>2.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>wscm-project</artifactId>
-    <packaging>pom</packaging>
-    <name>WS-ConfigurationManagement Project</name>
+    <artifactId>metro-cm-api</artifactId>
+    <packaging>jar</packaging>
+    <name>WS-ConfigurationManagement API</name>
 
     <!-- prerequisites -->
 
-    <modules>
-        <module>wscm-api</module>
-        <module>wscm-impl</module>
-    </modules>
-    
-    <!--dependencies></dependencies-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>maven-istack-commons-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <inherited>true</inherited>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- Compile scope -->
+        <dependency>
+            <groupId>org.glassfish.gmbal</groupId>
+            <artifactId>gmbal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>policy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
+        </dependency>
+
+
+        <!-- Test scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <!--properties></properties-->
 </project>
