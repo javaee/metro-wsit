@@ -40,24 +40,14 @@
 
 package com.sun.xml.ws.dump;
 
-import com.sun.xml.ws.api.message.Packet;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 final class MessageDumper {
-    private static final com.sun.istack.logging.Logger DUMPER_LOGGER = com.sun.istack.logging.Logger.getLogger(MessageDumper.class);
 
     static enum MessageType {
         Request("Request message"),
@@ -91,21 +81,17 @@ final class MessageDumper {
             return name;
         }
     }
+    
 
     private final String tubeName;
     private final Logger logger;
     private Level loggingLevel;
 
-    private final XMLOutputFactory xmlOutputFactory;
-    private AtomicBoolean logMissingStaxUtilsWarning;
 
     public MessageDumper(String tubeName, Logger logger, Level loggingLevel) {
         this.tubeName = tubeName;
         this.logger = logger;
         this.loggingLevel = loggingLevel;
-    
-        this.xmlOutputFactory = XMLOutputFactory.newInstance();
-        this.logMissingStaxUtilsWarning = new AtomicBoolean(false);
     }
 
     final boolean isLoggable() {
@@ -132,76 +118,5 @@ final class MessageDumper {
         logger.log(loggingLevel, logMessage);
 
         return logMessage;
-    }
-
-    final String convertToString(Throwable throwable) {
-        if (throwable == null) {
-            return "[ No exception ]";
-        }
-
-        StringWriter stringOut = new StringWriter();
-        throwable.printStackTrace(new PrintWriter(stringOut));
-        
-        return stringOut.toString();
-    }
-
-    final String convertToString(Packet packet) {
-        if (packet == null) {
-            return "[ Null packet ]";
-        }
-        StringWriter stringOut = null;
-        try {
-            stringOut = new StringWriter();
-            if (packet.getMessage() == null) {
-                stringOut.write("[ Empty packet ]");
-            } else {
-                XMLStreamWriter writer = null;
-                try {
-                    writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
-                    writer = createIndenter(writer);
-                    packet.getMessage().copy().writeTo(writer);
-                } catch (XMLStreamException e) {
-                    DUMPER_LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
-                } finally {
-                    if (writer != null) {
-                        try {
-                            writer.close();
-                        } catch (XMLStreamException ignored) {
-                            DUMPER_LOGGER.fine("Unexpected exception occured while closing XMLStreamWriter", ignored);
-                        }
-                    }
-                }
-            }
-            return stringOut.toString();
-        } finally {
-            if (stringOut != null) {
-                try {
-                    stringOut.close();
-                } catch (IOException ex) {
-                    DUMPER_LOGGER.finest("An exception occured when trying to close StringWriter", ex);
-                }
-            }
-        }
-    }
-
-    /**
-     * Wraps {@link XMLStreamWriter} by an indentation engine if possible.
-     *
-     * <p>
-     * We can do this only when we have <tt>stax-utils.jar</tt> in the classpath.
-     */
-    final XMLStreamWriter createIndenter(XMLStreamWriter writer) {
-        try {
-            Class<?> clazz = this.getClass().getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
-            Constructor<?> c = clazz.getConstructor(XMLStreamWriter.class);
-            writer = XMLStreamWriter.class.cast(c.newInstance(writer));
-        } catch (Exception ex) {
-            // if stax-utils.jar is not in the classpath, this will fail
-            // so, we'll just have to do without indentation
-            if (logMissingStaxUtilsWarning.compareAndSet(false, true)) {
-                DUMPER_LOGGER.log(Level.WARNING, "Put stax-utils.jar to the classpath to indent the dump output", ex);
-            }
-        }
-        return writer;
     }
 }

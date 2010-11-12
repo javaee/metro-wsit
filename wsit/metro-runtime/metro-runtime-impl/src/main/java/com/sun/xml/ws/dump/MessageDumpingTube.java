@@ -46,6 +46,7 @@ import com.sun.xml.ws.api.pipe.NextAction;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.TubeCloner;
 import com.sun.xml.ws.api.pipe.helper.AbstractFilterTubeImpl;
+import com.sun.xml.ws.commons.xmlutil.Converter;
 import com.sun.xml.ws.dump.MessageDumper.MessageType;
 import com.sun.xml.ws.dump.MessageDumper.ProcessingState;
 import com.sun.xml.ws.util.pipe.DumpTube;
@@ -104,19 +105,19 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processRequest(Packet request) {
-        dump(MessageType.Request, messageDumper.convertToString(request), Fiber.current().owner.id);
+        dump(MessageType.Request, Converter.convertToString(request), Fiber.current().owner.id);
         return super.processRequest(request);
     }
 
     @Override
     public NextAction processResponse(Packet response) {
-        dump(MessageType.Response, messageDumper.convertToString(response), Fiber.current().owner.id);
+        dump(MessageType.Response, Converter.convertToString(response), Fiber.current().owner.id);
         return super.processResponse(response);
     }
 
     @Override
     public NextAction processException(Throwable t) {
-        dump(MessageType.Exception, messageDumper.convertToString(t), Fiber.current().owner.id);
+        dump(MessageType.Exception, Converter.convertToString(t), Fiber.current().owner.id);
 
         return super.processException(t);
     }
