@@ -54,7 +54,7 @@
 
     <artifactId>metro-cm-project</artifactId>
     <packaging>pom</packaging>
-    <name>WS-ConfigurationManagement Project</name>
+    <name>Metro Configuration Management Project</name>
 
     <!-- prerequisites -->
 

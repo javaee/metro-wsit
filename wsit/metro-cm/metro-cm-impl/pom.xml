@@ -54,7 +54,7 @@
 
     <artifactId>metro-cm-impl</artifactId>
     <packaging>jar</packaging>
-    <name>WS-ConfigurationManagement Implementation</name>
+    <name>Metro Configuration Management Implementation</name>
     <!-- prerequisites -->
 
     <build>
