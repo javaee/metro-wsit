@@ -266,7 +266,7 @@
     </dependencies>
     
     <properties>
-        <build.id>${maven.build.timestamp}</build.id>
+        <build.id>${scmBranch}-${buildNumber}; ${timestamp}</build.id>
         <build.version>Metro/${project.version} (${build.id}) JAXWS-RI/${jaxws.ri.version} JAXWS/${jaxws.spec.version}</build.version>
         <major.version>${metro.release.version}</major.version>
     </properties>    
