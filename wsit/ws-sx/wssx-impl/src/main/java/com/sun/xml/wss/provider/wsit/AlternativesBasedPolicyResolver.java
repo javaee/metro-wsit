@@ -248,6 +248,9 @@ class AlternativesBasedPolicyResolver implements PolicyResolver {
                     if (nodes.getLength() > 0) {
                         Node node = nodes.item(0);
                         Node faultNode = node.getFirstChild();
+                        while (faultNode != null && faultNode.getNodeType() != Node.ELEMENT_NODE)
+                            faultNode = faultNode.getNextSibling();   //fix for bug #1487
+                        
                         if (faultNode == null) {
                             return new MessagePolicy();
                         }
