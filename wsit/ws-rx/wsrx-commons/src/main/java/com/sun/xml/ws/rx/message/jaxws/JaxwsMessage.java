@@ -43,6 +43,7 @@ package com.sun.xml.ws.rx.message.jaxws;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.commons.xmlutil.Converter;
 import com.sun.xml.ws.rx.message.RxMessage;
 import com.sun.xml.ws.rx.message.RxMessageBase;
 import java.io.ByteArrayInputStream;
@@ -76,7 +77,7 @@ public class JaxwsMessage extends RxMessageBase {
             return "JaxwsMessageState" + 
                     "{\n\twsaAction=" + wsaAction + 
                     ",\n\tcorrelationId=" + correlationId + 
-                    ",\n\tdata=" + data + 
+                    ",\n\tmessage data=\n" + Converter.messageDataToString(data, Converter.UTF_8) + 
                     "\n}";
         }               
     }

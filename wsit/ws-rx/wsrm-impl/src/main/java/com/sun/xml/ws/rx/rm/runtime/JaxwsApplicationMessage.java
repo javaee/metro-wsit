@@ -43,6 +43,7 @@ package com.sun.xml.ws.rx.rm.runtime;
 import com.sun.istack.NotNull;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.message.Packet;
+import com.sun.xml.ws.commons.xmlutil.Converter;
 import com.sun.xml.ws.rx.message.RxMessage;
 import com.sun.xml.ws.rx.message.jaxws.SerializableMessage;
 import java.io.ByteArrayInputStream;
@@ -74,7 +75,8 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
 
         public JaxwsApplicationMessage toMessage() {
             ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            return JaxwsApplicationMessage.newInstance(bais, nextResendCount, correlationId, wsaAction, sequenceId, messageNumber);
+            return JaxwsApplicationMessage.newInstance(bais, nextResendCount, correlationId, wsaAction, sequenceId, messageNumber);                        
+            // closing ByteArrayInputStream has no effect, so ignoring the redundant call
         }
 
         @Override
@@ -85,7 +87,7 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
                     ",\n\tnextResendCount=" + nextResendCount + 
                     ",\n\tcorrelationId=" + correlationId + 
                     ",\n\twsaAction=" + wsaAction + 
-                    ",\n\tdata=" + data + 
+                    ",\n\tmessage data=\n" + Converter.messageDataToString(data, Converter.UTF_8) + 
                     "\n}";
         }        
     }

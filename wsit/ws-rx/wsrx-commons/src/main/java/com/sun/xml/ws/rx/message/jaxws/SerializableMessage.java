@@ -37,31 +37,25 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.message.jaxws;
 
 import com.sun.istack.NotNull;
 import com.sun.istack.Nullable;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.message.Message;
-import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
-import com.sun.xml.ws.api.streaming.XMLStreamReaderFactory;
-import com.sun.xml.ws.api.streaming.XMLStreamWriterFactory;
+import com.sun.xml.ws.commons.xmlutil.Converter;
 import com.sun.xml.ws.rx.RxRuntimeException;
 import com.sun.xml.ws.rx.localization.LocalizationMessages;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
 /**
  *
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 public final class SerializableMessage {
+
     private static final Logger LOGGER = Logger.getLogger(SerializableMessage.class);
 
     private @Nullable Packet packet;
@@ -100,53 +94,20 @@ public final class SerializableMessage {
     }
 
     public byte[] toBytes() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         try {
-            if (message != null) {
-                XMLStreamWriter xsw = XMLStreamWriterFactory.create(baos, "UTF-8");
-                try {
-                    packet.getMessage().copy().writeTo(xsw);
-                } catch (XMLStreamException ex) {
-                    throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRX_1001_UNABLE_TO_SERIALIZE_MSG_TO_XML_STREAM(), ex));
-                } finally {
-                    try {
-                        xsw.close();
-                    } catch (XMLStreamException ex) {
-                        LOGGER.warning(LocalizationMessages.WSRX_1002_ERROR_CLOSING_XSW_AFTER_MSG_SERIALIZATION(), ex);
-                    }
-                }
-            }
-
-            return baos.toByteArray();
-        } finally {
-            try {
-                baos.close();
-            } catch (IOException ex) {
-                LOGGER.warning(LocalizationMessages.WSRX_1003_ERROR_CLOSING_BAOS_AFTER_MSG_SERIALIZATION(), ex);
-            }
+            return Converter.toBytes(message.copy(), Converter.UTF_8);
+        } catch (XMLStreamException ex) {
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRX_1001_UNABLE_TO_SERIALIZE_MSG_TO_XML_STREAM(), ex));
         }
     }
 
     public static SerializableMessage newInstance(@NotNull InputStream dataStream, String wsaAction) {
+        Message m;
         try {
-            XMLStreamReader xsr = XMLStreamReaderFactory.create(null, dataStream, "UTF-8", true);
-            try {
-                Message m = Messages.create(xsr);
-                return new SerializableMessage(m, wsaAction);
-            } finally {
-                try {
-                    xsr.close();
-                } catch (XMLStreamException ex) {
-                    LOGGER.warning(LocalizationMessages.WSRX_1004_ERROR_CLOSING_XSR_AFTER_MSG_DESERIALIZATION(), ex);
-                }
-            }
-        } finally {
-            try {
-                dataStream.close();
-            } catch (IOException ex) {
-                LOGGER.warning(LocalizationMessages.WSRX_1005_ERROR_CLOSING_IS_AFTER_MSG_DESERIALIZATION(), ex);
-            }
+            m = Converter.toMessage(dataStream, Converter.UTF_8);
+        } catch (XMLStreamException ex) {
+            throw LOGGER.logSevereException(new RxRuntimeException(LocalizationMessages.WSRX_1002_UNABLE_TO_DESERIALIZE_MSG_FROM_XML_STREAM(), ex));
         }
+        return new SerializableMessage(m, wsaAction);
     }
 }

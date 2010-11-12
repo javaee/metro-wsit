@@ -37,19 +37,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.commons.xmlutil;
 
+import com.sun.istack.NotNull;
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.message.Message;
+import com.sun.xml.ws.api.message.Messages;
 import com.sun.xml.ws.api.message.Packet;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 /**
@@ -59,49 +66,64 @@ import javax.xml.stream.XMLStreamWriter;
  * @author Marek Potociar
  */
 public final class Converter {
+
+    public static final String UTF_8 = "UTF-8";
+
     private Converter() {
         // prevents instantiation
     }
-
-    private static final Logger DUMPER_LOGGER = Logger.getLogger(Converter.class);
+    private static final Logger LOGGER = Logger.getLogger(Converter.class);
     private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
     private static final AtomicBoolean logMissingStaxUtilsWarning = new AtomicBoolean(false);
 
-    public static String convertToString(Throwable throwable) {
+    /**
+     * Converts a throwable to String
+     * 
+     * @param throwable
+     * @return String representation of throwable
+     */
+    public static String toString(Throwable throwable) {
         if (throwable == null) {
             return "[ No exception ]";
         }
 
         StringWriter stringOut = new StringWriter();
         throwable.printStackTrace(new PrintWriter(stringOut));
-        
+
         return stringOut.toString();
     }
 
-    public static String convertToString(Packet packet) {
+    public static String toString(Packet packet) {
         if (packet == null) {
             return "[ Null packet ]";
+        } else if (packet.getMessage() == null) {
+                return "[ Empty packet ]";
+        }
+        
+        return toString(packet.getMessage());
+
+    }
+
+    public static String toString(Message message) {
+        if (message == null) {
+            return "[ Null message ]";
         }
         StringWriter stringOut = null;
         try {
             stringOut = new StringWriter();
-            if (packet.getMessage() == null) {
-                stringOut.write("[ Empty packet ]");
-            } else {
-                XMLStreamWriter writer = null;
-                try {
-                    writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
-                    writer = createIndenter(writer);
-                    packet.getMessage().copy().writeTo(writer);
-                } catch (XMLStreamException e) {
-                    DUMPER_LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
-                } finally {
-                    if (writer != null) {
-                        try {
-                            writer.close();
-                        } catch (XMLStreamException ignored) {
-                            DUMPER_LOGGER.fine("Unexpected exception occured while closing XMLStreamWriter", ignored);
-                        }
+            XMLStreamWriter writer = null;
+            try {
+                writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
+                writer = createIndenter(writer);
+                message.copy().writeTo(writer);
+            } catch (XMLStreamException e) {
+                LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
+            } finally {
+                if (writer != null) {
+                    try {
+                        writer.close();
+                    } catch (XMLStreamException ignored) {
+                        LOGGER.fine("Unexpected exception occured while closing XMLStreamWriter", ignored);
                     }
                 }
             }
@@ -111,9 +133,69 @@ public final class Converter {
                 try {
                     stringOut.close();
                 } catch (IOException ex) {
-                    DUMPER_LOGGER.finest("An exception occured when trying to close StringWriter", ex);
+                    LOGGER.finest("An exception occured when trying to close StringWriter", ex);
                 }
             }
+        }
+    }
+
+    public static byte[] toBytes(Message message, String encoding) throws XMLStreamException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        try {
+            if (message != null) {
+                XMLStreamWriter xsw = xmlOutputFactory.createXMLStreamWriter(baos, encoding);
+                try {
+                    message.writeTo(xsw);
+                } finally {
+                    try {
+                        xsw.close();
+                    } catch (XMLStreamException ex) {
+                        LOGGER.warning("Unexpected exception occured while closing XMLStreamWriter", ex);
+                    }
+                }
+            }
+
+            return baos.toByteArray();
+        } finally {
+            try {
+                baos.close();
+            } catch (IOException ex) {
+                LOGGER.warning("Unexpected exception occured while closing ByteArrayOutputStream", ex);
+            }
+        }
+    }
+
+    /**
+     * Converts JAX-WS RI message represented as input stream back to Message
+     * object.
+     * 
+     * @param dataStream message data stream
+     * @param encoding message data stream encoding
+     * 
+     * @return {@link Message} object created from the data stream
+     */
+    public static Message toMessage(@NotNull InputStream dataStream, String encoding) throws XMLStreamException {
+        XMLStreamReader xsr = null;
+        try {
+            xsr = XMLInputFactory.newInstance().createXMLStreamReader(dataStream, encoding);
+            return Messages.create(xsr);
+        } finally {
+            try {
+                if (xsr != null) { xsr.close(); }
+            } catch (XMLStreamException ex) {
+                LOGGER.warning("Unexpected exception occured while closing XMLStreamReader", ex);
+            }
+        }
+    }
+    
+    public static String messageDataToString(final byte[] data, final String encoding) {
+        try {
+            return toString(toMessage(new ByteArrayInputStream(data), encoding));
+            // closing ByteArrayInputStream has no effect, so ignoring the redundant call                       
+        } catch (XMLStreamException ex) {
+            LOGGER.warning("Unexpected exception occured while converting message data to string", ex);
+            return "[ Message Data Conversion Failed ]";
         }
     }
 
@@ -123,7 +205,7 @@ public final class Converter {
      * <p>
      * We can do this only when we have <tt>stax-utils.jar</tt> in the class path.
      */
-    public static XMLStreamWriter createIndenter(XMLStreamWriter writer) {
+    private static XMLStreamWriter createIndenter(XMLStreamWriter writer) {
         try {
             Class<?> clazz = Converter.class.getClassLoader().loadClass("javanet.staxutils.IndentingXMLStreamWriter");
             Constructor<?> c = clazz.getConstructor(XMLStreamWriter.class);
@@ -132,10 +214,9 @@ public final class Converter {
             // if stax-utils.jar is not in the classpath, this will fail
             // so, we'll just have to do without indentation
             if (logMissingStaxUtilsWarning.compareAndSet(false, true)) {
-                DUMPER_LOGGER.log(Level.WARNING, "Put stax-utils.jar to the classpath to indent the dump output", ex);
+                LOGGER.log(Level.WARNING, "Put stax-utils.jar to the classpath to indent the dump output", ex);
             }
         }
         return writer;
     }
-    
 }

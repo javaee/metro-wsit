@@ -105,19 +105,19 @@ final class MessageDumpingTube extends AbstractFilterTubeImpl {
 
     @Override
     public NextAction processRequest(Packet request) {
-        dump(MessageType.Request, Converter.convertToString(request), Fiber.current().owner.id);
+        dump(MessageType.Request, Converter.toString(request), Fiber.current().owner.id);
         return super.processRequest(request);
     }
 
     @Override
     public NextAction processResponse(Packet response) {
-        dump(MessageType.Response, Converter.convertToString(response), Fiber.current().owner.id);
+        dump(MessageType.Response, Converter.toString(response), Fiber.current().owner.id);
         return super.processResponse(response);
     }
 
     @Override
     public NextAction processException(Throwable t) {
-        dump(MessageType.Exception, Converter.convertToString(t), Fiber.current().owner.id);
+        dump(MessageType.Exception, Converter.toString(t), Fiber.current().owner.id);
 
         return super.processException(t);
     }

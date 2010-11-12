@@ -50,6 +50,7 @@ import com.sun.xml.ws.rx.rm.runtime.sequence.SequenceData;
 import com.sun.xml.ws.rx.util.TimeSynchronizer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -909,6 +910,8 @@ final class PersistentSequenceData implements SequenceData {
 
         Connection con = cm.getConnection(false);
         PreparedStatement ps = null;
+            
+        InputStream messageDataStream = null;
         try {
             ps = cm.prepareStatement(con, "SELECT MSG_NUMBER, NEXT_RESEND_COUNT, WSA_ACTION, MSG_DATA FROM RM_UNACKED_MESSAGES " +
                     "WHERE ENDPOINT_UID=? AND SEQ_ID=? AND CORRELATION_ID=?");
@@ -933,8 +936,9 @@ final class PersistentSequenceData implements SequenceData {
             }
 
 
+            messageDataStream = rs.getBlob("MSG_DATA").getBinaryStream();
             ApplicationMessage message = JaxwsApplicationMessage.newInstance(
-                    rs.getBlob("MSG_DATA").getBinaryStream(),
+                    messageDataStream,
                     rs.getInt("NEXT_RESEND_COUNT"),
                     correlationId,
                     rs.getString("WSA_ACTION"),
@@ -955,8 +959,9 @@ final class PersistentSequenceData implements SequenceData {
                     sequenceId,
                     correlationId), ex));
         } finally {
+            if (messageDataStream != null) { try { messageDataStream.close(); } catch (IOException ex) { /* ignored */} }
             cm.recycle(ps);
-            cm.recycle(con);            
+            cm.recycle(con);                      
         }
     }
 }
