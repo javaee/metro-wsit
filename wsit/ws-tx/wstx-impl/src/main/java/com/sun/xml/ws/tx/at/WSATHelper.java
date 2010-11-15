@@ -76,21 +76,29 @@ import javax.transaction.Transaction;
  * better debug logging information as there do not appear to be any substantial performance implications.
  */
 public class WSATHelper<T> {
+    
+    private static String HOST_NAME = "localhost";
+    private static String HTTP_PORT = "8080";
+    private static String HTTPS_PORT = "8181";
 
     public final static WSATHelper V10 = new WSATHelper().WSATVersion(WSATVersion.v10);
     public final static WSATHelper V11 = new WSATHelper() {
+        @Override
         public String getRegistrationCoordinatorAddress() {
             return getHostAndPort() + WSATConstants.WSAT11_REGISTRATIONCOORDINATORPORTTYPEPORT;
         }
 
+        @Override
         public String getCoordinatorAddress() {
             return getHostAndPort() + WSATConstants.WSAT11_COORDINATORPORTTYPEPORT;
         }
 
+        @Override
         public String getParticipantAddress() {
             return getHostAndPort() + WSATConstants.WSAT11_PARTICIPANTPORTTYPEPORT;
         }
 
+        @Override
         public String getRegistrationRequesterAddress() {
             return getHostAndPort() + WSATConstants.WSAT11_REGISTRATIONREQUESTERPORTTYPEPORT;
             //throw new UnsupportedOperationException("Async registration is not supported by WS-AT since 1.1! ");
@@ -120,10 +128,16 @@ public class WSATHelper<T> {
         return this;
     }
 
-    protected WSATHelper (){
+    private WSATHelper (){
+        // do nothing
     }
 
-
+    public static void init(String hostName, String httpPort, String httpsPort) {
+        HOST_NAME = hostName;
+        HTTP_PORT = httpPort;
+        HTTPS_PORT = httpsPort;
+    }
+    
     public static WSATHelper getInstance() {
       return V10;
     }
@@ -384,7 +398,6 @@ public class WSATHelper<T> {
             participantPort = getParticipantPort(epr, xid, new String(wsatXAResource.getXid().getBranchQualifier()));
         } catch (SOAPException e) {
 //todoremove             if (isDebugEnabled()) WseeWsatLogger.logCannotCreateDurableParticipantPort(xid);
-            e.printStackTrace();
             XAException xaException = new XAException("Unable to create durable participant port:" + e);
             xaException.initCause(e);
             xaException.errorCode = XAException.XAER_RMFAIL;
@@ -447,9 +460,14 @@ public class WSATHelper<T> {
      * Return the host and port the WS-AT endpoints are deployed to or the frontend as the case may be
      * @return String URL with host and port  
      */
-    String getHostAndPort() { //todo
+    static String getHostAndPort() { //todo
         boolean isSSLRequired = WSATTubeHelper.isSSLRequired();
-        return "http://localhost:8080/";
+        
+        if (isSSLRequired) {
+            return "https://" + HOST_NAME + ":" + HTTPS_PORT;
+        } else {
+            return "http://" + HOST_NAME + ":" + HTTP_PORT;            
+        }
 //todoremove         return m_isUseLocalServerAddress?
 //todoremove                 ServerUtil.getLocalServerPublicURL(isSSLRequired ?"https":"http"):
 //todoremove                 ServerUtil.getHTTPServerURL(isSSLRequired);  //default
