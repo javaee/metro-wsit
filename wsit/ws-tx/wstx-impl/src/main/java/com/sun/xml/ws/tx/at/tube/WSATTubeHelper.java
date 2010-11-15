@@ -37,11 +37,8 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.tx.at.tube;
 
-import com.sun.xml.ws.api.message.Header;
-import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -51,53 +48,48 @@ import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 
 import javax.transaction.Transaction;
 
-
 public class WSATTubeHelper {
-
 
     public static boolean isSSLRequired() {
         return false; //todoremove
     }
 
-
     //public static TransactionalAttribute getTransactionalAttribute0(TransactionalFeature feature, Packet packet,WSDLPort port) {
 //     return new TransactionalAttribute(false, false, Transactional.Version.DEFAULT);
     //}
-
-
-
     public static TransactionalAttribute getTransactionalAttribute(TransactionalFeature feature, Packet packet, WSDLPort port) {
-      if (feature==null) feature = 
-              new TransactionalFeature(true, Transactional.TransactionFlowType.SUPPORTS, Transactional.Version.DEFAULT);
+        if (feature == null) {
+            feature =
+                    new TransactionalFeature(true, Transactional.TransactionFlowType.SUPPORTS, Transactional.Version.DEFAULT);
+        }
         //a dynamic service client can be created without a wsdl.
-      if (port == null) {
-        boolean isEnabled = feature.isEnabled() && Transactional.TransactionFlowType.NEVER != feature.getFlowType();
-        boolean isRequired = Transactional.TransactionFlowType.MANDATORY == feature.getFlowType();
-        if(WSATHelper.isDebugEnabled()){
-          debug("no wsdl port found, the effective transaction attribute is: enabled("+isEnabled+"),required("+isRequired+"), version("+feature.getVersion()+").");
+        if (port == null) {
+            boolean isEnabled = feature.isEnabled() && Transactional.TransactionFlowType.NEVER != feature.getFlowType();
+            boolean isRequired = Transactional.TransactionFlowType.MANDATORY == feature.getFlowType();
+            if (WSATHelper.isDebugEnabled()) {
+                debug("no wsdl port found, the effective transaction attribute is: enabled(" + isEnabled + "),required(" + isRequired + "), version(" + feature.getVersion() + ").");
+            }
+            return new TransactionalAttribute(isEnabled, isRequired, feature.getVersion());
         }
-        return new TransactionalAttribute(isEnabled, isRequired, feature.getVersion());
-      }
-      WSDLBoundOperation wsdlBoundOperation = packet.getMessage().getOperation(port);
-      if (wsdlBoundOperation != null &&
-              wsdlBoundOperation.getOperation() != null &&
-              !wsdlBoundOperation.getOperation().isOneWay()) {
-        String opName = wsdlBoundOperation.getName().getLocalPart();
-        boolean isEnabled = feature.isEnabled(opName) &&
-                Transactional.TransactionFlowType.NEVER != feature.getFlowType(opName);
-        boolean isRequired = Transactional.TransactionFlowType.MANDATORY == feature.getFlowType(opName);
+        WSDLBoundOperation wsdlBoundOperation = packet.getMessage().getOperation(port);
+        if (wsdlBoundOperation != null
+                && wsdlBoundOperation.getOperation() != null
+                && !wsdlBoundOperation.getOperation().isOneWay()) {
+            String opName = wsdlBoundOperation.getName().getLocalPart();
+            boolean isEnabled = feature.isEnabled(opName)
+                    && Transactional.TransactionFlowType.NEVER != feature.getFlowType(opName);
+            boolean isRequired = Transactional.TransactionFlowType.MANDATORY == feature.getFlowType(opName);
 
-        if(WSATHelper.isDebugEnabled()){
-          debug("the effective transaction attribute for operation' "+ opName+"' is : enabled("+isEnabled+"),required("+isRequired+"), version("+feature.getVersion()+").");
+            if (WSATHelper.isDebugEnabled()) {
+                debug("the effective transaction attribute for operation' " + opName + "' is : enabled(" + isEnabled + "),required(" + isRequired + "), version(" + feature.getVersion() + ").");
+            }
+            return new TransactionalAttribute(isEnabled, isRequired, feature.getVersion());
         }
-        return new TransactionalAttribute(isEnabled, isRequired, feature.getVersion());
-      }
-      if(WSATHelper.isDebugEnabled()){
-        debug("no twoway operation found for this request, the effective transaction attribute is disabled.");
-      }
-      return new TransactionalAttribute(false, false, Transactional.Version.DEFAULT);
+        if (WSATHelper.isDebugEnabled()) {
+            debug("no twoway operation found for this request, the effective transaction attribute is disabled.");
+        }
+        return new TransactionalAttribute(false, false, Transactional.Version.DEFAULT);
     }
-    
 
     /**
      * Get the provided transaction's Xid and return the WS-AT transaction id equivalent/translation
@@ -109,11 +101,7 @@ public class WSATTubeHelper {
         return "tmpwsattxid";
     }
 
-      private static void debug(String message) {
-		WSATHelper.getInstance().debug("WSATTubeHelper:" + message);
+    private static void debug(String message) {
+        WSATHelper.getInstance().debug("WSATTubeHelper:" + message);
     }
-
-
-      
-
 }
