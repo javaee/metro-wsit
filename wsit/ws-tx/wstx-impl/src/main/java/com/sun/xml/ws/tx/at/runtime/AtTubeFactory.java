@@ -44,7 +44,7 @@ import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
 import com.sun.xml.ws.api.pipe.PipelineAssembler;
 import com.sun.xml.ws.api.pipe.Tube;
-import com.sun.xml.ws.api.tx.at.TransactionalFeature;
+import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
 import com.sun.xml.ws.assembler.dev.TubeFactory;
@@ -52,10 +52,10 @@ import com.sun.xml.ws.policy.Policy;
 import com.sun.xml.ws.policy.PolicyException;
 import com.sun.xml.ws.policy.PolicyMap;
 import com.sun.xml.ws.policy.PolicyMapKey;
+import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.tube.WSATClientTube;
 import com.sun.xml.ws.tx.at.tube.WSATServerTube;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 

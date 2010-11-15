@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.tx.coord.common.endpoint;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.*;
@@ -51,7 +53,6 @@ import com.sun.xml.ws.tx.coord.common.WSCUtil;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterType;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.transaction.SystemException;
 
 import javax.transaction.xa.Xid;
@@ -62,6 +63,7 @@ import javax.xml.ws.WebServiceException;
 
 public abstract class BaseRegistration<T extends EndpointReference,K,P> implements RegistrationIF<T,K,P> {
 
+    private static final Logger LOGGER = Logger.getLogger(BaseRegistration.class);
     WebServiceContext context;
     Transactional.Version version;
 
@@ -73,6 +75,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
     public BaseRegisterResponseType<T,P> registerOperation(BaseRegisterType<T,K> parameters) {
  //todoremove        if (WSATHelper.isDebugEnabled())
  //todoremove            WseeWsatLogger.logRegisterOperationEntered(parameters);
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4504_REGISTER_OPERATION_ENTERED(parameters));
         String txId = WSATHelper.getInstance().getWSATTidFromWebServiceContextHeaderList(context);
         Xid xidFromWebServiceContextHeaderList = TransactionIdHelper.getInstance().wsatid2xid(txId);
         Xid xid = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
@@ -80,10 +83,11 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
         try {
             //todoremove     if (WSATHelper.isDebugEnabled())
             //todoremove        WseeWsatLogger.logRegisterOperationExited(registerResponseType);
+            if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
             TransactionManagerImpl.getInstance().getTransactionManager().suspend();
         } catch (SystemException ex) {
             ex.printStackTrace();
-            Logger.getLogger(BaseRegistration.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BaseRegistration.class).log(Level.SEVERE, null, ex);
         }
         return registerResponseType;
     }
@@ -110,6 +114,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
             return null;
         } else {
 //todoremove             WseeWsatLogger.logUnknownParticipantIdentifier(protocolIdentifier);
+            LOGGER.severe(LocalizationMessages.WSAT_4580_UNKNOWN_PARTICIPANT_IDENTIFIER(protocolIdentifier));
             throw new WebServiceException("Unknown participant identifier:"+protocolIdentifier);
         }
 
@@ -151,6 +156,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
     private Xid enlistResource(Xid xid, T epr) {
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logEnlistResource(epr, xid);
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4503_ENLIST_RESOURCE(epr, xid));
         WSATXAResource wsatXAResource = new WSATXAResource(version,epr, xid);
         try {
             Xid xidFromEnlist = getTransactionServices().enlistResource(wsatXAResource, xid);
@@ -172,11 +178,13 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      */
     private void registerSynchronization(Xid xid, T epr) {
 //todoremove         WseeWsatLogger.logRegisterSynchronization(epr, xid);
+        LOGGER.info(LocalizationMessages.WSAT_4525_REGISTER_SYNCHRONIZATION(epr, xid));
         WSATSynchronization wsatXAResource = new WSATSynchronization(version, epr, xid);
         try {
             getTransactionServices().registerSynchronization(wsatXAResource, xid);
         } catch (WSATException e) {
 //todoremove             WseeWsatLogger.logExceptionDuringRegisterSynchronization(e);
+            LOGGER.severe(LocalizationMessages.WSAT_4507_EXCEPTION_DURING_REGISTER_SYNCHRONIZATION(), e);
             WSATFaultFactory.throwContextRefusedFault();
         }
 

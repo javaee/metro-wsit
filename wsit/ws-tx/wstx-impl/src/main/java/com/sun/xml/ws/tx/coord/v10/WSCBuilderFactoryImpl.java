@@ -46,8 +46,6 @@ import com.sun.xml.ws.tx.coord.common.client.RegistrationProxyBuilder;
 import com.sun.xml.ws.tx.coord.common.client.RegistrationMessageBuilder;
 import com.sun.xml.ws.tx.coord.v10.client.RegistrationMessageBuilderImpl;
 import com.sun.xml.ws.tx.coord.v10.client.RegistrationProxyBuilderImpl;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class WSCBuilderFactoryImpl extends WSCBuilderFactory {
     public WSATCoordinationContextBuilder newWSATCoordinationContextBuilder() {

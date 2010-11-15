@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.tx.at.tube;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.internal.XidImpl;
@@ -64,6 +66,8 @@ import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
 
 public class WSATServerHelper implements WSATServer {
+    private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
+
     public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
         if(WSATHelper.isDebugEnabled())
             debug("processRequest HeaderList:"+headers+
@@ -167,7 +171,8 @@ public class WSATServerHelper implements WSATServer {
     }
 
     public void log(String message) {
-//todoremove         WseeWsatLogger.logWSATServerHelper("WSATServerInterceptor:" + message);
+//todoremove         WseeWsatLogger.logWSAT_ServerHelper("WSATServerInterceptor:" + message);
+        LOGGER.info(LocalizationMessages.WSAT_4612_WSAT_SERVERHELPER(message));
     }
 
     private void debug(String message) {

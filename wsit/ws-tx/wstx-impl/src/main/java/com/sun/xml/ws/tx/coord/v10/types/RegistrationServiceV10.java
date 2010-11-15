@@ -40,9 +40,11 @@
 
 package com.sun.xml.ws.tx.coord.v10.types;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
@@ -55,7 +57,7 @@ public class RegistrationServiceV10
 {
 
     private final static URL REGISTRATIONSERVICEV10_WSDL_LOCATION;
-    private final static Logger logger = Logger.getLogger(com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class.getName());
+    private final static Logger LOGGER = Logger.getLogger(com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class);
 
     static {
         URL url = null;
@@ -64,8 +66,8 @@ public class RegistrationServiceV10
             baseUrl = com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class.getResource(".");
             url = new URL(baseUrl, "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc10/wscoor.wsdl");
         } catch (MalformedURLException e) {
-            logger.warning("Failed to create URL for the wsdl Location: 'file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc10/wscoor.wsdl', retrying as a local file");
-            logger.warning(e.getMessage());
+            LOGGER.warning(LocalizationMessages.WSAT_4622_FAILED_TO_CREATE_URL_FOR_WSDL());
+            LOGGER.warning(e.getMessage());
         }
         REGISTRATIONSERVICEV10_WSDL_LOCATION = url;
     }

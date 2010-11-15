@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.tx.at.common.endpoint;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.api.message.HeaderList;
@@ -67,6 +69,7 @@ import javax.xml.ws.WebServiceException;
  *  This impl wraps the (sub)coordinator/TM of this server as a WS-AT participant
  */
 public class Participant<T> implements ParticipantIF<T> {
+   private static final Logger LOGGER = Logger.getLogger(Participant.class);
 
    private WebServiceContext m_context;
    private WSATVersion<T> m_version;
@@ -300,6 +303,7 @@ public class Participant<T> implements ParticipantIF<T> {
    private void log(String msg) {
     //   System.out.println("participant:"+msg);
 //todoremove        WseeWsatLogger.logWSATParticipant(msg);
+       LOGGER.info(LocalizationMessages.WSAT_4613_WSAT_PARTICIPANT(msg));
    }
 
    private void debug(String message) {

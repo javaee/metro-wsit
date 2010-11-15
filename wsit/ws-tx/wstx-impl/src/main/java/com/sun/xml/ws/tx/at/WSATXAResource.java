@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.tx.at;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import com.sun.xml.ws.api.tx.at.Transactional;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
@@ -52,6 +54,7 @@ import java.io.*;
 
 public class WSATXAResource implements WSATConstants, XAResource, Serializable {
 
+    private static final Logger LOGGER = Logger.getLogger(WSATXAResource.class);
     static final long serialVersionUID = -5827137400010343968L;
     private Xid m_xid;
     static final String ACTIVE = "ACTIVE";
@@ -95,6 +98,8 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
 
 //todoremove         if (WSATHelper.isDebugEnabled())
 //todoremove             WseeWsatLogger.logWSATXAResource(m_epr.toString(), m_xid,"");
+        if (WSATHelper.isDebugEnabled())
+            LOGGER.info(LocalizationMessages.WSAT_4538_WSAT_XARESOURCE(m_epr.toString(), m_xid,""));
         if (isRecovery) m_status = PREPARED;
 
     }
@@ -121,6 +126,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
     public int prepare(Xid xid) throws XAException {
         WSATHelper.getInstance().debug("prepare xid:"+xid);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPrepare(m_epr.toString(), m_xid);
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4539_PREPARE(m_epr.toString(), m_xid));
         getWSATHelper().prepare(m_epr, m_xid, this);
         try {
             synchronized (this) {
@@ -129,15 +135,22 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
                     return XAResource.XA_RDONLY;
                 } else if (m_status.equals(PREPARED)) {
 //todoremove                     if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPreparedBeforeWait(m_epr.toString(), m_xid);
+                    if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4540_PREPARED_BEFORE_WAIT(m_epr.toString(), m_xid));
                     return XAResource.XA_OK;
                 } else if (m_status.equals(ABORTED)) {
                     throw newFailedStateXAExceptionForMethodNameAndErrorcode("prepare", XAException.XA_RBROLLBACK);
                 }
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPrepareWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4541_PREPARE_WAITING_FOR_REPLY(
+                    m_epr.toString(), m_xid));
                 this.wait(getWaitForReplyTimeout());
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPrepareFinishedWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4542_PREPARE_FINISHED_WAITING_FOR_REPLY(
+                    m_epr.toString(), m_xid));
             }
 //todoremove             if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logPrepareReceivedReplyStatus(m_status, m_epr.toString(), m_xid);
+            if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4543_PREPARE_RECEIVED_REPLY_STATUS(
+                m_status, m_epr.toString(), m_xid));
             if (m_status.equals(READONLY)) {
                 logSuccess("preparereadonly");
                 return XAResource.XA_RDONLY;
@@ -148,9 +161,11 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
                 throw newFailedStateXAExceptionForMethodNameAndErrorcode("prepare", XAException.XA_RBROLLBACK);
             }
 //todoremove             WseeWsatLogger.logFailedStateForPrepare(m_status, m_epr.toString(), m_xid);
+            LOGGER.severe(LocalizationMessages.WSAT_4544_FAILED_STATE_FOR_PREPARE(m_status, m_epr.toString(), m_xid));
             throw newFailedStateXAExceptionForMethodNameAndErrorcode("prepare", XAException.XAER_RMFAIL);
         } catch (InterruptedException e) {
 //todoremove             WseeWsatLogger.logInterruptedExceptionDuringPrepare(e, m_epr.toString(), m_xid);
+            LOGGER.info(LocalizationMessages.WSAT_4545_INTERRUPTED_EXCEPTION_DURING_PREPARE(e, m_epr.toString(), m_xid));
             XAException xaException = new XAException("InterruptedException during WS-AT XAResource prepare");
             xaException.errorCode = XAException.XAER_RMFAIL;
             xaException.initCause(e);
@@ -188,37 +203,49 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
     public void commit(Xid xid, boolean onePhase) throws XAException {
         WSATHelper.getInstance().debug("commit xid:"+xid+" onePhase:"+onePhase);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommit(m_epr.toString(), m_xid);
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4546_COMMIT( m_epr.toString(), m_xid));
         getWSATHelper().commit(m_epr, m_xid, this);
         try {
             synchronized (this) {
                 if (m_status.equals(COMMITTED)) { // we received a reply already
 //todoremove                     if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommitBeforeWait(m_epr.toString(), m_xid);
+                    if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4547_COMMIT_BEFORE_WAIT(m_epr.toString(), m_xid));
                     getWSATHelper().removeDurableParticipant(this);
                     m_isRemovedFromMap = true;
                     return;
                 }
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommitWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4548_COMMIT_WAITING_FOR_REPLY(m_epr.toString(), m_xid));
                 this.wait(getWaitForReplyTimeout());
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommitFinishedWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4549_COMMIT_FINISHED_WAITING_FOR_REPLY(
+                    m_epr.toString(), m_xid));
             }
 //todoremove             if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logCommitReceivedReplyStatus(m_status, m_epr.toString(), m_xid);
+            if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4550_COMMIT_RECEIVED_REPLY_STATUS(
+                m_status, m_epr.toString(), m_xid));
             if (m_status.equals(COMMITTED)) {
                 logSuccess("preparecommitted");
                 getWSATHelper().removeDurableParticipant(this);
                 m_isRemovedFromMap = true;
             } else if (m_status.equals(PREPARED)) {//timed outs  
 //todoremove                 WseeWsatLogger.logFailedStateForCommit(m_status, m_epr.toString(), m_xid);
+                LOGGER.severe(LocalizationMessages.WSAT_4551_FAILED_STATE_FOR_COMMIT(
+                    m_status, m_epr.toString(), m_xid));
                 XAException xaException = newFailedStateXAExceptionForMethodNameAndErrorcode("commit", XAException.XAER_RMFAIL);
                 log("Failed state during WS-AT XAResource commit:" + m_status);
                 throw xaException;
             } else {  //should not occur as there is no transition from state ACTIVE TO commit action
 //todoremove                 WseeWsatLogger.logFailedStateForCommit(m_status, m_epr.toString(), m_xid);
+                LOGGER.severe(LocalizationMessages.WSAT_4551_FAILED_STATE_FOR_COMMIT(
+                    m_status, m_epr.toString(), m_xid));
                 XAException xaException = newFailedStateXAExceptionForMethodNameAndErrorcode("commit", XAException.XAER_PROTO);
                 log("Failed state during WS-AT XAResource commit:" + m_status);
                 throw xaException;
             }
         } catch (InterruptedException e) {
 //todoremove             WseeWsatLogger.logInterruptedExceptionDuringCommit(e, m_epr.toString(), m_xid);
+            LOGGER.severe(LocalizationMessages.WSAT_4552_INTERRUPTED_EXCEPTION_DURING_COMMIT(m_epr.toString(), m_xid), e);
             XAException xaException = new XAException("InterruptedException during WS-AT XAResource commit:"+e);
             xaException.errorCode = XAException.XAER_RMFAIL;
             xaException.initCause(e);
@@ -244,33 +271,41 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
     public void rollback(Xid xid) throws XAException {
         WSATHelper.getInstance().debug("rollback xid:"+xid);
 //todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollback(m_epr.toString(), m_xid);
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4553_ROLLBACK(m_epr.toString(), m_xid));
         getWSATHelper().rollback(m_epr, m_xid, this);
         try {
             synchronized (this) {
                 if (m_status.equals(ABORTED)) { // we received a reply already
 //todoremove                     if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollbackBeforeWait(m_epr.toString(), m_xid);
+                    if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4554_ROLLBACK_BEFORE_WAIT(m_epr.toString(), m_xid));
                     getWSATHelper().removeDurableParticipant(this);
                     m_isRemovedFromMap = true;
                     return;
                 }
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollbackWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4555_ROLLBACK_WAITING_FOR_REPLY(m_epr.toString(), m_xid));
                 this.wait(getWaitForReplyTimeout());
 //todoremove                 if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollbackFinishedWaitingForReply(m_epr.toString(), m_xid);
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4556_ROLLBACK_FINISHED_WAITING_FOR_REPLY(m_epr.toString(), m_xid));
             }
 //todoremove             if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logRollbackReceivedReplyStatus(m_status, m_epr.toString(), m_xid);
+            if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4557_ROLLBACK_RECEIVED_REPLY_STATUS(m_status, m_epr.toString(), m_xid));
             if (m_status.equals(ABORTED)) {
                 logSuccess("rollbackaborted");
                 getWSATHelper().removeDurableParticipant(this);
                 m_isRemovedFromMap = true;
             } else if (m_status.equals(PREPARED)) { // timed outs
 //todoremove                 WseeWsatLogger.logFailedStateForRollback(m_status, m_epr.toString(), m_xid);
+                LOGGER.severe(LocalizationMessages.WSAT_4558_FAILED_STATE_FOR_ROLLBACK(m_status, m_epr.toString(), m_xid));
                 throw newFailedStateXAExceptionForMethodNameAndErrorcode("rollback", XAException.XAER_RMFAIL);
             } else {
 //todoremove                 WseeWsatLogger.logFailedStateForRollback(m_status, m_epr.toString(), m_xid);
+                LOGGER.severe(LocalizationMessages.WSAT_4558_FAILED_STATE_FOR_ROLLBACK( m_status, m_epr.toString(), m_xid));
                 throw newFailedStateXAExceptionForMethodNameAndErrorcode("rollback", XAException.XAER_RMFAIL);
             }
         } catch (InterruptedException e) {
 //todoremove             WseeWsatLogger.logInterruptedExceptionDuringRollback(e, m_epr.toString(), m_xid);
+            LOGGER.severe(LocalizationMessages.WSAT_4559_INTERRUPTED_EXCEPTION_DURING_ROLLBACK(m_epr.toString(), m_xid), e);
             XAException xaException = new XAException("InterruptedException during WS-AT XAResource rollback");
             xaException.errorCode = XAException.XAER_RMFAIL;
             xaException.initCause(e);

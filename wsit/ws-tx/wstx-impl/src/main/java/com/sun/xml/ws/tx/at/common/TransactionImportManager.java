@@ -40,6 +40,9 @@
 
 package com.sun.xml.ws.tx.at.common;
 
+import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -121,7 +124,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
             }
         }
     }
-    private static final TxLogger logger = TxLogger.getATLogger(TransactionImportManager.class);
+    private static final Logger LOGGER = Logger.getLogger(TransactionImportManager.class);
     private static TransactionImportManager INSTANCE;
 
     public static TransactionImportManager getInstance() {
@@ -250,8 +253,9 @@ public class TransactionImportManager implements TransactionImportWrapper {
         try {
             result = getTransactionRemainingTimeout.invoke(javaeeTM);
         } catch (IllegalStateException ise) {
-            if (logger.isLogging(Level.FINEST)) {
-                logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
+            if (LOGGER.isLoggable(Level.FINEST)) {
+              //                logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
+                LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
             } else {
 //todoreadd                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), ise);
             }

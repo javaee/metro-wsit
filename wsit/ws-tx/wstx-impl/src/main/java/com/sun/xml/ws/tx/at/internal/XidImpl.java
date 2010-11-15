@@ -70,6 +70,10 @@ public class XidImpl implements Xid, Serializable {
         this(1234, globalTransactionId, new byte[]{});
     }
 
+    public XidImpl(byte[] globalTransactionId, int formatId) {
+        this(formatId, globalTransactionId, new byte[]{});
+    }
+
     public int getFormatId() {
         return formatId;
     }

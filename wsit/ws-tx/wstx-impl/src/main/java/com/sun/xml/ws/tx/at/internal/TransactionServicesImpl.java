@@ -49,7 +49,7 @@ import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.sun.istack.logging.Logger;
 
 import javax.transaction.*;
 import javax.transaction.xa.XAException;
@@ -115,7 +115,7 @@ public class TransactionServicesImpl implements TransactionServices {
         try {
             vote = TransactionImportManager.getInstance().getXATerminator().prepare(xidImpl);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, null, ex);
             throw new WSATException(ex);
         }
         return vote==XAResource.XA_OK?WSATConstants.PREPARED:WSATConstants.READONLY;
@@ -127,7 +127,7 @@ public class TransactionServicesImpl implements TransactionServices {
         try {
             TransactionImportManager.getInstance().getXATerminator().commit(xidImpl, false);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, null, ex);
             throw new WSATException(ex);
         }
     }
@@ -138,7 +138,7 @@ public class TransactionServicesImpl implements TransactionServices {
         try {
             TransactionImportManager.getInstance().getXATerminator().rollback(xidImpl);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, null, ex);
             throw new WSATException(ex);
         }
     }
