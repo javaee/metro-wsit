@@ -189,6 +189,13 @@
                             </goals>
                         </execution>
                     </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.google.code.maven-scm-provider-svnjava</groupId>
+                            <artifactId>maven-scm-provider-svnjava</artifactId>
+                            <version>1.12</version>
+                        </dependency>
+                    </dependencies>                    
                 </plugin>                
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
