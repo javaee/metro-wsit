@@ -128,7 +128,7 @@ public class WSATHelper<T> {
         return this;
     }
 
-    private WSATHelper (){
+    protected WSATHelper (){
         // do nothing
     }
 
