@@ -37,13 +37,11 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.tx.dev;
 
 public class WSATRuntimeConfig {
 
     private static WSATRuntimeConfig instance;
-
     private static boolean isWSATRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
     private static String hostAndPort;
     private static String txLogLocation;
@@ -51,11 +49,13 @@ public class WSATRuntimeConfig {
     private static String HTTP_HOST_AND_PORT = "http://localhost:8080/";
     private static String HTTPS_HOST_AND_PORT = "https://localhost:8181/";
 
-
-    private WSATRuntimeConfig() {}
+    private WSATRuntimeConfig() {
+    }
 
     public static WSATRuntimeConfig getInstance() {
-        if (instance ==null) instance = new WSATRuntimeConfig();
+        if (instance == null) {
+            instance = new WSATRuntimeConfig();
+        }
         return instance;
     }
 
@@ -76,8 +76,10 @@ public class WSATRuntimeConfig {
      * @return for example "https://localhost:8181/"
      */
     public String getHostAndPort() {
-        if (hostAndPort!=null) return hostAndPort;
-        return isWSATSSLEnabled ? HTTPS_HOST_AND_PORT:HTTP_HOST_AND_PORT;
+        if (hostAndPort != null) {
+            return hostAndPort;
+        }
+        return isWSATSSLEnabled ? HTTPS_HOST_AND_PORT : HTTP_HOST_AND_PORT;
     }
 
     public void setHostAndPort(String HostAndPort) {
@@ -96,31 +98,31 @@ public class WSATRuntimeConfig {
         return txLogLocation = TXLogLocation;
     }
 
+    public interface RecoveryEventListener {
 
-    public interface RecoveryEventListener  {
+        /**
+         * Indicate to the listener that recovery for a specific instance is about to start.
+         * @param delegated identifies whether it is part of a delegated transaction recovery
+         * @param instance the instance name for which transaction recovery is performed, null if unknown
+         */
+        void beforeRecovery(boolean delegated, String instance);
 
-    /**
-     * Indicate to the listener that recovery for a specific instance is about to start.
-     * @param delegated identifies whether it is part of a delegated transaction recovery
-     * @param instance the instance name for which transaction recovery is performed, null if unknown
-     */
-    void beforeRecovery(boolean delegated, String instance);
-
-    /**
-     * Indicate to the listener that recovery is over.
-     * @param success <code>true</code> if the recovery operation finished successfully
-     * @param delegated identifies whether it is part of a delegated transaction recovery
-     * @param instance the instance name for which transaction recovery is performed, null if unknown
-     */
-    void afterRecovery(boolean success, boolean delegated, String instance);
-
+        /**
+         * Indicate to the listener that recovery is over.
+         * @param success <code>true</code> if the recovery operation finished successfully
+         * @param delegated identifies whether it is part of a delegated transaction recovery
+         * @param instance the instance name for which transaction recovery is performed, null if unknown
+         */
+        void afterRecovery(boolean success, boolean delegated, String instance);
     }
 
     public class WSATRecoveryEventListener implements RecoveryEventListener {
 
         public void beforeRecovery(boolean delegated, String instance) {
-		if (!delegated) return;
-        //read logs of peer/crashed server
+            if (!delegated) {
+                return;
+            }
+            //read logs of peer/crashed server
 //		delegatedtxlogdir = txlogdir + File.separator + ".." + File.separator  ".." + File.separator + "wsat" + File.separator + instance;
 //		wsatRecoveryResourceHandlerForDelegated = createWSATRecoveryResourceHandlerForDelegated(delegatedtxlogdir);  // in reality this will likely be deferred until xaresource.recover call
 //		TransactionImportManager.getInstance().registerRecoveryResourceHandler(WSATGatewayRM.getInstance());
