@@ -253,12 +253,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
         try {
             result = getTransactionRemainingTimeout.invoke(javaeeTM);
         } catch (IllegalStateException ise) {
-            if (LOGGER.isLoggable(Level.FINEST)) {
-              //                logger.finest(METHOD, "looking up remaining txn timeout, no current transaction", ise);
-                LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
-            } else {
-//todoreadd                logger.info(METHOD, LocalizationMessages.TXN_MGR_OPERATION_FAILED_2008("getTransactionRemainingTimeout"), ise);
-            }
+            LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
         }
         return result;
     }

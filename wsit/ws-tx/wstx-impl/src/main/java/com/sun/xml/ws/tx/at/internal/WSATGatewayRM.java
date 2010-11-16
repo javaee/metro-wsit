@@ -45,11 +45,10 @@ import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
-import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
 
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
@@ -80,9 +79,8 @@ public class WSATGatewayRM implements XAResource {
   private final Object currentXidLock = new Object();
   private Xid currentXid;
   static boolean isReady = false;
-  static boolean isWSATRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
   public static  String txlogdir;
-  private static String txlogdirInbound;
+  static String txlogdirInbound;
   private static String txlogdirOutbound;
 
 
@@ -112,7 +110,7 @@ public class WSATGatewayRM implements XAResource {
   {
     if (singleton == null) {
       singleton = new WSATGatewayRM(serverName);
-      if(isWSATRecoveryEnabled) {
+      if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
         TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
       }
     }
@@ -330,7 +328,7 @@ public class WSATGatewayRM implements XAResource {
   }
 
   public Xid[] recover(int flag) throws XAException {
-    if(isWSATRecoveryEnabled) {
+    if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
         setTxLogDirs();
         try {
             singleton.initStore();
@@ -449,7 +447,7 @@ public class WSATGatewayRM implements XAResource {
      * @throws IOException from log write
      */
   private void persistBranchRecord(BranchRecord branch) throws IOException {
-    if(!isWSATRecoveryEnabled) return;
+    if(!WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) return;
     if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
     FileOutputStream fos = null;
     ObjectOutputStream out = null;
@@ -506,29 +504,6 @@ public class WSATGatewayRM implements XAResource {
     return deleted; */ return true;
   }
 
-  /**
-   * Used to register and unregister
-   * @return TransactionManager
-   */
-  private TransactionManager getTM() {
-      return TransactionManagerImpl.getInstance();
-  }
-
-
-  /**
-   * Used to register
-   * @param xid Xid
-   * @return Transaction transaction corresponding to Xid
-   */
-  private Transaction getTransaction(Xid xid) {
-      if(m_transaction!=null)return m_transaction; //for testing only
-        try {
-            return TransactionManagerImpl.getInstance().getTransaction();
-        } catch (SystemException ex) {
-            Logger.getLogger(WSATGatewayRM.class).log(Level.SEVERE, null, ex);
-            return null;
-        }
-  }
 
   //for testing only
   private static TransactionManager m_transactionManager;

@@ -139,19 +139,12 @@ public class WSATServerHelper implements WSATServer {
         WSCBuilderFactory factory = WSCBuilderFactory.newInstance(version);
         RegistrationMessageBuilder rrBuilder = factory.newWSATRegistrationRequestBuilder();
         BaseRegisterType registerType = rrBuilder.durable(true).txId(participantId).routing().build();
- //todoremove        if(WSATHelper.isDebugEnabled())debug("About to suspend tx before registerOperation call");
-//todoremove         javax.transaction.Transaction suspendedTx =
-//todoremove                 TransactionHelper.getTransactionHelper().getTransactionManager().forceSuspend();
-//todoremove         if(WSATHelper.isDebugEnabled())debug("Suspend was successful for tx:" + suspendedTx);
         RegistrationProxyBuilder proxyBuilder = factory.newRegistrationProxyBuilder();
         proxyBuilder.
                 to(cc.getRegistrationService()).
                 txIdForReference(participantId).
                 timeout(timeout);
         RegistrationIF proxyIF = proxyBuilder.build();
-//todoremove         if(WSATHelper.isDebugEnabled())
-//todoremove             debug("Before registerOperation call, suspend was successful for tx:" + suspendedTx +
-//todoremove                             " registration service proxy:"+proxyIF);
         BaseRegisterResponseType registerResponseType = proxyIF.registerOperation(registerType);
         if(WSATHelper.isDebugEnabled())debug("Return from registerOperation call:"+registerResponseType);
         if (registerResponseType != null){
@@ -166,12 +159,9 @@ public class WSATServerHelper implements WSATServer {
             log("Sending fault. Context refused registerResponseType is null");
             throw new WebServiceException("Sending fault. Context refused registerResponseType is null");
         }
-//todoremove         TransactionHelper.getTransactionHelper().getTransactionManager().forceResume(suspendedTx);
-//todoremove         if(WSATHelper.isDebugEnabled()) debug("Returned from registerOperation call resumed tx:" + suspendedTx);
     }
 
     public void log(String message) {
-//todoremove         WseeWsatLogger.logWSAT_ServerHelper("WSATServerInterceptor:" + message);
         LOGGER.info(LocalizationMessages.WSAT_4612_WSAT_SERVERHELPER(message));
     }
 

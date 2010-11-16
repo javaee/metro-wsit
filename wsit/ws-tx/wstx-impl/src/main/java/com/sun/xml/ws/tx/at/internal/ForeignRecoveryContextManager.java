@@ -43,19 +43,19 @@ package com.sun.xml.ws.tx.at.internal;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.common.CoordinatorIF;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
+import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import javax.transaction.Status;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.WebServiceException;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 
 public class ForeignRecoveryContextManager {
 
@@ -119,13 +119,14 @@ public class ForeignRecoveryContextManager {
     }
 
     synchronized void persist(Xid xid) {
-        if (false && WSATGatewayRM.isWSATRecoveryEnabled) {  //todo
+        if (false && WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {  //todo enable
             ForeignRecoveryContextManager.RecoveryContextWorker contextWorker = recoveredContexts.get(xid);
-//    if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
             FileOutputStream fos = null;
             ObjectOutputStream out = null;
             try {
-                fos = new FileOutputStream(WSATGatewayRM.txlogdir + xid.getGlobalTransactionId() + xid.getBranchQualifier());
+                fos = new FileOutputStream(
+                        WSATGatewayRM.txlogdirInbound + File.separator +
+                                xid.getGlobalTransactionId() + xid.getBranchQualifier()); //todo to hex
                 out = new ObjectOutputStream(fos);
                 out.writeObject(contextWorker);
                 out.close();

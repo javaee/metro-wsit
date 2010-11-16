@@ -53,7 +53,8 @@ import com.sun.xml.ws.tx.at.common.*;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 import com.sun.xml.ws.tx.at.common.client.ParticipantProxyBuilder;
 import com.sun.xml.ws.tx.at.internal.XidImpl;
-import com.sun.xml.ws.tx.at.tube.WSATTubeHelper;
+import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
+
 import java.util.logging.Level;
 
 import javax.transaction.xa.XAException;
@@ -77,10 +78,7 @@ import javax.transaction.Transaction;
  * better debug logging information as there do not appear to be any substantial performance implications.
  */
 public class WSATHelper<T> {
-    
-    private static String HOST_NAME = "localhost";
-    private static String HTTP_PORT = "8080";
-    private static String HTTPS_PORT = "8181";
+
 
     private static final Logger LOGGER = Logger.getLogger(WSATHelper.class);
 
@@ -135,11 +133,6 @@ public class WSATHelper<T> {
         // do nothing
     }
 
-    public static void init(String hostName, String httpPort, String httpsPort) {
-        HOST_NAME = hostName;
-        HTTP_PORT = httpPort;
-        HTTPS_PORT = httpsPort;
-    }
     
     public static WSATHelper getInstance() {
       return V10;
@@ -183,7 +176,7 @@ public class WSATHelper<T> {
      * @return boolean true if the status was set successfully
      */
     public boolean setDurableParticipantStatus(Xid xid, String status) {
-        WSATXAResource wsatXAResourceLock = null;
+        WSATXAResource wsatXAResourceLock;
         synchronized (m_durableParticipantXAResourceMapLock) {
             wsatXAResourceLock = getDurableParticipantXAResourceMap().get(new BranchXidImpl(xid));
         }
@@ -210,7 +203,6 @@ public class WSATHelper<T> {
             wsatSynchronization = m_volatileParticipantSynchronizationMap.get(xid);
         }
         if (wsatSynchronization == null) {
-//todoremove             if (isDebugEnabled()) WseeWsatLogger.logXidNotInVolatileResourceMap(xid, status);
             if (isDebugEnabled())
                 LOGGER.info(LocalizationMessages.WSAT_4581_XID_NOT_IN_DURABLE_RESOURCE_MAP(xid, status));
             return false;
@@ -231,14 +223,12 @@ public class WSATHelper<T> {
         synchronized (m_durableParticipantPortMapLock) {
             if (getDurableParticipantPortMap().containsKey(wsatXAResource)) {
                 m_durableParticipantPortMap.remove(wsatXAResource);
-//todoremove                 if (isDebugEnabled()) WseeWsatLogger.logDurablePortRemoved(wsatXAResource);
                 if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4583_DURABLE_PORT_REMOVED(wsatXAResource));
             }
         }
         synchronized (m_durableParticipantXAResourceMapLock) {
             if (getDurableParticipantXAResourceMap().containsKey(wsatXAResource.getXid())) {
                 getDurableParticipantXAResourceMap().remove(wsatXAResource.getXid());
-//todoremove                 if (isDebugEnabled()) WseeWsatLogger.logDurableXAResourceRemoved(wsatXAResource);
                 if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4584_DURABLE_XARESOURCE_REMOVED(wsatXAResource));
             }
         }
@@ -253,14 +243,12 @@ public class WSATHelper<T> {
         synchronized (m_volatileParticipantPortMapLock) {
             if (m_volatileParticipantPortMap.containsKey(new BranchXidImpl(xid))) {
                 m_volatileParticipantPortMap.remove(new BranchXidImpl(xid));
-//todoremove                 if (isDebugEnabled()) WseeWsatLogger.logVolatilePortRemoved(new BranchXidImpl(xid));
                 if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4585_VOLATILE_PORT_REMOVED(new BranchXidImpl(xid)));
             }
         }
         synchronized (m_volatileParticipantSynchronizationMapLock) {
             if (m_volatileParticipantSynchronizationMap.containsKey(new BranchXidImpl(xid))) {
                 m_volatileParticipantSynchronizationMap.remove(new BranchXidImpl(xid));
-//todoremove                 if (isDebugEnabled()) WseeWsatLogger.logVolatileSynchronizationRemoved(xid);
                 if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4586_VOLATILE_SYNCHRONIZATION_REMOVED(xid));
             }
         }
@@ -276,17 +264,14 @@ public class WSATHelper<T> {
      */
     public void prepare(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logAboutToSendPrepare(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4587_ABOUT_TO_SEND_PREPARE(xid, Thread.currentThread()));
         synchronized (m_durableParticipantXAResourceMapLock) {
             putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logDurableParticipantXAResourcePlacedInCacheFromPrepare(xid);
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4589_DURABLE_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE_FROM_PREPARE(xid));
         ParticipantIF<T> port = getDurableParticipantPort(epr, xid, wsatXAResource);
         T notification = builderFactory.newNotificationBuilder().build();
         port.prepare(notification);
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logPrepareSent(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4588_PREPARE_SENT(xid, Thread.currentThread()));
     }
 
@@ -312,11 +297,9 @@ public class WSATHelper<T> {
      */
     public void commit(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logAboutToSendCommit(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4590_ABOUT_TO_SEND_COMMIT(xid, Thread.currentThread()));
         T notification = builderFactory.newNotificationBuilder().build();
         getDurableParticipantPort(epr, xid, wsatXAResource).commit(notification);
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logCommitSent(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4591_COMMIT_SENT(xid, Thread.currentThread()));
     }
 
@@ -331,16 +314,13 @@ public class WSATHelper<T> {
      */
     public void rollback(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logAboutToSendRollback(xid, Thread.currentThread());
       if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4592_ABOUT_TO_SEND_ROLLBACK(xid, Thread.currentThread()));
         synchronized (m_durableParticipantXAResourceMapLock) {
             putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logRollbackParticipantXAResourcePlacedInCache(xid);
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4594_ROLLBACK_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE(xid));
         T notification = builderFactory.newNotificationBuilder().build();
         getDurableParticipantPort(epr, xid, wsatXAResource).rollback(notification); //place in map first
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logRollbackSent(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4593_ROLLBACK_SENT(xid, Thread.currentThread()));
     }
 
@@ -355,18 +335,14 @@ public class WSATHelper<T> {
     public void beforeCompletion(
             EndpointReference epr, Xid xid, WSATSynchronization wsatSynchronization)
             throws SOAPException {
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logAboutToSendPrepareVolatile(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4595_ABOUT_TO_SEND_PREPARE_VOLATILE(
             xid, Thread.currentThread()));
         T notification = builderFactory.newNotificationBuilder().build();
         getVolatileParticipantPort(epr, xid).prepare(notification);
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logPrepareVolatileSent(xid, Thread.currentThread());
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4596_PREPARE_VOLATILE_SENT(xid, Thread.currentThread()));
         synchronized (m_volatileParticipantSynchronizationMapLock) {
             m_volatileParticipantSynchronizationMap.put(new BranchXidImpl(xid), wsatSynchronization);
         }
-//todoremove         if (isDebugEnabled())
- //todoremove            WseeWsatLogger.logPrepareParticipantSynchronizationPlacedInCache(xid);
         if (isDebugEnabled())
             LOGGER.info(LocalizationMessages.WSAT_4597_PREPARE_PARTICIPANT_SYNCHRONIZATION_PLACED_IN_CACHE(xid));
     }
@@ -386,7 +362,6 @@ public class WSATHelper<T> {
             participantPort = m_volatileParticipantPortMap.get(new BranchXidImpl(xid));
         }
         if (participantPort != null) {
- //todoremove            if (isDebugEnabled()) WseeWsatLogger.logVolatileParticipantRetrievedFromCache(xid);
             if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4598_VOLATILE_PARTICIPANT_RETRIEVED_FROM_CACHE(xid));
             return participantPort;
         }
@@ -394,7 +369,6 @@ public class WSATHelper<T> {
         synchronized (m_volatileParticipantPortMapLock) {
             m_volatileParticipantPortMap.put(new BranchXidImpl(xid), participantPort);
         }
- //todoremove        if (isDebugEnabled()) WseeWsatLogger.logVolatileParticipantPortPlacedInCache(xid);
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4599_VOLATILE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
         return participantPort;
     }
@@ -415,7 +389,6 @@ public class WSATHelper<T> {
             participantPort = getDurableParticipantPortMap().get(wsatXAResource);
         }
         if (participantPort != null) {
- //todoremove            if (isDebugEnabled()) WseeWsatLogger.logDurableParticipantPortRetreivedFromCache(xid);
             if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4600_DURABLE_PARTICIPANT_PORT_RETREIVED_FROM_CACHE(xid));
             return participantPort;
         }
@@ -435,7 +408,6 @@ public class WSATHelper<T> {
 	    synchronized (m_durableParticipantPortMapLock) {
             getDurableParticipantPortMap().put(wsatXAResource, participantPort);
         }
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logDurableParticipantPortPlacedInCache(xid);
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4602_DURABLE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
         return participantPort;
     }
@@ -453,12 +425,9 @@ public class WSATHelper<T> {
      */
     public ParticipantIF<T> getParticipantPort(EndpointReference epr, Xid xid, String bqual)
             throws SOAPException {
-        String txId = TransactionIdHelper.getInstance().xid2wsatid(xid); //todoremove (WLXid) xid);
+        String txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         ParticipantProxyBuilder<T> proxyBuilder = builderFactory.newParticipantProxyBuilder();
-
         ParticipantIF<T> participantProxyIF = proxyBuilder.to(epr).txIdForReference(txId, bqual).build();
-
-   //todoremove      if (isDebugEnabled()) WseeWsatLogger.logSuccessfullyCreatedParticipantPort(participantProxyIF, xid);
         if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4603_SUCCESSFULLY_CREATED_PARTICIPANT_PORT(participantProxyIF, xid));
         return participantProxyIF;
     }
@@ -471,7 +440,7 @@ public class WSATHelper<T> {
      */
     public CoordinatorIF<T> getCoordinatorPort(EndpointReference epr, Xid xid) {
         if (isDebugEnabled()) debug("WSATHelper.getCoordinatorPort xid:" + xid + " epr:" + epr);
-        String txId = TransactionIdHelper.getInstance().xid2wsatid(xid);//todoremove (WLXid) xid);
+        String txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         CoordinatorProxyBuilder<T> proxyBuilder = builderFactory.newCoordinatorProxyBuilder();
         CoordinatorIF<T> coordinatorProxy = proxyBuilder.to(epr).txIdForReference(txId, "").build();
         if (isDebugEnabled())
@@ -481,24 +450,15 @@ public class WSATHelper<T> {
     }
 
     public String getRoutingAddress() {
-        return "none"; //todoremove _runtimeAccess == null ? null : _runtimeAccess.getServerName();
+        return "none";
     }
 
     /**
      * Return the host and port the WS-AT endpoints are deployed to or the frontend as the case may be
      * @return String URL with host and port  
      */
-    static String getHostAndPort() { //todo
-        boolean isSSLRequired = WSATTubeHelper.isSSLRequired();
-        
-        if (isSSLRequired) {
-            return "https://" + HOST_NAME + ":" + HTTPS_PORT;
-        } else {
-            return "http://" + HOST_NAME + ":" + HTTP_PORT;            
-        }
-//todoremove         return m_isUseLocalServerAddress?
-//todoremove                 ServerUtil.getLocalServerPublicURL(isSSLRequired ?"https":"http"):
-//todoremove                 ServerUtil.getHTTPServerURL(isSSLRequired);  //default
+    static String getHostAndPort() {
+        return WSATRuntimeConfig.getInstance().getHostAndPort();
     }
 
     public String getRegistrationCoordinatorAddress() {
@@ -541,10 +501,8 @@ public class WSATHelper<T> {
         Iterator<Header> headers = headerList.getHeaders(WSATConstants.TXID_QNAME, false);
         if (!headers.hasNext()) {
             throw new WebServiceException("txid does not exist in header");
-            //todo log and WSATFaultFactory.throwContextRefusedFault();
         }
         String txId = headers.next().getStringContent();
-//todoremove         if (isDebugEnabled()) WseeWsatLogger.logWSATTxIdInHeader(txId, Thread.currentThread());
         return txId;
     }
 
@@ -574,7 +532,7 @@ public class WSATHelper<T> {
      * @return true if debug for the WS-AT logger is enabled, false otherwise
      */
     public static boolean isDebugEnabled() {
-        return true; //todoremove DebugLogger.getDebugLogger(WSATConstants.DEBUG_WSAT).isDebugEnabled();
+        return true;
     }
 
     public Map<WSATXAResource, ParticipantIF<T>>  getDurableParticipantPortMap() {

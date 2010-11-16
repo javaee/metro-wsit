@@ -40,11 +40,13 @@
 
 package com.sun.xml.ws.tx.at.v11.client;
 
+import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.v11.types.CoordinatorPortType;
 import com.sun.xml.ws.tx.at.v11.types.ParticipantPortType;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 
@@ -56,9 +58,14 @@ import java.net.URL;
 public class WSAT11Service
     extends Service
 {
-
-    private static final String WSDL = "/META-INF/wstx/wsdls/wsat11/wstx-wsat-1.1-wsdl-200702.wsdl";
-    private final static URL WSAT11SERVICE_WSDL_LOCATION = WSAT11Service.class.getResource(WSDL);
+    private static URL WSAT11SERVICE_WSDL_LOCATION;
+    static {
+        try {
+            WSAT11SERVICE_WSDL_LOCATION = new URL(WSATHelper.V11.getCoordinatorAddress() + "?wsdl");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
     
     public WSAT11Service(URL wsdlLocation, QName serviceName) {
         super(wsdlLocation, serviceName);
