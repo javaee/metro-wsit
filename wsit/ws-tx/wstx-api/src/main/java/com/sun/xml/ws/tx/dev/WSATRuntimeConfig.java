@@ -48,6 +48,10 @@ public final class WSATRuntimeConfig {
 
     public static final class Initializer {
         
+        private Initializer() {
+            // do nothing
+        }
+        
         public Initializer hostName(String value) {
             WSATRuntimeConfig.hostName = value;
             
