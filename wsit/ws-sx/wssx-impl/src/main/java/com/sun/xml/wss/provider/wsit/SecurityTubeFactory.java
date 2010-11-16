@@ -122,7 +122,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
        maxNonceAge = SecurityConfigProvider.INSTANCE.getMaxNonceAge();
        if(maxNonceAge == MessageConstants.MAX_NONCE_AGE){ //if max nonce age is not set in domain.xml
            String maxNAge = System.getProperty("MAX_NONCE_AGE");
-           maxNonceAge = (maxNAge != null) ? Long.getLong(maxNAge) : MessageConstants.MAX_NONCE_AGE ;
+           maxNonceAge = (maxNAge != null) ? Long.parseLong(maxNAge) : MessageConstants.MAX_NONCE_AGE ;
        } 
     }    
 
