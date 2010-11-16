@@ -79,6 +79,7 @@ import com.sun.xml.wss.impl.policy.mls.SecureConversationTokenKeyBinding;
 import com.sun.xml.wss.impl.policy.mls.IssuedTokenKeyBinding;
 import com.sun.xml.ws.security.opt.impl.tokens.UsernameToken ;
 import com.sun.xml.wss.impl.policy.mls.AuthenticationTokenPolicy.UsernameTokenBinding;
+import com.sun.xml.wss.impl.policy.mls.TimestampPolicy;
 import com.sun.xml.wss.logging.impl.filter.LogStringsMessages;
 
 /**
@@ -151,6 +152,21 @@ public class SignatureFilter {
              throw new XWSSecurityException("error occurred while decoding the salt in username token",ex);
         } catch(XWSSecurityException ex){
             throw  ex;
+        }
+        if (binding.getUseNonce()&& unToken.getNonceValue() == null ) {
+            unToken.setNonce(binding.getNonce());
+            String creationTime = "";
+            TimestampPolicy tPolicy = (TimestampPolicy) binding.getFeatureBinding();
+            if(tPolicy == null)tPolicy = (TimestampPolicy) binding.newTimestampFeatureBinding();
+            creationTime = tPolicy.getCreationTime();
+            unToken.setCreationTime(creationTime);
+        }
+        if (binding.getUseCreated() && unToken.getCreatedValue() == null) {
+            String creationTime = "";
+            TimestampPolicy tPolicy = (TimestampPolicy) binding.getFeatureBinding();
+            if(tPolicy == null)tPolicy = (TimestampPolicy) binding.newTimestampFeatureBinding();
+            creationTime = tPolicy.getCreationTime();
+            unToken.setCreationTime(creationTime);
         }
         binding.setUsernameToken(unToken);
         String dataEncAlgo = null;

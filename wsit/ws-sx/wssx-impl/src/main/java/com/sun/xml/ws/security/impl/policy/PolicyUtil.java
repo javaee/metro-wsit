@@ -68,7 +68,7 @@ import org.w3c.dom.Document;
  *
  * @author K.Venugopal@sun.com Abhijit.Das@Sun.COM
  */
-public class PolicyUtil {
+public class PolicyUtil {    
     
     /** Creates a new instance of PolicyUtil */
     public PolicyUtil() {
@@ -295,6 +295,22 @@ public class PolicyUtil {
             return true;
         }
         return false;
+    }
+    
+    public static boolean useCreated(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+       if(assertion.getName().getLocalPart().equals(Created)
+               /*&& spVersion.namespaceUri.equals(SP13_NS)*/) {
+            return true;
+        }
+       return false;
+    }
+
+    public static boolean useNonce(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {
+        if(assertion.getName().getLocalPart().equals(Nonce) /*&&
+                spVersion.namespaceUri.equals(SP13_NS)*/) {
+            return true;
+        }
+       return false;
     }
     
     public static boolean isHttpsToken(PolicyAssertion assertion, SecurityPolicyVersion spVersion) {

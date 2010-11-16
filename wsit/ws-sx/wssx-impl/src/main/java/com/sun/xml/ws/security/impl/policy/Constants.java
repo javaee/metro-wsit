@@ -41,7 +41,6 @@
 package com.sun.xml.ws.security.impl.policy;
 
 import com.sun.xml.ws.policy.PolicyAssertion;
-import com.sun.xml.ws.security.policy.SecurityPolicyVersion;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,6 +55,7 @@ public class Constants {
     public final static String TRUST13_NS = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
     public final static String UTILITY_NS = "http://docs.oasis-open.org/wss/2004/01/oasis- 200401-wss-wssecurity-utility-1.0.xsd";
     public static final String MEX_NS = "http://schemas.xmlsoap.org/ws/2004/09/mex";
+    public static final String SP13_NS = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200802";
     public final static String _XPATHVERSION = "XPathVersion";
     public final static String InclusiveC14N = "InclusiveC14N";
     public final static String InclusiveC14NWithComments = "InclusiveC14NWithComments";
@@ -229,6 +229,7 @@ public class Constants {
     
     //utility constants
     public final static String Created = "Created";
+    public final static String Nonce = "Nonce";
     public final static String Expires = "Expires";
     public final static String SignWith ="SignWith";
     public final static String EncryptWith = "EncryptWith";

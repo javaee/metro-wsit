@@ -366,6 +366,8 @@ public class SecurityPolicyValidator implements PolicyAssertionValidator{
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri,RequireServerEntropy));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri,MustSupportIssuedTokens));
         supportedAssertions.add(new QName(SecurityPolicyVersion.SECURITYPOLICY200512.namespaceUri,NoPassword));
+        supportedAssertions.add(new QName("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200802","Created"));
+        supportedAssertions.add(new QName("http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200802","Nonce"));
         //-----------------------------------------------------------
         
         // Trust10 Assertions

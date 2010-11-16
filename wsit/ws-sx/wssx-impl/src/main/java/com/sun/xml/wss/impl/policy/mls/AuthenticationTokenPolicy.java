@@ -182,6 +182,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
         private SecretKey secretKey = null;
         private SecretKey Key = null;
         private boolean endorsing;
+        boolean useCreated = false;
         
         /**
          * Default Constructor
@@ -303,6 +304,14 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
             this.useNonce = useNonce;
         }
         
+        public void setUseCreated(boolean useCreated) {
+            if (isReadOnly()) {
+                throw new RuntimeException("Can not set useCreated flag : Policy is ReadOnly");
+            }
+            
+            this.useCreated = useCreated;
+        }
+        
         /**
          * setter for a boolean flag indicating whether the password should be
          * digested while constructing a wss:UsernameToken  from this Policy
@@ -361,6 +370,10 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
          */
         public boolean getUseNonce() {
             return this.useNonce;
+        }
+        
+        public boolean getUseCreated() {
+            return this.useCreated;
         }
         
         /**
@@ -447,7 +460,8 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
                     return false;
                 }
                 UsernameTokenBinding utBinding = (UsernameTokenBinding) policy;
-                assrt = (useNonce == utBinding.getUseNonce() && doDigest == utBinding.getDigestOn());
+                assrt = (useNonce == utBinding.getUseNonce() && doDigest == utBinding.getDigestOn() &&
+                        useCreated == utBinding.getUseCreated());
             } catch (Exception e) {
             }
             
@@ -473,6 +487,7 @@ public class AuthenticationTokenPolicy extends WSSFeatureBindingExtension {
             utBinding.setPassword(password);
             utBinding.setNonce(nonce);
             utBinding.setUseNonce(useNonce);
+            utBinding.setUseCreated(useCreated);
             utBinding.setReferenceType(_referenceType);
             utBinding.setDigestOn(doDigest);
             utBinding.setUsernameToken(usernametoken);

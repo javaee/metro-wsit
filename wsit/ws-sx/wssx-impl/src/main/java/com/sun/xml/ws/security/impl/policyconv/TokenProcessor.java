@@ -172,7 +172,10 @@ public class TokenProcessor {
             
             if(unToken.getClaims() != null){
                 untBinding.setClaims(unToken.getClaims().getClaimsAsBytes());
-            }                      
+            } 
+            
+            untBinding.setUseCreated(unToken.useCreated());
+            untBinding.setUseNonce(unToken.useNonce());            
 
             if (!ignoreDK && unToken.isRequireDerivedKeys()) {
                 DerivedTokenKeyBinding dtKB = new DerivedTokenKeyBinding();
@@ -457,9 +460,11 @@ public class TokenProcessor {
                 throw new PolicyException(ex);
             }
             key.setUUID(token.getTokenId());
-            key.isOptional(((PolicyAssertion) token).isOptional());
+            key.isOptional(((PolicyAssertion) token).isOptional());            
             setTokenInclusion(key,token);
             UserNameToken ut = (UserNameToken)token;
+            key.setUseCreated(ut.useCreated());
+            key.setUseNonce(ut.useNonce());
             if(!ut.hasPassword()){
                 key.setNoPassword(true);
             } else if(ut.useHashPassword()){

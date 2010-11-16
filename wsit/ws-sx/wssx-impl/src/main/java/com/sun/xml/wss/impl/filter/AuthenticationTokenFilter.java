@@ -469,7 +469,7 @@ public class AuthenticationTokenFilter {
                 unToken.setDigestOn();
             }
             
-            if ( policy.getUseNonce() || policy.getDigestOn()) {
+            if ( policy.getUseNonce() || policy.getDigestOn() || policy.getUseCreated()) {
                 String creationTime = "";
                 TimestampPolicy tPolicy = (TimestampPolicy) policy.getFeatureBinding();
                 creationTime = tPolicy.getCreationTime();
@@ -506,7 +506,7 @@ public class AuthenticationTokenFilter {
                 token.setDigestOn();
             }
             
-            if ( policy.getUseNonce() || policy.getDigestOn()) {
+            if ( policy.getUseNonce() || policy.getDigestOn() || policy.getUseCreated()) {
                 String creationTime = "";
                 TimestampPolicy tPolicy = (TimestampPolicy) policy.getFeatureBinding();
                 creationTime = tPolicy.getCreationTime();

@@ -431,6 +431,9 @@ public class KeySelectorImpl extends KeySelector {
                 AuthenticationTokenPolicy.UsernameTokenBinding untBinding = new AuthenticationTokenPolicy.UsernameTokenBinding();
                 untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
                 untBinding.setValueType(valueType);
+                untBinding.setUseNonce(((AuthenticationTokenPolicy.UsernameTokenBinding)token.getPolicy()).getUseNonce());
+                untBinding.setUseCreated(((AuthenticationTokenPolicy.UsernameTokenBinding)token.getPolicy()).getUseCreated());
+
                 if (inferredKB == null) {
                     wssContext.getSecurityContext().setInferredKB(untBinding);
                     if (wssContext.getExtraneousProperty("EncryptedKey") != null) {
@@ -650,6 +653,13 @@ public class KeySelectorImpl extends KeySelector {
                 } else if (token instanceof UsernameToken) {
                     AuthenticationTokenPolicy.UsernameTokenBinding untBinding = new AuthenticationTokenPolicy.UsernameTokenBinding();
                     untBinding.setReferenceType(MessageConstants.DIRECT_REFERENCE_TYPE);
+                    //SP13
+                    if(((UsernameToken)token).getCreatedValue() != null) {
+                       untBinding.setUseCreated(true); 
+                    }
+                    if(((UsernameToken)token).getNonceValue() != null) {
+                       untBinding.setUseNonce(true);
+                    }
                     if (inferredKB == null) {
                         wssContext.getSecurityContext().setInferredKB(untBinding);
                     } else if (PolicyTypeUtil.derivedTokenKeyBinding(inferredKB)) {

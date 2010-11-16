@@ -131,7 +131,8 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
      * SC feature is enabled by having a sp:SecureConversationToken in the Policy of the Service.
      */
     private static final String SC_LOCAL_NAME = "SecureConversationToken";
-    private static final String NONCE_LOCAL_NAME = "HashPassword";
+    private static final String DIGEST_PASSWORD_LOCAL_NAME = "HashPassword";
+    private static final String NONCE_LOCAL_NAME = "Nonce";
     private static final Set<QName> STICKINESS_ENABLERS = Collections.unmodifiableSet(new HashSet(Arrays.asList(new QName[] {
         new QName(SecurityPolicyVersion.SECURITYPOLICY200507.namespaceUri, SC_LOCAL_NAME),
         new QName(SecurityPolicyVersion.SECURITYPOLICY12NS.namespaceUri, SC_LOCAL_NAME),
@@ -155,7 +156,8 @@ public final class SecurityFeatureConfigurator implements PolicyFeatureConfigura
                     currentFeature.scUsed();
                 }
 
-                if (NONCE_LOCAL_NAME.equals(assertion.getName().getLocalPart())) {
+                if (NONCE_LOCAL_NAME.equals(assertion.getName().getLocalPart()) ||
+                        DIGEST_PASSWORD_LOCAL_NAME.equals(assertion.getName().getLocalPart())) {
                     currentFeature.nonceManagerUsed();
                 }
             }

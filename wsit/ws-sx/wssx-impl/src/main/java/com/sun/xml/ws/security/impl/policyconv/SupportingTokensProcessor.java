@@ -139,7 +139,7 @@ public class SupportingTokensProcessor {
                 if (PolicyUtil.isUsernameToken((PolicyAssertion)token,spVersion)) {
                     AuthenticationTokenPolicy.UsernameTokenBinding utb =
                             (AuthenticationTokenPolicy.UsernameTokenBinding) policy;
-                    utb.isEndorsing(true);
+                    utb.isEndorsing(true);                    
                 }
             }
             if(PolicyUtil.isIssuedToken((PolicyAssertion) token, spVersion) &&

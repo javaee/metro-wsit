@@ -352,6 +352,8 @@ public class SymmetricBindingProcessor extends BindingProcessor{
             if(unt.getClaims() != null){
                 utb.setClaims(unt.getClaims().getClaimsAsBytes());
             }
+            utb.setUseCreated(unt.useCreated());
+            utb.setUseNonce(unt.useNonce());
             //utb.setNoPassword(true);
             if(unt.isRequireDerivedKeys()){
             DerivedTokenKeyBinding dtKB =  new DerivedTokenKeyBinding();

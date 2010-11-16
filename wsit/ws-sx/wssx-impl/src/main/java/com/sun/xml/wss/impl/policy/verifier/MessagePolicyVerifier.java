@@ -207,7 +207,22 @@ public class MessagePolicyVerifier implements PolicyVerifier{
                                     MessageConstants.WSSE_FAILED_AUTHENTICATION,
                                     "Empty Password specified, Authentication of Username Password Token Failed",
                                     null);
+                        }                        
+                        //SP1.3
+                        if(actual.getUseCreated() == true && inferred.getUseCreated() == false ){
+                            throw SOAPUtil.newSOAPFaultException(
+                                    MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
+                                    "Invalid Username Password Token. Missing Created ",
+                                    null);
                         }
+                        
+                        if( actual.getUseNonce() == true && inferred.getUseNonce() == false){
+                            throw SOAPUtil.newSOAPFaultException(
+                                    MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
+                                    "Invalid Username Password Token. Missing Nonce ",
+                                    null);
+                        }
+                        
                         inferredSecurityPolicy.remove(pol);
                         found = true;
                         break;
@@ -451,11 +466,20 @@ public class MessagePolicyVerifier implements PolicyVerifier{
             throws XWSSecurityException {
         boolean verified = false;
         if(actualKeyBinding != null && inferredKeyBinding != null){
-            if(PolicyTypeUtil.usernameTokenBinding(actualKeyBinding) &&
-                 PolicyTypeUtil.usernameTokenBinding(inferredKeyBinding)) {
-                verified = true;
-            }else if(PolicyTypeUtil.x509CertificateBinding(actualKeyBinding) &&
-                    PolicyTypeUtil.x509CertificateBinding(inferredKeyBinding)){
+            if (PolicyTypeUtil.usernameTokenBinding(actualKeyBinding) &&
+                    PolicyTypeUtil.usernameTokenBinding(inferredKeyBinding)) {
+                UsernameTokenBinding act = (UsernameTokenBinding) actualKeyBinding;
+                UsernameTokenBinding inf = (UsernameTokenBinding) inferredKeyBinding;
+                
+                if (act.getUseCreated() == true && inf.getUseCreated() == false) { //SP13
+                    throw new XWSSecurityException("Policy verification error: Invalid Usernametoken, Missing Created");
+                } else if (act.getUseNonce() == true && inf.getUseNonce() == false) {
+                    throw new XWSSecurityException("Policy verification error: Invalid Usernametoken, Missing Nonce");
+                } else {
+                    verified = true;
+                }
+            } else if (PolicyTypeUtil.x509CertificateBinding(actualKeyBinding) &&
+                    PolicyTypeUtil.x509CertificateBinding(inferredKeyBinding)) {
                     /* TODO: cannot change actual policy, there seems to be a bug in
                      * security policy
                     AuthenticationTokenPolicy.X509CertificateBinding actualX509Bind =

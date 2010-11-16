@@ -72,7 +72,9 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
     private Issuer issuer = null;
     private IssuerName issuerName = null;
     private Claims claims = null;
-    private boolean reqDK=false;    
+    private boolean reqDK=false;
+    private boolean useNonce = false;
+    private boolean useCreated = false;
     
     /**
      * Creates a new instance of UsernameToken
@@ -178,12 +180,17 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
                     useHashPassword = true;
                 } else if (PolicyUtil.isRequireDerivedKeys(assertion, spVersion)){
                        reqDK = true;
+                }else if (PolicyUtil.useCreated(assertion, spVersion)){
+                       useCreated = true;
+                }else if (PolicyUtil.useNonce(assertion, spVersion)){
+                       useNonce = true;
+                       useCreated = true;
                 }else{
                     if(!assertion.isOptional()){
                         log_invalid_assertion(assertion, isServer,"UsernameToken");
                         fitness = AssertionFitness.HAS_UNKNOWN_ASSERTION;
                     }
-                }
+            }
             }
             if ( this.hasParameters() ) {
                 Iterator <PolicyAssertion> it = this.getParametersIterator();
@@ -218,5 +225,13 @@ public class UsernameToken extends PolicyAssertion implements com.sun.xml.ws.sec
 
     public Set getTokenRefernceType() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean useNonce() {
+        return useNonce;
+    }
+
+    public boolean useCreated() {
+        return useCreated;
     }
 }

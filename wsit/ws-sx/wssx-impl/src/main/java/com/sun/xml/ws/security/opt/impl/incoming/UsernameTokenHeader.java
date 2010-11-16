@@ -118,7 +118,10 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
         }
         if(filter.getNonce() != null){
             utPolicy.setUseNonce(true);
-        }
+        }        
+        if(filter.getCreated() != null){
+            utPolicy.setUseCreated(true);
+        }        
     }
     
     public void validate(ProcessingContext context) throws XWSSecurityException {
@@ -130,9 +133,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
             utPolicy.setNoPassword(false);
         }
         if(filter.getPassword() == null && filter.getCreated() != null  && !MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())){
-            context.getSecurityEnvironment().validateCreationTime(
-                        context.getExtraneousProperties(), filter.getCreated(), 
-                        MessageConstants.MAX_CLOCK_SKEW, MessageConstants.TIMESTAMP_FRESHNESS_LIMIT);          
+                validateNonceOrCreated(context);
         } else if (filter.getPassword() == null && filter.getCreated() == null) {
             if (MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())) {
                  throw SOAPUtil.newSOAPFaultException(
@@ -151,30 +152,9 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                         "Authentication of Username Password Token Failed",
                         null);
             }
-            if (filter.getCreated() != null) {
-                context.getSecurityEnvironment().validateCreationTime(
-                        context.getExtraneousProperties(), filter.getCreated(), 
-                        MessageConstants.MAX_CLOCK_SKEW, MessageConstants.TIMESTAMP_FRESHNESS_LIMIT);
-            }
-            if (filter.getNonce() != null) {
-                try {
-                    if (!context.getSecurityEnvironment().validateAndCacheNonce(
-                           context.getExtraneousProperties(), filter.getNonce(), filter.getCreated(),MessageConstants.MAX_NONCE_AGE)) {
-                        XWSSecurityException xwse =
-                                new XWSSecurityException(
-                                "Invalid/Repeated Nonce value for Username Token");
-                        throw SOAPUtil.newSOAPFaultException(
-                                MessageConstants.WSSE_FAILED_AUTHENTICATION,
-                                "Invalid/Repeated Nonce value for Username Token",
-                                xwse);
-                    }
-                } catch (NonceManager.NonceException ex) {
-                    throw SOAPUtil.newSOAPFaultException(
-                            MessageConstants.WSSE_FAILED_AUTHENTICATION,
-                            "Invalid/Repeated Nonce value for Username Token",
-                            ex);
-                }
-            }
+            validateNonceOrCreated(context);
+        } else if(filter.getNonce() != null || filter.getCreated() != null){ //SP1.3
+            validateNonceOrCreated(context);
         } else{
             authenticated = context.getSecurityEnvironment().authenticateUser(context.getExtraneousProperties(),
                     filter.getUsername(), filter.getPassword());
@@ -266,7 +246,33 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
     }
     public void writeTo(javax.xml.stream.XMLStreamWriter streamWriter, HashMap props) throws javax.xml.stream.XMLStreamException {
         throw new UnsupportedOperationException();
+    }  
+
+    private void validateNonceOrCreated(ProcessingContext context) throws XWSSecurityException {
+        if (filter.getCreated() != null) {
+            context.getSecurityEnvironment().validateCreationTime(
+                    context.getExtraneousProperties(), filter.getCreated(),
+                    MessageConstants.MAX_CLOCK_SKEW, MessageConstants.TIMESTAMP_FRESHNESS_LIMIT);
+        }
+        if (filter.getNonce() != null) {
+            try {
+                if (!context.getSecurityEnvironment().validateAndCacheNonce(
+                        context.getExtraneousProperties(), filter.getNonce(), filter.getCreated(), MessageConstants.MAX_NONCE_AGE)) {
+                    XWSSecurityException xwse =
+                            new XWSSecurityException(
+                            "Invalid/Repeated Nonce value for Username Token");
+                    throw SOAPUtil.newSOAPFaultException(
+                            MessageConstants.WSSE_FAILED_AUTHENTICATION,
+                            "Invalid/Repeated Nonce value for Username Token",
+                            xwse);
+                }
+            } catch (NonceManager.NonceException ex) {
+                throw SOAPUtil.newSOAPFaultException(
+                        MessageConstants.WSSE_FAILED_AUTHENTICATION,
+                        "Invalid/Repeated Nonce value for Username Token",
+                        ex);
+            }
+        }
     }
-    
 }
 

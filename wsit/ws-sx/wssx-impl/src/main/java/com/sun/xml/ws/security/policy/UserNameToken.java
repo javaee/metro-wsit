@@ -56,6 +56,16 @@ public interface UserNameToken extends Token{
     public String getType();
     
     /**
+     * returns true is Nonce needs to be used in the UsernameToken Header sent in the message.
+     */    
+    public boolean useNonce();
+    
+    /**
+     * returns true is Created needs to be used in the UsernameToken Header sent in the message.
+     */    
+    public boolean useCreated();
+    
+    /**
      * returns true is password needs to be used in the UsernameToken Header sent in the message.
      */
     public boolean hasPassword();
