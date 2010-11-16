@@ -39,24 +39,83 @@
  */
 package com.sun.xml.ws.tx.dev;
 
-public class WSATRuntimeConfig {
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+public final class WSATRuntimeConfig {
+
+    private static final Lock DATA_LOCK = new ReentrantLock();
+
+    public static final class Initializer {
+        
+        public Initializer hostName(String value) {
+            WSATRuntimeConfig.hostName = value;
+            
+            return this;
+        }
+
+        public Initializer httpPort(String value) {
+            WSATRuntimeConfig.httpPort = value;
+            
+            return this;
+        }
+
+        public Initializer httpsPort(String value) {
+            WSATRuntimeConfig.httpsPort = value;
+            
+            return this;
+        }
+
+        public Initializer txLogLocation(String value) {
+            WSATRuntimeConfig.txLogLocation = value;
+            
+            return this;
+        }
+        
+        public Initializer enableWsatRecovery(boolean value) {
+            WSATRuntimeConfig.isWsatRecoveryEnabled = value;
+            
+            return this;
+        }
+
+        public Initializer enableWsatSsl(boolean value) {
+            WSATRuntimeConfig.isWsatSslEnabled = value;
+            
+            return this;
+        }
+
+        public void done() {
+            DATA_LOCK.unlock();
+        }
+    }
     private static WSATRuntimeConfig instance;
-    private static boolean isWSATRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
-    private static String hostAndPort;
+    private static boolean isWsatRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
     private static String txLogLocation;
-    private static boolean isWSATSSLEnabled = Boolean.valueOf(System.getProperty("wsat.ssl.enabled", "false"));
-    private static String HTTP_HOST_AND_PORT = "http://localhost:8080/";
-    private static String HTTPS_HOST_AND_PORT = "https://localhost:8181/";
+    private static boolean isWsatSslEnabled = Boolean.valueOf(System.getProperty("wsat.ssl.enabled", "false"));
+    private static String hostName = "localhost";
+    private static String httpPort = "8080";
+    private static String httpsPort = "8181";
 
     private WSATRuntimeConfig() {
+        // do nothing
+    }
+
+    public static Initializer initializer() {
+        DATA_LOCK.lock();
+
+        return new Initializer();
     }
 
     public static WSATRuntimeConfig getInstance() {
-        if (instance == null) {
-            instance = new WSATRuntimeConfig();
+        DATA_LOCK.lock();
+        try {
+            if (instance == null) {
+                instance = new WSATRuntimeConfig();
+            }
+            return instance;
+        } finally {
+            DATA_LOCK.unlock();
         }
-        return instance;
     }
 
     /**
@@ -64,11 +123,7 @@ public class WSATRuntimeConfig {
      * @return
      */
     public boolean isWSATRecoveryEnabled() {
-        return isWSATRecoveryEnabled;
-    }
-
-    public void setWSATRecoveryEnabled(boolean WSATRecoveryEnabled) {
-        isWSATRecoveryEnabled = WSATRecoveryEnabled;
+        return isWsatRecoveryEnabled;
     }
 
     /**
@@ -76,14 +131,7 @@ public class WSATRuntimeConfig {
      * @return for example "https://localhost:8181/"
      */
     public String getHostAndPort() {
-        if (hostAndPort != null) {
-            return hostAndPort;
-        }
-        return isWSATSSLEnabled ? HTTPS_HOST_AND_PORT : HTTP_HOST_AND_PORT;
-    }
-
-    public void setHostAndPort(String HostAndPort) {
-        hostAndPort = HostAndPort;
+        return isWsatSslEnabled ? "https://" + hostName + ":" + httpsPort : "http://" + hostName + ":" + httpPort;
     }
 
     /**
@@ -92,10 +140,6 @@ public class WSATRuntimeConfig {
      */
     public String getTxLogLocation() {
         return txLogLocation;
-    }
-
-    public String setTxLogLocation(String TXLogLocation) {
-        return txLogLocation = TXLogLocation;
     }
 
     public interface RecoveryEventListener {
