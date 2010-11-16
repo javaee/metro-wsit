@@ -54,7 +54,7 @@
 
     <artifactId>wsrm-impl</artifactId>
     <packaging>jar</packaging>
-    <name>WS-RealiableMessaging Implementation</name>
+    <name>WS-ReliableMessaging Implementation</name>
 
     <!-- prerequisites -->
 

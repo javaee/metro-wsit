@@ -55,7 +55,7 @@
 
     <artifactId>wsrm-api</artifactId>
     <packaging>jar</packaging>
-    <name>WS-RealiableMessaging API</name>
+    <name>WS-ReliableMessaging API</name>
 
     <!-- prerequisites -->
 
