@@ -43,7 +43,6 @@ package com.sun.xml.ws.tx.at.common;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
