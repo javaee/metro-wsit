@@ -78,12 +78,6 @@ public interface TransactionServices {
     void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException;
 
     /**
-     * The tx timeout/ttl value
-     * @return int seconds
-     */
-    int getExpires();
-
-    /**
      * Called by server tube (WSATServerHelper) to infect thread with tx
      * @param timeout timeout/ttl
      * @param tId byte[]

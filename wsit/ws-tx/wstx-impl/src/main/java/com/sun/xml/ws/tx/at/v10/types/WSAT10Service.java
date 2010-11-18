@@ -50,7 +50,8 @@ import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceFeature;
 
-@WebServiceClient(name = "WSAT10Service", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wsat", wsdlLocation = "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsat10/wsat.wsdl")
+@WebServiceClient(name = "WSAT10Service", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wsat",
+        wsdlLocation = "file:wsdls/wsat10/wsat.wsdl")
 public class WSAT10Service
     extends Service
 {
@@ -63,7 +64,7 @@ public class WSAT10Service
         try {
             URL baseUrl;
             baseUrl = com.sun.xml.ws.tx.at.v10.types.WSAT10Service.class.getResource(".");
-            url = new URL(baseUrl, "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsat10/wsat.wsdl");
+            url = new URL(baseUrl, "file:wsdls/wsat10/wsat.wsdl");
         } catch (MalformedURLException e) {
             LOGGER.warning(LocalizationMessages.WSAT_4618_FAILED_TO_CREATE_URL_FOR_WSDL());
             LOGGER.warning(e.getMessage());

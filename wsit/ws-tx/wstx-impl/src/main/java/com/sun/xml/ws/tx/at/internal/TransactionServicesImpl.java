@@ -45,7 +45,6 @@ import com.sun.xml.ws.tx.at.runtime.TransactionServices;
 import com.sun.xml.ws.tx.at.WSATException;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
-import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,8 +57,11 @@ import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 
 public class TransactionServicesImpl implements TransactionServices {
+
     private static TransactionServices INSTANCE;
-    static List<Xid> importedXids = new ArrayList<Xid>(); //todo leak cleanup in rollback and commit
+
+    //this is used to track registrations and avoid dupe registration
+    static List<Xid> importedXids = new ArrayList<Xid>();
 
 
     public static TransactionServices getInstance() {
@@ -71,12 +73,21 @@ public class TransactionServicesImpl implements TransactionServices {
      ForeignRecoveryContextManager.getInstance().start();
    }
 
-    public byte[] getGlobalTransactionId() {
-        return new byte[]{'a'};
-    }
+   public byte[] getGlobalTransactionId() {
+       return new byte[]{'a'};
+   }
 
+    /**
+     * Remove Xid from importedXids.  This is safe anytime after two-phase completion begins as importedXids only
+     *  serves to avoid duplicate registration and it is a protocol error (ie bug)
+     *  if registration should take place after 2pc begins.
+     * @param xid Xid
+     */
+   private void removeFromImportedXids(Xid xid) {
+       importedXids.remove(xid);
+   }
 
-  public Xid enlistResource(XAResource resource, Xid xid)
+   public Xid enlistResource(XAResource resource, Xid xid)
           throws WSATException {
     WSATGatewayRM wsatgw = WSATGatewayRM.getInstance();
     if (wsatgw == null) throw new WSATException("WS-AT gateway not deployed.");
@@ -90,15 +101,13 @@ public class TransactionServicesImpl implements TransactionServices {
     } catch (SystemException e) {
       throw new WSATException(e);
     }
-  }
-    public void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException {
-        log("regsync");
+   }
+
+   public void registerSynchronization(Synchronization synchronization, Xid xid) throws WSATException {
+        debug("regsync");
     }
 
-    public int getExpires() {
-        return 30000;
-    }
-
+    //returns null if not infected previously or xid if it has
     public Xid importTransaction(int timeout, byte[] tId) throws WSATException {
         final XidImpl xidImpl = new XidImpl(tId);
         if(importedXids.contains(xidImpl)) return xidImpl;
@@ -108,8 +117,9 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public String prepare(byte[] tId) throws WSATException {
-        log("prepare");
+        debug("prepare");
         final XidImpl xidImpl = new XidImpl(tId);
+        removeFromImportedXids(xidImpl);
         ForeignRecoveryContextManager.getInstance().persist(xidImpl);
         int vote;
         try {
@@ -122,7 +132,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public void commit(byte[] tId) throws WSATException {
-        log("commit");
+        debug("commit");
         final XidImpl xidImpl = new XidImpl(tId);
         try {
             TransactionImportManager.getInstance().getXATerminator().commit(xidImpl, false);
@@ -133,8 +143,9 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public void rollback(byte[] tId) throws WSATException {
-        log("rollback");
+        debug("rollback");
         final XidImpl xidImpl = new XidImpl(tId);
+        removeFromImportedXids(xidImpl);
         try {
             TransactionImportManager.getInstance().getXATerminator().rollback(xidImpl);
         } catch (XAException ex) {
@@ -144,26 +155,40 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public void replayCompletion(String tId, XAResource xaResource) throws WSATException {
-        log("replayCompleiton");
+        debug("replayCompletion tid:" + tId + " xaResource:" + xaResource);
+        final XidImpl xid = new XidImpl(tId.getBytes());
+        ForeignRecoveryContext foreignRecoveryContext =
+                ForeignRecoveryContextManager.getInstance().getForeignRecoveryContext(xid);
+        if (WSATHelper.isDebugEnabled())
+            debug("replayCompletion() tid=" + tId + " xid=" + xid + " foreignRecoveryContext=" + foreignRecoveryContext);
+        if (foreignRecoveryContext == null) {
+            try {
+                xaResource.rollback(xid);
+            } catch (XAException xae) {
+                debug("replayCompletion() tid=" + tId + " (" + xid + "), XAException ("
+                        + JTAHelper.xaErrorCodeToString(xae.errorCode, false) + ") rolling back imported transaction: " + xae);
+                throw new WSATException("XAException on rollback of subordinate in response to replayCompletion for "
+                        + xid + "(tid=" + tId + ")", xae);
+            }
+        }
+        // if the transaction exists, then a completion retry for the resource will
+        // occur in due time.  There isn't a mechanism currently to speed
+        // up the retry in order to respond immediately.
     }
 
     public EndpointReference getParentReference(Xid xid) {
-      log("getParentReference");
-      if (xid == null) throw new IllegalArgumentException("No subordinate transaction " + xid);
-   //todo readd this and either set it on thread for getResource call below or get the frc off it directly somehow
-   //   Transaction tx = (Transaction) getTM().getTransaction(xid);
-   //   if (tx == null) throw new IllegalArgumentException("No subordinate transaction " + xid);
+      debug("getParentReference xid:"+xid);
+      if (xid == null) throw new IllegalArgumentException("No subordinate transaction parent reference as xid is null");
       ForeignRecoveryContext foreignRecoveryContext =
-              (ForeignRecoveryContext)TransactionManagerImpl.getInstance().getResource(
-                    WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT);
-      //          (ForeignRecoveryContext) tx.getProperty(WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT);
+              ForeignRecoveryContextManager.getInstance().getForeignRecoveryContext(xid);
       if (foreignRecoveryContext == null)
           throw new AssertionError("No recovery context associated with transaction " + xid);
       return foreignRecoveryContext.getEndpointReference();
     }
 
-    private void log(String msg){
-     //   System.out.println("txservicesimpl:"+msg);
+    private void debug(String msg){
+        Logger logger = Logger.getLogger(TransactionServicesImpl.class);
+        if(logger.isLoggable(Level.INFO))logger.log(Level.INFO, msg);
     }
 
 }

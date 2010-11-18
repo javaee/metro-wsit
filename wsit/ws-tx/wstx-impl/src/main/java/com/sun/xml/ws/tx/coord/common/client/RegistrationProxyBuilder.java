@@ -117,7 +117,7 @@ public abstract class RegistrationProxyBuilder {
             try {
                 PendingRequestManager.ResponseBox box = PendingRequestManager.reqisterRequest(txId);
                 asyncRegister(parameters.getDelegate());
-                return box.getReponse(timeout);
+                return box.getResponse(timeout);
             } finally {
                 PendingRequestManager.removeRequest(txId);
             }

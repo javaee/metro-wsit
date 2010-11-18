@@ -72,31 +72,22 @@ public class WSATServerHelper implements WSATServer {
         if(WSATHelper.isDebugEnabled())
             debug("processRequest HeaderList:"+headers+
                     " TransactionalAttribute:"+tx+ " isEnabled:"+tx.isEnabled());
-   //     if (tx.isEnabled()) {
-            CoordinationContextBuilder ccBuilder =
-                    CoordinationContextBuilder.headers(headers,tx.getVersion());
+            CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers,tx.getVersion());
             if(ccBuilder != null) {
                 processIncomingTransaction(ccBuilder);
             } else {
                 if(tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
             }
-  //      }
     }
     
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
         if (transactionalAttribute!=null && transactionalAttribute.isEnabled()) {
-//todoremove             if(WSATHelper.isDebugEnabled()) debug("processResponse isTransactionalAnnotationPresent about to suspend");
-//todoremove             javax.transaction.Transaction suspendedTx =
-//todoremove                     TransactionHelper.getTransactionHelper().getTransactionManager().forceSuspend();
-//todoremove             if(WSATHelper.isDebugEnabled()) debug("processResponse suspend was successful tx:" + suspendedTx);
+            debug("processResponse isTransactionalAnnotationPresent about to suspend");
         }
     }
 
     public void doHandleException(Throwable throwable) {
-//todoremove             if(WSATHelper.isDebugEnabled()) debug("processException about to suspend if transaction is present due to:"+ throwable);
-//todoremove             javax.transaction.Transaction suspendedTx =
-//todoremove                     TransactionHelper.getTransactionHelper().getTransactionManager().forceSuspend();
-//todoremove             if(WSATHelper.isDebugEnabled()) debug("processException suspend was successful tx:" + suspendedTx);
+        debug("processException about to suspend if transaction is present due to:"+ throwable);
     }
     
     /**
@@ -112,7 +103,7 @@ public class WSATServerHelper implements WSATServer {
      * @param builder CoordinationContextBuilder
      */
     private void processIncomingTransaction(CoordinationContextBuilder builder) {
-        if(WSATHelper.isDebugEnabled())debug("in processingIncomingTransaction");
+        if(WSATHelper.isDebugEnabled()) debug("in processingIncomingTransaction");
         //we either need to fast suspend immediately and resume after register as we are doing or move this after register
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
@@ -146,7 +137,7 @@ public class WSATServerHelper implements WSATServer {
                 timeout(timeout);
         RegistrationIF proxyIF = proxyBuilder.build();
         BaseRegisterResponseType registerResponseType = proxyIF.registerOperation(registerType);
-        if(WSATHelper.isDebugEnabled())debug("Return from registerOperation call:"+registerResponseType);
+        if(WSATHelper.isDebugEnabled()) debug("Return from registerOperation call:"+registerResponseType);
         if (registerResponseType != null){
             EndpointReference epr = registerResponseType.getCoordinatorProtocolService();
             ForeignRecoveryContext frc =

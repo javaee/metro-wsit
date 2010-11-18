@@ -73,17 +73,15 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
     }
     
     public BaseRegisterResponseType<T,P> registerOperation(BaseRegisterType<T,K> parameters) {
- //todoremove        if (WSATHelper.isDebugEnabled())
- //todoremove            WseeWsatLogger.logRegisterOperationEntered(parameters);
-        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4504_REGISTER_OPERATION_ENTERED(parameters));
+        if (WSATHelper.isDebugEnabled())
+            LOGGER.info(LocalizationMessages.WSAT_4504_REGISTER_OPERATION_ENTERED(parameters));
         String txId = WSATHelper.getInstance().getWSATTidFromWebServiceContextHeaderList(context);
         Xid xidFromWebServiceContextHeaderList = TransactionIdHelper.getInstance().wsatid2xid(txId);
         Xid xid = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
         BaseRegisterResponseType<T,P> registerResponseType = createRegisterResponseType(xid);
         try {
-            //todoremove     if (WSATHelper.isDebugEnabled())
-            //todoremove        WseeWsatLogger.logRegisterOperationExited(registerResponseType);
-            if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
+            if (WSATHelper.isDebugEnabled()) LOGGER.info(
+                    LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
             TransactionManagerImpl.getInstance().getTransactionManager().suspend();
         } catch (SystemException ex) {
             ex.printStackTrace();
@@ -113,7 +111,6 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
             registerSynchronization(xid, parameters.getParticipantProtocolService());
             return null;
         } else {
-//todoremove             WseeWsatLogger.logUnknownParticipantIdentifier(protocolIdentifier);
             LOGGER.severe(LocalizationMessages.WSAT_4580_UNKNOWN_PARTICIPANT_IDENTIFIER(protocolIdentifier));
             throw new WebServiceException("Unknown participant identifier:"+protocolIdentifier);
         }

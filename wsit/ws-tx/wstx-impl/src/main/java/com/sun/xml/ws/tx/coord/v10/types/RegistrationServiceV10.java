@@ -51,7 +51,7 @@ import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceFeature;
 
-@WebServiceClient(name = "RegistrationService_V10", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wscoor", wsdlLocation = "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc10/wscoor.wsdl")
+@WebServiceClient(name = "RegistrationService_V10", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wscoor", wsdlLocation = "file:wsdls/wsc10/wscoor.wsdl")
 public class RegistrationServiceV10
     extends Service
 {
@@ -64,7 +64,7 @@ public class RegistrationServiceV10
         try {
             URL baseUrl;
             baseUrl = com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class.getResource(".");
-            url = new URL(baseUrl, "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc10/wscoor.wsdl");
+            url = new URL(baseUrl, "file:wsdls/wsc10/wscoor.wsdl");
         } catch (MalformedURLException e) {
             LOGGER.warning(LocalizationMessages.WSAT_4622_FAILED_TO_CREATE_URL_FOR_WSDL());
             LOGGER.warning(e.getMessage());

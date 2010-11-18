@@ -54,7 +54,8 @@ import java.net.URL;
  * This is the service client for WSAT10 endpoitns.
  *
  */
-@WebServiceClient(name = "WSAT10Service", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wsat", wsdlLocation = "wsat.wsdl")
+@WebServiceClient(name = "WSAT10Service", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wsat",
+        wsdlLocation = "wsat.wsdl")
 public class WSAT10Service
     extends Service
 {
@@ -72,7 +73,7 @@ public class WSAT10Service
     }
 
     public WSAT10Service() {
-        super(WSAT10SERVICE_WSDL_LOCATION, new QName("http://schemas.xmlsoap.org/ws/2004/10/wsat", "WSATCoordinator")); //todo paul was WSAT10Service
+        super(WSAT10SERVICE_WSDL_LOCATION, new QName("http://schemas.xmlsoap.org/ws/2004/10/wsat", "WSATCoordinator"));
     }
 
 

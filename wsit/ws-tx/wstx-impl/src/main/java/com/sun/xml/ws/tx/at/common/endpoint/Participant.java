@@ -99,12 +99,12 @@ public class Participant<T> implements ParticipantIF<T> {
              coordinatorPort.preparedOperation(createNotification());
       } catch (Exception e) {
          log("prepare resulted in exception, sending aborted for tid:" + stringForTidByteArray(tid) + " " + e);
+         e.printStackTrace();
          if (coordinatorPort != null) coordinatorPort.abortedOperation(createNotification());
          else {
             log("prepare resulted in exception, unable to send abort as coordinatorPort was null" +
                         "for tid:" + stringForTidByteArray(tid) + " " + e); //should never occur
             throw new WebServiceException("coordinator port null during prepare");
-             // WSATFaultFactory.throwContextRefusedFault();
          }
       }
       if(WSATHelper.isDebugEnabled())

@@ -40,23 +40,33 @@
 
 package com.sun.xml.ws.tx.coord.v10.client;
 
+import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.coord.v10.types.RegistrationCoordinatorPortType;
 import com.sun.xml.ws.tx.coord.v10.types.RegistrationPortTypeRPC;
 import com.sun.xml.ws.tx.coord.v10.types.RegistrationRequesterPortType;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 
 
 
-@WebServiceClient(name = "RegistrationService_V10", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wscoor", wsdlLocation = "wscoor.wsdl")
+@WebServiceClient(name = "RegistrationService_V10", targetNamespace = "http://schemas.xmlsoap.org/ws/2004/10/wscoor",
+        wsdlLocation = "wscoor.wsdl")
 public class RegistrationServiceV10
     extends Service
 {
-    private static final String WSDL = "/META-INF/wstx/wsdls/wsc10/wscoor.wsdl";
-    private final static URL REGISTRATIONSERVICEV10_WSDL_LOCATION = RegistrationServiceV10.class.getResource(WSDL);
+
+    private static URL REGISTRATIONSERVICEV10_WSDL_LOCATION;
+    static {
+        try {
+            REGISTRATIONSERVICEV10_WSDL_LOCATION = new URL(WSATHelper.V10.getRegistrationCoordinatorAddress() + "?wsdl");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public RegistrationServiceV10(URL wsdlLocation, QName serviceName) {
         super(wsdlLocation, serviceName);

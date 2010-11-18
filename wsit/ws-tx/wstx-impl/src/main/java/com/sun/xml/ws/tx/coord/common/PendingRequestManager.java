@@ -89,7 +89,7 @@ public class PendingRequestManager {
             this.notify();
         }
 
-        public synchronized BaseRegisterResponseType getReponse(long timeout) {
+        public synchronized BaseRegisterResponseType getResponse(long timeout) {
             /* A thread can also wake up without being notified, interrupted, or
             * timing out, a so-called <i>spurious wakeup</i>.  While this will rarely
             * occur in practice, applications must guard against it by testing for

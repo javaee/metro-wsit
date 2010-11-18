@@ -565,7 +565,7 @@ public class WSATHelper<T> {
     }
 
     public void debug(String msg) {
-        Logger.getLogger(WSATHelper.class).log(Level.INFO, null);
+        Logger.getLogger(WSATHelper.class).log(Level.INFO, msg);
     }
 
   public static String assignUUID(){

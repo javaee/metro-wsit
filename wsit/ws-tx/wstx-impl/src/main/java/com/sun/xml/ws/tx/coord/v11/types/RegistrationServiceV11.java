@@ -51,7 +51,8 @@ import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceFeature;
 
-@WebServiceClient(name = "RegistrationService_V11", targetNamespace = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06", wsdlLocation = "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl")
+@WebServiceClient(name = "RegistrationService_V11", targetNamespace = "http://docs.oasis-open.org/ws-tx/wscoor/2006/06",
+        wsdlLocation = "file:wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl")
 public class RegistrationServiceV11
     extends Service
 {
@@ -64,7 +65,7 @@ public class RegistrationServiceV11
         try {
             URL baseUrl;
             baseUrl = com.sun.xml.ws.tx.coord.v11.types.RegistrationServiceV11 .class.getResource(".");
-            url = new URL(baseUrl, "file:/scratch/pparkins/dev/src1034//modules/wsee/src//wsee/wstx/WEB-INF/wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl");
+            url = new URL(baseUrl, "wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl");
         } catch (MalformedURLException e) {
             LOGGER.warning(LocalizationMessages.WSAT_4623_FAILED_TO_CREATE_URL_FOR_WSDL());
             LOGGER.warning(e.getMessage());

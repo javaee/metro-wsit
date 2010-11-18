@@ -83,7 +83,6 @@ public class WSATGatewayRM implements XAResource {
   static String txlogdirInbound;
   private static String txlogdirOutbound;
 
-
   WSATGatewayRM(String serverName) {
     resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
     branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());

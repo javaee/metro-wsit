@@ -141,6 +141,10 @@ public class ForeignRecoveryContextManager {
         return recoveredContexts;
     }
 
+    public ForeignRecoveryContext getForeignRecoveryContext(Xid xid) {
+        return recoveredContexts.get(xid).getContext();
+    }
+
     /**
      * Called as part of deleteForeignState in TransactionServicesImpl after completion of rollback or commit
      * @param fxid Xid
@@ -290,6 +294,10 @@ public class ForeignRecoveryContextManager {
 
         int getRetryCount() {
             return retryCount;
+        }
+
+        ForeignRecoveryContext getContext() {
+            return context;
         }
     }
 
