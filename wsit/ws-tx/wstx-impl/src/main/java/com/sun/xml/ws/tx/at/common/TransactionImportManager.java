@@ -46,7 +46,6 @@ import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.logging.Level;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
