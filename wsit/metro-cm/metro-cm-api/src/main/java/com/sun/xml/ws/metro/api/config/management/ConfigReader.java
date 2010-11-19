@@ -38,54 +38,55 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
+package com.sun.xml.ws.metro.api.config.management;
 
+import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 
 import javax.xml.ws.WebServiceException;
 
 /**
- * This interface encapsulates the logic to reconfigure an endpoint instance.
+ * Establish if the configuration data has changed and reconfigure the endpoint
+ * with the new configuration data.
  *
  * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface Configurator<T> {
+public interface ConfigReader<T> {
 
     /**
-     * Initializes the endpoint.
+     * Initialize the reader.
      *
-     * @param endpoint The managed endpoint instance. Must not be null.
+     * @param endpoint A ManagedEndpoint instance. Must not be null.
      * @param assertion This assertion contains the policy that configured the
      *   managed endpoint. May be null.
-     * @param reader A ConfigReader instance. Must not be null.
-     * @param saver A ConfigSaver instance. Must not be null.
+     * @param attributes The attributes with which the original WSEndpoint instance
+     *   was created.
+     * @param classLoader The class loader that is associated with the original
+     *   WSEndpoint instance.
+     * @param starter An EndpointStarter instance. Must not be null.
      * @throws WebServiceException If the initialization failed.
      */
-    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
-            ConfigReader<T> reader, ConfigSaver<T> saver)
-            throws WebServiceException;
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion, EndpointCreationAttributes attributes,
+            ClassLoader classLoader, EndpointStarter starter) throws WebServiceException;
 
     /**
-     * Starts any concurrent tasks required by the implementation.
-     * 
+     * Start this reader.
+     *
+     * It is assumed that the reader will concurrently poll or wait for a
+     * configuration change event.
+     *
+     * @param parameters Custom configurator implementations can use this to pass
+     *   in their own parameters.
      * @throws WebServiceException If the start failed.
      */
-    public void start() throws WebServiceException;
+    public void start(NamedParameters parameters) throws WebServiceException;
 
     /**
-     * Starts any concurrent tasks required by the implementation.
+     * Stop this reader.
      *
      * @throws WebServiceException If stopping failed.
      */
     public void stop() throws WebServiceException;
-
-    /**
-     * Reconfigures an endpoint instance.
-     *
-     * @param parameters The reconfiguration data.
-     * @throws WebServiceException If the reconfiguration failed.
-     */
-    public void recreate(NamedParameters parameters) throws WebServiceException;
-
+    
 }

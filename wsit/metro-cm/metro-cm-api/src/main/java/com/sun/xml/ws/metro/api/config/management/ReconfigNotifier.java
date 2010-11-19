@@ -38,36 +38,20 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
-
-import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
-
-import javax.xml.ws.WebServiceException;
+package com.sun.xml.ws.metro.api.config.management;
 
 /**
- * Persist configuration changes
+ * The communication components of the config management system may create instances
+ * of this listener that are used then to notify clients when the endpoint was
+ * reconfigured.
  *
- * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface ConfigSaver<T> {
+public interface ReconfigNotifier {
 
     /**
-     * Initialize this instance.
-     * 
-     * @param endpoint The ManagedEndpoint instance. Must not be null.
-     * @param assertion This assertion contains the policy that configured the
-     *   managed endpoint. May be null.
-     * @throws WebServiceException If initialization failed.
+     * Emit a notification that the endpoint was reconfigured.
      */
-    void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion) throws WebServiceException;
-
-    /**
-     * Persist configuration changes.
-     *
-     * @param parameters Any parameter that needs to be passed into the implementation
-     * @throws WebServiceException If persisting the configuration failed.
-     */
-    void persist(NamedParameters parameters) throws WebServiceException;
+    public void sendNotification();
 
 }

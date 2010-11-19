@@ -38,9 +38,10 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
+package com.sun.xml.ws.metro.api.config.management;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
 import com.sun.xml.ws.config.management.ManagementMessages;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;

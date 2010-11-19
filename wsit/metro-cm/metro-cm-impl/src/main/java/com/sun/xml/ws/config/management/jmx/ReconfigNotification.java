@@ -41,7 +41,7 @@
 package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.ReconfigNotifier;
+import com.sun.xml.ws.metro.api.config.management.ReconfigNotifier;
 import com.sun.xml.ws.config.management.ManagementMessages;
 
 import java.util.logging.Level;

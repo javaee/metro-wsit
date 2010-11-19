@@ -41,9 +41,9 @@
 package com.sun.xml.ws.config.management.persistence;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.NamedParameters;
-import com.sun.xml.ws.api.config.management.ManagedEndpoint;
-import com.sun.xml.ws.api.config.management.ConfigSaver;
+import com.sun.xml.ws.metro.api.config.management.NamedParameters;
+import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.metro.api.config.management.ConfigSaver;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion.ImplementationRecord;
 import com.sun.xml.ws.config.management.ManagementConstants;

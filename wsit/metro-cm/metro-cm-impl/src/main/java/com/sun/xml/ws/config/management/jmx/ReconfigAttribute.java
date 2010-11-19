@@ -41,10 +41,10 @@
 package com.sun.xml.ws.config.management.jmx;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.api.config.management.Configurator;
-import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.metro.api.config.management.Configurator;
+import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.NamedParameters;
+import com.sun.xml.ws.metro.api.config.management.NamedParameters;
 import com.sun.xml.ws.api.config.management.jmx.JmxConstants;
 import com.sun.xml.ws.config.management.ManagementConstants;
 import com.sun.xml.ws.config.management.ManagementMessages;

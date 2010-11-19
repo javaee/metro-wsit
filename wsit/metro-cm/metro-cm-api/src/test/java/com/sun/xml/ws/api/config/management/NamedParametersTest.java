@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.api.config.management;
 
+import com.sun.xml.ws.metro.api.config.management.NamedParameters;
 import java.util.HashMap;
 import junit.framework.TestCase;
 

@@ -38,52 +38,36 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
+package com.sun.xml.ws.metro.api.config.management;
 
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 
 import javax.xml.ws.WebServiceException;
 
 /**
- * The API that encapsulates any communication interface for configuration
- * management.
+ * Persist configuration changes
  *
- * @param <T> The endpoint type.
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface CommunicationServer<T> {
+public interface ConfigSaver<T> {
 
     /**
-     * Initialize the communication interface.
-     *
+     * Initialize this instance.
+     * 
      * @param endpoint The ManagedEndpoint instance. Must not be null.
      * @param assertion This assertion contains the policy that configured the
      *   managed endpoint. May be null.
-     * @param creationAttributes The attributes with which the original endpoint
-     *   was created.
-     * @param classLoader The class loader that is associated with the original
-     *   endpoint.
-     * @param configurator A Configurator instance. May not be null.
-     * @param starter An EndpointStarter instance. May not be null.
      * @throws WebServiceException If initialization failed.
      */
-    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
-            EndpointCreationAttributes creationAttributes, ClassLoader classLoader,
-            Configurator<T> configurator, EndpointStarter starter)
-            throws WebServiceException;
+    void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion) throws WebServiceException;
 
     /**
-     * Start the communication interface.
+     * Persist configuration changes.
      *
-     * @throws WebServiceException If the start failed.
+     * @param parameters Any parameter that needs to be passed into the implementation
+     * @throws WebServiceException If persisting the configuration failed.
      */
-    public void start() throws WebServiceException;
+    void persist(NamedParameters parameters) throws WebServiceException;
 
-    /**
-     * Stop the communication interface.
-     *
-     * @throws WebServiceException If stopping the interface failed.
-     */
-    public void stop() throws WebServiceException;
-    
 }

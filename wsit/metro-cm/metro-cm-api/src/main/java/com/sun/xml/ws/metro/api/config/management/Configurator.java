@@ -38,20 +38,54 @@
  * holder.
  */
 
-package com.sun.xml.ws.api.config.management;
+package com.sun.xml.ws.metro.api.config.management;
+
+import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
+
+import javax.xml.ws.WebServiceException;
 
 /**
- * The communication components of the config management system may create instances
- * of this listener that are used then to notify clients when the endpoint was
- * reconfigured.
+ * This interface encapsulates the logic to reconfigure an endpoint instance.
  *
+ * @param <T> The endpoint implementation class type.
  * @author Fabian Ritzmann
  */
-public interface ReconfigNotifier {
+public interface Configurator<T> {
 
     /**
-     * Emit a notification that the endpoint was reconfigured.
+     * Initializes the endpoint.
+     *
+     * @param endpoint The managed endpoint instance. Must not be null.
+     * @param assertion This assertion contains the policy that configured the
+     *   managed endpoint. May be null.
+     * @param reader A ConfigReader instance. Must not be null.
+     * @param saver A ConfigSaver instance. Must not be null.
+     * @throws WebServiceException If the initialization failed.
      */
-    public void sendNotification();
+    public void init(ManagedEndpoint<T> endpoint, ManagedServiceAssertion assertion,
+            ConfigReader<T> reader, ConfigSaver<T> saver)
+            throws WebServiceException;
+
+    /**
+     * Starts any concurrent tasks required by the implementation.
+     * 
+     * @throws WebServiceException If the start failed.
+     */
+    public void start() throws WebServiceException;
+
+    /**
+     * Starts any concurrent tasks required by the implementation.
+     *
+     * @throws WebServiceException If stopping failed.
+     */
+    public void stop() throws WebServiceException;
+
+    /**
+     * Reconfigures an endpoint instance.
+     *
+     * @param parameters The reconfiguration data.
+     * @throws WebServiceException If the reconfiguration failed.
+     */
+    public void recreate(NamedParameters parameters) throws WebServiceException;
 
 }

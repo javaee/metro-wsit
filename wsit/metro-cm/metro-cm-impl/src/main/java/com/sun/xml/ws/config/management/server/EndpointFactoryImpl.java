@@ -43,7 +43,7 @@ package com.sun.xml.ws.config.management.server;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.server.WSEndpoint;
 import com.sun.xml.ws.api.config.management.EndpointCreationAttributes;
-import com.sun.xml.ws.api.config.management.ManagedEndpoint;
+import com.sun.xml.ws.metro.api.config.management.ManagedEndpoint;
 import com.sun.xml.ws.api.config.management.ManagedEndpointFactory;
 import com.sun.xml.ws.api.config.management.policy.ManagedServiceAssertion;
 import com.sun.xml.ws.config.management.ManagementMessages;
