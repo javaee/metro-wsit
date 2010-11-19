@@ -39,8 +39,11 @@
  */
 package com.sun.xml.ws.tx.dev;
 
+import com.sun.istack.logging.Logger;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 
 public final class WSATRuntimeConfig {
 
@@ -99,6 +102,7 @@ public final class WSATRuntimeConfig {
     private static String hostName = "localhost";
     private static String httpPort = "8080";
     private static String httpsPort = "8181";
+    private static RecoveryEventListener wsatRecoveryEventListener;
 
     private WSATRuntimeConfig() {
         // do nothing
@@ -146,6 +150,10 @@ public final class WSATRuntimeConfig {
         return txLogLocation;
     }
 
+    public void setWSATRecoveryEventListener(RecoveryEventListener WSATRecoveryEventListener) {
+        wsatRecoveryEventListener = WSATRecoveryEventListener;
+    }
+
     public interface RecoveryEventListener {
 
         /**
@@ -167,16 +175,11 @@ public final class WSATRuntimeConfig {
     public class WSATRecoveryEventListener implements RecoveryEventListener {
 
         public void beforeRecovery(boolean delegated, String instance) {
-            if (!delegated) {
-                return;
-            }
-            //read logs of peer/crashed server
-//		delegatedtxlogdir = txlogdir + File.separator + ".." + File.separator  ".." + File.separator + "wsat" + File.separator + instance;
-//		wsatRecoveryResourceHandlerForDelegated = createWSATRecoveryResourceHandlerForDelegated(delegatedtxlogdir);  // in reality this will likely be deferred until xaresource.recover call
-//		TransactionImportManager.getInstance().registerRecoveryResourceHandler(WSATGatewayRM.getInstance());
+            wsatRecoveryEventListener.beforeRecovery(delegated, instance);
         }
 
         public void afterRecovery(boolean success, boolean delegated, String instance) {
+            wsatRecoveryEventListener.afterRecovery(success, delegated, instance);
         }
     }
 }

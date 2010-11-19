@@ -49,6 +49,7 @@ import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
 
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
@@ -68,7 +69,7 @@ import javax.xml.ws.WebServiceException;
 /**
  * Gateway XAResource for managing outbound WS-AT transaction branches.
  */
-public class WSATGatewayRM implements XAResource {
+public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEventListener {
   private static final Logger LOGGER = Logger.getLogger(WSATGatewayRM.class);
 
 
@@ -82,6 +83,7 @@ public class WSATGatewayRM implements XAResource {
   public static  String txlogdir;
   static String txlogdirInbound;
   private static String txlogdirOutbound;
+  private static String txlogdirOutboundRecovery;
 
   WSATGatewayRM(String serverName) {
     resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
@@ -111,11 +113,13 @@ public class WSATGatewayRM implements XAResource {
       singleton = new WSATGatewayRM(serverName);
       if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
         TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
+        WSATRuntimeConfig.getInstance().setWSATRecoveryEventListener(singleton);
       }
     }
     isReady = true;
     return singleton;
   }
+
 
     /**
      * Called for create of WSATGatewayRM
@@ -147,13 +151,13 @@ public class WSATGatewayRM implements XAResource {
     }
 
     /**
-     * Called for create of WSATGatewayRM
+     * Called for XAResource.recover
      */
     void recoverPendingBranches() {
     if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() outbound");
-    FileInputStream fis = null;
-    ObjectInputStream in = null;
-      File[] files = new File(txlogdirOutbound).listFiles();
+    FileInputStream fis;
+    ObjectInputStream in;
+      File[] files = new File(txlogdirOutboundRecovery).listFiles();
       if(files!=null) for (int i=0;i<files.length;i++) {
        try {
         fis = new FileInputStream(files[i]);
@@ -163,14 +167,14 @@ public class WSATGatewayRM implements XAResource {
         //pendingXids.addAll(branch.getAllXids());
         branch.commit(branch.getXid(), false);
         in.close();
-       } catch (Throwable e) {  //todo give file  info in this message
-            throw new WebServiceException("Failure while recovering WS-AT transaction logs", e);
+       } catch (Throwable e) {
+            throw new WebServiceException("Failure while recovering WS-AT transaction logs file:"+files[i], e);
        }
       }
     if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() inbound");
      fis = null;
      in = null;
-     files = new File(txlogdirInbound).listFiles();
+     files = new File(txlogdirOutboundRecovery).listFiles();
      if(files!=null) for (int i=0;i<files.length;i++) {
        try {
         fis = new FileInputStream(files[i]);
@@ -182,20 +186,6 @@ public class WSATGatewayRM implements XAResource {
             throw new WebServiceException("Failure while recovering WS-AT transaction logs inbound", e);
        }
       }
-  }
-
-
-  public void stop() {
-    try {
-      unregisterResource();
-    } catch (SystemException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void unregisterResource() throws SystemException {
-  //  TransactionManager tm = getTM();
-  //  tm.unregisterResource(resourceRegistrationName, true);
   }
 
   /**
@@ -326,9 +316,30 @@ public class WSATGatewayRM implements XAResource {
     }
   }
 
+    /**
+     * Call for local recover/server
+     * @param flag
+     * @return
+     * @throws XAException
+     */
   public Xid[] recover(int flag) throws XAException {
+      return recover(flag, null);
+  }
+
+    /**
+     * Call for delegated recovery specified by logDir value
+     * @param flag
+     * @param instance
+     * @return
+     * @throws XAException
+     */
+  public synchronized Xid[] recover(int flag, String instance) throws XAException { //todo finer sync
+     //for delegated recovery
+            String delegatedtxlogdir = instance==null?null:
+                    WSATGatewayRM.txlogdir + File.separator + ".." + File.separator  + ".." +
+                            File.separator + "wsat" + File.separator + instance + File.separator;
     if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
-        setTxLogDirs();
+        setTxLogDirs(delegatedtxlogdir);
         try {
             singleton.initStore();
         } catch (Exception e) {
@@ -350,13 +361,14 @@ public class WSATGatewayRM implements XAResource {
     return new Xid[0];
   }
 
-    private void setTxLogDirs() {
-        txlogdir = TransactionImportManager.getInstance().getTxLogLocation();
+  void setTxLogDirs(String peerTxlogdir) {  //param for peer or resetting
+        txlogdir = peerTxlogdir!=null?peerTxlogdir:TransactionImportManager.getInstance().getTxLogLocation();
         txlogdirInbound = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "inbound";
         txlogdirOutbound = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "outbound";
-    }
+        txlogdirOutboundRecovery = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "outbound";
+  }
 
-    public void forget(Xid xid) throws XAException {
+  public void forget(Xid xid) throws XAException {
     if (WSATHelper.isDebugEnabled()) debug("forget() xid=" + xid);
     BranchRecord branch = getBranch(xid);
     if (branch == null) JTAHelper.throwXAException(XAException.XAER_NOTA, "forget: no branch info for " + xid);
@@ -503,6 +515,26 @@ public class WSATGatewayRM implements XAResource {
     return deleted; */ return true;
   }
 
+    //RecoveryListener implementation
+    public void beforeRecovery(boolean delegated, String instance) {
+        debug("afterRecovery called, delegated:" + delegated + " instance:" + instance);
+        if (!delegated) {
+            return;
+        }
+        TransactionImportManager.getInstance().registerRecoveryResourceHandler(
+                new WSATGatewayRMPeerRecoveryDelegate(instance));
+    }
+
+    public void afterRecovery(boolean success, boolean delegated, String instance) {
+        debug("afterRecovery called, success:" + success + " delegated:" + delegated + " instance:" + instance);
+    }
+
+  private void debug(String msg) {
+    if (WSATHelper.isDebugEnabled()) {
+        Logger.getLogger(WSATGatewayRM.class).log(Level.INFO, msg);
+    }
+  }
+
 
   //for testing only
   private static TransactionManager m_transactionManager;
@@ -514,12 +546,6 @@ public class WSATGatewayRM implements XAResource {
       m_transaction = transaction;
   }
 
-  private void debug(String msg) {
-    if (WSATHelper.isDebugEnabled()) {
-   //   debugWSAT.debug
-      System.out.println("[WSATGatewayRM] " + resourceRegistrationName + " msg:" + msg);
-    }
-  }
 
     private final class BranchObjectHandler { // implements ObjectHandler {
     private static final int VERSION = 1;

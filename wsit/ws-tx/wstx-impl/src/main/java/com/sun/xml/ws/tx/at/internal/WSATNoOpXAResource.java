@@ -40,9 +40,12 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.istack.logging.Logger;
+
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import java.util.logging.Level;
 
 /**
  *
@@ -100,7 +103,7 @@ class WSATNoOpXAResource implements XAResource {
 
 
   private void debug(String msg) {
-    //  System.out.println("wsatnoopxaresource debug:"+msg);
+        Logger.getLogger(WSATNoOpXAResource.class).log(Level.INFO, msg);
     }
 
 }

@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
 
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.*;
+import java.util.logging.Level;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
@@ -71,8 +73,9 @@ public class BranchRecord implements Externalizable {
   private Map<Xid, RegisteredResource> registeredResources;
   private String branchAliasSuffix = "BI_WSATGatewayRM"; //this should be different from the WSATGateway resourcce name prefix, and should keep it short.
   private boolean logged;
+ private static final Logger LOGGER = Logger.getLogger(BranchRecord.class);
 
-  /**
+    /**
    * Used for recovery (created by readObject) and Externalizable no-arg constructor
    */
   public BranchRecord() {
@@ -319,10 +322,7 @@ public class BranchRecord implements Externalizable {
   }
 
   private void debug(String msg) {
-   //   System.out.println("BranchRecord:"+msg);
-  /**  if (WSATHelper.getInstance().isDebugEnabled()) {
-      WSATHelper.getInstance().debug("[WSAT Branch " + globalXid + "] " + msg);
-    } */
+    LOGGER.info(msg);
   }
 
   class RegisteredResource implements Externalizable {
