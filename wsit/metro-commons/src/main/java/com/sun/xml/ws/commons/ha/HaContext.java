@@ -67,7 +67,7 @@ public class HaContext {
 
         @Override
         public String toString() {
-            return "HaState{" + "packet=" + packet + ", haInfo=" + haInfo + '}';
+            return "HaState{" + "packet=" + packet + ", haInfo=" + asString(haInfo) + '}';
         }                
     }
 
