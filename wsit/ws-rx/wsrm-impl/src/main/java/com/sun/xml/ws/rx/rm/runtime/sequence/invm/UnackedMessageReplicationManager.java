@@ -72,7 +72,10 @@ final class UnackedMessageReplicationManager implements ReplicationManager<Strin
             LOGGER.finer(loggerProlog + "Message state loaded from unacked message backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
         }
 
-        final JaxwsApplicationMessage message = state.toMessage();
+        JaxwsApplicationMessage message = null;
+        if (state != null) {
+            message = state.toMessage();
+        }
 
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Message state converted to a unacked message: " + ((message == null) ? null : message.toString()));
