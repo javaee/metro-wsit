@@ -141,6 +141,10 @@ public class HaContext {
     }
     
     public static String asString(HaInfo haInfo) {
+        if (haInfo == null) {
+            return "null";
+        }
+        
         return "HaInfo{hashableKey=" + haInfo.getKey() + ", replicaInstance=" + haInfo.getReplicaInstance() + ", isFailover=" + haInfo.isFailOver() + "}";
     }
 }
