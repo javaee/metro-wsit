@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime;
 
 import com.sun.xml.ws.commons.DelayedTaskManager;
@@ -51,10 +50,9 @@ import java.util.logging.Level;
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 enum RedeliveryTaskExecutor {
+
     INSTANCE;
-
     private static final Logger LOGGER = Logger.getLogger(RedeliveryTaskExecutor.class);
-
     private final DelayedTaskManager delayedTaskManager;
 
     private RedeliveryTaskExecutor() {
@@ -62,15 +60,29 @@ enum RedeliveryTaskExecutor {
     }
 
     public boolean register(final ApplicationMessage message, long delay, TimeUnit timeUnit, final MessageHandler messageHandler) {
-        if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(String.format("A message with number [ %d ] has been scheduled for a redelivery on a sequence [ %s ] with a delay of %d %s", message.getMessageNumber(), message.getSequenceId(), delay, timeUnit.toString().toLowerCase()));
-        }
-
         final HaContext.State state = HaContext.currentState();
 
-        return delayedTaskManager.register(new DelayedTaskManager.DelayedTask() {
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format(
+                    "A message with number [ %d ] has been scheduled for a redelivery "
+                    + "on a sequence [ %s ] with a delay of %d %s "
+                    + "using current HA context state [ %s ]",
+                    message.getMessageNumber(),
+                    message.getSequenceId(),
+                    delay,
+                    timeUnit.toString().toLowerCase(),
+                    state.toString()));
+        }
+
+        return delayedTaskManager.register(new DelayedTaskManager.DelayedTask()   {
 
             public void run(DelayedTaskManager manager) {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format(
+                            "Attempting redelivery of a message with number [ %d ] on a sequence [ %s ]",
+                            message.getMessageNumber(),
+                            message.getSequenceId()));
+                }
                 final HaContext.State oldState = HaContext.initFrom(state);
                 try {
                     messageHandler.putToDeliveryQueue(message);
@@ -82,7 +94,6 @@ enum RedeliveryTaskExecutor {
             public String getName() {
                 return String.format("redelivery of a message with number [ %d ] on a sequenece [ %s ]", message.getMessageNumber(), message.getSequenceId());
             }
-
         }, delay, timeUnit);
     }
 }

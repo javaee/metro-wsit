@@ -37,21 +37,26 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.delivery;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.NamedThreadFactory;
 import com.sun.xml.ws.commons.ha.HaContext;
 import com.sun.xml.ws.rx.rm.runtime.ApplicationMessage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 /**
  *
  * @author Marek Potociar <marek.potociar at sun.com>
  */
 public final class Postman {
+
+    private static final Logger LOGGER = Logger.getLogger(Postman.class);
+
     public static interface Callback {
+
         /**
          * Implementation of this method is responsible for processing RM data in a
          * protocol dependent way and delivering the application message
@@ -70,9 +75,28 @@ public final class Postman {
 
     public void deliver(final ApplicationMessage message, final Callback deliveryCallback) {
         final HaContext.State state = HaContext.currentState();
-        executor.execute(new Runnable() {
+
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format(
+                    "Scheduling delivery execution of a message with number [ %d ] on a sequence [ %s ] "
+                    + "using current HA context state [ %s ]",
+                    message.getMessageNumber(),
+                    message.getSequenceId(),
+                    state.toString()));
+        }
+
+        executor.execute(new Runnable()  {
+
             public void run() {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer(String.format(
+                            "Executing delivery of a message with number [ %d ] on a sequence [ %s ]",
+                            message.getMessageNumber(),
+                            message.getSequenceId()));
+                }
+
                 final HaContext.State oldState = HaContext.initFrom(state);
+
                 try {
                     deliveryCallback.deliver(message);
                 } finally {

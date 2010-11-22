@@ -90,7 +90,7 @@ public class HaContext {
         final State newState = new State(packet, haInfo);
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
         }                    
         
         return oldState;
@@ -101,7 +101,7 @@ public class HaContext {
 
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
         }                    
 
         return oldState;
@@ -115,7 +115,7 @@ public class HaContext {
         state.get().haInfo = null;
         state.get().packet = null;
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : Current HA state cleared");
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Current HA state cleared");
         }                    
         
     }
@@ -131,7 +131,7 @@ public class HaContext {
         }
         
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : HaInfo value updated: " + asString(newValue));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : HaInfo value updated: " + asString(newValue));
         }                            
     }
 
