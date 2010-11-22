@@ -105,6 +105,10 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
 
         @NotNull
         public Tube createClient(@NotNull ClientTubeAssemblerContext jaxwsContext) {
+            if (LOGGER.isLoggable(Level.FINER)) {                
+                LOGGER.finer("Assembling client-side tubeline for WS endpoint: " + jaxwsContext.getAddress().getURI().toString());
+            }
+            
             ClientTubelineAssemblyContextImpl context = new ClientTubelineAssemblyContextImpl(jaxwsContext);
 
             Collection<TubeCreator> tubeCreators = tubelineAssemblyController.getTubeCreators(context);
@@ -146,6 +150,10 @@ public final class TubelineAssemblerFactoryImpl extends TubelineAssemblerFactory
 
         @NotNull
         public Tube createServer(@NotNull ServerTubeAssemblerContext jaxwsContext) {
+            if (LOGGER.isLoggable(Level.FINER)) {                
+                LOGGER.finer("Assembling endpoint tubeline for WS endpoint: " + jaxwsContext.getEndpoint().getServiceName() + "::" + jaxwsContext.getEndpoint().getPortName());
+            }
+            
             ServerTubelineAssemblyContextImpl context = new ServerTubelineAssemblyContextImpl(jaxwsContext);
             ServiceDefinition sd = context.getEndpoint().getServiceDefinition();
             if (sd != null) {

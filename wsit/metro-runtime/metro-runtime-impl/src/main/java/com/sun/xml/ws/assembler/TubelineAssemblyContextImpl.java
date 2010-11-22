@@ -39,12 +39,14 @@
  */
 package com.sun.xml.ws.assembler;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.assembler.dev.TubelineAssemblyContext;
 import com.sun.xml.ws.api.pipe.Pipe;
 import com.sun.xml.ws.api.pipe.Tube;
 import com.sun.xml.ws.api.pipe.helper.PipeAdapter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * A base tubeline assembly context class providing common methods for both
@@ -53,6 +55,7 @@ import java.util.List;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
+    private static final Logger LOGGER = Logger.getLogger(TubelineAssemblyContextImpl.class);
 
     private Tube head;
     private Pipe adaptedHead;
@@ -77,6 +80,10 @@ class TubelineAssemblyContextImpl implements TubelineAssemblyContext {
         head = newHead;
         tubes.add(head);
         adaptedHead = null;
+        
+        if (LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(String.format("Added '{0}' tube instance to the tubeline.", (newHead == null) ? null : newHead.getClass().getName()));
+        }
 
         return true;
     }
