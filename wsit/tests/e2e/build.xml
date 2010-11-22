@@ -230,7 +230,7 @@
         <echo message="Test harness not up-to-date, updating..." />
 
         <mkdir dir="tmp/test-harness"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
              dest="tmp/test-harness.zip"/>
         <unzip src="tmp/test-harness.zip" dest="tmp"/>
         
@@ -247,9 +247,9 @@
     <target name="overwrite-local-transport-lib" unless="local.transport.uptodate">
         <echo message="Local transport not up-to-date, updating..." />
 
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport.jar"
              dest="${test.lib.dir}/jaxws-local-transport.jar"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/artifact/jax-ws-sources/jaxws-ri/transports/local/build/jaxws-local-transport-src.zip"
              dest="${test.lib.dir}/jaxws-local-transport.src.zip"/>
 
         <copy file="tmp/local-transport-build-number.txt" todir="${test.lib.dir}" overwrite="true" verbose="${verbose}" />
@@ -257,9 +257,9 @@
 
     <target name="integrate-test-libs-hudson" description="integrates latest test harness and local JAX-Ws RI transport into Metro, meant for internal consumption only">
         <mkdir dir="tmp"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-test-harness/lastSuccessfulBuild/buildNumber"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-test-harness/lastSuccessfulBuild/buildNumber"
              dest="tmp/test-harness-build-number.txt"/>
-        <get src="http://hudson.sfbay.sun.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/buildNumber"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-2.2.x-nightly-push/lastSuccessfulBuild/buildNumber"
              dest="tmp/local-transport-build-number.txt"/>
 
         <loadfile property="test.harness.hudson" srcfile="tmp/test-harness-build-number.txt" />
