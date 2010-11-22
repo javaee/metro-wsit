@@ -67,7 +67,7 @@ public class HaContext {
 
         @Override
         public String toString() {
-            return "HaState{" + "packet=" + packet + ", haInfo=" + asString(haInfo) + '}';
+            return "HaState{packet=" + packet + ", haInfo=" + HaContext.asString(haInfo) + '}';
         }                
     }
 
@@ -90,7 +90,7 @@ public class HaContext {
         final State newState = new State(packet, haInfo);
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with a new "  + ((newState == null) ? null : newState.toString()));
         }                    
         
         return oldState;
@@ -101,7 +101,7 @@ public class HaContext {
 
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with a new "  + ((newState == null) ? null : newState.toString()));
         }                    
 
         return oldState;
