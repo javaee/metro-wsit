@@ -40,63 +40,28 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
+import junit.framework.TestCase;
 
 
 /**
- * Delegates to WSATGatewayRM for peer/delegate recovery.
- * The main/only purpose of this class is the special recover call made on WSATGatewayRM to identify the instance
- *  and/for log location
-*
-* @author paulparkinson
-*/
-public class WSATGatewayRMPeerRecoveryDelegate implements XAResource {
-    String peerLogLocation;
+ * User: paulparkinson
+ */
+public class ForeignRecoveryContextManagerTest extends TestCase {
 
-
-    public WSATGatewayRMPeerRecoveryDelegate(String peerLogLocation) {
-        this.peerLogLocation = peerLogLocation;
+    public ForeignRecoveryContextManagerTest(String name) {
+        super(name);
     }
 
-    public void commit(Xid xid, boolean b) throws XAException {
-        WSATGatewayRM.getInstance().commit(xid, b);
+    public void setUp() throws Exception {
+        super.setUp();
     }
 
-    public void end(Xid xid, int i) throws XAException {
-        WSATGatewayRM.getInstance().end(xid, i);
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
-    public void forget(Xid xid) throws XAException {
-        WSATGatewayRM.getInstance().forget(xid);
+    public void testBasic() throws Exception {
+
     }
 
-    public int getTransactionTimeout() throws XAException {
-        return WSATGatewayRM.getInstance().getTransactionTimeout();
-    }
-
-    public boolean isSameRM(XAResource xaResource) throws XAException {
-        return WSATGatewayRM.getInstance().isSameRM(xaResource);
-    }
-
-    public int prepare(Xid xid) throws XAException {
-        return WSATGatewayRM.getInstance().prepare(xid);
-    }
-    
-    public Xid[] recover(int i) throws XAException {
-            return WSATGatewayRM.getInstance().recover(i, peerLogLocation);
-    }
-
-    public void rollback(Xid xid) throws XAException {
-        WSATGatewayRM.getInstance().rollback(xid);
-    }
-
-    public boolean setTransactionTimeout(int i) throws XAException {
-        return WSATGatewayRM.getInstance().setTransactionTimeout(i);
-    }
-
-    public void start(Xid xid, int i) throws XAException {
-        WSATGatewayRM.getInstance().start(xid, i);
-    }
 }

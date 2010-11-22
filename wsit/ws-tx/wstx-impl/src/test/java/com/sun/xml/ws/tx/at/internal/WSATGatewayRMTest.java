@@ -40,12 +40,17 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.xml.ws.tx.at.WSATXAResourceTest;
 import junit.framework.TestCase;
+
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
 
 /**
  * User: paulparkinson
  */
 public class WSATGatewayRMTest extends TestCase {
+
     public WSATGatewayRMTest(String name) {
         super(name);
     }
@@ -58,17 +63,31 @@ public class WSATGatewayRMTest extends TestCase {
         super.tearDown();
     }
 
-    
-    public void testCreate() throws Exception {
-        WSATGatewayRM testWSATGatewayRM = new WSATGatewayRM("unittestserver");
-//        WSATGatewayRM.isWSATRecoveryEnabled = false;
-//        testWSATGatewayRM.create("testlocation");
+
+    public void testHolder() throws Exception {
+        ;
     }
 
-
+    // todo test passes and cleans up in the passing case but may not in faling case and so reactive after impl cleanup()
     public void xtestRecoverPendingBranches() throws Exception {
-        WSATGatewayRM testWSATGatewayRM = new WSATGatewayRM("unittestserver");
-        testWSATGatewayRM.recoverPendingBranches();
+        WSATGatewayRM testWSATGatewayRM = new WSATGatewayRM("unittestserver"){
+             String getTxLogDir() {
+                 return ".";
+             }
+        };
+        Xid[] xids = testWSATGatewayRM.recover(XAResource.TMSTARTRSCAN);
+        Xid xid = new XidImpl(1234, new byte[]{'a','b','c'}, new byte[]{'1'}); //todo reuse of xid may not be best/accurate 
+        BranchRecord branch = new BranchRecord(xid);
+        branch.addSubordinate(xid, WSATXAResourceTest.createWSATXAResourceForXid(xid));
+        assertEquals("testWSATGatewayRM.pendingXids.size()", 0, WSATGatewayRM.pendingXids.size());
+        assertEquals("xids.length", 0, xids.length);
+        assertFalse("branch.isLogged()", branch.isLogged());
+        testWSATGatewayRM.persistBranchIfNecessary(branch);
+        assertTrue("branch.isLogged()", branch.isLogged());
+        xids = testWSATGatewayRM.recover(XAResource.TMSTARTRSCAN);
+        assertEquals("xids.length", 2, xids.length);  //todo BUG need to get rid of the null entry
+        assertEquals("xid", xids[1], xid);
+        testWSATGatewayRM.rollback(xid);
     }
     
     /**

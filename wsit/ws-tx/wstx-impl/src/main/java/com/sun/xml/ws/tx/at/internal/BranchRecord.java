@@ -49,17 +49,15 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.*;
-import java.util.logging.Level;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+
 /**
  *
  * @author paulparkinson
  */
-
-
 
 /**
  * Encapsulates remote WS-AT participants as a branch for this superior
@@ -71,9 +69,10 @@ public class BranchRecord implements Externalizable {
 
   private Xid globalXid;
   private Map<Xid, RegisteredResource> registeredResources;
-  private String branchAliasSuffix = "BI_WSATGatewayRM"; //this should be different from the WSATGateway resourcce name prefix, and should keep it short.
+  private String branchAliasSuffix = "BI_WSATGatewayRM"; //this should be different from the WSATGateway resource name prefix, and should keep it short.
   private boolean logged;
- private static final Logger LOGGER = Logger.getLogger(BranchRecord.class);
+  private String txLogLocation;
+  private static final Logger LOGGER = Logger.getLogger(BranchRecord.class);
 
     /**
    * Used for recovery (created by readObject) and Externalizable no-arg constructor
@@ -170,9 +169,7 @@ public class BranchRecord implements Externalizable {
     if (isPrimaryBranch(xid)) {
       debug("rollback() xid=" + xid + " ignoring primary branch ");
     }
-
     RegisteredResource rr = getRegisteredResource(xid);
-
     try {
       rr.rollback(xid);
     } catch (XAException e) {
@@ -321,11 +318,19 @@ public class BranchRecord implements Externalizable {
     return true;
   }
 
+    public void setTxLogLocation(String logLocation) {
+        txLogLocation = logLocation;
+    }
+
+    public String getTxLogLocation() {
+        return txLogLocation;
+    }
+
   private void debug(String msg) {
     LOGGER.info(msg);
   }
 
-  class RegisteredResource implements Externalizable {
+    class RegisteredResource implements Externalizable {
   	private static final long serialVersionUID = 601688150453719976L;
     private static final int STATE_ACTIVE = 1;
     private static final int STATE_PREPARED = 2;

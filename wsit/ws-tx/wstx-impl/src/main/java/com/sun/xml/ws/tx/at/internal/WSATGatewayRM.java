@@ -71,24 +71,27 @@ import javax.xml.ws.WebServiceException;
  */
 public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEventListener {
   private static final Logger LOGGER = Logger.getLogger(WSATGatewayRM.class);
-
+  private static final String WSAT = "wsat";
+  private static final String OUTBOUND = "outbound";
+  private static final String INBOUND = "inbound";
 
   private static WSATGatewayRM singleton;
   static private String resourceRegistrationName; // JTA resource registration name
   static private Map<Xid, BranchRecord> branches; // xid to Branch
-  static private List<Xid> pendingXids; // collection of Xids
+  static List<Xid> pendingXids; // collection of Xids
   private final Object currentXidLock = new Object();
   private Xid currentXid;
   static boolean isReady = false;
   public static  String txlogdir;
   static String txlogdirInbound;
   private static String txlogdirOutbound;
-  private static String txlogdirOutboundRecovery;
 
+  // package access for test instantiation only, this is a singleton
   WSATGatewayRM(String serverName) {
     resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
     branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
     pendingXids = Collections.synchronizedList(new ArrayList<Xid>());
+    singleton = this;
   }
 
   public static synchronized WSATGatewayRM getInstance() {
@@ -110,15 +113,19 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   private static synchronized WSATGatewayRM create(String serverName)
   {
     if (singleton == null) {
-      singleton = new WSATGatewayRM(serverName);
-      if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
-        TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
-        WSATRuntimeConfig.getInstance().setWSATRecoveryEventListener(singleton);
-      }
+        new WSATGatewayRM(serverName);
+        setupRecovery();
     }
     isReady = true;
     return singleton;
   }
+
+    private static void setupRecovery() {
+        if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
+          TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
+          WSATRuntimeConfig.getInstance().setWSATRecoveryEventListener(singleton);
+        }
+    }
 
 
     /**
@@ -153,19 +160,19 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     /**
      * Called for XAResource.recover
      */
-    void recoverPendingBranches() {
+   void recoverPendingBranches(String outboundRecoveryDir, String inboundRecoveryDir) {
     if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() outbound");
     FileInputStream fis;
     ObjectInputStream in;
-      File[] files = new File(txlogdirOutboundRecovery).listFiles();
+      File[] files = new File(outboundRecoveryDir).listFiles();
       if(files!=null) for (int i=0;i<files.length;i++) {
        try {
         fis = new FileInputStream(files[i]);
         in = new ObjectInputStream(fis);
         BranchRecord branch = (BranchRecord) in.readObject();
-        //branches.put(branch.getXid(), branch);
-        //pendingXids.addAll(branch.getAllXids());
-        branch.commit(branch.getXid(), false);
+        branch.setTxLogLocation(files[i].getCanonicalPath());
+        branches.put(branch.getXid(), branch);
+        pendingXids.addAll(branch.getAllXids());
         in.close();
        } catch (Throwable e) {
             throw new WebServiceException("Failure while recovering WS-AT transaction logs file:"+files[i], e);
@@ -174,7 +181,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() inbound");
      fis = null;
      in = null;
-     files = new File(txlogdirOutboundRecovery).listFiles();
+     files = new File(inboundRecoveryDir).listFiles();
      if(files!=null) for (int i=0;i<files.length;i++) {
        try {
         fis = new FileInputStream(files[i]);
@@ -317,58 +324,74 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   }
 
     /**
-     * Call for local recover/server
-     * @param flag
-     * @return
+     * Call for local recover/server specified by null instance value
+     *
+     * @param flag 
+     * @return Xid[] indoubt Xids
      * @throws XAException
      */
-  public Xid[] recover(int flag) throws XAException {
-      return recover(flag, null);
-  }
+    public Xid[] recover(int flag) throws XAException {
+        return recover(flag, null);
+    }
 
     /**
-     * Call for delegated recovery specified by logDir value
+     * Call for delegated recovery specified by non-null instance
+     *
      * @param flag
      * @param instance
-     * @return
+     * @return Xid[] indoubt Xids
      * @throws XAException
      */
-  public synchronized Xid[] recover(int flag, String instance) throws XAException { //todo finer sync
-     //for delegated recovery
-            String delegatedtxlogdir = instance==null?null:
-                    WSATGatewayRM.txlogdir + File.separator + ".." + File.separator  + ".." +
-                            File.separator + "wsat" + File.separator + instance + File.separator;
-    if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
-        setTxLogDirs(delegatedtxlogdir);
-        try {
-            singleton.initStore();
-        } catch (Exception e) {
-            XAException xaEx = new XAException("WSATGatewayRM recover call failed due to StoreException:"+e);
-            xaEx.errorCode = XAException.XAER_RMFAIL;
-            xaEx.initCause(e);
-            throw xaEx;
+    public Xid[] recover(int flag, String instance) throws XAException {
+        if (WSATHelper.isDebugEnabled()) debug("recover() flag=" + flag);
+        setTxLogDirs();
+        boolean isDelegated = instance != null;
+        if (isDelegated) {
+            String delegatedtxlogdir = WSATGatewayRM.txlogdir + File.separator + ".." + File.separator + ".." +
+                    File.separator + instance + File.separator + WSAT + File.separator;
+            String delegatedtxlogdirOutbound = delegatedtxlogdir + OUTBOUND + File.separator;
+            String delegatedtxlogdirInbound = delegatedtxlogdir + INBOUND + File.separator;
+            if (WSATHelper.isDebugEnabled()) debug("recover() for delegate flag=" + flag +
+                    " delegatedtxlogdirOutbound:" + delegatedtxlogdirOutbound +
+                    ", delegatedtxlogdirInbound:" + delegatedtxlogdirInbound);
+            singleton.recoverPendingBranches(delegatedtxlogdirOutbound, delegatedtxlogdirInbound);
+        } else {
+            try {
+                singleton.initStore();
+            } catch (Exception e) {
+                XAException xaEx = new XAException("WSATGatewayRM recover call failed due to StoreException:" + e);
+                xaEx.errorCode = XAException.XAER_RMFAIL;
+                xaEx.initCause(e);
+                throw xaEx;
+            }
+            if (WSATHelper.isDebugEnabled()) debug("recover() for this server flag=" + flag +
+                    " txlogdirOutbound:" + txlogdirOutbound +
+                    ",txlogdirInbound:" + txlogdirInbound);
+            singleton.recoverPendingBranches(txlogdirOutbound, txlogdirInbound);
         }
-        singleton.recoverPendingBranches();
+        // return all pending Xids on first call, empty array otherwise
+        if ((flag & XAResource.TMSTARTRSCAN) != 0) {
+            if (WSATHelper.isDebugEnabled()) debug("WSAT recover(" + flag + ") returning " + pendingXids);
+            Xid[] xids = pendingXids.toArray(new Xid[pendingXids.size()]);
+            return xids;
+        }
+        if (WSATHelper.isDebugEnabled()) debug("recover() returning nothing");
+        return new Xid[0];
     }
-    if (WSATHelper.isDebugEnabled()) debug("recover() flag=" + flag);
-    // return all pending Xids on first call, empty array otherwise
-    if ((flag & XAResource.TMSTARTRSCAN) != 0) {
-      if (WSATHelper.isDebugEnabled()) debug("WSAT recover("+flag+") returning " + pendingXids);
-      Xid[] xids = pendingXids.toArray(new Xid[pendingXids.size()]);
-      return xids;
+
+    void setTxLogDirs() {
+        txlogdir = getTxLogDir();
+        txlogdirInbound =
+                txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + INBOUND + File.separator ;
+        txlogdirOutbound =
+                txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + OUTBOUND + File.separator ;
     }
-    if (WSATHelper.isDebugEnabled()) debug("recover() returning nothing");
-    return new Xid[0];
-  }
 
-  void setTxLogDirs(String peerTxlogdir) {  //param for peer or resetting
-        txlogdir = peerTxlogdir!=null?peerTxlogdir:TransactionImportManager.getInstance().getTxLogLocation();
-        txlogdirInbound = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "inbound";
-        txlogdirOutbound = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "outbound";
-        txlogdirOutboundRecovery = txlogdir + File.separator + ".." + File.separator + "wsat" + File.separator + "outbound";
-  }
+    String getTxLogDir() {
+        return TransactionImportManager.getInstance().getTxLogLocation();
+    }
 
-  public void forget(Xid xid) throws XAException {
+    public void forget(Xid xid) throws XAException {
     if (WSATHelper.isDebugEnabled()) debug("forget() xid=" + xid);
     BranchRecord branch = getBranch(xid);
     if (branch == null) JTAHelper.throwXAException(XAException.XAER_NOTA, "forget: no branch info for " + xid);
@@ -460,12 +483,15 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   private void persistBranchRecord(BranchRecord branch) throws IOException {
     if(!WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) return;
     if (WSATHelper.isDebugEnabled()) debug("persist branch record " + branch);
-    FileOutputStream fos = null;
-    ObjectOutputStream out = null;
-    fos = new FileOutputStream(txlogdirOutbound + counter++);//branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier());
+    FileOutputStream fos;
+    ObjectOutputStream out;
+    String logLocation = txlogdirOutbound + File.separator + System.currentTimeMillis() + ":" + counter++;
+    branch.setTxLogLocation(logLocation);
+    fos = new FileOutputStream(logLocation);
     out = new ObjectOutputStream(fos);
     out.writeObject(branch);
     out.close();
+    fos.flush();
     branch.setLogged(true);
   }
     
@@ -475,13 +501,20 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
      * @param branch BranchRecord
      */
   private void releaseBranchRecord(BranchRecord branch) {
-    if (WSATHelper.isDebugEnabled())   debug("release branch record " + branch);
-    //todo delete
-    new File(txlogdir + counter);//"branch.getXid().getGlobalTransactionId()+branch.getXid().getBranchQualifier()); //todo this may well work but test/verify
+    String logLocation = branch.getTxLogLocation();
+    if (WSATHelper.isDebugEnabled()) debug("release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation);
+      System.out.println("WSATGatewayRM.release branch record:" + branch + " logLocation:" + logLocation); 
+    new File(logLocation).delete();
     branch.setLogged(false);
   }
 
-  private void persistBranchIfNecessary(BranchRecord branch) throws XAException {
+  void persistBranchIfNecessary(BranchRecord branch) throws XAException {
     try {
       synchronized(branch) {
         if (!branch.isLogged()) {
@@ -491,28 +524,25 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
       }
     } catch(IOException pse) {
       debug("error persisting branch " + branch + ": " + pse.toString());
-   //   WseeWsatLogger.logErrorPersistingBranchRecord(branch.toString(), pse);
       LOGGER.severe(LocalizationMessages.WSAT_4500_ERROR_PERSISTING_BRANCH_RECORD(branch.toString()), pse);
       JTAHelper.throwXAException(XAException.XAER_RMERR, "Error persisting branch " + branch, pse);
     }
   }
 
-  private boolean deleteBranchIfNecessary(BranchRecord branch) throws XAException {
- /**   boolean deleted = false;
+  private void deleteBranchIfNecessary(BranchRecord branch) throws XAException {
+    boolean deleted = false;
     try {
       synchronized (branch) {
-        if (branch.isLogged() && branch.allResourcesCompleted()) {
+        if (branch.isLogged()) { //todo revisit && branch.allResourcesCompleted()) {
           delete(branch);
           deleted = true;
         }
       }
-    } catch(PersistentStoreException pse) {
+    } catch(Exception pse) {
       debug("error deleting branch record " + branch + ": " + pse.toString());
-//      WseeWsatLogger.logErrorDeletingBranchRecord(branch.toString(), pse);
       LOGGER.severe(LocalizationMessages.WSAT_4501_ERROR_DELETING_BRANCH_RECORD(branch.toString()), pse);
       JTAHelper.throwXAException(XAException.XAER_RMERR, "Error deleting branch record " + branch, pse);
     }
-    return deleted; */ return true;
   }
 
     //RecoveryListener implementation

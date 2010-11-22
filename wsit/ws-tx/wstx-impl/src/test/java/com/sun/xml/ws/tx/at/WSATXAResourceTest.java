@@ -234,7 +234,7 @@ public class WSATXAResourceTest extends TestCase {
      * @param b actual impl/true or stub/false
      * @return
      */
-    private static WSATXAResource createWSATXAResourceForXid(Xid xid, boolean b) {
+    public static WSATXAResource createWSATXAResourceForXid(Xid xid, boolean b) {
         String address = "testaddress";
         Node[] node0 = new Node[]{createElement("test")};
         MemberSubmissionEndpointReference epr0_0 =

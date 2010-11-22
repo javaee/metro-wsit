@@ -82,7 +82,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
         try {
             if (WSATHelper.isDebugEnabled()) LOGGER.info(
                     LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
-            TransactionManagerImpl.getInstance().getTransactionManager().suspend();
+            TransactionManagerImpl.getInstance().getTransactionManager().suspend(); //todo is this right?
         } catch (SystemException ex) {
             ex.printStackTrace();
             Logger.getLogger(BaseRegistration.class).log(Level.SEVERE, null, ex);

@@ -119,17 +119,18 @@ public class ForeignRecoveryContextManager {
     }
 
     synchronized void persist(Xid xid) {
-        if (false && WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {  //todo enable
+        if (WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
             ForeignRecoveryContextManager.RecoveryContextWorker contextWorker = recoveredContexts.get(xid);
             FileOutputStream fos = null;
             ObjectOutputStream out = null;
             try {
                 fos = new FileOutputStream(
                         WSATGatewayRM.txlogdirInbound + File.separator +
-                                xid.getGlobalTransactionId() + xid.getBranchQualifier()); //todo to hex
+                                xid.getGlobalTransactionId() + xid.getBranchQualifier()); //todo use time+counter here too
                 out = new ObjectOutputStream(fos);
                 out.writeObject(contextWorker);
                 out.close();
+                fos.flush();
             } catch (Throwable e) {
                 throw new WebServiceException("Unable to persist log for inbound transaction Xid:" + xid, e);
             }
