@@ -90,7 +90,7 @@ public class HaContext {
         final State newState = new State(packet, haInfo);
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + "with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
         }                    
         
         return oldState;
@@ -101,7 +101,7 @@ public class HaContext {
 
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + "with new "  + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with new "  + ((newState == null) ? null : newState.toString()));
         }                    
 
         return oldState;
