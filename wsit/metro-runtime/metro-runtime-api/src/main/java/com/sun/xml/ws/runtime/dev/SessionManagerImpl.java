@@ -208,7 +208,7 @@ public class SessionManagerImpl extends SessionManager {
             HASecurityContextTokenInfo hasctInfo = new HASecurityContextTokenInfo(sctInfo);
             HaInfo haInfo = HaContext.currentHaInfo();
             if (haInfo != null) {
-                HighAvailabilityProvider.saveTo(sctBs, new StickyKey(key, haInfo.getKey()), hasctInfo, true);
+                HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(sctBs, new StickyKey(key, haInfo.getKey()), hasctInfo, true));
             } else {
                 final StickyKey stickyKey = new StickyKey(key);
                 final String replicaId = HighAvailabilityProvider.saveTo(sctBs, stickyKey, hasctInfo, true);

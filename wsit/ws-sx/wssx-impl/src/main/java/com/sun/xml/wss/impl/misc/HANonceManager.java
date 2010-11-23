@@ -117,7 +117,7 @@ public class HANonceManager extends NonceManager {
             } else {
                 HaInfo haInfo = HaContext.currentHaInfo();
                 if (haInfo != null) {
-                    HighAvailabilityProvider.INSTANCE.saveTo(backingStore, new StickyKey(nonce, haInfo.getKey()), pojo, true);
+                    HaContext.udpateReplicaInstance(HighAvailabilityProvider.INSTANCE.saveTo(backingStore, new StickyKey(nonce, haInfo.getKey()), pojo, true));
                 } else {
                     final StickyKey stickyKey = new StickyKey(nonce);
                     final String replicaId = HighAvailabilityProvider.saveTo(backingStore, stickyKey, pojo, true);

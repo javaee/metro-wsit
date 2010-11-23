@@ -107,7 +107,7 @@ final class ResponseStorage {
                     LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for pending message state replication: " + HaContext.asString(haInfo));
                 }
 
-                HighAvailabilityProvider.saveTo(messageStateStore, new StickyKey(key, haInfo.getKey()), state, isNew);
+                HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(messageStateStore, new StickyKey(key, haInfo.getKey()), state, isNew));
             } else {
                 final StickyKey stickyKey = new StickyKey(key);
                 final String replicaId = HighAvailabilityProvider.saveTo(messageStateStore, stickyKey, state, isNew);

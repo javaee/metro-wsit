@@ -186,7 +186,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
         if (backingStore != null && dirty) {
             HaInfo haInfo = HaContext.currentHaInfo();
             if (haInfo != null) {
-                HighAvailabilityProvider.saveTo(backingStore, new StickyKey(sequenceId, haInfo.getKey()), this, false);
+                HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(backingStore, new StickyKey(sequenceId, haInfo.getKey()), this, false));
             } else {
                 final StickyKey key = new StickyKey(sequenceId);
                 final String replicaId = HighAvailabilityProvider.saveTo(backingStore, key, this, false);

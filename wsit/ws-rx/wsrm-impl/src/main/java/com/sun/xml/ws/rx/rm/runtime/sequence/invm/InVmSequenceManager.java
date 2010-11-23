@@ -508,7 +508,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
             if (LOGGER.isLoggable(Level.FINER)) {
                 LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for sequence data replication: " + HaContext.asString(haInfo));
             }
-            HighAvailabilityProvider.saveTo(sequenceDataBs, new StickyKey(key, haInfo.getKey()), value, isNew);
+            HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(sequenceDataBs, new StickyKey(key, haInfo.getKey()), value, isNew));
         } else {
             final StickyKey stickyKey = new StickyKey(key);
             final String replicaId = HighAvailabilityProvider.saveTo(sequenceDataBs, stickyKey, value, isNew);

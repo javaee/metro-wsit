@@ -180,7 +180,7 @@ public final class HighlyAvailableMap<K extends Serializable, V> implements Map<
                 if (LOGGER.isLoggable(Level.FINER)) {
                     LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for data replication: " + HaContext.asString(haInfo));
                 }
-                HighAvailabilityProvider.saveTo(backingStore, new StickyKey(key, haInfo.getKey()), value, isNew);
+                HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(backingStore, new StickyKey(key, haInfo.getKey()), value, isNew));
             } else {
                 final StickyKey stickyKey = new StickyKey(key);
                 final String replicaId = HighAvailabilityProvider.saveTo(backingStore, stickyKey, value, isNew);

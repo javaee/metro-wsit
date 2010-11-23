@@ -99,7 +99,7 @@ final class UnackedMessageReplicationManager implements ReplicationManager<Strin
                 LOGGER.finer(loggerProlog + "Existing HaInfo found, using it for unacked message state replication: " + HaContext.asString(haInfo));
             }
             
-            HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), value, isNew);
+            HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(unackedMesagesBs, new StickyKey(key, haInfo.getKey()), value, isNew));
         } else {
             final StickyKey stickyKey = new StickyKey(key);
             final String replicaId = HighAvailabilityProvider.saveTo(unackedMesagesBs, stickyKey, value, isNew);
