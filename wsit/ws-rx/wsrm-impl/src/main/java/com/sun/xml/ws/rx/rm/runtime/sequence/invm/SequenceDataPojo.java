@@ -37,9 +37,9 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.api.ha.HaInfo;
 import com.sun.xml.ws.api.ha.HighAvailabilityProvider;
@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
 
 /**
@@ -61,6 +62,7 @@ import org.glassfish.ha.store.api.BackingStore;
  * @author Marek Potociar (marek.potociar at sun.com)
  */
 class SequenceDataPojo implements Serializable /*Storeable*/ {
+    private static final Logger LOGGER = Logger.getLogger(SequenceDataPojo.class);
 
     static final long serialVersionUID = -5024744406713321676L;
     //
@@ -91,7 +93,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
             long expirationTime,
             boolean isInbound,
             BackingStore<StickyKey, SequenceDataPojo> bs) {
-        
+
         this.sequenceId = sequenceId;
         this.boundSecurityTokenReferenceId = boundSecurityTokenReferenceId;
         this.expirationTime = expirationTime;
@@ -186,12 +188,20 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
         if (backingStore != null && dirty) {
             HaInfo haInfo = HaContext.currentHaInfo();
             if (haInfo != null) {
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer("Sequence " + sequenceId + "]: Existing HaInfo found, using it for sequence state data replication: " + HaContext.asString(haInfo));
+                }
+
                 HaContext.udpateReplicaInstance(HighAvailabilityProvider.saveTo(backingStore, new StickyKey(sequenceId, haInfo.getKey()), this, false));
             } else {
-                final StickyKey key = new StickyKey(sequenceId);
-                final String replicaId = HighAvailabilityProvider.saveTo(backingStore, key, this, false);
+                final StickyKey stickyKey = new StickyKey(sequenceId);
+                final String replicaId = HighAvailabilityProvider.saveTo(backingStore, stickyKey, this, false);
 
-                HaContext.updateHaInfo(new HaInfo(key.getHashKey(), replicaId, false));
+                haInfo = new HaInfo(stickyKey.getHashKey(), replicaId, false);
+                HaContext.updateHaInfo(haInfo);
+                if (LOGGER.isLoggable(Level.FINER)) {
+                    LOGGER.finer("Sequence " + sequenceId + "]: No HaInfo found, created new after sequence state data replication: " + HaContext.asString(haInfo));
+                }
             }
         }
         resetDirty();
@@ -265,23 +275,23 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
 
     @Override
     public String toString() {
-        return "SequenceDataPojo"+ 
-                "{\n\tbackingStore=" + backingStore + 
-                ",\n\tsequenceId=" + sequenceId + 
-                ",\n\tboundSecurityTokenReferenceId=" + boundSecurityTokenReferenceId + 
-                ",\n\texpirationTime=" + expirationTime + 
-                ",\n\tstate=" + state + 
-                ",\n\tackRequestedFlag=" + ackRequestedFlag + 
-                ",\n\tlastMessageNumber=" + lastMessageNumber + 
-                ",\n\tlastActivityTime=" + lastActivityTime + 
-                ",\n\tlastAcknowledgementRequestTime=" + lastAcknowledgementRequestTime + 
-                ",\n\tallUnackedMessageNumbers=" + allUnackedMessageNumbers + 
-                ",\n\treceivedUnackedMessageNumbers=" + receivedUnackedMessageNumbers + 
-                ",\n\tunackedNumberToCorrelationIdMap=" + unackedNumberToCorrelationIdMap + 
-                ",\n\tinbound=" + inbound + 
-                ",\n\tdirty=" + dirty + 
-                "\n}";
-    }       
+        return "SequenceDataPojo"
+                + "{\n\tbackingStore=" + backingStore
+                + ",\n\tsequenceId=" + sequenceId
+                + ",\n\tboundSecurityTokenReferenceId=" + boundSecurityTokenReferenceId
+                + ",\n\texpirationTime=" + expirationTime
+                + ",\n\tstate=" + state
+                + ",\n\tackRequestedFlag=" + ackRequestedFlag
+                + ",\n\tlastMessageNumber=" + lastMessageNumber
+                + ",\n\tlastActivityTime=" + lastActivityTime
+                + ",\n\tlastAcknowledgementRequestTime=" + lastAcknowledgementRequestTime
+                + ",\n\tallUnackedMessageNumbers=" + allUnackedMessageNumbers
+                + ",\n\treceivedUnackedMessageNumbers=" + receivedUnackedMessageNumbers
+                + ",\n\tunackedNumberToCorrelationIdMap=" + unackedNumberToCorrelationIdMap
+                + ",\n\tinbound=" + inbound
+                + ",\n\tdirty=" + dirty
+                + "\n}";
+    }
 
     private static enum Parameter {
 
