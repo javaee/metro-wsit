@@ -126,7 +126,7 @@ public class SessionManagerImpl extends SessionManager {
      */
     public Session  getSession(String key) {
         Session session = sessionMap.get(key);
-        if (session ==null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+        if (session == null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured() && sctBs != null){
             SecurityContextTokenInfo sctInfo = HighAvailabilityProvider.loadFrom(sctBs, new StickyKey(key), null);
             session = new Session(this, key, null);
             session.setSecurityInfo(sctInfo);
@@ -155,7 +155,7 @@ public class SessionManagerImpl extends SessionManager {
      */
     public void terminateSession(String key) {
         sessionMap.remove(key);
-        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+        if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured() && sctBs != null){
             HighAvailabilityProvider.removeFrom(sctBs, new StickyKey(key));
         }
     }
