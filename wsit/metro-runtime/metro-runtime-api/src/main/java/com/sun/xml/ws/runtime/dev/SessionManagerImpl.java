@@ -54,6 +54,14 @@ import com.sun.xml.ws.commons.ha.StickyKey;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.SecurityContextTokenInfo;
+import com.sun.xml.ws.security.SecurityTokenReference;
+import com.sun.xml.ws.security.Token;
+import com.sun.xml.wss.XWSSecurityException;
+import java.net.URI;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -63,6 +71,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.GregorianCalendar;
 import java.util.Set;
+import javax.security.auth.Subject;
 import javax.xml.namespace.QName;
 
 import javax.xml.ws.WebServiceException;
@@ -93,7 +102,7 @@ public class SessionManagerImpl extends SessionManager {
     private Map<String, SecurityContextTokenInfo> securityContextTokenInfoMap
             = new HashMap<String, SecurityContextTokenInfo>();
 
-    private final BackingStore<StickyKey, SecurityContextTokenInfo> sctBs;
+    private final BackingStore<StickyKey, HASecurityContextTokenInfo> sctBs;
     
     /** Creates a new instance of SessionManagerImpl */
     public SessionManagerImpl(WSEndpoint endpoint, boolean isSC) {
@@ -103,7 +112,7 @@ public class SessionManagerImpl extends SessionManager {
                 bsFactory,
                 endpoint.getServiceName() + ":" + endpoint.getPortName()+ "_SCT_BS",
                 StickyKey.class,
-                SecurityContextTokenInfo.class);
+                HASecurityContextTokenInfo.class);
         } else{
             sctBs = null;
         }
@@ -187,18 +196,22 @@ public class SessionManagerImpl extends SessionManager {
      * 
      */ 
     public Session createSession(String key, Object obj) {
+        return createSession(key, null, obj);
+    }
+    
+    public Session createSession(String key, SecurityContextTokenInfo sctInfo, Object obj) {
         
         Session sess = new Session(this, key, obj);
         sessionMap.put(key, sess);
 
-        SecurityContextTokenInfo sctInfo = sess.getSecurityInfo();
         if (sctInfo != null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
+            HASecurityContextTokenInfo hasctInfo = new HASecurityContextTokenInfo(sctInfo);
             HaInfo haInfo = HaContext.currentHaInfo();
             if (haInfo != null) {
-                HighAvailabilityProvider.saveTo(sctBs, new StickyKey(key, haInfo.getKey()), sctInfo, true);
+                HighAvailabilityProvider.saveTo(sctBs, new StickyKey(key, haInfo.getKey()), hasctInfo, true);
             } else {
                 final StickyKey stickyKey = new StickyKey(key);
-                final String replicaId = HighAvailabilityProvider.saveTo(sctBs, stickyKey, sctInfo, true);
+                final String replicaId = HighAvailabilityProvider.saveTo(sctBs, stickyKey, hasctInfo, true);
                 HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
             }
         }
@@ -296,6 +309,380 @@ public class SessionManagerImpl extends SessionManager {
             //securityContextTokenInfoMap.put(((SecurityContextToken)itctx.getSecurityToken()).getInstance(), itctx.getSecurityContextTokenInfo());
             securityContextTokenInfoMap.put(sctInfoKey, itctx.getSecurityContextTokenInfo());
             itctx.setSecurityContextTokenInfo(null);
+        }
+    }
+    
+    static class HASecurityContextTokenInfo implements SecurityContextTokenInfo{
+        
+        String identifier = null;
+        String extId = null;
+        String instance = null;
+        byte[] secret = null;
+        Map<String, byte[]> secretMap = new HashMap<String, byte[]>();
+        Date creationTime = null;
+        Date expirationTime = null;
+
+        public HASecurityContextTokenInfo() {
+            
+        }
+        
+        public HASecurityContextTokenInfo(SecurityContextTokenInfo sctInfo) {
+            
+        }
+
+    
+        public String getIdentifier() {
+            return identifier;
+        }
+    
+        public void setIdentifier(final String identifier) {
+            this.identifier = identifier;
+        }
+
+        /*
+         * external Id corresponds to the wsu Id on the token.
+         */
+        public String getExternalId() {
+            return extId;
+        }
+
+        public void setExternalId(final String externalId) {
+            this.extId = externalId;
+        }
+    
+        public String getInstance() {
+            return instance;
+        }
+
+        public void setInstance(final String instance) {
+            this.instance = instance;
+        }
+
+        public byte[] getSecret() {
+            byte [] newSecret = new byte[secret.length];
+            System.arraycopy(secret,0,newSecret,0,secret.length);
+            return newSecret;
+        }
+
+        public byte[] getInstanceSecret(final String instance) {
+            return secretMap.get(instance);
+        }
+
+        public void addInstance(final String instance, final byte[] key) {
+            byte [] newKey = new byte[key.length];
+            System.arraycopy(key,0,newKey,0,key.length);
+            if (instance == null) {
+                this.secret = newKey;
+            } else {
+                secretMap.put(instance, newKey);
+            }
+        }
+    
+        public Date getCreationTime() {
+            return new Date(creationTime.getTime());
+        }
+
+        public void setCreationTime(final Date creationTime) {
+            this.creationTime = new Date(creationTime.getTime());
+        }
+
+        public Date getExpirationTime() {
+            return new Date(expirationTime.getTime());
+        }
+
+        public void setExpirationTime(final Date expirationTime) {
+            this.expirationTime = new Date(expirationTime.getTime());
+        }
+
+        public Set getInstanceKeys() {
+          return null;
+        }
+    
+        public IssuedTokenContext getIssuedTokenContext() {
+
+            final IssuedTokenContext itc = new HAIssuedTokenContext();
+            itc.setCreationTime(getCreationTime());
+            itc.setExpirationTime(getExpirationTime());
+            itc.setProofKey(getSecret());
+            itc.setSecurityContextTokenInfo(this);
+        
+            return itc;
+        }
+
+        public IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference) {
+            return null;
+        }
+    }
+    
+    static class HAIssuedTokenContext implements IssuedTokenContext {
+        X509Certificate x509Certificate = null;
+        Token securityToken = null;
+        Token associatedProofToken = null;
+        Token secTokenReference = null;
+        Token unAttachedSecTokenReference = null;
+        ArrayList<Object> securityPolicies = new ArrayList<Object>();
+        Object otherPartyEntropy = null;
+        Object selfEntropy = null;
+        URI computedKeyAlgorithm;
+        String sigAlgorithm;
+        String encAlgorithm;
+        String canonicalizationAlgorithm;
+        String signWith;
+        String encryptWith;
+        byte[] proofKey = null; // used in SecureConversation
+        SecurityContextTokenInfo sctInfo = null; // used in SecureConversation
+        Date creationTime = null;
+        Date expiryTime = null;
+        String username = null;
+        String endPointAddress = null;
+        Subject subject;
+        KeyPair proofKeyPair;
+        String authType = null;
+        String tokenType = null;
+        String keyType = null;
+        String tokenIssuer = null;
+        Token target = null;
+
+        Map<String, Object> otherProps = new HashMap<String, Object>();
+
+        public X509Certificate getRequestorCertificate() {
+            return x509Certificate;
+        }
+
+        public void setRequestorCertificate(X509Certificate cert) {
+            this.x509Certificate = cert;
+        }
+
+        public Subject getRequestorSubject(){
+            return subject;
+        }
+
+        public void setRequestorSubject(Subject subject){
+            this.subject = subject;
+        }
+
+        public String getRequestorUsername() {
+            return username;
+        }
+
+        public void setRequestorUsername(String username) {
+            this.username = username;
+        }
+
+
+        public void setSecurityToken(Token securityToken) {
+            this.securityToken = securityToken;
+        }
+
+        public Token getSecurityToken() {
+            return securityToken;
+        }
+
+        public void setAssociatedProofToken(Token associatedProofToken) {
+            this.associatedProofToken = associatedProofToken;
+        }
+
+        public Token getAssociatedProofToken() {
+            return associatedProofToken;
+        }
+
+        public Token getAttachedSecurityTokenReference() {
+            return secTokenReference;
+        }
+
+        public void setAttachedSecurityTokenReference(Token secTokenReference) {
+            this.secTokenReference = secTokenReference;
+        }
+
+        public Token getUnAttachedSecurityTokenReference() {
+            return unAttachedSecTokenReference;
+        }
+
+        public void setUnAttachedSecurityTokenReference(Token secTokenReference) {
+            this.unAttachedSecTokenReference = secTokenReference;
+        }
+
+        public ArrayList<Object> getSecurityPolicy() {
+            return securityPolicies;
+        }
+
+        public void setOtherPartyEntropy(Object otherPartyEntropy) {
+            this.otherPartyEntropy = otherPartyEntropy;
+        }
+
+        public Object getOtherPartyEntropy() {
+            return otherPartyEntropy;
+        }
+
+        public Key getDecipheredOtherPartyEntropy(Key privKey) throws XWSSecurityException {
+            return null;
+        }
+
+        public void setSelfEntropy(Object selfEntropy) {
+            this.selfEntropy = selfEntropy;
+        }
+
+        public Object getSelfEntropy() {
+            return selfEntropy;
+        }
+
+
+        public URI getComputedKeyAlgorithmFromProofToken() {
+            return computedKeyAlgorithm;
+        }
+
+        public void setComputedKeyAlgorithmFromProofToken(URI computedKeyAlgorithm) {
+            this.computedKeyAlgorithm = computedKeyAlgorithm;
+        }
+
+        public void setProofKey(byte[] key){
+            this.proofKey = key;
+        }
+
+        public byte[] getProofKey() {
+            return proofKey;
+        }
+
+        public void setProofKeyPair(KeyPair keys){
+            this.proofKeyPair = keys;
+        }
+
+        public KeyPair getProofKeyPair(){
+            return this.proofKeyPair;
+        }
+
+        public void setAuthnContextClass(String authType){
+            this.authType = authType;
+        }
+
+        public String getAuthnContextClass(){
+            return this.authType;
+        }
+
+        public Date getCreationTime() {
+            return creationTime;
+        }
+
+        public Date getExpirationTime() {
+            return expiryTime;
+        }
+
+        public void setCreationTime(Date date) {
+            creationTime = date;
+        }
+
+        public void  setExpirationTime(Date date) {
+            expiryTime = date;
+        }
+
+        /**
+         * set the endpointaddress
+         */
+        public void  setEndpointAddress(String endPointAddress){
+            this.endPointAddress = endPointAddress;
+        }
+
+        /**
+         *get the endpoint address
+         */
+        public String getEndpointAddress(){
+            return this.endPointAddress;
+        }
+
+        public void destroy() {
+
+        }
+
+        public SecurityContextTokenInfo getSecurityContextTokenInfo() {
+            return sctInfo;
+        }
+
+        public void setSecurityContextTokenInfo(SecurityContextTokenInfo sctInfo) {
+            this.sctInfo = sctInfo;
+        }
+
+        public Map<String, Object> getOtherProperties() {
+            return this.otherProps;
+        }
+
+        public void setTokenType(String tokenType) {
+            this.tokenType = tokenType;
+        }
+
+        public String getTokenType() {
+            return tokenType;
+        }
+
+        public void setKeyType(String keyType) {
+            this.keyType = keyType;
+        }
+
+        public String getKeyType() {
+            return keyType;
+        }
+
+        public void setAppliesTo(String appliesTo) {
+            this.endPointAddress = appliesTo;
+        }
+
+        public String getAppliesTo() {
+            return endPointAddress;
+        }
+
+        public void setTokenIssuer(String issuer) {
+            this.tokenIssuer = issuer;
+        }
+
+        public String getTokenIssuer() {
+            return tokenIssuer;
+        }
+
+        public void setSignatureAlgorithm(String sigAlg){
+            this.sigAlgorithm = sigAlg;
+        }
+
+        public String getSignatureAlgorithm(){
+            return sigAlgorithm;
+        }
+
+        public void setEncryptionAlgorithm(String encAlg){
+            this.encAlgorithm = encAlg;
+        }
+
+        public String getEncryptionAlgorithm(){
+            return encAlgorithm;
+        }
+
+        public void setCanonicalizationAlgorithm(String canonAlg){
+            this.canonicalizationAlgorithm = canonAlg;
+        }
+
+        public String getCanonicalizationAlgorithm(){
+            return canonicalizationAlgorithm;
+        }
+
+        public void setSignWith(String signWithAlgo){
+            this.signWith = signWithAlgo;
+        }
+
+        public String getSignWith(){
+            return signWith;
+        }    
+
+        public void setEncryptWith(String encryptWithAlgo){
+            this.encryptWith = encryptWithAlgo;
+        }
+
+        public String getEncryptWith(){
+            return encryptWith;
+        }
+
+        public void setTarget(Token target) {
+            this.target = target;
+        }
+
+        public Token getTarget() {
+            return target;
         }
     }
 }

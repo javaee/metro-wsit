@@ -331,18 +331,16 @@ public class WSSCContract {
         }
 
         final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
-        final Session session =
-                sm.createSession(token.getIdentifier().toString());
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
-        populateITC(now, session, secret, token, attachedReference, context, unattachedRef);
+        populateITC(now, secret, token, attachedReference, context, unattachedRef);
         sm.addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
     
-    private void populateITC(final long currentTime, final Session session, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
+    private void populateITC(final long currentTime, final byte[] secret, final SecurityContextToken token, final SecurityTokenReference attachedReference, final IssuedTokenContext context, final SecurityTokenReference unattachedRef) {
         
         // Populate the IssuedTokenContext
         context.setSecurityToken(token);
@@ -358,8 +356,10 @@ public class WSSCContract {
         sctinfo.addInstance(null, secret);
         
         sctinfo.setCreationTime(new Date(currentTime));
-        sctinfo.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout()));        
-        session.setSecurityInfo(sctinfo);
+        sctinfo.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout())); 
+        
+        final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
+        sm.createSession(token.getIdentifier().toString(), sctinfo, null);
     }
     
     private void populateRenewedITC(final Session session, final byte[] secret, final SecurityContextToken token, final IssuedTokenContext context, final SecurityTokenReference attachedReference) {        
@@ -577,7 +577,7 @@ public class WSSCContract {
         }
                 
         final IssuedTokenContext cxt = ((SessionManager)context.getOtherProperties().get("SessionManager")).getSecurityContext(id, true);
-        if (cxt == null || cxt.getSecurityToken() == null){
+        if (cxt == null || cxt.getSecurityContextTokenInfo() == null){
             log.log(Level.SEVERE,
                     LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));
             throw new WSSecureConversationException(LogStringsMessages.WSSC_0015_UNKNOWN_CONTEXT(id));

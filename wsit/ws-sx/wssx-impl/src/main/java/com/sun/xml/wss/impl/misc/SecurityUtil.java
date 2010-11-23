@@ -106,6 +106,7 @@ import java.security.PrivilegedAction;
 import java.security.cert.X509Certificate;
 import javax.security.auth.Subject;
 import com.sun.xml.ws.runtime.dev.SessionManager;
+import com.sun.xml.ws.security.SecurityContextTokenInfo;
 import com.sun.xml.ws.security.opt.impl.keyinfo.SecurityContextToken13;
 import com.sun.xml.ws.security.secconv.impl.bindings.SecurityContextTokenType;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
@@ -435,8 +436,23 @@ public class SecurityUtil {
             }
             
             ictx = ((SessionManager)context.getExtraneousProperty("SessionManager")).getSecurityContext(sctId, !context.isExpired());
+            java.net.URI identifier = null;
+            String instance = null;
+            String wsuId = null;
+                    
             SecurityContextToken sct = (SecurityContextToken)ictx.getSecurityToken();
-            ictx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sct.getIdentifier(), sct.getInstance(), sct.getWsuId()));
+            if (sct != null){
+                identifier = sct.getIdentifier();
+                instance = sct.getInstance();
+                wsuId = sct.getWsuId();
+            }else{
+                SecurityContextTokenInfo sctInfo = ictx.getSecurityContextTokenInfo();
+                identifier = java.net.URI.create(sctInfo.getIdentifier());
+                instance = sctInfo.getInstance();
+                wsuId = sctInfo.getExternalId();  
+            }
+            
+            ictx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(identifier, instance, wsuId));
         }
             
         

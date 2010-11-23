@@ -811,9 +811,9 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
                 packet.invocationProperties.put(
                         Session.SESSION_KEY, session.getUserData());
                 
-                IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
+                //IssuedTokenContext itctx = session.getSecurityInfo().getIssuedTokenContext();
                 //add the subject of requestor
-                itctx.setRequestorSubject(ictx.getRequestorSubject());
+                //itctx.setRequestorSubject(ictx.getRequestorSubject());
                 //((ProcessingContextImpl)ctx).getIssuedTokenContextMap().put(sctId, itctx);
                 
             } else if (requestType.toString().equals(wsTrustVer.getRenewRequestTypeURI())) {

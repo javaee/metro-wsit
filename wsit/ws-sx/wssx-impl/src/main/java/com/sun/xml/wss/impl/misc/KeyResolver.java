@@ -1089,8 +1089,14 @@ public class KeyResolver {
         }
         
         byte[] proofKey = null;
+        String instance = null;
         com.sun.xml.ws.security.SecurityContextToken scToken = (com.sun.xml.ws.security.SecurityContextToken)ctx.getSecurityToken();
-        if(scToken.getInstance() != null){
+        if (scToken != null){
+            instance = scToken.getInstance();
+        }else{
+            instance = ctx.getSecurityContextTokenInfo().getInstance();
+        }
+        if(instance != null){
             if(context.isExpired()){
                 proofKey = ctx.getProofKey();
             }else{
