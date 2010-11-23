@@ -160,6 +160,6 @@ public class JaxwsApplicationMessage extends ApplicationMessageBase {
         sb.append("nextResendCount=[ ").append(this.getNextResendCount()).append(" ], ");
         sb.append("wsaAction=[ ").append(this.jaxwsMessage.getWsaAction());
         sb.append(" ] }");
-        return super.toString();
+        return sb.toString();
     }
 }
