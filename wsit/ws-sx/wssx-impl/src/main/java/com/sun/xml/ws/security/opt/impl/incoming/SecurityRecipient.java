@@ -231,29 +231,22 @@ public final class SecurityRecipient {
 
             return createMessage();
         } catch (WssSoapFaultException ex) {
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw ex;
         } catch (WebServiceException te) {
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw te;
         } catch (XMLStreamException e) {
-            // TODO need to throw more meaningful exception
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw new WebServiceException(e);
         } catch (XWSSecurityException xe) {
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw xe;
         } catch (XWSSecurityRuntimeException re) {
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw re;
         } catch (Exception e) {
-            Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, getEmptyBodyNoException(), soapVersion);
-            ctx.setPVMessage(msg);
+            setExceptionMessage(ctx);
             throw new XWSSecurityRuntimeException(e);
         }
     }
@@ -1781,5 +1774,28 @@ public final class SecurityRecipient {
             }
         }
         return true;
+    }
+
+    private XMLStreamReader getEmptyBodyStart() throws XMLStreamException {
+        // create an empty body and create xmlstream reader out of it
+        String emptyBody = "<S:Body xmlns:S=\"" + soapVersion.nsUri + "\"" + "></S:Body>";
+        InputStream in = new ByteArrayInputStream(emptyBody.getBytes());
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        XMLStreamReader empBody = xif.createXMLStreamReader(in);
+        empBody.next(); //next of start document
+        return empBody;
+    }
+    private void setExceptionMessage(JAXBFilterProcessingContext ctx) {
+        XMLStreamReader rdr = null;
+        try {
+            rdr = getEmptyBodyStart();
+        }catch (Exception e) {
+        }
+
+        if (bodyTag == null) {
+            bodyTag = new TagInfoset(rdr);
+        }
+        Message msg = new StreamMessage(envelopeTag, headerTag, new AttachmentSetImpl(), headers, bodyTag, rdr, soapVersion);
+        ctx.setPVMessage(msg);
     }
 }

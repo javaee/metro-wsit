@@ -567,6 +567,19 @@ public final class VerifiedStreamMessage extends AbstractMessageImpl {
             }
         }
 
+        if (reader.getEventType() == XMLStreamReader.END_DOCUMENT) {
+            if (buffer != null) {
+                try {
+                    reader = buffer.readAsXMLStreamReader();
+                    reader = new VerifiedMessageXMLStreamReader(reader, bodyEnvNs);
+                    reader.next();
+                } catch (XMLStreamException ex) {
+                    logger.log(Level.SEVERE, LogStringsMessages.WSS_1612_ERROR_READING_BUFFER(), ex);
+                    throw new com.sun.xml.wss.impl.XWSSecurityRuntimeException(ex);
+                }
+            }
+        }
+
     }
 }
 
