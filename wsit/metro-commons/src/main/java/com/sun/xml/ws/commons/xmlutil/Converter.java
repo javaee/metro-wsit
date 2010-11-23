@@ -176,19 +176,10 @@ public final class Converter {
      * @return {@link Message} object created from the data stream
      */
     public static Message toMessage(@NotNull InputStream dataStream, String encoding) throws XMLStreamException {
-        XMLStreamReader xsr = null;
-        try {
-            xsr = XMLInputFactory.newInstance().createXMLStreamReader(dataStream, encoding);
-            return Messages.create(xsr);
-        } finally {
-            try {
-                if (xsr != null) { xsr.close(); }
-            } catch (XMLStreamException ex) {
-                LOGGER.warning("Unexpected exception occured while closing XMLStreamReader", ex);
-            }
-        }
+        XMLStreamReader xsr = XMLInputFactory.newInstance().createXMLStreamReader(dataStream, encoding);
+        return Messages.create(xsr);
     }
-    
+
     public static String messageDataToString(final byte[] data, final String encoding) {
         try {
             return toString(toMessage(new ByteArrayInputStream(data), encoding));
