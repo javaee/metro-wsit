@@ -96,14 +96,17 @@ public class SessionManagerImpl extends SessionManager {
     private final BackingStore<StickyKey, SecurityContextTokenInfo> sctBs;
     
     /** Creates a new instance of SessionManagerImpl */
-    public SessionManagerImpl(WSEndpoint endpoint) {
-        final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-        this.sctBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
+    public SessionManagerImpl(WSEndpoint endpoint, boolean isSC) {
+        if (isSC){
+            final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
+            this.sctBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
                 endpoint.getServiceName() + ":" + endpoint.getPortName()+ "_SCT_BS",
                 StickyKey.class,
                 SecurityContextTokenInfo.class);
-        
+        } else{
+            sctBs = null;
+        }
     }
     
     /**

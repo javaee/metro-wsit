@@ -196,7 +196,7 @@ public abstract class SessionManager {
      *
      * @return The value of the <code>manager</code> field.
      */ 
-    public static SessionManager getSessionManager(WSEndpoint endpoint) {
+    public static SessionManager getSessionManager(WSEndpoint endpoint, boolean isSC) {
         synchronized (LOCK) {
             try {
                 LOGGER.entering();
@@ -207,7 +207,7 @@ public abstract class SessionManager {
                     if (finder != null && finder.toArray().length > 0) {
                         sm = finder.toArray()[0];
                     } else {
-                        sm = new SessionManagerImpl(endpoint);
+                        sm = new SessionManagerImpl(endpoint, isSC);
                     }
                     SESSION_MANAGERS.put(endpoint, sm);
                     endpoint.getManagedObjectManager()
@@ -222,5 +222,9 @@ public abstract class SessionManager {
             }
         }
     }
+    
+     public static SessionManager getSessionManager(WSEndpoint endpoint){
+         return getSessionManager(endpoint, false);
+     }
 }
 

@@ -160,7 +160,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //this.subject = subject;
         //this.map = map;
         endPoint = new WeakReference((WSEndpoint)map.get("ENDPOINT"));
-        sessionManager = SessionManager.getSessionManager(endPoint.get());
+        sessionManager = SessionManager.getSessionManager(endPoint.get(), true);
 
         //need to merge config assertions from all alternatives
         //because we do not know which alternative the req uses

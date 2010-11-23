@@ -226,7 +226,7 @@ public final class SecurityTubeFactory implements TubeFactory, TubelineAssemblyC
                     wasNonceBsInitialized = true;
                 }
                 if (!wasScBsInitialized && feature.isScUsed()) {
-                    SessionManager.getSessionManager(endpoint); // this call initializes SCT backing store (if not initializes already
+                    SessionManager.getSessionManager(endpoint, true); // this call initializes SCT backing store (if not initializes already
                     wasScBsInitialized = true;
                 }
             }

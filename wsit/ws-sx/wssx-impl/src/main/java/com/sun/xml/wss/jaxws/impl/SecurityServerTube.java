@@ -195,7 +195,11 @@ public class SecurityServerTube extends SecurityTubeBase {
             if (cntxtClass != null) {
                 contextDelegate = this.loadClass(cntxtClass);
             }
-            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint());
+            boolean isSC = false;
+            if (wsscVer != null){
+                isSC = true;
+            }  
+            sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint(), isSC);
             props.put(PipeConstants.ENDPOINT, context.getEndpoint());
             props.put(PipeConstants.POLICY, context.getPolicyMap());
             props.put(PipeConstants.WSDL_MODEL, context.getWsdlPort());
