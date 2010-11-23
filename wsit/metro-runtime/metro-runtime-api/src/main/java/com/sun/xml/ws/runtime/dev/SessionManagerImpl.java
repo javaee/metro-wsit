@@ -327,7 +327,16 @@ public class SessionManagerImpl extends SessionManager {
         }
         
         public HASecurityContextTokenInfo(SecurityContextTokenInfo sctInfo) {
-            
+            identifier = sctInfo.getIdentifier();
+            extId = sctInfo.getExternalId();
+            instance = sctInfo.getInstance();
+            secret = sctInfo.getSecret();
+            creationTime = sctInfo.getCreationTime();
+            expirationTime = sctInfo.getExpirationTime();
+            Set<String> instKeys = sctInfo.getInstanceKeys();
+            for (String instKey : instKeys){
+                secretMap.put(instKey, sctInfo.getInstanceSecret(instance));
+            }
         }
 
     
