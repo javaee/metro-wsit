@@ -393,6 +393,16 @@
         <!-- module>contribs</module -->
     </modules>
 
+
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>java.net-m2-dist-repository</id>
+            <name>java.net-m2-repository</name>
+            <url>java-net:/maven2-repository/trunk/repository</url>
+        </repository>
+    </distributionManagement>
+    
     <repositories>
         <repository>
             <id>glassfish.dev.java.net</id>
@@ -726,15 +736,20 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>java.net-m2-dist-repository</id>
-            <name>java.net-m2-repository</name>
-            <url>java-net:/maven2-repository/trunk/repository</url>
-        </repository>
-    </distributionManagement>
+    
+    <profiles>
+        <profile>
+            <id>local-deployment</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>java.net-m2-dist-repository</id>
+                    <name>java.net-m2-repository</name>
+                    <url>file:///${user.home}/local-javanet-repo/</url>
+                </repository>
+            </distributionManagement>            
+        </profile>
+    </profiles>
 
     <properties>
         <glassfish.version>3.1-b23</glassfish.version>
