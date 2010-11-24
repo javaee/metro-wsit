@@ -137,7 +137,7 @@ public abstract class SessionManager {
      */ 
     public abstract Session createSession(String key, Object obj);
     
-    public abstract Session createSession(String key, SecurityContextTokenInfo sctInfo, Object obj);
+    public abstract Session createSession(String key, SecurityContextTokenInfo sctInfo);
     
      /**
      * Creates a Session with the given key, using an instance of 

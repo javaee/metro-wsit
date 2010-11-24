@@ -196,11 +196,14 @@ public class SessionManagerImpl extends SessionManager {
      * 
      */ 
     public Session createSession(String key, Object obj) {
-        return createSession(key, null, obj);
+        Session session = new Session(this, key, Collections.synchronizedMap(new HashMap<String, String>()));
+        sessionMap.put(key, session);
+        
+        return session;
     }
     
-    public Session createSession(String key, SecurityContextTokenInfo sctInfo, Object obj) {        
-        Session session = new Session(this, key, obj);
+    public Session createSession(String key, SecurityContextTokenInfo sctInfo) {  
+        Session session = new Session(this, key, Collections.synchronizedMap(new HashMap<String, String>()));
         session.setSecurityInfo(sctInfo);
         sessionMap.put(key, session);
 

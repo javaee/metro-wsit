@@ -357,7 +357,7 @@ public class WSSCContract {
         sctinfo.setExpirationTime(new Date(currentTime + this.getSCTokenTimeout())); 
         
         final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
-        sm.createSession(token.getIdentifier().toString(), sctinfo, null);
+        sm.createSession(token.getIdentifier().toString(), sctinfo);
         context.setSecurityContextTokenInfo(sctinfo);
         sm.addSecurityContext(token.getIdentifier().toString(), context);
     }
