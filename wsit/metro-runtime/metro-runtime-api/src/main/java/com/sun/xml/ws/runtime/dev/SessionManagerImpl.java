@@ -199,10 +199,10 @@ public class SessionManagerImpl extends SessionManager {
         return createSession(key, null, obj);
     }
     
-    public Session createSession(String key, SecurityContextTokenInfo sctInfo, Object obj) {
-        
-        Session sess = new Session(this, key, obj);
-        sessionMap.put(key, sess);
+    public Session createSession(String key, SecurityContextTokenInfo sctInfo, Object obj) {        
+        Session session = new Session(this, key, obj);
+        session.setSecurityInfo(sctInfo);
+        sessionMap.put(key, session);
 
         if (sctInfo != null && HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()){
             HASecurityContextTokenInfo hasctInfo = new HASecurityContextTokenInfo(sctInfo);
@@ -215,7 +215,8 @@ public class SessionManagerImpl extends SessionManager {
                 HaContext.updateHaInfo(new HaInfo(stickyKey.getHashKey(), replicaId, false));
             }
         }
-        return sess;
+        
+        return session;
     }
     
      /**
