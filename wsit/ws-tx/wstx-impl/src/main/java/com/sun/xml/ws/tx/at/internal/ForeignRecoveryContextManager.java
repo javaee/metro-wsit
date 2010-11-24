@@ -68,10 +68,9 @@ public class ForeignRecoveryContextManager {
     private static ForeignRecoveryContextManager singleton = new ForeignRecoveryContextManager();
 
 
-    private Map<Xid, RecoveryContextWorker> recoveredContexts;
+    private Map<Xid, RecoveryContextWorker> recoveredContexts = new HashMap<Xid, RecoveryContextWorker>();
 
     private ForeignRecoveryContextManager() {
-        recoveredContexts = new HashMap<Xid, RecoveryContextWorker>();
     }
 
     public static ForeignRecoveryContextManager getInstance() {
@@ -115,6 +114,7 @@ public class ForeignRecoveryContextManager {
      * @param isRecovery true if this is population from tx log, false if this is runtime register call prep
      */
     synchronized void add(ForeignRecoveryContext context, boolean isRecovery) {
+        if(context==null) return;
         recoveredContexts.put(context.getXid(), new RecoveryContextWorker(context, isRecovery?-1:0));
     }
 

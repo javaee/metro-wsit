@@ -104,6 +104,4 @@ public interface TransactionImportWrapper {
 
     public Xid getXid() throws SystemException;
 
-    public Transaction getTransaction(Xid xid);
-
 }

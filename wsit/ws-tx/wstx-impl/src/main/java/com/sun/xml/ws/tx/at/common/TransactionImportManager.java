@@ -262,10 +262,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
         return getXid.invoke(javaeeTM);
     }
 
-    public Transaction getTransaction(Xid xid) {
-        return getTransaction.invoke(javaeeTM, xid);
-    }
-
     public String getTxLogLocation() {
         return getTxLogLocation.invoke(javaeeTM);
     }

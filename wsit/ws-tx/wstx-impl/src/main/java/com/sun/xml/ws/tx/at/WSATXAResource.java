@@ -271,7 +271,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
                 logSuccess("rollbackaborted");
                 getWSATHelper().removeDurableParticipant(this);
                 m_isRemovedFromMap = true;
-            } else if (m_status.equals(PREPARED)) { // timed outs
+            } else if (m_status.equals(PREPARED)) { // timed outs and recovering txs
                 LOGGER.severe(LocalizationMessages.WSAT_4558_FAILED_STATE_FOR_ROLLBACK(m_status, m_epr.toString(), m_xid));
                 throw newFailedStateXAExceptionForMethodNameAndErrorcode("rollback", XAException.XAER_RMFAIL);
             } else {
@@ -415,9 +415,10 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
       byte[] eprBytes = new byte[len];
       ois.readFully(eprBytes);
       m_epr = EndpointReference.readFrom(new StreamSource(new ByteArrayInputStream(eprBytes)));
+      m_status = PREPARED;  //would not be in log unless prepare was complete
     }
 
-   private void log(String message) {  //todo this is only used in two places and they should be logs not just debug
+   private void log(String message) {  //todo this is only used in two places in commit and they should be logs not just debug
       WSATHelper.getInstance().debug("WSATXAResource:" + message);
    }
 

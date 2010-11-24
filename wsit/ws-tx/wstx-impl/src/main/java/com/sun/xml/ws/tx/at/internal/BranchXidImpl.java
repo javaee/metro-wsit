@@ -83,9 +83,7 @@ public class BranchXidImpl implements Xid, Externalizable {
   // Object
   //
   
-  public boolean equals(Object o) { //todo return this branchqual type check
-  //  if (!(o instanceof BranchXidImpl)) return false;
-  //  BranchXidImpl that = (BranchXidImpl) o;
+  public boolean equals(Object o) { 
     if (!(o instanceof Xid)) return false;
     Xid that = (Xid) o;
         final boolean formatId = getFormatId() == that.getFormatId();

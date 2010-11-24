@@ -55,7 +55,6 @@ public abstract class TransactionIdHelper {
     try {
       singleton = new TransactionIdHelperImpl();
     } catch (NoSuchAlgorithmException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

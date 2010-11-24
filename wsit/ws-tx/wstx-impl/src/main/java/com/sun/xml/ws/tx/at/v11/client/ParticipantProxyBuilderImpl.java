@@ -45,7 +45,6 @@ import com.sun.xml.ws.tx.at.common.ParticipantIF;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.at.v11.types.Notification;
 import com.sun.xml.ws.tx.at.v11.types.ParticipantPortType;
-import com.sun.xml.ws.client.WSServiceDelegate;
 
 
 /**
@@ -69,11 +68,6 @@ public class ParticipantProxyBuilderImpl extends ParticipantProxyBuilder<Notific
 
         ParticipantProxyImpl() {
             port = service.getParticipantPort(to,getEnabledFeatures());
- //todoremove            Provider Provider = Provider.getInstance();
- //todoremove            WSServiceDelegate delegate = Provider.createServiceDelegate(service.getWSDLDocumentLocation(),service.getServiceName(), WSAT11Service.class );
-
- //todoremove            port = delegate.getPort(to, ParticipantPortType.class, getEnabledFeatures());
-
         }
 
         public void prepare(Notification parameters) {

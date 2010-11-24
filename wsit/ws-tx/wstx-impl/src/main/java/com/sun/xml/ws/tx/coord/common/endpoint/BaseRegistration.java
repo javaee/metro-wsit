@@ -80,13 +80,13 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
         Xid xid = processRegisterTypeAndEnlist(parameters, xidFromWebServiceContextHeaderList);
         BaseRegisterResponseType<T,P> registerResponseType = createRegisterResponseType(xid);
         try {
-            if (WSATHelper.isDebugEnabled()) LOGGER.info(
-                    LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
-            TransactionManagerImpl.getInstance().getTransactionManager().suspend(); //todo is this right?
+            TransactionManagerImpl.getInstance().getTransactionManager().suspend();
         } catch (SystemException ex) {
             ex.printStackTrace();
             Logger.getLogger(BaseRegistration.class).log(Level.SEVERE, null, ex);
         }
+        if (WSATHelper.isDebugEnabled())
+            LOGGER.info(LocalizationMessages.WSAT_4505_REGISTER_OPERATION_EXITED(registerResponseType));
         return registerResponseType;
     }
 
@@ -101,9 +101,12 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      *
      * @param parameters RegisterType
      * @param xid        Xid
+     * @return Xid xid
      */
      Xid processRegisterTypeAndEnlist(BaseRegisterType<T,K> parameters, Xid xid) {
-        if (parameters == null) WSATFaultFactory.throwInvalidParametersFault();
+        if (parameters == null) throw new WebServiceException(
+                "The message contained invalid parameters and could not be processed. " +
+                        "Parameter argument for registration was null");
         String protocolIdentifier = parameters.getProtocolIdentifier();
         if(parameters.isDurable()) {
             return enlistResource(xid, parameters.getParticipantProtocolService());
@@ -149,10 +152,9 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      *
      * @param xid              Xid
      * @param epr              EndpointReferenceType obtained from RegisterType parameters provided to registerOperation
+     * @return Xid xid
      */
     private Xid enlistResource(Xid xid, T epr) {
-//todoremove         if (WSATHelper.isDebugEnabled())
-//todoremove             WseeWsatLogger.logEnlistResource(epr, xid);
         if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4503_ENLIST_RESOURCE(epr, xid));
         WSATXAResource wsatXAResource = new WSATXAResource(version,epr, xid);
         try {
@@ -161,7 +163,7 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
             wsatXAResource.setBranchQualifier(xidFromEnlist.getBranchQualifier());
             return xidFromEnlist;
         } catch (WSATException e) {
-            e.printStackTrace();  //todo logging
+            e.printStackTrace(); 
             throw new WebServiceException(e);
         }
     }
@@ -174,13 +176,11 @@ public abstract class BaseRegistration<T extends EndpointReference,K,P> implemen
      *                            EndpointReferenceType
      */
     private void registerSynchronization(Xid xid, T epr) {
-//todoremove         WseeWsatLogger.logRegisterSynchronization(epr, xid);
         LOGGER.info(LocalizationMessages.WSAT_4525_REGISTER_SYNCHRONIZATION(epr, xid));
         WSATSynchronization wsatXAResource = new WSATSynchronization(version, epr, xid);
         try {
             getTransactionServices().registerSynchronization(wsatXAResource, xid);
         } catch (WSATException e) {
-//todoremove             WseeWsatLogger.logExceptionDuringRegisterSynchronization(e);
             LOGGER.severe(LocalizationMessages.WSAT_4507_EXCEPTION_DURING_REGISTER_SYNCHRONIZATION(), e);
             WSATFaultFactory.throwContextRefusedFault();
         }

@@ -59,7 +59,7 @@ public interface RegistrationCoordinatorPortType {
     /**
      * 
      * @param parameters
-     */ //todo paul was http://schemas.xmlsoap.org/ws/2004/10/wscoor/RegisterOperation
+     */ 
     @WebMethod(operationName = "RegisterOperation", action = "http://schemas.xmlsoap.org/ws/2004/10/wscoor/Register")
     @Oneway
     public void registerOperation(

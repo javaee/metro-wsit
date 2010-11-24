@@ -71,7 +71,6 @@ public class RegistrationProxyImpl extends BaseRegistration<MemberSubmissionEndp
 
     @Override
     protected String getCoordinatorAddress() {
-        //todoBethune
         return WSATHelper.V10.getCoordinatorAddress();
     }
 

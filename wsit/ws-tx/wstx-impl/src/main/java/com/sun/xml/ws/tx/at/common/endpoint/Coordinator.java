@@ -80,16 +80,13 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void preparedOperation(T parameters) {
-//todoremove         if(isDebugEnabled()) WseeWsatLogger.logPreparedOperationEntered(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4509_PREPARED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
- //todoremove         if(isDebugEnabled()) WseeWsatLogger.logPreparedOperation(xidFromWebServiceContextHeaderList);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4510_PREPARED_OPERATION(xidFromWebServiceContextHeaderList));
         if (!getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.PREPARED)) {
             //Xid does not exist so must/better be recovery
             replayOperation(parameters);
         }
-  //todoremove        if(isDebugEnabled()) WseeWsatLogger.logPreparedOperationExited(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4511_PREPARED_OPERATION_EXITED(parameters));
     }
 
@@ -99,13 +96,10 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void abortedOperation(T parameters) {
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logAbortedOperationEntered(parameters);
       if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4512_ABORTED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logAbortedOperation(xidFromWebServiceContextHeaderList);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4513_ABORTED_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.ABORTED);
- //todoremove         if(isDebugEnabled()) WseeWsatLogger.logAbortedOperationExited(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
     }
 
@@ -115,13 +109,10 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void readOnlyOperation(T parameters) {
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logReadOnlyOperationEntered(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4515_READ_ONLY_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-//todoremove          if(isDebugEnabled())  WseeWsatLogger.logReadOnlyOperation(xidFromWebServiceContextHeaderList);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4516_READ_ONLY_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.READONLY);
- //todoremove         if(isDebugEnabled()) WseeWsatLogger.logReadOnlyOperationExited(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4517_READ_ONLY_OPERATION_EXITED(parameters));
     }
 
@@ -131,13 +122,10 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void committedOperation(T parameters) {
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logCommittedOperationEntered(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4518_COMMITTED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-//todoremove          if(isDebugEnabled())  WseeWsatLogger.logCommittedOperation(xidFromWebServiceContextHeaderList);
         if(isDebugEnabled())  LOGGER.info(LocalizationMessages.WSAT_4519_COMMITTED_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.COMMITTED);
- //todoremove         if(isDebugEnabled()) WseeWsatLogger.logCommittedOperationExited(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4520_COMMITTED_OPERATION_EXITED(parameters));
     }
 
@@ -147,22 +135,18 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters  Notification
      */
     public void replayOperation(T parameters) {
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logReplayOperationEntered(parameters);
         if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4521_REPLAY_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
         String wsatTid = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(context);
-//todoremove          if(isDebugEnabled())  WseeWsatLogger.logReplayOperation(xidFromWebServiceContextHeaderList);
         if(isDebugEnabled())  LOGGER.info(LocalizationMessages.WSAT_4522_REPLAY_OPERATION(xidFromWebServiceContextHeaderList));
         try {
             getTransactionServices().replayCompletion(
                     wsatTid, createWSATXAResourceForXidFromReplyTo(xidFromWebServiceContextHeaderList));
         } catch (WSATException e) {
- //todoremove             if(isDebugEnabled())  WseeWsatLogger.logReplayOperationSOAPException(xidFromWebServiceContextHeaderList, e);
-            if(isDebugEnabled())  
+            if(isDebugEnabled())
                 LOGGER.severe(LocalizationMessages.WSAT_4523_REPLAY_OPERATION_SOAPEXCEPTION(xidFromWebServiceContextHeaderList), e);
             //there is no consequence, recovery reattempt should be (re)issued by subordinate
         }
-//todoremove          if(isDebugEnabled()) WseeWsatLogger.logAbortedOperationExited(parameters);
             if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
     }
 

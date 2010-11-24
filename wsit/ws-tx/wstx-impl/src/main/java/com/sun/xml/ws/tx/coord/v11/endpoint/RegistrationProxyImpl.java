@@ -72,7 +72,6 @@ public class RegistrationProxyImpl extends BaseRegistration<W3CEndpointReference
 
     @Override
     protected String getCoordinatorAddress() {
-        //todoBethune
         return WSATHelper.V11.getCoordinatorAddress();
     }
 

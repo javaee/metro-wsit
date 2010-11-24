@@ -59,7 +59,6 @@ public abstract class BaseProxyBuilder<T, B extends BaseProxyBuilder<T,B>> {
     protected EndpointReference to;
     protected EndpointReference replyTo;
     protected List<WebServiceFeature> features;
-//todoremove     protected List<CredentialProvider> credentialProviders;
 
 
     protected BaseProxyBuilder(WSATVersion<T> version) {
@@ -114,16 +113,6 @@ public abstract class BaseProxyBuilder<T, B extends BaseProxyBuilder<T,B>> {
         return (B) this;
     }
 
-    /**
-     * specify credential providers required by webservice security runtime.
-     * @return
-     
-    public B credentialProvider(CredentialProvider credentialProvider){
-        if(credentialProvider == null) return (B) this;
-        if(credentialProviders == null) credentialProviders = new ArrayList<CredentialProvider>();
-        credentialProviders.add(credentialProvider);
-        return (B) this;
-   }*///todoremove 
 
     protected WebServiceFeature[] getEnabledFeatures() {
         return features.toArray(new WebServiceFeature[0]);

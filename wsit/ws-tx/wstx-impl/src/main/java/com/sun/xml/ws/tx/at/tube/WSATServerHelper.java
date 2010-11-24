@@ -69,17 +69,16 @@ public class WSATServerHelper implements WSATServer {
     private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
 
     public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
-        if(WSATHelper.isDebugEnabled())
-            debug("processRequest HeaderList:"+headers+
-                    " TransactionalAttribute:"+tx+ " isEnabled:"+tx.isEnabled());
-            CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers,tx.getVersion());
-            if(ccBuilder != null) {
-                processIncomingTransaction(ccBuilder);
-            } else {
-                if(tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
-            }
+        if (WSATHelper.isDebugEnabled())
+            debug("processRequest HeaderList:" + headers + " TransactionalAttribute:" + tx + " isEnabled:" + tx.isEnabled());
+        CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers, tx.getVersion());
+        if (ccBuilder != null) {
+            processIncomingTransaction(ccBuilder);
+        } else {
+            if (tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
+        }
     }
-    
+
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
         if (transactionalAttribute!=null && transactionalAttribute.isEnabled()) {
             debug("processResponse isTransactionalAnnotationPresent about to suspend");
@@ -109,24 +108,25 @@ public class WSATServerHelper implements WSATServer {
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
         boolean isRegistered = false;
-        Xid foreignXid;
+        Xid foreignXid; //serves as a boolean
         try {
-            foreignXid = WSATHelper.getTransactionServices().importTransaction(
-                  (int) timeout, tid.getBytes());
+          foreignXid = WSATHelper.getTransactionServices().importTransaction((int) timeout, tid.getBytes());
           if(foreignXid!=null) isRegistered = true;
           if(!isRegistered) {
               foreignXid = new XidImpl(tid.getBytes());
-              register(builder, cc, foreignXid, timeout);
+              register(builder, cc, foreignXid, timeout, tid);
           }
         } catch (WSATException e) {
             throw new WebServiceException(e);
         }
     }
 
-    private void register(CoordinationContextBuilder builder, CoordinationContextIF cc, Xid foreignXid, long timeout)
+    private void register(
+            CoordinationContextBuilder builder, CoordinationContextIF cc,
+            Xid foreignXid, long timeout, String participantId)
     {
-       String participantId = TransactionIdHelper.getInstance().xid2wsatid(foreignXid);
-       Transactional.Version version = builder.getVersion();
+        participantId = TransactionIdHelper.getInstance().xid2wsatid(foreignXid);
+        Transactional.Version version = builder.getVersion();
         WSCBuilderFactory factory = WSCBuilderFactory.newInstance(version);
         RegistrationMessageBuilder rrBuilder = factory.newWSATRegistrationRequestBuilder();
         BaseRegisterType registerType = rrBuilder.durable(true).txId(participantId).routing().build();

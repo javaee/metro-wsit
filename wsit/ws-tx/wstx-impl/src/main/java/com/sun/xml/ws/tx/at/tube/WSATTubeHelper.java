@@ -50,13 +50,6 @@ import javax.transaction.Transaction;
 
 public class WSATTubeHelper {
 
-    public static boolean isSSLRequired() {
-        return false; //todoremove
-    }
-
-    //public static TransactionalAttribute getTransactionalAttribute0(TransactionalFeature feature, Packet packet,WSDLPort port) {
-//     return new TransactionalAttribute(false, false, Transactional.Version.DEFAULT);
-    //}
     public static TransactionalAttribute getTransactionalAttribute(TransactionalFeature feature, Packet packet, WSDLPort port) {
         if (feature == null) {
             feature =

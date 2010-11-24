@@ -73,7 +73,7 @@ class WSATNoOpXAResource implements XAResource {
     }
 
     public int getTransactionTimeout() throws XAException {
-        return 30000; //todo make -1
+        return -1; 
     }
 
     public boolean isSameRM(XAResource xar) throws XAException {

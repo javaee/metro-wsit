@@ -41,7 +41,8 @@
 package com.sun.xml.ws.tx.at;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.api.tx.at.Transactional;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
@@ -69,8 +70,6 @@ public class WSATSynchronization implements Synchronization {
         this.m_version = version;
         m_xid = xid;
         m_epr = epr;
-       //todoremove  if (WSATHelper.isDebugEnabled())
-          //todoremove   WseeWsatLogger.logWSATSynchronization( m_epr.toString(), m_xid, "");
        if (WSATHelper.isDebugEnabled())
            LOGGER.info(LocalizationMessages.WSAT_4526_WSAT_SYNCHRONIZATION(m_epr.toString(), m_xid, ""));
     }
@@ -80,43 +79,32 @@ public class WSATSynchronization implements Synchronization {
     }
 
     public void beforeCompletion() {
-      //todoremove   if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logBeforeCompletionEntered( m_epr.toString(), m_xid);
         if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4527_BEFORE_COMPLETION_ENTERED(m_epr.toString(), m_xid));
         try {
             WSATHelper.getInstance().beforeCompletion( m_epr, m_xid, this);
             synchronized (this) {
                 if (m_status.equals(WSATConstants.COMMITTED)) { // we received a reply from call already
-//todoremove                     if (WSATHelper.isDebugEnabled())
-//todoremove                         WseeWsatLogger.logBeforeCompletionCommittedBeforeWait( m_epr.toString(), m_xid);
                     if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4528_BEFORE_COMPLETION_COMMITTED_BEFORE_WAIT(
                         m_epr.toString(), m_xid));
                     return;
                 }
-//todoremove                 if (WSATHelper.isDebugEnabled())
-//todoremove                     WseeWsatLogger.logBeforeCompletionWaitingForReply(m_epr.toString(), m_xid);
                 if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4529_BEFORE_COMPLETION_WAITING_FOR_REPLY(
                     m_epr.toString(), m_xid));
                 this.wait(WSATHelper.getInstance().getWaitForReplyTimeout());
-//todoremove                 if (WSATHelper.isDebugEnabled())
-//todoremove                     WseeWsatLogger.logBeforeCompletionFinishedWaitingForReply(m_epr.toString(), m_xid);
                 if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4530_BEFORE_COMPLETION_FINISHED_WAITING_FOR_REPLY(
                     m_epr.toString(), m_xid));
             }
-//todoremove             WseeWsatLogger.logBeforeCompletionReceivedReplyWithStatus(m_status, m_epr.toString(), m_xid);
             LOGGER.info(LocalizationMessages.WSAT_4531_BEFORE_COMPLETION_RECEIVED_REPLY_WITH_STATUS(
                 m_status, m_epr.toString(), m_xid));
             if (!m_status.equals(WSATConstants.COMMITTED)) {
-//todoremove                 WseeWsatLogger.logBeforeCompletionUnexceptedStatus(m_status, m_epr.toString(), m_xid);
                 LOGGER.severe(LocalizationMessages.WSAT_4532_BEFORE_COMPLETION_UNEXCEPTED_STATUS(
                     m_status, m_epr.toString(), m_xid));
                 setRollbackOnly();
             }
         } catch (InterruptedException e) {
-//todoremove             WseeWsatLogger.logBeforeCompletionInterruptedException(e, m_epr.toString(), m_xid);
             LOGGER.severe(LocalizationMessages.WSAT_4533_BEFORE_COMPLETION_INTERRUPTED_EXCEPTION(m_epr.toString(), m_xid), e);
             setRollbackOnly();
         } catch (Exception e) {
-//todoremove             WseeWsatLogger.logBeforeCompletionException(e, m_epr.toString(), m_xid);
             LOGGER.severe(LocalizationMessages.WSAT_4534_BEFORE_COMPLETION_EXCEPTION(m_epr.toString(), m_xid), e);
             setRollbackOnly();
         } finally {
@@ -126,23 +114,20 @@ public class WSATSynchronization implements Synchronization {
     }
 
     private void setRollbackOnly() {
-        Transaction transaction = null;//todoremove TransactionHelper.getTransactionHelper().getTransaction();
-        if (transaction != null) {
-            try {
+        try {
+            Transaction transaction = TransactionManagerImpl.getInstance().getTransaction();
+            if (transaction != null) {
                 transaction.setRollbackOnly();
-            } catch (SystemException e) {
-        //todoremove         WseeWsatLogger.logBeforeCompletionSystemExceptionDuringSetRollbackOnly(e, m_epr.toString(), m_xid);
-              LOGGER.info(LocalizationMessages.WSAT_4535_BEFORE_COMPLETION_SYSTEM_EXCEPTION_DURING_SET_ROLLBACK_ONLY(
-                  e, m_epr.toString(), m_xid));
-            }
-        } else ;
-//todoremove WseeWsatLogger.logBeforeCompletionTransactionNullDuringSetRollbackOnly(m_epr.toString(), m_xid);
-        LOGGER.info(LocalizationMessages.WSAT_4536_BEFORE_COMPLETION_TRANSACTION_NULL_DURING_SET_ROLLBACK_ONLY(
-            m_epr.toString(), m_xid));
+            } else
+                LOGGER.info(LocalizationMessages.WSAT_4536_BEFORE_COMPLETION_TRANSACTION_NULL_DURING_SET_ROLLBACK_ONLY(
+                        m_epr.toString(), m_xid));
+        } catch (SystemException e) {
+            LOGGER.info(LocalizationMessages.WSAT_4535_BEFORE_COMPLETION_SYSTEM_EXCEPTION_DURING_SET_ROLLBACK_ONLY(
+                    e, m_epr.toString(), m_xid));
+        }
     }
 
     public void afterCompletion(int status) {
-//todoremove         if (WSATHelper.isDebugEnabled()) WseeWsatLogger.logAfterCompletionStatus(m_epr.toString(), m_xid, "" + status);
       if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4537_AFTER_COMPLETION_STATUS(m_epr.toString(), m_xid, "" + status));
         //no-op
     }

@@ -121,12 +121,6 @@ public class WSATServerTube extends AbstractFilterTubeImpl implements WSATConsta
       request.invocationProperties.put(WSATATTRIBUTE, tx);
       HeaderList headers = request.getMessage().getHeaders();
       m_wsatServerHelper.doHandleRequest(headers, tx);
-      //this is workaround for the well-known MU tube problem - MU tube is placed before security tubes and WS-AT tubes
-      if (!tx.isEnabled()) {
-        Set<QName> notUnderstoodHeaders =null;//todoremove = MUHeaderHelper.getMUWSATHeaders(headers);
-        if (notUnderstoodHeaders != null && !notUnderstoodHeaders.isEmpty())
-            return super.processRequest(request); //todoremove        return doReturnWith(request.createResponse(MUHeaderHelper.createMUSOAPFaultMessage(tx.getSoapVersion(), notUnderstoodHeaders)));
-      }
       return super.processRequest(request);
     }
 

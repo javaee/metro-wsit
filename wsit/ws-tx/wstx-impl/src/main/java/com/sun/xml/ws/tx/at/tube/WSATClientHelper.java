@@ -172,7 +172,7 @@ public class WSATClientHelper implements WSATClient {
             TransactionalAttribute transactionalAttribute, Map<String, Object> map) {
         List<Header> headers = new ArrayList<Header>();
         String txId;
-        //todo use cluster/servername to make this unique
+        //todo add cluster/servername to make this unique
         String s = UUID.randomUUID().toString().replace("urn:","").replaceAll("uuid:","").trim();
         byte[] activityId = WSATHelper.assignUUID().getBytes();
         LOGGER.info("WS-AT activityId:" + activityId);
