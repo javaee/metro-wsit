@@ -330,13 +330,11 @@ public class WSSCContract {
             throw new WSSecureConversationException(LogStringsMessages.WSSC_0020_PROBLEM_CREATING_RSTR(), ex);
         }
 
-        final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
         if (log.isLoggable(Level.FINE)) {
             log.log(Level.FINE,
                     LogStringsMessages.WSSC_1010_CREATING_SESSION(token.getIdentifier()));
         }
         populateITC(now, secret, token, attachedReference, context, unattachedRef);
-        sm.addSecurityContext(token.getIdentifier().toString(), context);
         return response;
     }
     
@@ -360,6 +358,8 @@ public class WSSCContract {
         
         final SessionManager sm = (SessionManager)context.getOtherProperties().get("SessionManager");
         sm.createSession(token.getIdentifier().toString(), sctinfo, null);
+        context.setSecurityContextTokenInfo(sctinfo);
+        sm.addSecurityContext(token.getIdentifier().toString(), context);
     }
     
     private void populateRenewedITC(final Session session, final byte[] secret, final SecurityContextToken token, final IssuedTokenContext context, final SecurityTokenReference attachedReference) {        
