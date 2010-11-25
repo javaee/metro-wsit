@@ -159,15 +159,15 @@
         <pathelement location="${emma.dir}/emma.jar" />
         <pathelement location="${emma.dir}/emma_ant.jar" />
     </path>
+    <path id="instr.override.path">
+        <pathelement location="${out.instr.dir}" />
+        <path refid="emma.lib" />
+    </path>
 
     <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
 
     <target name="emma" description="turns on EMMA's on-the-fly instrumentation mode" >
         <property name="emma.enabled" value="true" />
-        <path id="instr.override.path">
-            <pathelement location="${out.instr.dir}" />
-            <path refid="emma.lib" />
-        </path>
     </target>
 
     <target name="setup-emma-remote" description="internal: overrides remote setup for emma">
@@ -175,14 +175,14 @@
         <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
-    <target name="setup-emma-local" description="internal: overrides local setup for emma" depends="prepare-local">
+    <target name="setup-emma-local" description="internal: overrides local setup for emma">
         <property name="metro.image" value="${basedir}/metro-image"/>
-        <property name="metro.sources" value="${metro.dir}/rt/src"/>
+        <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
     <target name="setup-emma-v3" description="internal: overrides GlassFish v3 setup for emma">
         <property name="metro.image" value="${basedir}/metro-image"/>
-        <property name="metro.sources" value="${metro.dir}/rt/src"/>
+        <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
     <!--target name="emma_report" description="just creates a report from metadata files" >
@@ -207,18 +207,19 @@
         <delete dir="${coverage.dir}"/>
     </target>
 
-    <target name="prepare-local" description="Prepares local copy of the Metro bundle">
+
+    <target name="prepare">
+        <mkdir dir="${logs.dir}"/>
+        <mkdir dir="${logs.dir}/junit-reports" />
+        <mkdir dir="${out.instr.dir}" />
+    </target>
+
+    <target name="get-metro-local" description="Prepares local copy of the Metro bundle">
         <mkdir dir="metro-image" />
         <unzip src="${metro.dir}/bundles/metro-standalone/target/metro.zip" dest="metro-image" />
     </target>
-
-    <target name="prepare">
-        <mkdir dir="${out.instr.dir}" />
-        <mkdir dir="${logs.dir}/junit-reports" />
-        <mkdir dir="${logs.dir}"/>
-    </target>
-
-    <target name="get-wsit-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
+    
+    <target name="get-metro-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="metro-image"/>
         <get src="http://sysifos-sol.czech.sun.com/hudson/job/metro-main-trunk/lastSuccessfulBuild/artifact/wsit/bundles/metro-standalone/target/metro.zip"
              dest="metro-image/metro.zip"/>
@@ -291,7 +292,7 @@
     </target>
 
     <target name="main-hudson" description="Invoke Metro E2E tests based on a last successful Metro build from Hudson."
-            depends="setup-emma-remote, get-wsit-hudson">
+            depends="setup-emma-remote, get-metro-hudson">
 
         <run-tests>
             <arguments>
@@ -376,7 +377,7 @@
 
     <target name="main"
             description="Runs the e2e tests on the entire workspace"
-            depends="setup-emma-local">
+            depends="setup-emma-local, get-metro-local">
 
         <run-tests>
             <arguments>
