@@ -76,7 +76,7 @@ public class ClientAckRequesterTask implements DelayedTask {
             }
 
             if (rc.sequenceManager().isValid(outboundSequenceId)) {
-                final Sequence sequence = rc.getOutboundSequence(outboundSequenceId);
+                final Sequence sequence = rc.sequenceManager().getOutboundSequence(outboundSequenceId);
                 if (!sequence.isClosed() && !sequence.isExpired()) {
                     try {
                         if (sequence.isStandaloneAcknowledgementRequestSchedulable(acknowledgementRequestInterval)) {

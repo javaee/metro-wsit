@@ -131,9 +131,35 @@ public interface SequenceManager extends TimeSynchronizer {
      *
      * @return sequence identified with the {@code sequenceId} identifier
      *
-     * @exception UnknownSequenceExceptio in case no such sequence is registered within the sequence manager
+     * @exception UnknownSequenceException in case no such sequence is registered within the sequence manager
      */
     public Sequence getSequence(String sequenceId) throws UnknownSequenceException;
+
+    /**
+     * Retrieves an existing inbound sequence from the internal sequence storage
+     *
+     * @param sequenceId the unique sequence identifier
+     *
+     * @return sequence identified with the {@code sequenceId} identifier
+     *
+     * @exception UnknownSequenceException in case no such sequence is registered 
+     *            within the sequence manager or in case the registered sequence was
+     *            not created as inbound.
+     */
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException;
+
+    /**
+     * Retrieves an existing outbound sequence from the internal sequence storage
+     *
+     * @param sequenceId the unique sequence identifier
+     *
+     * @return sequence identified with the {@code sequenceId} identifier
+     *
+     * @exception UnknownSequenceException in case no such sequence is registered 
+     *            within the sequence manager or in case the registered sequence was
+     *            not created as outbound.
+     */
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException;
 
     /**
      * Provides information on whether the sequence identifier is a valid identifier that belongs to an existing 

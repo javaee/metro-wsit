@@ -242,6 +242,32 @@ public final class PersistentSequenceManager implements SequenceManager {
     /**
      * {@inheritDoc}
      */
+    public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
+        final Sequence sequence = getSequence(sequenceId);
+        
+        if (!(sequence instanceof InboundSequence)) {
+            throw new UnknownSequenceException(sequenceId);            
+        }
+        
+        return sequence;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
+        final Sequence sequence = getSequence(sequenceId);
+        
+        if (!(sequence instanceof OutboundSequence)) {
+            throw new UnknownSequenceException(sequenceId);            
+        }
+        
+        return sequence;
+    }       
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isValid(final String sequenceId) {
         Sequence s;
         try {

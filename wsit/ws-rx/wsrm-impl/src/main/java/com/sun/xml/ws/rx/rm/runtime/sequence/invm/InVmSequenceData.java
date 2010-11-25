@@ -174,7 +174,7 @@ final class InVmSequenceData implements SequenceData {
             data.getUnackedNumberToCorrelationIdMap().put(msgNumberKey, message.getCorrelationId());
             data.replicate();
             
-            messageStore.put(message.getCorrelationId(), message);
+            messageStore.put(decorateForSequence(message.getCorrelationId()), message);
         } finally {
             unlockWrite();
         }
@@ -253,7 +253,7 @@ final class InVmSequenceData implements SequenceData {
             final String correlationId = data.getUnackedNumberToCorrelationIdMap().remove(messageNumber);
             data.replicate();
 
-            messageStore.remove(correlationId);
+            messageStore.remove(decorateForSequence(correlationId));
         } finally {
             unlockWrite();
         }
@@ -264,7 +264,7 @@ final class InVmSequenceData implements SequenceData {
 
         try {
             lockRead();
-            return messageStore.get(correlationId);
+            return messageStore.get(decorateForSequence(correlationId));
         } finally {
             unlockRead();
         }
@@ -318,7 +318,11 @@ final class InVmSequenceData implements SequenceData {
     private void initLocalCache() {
         for (Long unackedMessageNumber : data.getReceivedUnackedMessageNumbers()) {
             final String correlationId = data.getUnackedNumberToCorrelationIdMap().get(unackedMessageNumber);
-            messageStore.get(correlationId);
+            messageStore.get(decorateForSequence(correlationId));
         }
+    }
+    
+    private String decorateForSequence(String correlationId) {
+        return data.getSequenceId() + "_" + correlationId;
     }
 }

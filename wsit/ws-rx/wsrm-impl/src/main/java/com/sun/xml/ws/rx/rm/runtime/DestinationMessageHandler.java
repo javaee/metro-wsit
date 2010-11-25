@@ -90,7 +90,7 @@ class DestinationMessageHandler implements MessageHandler {
         if (inboundSequenceId == null) {
             throw new WsrmRequiredException();
         }
-        final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
+        final Sequence inboundSequence = sequenceManager.getInboundSequence(inboundSequenceId);
         
 
         // register and possibly store message in the unacked message sequence queue
@@ -109,15 +109,15 @@ class DestinationMessageHandler implements MessageHandler {
         if (acknowledgementData.getAcknowledgedSequenceId() != null) { // process outbound sequence acknowledgements           
             final List<AckRange> acknowledgedRanges = acknowledgementData.getAcknowledgedRanges();
             if (!acknowledgedRanges.isEmpty()) {
-                Sequence sequence = sequenceManager.getSequence(acknowledgementData.getAcknowledgedSequenceId());
-                if (!sequence.isClosed()) { // we ignore acknowledgments on closed sequences
-                    sequence.acknowledgeMessageNumbers(acknowledgedRanges);
+                Sequence outboundSequence = sequenceManager.getOutboundSequence(acknowledgementData.getAcknowledgedSequenceId());
+                if (!outboundSequence.isClosed()) { // we ignore acknowledgments on closed sequences
+                    outboundSequence.acknowledgeMessageNumbers(acknowledgedRanges);
                 }
             }
         }
 
         if (acknowledgementData.getAckReqestedSequenceId() != null) { // process inbound sequence ack requested flag
-            final Sequence inboundSequence = sequenceManager.getSequence(acknowledgementData.getAckReqestedSequenceId());
+            final Sequence inboundSequence = sequenceManager.getInboundSequence(acknowledgementData.getAckReqestedSequenceId());
             inboundSequence.setAckRequestedFlag();
         }
     }
@@ -133,7 +133,7 @@ class DestinationMessageHandler implements MessageHandler {
         assert sequenceManager != null;
 
         AcknowledgementData.Builder ackDataBuilder = AcknowledgementData.getBuilder();
-        final Sequence inboundSequence = sequenceManager.getSequence(inboundSequenceId);
+        final Sequence inboundSequence = sequenceManager.getInboundSequence(inboundSequenceId);
         if (inboundSequence.isAckRequested() || inboundSequence.isClosed()) {
             ackDataBuilder.acknowledgements(inboundSequence.getId(), inboundSequence.getAcknowledgedMessageNumbers(), inboundSequence.isClosed());
             inboundSequence.clearAckRequestedFlag();
@@ -152,7 +152,7 @@ class DestinationMessageHandler implements MessageHandler {
     public void acknowledgeApplicationLayerDelivery(ApplicationMessage inMessage) throws UnknownSequenceException {
         assert sequenceManager != null;
 
-        sequenceManager.getSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
+        sequenceManager.getInboundSequence(inMessage.getSequenceId()).acknowledgeMessageNumber(inMessage.getMessageNumber());
     }
 
     public void putToDeliveryQueue(ApplicationMessage message) throws RxRuntimeException, UnknownSequenceException {
@@ -162,6 +162,6 @@ class DestinationMessageHandler implements MessageHandler {
             LOGGER.finer(String.format("Putting a message with number [ %d ] to the delivery queue of a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
         }
 
-        sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
+        sequenceManager.getInboundSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 }

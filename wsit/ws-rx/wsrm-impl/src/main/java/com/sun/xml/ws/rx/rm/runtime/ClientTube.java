@@ -465,7 +465,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private boolean sendCloseSequenceRequest() {
         CloseSequenceData.Builder dataBuilder = CloseSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getOutboundSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);
@@ -511,7 +511,7 @@ final class ClientTube extends AbstractFilterTubeImpl {
     private void terminateOutboundSequence() {
         TerminateSequenceData.Builder dataBuilder = TerminateSequenceData.getBuilder(
                 outboundSequenceId.value,
-                rc.sequenceManager().getSequence(outboundSequenceId.value).getLastMessageNumber());
+                rc.sequenceManager().getOutboundSequence(outboundSequenceId.value).getLastMessageNumber());
         dataBuilder.acknowledgementData(rc.sourceMessageHandler.getAcknowledgementData(outboundSequenceId.value));
 
         final Packet request = rc.protocolHandler.toPacket(dataBuilder.build(), null);

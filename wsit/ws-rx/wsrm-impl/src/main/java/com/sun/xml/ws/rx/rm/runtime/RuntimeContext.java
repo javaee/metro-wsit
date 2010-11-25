@@ -160,24 +160,6 @@ public final class RuntimeContext {
         }
     }
 
-    public Sequence getSequence(String sequenceId) throws UnknownSequenceException {
-        assert sequenceManager != null;
-
-        return sequenceManager.getSequence(sequenceId);
-    }
-
-    public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
-        assert sequenceManager != null;
-
-        return sequenceManager.getSequence(sequenceId);
-    }
-
-    public Sequence getBoundSequence(String sequenceId) throws UnknownSequenceException {
-        assert sequenceManager != null;
-
-        return sequenceManager.getBoundSequence(sequenceId);
-    }
-
     public String getBoundSequenceId(String sequenceId) throws UnknownSequenceException {
         assert sequenceManager != null;
 

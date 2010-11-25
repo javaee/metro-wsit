@@ -177,7 +177,10 @@ public class ServerTube extends AbstractFilterTubeImpl {
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
             rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
-            validateSecurityContextTokenId(rc.getSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket());
+            final Sequence inboundSequence = rc.sequenceManager().getInboundSequence(message.getSequenceId());
+            
+            
+            validateSecurityContextTokenId(inboundSequence.getBoundSecurityTokenReferenceId(), message.getPacket());
             if (!hasSession(request)) { // security did not set session - we must do it
                 setSession(message.getSequenceId(), request);
             }
@@ -250,7 +253,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
     private NextAction handleDuplicateMessageException(JaxwsApplicationMessage message, Packet request) throws UnknownSequenceException, RxRuntimeException {
         // Replay model behavior
-        Sequence outboundSequence = rc.getBoundSequence(message.getSequenceId());
+        Sequence outboundSequence = rc.sequenceManager().getBoundSequence(message.getSequenceId());
         if (outboundSequence != null) {
             final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
             if (_responseMessage == null) {
@@ -392,7 +395,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
-        Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
+        Sequence inboundSequence = rc.sequenceManager().getInboundSequence(requestData.getSequenceId());
 
         // TODO handle last message number - pass it to the sequence so that it can allocate new unacked messages if necessary
         // int lastMessageNumber = closeSeqElement.getLastMsgNumber();
@@ -424,8 +427,8 @@ public class ServerTube extends AbstractFilterTubeImpl {
 
         rc.destinationMessageHandler.processAcknowledgements(requestData.getAcknowledgementData());
 
-        Sequence inboundSequence = rc.getSequence(requestData.getSequenceId());
-        Sequence outboundSeqence = rc.getBoundSequence(requestData.getSequenceId());
+        Sequence inboundSequence = rc.sequenceManager().getInboundSequence(requestData.getSequenceId());
+        Sequence outboundSeqence = rc.sequenceManager().getBoundSequence(requestData.getSequenceId());
         try {
             final TerminateSequenceResponseData.Builder responseBuilder = TerminateSequenceResponseData.getBuilder(inboundSequence.getId());
             responseBuilder.acknowledgementData(rc.destinationMessageHandler.getAcknowledgementData(inboundSequence.getId()));

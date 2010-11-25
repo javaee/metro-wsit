@@ -84,7 +84,7 @@ class SourceMessageHandler implements MessageHandler {
         assert outMessage != null;
         assert outboundSequenceId != null;
 
-        final Sequence outboundSequence = sequenceManager.getSequence(outboundSequenceId);
+        final Sequence outboundSequence = sequenceManager.getOutboundSequence(outboundSequenceId);
         outboundSequence.registerMessage(outMessage, true); // TODO it may not be needed to store message if AtMostOnce delivery
     }
 
@@ -144,7 +144,7 @@ class SourceMessageHandler implements MessageHandler {
             inboundSequence.clearAckRequestedFlag();
         }
         // outbound sequence ack requested flag
-        final Sequence outboundSequence = sequenceManager.getSequence(outboundSequenceId);
+        final Sequence outboundSequence = sequenceManager.getOutboundSequence(outboundSequenceId);
         if (outboundSequence.hasUnacknowledgedMessages()) {
             ackDataBuilder.ackReqestedSequenceId(outboundSequenceId);
             outboundSequence.updateLastAcknowledgementRequestTime();
@@ -159,6 +159,6 @@ class SourceMessageHandler implements MessageHandler {
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(String.format("Putting a message with number [ %d ] to the delivery queue of a sequence [ %s ]", message.getMessageNumber(), message.getSequenceId()));
         }
-        sequenceManager.getSequence(message.getSequenceId()).getDeliveryQueue().put(message);
+        sequenceManager.getOutboundSequence(message.getSequenceId()).getDeliveryQueue().put(message);
     }
 }
