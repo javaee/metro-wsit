@@ -57,9 +57,11 @@ public class HaContext {
      * Internal state data of the HA context
      */
     public static final class State {
+        
+        private static final State EMPTY = new State(null, null);
 
-        private Packet packet;
-        private HaInfo haInfo;
+        private final Packet packet;
+        private final HaInfo haInfo;
 
         private State(Packet packet, HaInfo haInfo) {
             this.packet = packet;
@@ -71,16 +73,17 @@ public class HaContext {
             return "HaState{packet=" + packet + ", haInfo=" + HaContext.asString(haInfo) + '}';
         }
     }
+    //
     private static final ThreadLocal<State> state = new ThreadLocal<State>()  {
 
         @Override
         protected State initialValue() {
-            return new State(null, null);
+            return State.EMPTY;
         }
     };
 
-    public static State initFrom(Packet packet) {
-        State oldState = state.get();
+    public static State initFrom(final Packet packet) {
+        final State oldState = state.get();
 
         HaInfo haInfo = null;
         if (packet != null && packet.supports(Packet.HA_INFO)) {
@@ -89,18 +92,18 @@ public class HaContext {
         final State newState = new State(packet, haInfo);
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from packet - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with a new " + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from packet - replaced old " + oldState.toString() + " with a new " + newState.toString());
         }
 
         return oldState;
     }
 
-    public static State initFrom(State newState) {
-        State oldState = state.get();
+    public static State initFrom(final State newState) {
+        final State oldState = state.get();
 
         state.set(newState);
         if (LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from state - replaced old " + ((oldState == null) ? null : oldState.toString()) + " with a new " + ((newState == null) ? null : newState.toString()));
+            LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Initialized from state - replaced old " + oldState.toString() + " with a new " + newState.toString());
         }
 
         return oldState;
@@ -111,8 +114,7 @@ public class HaContext {
     }
 
     public static void clear() {
-        state.get().haInfo = null;
-        state.get().packet = null;
+        state.set(State.EMPTY);
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Current HA state cleared");
         }
@@ -125,11 +127,16 @@ public class HaContext {
 
     public static void udpateReplicaInstance(final String replicaInstance) {
         boolean updateNeeded = false;
+        final State currentState = state.get(); 
+        
+        if (currentState.haInfo == null) {
+            throw new IllegalStateException("Unable to update replicaInstance. Current HaInfo in the local thread is null.");
+        }
 
         if (replicaInstance == null) {
-            updateNeeded = state.get().haInfo.getReplicaInstance() != null;
+            updateNeeded = currentState.haInfo.getReplicaInstance() != null;
         } else {
-            updateNeeded = !replicaInstance.equals(state.get().haInfo.getReplicaInstance());
+            updateNeeded = !replicaInstance.equals(currentState.haInfo.getReplicaInstance());
         }
 
         if (updateNeeded) {
@@ -137,7 +144,7 @@ public class HaContext {
                 LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : Replica instance value changed to '" + replicaInstance + "'. Updating current HaInfo.");
             }
             
-            final HaInfo old = state.get().haInfo;
+            final HaInfo old = currentState.haInfo;
             updateHaInfo(new HaInfo(old.getKey(), replicaInstance, old.isFailOver()));
         } else if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer("[METRO-HA] " + Thread.currentThread().toString() + " : New replica instance value '" + replicaInstance + "' same as current - no HaInfo update necessary");
@@ -145,9 +152,10 @@ public class HaContext {
     }
 
     public static void updateHaInfo(final HaInfo newValue) {
-        state.get().haInfo = newValue;
-        if (state.get().packet != null && state.get().packet.supports(Packet.HA_INFO)) {
-            state.get().packet.put(Packet.HA_INFO, newValue);
+        final Packet packet = state.get().packet;
+        state.set(new State(packet, newValue));
+        if (packet != null && packet.supports(Packet.HA_INFO)) {
+            packet.put(Packet.HA_INFO, newValue);
         }
 
         if (LOGGER.isLoggable(Level.FINER)) {
