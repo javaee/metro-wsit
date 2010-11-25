@@ -41,7 +41,7 @@
 
 -->
 
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsa10="http://www.w3.org/2006/05/addressing/wsdl" targetNamespace="http://tempuri.org/" name="PingService">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsap10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/09/policy/addressing" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:tns="http://tempuri.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsa10="http://www.w3.org/2006/05/addressing/wsdl" xmlns:metrormp="http://java.sun.com/xml/ns/metro/ws-rx/wsrmp/200702" targetNamespace="http://tempuri.org/" name="PingService">
 <!--	<wsdl:types>
 		<xsd:schema targetNamespace="http://tempuri.org/Imports">
 			<xsd:import schemaLocation="ReliableOneWay.xsd" namespace="http://tempuri.org/"/>
@@ -94,10 +94,11 @@
                     <net:MaxReceiveBufferSize>32</net:MaxReceiveBufferSize>
                 </net:RmFlowControl>
 
-                <sunclient:ResendInterval xmlns:sunclient="http://sun.com/2006/03/rm/client" Milliseconds="1000"/>
-                <sunclient:AckRequestInterval xmlns:sunclient="http://sun.com/2006/03/rm/client" Milliseconds="300"/>
+                <metrormp:RetransmissionConfig>
+                    <metrormp:Interval Milliseconds="1000" />
+                </metrormp:RetransmissionConfig>
+                <metrormp:AckRequestInterval Milliseconds="300"/>
                 <!--sunclient:CloseTimeout xmlns:sunclient="http://sun.com/2006/03/rm/client" Milliseconds="2000"/-->
-
               
             </wsp:All>
         </wsp:ExactlyOne>
