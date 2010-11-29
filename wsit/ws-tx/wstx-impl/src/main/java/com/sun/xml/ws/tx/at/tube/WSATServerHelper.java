@@ -41,7 +41,8 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.common.TransactionImportManager;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.tx.at.internal.XidImpl;
@@ -61,19 +62,22 @@ import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterType;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 
+import javax.transaction.SystemException;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import java.util.logging.Level;
 
 public class WSATServerHelper implements WSATServer {
     private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
+    Xid xidToResume; //todo should not rely on tube member vars, use context map instead
 
     public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
         if (WSATHelper.isDebugEnabled())
             debug("processRequest HeaderList:" + headers + " TransactionalAttribute:" + tx + " isEnabled:" + tx.isEnabled());
         CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers, tx.getVersion());
         if (ccBuilder != null) {
-            processIncomingTransaction(ccBuilder);
+            xidToResume = processIncomingTransaction(ccBuilder);
         } else {
             if (tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
         }
@@ -82,11 +86,13 @@ public class WSATServerHelper implements WSATServer {
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
         if (transactionalAttribute!=null && transactionalAttribute.isEnabled()) {
             debug("processResponse isTransactionalAnnotationPresent about to suspend");
+            TransactionImportManager.getInstance().release(xidToResume);
         }
     }
 
     public void doHandleException(Throwable throwable) {
         debug("processException about to suspend if transaction is present due to:"+ throwable);
+        if(xidToResume!=null) TransactionImportManager.getInstance().release(xidToResume);
     }
     
     /**
@@ -101,7 +107,7 @@ public class WSATServerHelper implements WSATServer {
      * //    MUST include a wsa:ReplyTo header.
      * @param builder CoordinationContextBuilder
      */
-    private void processIncomingTransaction(CoordinationContextBuilder builder) {
+    private Xid processIncomingTransaction(CoordinationContextBuilder builder) {
         if(WSATHelper.isDebugEnabled()) debug("in processingIncomingTransaction");
         //we either need to fast suspend immediately and resume after register as we are doing or move this after register
         CoordinationContextIF cc = builder.buildFromHeader();
@@ -119,6 +125,7 @@ public class WSATServerHelper implements WSATServer {
         } catch (WSATException e) {
             throw new WebServiceException(e);
         }
+        return foreignXid;
     }
 
     private void register(
@@ -157,6 +164,6 @@ public class WSATServerHelper implements WSATServer {
     }
 
     private void debug(String message) {
-		WSATHelper.getInstance().debug("WSATServerInterceptor:" + message);
+		LOGGER.info(message);
     }
 }

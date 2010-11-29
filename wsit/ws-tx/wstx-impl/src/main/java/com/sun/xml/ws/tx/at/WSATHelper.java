@@ -522,7 +522,6 @@ public class WSATHelper<T> {
         if(bqual!=null) bqual = bqual.replaceAll("&#044;", ",");
         if (isDebugEnabled())
             debug("WSATHelper.getBQualFromWebServiceContextHeaderList returning bqual:" + bqual + " on thread:" + Thread.currentThread());
- //todo log rather than generic debug, ie if (isDebugEnabled()) WseeWsatLogger.logWSATTxIdInHeader(bqual, Thread.currentThread());
         return bqual;
     }
 
@@ -564,12 +563,12 @@ public class WSATHelper<T> {
         m_xidToTransactionMap.remove(xid);
     }
 
-    public void debug(String msg) {
-        Logger.getLogger(WSATHelper.class).log(Level.INFO, msg);
+    private void debug(String msg) {
+        LOGGER.log(Level.INFO, msg);
     }
 
-  public static String assignUUID(){
-    return UUID.randomUUID().toString();
-  }
+    public static String assignUUID(){
+        return UUID.randomUUID().toString();
+    }
 
 }

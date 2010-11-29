@@ -39,6 +39,7 @@
  */
 package com.sun.xml.ws.tx.at.tube;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.message.Packet;
 import com.sun.xml.ws.api.model.wsdl.WSDLBoundOperation;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -46,9 +47,8 @@ import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 
-import javax.transaction.Transaction;
-
-public class WSATTubeHelper {
+public class WSATTubeHelper {   
+    private static final Logger LOGGER = Logger.getLogger(WSATTubeHelper.class);
 
     public static TransactionalAttribute getTransactionalAttribute(TransactionalFeature feature, Packet packet, WSDLPort port) {
         if (feature == null) {
@@ -84,17 +84,7 @@ public class WSATTubeHelper {
         return new TransactionalAttribute(false, false, Transactional.Version.DEFAULT);
     }
 
-    /**
-     * Get the provided transaction's Xid and return the WS-AT transaction id equivalent/translation
-     *
-     * @param transaction Transaction
-     * @return String WS-AT transaction id
-     */
-    static String getWSATTxIdForTransaction(Transaction transaction) {
-        return "tmpwsattxid";
-    }
-
     private static void debug(String message) {
-        WSATHelper.getInstance().debug("WSATTubeHelper:" + message);
+        LOGGER.info(message);
     }
 }

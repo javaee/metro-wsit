@@ -121,7 +121,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException xaException
      */
     public int prepare(Xid xid) throws XAException {
-        WSATHelper.getInstance().debug("prepare xid:"+xid);
+        debug("prepare xid:"+xid);
         if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4539_PREPARE(m_epr.toString(), m_xid));
         getWSATHelper().prepare(m_epr, m_xid, this);
         try {
@@ -191,7 +191,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException xaException
      */
     public void commit(Xid xid, boolean onePhase) throws XAException {
-        WSATHelper.getInstance().debug("commit xid:"+xid+" onePhase:"+onePhase);
+        debug("commit xid:"+xid+" onePhase:"+onePhase);
         if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4546_COMMIT( m_epr.toString(), m_xid));
         getWSATHelper().commit(m_epr, m_xid, this);
         try {
@@ -217,13 +217,13 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
                 LOGGER.severe(LocalizationMessages.WSAT_4551_FAILED_STATE_FOR_COMMIT(
                     m_status, m_epr.toString(), m_xid));
                 XAException xaException = newFailedStateXAExceptionForMethodNameAndErrorcode("commit", XAException.XAER_RMFAIL);
-                log("Failed state during WS-AT XAResource commit:" + m_status);
+                log("Failed state during WS-AT XAResource commit:" + m_status, xaException);
                 throw xaException;
             } else {  //should not occur as there is no transition from state ACTIVE TO commit action
                 LOGGER.severe(LocalizationMessages.WSAT_4551_FAILED_STATE_FOR_COMMIT(
                     m_status, m_epr.toString(), m_xid));
                 XAException xaException = newFailedStateXAExceptionForMethodNameAndErrorcode("commit", XAException.XAER_PROTO);
-                log("Failed state during WS-AT XAResource commit:" + m_status);
+                log("Failed state during WS-AT XAResource commit:" + m_status, xaException);
                 throw xaException;
             }
         } catch (InterruptedException e) {
@@ -251,7 +251,7 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
      * @throws XAException
      */
     public void rollback(Xid xid) throws XAException {
-        WSATHelper.getInstance().debug("rollback xid:"+xid);
+        debug("rollback xid:"+xid);
         if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4553_ROLLBACK(m_epr.toString(), m_xid));
         getWSATHelper().rollback(m_epr, m_xid, this);
         try {
@@ -418,13 +418,16 @@ public class WSATXAResource implements WSATConstants, XAResource, Serializable {
       m_status = PREPARED;  //would not be in log unless prepare was complete
     }
 
-   private void log(String message) {  //todo this is only used in two places in commit and they should be logs not just debug
-      WSATHelper.getInstance().debug("WSATXAResource:" + message);
+   private void log(String message, XAException xaex) {  //todo msgcat, this is only used in two places in commit
+      LOGGER.warning( message + " XAException.errorcode:" + xaex.errorCode, xaex);
    }
 
-
    private void logSuccess(String method) {
-       WSATHelper.getInstance().debug("success state during "+method+" of WS-AT XAResource:"+this);
+      LOGGER.info("success state during " + method + " of WS-AT XAResource:" + this);
+   }
+
+   private void debug(String msg) {
+      LOGGER.info(msg);
    }
 
     public String toString() {

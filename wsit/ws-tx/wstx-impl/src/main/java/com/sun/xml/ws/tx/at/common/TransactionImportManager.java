@@ -218,7 +218,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
                     sb.append(mi.methodName).append("\n");
                 }
             }
-            // TODO log and throw? error
+            LOGGER.info(sb.toString());
         }
     }
 

@@ -187,7 +187,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         fis = new FileInputStream(files[i]);
         in = new ObjectInputStream(fis);
         ForeignRecoveryContext frc = (ForeignRecoveryContext) in.readObject();
-        ForeignRecoveryContextManager.getInstance().add(frc, true);
+        ForeignRecoveryContextManager.getInstance().add(frc);
         in.close();
        } catch (Throwable e) {
             throw new WebServiceException("Failure while recovering WS-AT transaction logs inbound file:"+files[i], e);

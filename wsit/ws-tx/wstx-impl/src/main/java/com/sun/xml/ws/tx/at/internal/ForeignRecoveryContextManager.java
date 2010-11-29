@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.common.CoordinatorIF;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
@@ -49,9 +50,7 @@ import javax.transaction.Status;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.WebServiceException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,8 +64,10 @@ public class ForeignRecoveryContextManager {
     // the ttl which is not really a true indication of transaction timeout to go by.
     private static final int INDOUBT_TIMEOUT =
             new Integer(System.getProperty("com.sun.xml.ws.tx.at.internal.indoubt.timeout", "90000"));
-    private static ForeignRecoveryContextManager singleton = new ForeignRecoveryContextManager();
-
+    private static ForeignRecoveryContextManager singleton = new ForeignRecoveryContextManager();  
+    volatile int counter;
+    private static final Logger LOGGER_ContextRunnable = Logger.getLogger(ContextRunnable.class);
+    private static final Logger LOGGER_RecoveryContextWorker = Logger.getLogger(RecoveryContextWorker.class);
 
     private Map<Xid, RecoveryContextWorker> recoveredContexts = new HashMap<Xid, RecoveryContextWorker>();
 
@@ -120,13 +121,12 @@ public class ForeignRecoveryContextManager {
 
     synchronized void persist(Xid xid) {
         if (WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
-            ForeignRecoveryContextManager.RecoveryContextWorker contextWorker = recoveredContexts.get(xid);
-            FileOutputStream fos = null;
-            ObjectOutputStream out = null;
+            ForeignRecoveryContext contextWorker = recoveredContexts.get(xid).getContext();
+            FileOutputStream fos;
+            ObjectOutputStream out;
             try {
                 fos = new FileOutputStream(
-                        WSATGatewayRM.txlogdirInbound + File.separator +
-                                xid.getGlobalTransactionId() + xid.getBranchQualifier()); //todo use time+counter here too
+                        WSATGatewayRM.txlogdirInbound + File.separator + System.currentTimeMillis() + "-" + counter++);
                 out = new ObjectOutputStream(fos);
                 out.writeObject(contextWorker);
                 out.close();
@@ -182,19 +182,19 @@ public class ForeignRecoveryContextManager {
 
                             }
                         } catch (Throwable e) { 
-//todoremove                            debugWSAT.debug(
-//todoremove                                    "ForeignRecoveryContextManager$ContextTimerListener.timerExpired error scheduling " +
-//todoremove                                            "work for recovery context:" + rc.context +
-//todoremove                                            " Exception getting transaction status, transaction may be null:" + e);
+                            debug(
+                                    "ForeignRecoveryContextManager$ContextTimerListener.timerExpired error scheduling " +
+                                            "work for recovery context:" + rc.context +
+                                            " Exception getting transaction status, transaction may be null:" + e);
                         }
                     }
                 }
             }
-//todoremove            if (debugWSAT.isDebugEnabled() && !replayList.isEmpty()) {
-//todoremove                debugWSAT.debug(
-//todoremove                        "ForeignRecoveryContextManager$ContextTimerListener.timerExpired replayList.size():" +
-//todoremove                                replayList.size());
-//todoremove            }
+            if (!replayList.isEmpty()) {
+                debug(
+                        "ForeignRecoveryContextManager$ContextTimerListener.timerExpired replayList.size():" +
+                                replayList.size());
+            }
             for (RecoveryContextWorker rc : replayList) {
                 boolean isScheduled = rc.isScheduled();
                 if (!isScheduled){
@@ -202,20 +202,25 @@ public class ForeignRecoveryContextManager {
                     {
                         rc.setScheduled(true);
                         rc.incrementRetryCount();
- //todoremove                       workManager.schedule(rc);
+                        new Thread(rc).start();//todo use workManager.schedule(rc);
                     }
 
                 }
             }
         }
 
+        private void debug (String message) {
+            LOGGER_ContextRunnable.info(message);
+        }
+
     }
 
-    private class RecoveryContextWorker { //todoremoveextends WorkAdapter {
+    private class RecoveryContextWorker implements Runnable {
 
         ForeignRecoveryContext context;
         long lastReplayMillis;
         boolean scheduled;
+        private int retryCount = 1;
 
         /**
          * Only constructor
@@ -255,27 +260,21 @@ public class ForeignRecoveryContextManager {
             try {
                 Xid xid = context.getXid();
                 if (xid == null) {
-//todoremove                    if (debugWSAT.isDebugEnabled()) {
-//todoremove                        debugWSAT.debug("no Xid mapping for recovered context " + context);
-//todoremove                    }
+                    debug("no Xid mapping for recovered context " + context);
                     return;
                 }
-//todoremove                if (debugWSAT.isDebugEnabled()) debugWSAT.debug("about to send Prepared recovery call for " + context);
+                debug("about to send Prepared recovery call for " + context);
                 CoordinatorIF coordinatorPort =
                         WSATHelper.getInstance(context.getVersion()).getCoordinatorPort(
                                 context.getEndpointReference(), xid);
-//todoremove                if (debugWSAT.isDebugEnabled())
-//todoremove                    debugWSAT.debug(
-//todoremove                            "About to send Prepared recovery call for " + context +
-//todoremove                                    " with coordinatorPort:" + coordinatorPort);
+                debug("About to send Prepared recovery call for " + context + " with coordinatorPort:" + coordinatorPort);
                 Object notification = WSATVersion.getInstance(context.getVersion()).newNotificationBuilder().build();
                 Transaction transaction = context.getTransaction();
                 if (transaction != null && transaction.getStatus() == Status.STATUS_PREPARED)
                     coordinatorPort.preparedOperation(notification);
-//todoremove                if (debugWSAT.isDebugEnabled())
-//todoremove                    debugWSAT.debug("Prepared recovery call for " + context + " returned successfully");
+                debug("Prepared recovery call for " + context + " returned successfully");
             } catch (Throwable e) {
-//todoremove                debugWSAT.debug("Prepared recovery call error for " + context, e);
+                debug("Prepared recovery call error for " + context + " exception:" + e);
             } finally {
                 synchronized (this) {
                     scheduled = false;
@@ -285,12 +284,9 @@ public class ForeignRecoveryContextManager {
         }
 
         //the following is provided to backoff bottom up requests exponentially...
-
-        private int retryCount = 1;
         void incrementRetryCount() {  // this is weak but does the job and insures no overflow
             if (retryCount * 2 * INDOUBT_TIMEOUT < Integer.MAX_VALUE / 3) retryCount *= 2;
-//todoremove                if (debugWSAT.isDebugEnabled())
-//todoremove                    debugWSAT.debug("Next recovery call for " + context + " in:"+ retryCount * INDOUBT_TIMEOUT);
+            debug("Next recovery call for " + context + " in:"+ retryCount * INDOUBT_TIMEOUT);
         }
 
         int getRetryCount() {
@@ -299,6 +295,10 @@ public class ForeignRecoveryContextManager {
 
         ForeignRecoveryContext getContext() {
             return context;
+        }
+
+        private void debug (String message) {
+            LOGGER_RecoveryContextWorker.info(message);
         }
     }
 

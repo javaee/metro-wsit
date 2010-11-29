@@ -102,7 +102,6 @@ class TransactionIdHelperImpl extends TransactionIdHelper {
   }
 
   public Xid wsatid2xid(String wsatid) {
-   // return XidImpl.create(wsatid);
     return create(wsatid);
   }
 
@@ -117,7 +116,6 @@ class TransactionIdHelperImpl extends TransactionIdHelper {
     if (tok.hasMoreElements()) {
       bqualString = tok.nextToken();
     }
-//this is very basic XidImpl, not as complex as original
     return new XidImpl(Integer.parseInt(formatIdString, 16),
                        stringToByteArray(gtridString),
                        (bqualString != null) ? stringToByteArray(bqualString) : new byte[]{});

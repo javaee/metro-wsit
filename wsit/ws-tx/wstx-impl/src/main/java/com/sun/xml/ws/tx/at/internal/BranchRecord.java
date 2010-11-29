@@ -270,11 +270,10 @@ public class BranchRecord implements Externalizable {
         if (WSATHelper.getInstance().isDebugEnabled()) {
           byte[] branchQualifier = registeredResource.getBranchXid().getBranchQualifier();
           if (branchQualifier == null) branchQualifier = new byte[0];
-          WSATHelper.getInstance().debug("WSAT Branch registered branchId:\t[" + new String(branchQualifier) + "] ");
+          debug("WS-AT Branch registered branchId:\t[" + new String(branchQualifier) + "] ");
           branchQualifier = xid.getBranchQualifier();
           if (branchQualifier == null) branchQualifier = new byte[0];
-          WSATHelper.getInstance().debug(
-                  "WSAT Branch branchId used to identify a registered resource:\t[" + new String(branchQualifier) + "] ");
+          debug("WS-AT Branch branchId used to identify a registered resource, branchQual:" + new String(branchQualifier));
         }
         debug("prepare() xid=" + xid + " returning XA_RDONLY");
         JTAHelper.throwXAException(XAException.XAER_NOTA, "xid=" + xid);

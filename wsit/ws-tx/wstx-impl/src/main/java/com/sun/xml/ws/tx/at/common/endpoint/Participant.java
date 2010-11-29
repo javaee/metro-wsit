@@ -251,8 +251,10 @@ public class Participant<T> implements ParticipantIF<T> {
       * @return byte[] tid
      */
    byte[] getWSATTid() {
-      byte tid[] = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(m_context).
-              replace("urn:", "").replace("uuid:", "").getBytes();
+      String tidFromHeader = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(m_context).
+              replace("urn:", "").replace("uuid:", "");
+      Xid xidFromWebServiceContextHeaderList = TransactionIdHelper.getInstance().wsatid2xid(tidFromHeader);
+      byte[] tid = xidFromWebServiceContextHeaderList.getGlobalTransactionId();
       if(WSATHelper.isDebugEnabled()) debug("getWSATTid tid:" + stringForTidByteArray(tid));
       return tid;
    }
