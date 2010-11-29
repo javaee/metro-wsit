@@ -102,6 +102,10 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     return singleton;
   }
 
+  /**
+   * Called during tube/web service init
+   * @return
+   */
   public static synchronized WSATGatewayRM create() {
     return create("server");    
   }
@@ -115,16 +119,23 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   {
     if (singleton == null) {
         new WSATGatewayRM(serverName);
-        setupRecovery();
+        isReady = setupRecovery();
     }
     isReady = true;
     return singleton;
   }
 
-    private static void setupRecovery() {
-        if(WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
-          TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
-          WSATRuntimeConfig.getInstance().setWSATRecoveryEventListener(singleton);
+    private static boolean setupRecovery() {
+        if (!WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) return true;
+        TransactionImportManager.getInstance().registerRecoveryResourceHandler(singleton);
+        WSATRuntimeConfig.getInstance().setWSATRecoveryEventListener(singleton);
+        setTxLogDirs();
+        try {
+            initStore();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -132,14 +143,18 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     /**
      * Called for create of WSATGatewayRM
      */
-   void initStore() throws Exception {
+   static void initStore() throws Exception {
+        if (isStoreInit) return;
         if (WSATHelper.isDebugEnabled()) debug("WSATGatewayRM.initStore path:"+txlogdirInbound);
         createFile(txlogdirInbound, true);
         if (WSATHelper.isDebugEnabled()) debug("WSATGatewayRM.initStore path:"+txlogdirOutbound);
         createFile(txlogdirOutbound, true);
+        isStoreInit = true;
     }
+    //todo temp
+    static boolean isStoreInit = false;
 
-    public File createFile(String logFilePath, boolean isDir) throws Exception {
+    static private File createFile(String logFilePath, boolean isDir) throws Exception {
         File file = new File(logFilePath);
         if (!file.exists()) {
             if (isDir && !file.mkdirs()) {
@@ -346,7 +361,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
      */
     public Xid[] recover(int flag, String instance) throws XAException {
         if (WSATHelper.isDebugEnabled()) debug("recover() flag=" + flag);
-        setTxLogDirs();
+       // setTxLogDirs();
         boolean isDelegated = instance != null;
         if (isDelegated) {
             String delegatedtxlogdir = WSATGatewayRM.txlogdir + File.separator + ".." + File.separator + ".." +
@@ -381,7 +396,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         return new Xid[0];
     }
 
-    void setTxLogDirs() {
+    static void setTxLogDirs() {
         txlogdir = getTxLogDir();
         txlogdirInbound =
                 txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + INBOUND + File.separator ;
@@ -389,8 +404,9 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
                 txlogdir + File.separator + ".." + File.separator + WSAT + File.separator + OUTBOUND + File.separator ;
     }
 
-    String getTxLogDir() {
-        return TransactionImportManager.getInstance().getTxLogLocation();
+    static String getTxLogDir() {
+     //   return TransactionImportManager.getInstance().getTxLogLocation();
+        return WSATRuntimeConfig.getInstance().getTxLogLocation();
     }
 
     public void forget(Xid xid) throws XAException {
@@ -553,7 +569,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         debug("afterRecovery called, success:" + success + " delegated:" + delegated + " instance:" + instance);
     }
 
-  private void debug(String msg) {
+  private static void debug(String msg) {
     if (WSATHelper.isDebugEnabled()) {
         Logger.getLogger(WSATGatewayRM.class).log(Level.INFO, msg);
     }
