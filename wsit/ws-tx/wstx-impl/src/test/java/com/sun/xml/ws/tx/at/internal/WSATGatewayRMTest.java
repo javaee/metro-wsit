@@ -71,10 +71,10 @@ public class WSATGatewayRMTest extends TestCase {
     // todo test passes and cleans up in the passing case but may not in faling case and so reactive after impl cleanup()
     public void xtestRecoverPendingBranches() throws Exception {
         WSATGatewayRM testWSATGatewayRM = new WSATGatewayRM("unittestserver"){
-             String getTxLogDir() {
+  /** todo           String getTxLogDir() {
                  return ".";
              }
-        };
+ */       };
         Xid[] xids = testWSATGatewayRM.recover(XAResource.TMSTARTRSCAN);
         Xid xid = new XidImpl(1234, new byte[]{'a','b','c'}, new byte[]{'1'}); //todo reuse of xid may not be best/accurate 
         BranchRecord branch = new BranchRecord(xid);

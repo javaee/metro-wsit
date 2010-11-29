@@ -95,6 +95,10 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     singleton = this;
   }
 
+  /**
+   * called by transaction services for enlistment and used by HA delegation
+   * @return
+   */
   public static synchronized WSATGatewayRM getInstance() {
     if(singleton==null) {
         create("server");
@@ -121,7 +125,6 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         new WSATGatewayRM(serverName);
         isReady = setupRecovery();
     }
-    isReady = true;
     return singleton;
   }
 
