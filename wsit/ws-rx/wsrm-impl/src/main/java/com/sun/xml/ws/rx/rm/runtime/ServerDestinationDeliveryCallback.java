@@ -103,26 +103,24 @@ class ServerDestinationDeliveryCallback implements Postman.Callback {
                     return;
                 }
 
-                try {
-                    if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
-                        AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());                        
-                        if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
-                            // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
-                            response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
-                            rc.protocolHandler.appendAcknowledgementHeaders(response, ackData);
-                        }
-
-                        resumeParentFiber(response);
-                    } else {
-                        JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
-                        rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
-                        rc.sourceMessageHandler.putToDeliveryQueue(message);
+                if (response.getMessage() == null) { // was one-way request - create empty acknowledgement message if needed
+                    AcknowledgementData ackData = rc.destinationMessageHandler.getAcknowledgementData(request.getSequenceId());
+                    if (ackData.getAckReqestedSequenceId() != null || ackData.containsSequenceAcknowledgementData()) {
+                        // create acknowledgement response only if there is something to send in the SequenceAcknowledgement header
+                        response = rc.communicator.setEmptyResponseMessage(response, request.getPacket(), rc.rmVersion.protocolVersion.sequenceAcknowledgementAction);
+                        rc.protocolHandler.appendAcknowledgementHeaders(response, ackData);
                     }
 
-                    // TODO handle RM faults
-                } catch (DuplicateMessageRegistrationException ex) {
-                    onCompletion(ex);
+                    resumeParentFiber(response);
+                } else {
+                    JaxwsApplicationMessage message = new JaxwsApplicationMessage(response, getCorrelationId());
+                    rc.sourceMessageHandler.registerMessage(message, rc.getBoundSequenceId(request.getSequenceId()));
+                    rc.sourceMessageHandler.putToDeliveryQueue(message);
                 }
+
+                // TODO handle RM faults
+            } catch (DuplicateMessageRegistrationException ex) {
+                onCompletion(ex);
             } finally {
                 HaContext.clear();
             }

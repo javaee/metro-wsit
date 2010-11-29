@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.istack.NotNull;
@@ -128,7 +127,7 @@ final class InVmSequenceData implements SequenceData {
 
         data.setState(newState);
         data.replicate();
-   }
+    }
 
     public boolean getAckRequestedFlag() {
         return data.getAckRequestedFlag();
@@ -173,13 +172,13 @@ final class InVmSequenceData implements SequenceData {
 
             data.getUnackedNumberToCorrelationIdMap().put(msgNumberKey, message.getCorrelationId());
             data.replicate();
-            
+
             messageStore.put(decorateForSequence(message.getCorrelationId()), message);
         } finally {
             unlockWrite();
         }
     }
- 
+
     /**
      * {@inheritDoc}
      */
@@ -192,7 +191,7 @@ final class InVmSequenceData implements SequenceData {
             data.setLastMessageNumber(data.getLastMessageNumber() + 1);
             addUnackedMessageNumber(data.getLastMessageNumber(), received);
             data.replicate();
-            
+
             return data.getLastMessageNumber();
         } finally {
             dataLock.writeLock().unlock();
@@ -243,11 +242,34 @@ final class InVmSequenceData implements SequenceData {
         }
     }
 
+    void markUnackedAsFailedOver() {
+        lockWrite();
+        try {
+            for (Long unackedNumber : data.getReceivedUnackedMessageNumbers()) {
+                data.getFailedOverUnackedMessageNumbers().add(unackedNumber);
+            }
+        } finally {
+            unlockWrite();
+        }
+
+    }
+
+    public boolean isFailedOver(long messageNumber) {
+        final Long value = Long.valueOf(messageNumber);
+        lockRead();
+        try {
+            return data.getFailedOverUnackedMessageNumbers().contains(value);
+        } finally {
+            unlockRead();
+        }
+    }
+
     public void markAsAcknowledged(long messageNumber) {
         updateLastActivityTime();
 
         try {
             lockWrite();
+            data.getFailedOverUnackedMessageNumbers().remove(messageNumber);
             data.getReceivedUnackedMessageNumbers().remove(messageNumber);
             data.getAllUnackedMessageNumbers().remove(messageNumber);
             final String correlationId = data.getUnackedNumberToCorrelationIdMap().remove(messageNumber);
@@ -321,7 +343,7 @@ final class InVmSequenceData implements SequenceData {
             messageStore.get(decorateForSequence(correlationId));
         }
     }
-    
+
     private String decorateForSequence(String correlationId) {
         return data.getSequenceId() + "_" + correlationId;
     }

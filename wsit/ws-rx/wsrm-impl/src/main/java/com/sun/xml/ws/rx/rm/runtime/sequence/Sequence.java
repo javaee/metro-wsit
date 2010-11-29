@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence;
 
 import com.sun.istack.NotNull;
@@ -138,6 +137,7 @@ public interface Sequence {
         }
 
         abstract void verifyAcceptingMessageRegistration(String sequenceId, AbstractSoapFaultException.Code code);
+
         abstract void verifyAcceptingAcknowledgement(String sequenceId, AbstractSoapFaultException.Code code);
     }
 
@@ -167,7 +167,7 @@ public interface Sequence {
 
     public static class AckRange {
 
-        private static final Comparator<AckRange> COMPARATOR = new Comparator<AckRange>() {
+        private static final Comparator<AckRange> COMPARATOR = new Comparator<AckRange>()  {
 
             public int compare(AckRange range1, AckRange range2) {
                 if (range1.lower <= range2.lower) {
@@ -244,7 +244,7 @@ public interface Sequence {
      *
      * @return the message that is stored in the sequence if available, {@code null} otherwise.
      */
-    public
+    public 
     @Nullable
     ApplicationMessage retrieveMessage(@NotNull String correlationId);
 
@@ -277,6 +277,17 @@ public interface Sequence {
      * @exception AbstractSoapFaultException in case the sequence is terminated
      */
     public void acknowledgeMessageNumber(long messageNumber) throws AbstractSoapFaultException;
+
+    /**
+     * Determines whether a given message number is registered as 
+     * received, unacknowledged and failed over.
+     * 
+     * @param messageNumber message number to be tested
+     * 
+     * @return {@code true} if the message number is registered as received, unacknowledged
+     *         and failed over, {@code false} otherwise 
+     */
+    public boolean isFailedOver(long messageNumber);
 
     /**
      * Provides a collection of ranges of message numbers acknowledged with the sequence

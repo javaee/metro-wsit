@@ -80,6 +80,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
     //
     private Set<Long> allUnackedMessageNumbers;
     private Set<Long> receivedUnackedMessageNumbers;
+    private Set<Long> failedOverUnackedMessageNumbers;
     //
     private Map<Long, String> unackedNumberToCorrelationIdMap;
     private boolean inbound;
@@ -101,6 +102,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
 
         this.allUnackedMessageNumbers = new TreeSet<Long>();
         this.receivedUnackedMessageNumbers = new HashSet<Long>();
+        this.failedOverUnackedMessageNumbers = new HashSet<Long>();
         //
         this.unackedNumberToCorrelationIdMap = new HashMap<Long, String>();
         //
@@ -170,6 +172,10 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
 
     public Set<Long> getReceivedUnackedMessageNumbers() {
         return receivedUnackedMessageNumbers;
+    }
+
+    public Set<Long> getFailedOverUnackedMessageNumbers() {
+        return failedOverUnackedMessageNumbers;
     }
 
     public Map<Long, String> getUnackedNumberToCorrelationIdMap() {
@@ -268,6 +274,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
         hash = 61 * hash + (int) (this.lastAcknowledgementRequestTime ^ (this.lastAcknowledgementRequestTime >>> 32));
         hash = 61 * hash + (this.allUnackedMessageNumbers != null ? this.allUnackedMessageNumbers.hashCode() : 0);
         hash = 61 * hash + (this.receivedUnackedMessageNumbers != null ? this.receivedUnackedMessageNumbers.hashCode() : 0);
+        hash = 61 * hash + (this.failedOverUnackedMessageNumbers != null ? this.failedOverUnackedMessageNumbers.hashCode() : 0);
         hash = 61 * hash + (this.unackedNumberToCorrelationIdMap != null ? this.unackedNumberToCorrelationIdMap.hashCode() : 0);
         hash = 61 * hash + (this.inbound ? 1 : 0);
         return hash;
@@ -287,6 +294,7 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
                 + ",\n\tlastAcknowledgementRequestTime=" + lastAcknowledgementRequestTime
                 + ",\n\tallUnackedMessageNumbers=" + allUnackedMessageNumbers
                 + ",\n\treceivedUnackedMessageNumbers=" + receivedUnackedMessageNumbers
+                + ",\n\tfailedOverUnackedMessageNumbers=" + failedOverUnackedMessageNumbers
                 + ",\n\tunackedNumberToCorrelationIdMap=" + unackedNumberToCorrelationIdMap
                 + ",\n\tinbound=" + inbound
                 + ",\n\tdirty=" + dirty
@@ -307,9 +315,10 @@ class SequenceDataPojo implements Serializable /*Storeable*/ {
         //
         allUnackedMessageNumbers("allUnackedMessageNumbers", 8),
         receivedUnackedMessageNumbers("receivedUnackedMessageNumbers", 9),
+        failedOverUnackedMessageNumbers("failedOverUnackedMessageNumbers", 10),
         //
-        unackedNumberToCorrelationIdMap("unackedNumberToCorrelationIdMap", 10),
-        inbound("inbound", 11);
+        unackedNumberToCorrelationIdMap("unackedNumberToCorrelationIdMap", 11),
+        inbound("inbound", 12);
         //
         public final String name;
         public final int index;

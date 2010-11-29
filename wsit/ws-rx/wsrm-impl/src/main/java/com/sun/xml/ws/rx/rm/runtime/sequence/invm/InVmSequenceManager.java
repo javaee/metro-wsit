@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.invm;
 
 import com.sun.xml.ws.rx.ha.HighlyAvailableMap;
@@ -143,7 +142,6 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
         this.boundSequences = HighlyAvailableMap.create(
                 uniqueEndpointId + "_BOUND_SEQUENCE_MAP",
-                new HashMap<String, String>(),
                 HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
                 uniqueEndpointId + "_BOUND_SEQUENCE_BS",
@@ -155,14 +153,14 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
                 uniqueEndpointId + "_SEQUENCE_DATA_BS",
                 StickyKey.class,
                 SequenceDataPojo.class);
-        this.sequences = HighlyAvailableMap.create(uniqueEndpointId + "_SEQUENCE_DATA_MAP", new HashMap<String, AbstractSequence>(), this);
+        this.sequences = HighlyAvailableMap.create(uniqueEndpointId + "_SEQUENCE_DATA_MAP", this);
 
         UnackedMessageReplicationManager unackedMsgRM = null;
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
             unackedMsgRM = new UnackedMessageReplicationManager(uniqueEndpointId);
         }
 
-        this.unackedMessageStore = HighlyAvailableMap.create(uniqueEndpointId + "_UNACKED_MESSAGES_MAP", new HashMap<String, ApplicationMessage>(), unackedMsgRM);
+        this.unackedMessageStore = HighlyAvailableMap.create(uniqueEndpointId + "_UNACKED_MESSAGES_MAP", unackedMsgRM);
 
         MaintenanceTaskExecutor.INSTANCE.register(
                 new SequenceMaintenanceTask(this, configuration.getRmFeature().getSequenceManagerMaintenancePeriod(), TimeUnit.MILLISECONDS),
@@ -303,11 +301,11 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      */
     public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
         final Sequence sequence = getSequence(sequenceId);
-        
+
         if (!(sequence instanceof InboundSequence)) {
-            throw new UnknownSequenceException(sequenceId);            
+            throw new UnknownSequenceException(sequenceId);
         }
-        
+
         return sequence;
     }
 
@@ -316,13 +314,13 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      */
     public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
         final Sequence sequence = getSequence(sequenceId);
-        
+
         if (!(sequence instanceof OutboundSequence)) {
-            throw new UnknownSequenceException(sequenceId);            
+            throw new UnknownSequenceException(sequenceId);
         }
-        
+
         return sequence;
-    }       
+    }
 
     /**
      * {@inheritDoc}
@@ -486,16 +484,16 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.unackedMessageStore.invalidateCache();
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Local cache invalidated");
-        }        
+        }
     }
 
     public void dispose() {
         this.sequences.close();
         this.sequences.destroy();
-        
+
         this.boundSequences.close();
         this.boundSequences.destroy();
-        
+
         this.unackedMessageStore.close();
         this.unackedMessageStore.destroy();
     }
@@ -504,14 +502,28 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         SequenceDataPojo state = HighAvailabilityProvider.loadFrom(sequenceDataBs, new StickyKey(key), null);
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Sequence state data loaded from backing store for key [" + key + "]: " + ((state == null) ? null : state.toString()));
-        }        
+        }
         if (state == null) {
             return null;
         }
 
         state.setBackingStore(sequenceDataBs);
         InVmSequenceData data = InVmSequenceData.loadReplica(state, this, unackedMessageStore); // TODO HA time sync.
-        final AbstractSequence sequence = (state.isInbound()) ? new InboundSequence(data, this.inboundQueueBuilder, this) : new OutboundSequence(data, this.outboundQueueBuilder, this);
+
+        final AbstractSequence sequence;
+        if (state.isInbound()) {
+            if (HaContext.failoverDetected() && !data.getUnackedMessageNumbers().isEmpty()) {
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(loggerProlog + "Unacked messages detected during failover of an inbound sequence data [" + data.getSequenceId() + "]: Registering as failed-over");
+                }
+                data.markUnackedAsFailedOver();
+            }
+
+            sequence = new InboundSequence(data, this.inboundQueueBuilder, this);
+        } else {
+            sequence = new OutboundSequence(data, this.outboundQueueBuilder, this);
+        }
+
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Sequence state data for key [" + key + "] converted into sequence of class: " + sequence.getClass());
         }
@@ -551,7 +563,7 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         HighAvailabilityProvider.removeFrom(sequenceDataBs, new StickyKey(key));
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(loggerProlog + "Removed sequence data from the backing store for key [" + key + "]");
-        }        
+        }
     }
 
     public void close() {

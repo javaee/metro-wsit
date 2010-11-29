@@ -177,10 +177,7 @@ public class ServerTube extends AbstractFilterTubeImpl {
             rc.protocolHandler.loadSequenceHeaderData(message, message.getJaxwsMessage());
             rc.protocolHandler.loadAcknowledgementData(message, message.getJaxwsMessage());
 
-            final Sequence inboundSequence = rc.sequenceManager().getInboundSequence(message.getSequenceId());
-            
-            
-            validateSecurityContextTokenId(inboundSequence.getBoundSecurityTokenReferenceId(), message.getPacket());
+            validateSecurityContextTokenId(rc.sequenceManager().getInboundSequence(message.getSequenceId()).getBoundSecurityTokenReferenceId(), message.getPacket());
             if (!hasSession(request)) { // security did not set session - we must do it
                 setSession(message.getSequenceId(), request);
             }
@@ -252,8 +249,21 @@ public class ServerTube extends AbstractFilterTubeImpl {
     }
 
     private NextAction handleDuplicateMessageException(JaxwsApplicationMessage message, Packet request) throws UnknownSequenceException, RxRuntimeException {
+        // Is failed over during request processing?
+        final Sequence inboundSequence = rc.sequenceManager().getInboundSequence(message.getSequenceId());
+        if (inboundSequence.isFailedOver(message.getMessageNumber())) {
+            synchronized (message.getCorrelationId()) {
+                // this synchronization is needed so that all 3 operations occur before
+                // AbstractResponseHandler.getParentFiber() is invoked on the response thread
+                rc.suspendedFiberStorage.register(message.getCorrelationId(), Fiber.current());
+                rc.destinationMessageHandler.putToDeliveryQueue(message);
+
+                return doSuspend();
+            }
+        }
+
         // Replay model behavior
-        Sequence outboundSequence = rc.sequenceManager().getBoundSequence(message.getSequenceId());
+        final Sequence outboundSequence = rc.sequenceManager().getBoundSequence(message.getSequenceId());
         if (outboundSequence != null) {
             final ApplicationMessage _responseMessage = outboundSequence.retrieveMessage(message.getCorrelationId());
             if (_responseMessage == null) {

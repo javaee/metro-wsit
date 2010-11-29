@@ -147,6 +147,10 @@ public abstract class AbstractSequence implements Sequence {
     public boolean isAckRequested() {
         return data.getAckRequestedFlag();
     }
+    
+    public boolean isFailedOver(long messageNumber) {
+        return data.isFailedOver(messageNumber);
+    }
 
     public void updateLastAcknowledgementRequestTime() {
         data.setLastAcknowledgementRequestTime(timeSynchronizer.currentTimeInMillis());

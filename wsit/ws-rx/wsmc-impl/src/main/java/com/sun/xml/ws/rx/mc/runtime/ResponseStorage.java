@@ -51,7 +51,6 @@ import com.sun.xml.ws.rx.ha.ReplicationManager;
 import com.sun.xml.ws.rx.mc.localization.LocalizationMessages;
 import com.sun.xml.ws.rx.message.jaxws.JaxwsMessage;
 import com.sun.xml.ws.rx.message.jaxws.JaxwsMessage.JaxwsMessageState;
-import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
@@ -165,8 +164,8 @@ final class ResponseStorage {
 
             responseManager = new PendingMessageDataReplicationManager(endpointUid);
         }
-        this.pendingResponseIdentifiers = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_IDENTIFIERS_MAP", new HashMap<String, PendingResponseIdentifiers>(), responseIdentifiersManager);
-        this.pendingResponses = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_DATA_MAP", new HashMap<String, JaxwsMessage>(), responseManager);
+        this.pendingResponseIdentifiers = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_IDENTIFIERS_MAP", responseIdentifiersManager);
+        this.pendingResponses = HighlyAvailableMap.create(endpointUid + "_MC_PENDING_MESSAGE_DATA_MAP", responseManager);
         this.endpointUid = endpointUid;
 
         if (LOGGER.isLoggable(Level.FINER)) {

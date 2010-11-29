@@ -406,6 +406,10 @@ final class PersistentSequenceData implements SequenceData {
         return expirationTime;
     }
 
+    public boolean isFailedOver(long messageNumber) {
+        return false; // TODO implement
+    }
+
     private <T> T getFieldData(Connection con, FieldInfo<T> fi) throws PersistenceException {
         PreparedStatement ps = null;
         try {

@@ -122,6 +122,8 @@ public interface SequenceData {
      * @param messageNumber
      */
     void markAsAcknowledged(long messageNumber);
+    
+    boolean isFailedOver(long messageNumber);
 
     void attachMessageToUnackedMessageNumber(ApplicationMessage message);
 
