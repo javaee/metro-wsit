@@ -43,7 +43,7 @@
 
 <project name="Metro on GlassFish" default="help" basedir=".">
     <property environment="env"/>
-    <property name="as.home" value="${env.AS_HOME}"/>
+    <property name="as.home" value="${@gf.home@}"/>
     <property name="as.lib.home" value="${as.home}/lib"/>
     <property name="backup.dir" value="${as.home}/.metro-${project.version}"/>
 

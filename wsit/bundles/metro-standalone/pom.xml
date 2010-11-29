@@ -152,6 +152,7 @@
         <product.name>Metro ${project.version}</product.name>
         <release.date>${maven.build.timestamp}</release.date>
         <jre.home>java.home</jre.home>
+        <gf.home>env.AS_HOME</gf.home>
         <bundle.artifact.name>${project.artifactId}-${project.version}.zip</bundle.artifact.name>
         <src.bundle.artifact.name>${project.artifactId}-${project.version}.src.zip</src.bundle.artifact.name>
         <download.link>${java.net.m2.repository.metroRootUrl}/${project.artifactId}/${project.version}/${bundle.artifact.name}</download.link>
