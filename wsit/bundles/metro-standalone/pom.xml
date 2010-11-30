@@ -57,6 +57,78 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>jaxws-ri</includeArtifactIds>
+                            <includes>jaxws-ri/bin/**, jaxws-ri/samples/**</includes>
+                            <outputDirectory>${project.build.directory}/unpacked-dependencies</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>maven-replacer-plugin</artifactId>
+                <executions>                
+                    <execution>
+                        <id>replace-jaxws-with-metro</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <basedir>target/unpacked-dependencies/jaxws-ri</basedir>
+                            <includes>
+                                <include>bin/**.bat</include>
+                                <include>bin/**.sh</include>
+                                <include>samples/docs/index.html</include>
+                                <include>samples/**/build.xml</include>
+                                <include>samples/**/deploy-targets.xml</include>
+                                <include>samples/**/Readme.txt</include>
+                                <include>samples/**/web.xml</include>
+                            </includes>
+                            <replacements>
+                                <replacement>
+                                    <token>JAX-WS</token>
+                                    <value>Metro</value>
+                                </replacement>
+                                <replacement>
+                                    <token>JAXWS_HOME</token>
+                                    <value>METRO_HOME</value>
+                                </replacement>
+                                <replacement>
+                                    <token>jaxws-tools.jar</token>
+                                    <value>webservices-tools.jar</value>
+                                </replacement>
+                                <replacement>
+                                    <token>jaxws.classpath</token>
+                                    <value>metro.classpath</value>
+                                </replacement>
+                                <replacement>
+                                    <token>/jaxws-</token>
+                                    <value>/metro-</value>
+                                </replacement>
+                                <replacement>
+                                    <token>https://jax-ws.dev.java.net/guide</token>
+                                    <value>http://metro.java.net/guide</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <finalName>metro</finalName>
@@ -144,6 +216,11 @@
             <groupId>com.ctc.wstx</groupId>
             <artifactId>woodstox-osgi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-ri</artifactId>
+            <type>zip</type>
+        </dependency>        
     </dependencies>
 
     <properties>
