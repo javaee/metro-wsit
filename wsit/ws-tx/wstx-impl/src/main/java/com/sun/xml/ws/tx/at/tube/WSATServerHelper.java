@@ -62,11 +62,9 @@ import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterType;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 
-import javax.transaction.SystemException;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
-import java.util.logging.Level;
 
 public class WSATServerHelper implements WSATServer {
     private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
@@ -84,15 +82,17 @@ public class WSATServerHelper implements WSATServer {
     }
 
     public void doHandleResponse(TransactionalAttribute transactionalAttribute) {
-        if (transactionalAttribute!=null && transactionalAttribute.isEnabled()) {
-            debug("processResponse isTransactionalAnnotationPresent about to suspend");
+        if(xidToResume!=null) {
+            debug("doHandleResponse about to suspend " + xidToResume);
             TransactionImportManager.getInstance().release(xidToResume);
         }
     }
 
     public void doHandleException(Throwable throwable) {
-        debug("processException about to suspend if transaction is present due to:"+ throwable);
-        if(xidToResume!=null) TransactionImportManager.getInstance().release(xidToResume);
+        if(xidToResume!=null) {
+            debug("doHandleException about to suspend " + xidToResume + " Exception:" + throwable);
+            TransactionImportManager.getInstance().release(xidToResume);
+        }
     }
     
     /**
@@ -108,13 +108,13 @@ public class WSATServerHelper implements WSATServer {
      * @param builder CoordinationContextBuilder
      */
     private Xid processIncomingTransaction(CoordinationContextBuilder builder) {
-        if(WSATHelper.isDebugEnabled()) debug("in processingIncomingTransaction");
+        if(WSATHelper.isDebugEnabled()) debug("in processingIncomingTransaction builder:"+builder);
         //we either need to fast suspend immediately and resume after register as we are doing or move this after register
         CoordinationContextIF cc = builder.buildFromHeader();
         long timeout = cc.getExpires().getValue();
         String tid = cc.getIdentifier().getValue().replace("urn:","").replaceAll("uuid:","");
         boolean isRegistered = false;
-        Xid foreignXid; //serves as a boolean
+        Xid foreignXid = null; //serves as a boolean
         try {
           foreignXid = WSATHelper.getTransactionServices().importTransaction((int) timeout, tid.getBytes());
           if(foreignXid!=null) isRegistered = true;
@@ -123,6 +123,11 @@ public class WSATServerHelper implements WSATServer {
               register(builder, cc, foreignXid, timeout, tid);
           }
         } catch (WSATException e) {
+            if(foreignXid!=null) {
+                TransactionImportManager.getInstance().release(foreignXid);
+            } else {
+                debug("in processingIncomingTransaction WSATException foreignXid is null");
+            }
             throw new WebServiceException(e);
         }
         return foreignXid;
