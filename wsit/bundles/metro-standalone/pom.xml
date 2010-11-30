@@ -87,7 +87,7 @@
                             <goal>replace</goal>
                         </goals>
                         <configuration>
-                            <basedir>target/unpacked-dependencies/jaxws-ri</basedir>
+                            <basedir>${project.build.directory}/unpacked-dependencies/jaxws-ri</basedir>
                             <includes>
                                 <include>bin/**.bat</include>
                                 <include>bin/**.sh</include>
