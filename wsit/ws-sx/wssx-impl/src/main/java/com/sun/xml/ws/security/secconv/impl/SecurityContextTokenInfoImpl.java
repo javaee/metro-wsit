@@ -144,9 +144,7 @@ public class SecurityContextTokenInfoImpl implements SecurityContextTokenInfo {
     }
     
     public Set getInstanceKeys() {
-      return null;
-// TBD   
-      //return secretMap.keySet();
+        return secretMap.keySet();
     }
     
     public IssuedTokenContext getIssuedTokenContext() {

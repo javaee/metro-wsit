@@ -408,7 +408,7 @@ public class SessionManagerImpl extends SessionManager {
         }
 
         public Set getInstanceKeys() {
-          return null;
+          return secretMap.keySet();
         }
     
         public IssuedTokenContext getIssuedTokenContext() {
