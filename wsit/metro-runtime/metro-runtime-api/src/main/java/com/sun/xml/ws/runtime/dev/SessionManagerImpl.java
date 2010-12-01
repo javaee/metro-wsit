@@ -270,7 +270,12 @@ public class SessionManagerImpl extends SessionManager {
             if (!recovered){                
                 throw new WebServiceException("Could not locate SecureConversation session for Id:" + key);
             }
-        }        
+        }else if (ctx.getSecurityContextTokenInfo() == null && ctx.getSecurityToken() != null){
+            String sctInfoKey = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString()+"_"+
+                            ((SecurityContextToken)ctx.getSecurityToken()).getInstance();                    
+            //ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(((SecurityContextToken)ctx.getSecurityToken()).getInstance()));
+            ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(sctInfoKey));
+        }
 
         if (ctx != null && checkExpiry){
             // Expiry check of security context token
@@ -290,12 +295,7 @@ public class SessionManagerImpl extends SessionManager {
                 throw new WSSecureConversationRuntimeException(new QName("RenewNeeded"), "The provided context token has expired");
             }            
         }
-        if(((SecurityContextToken)ctx.getSecurityToken()).getInstance() != null){
-            String sctInfoKey = ((SecurityContextToken)ctx.getSecurityToken()).getIdentifier().toString()+"_"+
-                            ((SecurityContextToken)ctx.getSecurityToken()).getInstance();                    
-            //ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(((SecurityContextToken)ctx.getSecurityToken()).getInstance()));
-            ctx.setSecurityContextTokenInfo(securityContextTokenInfoMap.get(sctInfoKey));
-        }
+        
         return ctx;
     }
 
@@ -307,12 +307,11 @@ public class SessionManagerImpl extends SessionManager {
      */
     public void addSecurityContext(String key, IssuedTokenContext itctx){
         issuedTokenContextMap.put(key, itctx);
-        if(((SecurityContextToken)itctx.getSecurityToken()).getInstance() != null){
-            String sctInfoKey = ((SecurityContextToken)itctx.getSecurityToken()).getIdentifier().toString()+"_"+
-                            ((SecurityContextToken)itctx.getSecurityToken()).getInstance();                    
+        SecurityContextTokenInfo sctInfo = itctx.getSecurityContextTokenInfo();
+        if(sctInfo.getInstance() != null){
+            String sctInfoKey = sctInfo.getIdentifier().toString()+"_"+ sctInfo.getInstance();                    
             //securityContextTokenInfoMap.put(((SecurityContextToken)itctx.getSecurityToken()).getInstance(), itctx.getSecurityContextTokenInfo());
-            securityContextTokenInfoMap.put(sctInfoKey, itctx.getSecurityContextTokenInfo());
-            itctx.setSecurityContextTokenInfo(null);
+            securityContextTokenInfoMap.put(sctInfoKey, sctInfo);
         }
     }
     
@@ -424,6 +423,14 @@ public class SessionManagerImpl extends SessionManager {
 
         public IssuedTokenContext getIssuedTokenContext(SecurityTokenReference reference) {
             return null;
+        }
+        
+        @Override
+        public String toString(){
+            String str = "Identifier=" + identifier + " : Secret=" + secret +
+                         " : ExternalId=" +  this.extId + " : Creation Time=" +
+                         this.creationTime + " : Expiration Time=" + this.expirationTime;
+            return str;
         }
     }
     

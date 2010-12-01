@@ -123,6 +123,7 @@ import com.sun.xml.ws.security.opt.impl.util.WSSElementFactory;
 import com.sun.xml.ws.security.secconv.impl.client.DefaultSCTokenConfiguration;
 import com.sun.xml.ws.security.trust.WSTrustElementFactory;
 import com.sun.xml.wss.logging.impl.dsig.LogStringsMessages;
+import java.net.URI;
 import java.security.cert.CertificateEncodingException;
 import javax.crypto.SecretKey;
 import javax.security.auth.Subject;
@@ -1227,8 +1228,21 @@ public class KeySelectorImpl extends KeySelector {
         } else {
             //Retrive the context from Session Manager's cache
             ctx = ((SessionManager) wssContext.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !wssContext.isExpired());
+            URI sctId = null;
+            String sctIns = null;
+            String wsuId = null;
             com.sun.xml.ws.security.SecurityContextToken sct = (com.sun.xml.ws.security.SecurityContextToken) ctx.getSecurityToken();
-            ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sct.getIdentifier(), sct.getInstance(), sct.getWsuId()));
+            if (sct != null){
+                sctId = sct.getIdentifier();
+                sctIns = sct.getInstance();
+                wsuId = sct.getWsuId();
+            }else {
+                SecurityContextTokenInfo sctInfo = ctx.getSecurityContextTokenInfo();
+                sctId = URI.create(sctInfo.getIdentifier());
+                sctIns = sctInfo.getInstance();
+                wsuId = sctInfo.getExternalId();  
+            }
+            ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sctId, sctIns, wsuId));            
         }
 
         //update otherparty subject with bootstrap credentials.

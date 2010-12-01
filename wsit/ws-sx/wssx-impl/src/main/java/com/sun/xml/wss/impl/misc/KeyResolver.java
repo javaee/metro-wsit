@@ -1068,8 +1068,21 @@ public class KeyResolver {
         }else{
             //Retrive the context from Session Manager's cache
             ctx = ((SessionManager)context.getExtraneousProperty("SessionManager")).getSecurityContext(scId, !context.isExpired());
+            java.net.URI sctId = null;
+            String sctIns = null;
+            String wsuId = null;
             SecurityContextToken sct = (SecurityContextToken)ctx.getSecurityToken();
-            ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sct.getIdentifier(), sct.getInstance(), sct.getWsuId()));
+            if (sct != null){
+                sctId = sct.getIdentifier();
+                sctIns = sct.getInstance();
+                wsuId = sct.getWsuId();
+            }else {
+                SecurityContextTokenInfo sctInfo = ctx.getSecurityContextTokenInfo();
+                sctId = java.net.URI.create(sctInfo.getIdentifier());
+                sctIns = sctInfo.getInstance();
+                wsuId = sctInfo.getExternalId();  
+            }
+            ctx.setSecurityToken(WSTrustElementFactory.newInstance(protocol).createSecurityContextToken(sctId, sctIns, wsuId));
         }       
                 
         if (ctx == null) {
