@@ -190,37 +190,21 @@
         <mkdir dir="wsit-image"/>
         <mkdir dir="wsit-image/runtime"/>
         
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/wsit-javanet/lastSuccessfulBuild/artifact/dist/metro.zip"
              dest="wsit-image/metro.zip"/>
         <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
         
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/wsit-javanet/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
              dest="wsit-image/webservices-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/wsit-javanet/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
              dest="wsit-image/webservices-tools-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
-             dest="wsit-image/runtime/jaxws-local-transport.jar"/>
-    </target>
-    
-    <target name="get-wsit-bleedingedge-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
-        <mkdir dir="wsit-image"/>
-        <mkdir dir="wsit-image/runtime"/>
-        
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/dist/metro.zip"
-             dest="wsit-image/metro.zip"/>
-        <unzip src="wsit-image/metro.zip" dest="wsit-image"/>
-        
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/rt/build/webservices-src.zip"
-             dest="wsit-image/webservices-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/tools/build/webservices-tools-src.zip"
-             dest="wsit-image/webservices-tools-src.zip"/>
-        <get src="http://kohsuke.sfbay/hudson/job/wsit-javanet-bleedingedge/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/wsit-javanet/lastSuccessfulBuild/artifact/lib/runtime/jaxws-local-transport.jar"
              dest="wsit-image/runtime/jaxws-local-transport.jar"/>
     </target>
     
     <target name="integrate-test-harness-hudson" description="integrates latest test harness into WSIT, meant for internal consumption only">
         <mkdir dir="tmp/test-harness"/>
-        <get src="http://kohsuke.sfbay/hudson/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
              dest="tmp/test-harness.zip"/>
         <unzip src="tmp/test-harness.zip" dest="tmp"/>
         <copy todir="${test.lib.dir}" overwrite="true" verbose="${verbose}">
@@ -247,22 +231,6 @@
     <target name="main-hudson"
             description="Invoke unit test from Hudson. This downloads WSIT from Hudson, as opposed to test the local one"
             depends="setup-emma-remote, get-wsit-hudson">
-        
-        <run-tests>
-            <arguments>
-                <arg value="-r" />
-                <arg path="${testcases}" />
-                <arg value="-cp:wsit-image" />
-                <arg path="wsit-image/metro" />
-                <arg value="-transport" />
-                <arg path="wsit-image/runtime/jaxws-local-transport.jar" />
-            </arguments>
-        </run-tests>
-    </target>
-    
-    <target name="main-bleedingedge-hudson"
-            description="Invoke unit test from Hudson. This downloads WSIT (wsit-javanet-bleedingedge) from Hudson, as opposed to test the local one"
-            depends="setup-emma-remote, get-wsit-bleedingedge-hudson">
         
         <run-tests>
             <arguments>

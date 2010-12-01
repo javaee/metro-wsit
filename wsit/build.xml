@@ -179,47 +179,45 @@
     <target name="integrate-jaxws-hudson"
             description="integrates latest JAX-WS 2.1.8 bits in WSIT, meant for internal consumption only">
 
-        <integrate-jaxws jaxws.base.url="http://hudson.sfbay.sun.com/job/jaxws-ri-2.1.8/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://hudson-sca.us.oracle.com/job/jaxws-ri-2.1.8/lastSuccessfulBuild"/>
         
     </target>
 
     <target name="integrate-jaxws-bleedingedge-hudson"
             description="integrates latest JAX-WS 2.1.3 bleedingedge bits in WSIT, meant for internal consumption only">
                 
-        <integrate-jaxws jaxws.base.url="http://kohsuke.sfbay/hudson/job/jaxws-2.1.x-bleedingedge/lastSuccessfulBuild"/>
+        <integrate-jaxws jaxws.base.url="http://hudson-sca.us.oracle.com/job/jaxws-2.1.x-bleedingedge/lastSuccessfulBuild"/>
         
     </target>
     
     <target name="integrate-jaxb-osgi-hudson"
         description="integrates latest JAXB 2.x OSGi bundle for GlassFish V3">
-        <get src="http://hudson.sfbay/view/JAXB%202.1/job/jaxb-ri-2.1/793/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxb-ri-2.1/793/artifact/jaxb2-sources/jaxb-ri/osgi/build/jaxb-osgi.jar"
              dest="${lib.osgi.dir}/jaxb.jar" />
     </target>
 
     <target name="integrate-xwss30-hudson"
             description="integrate the last successful XWSS 3.0 Hudson build">
-        <!-- get src="http://kohsuke.sfbay/hudson/job/xwss3.0/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.src.zip"
-         dest="lib/xws-security.src.zip" / -->
-        <get src="http://hudson.sfbay.sun.com/job/XWSS30-METRO-1_4-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/XWSS30-METRO-1_4-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/lib/xws-security.jar"
              dest="lib/runtime/xws-security.jar" />
-        <get src="http://hudson.sfbay.sun.com/job/XWSS30-METRO-1_4-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/XWSS30-METRO-1_4-BRANCH/lastSuccessfulBuild/artifact/xwss/xwss-ri/dist/wsit/xws-security.src.zip"
              dest="lib/runtime/xws-security.src.zip" />
     </target>
 
     <target name="integrate-jaxrpc"
             description="integrate the last successful jaxrpc with jcaps fixes build">
-        <get src="http://kohsuke.sfbay/hudson/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-impl.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-impl.jar"
              dest="lib/runtime/jaxrpc-impl.jar" />
-        <get src="http://kohsuke.sfbay/hudson/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-spi.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/jaxrpc-caps6-branch/lastSuccessfulBuild/artifact/build/lib/jaxrpc-spi.jar"
              dest="lib/runtime/jaxrpc-spi.jar" />
     </target>
     
     <target name="integrate-policy-hudson"
             description="integrates the last successful policy Hudson build">
                 
-        <get src="http://hudson.sfbay.sun.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy.jar"
+        <get src="http://hudson-sca.us.oracle.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy.jar"
              dest="${basedir}/lib/runtime/policy.jar" />
-        <get src="http://hudson.sfbay.sun.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy-src.zip"
+        <get src="http://hudson-sca.us.oracle.com/job/policy-core_METRO-1_6-BRANCH/4/artifact/target/policy-src.zip"
              dest="${basedir}/lib/runtime/policy-src.zip" />
         
     </target>
@@ -273,7 +271,7 @@
     <target name="integrate-htmlmacro-hudson"
             description="integrate the last successful htmlmacro Hudson build">
         <get
-          src="http://kohsuke.sfbay.sun.com/hudson/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
+          src="http://hudson-sca.us.oracle.com/job/htmlmacro/lastSuccessfulBuild/artifact/htmlmacro/build/htmlmacro.zip"
           dest="${lib.releasenotes.dir}/htmlmacro.zip"/>
         <mkdir dir="${lib.releasenotes.dir}/htmlmacro"/>
         <unzip src="${lib.releasenotes.dir}/htmlmacro.zip" dest="${lib.releasenotes.dir}/htmlmacro"/>
@@ -462,7 +460,7 @@
         <property name="module.dir" value="${basedir}/ucmodule/glassfish/modules"/>
         <property name="metro.hudson.job.name" value="wsit-javanet" />
         <loadresource property="metro.hudson.pushed.build.number">
-            <url url="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/lastSuccessfulBuild/buildNumber" />
+            <url url="http://hudson-sca.us.oracle.com/job/${metro.hudson.job.name}/lastSuccessfulBuild/buildNumber" />
         </loadresource>
         <property name="module.revision" value="3" />
 
@@ -476,13 +474,6 @@
     
     <target name="prepare-uc2" depends="-clean-uc2, -set-uc2-properties" description="Prepare GlassFish Update Center Module">
         <mkdir dir="${module.dir}"/>
-
-      <!--get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/jaxb.jar"
-      dest="${module.dir}/jaxb.jar" />
-      <get src="http://hudson.sfbay.sun.com/job/${metro.hudson.job.name}/${metro.hudson.pushed.build.number}/artifact/dist/image/metro/for_v3/webservices.jar"
-      dest="${module.dir}/webservices.jar" />      
-      <get src="http://hudson.sfbay/job/jsr109-impl/org.glassfish.webservices$jsr109-impl/lastSuccessfulBuild/artifact/org.glassfish.webservices/jsr109-impl/10.0-SNAPSHOT/jsr109-impl-10.0-SNAPSHOT.jar"
-      dest="${module.dir}/jsr109-impl.jar" /-->
       
         <get src="file://${user.home}/sandbox/java.net/metro-1_5/dist/image/metro/for_v3/jaxb.jar"
       dest="${module.dir}/jaxb.jar" />
