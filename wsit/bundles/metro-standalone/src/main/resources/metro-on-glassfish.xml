@@ -73,7 +73,7 @@
         <echo message="  JAX-WS API 2.1. If you want to run Metro applications"/>
         <echo message="  outside GlassFish you will need to use the endorsed"/>
         <echo message="  standards override mechanism. For more details see"/>
-        <echo message="  http://java.sun.com/javase/6/docs/technotes/guides/standards/index.html"/>
+        <echo message="  http://download.oracle.com/javase/6/docs/technotes/guides/standards/index.html"/>
         <echo/>
         <echo message="  If you want to enable JAX-WS ${jaxws.spec.version} for all applications"/>
         <echo message="  running under Java SE 6, you may run the command"/>
