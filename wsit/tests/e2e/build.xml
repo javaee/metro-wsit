@@ -171,17 +171,17 @@
     </target>
 
     <target name="setup-emma-remote" description="internal: overrides remote setup for emma">
-        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.image" value="${basedir}/metro-image/metro"/>
         <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
     <target name="setup-emma-local" description="internal: overrides local setup for emma">
-        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.image" value="${basedir}/metro-image/metro"/>
         <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
     <target name="setup-emma-v3" description="internal: overrides GlassFish v3 setup for emma">
-        <property name="metro.image" value="${basedir}/metro-image"/>
+        <property name="metro.image" value="${basedir}/metro-image/metro"/>
         <property name="metro.sources" value="${basedir}/metro-image/webservices-src.zip"/>
     </target>
 
