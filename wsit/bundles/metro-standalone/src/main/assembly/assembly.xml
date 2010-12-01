@@ -50,12 +50,12 @@
     <fileSets>
         <fileSet>
             <directory>src/main/resources</directory>
-            <outputDirectory></outputDirectory>
+            <outputDirectory>metro</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/unpacked-dependencies/jaxws-ri</directory>
-            <outputDirectory></outputDirectory>
+            <outputDirectory>metro</outputDirectory>
             <filtered>false</filtered>
         </fileSet>
     </fileSets>
@@ -64,7 +64,7 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>metro/lib</outputDirectory>
 
             <includes>
                 <include>javax.xml.stream:stax-api</include>
@@ -80,7 +80,7 @@
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
-            <outputDirectory>osgi</outputDirectory>
+            <outputDirectory>metro/osgi</outputDirectory>
 
             <includes>
                 <include>javax.xml.bind:jaxb-api-osgi</include>

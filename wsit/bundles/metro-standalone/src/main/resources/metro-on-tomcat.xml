@@ -43,14 +43,14 @@
 
 <project name="Metro on Tomcat" default="help">
     <property environment="env"/>
-    <property name="tomcat.home" value="${env.CATALINA_HOME}"/>
+    <property name="tomcat.home" value="${@catalina.home.env.string@}"/>
     <property name="catalina.home" value="${tomcat.home}"/>
     <property name="catalina.lib.home" value="${catalina.home}/shared/lib"/>
     <property name="catalina.endorsed" value="${catalina.home}/common/endorsed"/>
 
     <!-- Check if we are running JAVA SE 6 --> 
     <condition property="jdk6">
-        <contains string="${java.version}" substring="1.6.0"/>
+        <contains string="${@java.version.string@}" substring="1.6.0"/>
     </condition>
 
     <condition property="catalina.home.exists">
@@ -72,19 +72,19 @@
     <target name="jdk6-message" if="jdk6">
         <echo message="Metro is being installed using Java SE 6."/>
         <echo/>
-        <echo message="  Metro provides JAX-WS 2.2 while Java SE includes"/>
-        <echo message="  JAX-WS 2.1. If you want to run Metro applications"/>
+        <echo message="  ${product.name} provides JAX-WS API ${jaxws.spec.version} while Java SE 6 includes"/>
+        <echo message="  JAX-WS API 2.1. If you want to run Metro applications"/>
         <echo message="  outside Tomcat, you will need to use the endorsed"/>
         <echo message="  standards override mechanism. For more details see"/>
         <echo message="  http://java.sun.com/javase/6/docs/technotes/guides/standards/index.html"/>
         <echo/>
-        <echo message="  If you want to enable JAX-WS 2.2 for all applications"/>
+        <echo message="  If you want to enable JAX-WS ${jaxws.spec.version} for all applications"/>
         <echo message="  running under Java SE 6, you may run the command"/>
         <echo message="  'ant install-api'."/>
         <echo message="  That command will copy the file webservices-api.jar to"/>
-        <echo message="  ${@jre.home@}/lib/endorsed."/>
+        <echo message="  ${@java.home.string@}/lib/endorsed."/>
         <echo message="  The command needs to be run by a user that has the"/>
-        <echo message="  permissions to copy files into ${@jre.home@}/lib/endorsed."/>
+        <echo message="  permissions to copy files into ${@java.home.string@}/lib/endorsed."/>
         <echo/>
         <echo message="  NOTE that any Java application that incidentally"/>
         <echo message="  uses one of the APIs included in Metro but does"/>
@@ -135,15 +135,15 @@
     </target>
 
     <target name="test-api" description="Test if 'webservices-api.jar' is already installed in $JAVA_HOME/lib/endorsed" if="jdk6">
-        <available property="api.installed" file="${@jre.home@}/lib/endorsed/webservices-api.jar"/>
+        <available property="api.installed" file="${@java.home.string@}/lib/endorsed/webservices-api.jar"/>
     </target>
 
     <target name="check-api" depends="test-api" if="api.installed"
             description="Print a warning if 'webservices-api.jar' is found in $JAVA_HOME/lib/endorsed">
-        <echo message="Found the file webservices-api.jar in ${@jre.home@}/lib/endorsed."/>
+        <echo message="Found the file webservices-api.jar in ${@java.home.string@}/lib/endorsed."/>
         <echo/>
         <echo message="  This installation does not automatically overwrite"/>
-        <echo message="  'webservices-api.jar' in ${@jre.home@}/lib/endorsed."/>
+        <echo message="  'webservices-api.jar' in ${@java.home.string@}/lib/endorsed."/>
         <echo message="  Please execute the command 'ant install-api' to"/>
         <echo message="  update 'webservices-api.jar'."/>
         <echo/>
@@ -151,12 +151,12 @@
         <echo message="  one of the APIs included in Metro but does not"/>
         <echo message="  have all Metro JARs on its classpath may experience"/>
         <echo message="  class loading issues if you install webservices-api.jar"/>
-        <echo message="  into ${@jre.home@}/lib/endorsed."/>
+        <echo message="  into ${@java.home.string@}/lib/endorsed."/>
     </target>
 
     <target name="install-api" description="Installs 'webservices-api.jar' into $JAVA_HOME/lib/endorsed" if="jdk6">
-        <mkdir dir="${@jre.home@}/lib/endorsed"/>
-        <copy toDir="${@jre.home@}/lib/endorsed" overwrite="true">
+        <mkdir dir="${@java.home.string@}/lib/endorsed"/>
+        <copy toDir="${@java.home.string@}/lib/endorsed" overwrite="true">
             <fileset dir="lib">
                 <include name="webservices-api.jar"/>
             </fileset>
@@ -165,7 +165,7 @@
 
     <taskdef name="updatesharedloaderprop" classname="com.sun.xml.ws.installer.UpdateSharedLoaderProp">
         <classpath>
-            <fileset dir="${basedir}/lib" includes="webservices-rt.jar"/>
+            <fileset dir="./lib" includes="webservices-rt.jar"/>
         </classpath>
     </taskdef>
 
@@ -182,7 +182,7 @@
             <fileset dir="${catalina.endorsed}" includes="webservices-api.jar, jsr173_api.jar"/>
         </delete>
         <delete quiet="true">
-            <fileset dir="${@jre.home@}/lib/endorsed" includes="webservices-api.jar, jsr173_api.jar"/>
+            <fileset dir="${@java.home.string@}/lib/endorsed" includes="webservices-api.jar, jsr173_api.jar"/>
         </delete>
     </target>
 
