@@ -56,6 +56,7 @@ import com.sun.xml.ws.tx.at.common.CoordinatorIF;
 import com.sun.xml.ws.tx.at.common.ParticipantIF;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
+import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
@@ -99,9 +100,17 @@ public class Participant<T> implements ParticipantIF<T> {
              coordinatorPort.readOnlyOperation(createNotification());
          else if(vote.equals(WSATConstants.PREPARED))
              coordinatorPort.preparedOperation(createNotification());
-      } catch (Exception e) {
-         log("prepare resulted in exception, sending aborted for tid:" + stringForTidByteArray(tid) + " " + e);
-         e.printStackTrace();
+      } catch (WSATException e) {
+          e.printStackTrace();
+          if(WSATRuntimeConfig.getInstance().isRollbackOnFailedPrepare()) {
+              try {
+                  log("prepare resulted in exception, issuing rollback for tid:" + stringForTidByteArray(tid) + " " + e);
+                  getTransactionaService().rollback(tid);
+              } catch (WSATException e1) {
+                  e1.printStackTrace();
+              }
+          }
+          log("prepare resulted in exception, sending aborted for tid:" + stringForTidByteArray(tid) + " " + e);
          if (coordinatorPort != null) coordinatorPort.abortedOperation(createNotification());
          else {
             log("prepare resulted in exception, unable to send abort as coordinatorPort was null" +

@@ -61,17 +61,15 @@ import com.sun.xml.ws.tx.at.runtime.TransactionIdHelper;
 import com.sun.xml.ws.tx.coord.common.WSATCoordinationContextBuilder;
 import com.sun.xml.ws.tx.coord.common.WSCBuilderFactory;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
-import java.util.UUID;
 
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 
 public class WSATClientHelper implements WSATClient {
+    private volatile int counter = 0;
     private static final Logger LOGGER = Logger.getLogger(WSATClientHelper.class);
 
     /**
@@ -179,11 +177,9 @@ public class WSATClientHelper implements WSATClient {
         }
         List<Header> headers = new ArrayList<Header>();
         String txId;
-        //todo add cluster/servername to make this unique
-        String s = UUID.randomUUID().toString().replace("urn:","").replaceAll("uuid:","").trim();
         byte[] activityId = WSATHelper.assignUUID().getBytes();
         LOGGER.info("WS-AT activityId:" + activityId);
-        Xid xid = new XidImpl(1234,new String(""+System.currentTimeMillis()).getBytes(), new byte[]{});
+        Xid xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
         txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         long ttl = 0;
         try {

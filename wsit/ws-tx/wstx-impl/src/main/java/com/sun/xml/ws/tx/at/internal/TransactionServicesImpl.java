@@ -126,8 +126,8 @@ public class TransactionServicesImpl implements TransactionServices {
         try {
             vote = TransactionImportManager.getInstance().getXATerminator().prepare(xidImpl);
         } catch (XAException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WSATException(ex.getMessage(), ex);
+            LOGGER.warning(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
+            throw new WSATException(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
         } finally {
             TransactionImportManager.getInstance().release(xidImpl); //prepare does an implicit import/recreate  
         }
@@ -145,8 +145,8 @@ public class TransactionServicesImpl implements TransactionServices {
             TransactionImportManager.getInstance().getXATerminator().commit(xidImpl, false);
             ForeignRecoveryContextManager.getInstance().delete(xidImpl);
         } catch (XAException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WSATException(ex.getMessage(), ex);
+            LOGGER.warning(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
+            throw new WSATException(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
         } finally {
             TransactionImportManager.getInstance().release(xidImpl);
         }
@@ -160,10 +160,10 @@ public class TransactionServicesImpl implements TransactionServices {
             TransactionImportManager.getInstance().getXATerminator().rollback(xidImpl);
             ForeignRecoveryContextManager.getInstance().delete(xidImpl);
         } catch (XAException ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.warning(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
             if(ex.errorCode == XAException.XAER_NOTA || ex.errorCode == XAException.XAER_PROTO)
                 ForeignRecoveryContextManager.getInstance().delete(xidImpl);
-            throw new WSATException(ex.getMessage(), ex);
+            throw new WSATException(ex.getMessage() + " errorcode:" + ex.errorCode, ex);
         } finally {
             TransactionImportManager.getInstance().release(xidImpl);
         }

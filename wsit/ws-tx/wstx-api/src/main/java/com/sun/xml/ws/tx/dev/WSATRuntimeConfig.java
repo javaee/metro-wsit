@@ -39,11 +39,9 @@
  */
 package com.sun.xml.ws.tx.dev;
 
-import com.sun.istack.logging.Logger;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 
 public final class WSATRuntimeConfig {
 
@@ -91,6 +89,12 @@ public final class WSATRuntimeConfig {
             return this;
         }
 
+        public Initializer enableRollbackOnFailedPrepare(boolean value) {
+            WSATRuntimeConfig.isRollbackOnFailedPrepare = value;
+
+            return this;
+        }
+
         public void done() {
             DATA_LOCK.unlock();
         }
@@ -99,6 +103,7 @@ public final class WSATRuntimeConfig {
     private static boolean isWsatRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
     private static String txLogLocation;
     private static boolean isWsatSslEnabled = Boolean.valueOf(System.getProperty("wsat.ssl.enabled", "false"));
+    private static boolean isRollbackOnFailedPrepare = Boolean.valueOf(System.getProperty("wsat.rollback.on.failed.prepare", "true"));
     private static String hostName = "localhost";
     private static String httpPort = "8080";
     private static String httpsPort = "8181";
@@ -148,6 +153,10 @@ public final class WSATRuntimeConfig {
      */
     public String getTxLogLocation() {
         return txLogLocation;
+    }
+
+    public boolean isRollbackOnFailedPrepare() {
+        return isRollbackOnFailedPrepare;
     }
 
     public void setWSATRecoveryEventListener(RecoveryEventListener WSATRecoveryEventListener) {
