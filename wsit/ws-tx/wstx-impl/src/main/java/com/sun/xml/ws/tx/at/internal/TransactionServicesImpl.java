@@ -59,6 +59,7 @@ import javax.xml.ws.EndpointReference;
 public class TransactionServicesImpl implements TransactionServices {
 
     private static TransactionServices INSTANCE;
+    private static Logger LOGGER = Logger.getLogger(TransactionServicesImpl.class);
 
     //this is used to track registrations and avoid dupe registration
     static List<Xid> importedXids = new ArrayList<Xid>();
@@ -117,7 +118,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     public String prepare(byte[] tId) throws WSATException {
-        debug("prepare");
+        debug("prepare:" + new String(tId));
         final XidImpl xidImpl = new XidImpl(tId);
         removeFromImportedXids(xidImpl);
         ForeignRecoveryContextManager.getInstance().persist(xidImpl);
@@ -125,32 +126,46 @@ public class TransactionServicesImpl implements TransactionServices {
         try {
             vote = TransactionImportManager.getInstance().getXATerminator().prepare(xidImpl);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WSATException(ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new WSATException(ex.getMessage(), ex);
+        } finally {
+            TransactionImportManager.getInstance().release(xidImpl); //prepare does an implicit import/recreate  
+        }
+        if(vote==XAResource.XA_RDONLY) {
+            debug("deleting record due to readonly reply from prepare for txid:" + new String(tId));
+            ForeignRecoveryContextManager.getInstance().delete(xidImpl);
         }
         return vote==XAResource.XA_OK?WSATConstants.PREPARED:WSATConstants.READONLY;
     }
 
     public void commit(byte[] tId) throws WSATException {
-        debug("commit");
+        debug("commit:" + new String(tId));
         final XidImpl xidImpl = new XidImpl(tId);
         try {
             TransactionImportManager.getInstance().getXATerminator().commit(xidImpl, false);
+            ForeignRecoveryContextManager.getInstance().delete(xidImpl);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WSATException(ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new WSATException(ex.getMessage(), ex);
+        } finally {
+            TransactionImportManager.getInstance().release(xidImpl);
         }
     }
 
     public void rollback(byte[] tId) throws WSATException {
-        debug("rollback");
+        debug("rollback:" + new String(tId));
         final XidImpl xidImpl = new XidImpl(tId);
         removeFromImportedXids(xidImpl);
         try {
             TransactionImportManager.getInstance().getXATerminator().rollback(xidImpl);
+            ForeignRecoveryContextManager.getInstance().delete(xidImpl);
         } catch (XAException ex) {
-            Logger.getLogger(TransactionServicesImpl.class).log(Level.SEVERE, ex.getMessage(), ex);
-            throw new WSATException(ex);
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            if(ex.errorCode == XAException.XAER_NOTA || ex.errorCode == XAException.XAER_PROTO)
+                ForeignRecoveryContextManager.getInstance().delete(xidImpl);
+            throw new WSATException(ex.getMessage(), ex);
+        } finally {
+            TransactionImportManager.getInstance().release(xidImpl);
         }
     }
 
@@ -164,6 +179,7 @@ public class TransactionServicesImpl implements TransactionServices {
         if (foreignRecoveryContext == null) {
             try {
                 xaResource.rollback(xid);
+                ForeignRecoveryContextManager.getInstance().delete(xid);
             } catch (XAException xae) {
                 debug("replayCompletion() tid=" + tId + " (" + xid + "), XAException ("
                         + JTAHelper.xaErrorCodeToString(xae.errorCode, false) + ") rolling back imported transaction: " + xae);
@@ -187,8 +203,7 @@ public class TransactionServicesImpl implements TransactionServices {
     }
 
     private void debug(String msg){
-        Logger logger = Logger.getLogger(TransactionServicesImpl.class);
-        if(logger.isLoggable(Level.INFO))logger.log(Level.INFO, msg);
+        LOGGER.log(Level.INFO, msg);
     }
 
 }

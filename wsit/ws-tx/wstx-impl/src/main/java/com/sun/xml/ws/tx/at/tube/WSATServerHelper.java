@@ -42,6 +42,7 @@ package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
+import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.api.message.HeaderList;
 import com.sun.xml.ws.tx.at.WSATConstants;
@@ -62,6 +63,8 @@ import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterType;
 import com.sun.xml.ws.tx.coord.common.types.CoordinationContextIF;
 
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
@@ -75,6 +78,10 @@ public class WSATServerHelper implements WSATServer {
             debug("processRequest HeaderList:" + headers + " TransactionalAttribute:" + tx + " isEnabled:" + tx.isEnabled());
         CoordinationContextBuilder ccBuilder = CoordinationContextBuilder.headers(headers, tx.getVersion());
         if (ccBuilder != null) {
+            while(!WSATGatewayRM.isReadyForRuntime) {
+                debug("WS-AT recovery is enabled but WS-AT is not ready for runtime.  Processing WS-AT recovery log files...");
+                WSATGatewayRM.getInstance().recover();
+            }
             xidToResume = processIncomingTransaction(ccBuilder);
         } else {
             if (tx.isRequired()) throw new WebServiceException("transaction context is required to be inflowed");
@@ -122,7 +129,7 @@ public class WSATServerHelper implements WSATServer {
               foreignXid = new XidImpl(tid.getBytes());
               register(builder, cc, foreignXid, timeout, tid);
           }
-        } catch (WSATException e) {
+        } catch (Exception e) {
             if(foreignXid!=null) {
                 TransactionImportManager.getInstance().release(foreignXid);
             } else {
@@ -159,8 +166,9 @@ public class WSATServerHelper implements WSATServer {
             TransactionManagerImpl.getInstance().putResource(
                     WSATConstants.TXPROP_WSAT_FOREIGN_RECOVERY_CONTEXT, frc);
         } else {
-            log("Sending fault. Context refused registerResponseType is null");
-            throw new WebServiceException("Sending fault. Context refused registerResponseType is null");
+            log("Sending fault. Context refused registerResponseType is null (this may be due to request timeout)");
+            throw new WebServiceException(
+                    "Sending fault. Context refused registerResponseType is null (this may be due to request timeout)");
         }
     }
 

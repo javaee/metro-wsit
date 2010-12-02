@@ -41,7 +41,8 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,8 @@ import java.util.UUID;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 
@@ -170,6 +173,10 @@ public class WSATClientHelper implements WSATClient {
      */
     private List<Header> processTransactionalRequest(
             TransactionalAttribute transactionalAttribute, Map<String, Object> map) {
+        while (!WSATGatewayRM.isReadyForRuntime) {
+            LOGGER.info("WS-AT recovery is enabled but WS-AT is not ready for runtime.  Processing WS-AT recovery log files...");
+            WSATGatewayRM.getInstance().recover();
+        }
         List<Header> headers = new ArrayList<Header>();
         String txId;
         //todo add cluster/servername to make this unique

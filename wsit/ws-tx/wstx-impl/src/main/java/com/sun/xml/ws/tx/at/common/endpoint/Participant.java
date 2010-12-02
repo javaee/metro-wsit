@@ -57,6 +57,7 @@ import com.sun.xml.ws.tx.at.common.ParticipantIF;
 import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.at.common.client.CoordinatorProxyBuilder;
 
+import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.ws.EndpointReference;
@@ -184,7 +185,9 @@ public class Participant<T> implements ParticipantIF<T> {
           log("rollback IllegalArgumentException for tid:" + stringForTidByteArray(tid) + " " + e);
       } catch (WSATException e) {  //indicates NOTA or
           log("rollback WSATException for tid:" + stringForTidByteArray(tid) + " " + e);
-          throw new WebServiceException("Participant.rollback WSATException for tid:" + stringForTidByteArray(tid) + " " + e);
+          if(e.errorCode!= XAException.XAER_NOTA && e.errorCode!= XAException.XAER_PROTO) //proto for GF
+              throw new WebServiceException("Participant.rollback WSATException for tid:" +
+                      stringForTidByteArray(tid) + " " + e);
       }
       if(coordinatorPort != null)
           coordinatorPort.abortedOperation(createNotification());

@@ -48,7 +48,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
-import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -137,8 +136,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
     private final MethodInfo<?> release;
     private final MethodInfo<XATerminator> getXATerminator;
     private final MethodInfo<Integer> getTransactionRemainingTimeout;
-    private final MethodInfo<Xid> getXid;
-    private final MethodInfo<Transaction> getTransaction;
     private final MethodInfo<String> getTxLogLocation;
     static private MethodInfo<?> registerRecoveryResourceHandler;
 
@@ -166,14 +163,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
                 new Class<?>[]{},
                 int.class,
                 Integer.class);
-        this.getXid = new MethodInfo<Xid>(
-                "getXid",
-                new Class<?>[]{},
-                Xid.class);
-        this.getTransaction = new MethodInfo<Transaction>(
-                "getTransaction",
-                new Class<?>[]{Xid.class},
-                Transaction.class);
         this.getTxLogLocation = new MethodInfo<String>(
                 "getTxLogLocation",
                 new Class<?>[]{},
@@ -187,8 +176,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
             release,
             getXATerminator,
             getTransactionRemainingTimeout,
-            getXid,
-            getTransaction,
             getTxLogLocation,
             registerRecoveryResourceHandler    
         };
@@ -255,11 +242,6 @@ public class TransactionImportManager implements TransactionImportWrapper {
             LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
         }
         return result;
-    }
-
-    //todo exception handling....
-    public Xid getXid() throws SystemException {
-        return getXid.invoke(javaeeTM);
     }
 
     public String getTxLogLocation() {

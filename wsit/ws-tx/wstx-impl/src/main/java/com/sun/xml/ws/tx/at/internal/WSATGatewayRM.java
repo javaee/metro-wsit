@@ -81,13 +81,14 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   static List<Xid> pendingXids; // collection of Xids
   private final Object currentXidLock = new Object();
   private Xid currentXid;
-  static boolean isReady = false;
+  static boolean isReadyForRecovery = false;
+  public static boolean isReadyForRuntime = false;
   public static  String txlogdir;
   static String txlogdirInbound;
   private static String txlogdirOutbound;
   private volatile int counter = 0;
 
-  // package access for test instantiation only, this is a singleton
+    // package access for test instantiation only, this is a singleton
   WSATGatewayRM(String serverName) {
     resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
     branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
@@ -123,7 +124,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   {
     if (singleton == null) {
         new WSATGatewayRM(serverName);
-        isReady = setupRecovery();
+        isReadyForRecovery = setupRecovery();
     }
     return singleton;
   }
@@ -179,7 +180,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
      * Called for XAResource.recover
      */
    void recoverPendingBranches(String outboundRecoveryDir, String inboundRecoveryDir) {
-    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() outbound directory:"+outboundRecoveryDir);
+    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches outbound directory:"+outboundRecoveryDir);
     FileInputStream fis;
     ObjectInputStream in;
       File[] files = new File(outboundRecoveryDir).listFiles();
@@ -196,7 +197,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
             throw new WebServiceException("Failure while recovering WS-AT transaction logs outbound file:"+files[i], e);
        }
       }
-    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches() inbound directory:"+inboundRecoveryDir);
+    if (WSATHelper.isDebugEnabled()) debug("recoverPendingBranches inbound directory:"+inboundRecoveryDir);
      fis = null;
      in = null;
      files = new File(inboundRecoveryDir).listFiles();
@@ -205,6 +206,8 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         fis = new FileInputStream(files[i]);
         in = new ObjectInputStream(fis);
         ForeignRecoveryContext frc = (ForeignRecoveryContext) in.readObject();
+        frc.setTxLogLocation(files[i].getCanonicalPath());
+        frc.setRecovered();
         ForeignRecoveryContextManager.getInstance().add(frc);
         in.close();
        } catch (Throwable e) {
@@ -344,6 +347,17 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   }
 
     /**
+     * Used for lazy/automatic-recovery="false"
+     */
+    public void recover() {
+        try {
+            recover(XAResource.TMSTARTRSCAN | XAResource.TMENDRSCAN);
+        } catch (XAException e) {
+            e.printStackTrace();  
+        }
+    }
+
+    /**
      * Call for local recover/server specified by null instance value
      *
      * @param flag 
@@ -364,7 +378,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
      */
     public Xid[] recover(int flag, String instance) throws XAException {
         if (WSATHelper.isDebugEnabled()) debug("recover() flag=" + flag);
-       // setTxLogDirs();
+        if(!isReadyForRecovery) throw new XAException("recover call on WS-AT gateway failed due to failed initialization");
         boolean isDelegated = instance != null;
         if (isDelegated) {
             String delegatedtxlogdir = WSATGatewayRM.txlogdir + File.separator + ".." + File.separator + ".." +
@@ -375,7 +389,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
                     " delegatedtxlogdirOutbound:" + delegatedtxlogdirOutbound +
                     ", delegatedtxlogdirInbound:" + delegatedtxlogdirInbound);
             singleton.recoverPendingBranches(delegatedtxlogdirOutbound, delegatedtxlogdirInbound);
-        } else {
+        } else if(!isReadyForRuntime){
             try {
                 singleton.initStore();
             } catch (Exception e) {
@@ -388,6 +402,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
                     " txlogdirOutbound:" + txlogdirOutbound +
                     ",txlogdirInbound:" + txlogdirInbound);
             singleton.recoverPendingBranches(txlogdirOutbound, txlogdirInbound);
+            isReadyForRuntime = true;
         }
         // return all pending Xids on first call, empty array otherwise
         if ((flag & XAResource.TMSTARTRSCAN) != 0) {
@@ -395,7 +410,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
             Xid[] xids = pendingXids.toArray(new Xid[pendingXids.size()]);
             return xids;
         }
-        if (WSATHelper.isDebugEnabled()) debug("recover() returning nothing");
+        if (WSATHelper.isDebugEnabled()) debug("recover() returning empty array");
         return new Xid[0];
     }
 

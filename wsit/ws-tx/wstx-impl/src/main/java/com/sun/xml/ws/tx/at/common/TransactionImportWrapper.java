@@ -42,7 +42,6 @@ package com.sun.xml.ws.tx.at.common;
 
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
-import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
 
 /**
@@ -101,7 +100,4 @@ public interface TransactionImportWrapper {
      *    encounters an unexpected error condition.
      */
     public int getTransactionRemainingTimeout() throws SystemException;
-
-    public Xid getXid() throws SystemException;
-
 }

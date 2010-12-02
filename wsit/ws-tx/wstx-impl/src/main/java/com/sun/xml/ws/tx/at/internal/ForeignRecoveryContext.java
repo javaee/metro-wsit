@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.tx.at.internal;
 
+import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.api.tx.at.Transactional;
 
 import javax.transaction.Transaction;
@@ -59,6 +60,9 @@ public class ForeignRecoveryContext implements Externalizable {
     private Xid fxid;
     private Transactional.Version version;
     private EndpointReference epr;
+    private String txLogLocation;
+    private boolean recovered;
+    transient private static Logger LOGGER = Logger.getLogger(ForeignRecoveryContext.class);
 
     /**
      * For recovery, for Externalizable
@@ -169,9 +173,22 @@ public class ForeignRecoveryContext implements Externalizable {
     }
 
     private void debug(String msg) {
-//todoremove        if (ForeignRecoveryContextManager.getInstance().debugWSAT.isDebugEnabled()) {
-//todoremove             ForeignRecoveryContextManager.getInstance().debugWSAT.debug(this + " " + msg);
-//todoremove         }
+        LOGGER.info(msg);
     }
 
+    public void setTxLogLocation(String logLocation) {
+        txLogLocation = logLocation;
+    }
+
+    public String getTxLogLocation() {
+        return txLogLocation;
+    }
+
+    public void setRecovered() {
+        recovered = true;
+    }
+
+    public boolean isRecovered() {
+        return recovered;
+    }
 }

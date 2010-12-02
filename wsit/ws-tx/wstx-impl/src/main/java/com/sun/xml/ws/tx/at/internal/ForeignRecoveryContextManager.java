@@ -47,6 +47,7 @@ import com.sun.xml.ws.tx.at.common.WSATVersion;
 import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import javax.transaction.Status;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.WebServiceException;
@@ -125,8 +126,10 @@ public class ForeignRecoveryContextManager {
             FileOutputStream fos;
             ObjectOutputStream out;
             try {
-                fos = new FileOutputStream(
-                        WSATGatewayRM.txlogdirInbound + File.separator + System.currentTimeMillis() + "-" + counter++);
+                String logLocation =
+                        WSATGatewayRM.txlogdirInbound + File.separator + System.currentTimeMillis() + "-" + counter++;
+                contextWorker.setTxLogLocation(logLocation);
+                fos = new FileOutputStream(logLocation);
                 out = new ObjectOutputStream(fos);
                 out.writeObject(contextWorker);
                 out.close();
@@ -137,13 +140,26 @@ public class ForeignRecoveryContextManager {
         }
     }
 
+    public void delete(XidImpl xid) {
+        if (WSATRuntimeConfig.getInstance().isWSATRecoveryEnabled()) {
+            ForeignRecoveryContext contextWorker = recoveredContexts.get(xid).getContext();
+            String logLocation = contextWorker.getTxLogLocation();
+            try {
+                new File(logLocation).delete();
+            } catch (Throwable e) {
+                LOGGER_RecoveryContextWorker.warning("Unable to delete WS-AT log file:" + logLocation);
+            }
+        }
+    }
+
         //for testing only
     Map<Xid, RecoveryContextWorker> getRecoveredContexts() {
         return recoveredContexts;
     }
 
     public ForeignRecoveryContext getForeignRecoveryContext(Xid xid) {
-        return recoveredContexts.get(xid).getContext();
+        ForeignRecoveryContextManager.RecoveryContextWorker recoveryContextWorker = recoveredContexts.get(xid);
+        return recoveryContextWorker==null?null:recoveryContextWorker.getContext();
     }
 
     /**
@@ -153,6 +169,8 @@ public class ForeignRecoveryContextManager {
     synchronized void remove(Xid fxid) {
         recoveredContexts.remove(fxid);
     }
+
+
 
     private class ContextRunnable implements Runnable {
 
@@ -176,7 +194,7 @@ public class ForeignRecoveryContextManager {
                     else {
                         try {
                             Transaction transaction = rc.context.getTransaction();
-                            if (transaction != null && transaction.getStatus() == Status.STATUS_PREPARED) {
+                            if (isEligibleForBottomUpQuery(rc, transaction)) {
                                 if (lastReplay == 0) rc.setLastReplayMillis(System.currentTimeMillis()); //runtime
                                 replayList.add(rc);
 
@@ -207,6 +225,11 @@ public class ForeignRecoveryContextManager {
 
                 }
             }
+        }
+
+        boolean isEligibleForBottomUpQuery(RecoveryContextWorker rc, Transaction transaction) throws SystemException {
+            return rc.context.isRecovered() ||
+                    (transaction != null && transaction.getStatus() == Status.STATUS_PREPARED);
         }
 
         private void debug (String message) {
@@ -270,8 +293,7 @@ public class ForeignRecoveryContextManager {
                 debug("About to send Prepared recovery call for " + context + " with coordinatorPort:" + coordinatorPort);
                 Object notification = WSATVersion.getInstance(context.getVersion()).newNotificationBuilder().build();
                 Transaction transaction = context.getTransaction();
-                if (transaction != null && transaction.getStatus() == Status.STATUS_PREPARED)
-                    coordinatorPort.preparedOperation(notification);
+                if (isEligibleForBottomUpQuery(this, transaction)) coordinatorPort.preparedOperation(notification);
                 debug("Prepared recovery call for " + context + " returned successfully");
             } catch (Throwable e) {
                 debug("Prepared recovery call error for " + context + " exception:" + e);
@@ -283,10 +305,15 @@ public class ForeignRecoveryContextManager {
             }
         }
 
+        boolean isEligibleForBottomUpQuery(RecoveryContextWorker rc, Transaction transaction) throws SystemException {
+            return rc.context.isRecovered() ||
+                    (transaction != null && transaction.getStatus() == Status.STATUS_PREPARED);
+        }
+
         //the following is provided to backoff bottom up requests exponentially...
         void incrementRetryCount() {  // this is weak but does the job and insures no overflow
             if (retryCount * 2 * INDOUBT_TIMEOUT < Integer.MAX_VALUE / 3) retryCount *= 2;
-            debug("Next recovery call for " + context + " in:"+ retryCount * INDOUBT_TIMEOUT);
+            debug("Next recovery call for " + context + " in:" + retryCount * INDOUBT_TIMEOUT + "ms");
         }
 
         int getRetryCount() {
