@@ -766,14 +766,14 @@
         <glassfish.version>3.1-b23</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
 
-        <jaxb.api.version>2.2.2-promoted-b95</jaxb.api.version>
-        <jaxb.ri.version>2.2.2-promoted-b95</jaxb.ri.version>
+        <jaxb.api.version>2.2.2-promoted-b98</jaxb.api.version>
+        <jaxb.ri.version>2.2.2-promoted-b98</jaxb.ri.version>
         <jaxb.ri.release.version>2.2.2</jaxb.ri.release.version>
         <jaxb.spec.version>2.2.1</jaxb.spec.version>
 
-        <jaxws.api.version>2.2.2-SNAPSHOT</jaxws.api.version>
+        <jaxws.api.version>2.2.2-promoted-b02</jaxws.api.version>
         <jaxws.ri.release.version>2.2.2</jaxws.ri.release.version>
-        <jaxws.ri.version>2.2.2-SNAPSHOT</jaxws.ri.version>
+        <jaxws.ri.version>2.2.2-promoted-b02</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.1</metro.release.version>
