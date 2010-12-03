@@ -763,7 +763,7 @@
     </profiles>
 
     <properties>
-        <glassfish.version>3.1-b23</glassfish.version>
+        <glassfish.version>3.1-b31</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
 
         <jaxb.api.version>2.2.2-promoted-b98</jaxb.api.version>
