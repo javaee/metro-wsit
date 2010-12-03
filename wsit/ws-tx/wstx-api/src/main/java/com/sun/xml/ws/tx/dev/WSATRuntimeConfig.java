@@ -39,7 +39,6 @@
  */
 package com.sun.xml.ws.tx.dev;
 
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -48,44 +47,58 @@ public final class WSATRuntimeConfig {
     private static final Lock DATA_LOCK = new ReentrantLock();
 
     public static final class Initializer {
-        
+
         private Initializer() {
             // do nothing
         }
-        
+
         public Initializer hostName(String value) {
             WSATRuntimeConfig.hostName = value;
-            
+
             return this;
         }
 
         public Initializer httpPort(String value) {
             WSATRuntimeConfig.httpPort = value;
-            
+
             return this;
         }
 
         public Initializer httpsPort(String value) {
             WSATRuntimeConfig.httpsPort = value;
+
+            return this;
+        }
+
+        /**
+         * @deprecated Use {@link Initializer#txLogLocation(com.sun.xml.ws.tx.dev.WSATRuntimeConfig.TxlogLocationProvider) instead
+         */
+        @Deprecated        
+        public Initializer txLogLocation(final String value) {
+            WSATRuntimeConfig.txLogLocationProvider = new TxlogLocationProvider() {
+                public String getTxLogLocation() {
+                    return value;
+                }
+            };
+
+            return this;
+        }
+
+        public Initializer txLogLocation(final TxlogLocationProvider provider) { 
+            WSATRuntimeConfig.txLogLocationProvider = provider;
             
             return this;
         }
 
-        public Initializer txLogLocation(String value) {
-            WSATRuntimeConfig.txLogLocation = value;
-            
-            return this;
-        }
-        
         public Initializer enableWsatRecovery(boolean value) {
             WSATRuntimeConfig.isWsatRecoveryEnabled = value;
-            
+
             return this;
         }
 
         public Initializer enableWsatSsl(boolean value) {
             WSATRuntimeConfig.isWsatSslEnabled = value;
-            
+
             return this;
         }
 
@@ -101,7 +114,7 @@ public final class WSATRuntimeConfig {
     }
     private static WSATRuntimeConfig instance;
     private static boolean isWsatRecoveryEnabled = Boolean.valueOf(System.getProperty("wsat.recovery.enabled", "true"));
-    private static String txLogLocation;
+    private static TxlogLocationProvider txLogLocationProvider;
     private static boolean isWsatSslEnabled = Boolean.valueOf(System.getProperty("wsat.ssl.enabled", "false"));
     private static boolean isRollbackOnFailedPrepare = Boolean.valueOf(System.getProperty("wsat.rollback.on.failed.prepare", "true"));
     private static String hostName = "localhost";
@@ -152,7 +165,7 @@ public final class WSATRuntimeConfig {
      * @return String directory
      */
     public String getTxLogLocation() {
-        return txLogLocation;
+        return (txLogLocationProvider == null) ? null : txLogLocationProvider.getTxLogLocation();
     }
 
     public boolean isRollbackOnFailedPrepare() {
@@ -161,6 +174,15 @@ public final class WSATRuntimeConfig {
 
     public void setWSATRecoveryEventListener(RecoveryEventListener WSATRecoveryEventListener) {
         wsatRecoveryEventListener = WSATRecoveryEventListener;
+    }
+
+    public interface TxlogLocationProvider {
+
+        /**
+         * Returns current value of the underlying transaction log location
+         * @return transaction log directory path string
+         */
+        String getTxLogLocation();
     }
 
     public interface RecoveryEventListener {
