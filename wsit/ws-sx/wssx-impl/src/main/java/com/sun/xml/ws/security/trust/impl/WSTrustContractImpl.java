@@ -319,12 +319,12 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
 
                  // set OnBehalfOf attribute
                 claims.getOtherAttributes().put(new QName("OnBehalfOf"), "true");
+                context.getOtherProperties().put("OnBehalfOf", "true");
 
                 // Create a Subject with ActAs credential and put it in claims
                 Subject oboSubj = new Subject();
                 oboSubj.getPublicCredentials().add(eleFac.toElement(oboToken));
                 claims.getSupportingProperties().add(oboSubj);
-                confirMethod = getSenderVouchesMethod(tokenType);
             }
         }
         
@@ -338,12 +338,12 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             if (actAsToken != null){
                 // set ActAs attribute
                 claims.getOtherAttributes().put(new QName("ActAs"), "true");
+                context.getOtherProperties().put("ActAs", "true");
 
                 // Create a Subject with ActAs credential and put it in claims
                 Subject actAsSubj = new Subject();
                 actAsSubj.getPublicCredentials().add(eleFac.toElement(actAsToken));
                 claims.getSupportingProperties().add(actAsSubj);
-                confirMethod = getSenderVouchesMethod(tokenType);
             }
         }
 
