@@ -459,7 +459,7 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
      
     private KeyInfo createKeyInfo(final IssuedTokenContext ctx)throws WSTrustException{
         Element kiEle = (Element)ctx.getOtherProperties().get("ConfirmationKeyInfo");
-        if (kiEle != null){
+        if (kiEle != null && "KeyInfo".equals(kiEle.getLocalName())){
             try{
                 return new KeyInfo(kiEle, null);
             }catch(com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException ex){
@@ -479,6 +479,10 @@ public class DefaultSAMLTokenProvider implements STSTokenProvider {
         
         final String appliesTo = ctx.getAppliesTo();
         final KeyInfo keyInfo = new KeyInfo(doc);
+        if (kiEle != null){
+            keyInfo.addUnknownElement(kiEle);
+            return keyInfo;
+        }
         String keyType = ctx.getKeyType();
         WSTrustVersion wstVer = (WSTrustVersion)ctx.getOtherProperties().get(IssuedTokenContext.WS_TRUST_VERSION);
         if (wstVer.getSymmetricKeyTypeURI().equals(keyType)){

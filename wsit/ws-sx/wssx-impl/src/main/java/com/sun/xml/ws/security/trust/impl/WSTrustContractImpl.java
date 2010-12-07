@@ -431,8 +431,8 @@ public class WSTrustContractImpl implements WSTrustContract<BaseSTSRequest, Base
             // Get UseKey from the RST
             UseKey useKey = rst.getUseKey();
             if (useKey != null){
-                Element keyInfo = (Element)eleFac.toElement(useKey.getToken().getTokenValue());
-                context.getOtherProperties().put("ConfirmationKeyInfo", keyInfo);
+                Element uk = (Element)eleFac.toElement(useKey.getToken().getTokenValue());
+                context.getOtherProperties().put("ConfirmationKeyInfo", uk);
             }
             final Set certs = subject.getPublicCredentials();
             boolean addedClientCert = false;
