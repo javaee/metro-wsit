@@ -51,6 +51,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
+import com.sun.xml.ws.api.SOAPVersion;
+import com.sun.xml.ws.api.addressing.AddressingVersion;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.soap.SOAPException;
@@ -171,8 +173,21 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      * @return
      *      null if a {@link Message} doesn't have any payload.
      */
-    public String getPayloadLocalPart(){        
-        return sm.getPayloadLocalPart();
+    public String getPayloadLocalPart() {
+        String lp = sm.getPayloadLocalPart();
+        String action = null;
+        if ("EncryptedData".equals(lp)) {
+            if (hl != null) {
+                try {
+                    action = hl.getAction(AddressingVersion.W3C, sm.getSOAPVersion());
+                } catch (Exception e) {
+                }
+            }
+            if (action != null && action.endsWith("addressing/fault")) {
+                lp = "Fault";
+            }
+        }
+        return lp;
     }
     
     /**
@@ -204,16 +219,6 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
         return true;
     }
     
-    /**
-     * Returns true if this message is a fault.
-     *
-     * <p>
-     * Just a convenience method built on {@link #getPayloadNamespaceURI()}
-     * and {@link #getPayloadLocalPart()}.
-     */
-    public boolean isFault() {        
-        return false;
-    }
     
     /**
      * Consumes this message including the envelope.

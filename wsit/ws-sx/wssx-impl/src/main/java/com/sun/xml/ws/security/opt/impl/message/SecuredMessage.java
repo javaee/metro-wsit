@@ -94,6 +94,10 @@ public class SecuredMessage {
         this.sh = sh;
     }
 
+    public SOAPVersion getSOAPVersion() {
+       return this.soapVersion;
+    }
+    
     public ArrayList getHeaders() {
         return headers;
     }
