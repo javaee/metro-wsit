@@ -230,8 +230,8 @@
     <target name="overwrite-test-harness-lib" unless="test.harness.uptodate">
         <echo message="Test harness not up-to-date, updating..." />
 
-        <mkdir dir="tmp/test-harness"/>
-        <get src="http://hudson-sca.us.oracle.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/build/test-harness.zip"
+        <mkdir dir="tmp/test-harness"/>                  
+        <get src="http://hudson-sca.us.oracle.com/job/jaxws-test-harness/lastSuccessfulBuild/artifact/test-harness/build/test-harness.zip"
              dest="tmp/test-harness.zip"/>
         <unzip src="tmp/test-harness.zip" dest="tmp"/>
         
