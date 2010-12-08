@@ -174,9 +174,23 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
      *      null if a {@link Message} doesn't have any payload.
      */
     public String getPayloadLocalPart() {
-        String lp = sm.getPayloadLocalPart();
+        return sm.getPayloadLocalPart();
+    }
+
+     /**
+     * Returns true if this message is a fault.
+     *
+     * <p>
+     * Just a convenience method built on {@link #getPayloadNamespaceURI()}
+     * and {@link #getPayloadLocalPart()}.
+     */
+    public boolean isFault() {
+        // TODO: is SOAP version a property of a Message?
+        // or is it defined by external factors?
+        // how do I compare?
+        String localPart = getPayloadLocalPart();
         String action = null;
-        if ("EncryptedData".equals(lp)) {
+        if ("EncryptedData".equals(localPart)) {
             if (hl != null) {
                 try {
                     action = hl.getAction(AddressingVersion.W3C, sm.getSOAPVersion());
@@ -184,10 +198,15 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
                 }
             }
             if (action != null && action.endsWith("addressing/fault")) {
-                lp = "Fault";
+                localPart = "Fault";
             }
         }
-        return lp;
+        if(localPart==null || !localPart.equals("Fault")) {
+            return false;
+        }
+
+        String nsUri = getPayloadNamespaceURI();
+        return nsUri.equals(SOAPVersion.SOAP_11.nsUri) || nsUri.equals(SOAPVersion.SOAP_12.nsUri);
     }
     
     /**
