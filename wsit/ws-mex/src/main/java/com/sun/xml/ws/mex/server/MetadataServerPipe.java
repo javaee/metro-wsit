@@ -156,7 +156,8 @@ public class MetadataServerPipe extends AbstractFilterTubeImpl {
 
             writeStartEnvelope(writer, adVersion);
             wsdlRetriever.addDocuments(writer, request, address);
-            writer.writeEndDocument();
+            //writer.writeEndDocument();
+            writeEndEnvelope(writer);
             writer.flush();
 
             final Message responseMessage = Messages.create(buffer);
@@ -189,4 +190,11 @@ public class MetadataServerPipe extends AbstractFilterTubeImpl {
         writer.writeStartElement(MEX_PREFIX, "Metadata", MEX_NAMESPACE);
     }
     
+    private void writeEndEnvelope(final XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndDocument();
+    }
 }
