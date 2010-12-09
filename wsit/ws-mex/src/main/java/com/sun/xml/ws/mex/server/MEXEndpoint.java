@@ -156,7 +156,6 @@ public class MEXEndpoint implements Provider<Message> {
                 writeStartEnvelope(writer, wsaVersion, soapVersion);
                 WSDLRetriever wsdlRetriever = new WSDLRetriever(ownerEndpoint);
                 wsdlRetriever.addDocuments(writer, null, address);
-               // writer.writeEndDocument();
                 writeEndEnvelope(writer);
                 writer.flush();
                 final Message responseMessage = Messages.create(buffer);
