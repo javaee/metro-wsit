@@ -140,12 +140,12 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
 
         final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-        this.boundSequences = HighlyAvailableMap.create(
+        this.boundSequences = HighlyAvailableMap.createSticky(
                 uniqueEndpointId + "_BOUND_SEQUENCE_MAP",
                 HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
                 uniqueEndpointId + "_BOUND_SEQUENCE_BS",
-                String.class,
+                StickyKey.class,
                 String.class));
 
         this.sequenceDataBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
