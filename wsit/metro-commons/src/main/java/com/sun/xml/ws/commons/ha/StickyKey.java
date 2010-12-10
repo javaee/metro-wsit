@@ -81,4 +81,9 @@ public class StickyKey implements HashableKey, Serializable {
     public int hashCode() {
         return this.key.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "StickyKey{" + "key=" + key + ", hashKey=" + hashKey + '}';
+    }
 }
