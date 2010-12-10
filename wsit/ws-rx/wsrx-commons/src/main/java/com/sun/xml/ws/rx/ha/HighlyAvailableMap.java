@@ -333,13 +333,15 @@ public final class HighlyAvailableMap<K extends Serializable, V> implements Map<
         }           
     }
 
-    public V remove(Object key) {
+    public V remove(Object key) {        
         @SuppressWarnings("unchecked")
         K _key = (K) key;
+
+        V oldValue = get(_key);
         
         dataLock.writeLock().lock();
         try {
-            V oldValue = localMap.remove(_key);
+            localMap.remove(_key);                                    
             replicationManager.remove(_key);
             if (LOGGER.isLoggable(Level.FINER)) {
                 LOGGER.finer(loggerProlog + "Removing data for key ["+ key + "]: " + oldValue);
