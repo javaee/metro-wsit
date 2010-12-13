@@ -82,7 +82,8 @@ public class HANonceManager extends NonceManager {
             //not sure whether this statement required or not ?
             bsConfig.getVendorSpecificSettings().put(BackingStoreConfiguration.START_GMS, true);
             final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-            backingStore = bsFactory.createBackingStore(bsConfig);            
+            backingStore = bsFactory.createBackingStore(bsConfig);
+            singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), this.maxNonceAge, this.maxNonceAge, TimeUnit.MILLISECONDS);
         } catch (BackingStoreException ex) {
             LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0826_ERROR_INITIALIZE_BACKINGSTORE(), ex);
         }
@@ -91,6 +92,7 @@ public class HANonceManager extends NonceManager {
     public HANonceManager(BackingStore<StickyKey, HAPojo> backingStore, final long maxNonceAge) {
         this.backingStore = backingStore;
         this.maxNonceAge = maxNonceAge;
+        singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), this.maxNonceAge, this.maxNonceAge, TimeUnit.MILLISECONDS);
     }
 
 
@@ -101,7 +103,7 @@ public class HANonceManager extends NonceManager {
         //MAX_NONCE_AGE the second instance would detect this as a replay since its NonceCleanup Task
         //never executed.
         //if(!isScheduled){
-            singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
+        //    singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
         //    isScheduled = true;
         //}
         byte[] data = created.getBytes();
