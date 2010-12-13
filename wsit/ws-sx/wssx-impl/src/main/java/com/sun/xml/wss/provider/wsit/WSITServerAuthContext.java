@@ -161,7 +161,7 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //this.map = map;
         endPoint = new WeakReference((WSEndpoint)map.get("ENDPOINT"));
         boolean isSC = false;
-        if (wsscVer != null){
+        if (!this.getInBoundSCP(null).isEmpty()|| !this.getOutBoundSCP(null).isEmpty()){
                 isSC = true;
         }
         sessionManager = SessionManager.getSessionManager(endPoint.get(), isSC);

@@ -196,7 +196,7 @@ public class SecurityServerTube extends SecurityTubeBase {
                 contextDelegate = this.loadClass(cntxtClass);
             }
             boolean isSC = false;
-            if (wsscVer != null){
+            if (!this.getSecureConversationPolicies(null, null).isEmpty()){
                 isSC = true;
             }  
             sessionManager = SessionManager.getSessionManager(((ServerTubeConfiguration) tubeConfig).getEndpoint(), isSC);
