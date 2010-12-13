@@ -69,7 +69,7 @@ public class HANonceManager extends NonceManager {
     private Long maxNonceAge;
     private BackingStore<StickyKey, HAPojo> backingStore = null;
     private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-    private boolean isScheduled = false;
+    //private boolean isScheduled = false;
     public HANonceManager(final long maxNonceAge) {
         this.maxNonceAge = maxNonceAge;
 
@@ -96,10 +96,14 @@ public class HANonceManager extends NonceManager {
 
     @Override
     public boolean validateNonce(String nonce, String created) throws NonceException {
-        if(!isScheduled){
+        //need to eagerly start the NonceCleanupTask otherwise in a cluster mode if the
+        //first request goes to one instance and second request goes to another one after
+        //MAX_NONCE_AGE the second instance would detect this as a replay since its NonceCleanup Task
+        //never executed.
+        //if(!isScheduled){
             singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
-            isScheduled = true;
-        }
+        //    isScheduled = true;
+        //}
         byte[] data = created.getBytes();
         HAPojo pojo = new HAPojo();
         pojo.setData(data);
@@ -137,6 +141,9 @@ public class HANonceManager extends NonceManager {
 
         public void run() {
             try {
+                if (backingStore.size() <= 0) {
+                    return;
+                }
                 int removed = backingStore.removeExpired(maxNonceAge);
                 LOGGER.log(Level.INFO, " removed {0} expired entries from backing store ",removed);
             } catch (BackingStoreException ex) {
@@ -159,6 +166,12 @@ public class HANonceManager extends NonceManager {
 
         public byte[] getData() {
             return this.data;
+        }
+        public String toString() {
+            if (data == null) {
+                return "";
+            }
+            return new String(data);
         }
     }
 }
