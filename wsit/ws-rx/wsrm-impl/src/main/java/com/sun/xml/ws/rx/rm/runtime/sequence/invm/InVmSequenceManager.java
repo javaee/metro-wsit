@@ -71,6 +71,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import org.glassfish.ha.store.api.BackingStore;
+import org.glassfish.ha.store.api.BackingStoreConfiguration;
+import org.glassfish.ha.store.api.BackingStoreException;
 import org.glassfish.ha.store.api.BackingStoreFactory;
 
 /**
@@ -140,13 +142,26 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         this.maxConcurrentInboundSequences = configuration.getRmFeature().getMaxConcurrentSessions();
 
         final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
-        this.boundSequences = HighlyAvailableMap.createSticky(
-                uniqueEndpointId + "_BOUND_SEQUENCE_MAP",
-                HighAvailabilityProvider.INSTANCE.createBackingStore(
-                bsFactory,
-                uniqueEndpointId + "_BOUND_SEQUENCE_BS",
+        
+        /*
+         * We need to explicitly set the classloader that loads the Metro module classes
+         * to workaround the GF HA issue http://java.net/jira/browse/GLASSFISH-15084
+         * when value class is from the Java core lib.
+         */ 
+        final String boundSequencesBsName = uniqueEndpointId + "_BOUND_SEQUENCE_BS";
+        final BackingStoreConfiguration<StickyKey, String> boundSequencesBsConfig = HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration(
+                boundSequencesBsName,
                 StickyKey.class,
-                String.class));
+                String.class);
+        boundSequencesBsConfig.setClassLoader(this.getClass().getClassLoader());                
+        final BackingStore<StickyKey, String> boundSequencesBs;
+        try {
+            boundSequencesBs = bsFactory.createBackingStore(boundSequencesBsConfig);
+        } catch (BackingStoreException ex) {
+            throw new RxRuntimeException(LocalizationMessages.WSRM_1142_ERROR_CREATING_HA_BACKING_STORE(boundSequencesBsName), ex);
+        }
+        this.boundSequences = HighlyAvailableMap.createSticky(
+                uniqueEndpointId + "_BOUND_SEQUENCE_MAP", boundSequencesBs);
 
         this.sequenceDataBs = HighAvailabilityProvider.INSTANCE.createBackingStore(
                 bsFactory,
