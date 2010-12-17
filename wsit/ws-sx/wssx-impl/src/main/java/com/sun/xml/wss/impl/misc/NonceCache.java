@@ -135,14 +135,7 @@ public class NonceCache extends TimerTask {
             return;
         }
 
-        if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "Clearing old Nonce values...for {0}", this);
-        }
-
-        oldNonceCache.clear();
-        Map<String, String> temp = nonceCache;
-        nonceCache = oldNonceCache;
-        oldNonceCache = temp;
+       removeExpired();
     }
 
     @Override
@@ -158,5 +151,16 @@ public class NonceCache extends TimerTask {
     @ManagedAttribute
     public long getMaxNonceAge() {
         return MAX_NONCE_AGE;
+    }
+
+    public void removeExpired() {
+        if (log.isLoggable(Level.FINE)) {
+            log.log(Level.FINE, "Clearing old Nonce values...for {0}", this);
+        }
+
+        oldNonceCache.clear();
+        Map<String, String> temp = nonceCache;
+        nonceCache = oldNonceCache;
+        oldNonceCache = temp;
     }
 }

@@ -68,6 +68,7 @@ public class HANonceManager extends NonceManager {
 
     private Long maxNonceAge;
     private BackingStore<StickyKey, HAPojo> backingStore = null;
+    private NonceCache localCache;
     private final ScheduledExecutorService singleThreadScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     //private boolean isScheduled = false;
     public HANonceManager(final long maxNonceAge) {
@@ -78,11 +79,13 @@ public class HANonceManager extends NonceManager {
                     HighAvailabilityProvider.INSTANCE.initBackingStoreConfiguration("HANonceManagerStore", StickyKey.class, HANonceManager.HAPojo.class);
             //maxNonceAge is in milliseconds so convert it into seconds
             bsConfig.getVendorSpecificSettings().put("max.idle.timeout.in.seconds", maxNonceAge / 1000L);
-            bsConfig.setClassLoader(ClassLoader.getSystemClassLoader());
+            //bsConfig.getVendorSpecificSettings().put("local.caching", true);
+            //bsConfig.setClassLoader(this.getClass().getClassLoader());
             //not sure whether this statement required or not ?
             bsConfig.getVendorSpecificSettings().put(BackingStoreConfiguration.START_GMS, true);
             final BackingStoreFactory bsFactory = HighAvailabilityProvider.INSTANCE.getBackingStoreFactory(HighAvailabilityProvider.StoreType.IN_MEMORY);
             backingStore = bsFactory.createBackingStore(bsConfig);
+            localCache = new NonceCache(maxNonceAge);
             singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), this.maxNonceAge, this.maxNonceAge, TimeUnit.MILLISECONDS);
         } catch (BackingStoreException ex) {
             LOGGER.log(Level.SEVERE, LogStringsMessages.WSS_0826_ERROR_INITIALIZE_BACKINGSTORE(), ex);
@@ -106,6 +109,8 @@ public class HANonceManager extends NonceManager {
         //    singleThreadScheduledExecutor.scheduleAtFixedRate(new nonceCleanupTask(), maxNonceAge, maxNonceAge, TimeUnit.MILLISECONDS);
         //    isScheduled = true;
         //}
+        //first check in local NonceCache.
+        boolean isnewNonce = localCache.validateAndCacheNonce(nonce, created);
         byte[] data = created.getBytes();
         HAPojo pojo = new HAPojo();
         pojo.setData(data);
@@ -116,7 +121,7 @@ public class HANonceManager extends NonceManager {
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, " exception during load command ", ex);
             }
-            if (value != null) {
+            if (value != null) {              
                 final String message = "Nonce Repeated : Nonce Cache already contains the nonce value :" + nonce;
                 LOGGER.log(Level.WARNING, LogStringsMessages.WSS_0815_NONCE_REPEATED_ERROR(nonce));
                 throw new NonceManager.NonceException(message);
@@ -143,6 +148,8 @@ public class HANonceManager extends NonceManager {
 
         public void run() {
             try {
+                //clear local nonce cache
+                localCache.removeExpired();
                 if (backingStore.size() <= 0) {
                     return;
                 }
