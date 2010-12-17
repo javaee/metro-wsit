@@ -62,6 +62,7 @@ import org.w3c.dom.Element;
 import com.sun.xml.wss.logging.impl.opt.token.LogStringsMessages;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
+import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 
 /**
  *
@@ -159,7 +160,8 @@ public class IssuedTokenBuilder extends TokenBuilder {
                 context.getSecurityHeader().add(issuedTokenElement);
             }
         }
-        
+
+        ((NamespaceContextEx)context.getNamespaceContext()).addWSS11NS();
         keyInfo = new KeyInfo();
         JAXBElement je = new com.sun.xml.ws.security.secext10.ObjectFactory().createSecurityTokenReference(str);
         List strList = Collections.singletonList(je);
