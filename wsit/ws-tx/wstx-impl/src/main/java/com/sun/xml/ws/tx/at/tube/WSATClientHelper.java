@@ -79,6 +79,13 @@ public class WSATClientHelper implements WSATClient {
      * @return a list of Header that should be added the request message
      */
     public List<Header> doHandleRequest(TransactionalAttribute transactionalAttribute, Map<String, Object> map) {
+        try {
+            if (TransactionManagerImpl.getInstance().getTransactionManager().getTransaction()==null) 
+                return new ArrayList();
+        } catch (SystemException e) {
+            e.printStackTrace();
+            return new ArrayList();
+        }
         List<Header> addedHeaders = processTransactionalRequest(transactionalAttribute, map);
         return addedHeaders;
     }
