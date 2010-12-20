@@ -402,15 +402,10 @@
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
-            <id>rator.sfbay</id>
-            <url>dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/</url> 
-        </repository>
-        <!--repository>
-            <uniqueVersion>false</uniqueVersion>
             <id>java.net-m2-dist-repository</id>
             <name>java.net-m2-repository</name>
             <url>java-net:/maven2-repository/trunk/repository</url>
-        </repository-->
+        </repository>
     </distributionManagement>
     
     <repositories>
@@ -762,6 +757,17 @@
                     <id>java.net-m2-dist-repository</id>
                     <name>java.net-m2-repository</name>
                     <url>file:///${user.home}/local-javanet-repo/</url>
+                </repository>
+            </distributionManagement>            
+        </profile>
+
+        <profile>
+            <id>glassfish-repository-deployment</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>rator.sfbay</id>
+                    <url>dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/</url> 
                 </repository>
             </distributionManagement>            
         </profile>
