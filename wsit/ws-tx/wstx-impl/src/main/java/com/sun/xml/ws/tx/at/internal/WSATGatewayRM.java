@@ -41,6 +41,7 @@
 package com.sun.xml.ws.tx.at.internal;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
@@ -51,10 +52,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
+import javax.transaction.*;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -231,33 +229,27 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   public Xid registerWSATResource(Xid xid, XAResource wsatResource, Transaction tx)
       throws IllegalStateException, RollbackException, SystemException {
     // enlist each WSAT resource, specifically each endpoint, as a separate branch alias
-  //  Transaction tx = getTransaction(xid);
     if (tx == null)
         throw new IllegalStateException("Transaction " + tx + " does not exist, wsatResource=" + wsatResource);
+    Xid xidFromActivityMap = activityXidToInternalXidMap.get(xid);
+    BranchRecord branch = getOrCreateBranch(xidFromActivityMap!=null?xidFromActivityMap:xid);
+    WSATXAResource resource = (WSATXAResource)branch.exists(wsatResource);
+    if (resource!=null) return resource.getXid();
     // enlist primary, read-only branch (ensures 2PC)
-
-    /** this is all moved after enlist due to changing xid in GF
-    BranchRecord branch = getOrCreateBranch(xid);
-    //todo lack of this could result in an issue/inefficiency if a subordinate incorrectly registers twice
-    XAResource resource = branch.exists(wsatResource);
-    if (resource!=null) {
-      return ((WSATXAResource)resource).getXid().getBranchQualifier();
-    }
-    branch.addSubordinate(wsatResource);
-     */
+    tx.enlistResource(new WSATNoOpXAResource()); //todo enlists new one for every new participant, a noop but still noise
     synchronized(currentXidLock) {
-      tx.enlistResource(this);
+      tx.enlistResource(new WSATGatewayRMPeerRecoveryDelegate());
       // this is again due to changing xid in GF
       ((WSATXAResource)wsatResource).setXid(currentXid);
-      BranchRecord branch = getOrCreateBranch(currentXid);
+      branch = getOrCreateBranch(currentXid);
       branch.addSubordinate(currentXid, ((WSATXAResource)wsatResource));
-      tx.enlistResource(new WSATNoOpXAResource());
+      activityXidToInternalXidMap.put(xid, currentXid);
       if (WSATHelper.isDebugEnabled())
         debug("registerWSATResource() xid=" + currentXid);
     }
     return currentXid;
   }
-
+  public Map<Xid,Xid> activityXidToInternalXidMap = new HashMap<Xid,Xid>();
 
     /**
      * Implementation of Subordinate/ServerXAResource called in reaction to registerWSATResource enlistResource call

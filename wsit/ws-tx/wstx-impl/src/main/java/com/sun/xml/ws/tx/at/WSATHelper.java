@@ -550,10 +550,20 @@ public class WSATHelper<T> {
         return m_volatileParticipantPortMap;
     }
 
+    /**
+     * Called by client side outbound tube where suspended tx is placed
+     * @param xid
+     * @param transaction
+     */
     public void putToXidToTransactionMap(Xid xid, Transaction transaction) {
         m_xidToTransactionMap.put(new XidImpl(xid), transaction);
     }
 
+    /**
+     * Called by transactionservices enlistResource before calling wsatgatewayrm.enlist
+     * @param xid Xid
+     * @return Transaction associated with Xid
+     */
     public Transaction getFromXidToTransactionMap(Xid xid) {
         Transaction transaction = m_xidToTransactionMap.get(xid);
         return transaction;

@@ -56,6 +56,9 @@ public class WSATGatewayRMPeerRecoveryDelegate implements XAResource {
     String peerLogLocation;
 
 
+    public WSATGatewayRMPeerRecoveryDelegate() {
+    }
+
     public WSATGatewayRMPeerRecoveryDelegate(String peerLogLocation) {
         this.peerLogLocation = peerLogLocation;
     }
@@ -85,7 +88,9 @@ public class WSATGatewayRMPeerRecoveryDelegate implements XAResource {
     }
     
     public Xid[] recover(int i) throws XAException {
-            return WSATGatewayRM.getInstance().recover(i, peerLogLocation);
+            return peerLogLocation==null?
+                    WSATGatewayRM.getInstance().recover(i):
+                    WSATGatewayRM.getInstance().recover(i, peerLogLocation);
     }
 
     public void rollback(Xid xid) throws XAException {
