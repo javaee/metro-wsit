@@ -41,7 +41,6 @@
 package com.sun.xml.ws.tx.at.internal;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.common.TransactionManagerImpl;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
@@ -84,7 +83,10 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   public static  String txlogdir;
   static String txlogdirInbound;
   private static String txlogdirOutbound;
+    static boolean isStoreInit = false;
   private volatile int counter = 0;
+  private Map<Xid,Xid> activityXidToInternalXidMap = new HashMap<Xid,Xid>();
+  private Map<Xid,Xid> internalXidToActivityXidMap = new HashMap<Xid,Xid>();
 
     // package access for test instantiation only, this is a singleton
   WSATGatewayRM(String serverName) {
@@ -153,8 +155,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         createFile(txlogdirOutbound, true);
         isStoreInit = true;
     }
-    //todo temp
-    static boolean isStoreInit = false;
+
 
     static private File createFile(String logFilePath, boolean isDir) throws Exception {
         File file = new File(logFilePath);
@@ -232,24 +233,27 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     if (tx == null)
         throw new IllegalStateException("Transaction " + tx + " does not exist, wsatResource=" + wsatResource);
     Xid xidFromActivityMap = activityXidToInternalXidMap.get(xid);
-    BranchRecord branch = getOrCreateBranch(xidFromActivityMap!=null?xidFromActivityMap:xid);
-    WSATXAResource resource = (WSATXAResource)branch.exists(wsatResource);
-    if (resource!=null) return resource.getXid();
+    BranchRecord branch;
+    if(xidFromActivityMap!=null) {
+        branch = getBranch(xidFromActivityMap);
+        WSATXAResource resource = (WSATXAResource) branch.exists(wsatResource);
+        if (resource!=null) return resource.getXid();
+    }
     // enlist primary, read-only branch (ensures 2PC)
-    tx.enlistResource(new WSATNoOpXAResource()); //todo enlists new one for every new participant, a noop but still noise
+    tx.enlistResource(new WSATNoOpXAResource()); 
     synchronized(currentXidLock) {
       tx.enlistResource(new WSATGatewayRMPeerRecoveryDelegate());
       // this is again due to changing xid in GF
       ((WSATXAResource)wsatResource).setXid(currentXid);
-      branch = getOrCreateBranch(currentXid);
+      branch = getBranch(currentXid);
       branch.addSubordinate(currentXid, ((WSATXAResource)wsatResource));
       activityXidToInternalXidMap.put(xid, currentXid);
+      internalXidToActivityXidMap.put(currentXid, xid);
       if (WSATHelper.isDebugEnabled())
         debug("registerWSATResource() xid=" + currentXid);
     }
     return currentXid;
   }
-  public Map<Xid,Xid> activityXidToInternalXidMap = new HashMap<Xid,Xid>();
 
     /**
      * Implementation of Subordinate/ServerXAResource called in reaction to registerWSATResource enlistResource call
@@ -298,6 +302,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
 
   public int prepare(Xid xid) throws XAException {
     if (WSATHelper.isDebugEnabled()) debug("prepare() xid=" + xid);
+    purgeActivityAndInternalXidMapEntries(xid);
     BranchRecord branch = getBranch(xid);
     if (WSATHelper.isDebugEnabled()) debug("prepare() xid=" + xid+" branch="+branch);
     if (branch == null) {
@@ -306,11 +311,16 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     if (WSATHelper.isDebugEnabled()) debug("prepare() xid=" + xid);
     persistBranchIfNecessary(branch);
     int vote = branch.prepare(xid);
-    if(vote == XAResource.XA_RDONLY) deleteBranchIfNecessary(branch);
+    if (vote == XAResource.XA_RDONLY) deleteBranchIfNecessary(branch);
     return vote;
   }
 
-  public void commit(Xid xid, boolean onePhase) throws XAException {
+    private void purgeActivityAndInternalXidMapEntries(Xid xid) {
+        Xid activityXid = internalXidToActivityXidMap.remove(xid);
+        if (activityXid!=null) activityXidToInternalXidMap.remove(activityXid);
+    }
+
+    public void commit(Xid xid, boolean onePhase) throws XAException {
     if (WSATHelper.isDebugEnabled()) debug("commit() xid=" + xid);
     BranchRecord branch = getBranch(xid);
     if (branch == null) {
@@ -324,8 +334,8 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   }
 
   public void rollback(Xid xid) throws XAException {
-    if (WSATHelper.isDebugEnabled())
-        debug("rollback() xid=" + xid);
+    if (WSATHelper.isDebugEnabled()) debug("rollback() xid=" + xid);
+    purgeActivityAndInternalXidMapEntries(xid);
     BranchRecord branch = getBranch(xid);
     if (branch == null) {
       JTAHelper.throwXAException(XAException.XAER_NOTA,
@@ -498,8 +508,6 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
 
   private void delete(BranchRecord branch)  {
     releaseBranchRecord(branch);
-    branches.remove(branch.getXid());
-    pendingXids.removeAll(branch.getAllXids());
     branch.cleanup();
   }
 
@@ -553,7 +561,9 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     boolean deleted = false;
     try {
       synchronized (branch) {
-        if (branch.isLogged()) { //todo revisit && branch.allResourcesCompleted()) {
+        branches.remove(branch.getXid());
+        pendingXids.removeAll(branch.getAllXids());
+        if (branch.isLogged()) {
           delete(branch);
           deleted = true;
         }
