@@ -263,7 +263,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
      * @param flags flags
      * @throws XAException xaException
      */
-    public void start(Xid xid, int flags) throws XAException {
+  public void start(Xid xid, int flags) throws XAException {
     currentXid = xid;
     debug("start currentXid:"+currentXid+" xid:"+xid);
     if (WSATHelper.isDebugEnabled())
@@ -310,7 +310,13 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     }
     if (WSATHelper.isDebugEnabled()) debug("prepare() xid=" + xid);
     persistBranchIfNecessary(branch);
-    int vote = branch.prepare(xid);
+    int vote;
+    try {
+        vote = branch.prepare(xid);
+    } catch (XAException xae) {
+        deleteBranchIfNecessary(branch);
+        throw xae;
+    }
     if (vote == XAResource.XA_RDONLY) deleteBranchIfNecessary(branch);
     return vote;
   }
@@ -596,18 +602,7 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
   }
 
 
-  //for testing only
-  private static TransactionManager m_transactionManager;
-  static void setTM(TransactionManager transactionManager) {
-      m_transactionManager = transactionManager;
-  }
-  private static Transaction m_transaction;
-  static void setTx(Transaction transaction) {
-      m_transaction = transaction;
-  }
-
-
-    private final class BranchObjectHandler { 
+  private final class BranchObjectHandler {
     private static final int VERSION = 1;
 
     public Object readObject(ObjectInput in) throws ClassNotFoundException, IOException {
