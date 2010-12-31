@@ -782,9 +782,9 @@
         <jaxb.ri.release.version>2.2.3</jaxb.ri.release.version>
         <jaxb.spec.version>2.2.1</jaxb.spec.version>
 
-        <jaxws.api.version>2.2.2-promoted-b05</jaxws.api.version>
+        <jaxws.api.version>2.2.3-promoted-b06</jaxws.api.version>
         <jaxws.ri.release.version>2.2.3</jaxws.ri.release.version>
-        <jaxws.ri.version>2.2.3-promoted-b05</jaxws.ri.version>
+        <jaxws.ri.version>2.2.3-promoted-b06</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.1</metro.release.version>
