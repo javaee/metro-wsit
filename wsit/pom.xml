@@ -402,9 +402,9 @@
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
-            <id>java.net-m2-dist-repository</id>
-            <name>java.net-m2-repository</name>
-            <url>java-net:/maven2-repository/trunk/repository</url>
+            <id>java.net-maven2-repository</id>
+            <name>java.net-maven2-repository</name>
+            <url>svn:https://svn.java.net/svn/maven2-repository~svn/trunk/repository</url> 
         </repository>
     </distributionManagement>
     
