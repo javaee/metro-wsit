@@ -105,7 +105,7 @@
         <repository>
             <uniqueVersion>false</uniqueVersion>
             <id>java.net-maven2-repository</id>
-            <url>java-net:/maven2-repository/trunk/repository/</url>
+            <url>svn:https://svn.java.net/svn/maven2-repository~svn/trunk/repository/</url>
         </repository>
     </distributionManagement>
 
