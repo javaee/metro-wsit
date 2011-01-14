@@ -1,16 +1,15 @@
-<html>
 <!--
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
     and Distribution License("CDDL") (collectively, the "License").  You
     may not use this file except in compliance with the License.  You can
     obtain a copy of the License at
-    https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
     or packager/legal/LICENSE.txt.  See the License for the specific
     language governing permissions and limitations under the License.
 
@@ -40,7 +39,8 @@
     holder.
 
 -->
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
     <title>${product.name}</title>
     <body>
         <h1>${product.name}</h1>
@@ -48,7 +48,7 @@
 
         <p><tt>Release Date: ${release.date}</tt></p>
         <div style="float:right">
-            <a href="${download.link}"><img alt="Download ${product.name}" src="https://metro.dev.java.net/${metro.release.version}/download.png" border=0/></a>
+            <a href="${download.link}"><img  alt="Download ${product.name}" src="http://metro.java.net/${metro.release.version}/download.png" border="0"/></a>
         </div>
 
         <a name="downloading"></a>
@@ -195,34 +195,36 @@ catalina.sh start
             ${product.name} release consists of following components:
         </p>
         <ul>
-            <li>Metro/WSIT ${metro.release.version} - <a href="https://wsit.dev.java.net/source/browse/*checkout*/wsit/wsit/status-notes/status-notes-${metro.release.version}-FCS.html">Browse the WSIT release notes online.</a></li>
-            <li>JAX-WS RI ${jaws.ri.release.version} - <a href="https://jax-ws.dev.java.net/${jaws.ri.release.version}/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
-            <li>JAXB RI ${jaxb.ri.release.version} - <a href="https://jaxb.dev.java.net/${jaxb.ri.release.version}/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
+            <li>Metro/WSIT ${metro.release.version} - <a href="http://java.net/projects/wsit/sources/svn/show/trunk/wsit/status-notes/status-notes-${metro.release.version}-FCS.html">Browse the WSIT release notes online.</a></li>
+            <li>JAX-WS RI ${jaws.ri.release.version} - <a href="http://jax-ws.java.net/${jaws.ri.release.version}/docs/ReleaseNotes.html">Browse the JAX-WS RI release notes online.</a></li>
+            <li>JAXB RI ${jaxb.ri.release.version} - <a href="http://jaxb.java.net/${jaxb.ri.release.version}/docs/ReleaseNotes.html">Browse the JAXB RI release notes online.</a></li>
         </ul>
 
     <h2>Users Guide</h2>
     <p>
-        We have created a <a href="https://metro.dev.java.net/${metro.release.version}/guide/">snapshot of Metro Users Guide</a>
-        at the time of this Metro release. You may also wish to consult <a href="https://metro.dev.java.net/guide/">the latest version</a>
+        We have created a <a href="http://metro.java.net/${metro.release.version}/guide/">snapshot of Metro Users Guide</a>
+        at the time of this Metro release. You may also wish to consult <a href="http://metro.java.net/guide/">the latest version</a>
         of the Metro Users Gude.
     </p>
 
     <h2>Technical Support</h2>
     <p>
-        Please <a href="mailto:users-subscribe@metro.dev.java.net?subject=subscribe">subscribe to the users list</a>
-        and send comments/feedbacks/opinions to <a href="mailto:users@metro.dev.java.net">the list</a>. Additionally,
+        Please <a href="mailto:users-subscribe@metro.java.net?subject=subscribe">subscribe to the users list</a>
+        and send comments/feedbacks/opinions to <a href="mailto:users@metro.java.net">the list</a>. Additionally,
         we encourage you to report any bugs you might find while using Metro through our
-        <a href="https://metro.dev.java.net/use/issue-tracker.html">Metro issue trackers</a>.
+        <a href="http://metro.java.net/use/issue-tracker.html">Metro issue trackers</a>.
     </p>
 
     <h2>Workspace Snapshot</h2>
     <p>
-        If you'd like to hack the source code starting from the final release version, download
-        <a href="https://metro.dev.java.net/${metro.release.version}/${src.bundle.artifact.name}">the workspace snapshot zip bundle</a>.
-        It contains all the CVS control files, making it ideal for submitting patches, checking diffs, etc.
+        If you'd like to hack the source code starting from the final release version, please
+        check out the Metro sources running the following command from the command line:
     </p>
+    <pre>
+        svn export https://svn.java.net/svn/wsit~svn/${scmBranch}/wsit -r ${buildNumber} metro-sources
+    </pre>
     <div style="background-color: rgb(255,255,102);">
-        This component is released under the <b><a href="https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html">Common Development and Distribution License (CDDL) version 1.1 + GNU General Public License (GPL) version 2</a></b>.
+        This component is released under the <b><a href="http://glassfish.java.net/public/CDDL+GPL_1_1.html">Common Development and Distribution License (CDDL) version 1.1 + GNU General Public License (GPL) version 2</a></b>.
         You must agree to these licenses as part of installation before viewing and/or using the code.
     </div>
 </body>

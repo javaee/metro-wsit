@@ -52,6 +52,9 @@
             <directory>src/main/resources</directory>
             <outputDirectory>metro</outputDirectory>
             <filtered>true</filtered>
+            <excludes>
+                <exclude>LICENSE.*</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/unpacked-dependencies/jaxws-ri</directory>

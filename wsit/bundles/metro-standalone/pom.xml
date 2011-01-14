@@ -3,14 +3,14 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
     and Distribution License("CDDL") (collectively, the "License").  You
     may not use this file except in compliance with the License.  You can
     obtain a copy of the License at
-    https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
     or packager/legal/LICENSE.txt.  See the License for the specific
     language governing permissions and limitations under the License.
 
@@ -122,6 +122,10 @@
                                     <token>https://jax-ws.dev.java.net/guide</token>
                                     <value>http://metro.java.net/guide</value>
                                 </replacement>
+                                <replacement>
+                                    <token>https://jax-ws.java.net/guide</token>
+                                    <value>http://metro.java.net/guide</value>
+                                </replacement>
                             </replacements>
                         </configuration>
                     </execution>
@@ -152,6 +156,114 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>otn</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-dependencies</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>unpack-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <includeArtifactIds>jaxws-ri</includeArtifactIds>
+                                    <includes>jaxws-ri/bin/**, jaxws-ri/samples/**</includes>
+                                    <outputDirectory>${project.build.directory}/unpacked-dependencies</outputDirectory>
+                                    <overWriteReleases>false</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.google.code.maven-replacer-plugin</groupId>
+                        <artifactId>maven-replacer-plugin</artifactId>
+                        <executions>                
+                            <execution>
+                                <id>replace-jaxws-with-metro</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>replace</goal>
+                                </goals>
+                                <configuration>
+                                    <basedir>${project.build.directory}/unpacked-dependencies/jaxws-ri</basedir>
+                                    <includes>
+                                        <include>bin/**.bat</include>
+                                        <include>bin/**.sh</include>
+                                        <include>samples/docs/index.html</include>
+                                        <include>samples/**/build.xml</include>
+                                        <include>samples/**/deploy-targets.xml</include>
+                                        <include>samples/**/Readme.txt</include>
+                                        <include>samples/**/web.xml</include>
+                                    </includes>
+                                    <replacements>
+                                        <replacement>
+                                            <token>JAX-WS</token>
+                                            <value>Metro</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>JAXWS_HOME</token>
+                                            <value>METRO_HOME</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>jaxws-tools.jar</token>
+                                            <value>webservices-tools.jar</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>jaxws.classpath</token>
+                                            <value>metro.classpath</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>/jaxws-</token>
+                                            <value>/metro-</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>https://jax-ws.dev.java.net/guide</token>
+                                            <value>http://metro.java.net/guide</value>
+                                        </replacement>
+                                        <replacement>
+                                            <token>https://jax-ws.java.net/guide</token>
+                                            <value>http://metro.java.net/guide</value>
+                                        </replacement>
+                                    </replacements>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+            
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <finalName>metro-otn</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/assembly-otn.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <!-- this is used for inheritance merges -->
+                                <phase>package</phase>
+                                <!-- append to the packaging phase. -->
+                                <goals>
+                                    <goal>attached</goal>
+                                    <!-- goals == mojos -->
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
