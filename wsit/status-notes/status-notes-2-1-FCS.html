@@ -715,121 +715,19 @@
 
         <p><b>New in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>TODO</li>
         </ul>
 
         <p><b>Fixed in this release</b></p>
         <ul>
-            <li>n/a</li>
+            <li>TODO</li>
         </ul>
 
         <p><b>Known issues</b></p>
-        <table border="1" cellpadding="2" cellspacing="3">
-            <col>
-            <col>
-            <tr>
-                <th>Feature</th>
-                <th>Status/Workaround</th>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-1284">issue 1284</a>:
-                        WS-AT web services are not auto-deployed in GFv3
-                </td>
-                <td>
-                    <p>Workaround: <a href="https://metro.dev.java.net/guide/Deploying_and_Configuring_the_WS_TX_Service_on_GlassFish_V3.html">Manually deploy the services on GFv3</a>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-397">issue 397</a>:
-                        Transaction attribute specified in ejb deployment descriptor is disregarded by mapping of CMT EJB web service to appropriate WS-AT policy assertions
-                    </p>
-                </td>
-                <td>
-                    <p>Workaround: Use Java EE 5.0 program annotations on Container Managed Transaction (CMT) EJB Web Services.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-471">issue 471</a>:
-                        Detect unsupported invocations of WS-AT webmethods
-                    </p>
-                </td>
-                <td>
-                    <p>Partially fixed.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-539">issue 539</a>:
-                        WS-AT txn registration fails silently, only SEVERE event in server.log
-                    </p>
-                </td>
-                <td>
-                    <p>Check server.log for the following message "SEVERE WSTX-AT-0022: Registration with durable parent failed" if your client isn't working as expected.
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-717">issue 717</a>:
-                        Ejb web service deployment fails on AIX
-                    </p>
-                </td>
-                <td>
-                    <p>
-                        Seeing this error during deployment of some TX SQE functional tests only on AIX:
-                        <br>
-                        <code><b>Could not invoke defineClass!;_RequestID=fe0ba2aa-af5d-474f-88bd-fe8085434899;|EJB5090: Exception in creating EJB container [java.lang.RuntimeException: Could not invoke defineClass!]|#]</b></code>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p>
-                        <a href="http://java.net/jira/browse/WSIT-1293">issue 1293</a>:
-                        IllegalStateException: Servlet [CoordinatorPortTypeImpl] and Servlet [CompletionCoordinatorPortTypeImpl] have the same url pattern: [/WSATCoordinator]
-                    </p>
-                </td>
-                <td>
-                    <p>Waived for 2.0.
-                    </p>
-                </td>
-            </tr>
-        </table>
 
         <p><b>Feature requests not implemented in this release</b></p>
         <ul>
-            <li>Transaction recovery</li>
-            <li>Processing Transaction Attributes in EJB deployment descriptor</li>
-            <li>
-                WS-Atomic Transaction capabilities are not available in Tomcat web server with WSIT installed.
-                WS-Atomic Transactions context can only flow from Web and EJB tier of Glassfish v2 Application Server.
-            </li>
-            <li>
-                A JAX-WS 2.0/2.1, WSIT 1.0, Glassfish v2 Application client or a Tomcat hosted web service can invoke
-                a transacted web service operation with policy assertion of &lt;wsat:ATAssertion
-                wsp:Optional=&rdquo;true&rdquo;/&gt; since it is optional to flow a transactional context with the
-                request. It is not possible to call a transacted web service operation with policy assertion of
-                &lt;wsat:ATAssertion&gt; from any of the listed containers that do not support flowing a
-                WS-Atomic Transaction context.
-            </li>
-            <li>
-                Optional protocol messages currently not implemented.
-                <br>
-                <a href="http://specs.xmlsoap.org/ws/2004/10/wscoor/wscoor.pdf">[WSCOOR2004]</a>
-                Section 3.1 Activation Service and <a href="http://specs.xmlsoap.org/ws/2004/10/wsat/wsat.pdf">[WSAT2004]</a>
-                Section 3.2 Completion Protocol
-            </li>
+            <li>TODO</li>
         </ul>
 
         <!-- ========================================================================================== -->
