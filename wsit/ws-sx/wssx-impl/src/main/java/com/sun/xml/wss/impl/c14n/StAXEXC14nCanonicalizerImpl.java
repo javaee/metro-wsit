@@ -169,8 +169,10 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                         //outputAttrToWriter("xmlns", _defURI, _stream);
                         AttributeNS ns = new AttributeNS();
                         ns.setPrefix("");
-                        ns.setUri(_defURI);                        
-                        _nsResult.add(ns);
+                        ns.setUri(_defURI);
+                        if (!_nsResult.contains(ns)) {
+                            _nsResult.add(ns);
+                        }
                     }
                 }
 
