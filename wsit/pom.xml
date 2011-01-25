@@ -526,11 +526,6 @@
                 <version>${jaxb.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api-osgi-sources</artifactId>
-                <version>${jaxb.api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jaxb.ri.version}</version>
