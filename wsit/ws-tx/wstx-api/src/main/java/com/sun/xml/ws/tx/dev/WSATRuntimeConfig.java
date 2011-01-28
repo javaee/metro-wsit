@@ -39,11 +39,12 @@
  */
 package com.sun.xml.ws.tx.dev;
 
+import com.sun.istack.logging.Logger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class WSATRuntimeConfig {
-
+    private static final Logger LOGGER = Logger.getLogger(WSATRuntimeConfig.class);
     private static final Lock DATA_LOCK = new ReentrantLock();
 
     public static final class Initializer {
@@ -65,13 +66,21 @@ public final class WSATRuntimeConfig {
         }
 
         public Initializer httpPort(String value) {
-            WSATRuntimeConfig.httpPort = Integer.parseInt(value);
+            if (value != null && !value.trim().isEmpty()) {
+                WSATRuntimeConfig.httpPort = Integer.parseInt(value.trim());               
+            } else {
+                LOGGER.config(String.format("Could not set HTTP port value to '%1s'. Rolling back to default: %2d", value, WSATRuntimeConfig.httpPort));
+            }
 
             return this;
         }
 
         public Initializer httpsPort(String value) {
-            WSATRuntimeConfig.httpsPort = Integer.parseInt(value);
+            if (value != null && !value.trim().isEmpty()) {
+                WSATRuntimeConfig.httpsPort = Integer.parseInt(value.trim());
+            } else {
+                LOGGER.config(String.format("Could not set HTTPS port value to '%1s'. Rolling back to default: %2d", value, WSATRuntimeConfig.httpsPort));
+            }
 
             return this;
         }
