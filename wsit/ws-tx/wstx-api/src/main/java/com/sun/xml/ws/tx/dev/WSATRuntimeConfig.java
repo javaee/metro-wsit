@@ -205,7 +205,7 @@ public final class WSATRuntimeConfig {
 
         /**
          * Returns current value of the underlying transaction log location
-//         * @return transaction log directory path string
+         * @return transaction log directory path string
          */
         String getTxLogLocation();
     }
