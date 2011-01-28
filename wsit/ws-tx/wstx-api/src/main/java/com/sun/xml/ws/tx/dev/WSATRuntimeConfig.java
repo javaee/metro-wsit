@@ -206,11 +206,11 @@ public final class WSATRuntimeConfig {
     public class WSATRecoveryEventListener implements RecoveryEventListener {
 
         public void beforeRecovery(boolean delegated, String instance) {
-            wsatRecoveryEventListener.beforeRecovery(delegated, instance);
+            if(wsatRecoveryEventListener!=null) wsatRecoveryEventListener.beforeRecovery(delegated, instance);
         }
 
         public void afterRecovery(boolean success, boolean delegated, String instance) {
-            wsatRecoveryEventListener.afterRecovery(success, delegated, instance);
+            if(wsatRecoveryEventListener!=null) wsatRecoveryEventListener.afterRecovery(success, delegated, instance);
         }
     }
 }
