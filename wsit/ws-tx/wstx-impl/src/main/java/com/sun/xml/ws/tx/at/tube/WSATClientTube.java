@@ -54,8 +54,12 @@ import com.sun.xml.ws.api.pipe.helper.AbstractTubeImpl;
 import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
 import com.sun.xml.ws.tx.at.WSATConstants;
 import com.sun.xml.ws.api.tx.at.TransactionalFeature;
+import com.sun.xml.ws.tx.dev.WSATRuntimeConfig;
 
 import javax.xml.namespace.QName;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.*;
 
 public class WSATClientTube extends AbstractFilterTubeImpl implements WSATConstants {
@@ -94,10 +98,35 @@ public class WSATClientTube extends AbstractFilterTubeImpl implements WSATConsta
     }
 
     private void doProcessRequest(Packet request) {
+        URL url = request.endpointAddress.getURL();
+        String host = url.getHost();
+        int port = url.getPort();
+        String localhostAndPort =
+                WSATRuntimeConfig.getInstance().getHostAndPort().replace("http://","").replace("https://","");
+        String thisServersInetAddress = null;
+        String[] localhostAndPortArray;
+        String thisServersHost= null;
+        String thisServersHostWithoutDomain = null;
+        String thisServersPort= null;
+        try {
+            thisServersInetAddress = InetAddress.getLocalHost().getHostAddress();
+            localhostAndPortArray = localhostAndPort.split(":");
+            thisServersHost= localhostAndPortArray[0];
+            thisServersPort= localhostAndPortArray[1];
+            thisServersHostWithoutDomain = thisServersHost.split(".")[0];
+        } catch (Exception e) { 
+        }
+        boolean isSameHost =
+                host.equals("localhost") || host.equals(thisServersHost)
+                        || host.equals(thisServersInetAddress) || host.equals(thisServersHostWithoutDomain);
+        boolean isSamePort = new String("" + port).equals(thisServersPort);
+        boolean isColoc = isSameHost && isSamePort;
+        request.invocationProperties.put("wsat.isColoc", isColoc);
         TransactionalAttribute transactionalAttribute =
                 WSATTubeHelper.getTransactionalAttribute(m_transactionalFeature, request, m_port);
         transactionalAttribute.setSoapVersion(m_wsbinding.getSOAPVersion());
-        List<Header> addedHeaders = m_wsatClientHelper.doHandleRequest(transactionalAttribute, request.invocationProperties);
+        List<Header> addedHeaders =
+                m_wsatClientHelper.doHandleRequest(transactionalAttribute, request.invocationProperties);
         if (addedHeaders != null) {
             for (Header header : addedHeaders) {
                 request.getMessage().getHeaders().add(header);
