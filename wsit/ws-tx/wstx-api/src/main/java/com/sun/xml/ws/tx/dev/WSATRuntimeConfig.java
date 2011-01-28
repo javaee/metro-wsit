@@ -52,6 +52,12 @@ public final class WSATRuntimeConfig {
             // do nothing
         }
 
+        public Initializer domainName(String value) {
+            WSATRuntimeConfig.domainName = value;
+
+            return this;
+        }
+
         public Initializer hostName(String value) {
             WSATRuntimeConfig.hostName = value;
 
@@ -59,27 +65,13 @@ public final class WSATRuntimeConfig {
         }
 
         public Initializer httpPort(String value) {
-            WSATRuntimeConfig.httpPort = value;
+            WSATRuntimeConfig.httpPort = Integer.parseInt(value);
 
             return this;
         }
 
         public Initializer httpsPort(String value) {
-            WSATRuntimeConfig.httpsPort = value;
-
-            return this;
-        }
-
-        /**
-         * @deprecated Use {@link Initializer#txLogLocation(com.sun.xml.ws.tx.dev.WSATRuntimeConfig.TxlogLocationProvider) instead
-         */
-        @Deprecated        
-        public Initializer txLogLocation(final String value) {
-            WSATRuntimeConfig.txLogLocationProvider = new TxlogLocationProvider() {
-                public String getTxLogLocation() {
-                    return value;
-                }
-            };
+            WSATRuntimeConfig.httpsPort = Integer.parseInt(value);
 
             return this;
         }
@@ -117,9 +109,10 @@ public final class WSATRuntimeConfig {
     private static TxlogLocationProvider txLogLocationProvider;
     private static boolean isWsatSslEnabled = Boolean.valueOf(System.getProperty("wsat.ssl.enabled", "false"));
     private static boolean isRollbackOnFailedPrepare = Boolean.valueOf(System.getProperty("wsat.rollback.on.failed.prepare", "true"));
+    private static String domainName = "domain1";
     private static String hostName = "localhost";
-    private static String httpPort = "8080";
-    private static String httpsPort = "8181";
+    private static int httpPort = 8080;
+    private static int httpsPort = 8181;
     private static RecoveryEventListener wsatRecoveryEventListener;
 
     private WSATRuntimeConfig() {
@@ -161,6 +154,38 @@ public final class WSATRuntimeConfig {
     }
 
     /**
+     * Returns the current domain name as provided by the container 
+     * @return the current domain name as provided by the container 
+     */
+    public static String getDomainName() {
+        return domainName;
+    }
+
+    /**
+     * Returns the current instance/host name as provided by the container 
+     * @return container the current instance/host name as provided by the container 
+     */
+    public static String getHostName() {
+        return hostName;
+    }
+
+    /**
+     * Returns the current HTTP name as used by the container 
+     * @return the current HTTP name as used by the container
+     */
+    public static int getHttpPort() {
+        return httpPort;
+    }
+
+    /**
+     * the current HTTPS name as used by the container
+     * @return the current HTTPS name as used by the container
+     */
+    public static int getHttpsPort() {
+        return httpsPort;
+    }
+
+    /**
      * Return the underlying transaction log location
      * @return String directory
      */
@@ -180,7 +205,7 @@ public final class WSATRuntimeConfig {
 
         /**
          * Returns current value of the underlying transaction log location
-         * @return transaction log directory path string
+//         * @return transaction log directory path string
          */
         String getTxLogLocation();
     }
