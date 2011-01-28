@@ -66,7 +66,7 @@ public final class WSATRuntimeConfig {
         }
 
         public Initializer httpPort(String value) {
-            if (value != null && !value.trim().isEmpty()) {
+            if (value != null && value.trim().length() > 0) {
                 WSATRuntimeConfig.httpPort = Integer.parseInt(value.trim());               
             } else {
                 LOGGER.config(String.format("Could not set HTTP port value to '%1s'. Rolling back to default: %2d", value, WSATRuntimeConfig.httpPort));
@@ -76,7 +76,7 @@ public final class WSATRuntimeConfig {
         }
 
         public Initializer httpsPort(String value) {
-            if (value != null && !value.trim().isEmpty()) {
+            if (value != null && value.trim().length() > 0) {
                 WSATRuntimeConfig.httpsPort = Integer.parseInt(value.trim());
             } else {
                 LOGGER.config(String.format("Could not set HTTPS port value to '%1s'. Rolling back to default: %2d", value, WSATRuntimeConfig.httpsPort));
