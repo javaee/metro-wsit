@@ -664,12 +664,12 @@
             <dependency>
                 <groupId>javax.xml.soap</groupId>
                 <artifactId>saaj-api</artifactId>
-                <version>1.3.1</version>
+                <version>1.3.2</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.messaging.saaj</groupId>
                 <artifactId>saaj-impl</artifactId>
-                <version>1.3.4</version>
+                <version>1.3.7</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.security</groupId>
