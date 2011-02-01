@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -38,56 +38,23 @@
  * holder.
  */
 
-/*
- * Default CSS stylesheet
- */
+package metro_sample.server;
 
-body {
-    background-color: white;
-}
+import javax.jws.WebService;
 
-h1, h2 {
-    text-align: center;
-    font-family: sans-serif;
-    color: #000099;
-}
+@WebService(endpointInterface = "metro_sample.server.AddNumbersPortType")
+public class AddNumbersImpl implements AddNumbersPortType {
 
-h3, h4, h5, h6 {
-    text-align: left;
-    font-family: sans-serif;
-    color: #000099;
-}
 
-code {
-    font-family: Courier, monospace;
-}
+    public int addNumbers(int number1, int number2) throws AddNumbersFault_Exception {
+        if (number1 < 0 || number2 < 0) {
+            AddNumbersFault fb = new AddNumbersFault();
+            fb.setDetail("Negative numbers cant be added!");
+            fb.setMessage("Numbers: " + number1 + ", " + number2);
 
-diff {
-    font-family: Courier, monospace;
-    color: red;
-}
+            throw new AddNumbersFault_Exception(fb.getMessage(), fb);
+        }
 
-table.property {
-	margin-left: 2em;
+        return number1 + number2;
+    }
 }
-
-table.property tr td {
-	background-color: rgb(240,240,255);
-	padding: 0.2em;
-}
-
-pre.code {
-	background-color: rgb(240,240,255);
-	border: 1px solid navy;
-	color: black;
-	font-weight: bold;
-	padding: 0.5em;
-	margin-left: 2em;
-}
-
-/*
-hr {
-    align: center;
-    width: 70%;
-}
-*/

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -37,57 +37,28 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
+package metro_sample.common;
 
-/*
- * Default CSS stylesheet
- */
+import java.util.logging.Logger;
 
-body {
-    background-color: white;
+import com.sun.xml.ws.api.pipe.Tube;
+import com.sun.xml.ws.assembler.dev.ClientTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.ServerTubelineAssemblyContext;
+import com.sun.xml.ws.assembler.dev.TubeFactory;
+import javax.xml.ws.WebServiceException;
+
+public final class CustomTubeFactory implements TubeFactory {
+    private static final Logger logger = Logger.getLogger(CustomTubeFactory.class.getName());
+ 
+    public Tube createTube(ClientTubelineAssemblyContext context) throws WebServiceException {
+        logger.info("Creating client-side interceptor tube");
+ 
+        return new CustomTube(context.getTubelineHead(), CustomTube.Side.Client);
+    }
+ 
+    public Tube createTube(ServerTubelineAssemblyContext context) throws WebServiceException {
+        logger.info("Creating server-side interceptor tube");
+ 
+        return new CustomTube(context.getTubelineHead(), CustomTube.Side.Endpoint);
+    }
 }
-
-h1, h2 {
-    text-align: center;
-    font-family: sans-serif;
-    color: #000099;
-}
-
-h3, h4, h5, h6 {
-    text-align: left;
-    font-family: sans-serif;
-    color: #000099;
-}
-
-code {
-    font-family: Courier, monospace;
-}
-
-diff {
-    font-family: Courier, monospace;
-    color: red;
-}
-
-table.property {
-	margin-left: 2em;
-}
-
-table.property tr td {
-	background-color: rgb(240,240,255);
-	padding: 0.2em;
-}
-
-pre.code {
-	background-color: rgb(240,240,255);
-	border: 1px solid navy;
-	color: black;
-	font-weight: bold;
-	padding: 0.5em;
-	margin-left: 2em;
-}
-
-/*
-hr {
-    align: center;
-    width: 70%;
-}
-*/

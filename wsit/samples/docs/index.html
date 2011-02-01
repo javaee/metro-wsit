@@ -1,18 +1,16 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
-    <head>
 <!--
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
     and Distribution License("CDDL") (collectively, the "License").  You
     may not use this file except in compliance with the License.  You can
     obtain a copy of the License at
-    https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
     or packager/legal/LICENSE.txt.  See the License for the specific
     language governing permissions and limitations under the License.
 
@@ -42,6 +40,8 @@
     holder.
 
 -->
+<html>
+    <head>
 
         <title>Metro -- Samples Documentation</title>
         <link rel="stylesheet" type="text/css" href="style/default.css"/>
@@ -61,12 +61,12 @@
             Metro samples in a JavaEE container in a JavaEE portable manner you
             need to modify them to use the standard JavaEE 5 deployment descriptor;
             please refer to the <a href="http://java.sun.com/javaee/index.jsp">JavaEE 5</a>
-            or <a href="https://glassfish.dev.java.net/">GlassFish</a>
+            or <a href="http://glassfish.java.net/">GlassFish</a>
             documentation/samples.
         </p>
         <p>
             All these samples are tested to run on
-            <a href="https://glassfish.dev.java.net/">Glassfish AS</a> and on Apache
+            <a href="http://glassfish.java.net/">Glassfish AS</a> and on Apache
             Tomcat 5.x.
         </p>
 
@@ -77,216 +77,11 @@
             This section explains the directory structure of the Metro <code>samples</code>
             directory in the bundle:
         </p>
-
-        <table border="0" width="100%" cellspacing="0" cellpadding="2">
-            <tbody>
-                <tr valign="top">
-                    <td width="15%">
-                        <p>docs
-                    </td>
-                    <td width="85%">
-                        <p>index.html, this file
-                    </td>
-                </tr>
-                <tr>
-                    <td>fromjava-wsaddressing</td>
-                    <td>Starting from Java endpoint how to develop W3C WS-Addressing endpoint</td>
-                </tr>
-                <tr>
-                    <td>fromwsdl-wsaddressing</td>
-                    <td>Starting from WSDL how to develop a WS-Addressing endpoint</td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>fromjava
-                    </td>
-                    <td>
-                        <p>Demonstrates how to build, deploy, and invoke a simple Web service starting from a Java service endpoint implementation using annotations.
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>fromjavahandler
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromjava</b> sample but with a simple logging handler on the client and server.
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>fromwsdl
-                    </td>
-                    <td>
-                        <p>Demonstrates how to build, deploy, and invoke a simple Web service starting from a WSDL using external customizations.
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>fromwsdl_secure
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromwsdl</b> sample but demonstrates how to build, deploy, and invoke an HTTPS Web service and client from a WSDL.
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>fromwsdlhandler
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromwsdl</b> sample but with a simple logging handler on the client and server.
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>dispatch
-                    </td>
-                    <td>
-                        <p>Demonstrates how to dynamically invoke web service endpoints.
-                    </td>
-                </tr>
-                <tr>
-                    <td>provider</td>
-                    <td>Demonstrates how to build, deploy, and invoke
-                        <code>javax.xml.ws.Provider</code> based Web service endpoint.
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>asyncprovider
-                    </td>
-                    <td>
-                        <p>Demonstrates how to build, deploy, and invoke
-                            <code>a server side asynchronous Provider</code> based Web service endpoint.
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <td>
-                        <p>annotations
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromjava</b> but shows how to specify a different parameter name, operation name, targetNamespace, and other similar features.
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>async
-                    </td>
-                    <td>
-                        <p>Demonstrates how to generate async operations in a client SEI from a WSDL and invoke it from the client application.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>external-customize
-                    </td>
-                    <td>
-                        <p>Demonstrates how a client client application can customize a published WSDL using external binding file.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>inline-customize
-                    </td>
-                    <td>
-                        <p>Demonstrates how a client application and server endpoint can be generated from a WSDL with embedded binding declarations.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>mtom
-                    </td>
-                    <td>
-                        <p>Demonstrates how to enable MTOM and swaRef.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>mtom-soap12
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>mtom</b> sample but shows how to specify SOAP 1.2 binding.
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>fromjava-soap12
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromjava</b> sample but shows how to specify SOAP 1.2 binding.
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>fromwsdl-soap12
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromwsdl</b> sample but shows how to specify SOAP 1.2 binding.
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>supplychain
-                    </td>
-                    <td>
-                        <p>Same as
-                            <b>fromjava</b> sample but using JavaBeans as parameter and return types.
-                            <br> Also the service can be built and deployed using Endpoint API.
-
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>mime
-                    </td>
-                    <td>
-                        <p>Demonstrates how a MIME binding is defined in the WSDL to send wsdl:part as MIME attachments. This requires that the development model is 'starting from WSDL'.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>wsimport_catalog
-                    </td>
-                    <td>
-                        <p>Demonstrates a how a WSDL and schema URI's can be resolved using catalog mechanism using wsimport ant tasks' catalog attribute and also using ant's core type xmlcatalog.
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>catalog
-                    </td>
-                    <td>
-                        <p>Shows the catalog capability on the client side; Catalog is used every time the implementation tries to access a resource identified by URI that is believed to contain either a WSDL document or any other document on which it depends .
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <p>restful
-                    </td>
-                    <td>
-                        <p>Shows an example of a REST Web Service implemented as a JAX-WS 2.0 Provider and accessed via a JAX-WS Dispatch client. The Request uses an HTTP GET Request Method and uses the JAX-WS MessageContext properties PATH_INFO and QUERY_STRING.
-                    </td>
-                </tr>
-                <tr>
-                    <td>stateful</td>
-                    <td>This sample shows the JAX-WS RI's stateful webservice support feature.</td>
-                </tr>
-            </tbody>
-        </table>
+        <ul>
+            <li><code>docs/</code> - contains Metro samples documentation, particularly <code>index.html</code> (this file)</li>
+            <li>sample directories - please consult a nested <code>README</code> file in each sample directory for the description 
+                of the sample and specific instructions how to run the sample.</li>
+        </ul>
 
         <h2>
             <a name="2.0"></a><font color="#280099">2.0 Prerequisites</font>
@@ -305,8 +100,8 @@
             </li>
             <li>
                 <p style="margin-bottom: 0in;">
-                    <a href="https://glassfish.dev.java.net/public/downloadsindex.html">Download</a>
-                    GlassFish Open Source Edition 3.0.1 or later application server and install it.
+                    <a href="http://glassfish.java.net/public/downloadsindex.html">Download</a>
+                    GlassFish Open Source Edition 3.1 or later application server and install it.
                 </p>
             </li>
             <li>
@@ -340,7 +135,7 @@
 
             <li>
                 <p style="margin-bottom: 0in;">
-                    <a href="https://glassfish.dev.java.net/">GlassFish</a> Open 
+                    <a href="https://glassfish.java.net/">GlassFish</a> Open 
                     Source Edition 3.1 integrates Metro 2.1. So you may just start
                     using it and skip step 6 below unless you want to use the
                     latest Metro build.
@@ -499,7 +294,7 @@
         <br>
         <p>
             We appreciate your feedback, please send it to
-            <a href="mailto:users@jax-ws.dev.java.net">users@jax-ws.dev.java.net</a>.
+            <a href="mailto:users@metro.java.net">users@metro.java.net</a>.
         </p>
     </body>
 </html>

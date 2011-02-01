@@ -58,6 +58,11 @@
             <outputDirectory>metro</outputDirectory>
             <filtered>false</filtered>
         </fileSet>
+        <fileSet>
+            <directory>../../samples</directory>
+            <outputDirectory>metro/samples</outputDirectory>
+            <filtered>false</filtered>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
