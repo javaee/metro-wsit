@@ -69,6 +69,7 @@
                         <configuration>
                             <includeArtifactIds>jaxws-ri</includeArtifactIds>
                             <includes>jaxws-ri/bin/**, jaxws-ri/samples/**</includes>
+                            <excludes>jaxws-ri/samples/docs/**</excludes>
                             <outputDirectory>${project.build.directory}/unpacked-dependencies</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
@@ -91,7 +92,6 @@
                             <includes>
                                 <include>bin/**.bat</include>
                                 <include>bin/**.sh</include>
-                                <include>samples/docs/index.html</include>
                                 <include>samples/**/build.xml</include>
                                 <include>samples/**/deploy-targets.xml</include>
                                 <include>samples/**/Readme.txt</include>
