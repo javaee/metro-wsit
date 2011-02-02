@@ -784,7 +784,7 @@
         
         <metro.release.version>2.2</metro.release.version>
         
-        <policy.version>2.2.2-b04</policy.version>
+        <policy.version>2.2.2</policy.version>
         
         <java.net.m2.repository.metroRootUrl>http://download.java.net/maven/2/org/glassfish/metro</java.net.m2.repository.metroRootUrl>
 
