@@ -64,6 +64,10 @@
         <fileSet>
             <directory>../../samples</directory>
             <outputDirectory>metro/samples</outputDirectory>
+            <excludes>
+                <exclude>**/build/**</exclude>
+                <exclude>**/target/**</exclude>
+            </excludes>
             <filtered>false</filtered>
         </fileSet>        
     </fileSets>
