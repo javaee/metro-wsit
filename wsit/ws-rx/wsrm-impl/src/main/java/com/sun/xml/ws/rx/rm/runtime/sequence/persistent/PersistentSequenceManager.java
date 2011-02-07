@@ -37,7 +37,6 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-
 package com.sun.xml.ws.rx.rm.runtime.sequence.persistent;
 
 import com.sun.istack.logging.Logger;
@@ -111,6 +110,11 @@ public final class PersistentSequenceManager implements SequenceManager {
      * Unique identifier of the WS endpoint for which this particular sequence manager will be used
      */
     private final String uniqueEndpointId;
+    /**
+     * Internal variable to store information about whether or not this instance 
+     * of the SequenceManager is still valid.
+     */
+    private volatile boolean disposed = false;
 
     public PersistentSequenceManager(final String uniqueEndpointId, final DeliveryQueueBuilder inboundQueueBuilder, final DeliveryQueueBuilder outboundQueueBuilder, final RmConfiguration configuration) {
         this.uniqueEndpointId = uniqueEndpointId;
@@ -244,11 +248,11 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     public Sequence getInboundSequence(String sequenceId) throws UnknownSequenceException {
         final Sequence sequence = getSequence(sequenceId);
-        
+
         if (!(sequence instanceof InboundSequence)) {
-            throw new UnknownSequenceException(sequenceId);            
+            throw new UnknownSequenceException(sequenceId);
         }
-        
+
         return sequence;
     }
 
@@ -257,13 +261,13 @@ public final class PersistentSequenceManager implements SequenceManager {
      */
     public Sequence getOutboundSequence(String sequenceId) throws UnknownSequenceException {
         final Sequence sequence = getSequence(sequenceId);
-        
+
         if (!(sequence instanceof OutboundSequence)) {
-            throw new UnknownSequenceException(sequenceId);            
+            throw new UnknownSequenceException(sequenceId);
         }
-        
+
         return sequence;
-    }       
+    }
 
     /**
      * {@inheritDoc}
@@ -437,31 +441,38 @@ public final class PersistentSequenceManager implements SequenceManager {
         return System.currentTimeMillis();
     }
 
-    public void onMaintenance() {
+    public boolean onMaintenance() {
         LOGGER.entering();
+        final boolean continueMaintenance = !disposed;
+
         try {
             dataLock.writeLock().lock();
 
-            Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
-            while (sequenceKeyIterator.hasNext()) {
-                String key = sequenceKeyIterator.next();
+            if (continueMaintenance) {
 
-                AbstractSequence sequence = sequences.get(key);
-                if (shouldRemove(sequence)) {
-                    LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
-                    sequenceKeyIterator.remove();
-                    PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
-                    if (boundSequences.containsKey(sequence.getId())) {
-                        boundSequences.remove(sequence.getId());
+                Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
+                while (sequenceKeyIterator.hasNext()) {
+                    String key = sequenceKeyIterator.next();
+
+                    AbstractSequence sequence = sequences.get(key);
+                    if (shouldRemove(sequence)) {
+                        LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
+                        sequenceKeyIterator.remove();
+                        PersistentSequenceData.remove(cm, uniqueEndpointId, sequence.getId());
+                        if (boundSequences.containsKey(sequence.getId())) {
+                            boundSequences.remove(sequence.getId());
+                        }
+                    } else if (shouldTeminate(sequence)) {
+                        LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
+                        tryTerminateSequence(sequence.getId());
                     }
-                } else if (shouldTeminate(sequence)) {
-                    LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
-                    tryTerminateSequence(sequence.getId());
                 }
             }
+
+            return continueMaintenance;
         } finally {
             dataLock.writeLock().unlock();
-            LOGGER.exiting();
+            LOGGER.exiting(continueMaintenance);
         }
     }
 
@@ -481,6 +492,6 @@ public final class PersistentSequenceManager implements SequenceManager {
     }
 
     public void dispose() {
-        // TODO should delete all endpoint related data?
+        this.disposed = true;
     }
 }

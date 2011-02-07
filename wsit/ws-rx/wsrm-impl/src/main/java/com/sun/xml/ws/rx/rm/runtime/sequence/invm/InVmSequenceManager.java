@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
@@ -126,6 +127,11 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
      * Actual number of concurrent inbound sequences
      */
     private final AtomicLong actualConcurrentInboundSequences;
+    /**
+     * Internal variable to store information about whether or not this instance 
+     * of the SequenceManager is still valid.
+     */
+    private final AtomicBoolean disposed = new AtomicBoolean(false);
     //
     private final String loggerProlog;
 
@@ -452,33 +458,39 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
         return System.currentTimeMillis();
     }
 
-    public void onMaintenance() {
+    public boolean onMaintenance() {
         LOGGER.entering();
+        
+        final boolean continueMaintenance = !this.disposed.get();
+        
         try {
             dataLock.writeLock().lock();
+            if (continueMaintenance) {
+                Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
+                while (sequenceKeyIterator.hasNext()) {
+                    String key = sequenceKeyIterator.next();
 
-            Iterator<String> sequenceKeyIterator = sequences.keySet().iterator();
-            while (sequenceKeyIterator.hasNext()) {
-                String key = sequenceKeyIterator.next();
+                    final Sequence sequence = sequences.get(key);
+                    if (shouldRemove(sequence)) {
+                        LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
+                        sequenceKeyIterator.remove();
+                        sequences.getReplicationManager().remove(key);
 
-                final Sequence sequence = sequences.get(key);
-                if (shouldRemove(sequence)) {
-                    LOGGER.config(LocalizationMessages.WSRM_1152_REMOVING_SEQUENCE(sequence.getId()));
-                    sequenceKeyIterator.remove();
-                    sequences.getReplicationManager().remove(key);
-
-                    if (boundSequences.containsKey(sequence.getId())) {
-                        boundSequences.remove(sequence.getId());
+                        if (boundSequences.containsKey(sequence.getId())) {
+                            boundSequences.remove(sequence.getId());
+                        }
+                    } else if (shouldTeminate(sequence)) {
+                        LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
+                        tryTerminateSequence(sequence.getId());
                     }
-                } else if (shouldTeminate(sequence)) {
-                    LOGGER.config(LocalizationMessages.WSRM_1153_TERMINATING_SEQUENCE(sequence.getId()));
-                    tryTerminateSequence(sequence.getId());
                 }
             }
+            
+            return continueMaintenance;
 
         } finally {
             dataLock.writeLock().unlock();
-            LOGGER.exiting();
+            LOGGER.exiting(continueMaintenance);
         }
     }
 
@@ -503,14 +515,16 @@ public final class InVmSequenceManager implements SequenceManager, ReplicationMa
     }
 
     public void dispose() {
-        this.sequences.close();
-        this.sequences.destroy();
+        if (this.disposed.compareAndSet(false, true)) {        
+            this.sequences.close();
+            this.sequences.destroy();
 
-        this.boundSequences.close();
-        this.boundSequences.destroy();
+            this.boundSequences.close();
+            this.boundSequences.destroy();
 
-        this.unackedMessageStore.close();
-        this.unackedMessageStore.destroy();
+            this.unackedMessageStore.close();
+            this.unackedMessageStore.destroy();            
+        }
     }
 
     public AbstractSequence load(String key) {

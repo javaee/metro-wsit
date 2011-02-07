@@ -213,8 +213,11 @@ public interface SequenceManager extends TimeSynchronizer {
      *
      * This maintenance method is intended to be called externally by a {@link SequenceMaintenanceTask}
      * instance associated with this {@code SequenceManager}.
+     * 
+     * @return {@code true} if the next maintenance execution task is supposed to be scheduled,
+     *         {@code false} otherwise.
      */
-    public void onMaintenance();
+    public boolean onMaintenance();
 
     /**
      * Instructs the {@link SequenceManager} instance to invalidate it's local 

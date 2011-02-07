@@ -72,9 +72,7 @@ public class SequenceMaintenanceTask implements DelayedTaskManager.DelayedTask {
 
     public void run(DelayedTaskManager manager) {
         SequenceManager sequenceManager = smReference.get();
-        if (sequenceManager != null) {
-            sequenceManager.onMaintenance();
-
+        if (sequenceManager != null && sequenceManager.onMaintenance()) {
             if (!manager.isClosed()) {
                 boolean registrationSuccesfull = manager.register(this, period, timeUnit);
 
