@@ -217,11 +217,11 @@ catalina.sh start
 
     <h2>Workspace Snapshot</h2>
     <p>
-        If you'd like to hack the source code starting from the final release version, please
-        check out the Metro sources running the following command from the command line:
+        If you'd like to hack the source code used to build these binaries, please check out the Metro sources 
+        running the following command from the command line:
     </p>
-    <pre>
-        svn export https://svn.java.net/svn/wsit~svn/${scmBranch}/wsit -r ${buildNumber} metro-sources
+    <pre>        
+        svn export https://svn.java.net/svn/wsit~svn/${scmBranch} -r ${buildNumber} metro-sources
     </pre>
     <div style="background-color: rgb(255,255,102);">
         This component is released under the <b><a href="http://glassfish.java.net/public/CDDL+GPL_1_1.html">Common Development and Distribution License (CDDL) version 1.1 + GNU General Public License (GPL) version 2</a></b>.
