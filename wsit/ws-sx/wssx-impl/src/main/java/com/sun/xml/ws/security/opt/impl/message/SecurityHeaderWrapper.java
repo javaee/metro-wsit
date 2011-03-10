@@ -43,6 +43,7 @@ package com.sun.xml.ws.security.opt.impl.message;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
 import com.sun.xml.ws.api.addressing.WSEndpointReference;
 import com.sun.xml.ws.security.opt.impl.outgoing.SecurityHeader;
+import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
@@ -333,4 +334,8 @@ public class SecurityHeaderWrapper implements com.sun.xml.ws.api.message.Header 
     public @NotNull WSEndpointReference readAsEPR(AddressingVersion expected) throws XMLStreamException{
          throw new UnsupportedOperationException();
     }
+
+	public <T> T readAsJAXB(XMLBridge<T> arg0) throws JAXBException {
+        throw new UnsupportedOperationException();
+	}
 }

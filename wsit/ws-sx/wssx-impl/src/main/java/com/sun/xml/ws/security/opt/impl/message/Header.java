@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.opt.impl.message;
 
 import com.sun.xml.ws.security.opt.api.SecurityElementWriter;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
+import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.xml.wss.impl.c14n.StAXAttr;
 import com.sun.xml.wss.impl.c14n.AttributeNS;
 import com.sun.istack.NotNull;
@@ -446,4 +447,8 @@ public class Header implements com.sun.xml.ws.api.message.Header {
             xsw.writeAttribute(attr.getPrefix(),attr.getUri(),attr.getLocalName(),attr.getValue());
         }
     }
+
+	public <T> T readAsJAXB(XMLBridge<T> arg0) throws JAXBException {
+        throw new UnsupportedOperationException();
+	}
 }

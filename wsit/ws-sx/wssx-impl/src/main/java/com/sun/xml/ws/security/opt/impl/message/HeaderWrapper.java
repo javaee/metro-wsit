@@ -50,6 +50,8 @@ import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.bind.api.BridgeContext;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.security.opt.impl.dsig.SignedMessageHeader;
+import com.sun.xml.ws.spi.db.XMLBridge;
+
 import org.xml.sax.ContentHandler;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -363,5 +365,11 @@ public class HeaderWrapper implements com.sun.xml.ws.api.message.Header  {
         }
         throw new UnsupportedOperationException();
     }
-    
+
+	public <T> T readAsJAXB(XMLBridge<T> bridge) throws JAXBException {
+        if(header != null){
+            return header.readAsJAXB(bridge);
+        }
+        throw new UnsupportedOperationException();
+	}    
 }

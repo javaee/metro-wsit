@@ -41,6 +41,7 @@
 package com.sun.xml.ws.security.opt.impl.message;
 
 import com.sun.xml.ws.security.opt.api.SecurityElement;
+import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.istack.NotNull;
 import com.sun.xml.bind.api.Bridge;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -456,4 +457,8 @@ public class MessageWrapper extends com.sun.xml.ws.api.message.Message{
             throw new UnsupportedOperationException("Message is buffered , only writeTo method is supported");
         }
     }
+
+	public <T> T readPayloadAsJAXB(XMLBridge<T> arg0) throws JAXBException {
+        throw new UnsupportedOperationException();
+	}
 }

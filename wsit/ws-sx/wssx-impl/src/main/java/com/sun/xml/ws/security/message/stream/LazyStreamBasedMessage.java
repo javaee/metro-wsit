@@ -41,6 +41,7 @@
 package com.sun.xml.ws.security.message.stream;
 
 import com.sun.xml.ws.message.stream.*;
+import com.sun.xml.ws.spi.db.XMLBridge;
 import com.sun.xml.stream.buffer.MutableXMLStreamBuffer;
 import com.sun.xml.ws.api.message.Message;
 import com.sun.xml.ws.api.model.wsdl.WSDLPort;
@@ -522,6 +523,12 @@ public class LazyStreamBasedMessage extends Message{
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         buffer.writeToXMLStreamWriter(xof.createXMLStreamWriter(System.out));
     }
-    
+
+	public <T> T readPayloadAsJAXB(XMLBridge<T> bridge) throws JAXBException {
+        if(!readMessage){
+            cacheMessage();
+        }
+        return message.readPayloadAsJAXB(bridge);
+	}    
 }
 

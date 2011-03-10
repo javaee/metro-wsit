@@ -452,7 +452,20 @@
     </pluginRepositories>
 
     <!--dependencies></dependencies-->
-    <!--reporting></reporting-->
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.7.2</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -777,9 +790,9 @@
         <jaxb.ri.release.version>2.2.3-1</jaxb.ri.release.version>
         <jaxb.spec.version>2.2.2</jaxb.spec.version>
 
-        <jaxws.api.version>2.2.3</jaxws.api.version>
-        <jaxws.ri.release.version>2.2.3</jaxws.ri.release.version>
-        <jaxws.ri.version>2.2.3</jaxws.ri.version>
+        <jaxws.api.version>2.2.5-promoted-b01</jaxws.api.version>
+        <jaxws.ri.release.version>2.2.5</jaxws.ri.release.version>
+        <jaxws.ri.version>2.2.5-promoted-b01</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.2</metro.release.version>
