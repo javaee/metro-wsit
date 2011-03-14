@@ -392,7 +392,9 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
      */
     public void write(XMLStreamWriter writer) throws XMLStreamException {
         this.nextWriter = writer;
-        boolean defaultNSDecl = false;
+        if(nextWriter instanceof StAXEXC14nCanonicalizerImpl){
+            ((StAXEXC14nCanonicalizerImpl)nextWriter).forceDefaultNS(true);
+        }
         if(data instanceof JAXBData){
             try {
                 ((JAXBData)data).writeTo(this);
@@ -400,18 +402,7 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
                 Iterator<NamespaceContextEx.Binding> itr = nc.iterator();
                 while(itr.hasNext()){
                     final NamespaceContextEx.Binding nd = itr.next();
-                    
                     nextWriter.writeNamespace(nd.getPrefix(),nd.getNamespaceURI());
-                    if (nd.getPrefix() == null || nd.getPrefix().equals("")) {
-                        defaultNSDecl = true;
-                    }
-                }
-                if (!defaultNSDecl) {
-                    if (nextWriter instanceof StAXEXC14nCanonicalizerImpl) {
-                        ((StAXEXC14nCanonicalizerImpl) nextWriter).forceDefaultNS(true);
-                        nextWriter.writeDefaultNamespace("");
-                    //((StAXEXC14nCanonicalizerImpl)nextWriter).forceDefaultNS(false);
-                    }
                 }
             } catch (XWSSecurityException ex) {
                 logger.log(Level.SEVERE, LogStringsMessages.WSS_1706_ERROR_ENVELOPED_SIGNATURE(),ex);
@@ -424,18 +415,7 @@ public class StAXSTRTransformWriter implements XMLStreamWriter,StreamWriterData{
             
             while(itr.hasNext()){
                 final NamespaceContextEx.Binding nd = itr.next();
-                
                 nextWriter.writeNamespace(nd.getPrefix(),nd.getNamespaceURI());
-                if (nd.getPrefix() == null || nd.getPrefix().equals("")) {
-                    defaultNSDecl = true;
-                }
-            }
-            if (!defaultNSDecl) {
-                if(nextWriter instanceof StAXEXC14nCanonicalizerImpl){
-                    ((StAXEXC14nCanonicalizerImpl)nextWriter).forceDefaultNS(true);
-                    nextWriter.writeDefaultNamespace("");
-                    //((StAXEXC14nCanonicalizerImpl)nextWriter).forceDefaultNS(false);
-                }                
             }
             ((StreamWriterData)data).write(this);
         }else if(data instanceof OctectStreamData){

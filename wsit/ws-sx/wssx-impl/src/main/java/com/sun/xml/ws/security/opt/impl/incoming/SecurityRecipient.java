@@ -410,6 +410,10 @@ public final class SecurityRecipient {
                                     }
                                 }
                             }
+                        } else {
+                            //unrecognized valuetype
+                            logger.log(Level.SEVERE, LogStringsMessages.WSS_1616_UNRECOGNIZED_BST_VALUETYPE(valueType));
+                            throw new XWSSecurityException(LogStringsMessages.WSS_1616_UNRECOGNIZED_BST_VALUETYPE(valueType));
                         }
 
                         break;

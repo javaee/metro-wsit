@@ -632,6 +632,19 @@ public abstract class BaseCanonicalizer {
                 }
                 return null;
             }
+            if (attrNS != null && !attrNS.isWritten()) {
+                 //now check if at output parents it was written
+                int tmp = nsDepth -1;
+                while (tmp >=0) {
+                    UsedNSList uList = (UsedNSList)clearDepth.get(tmp);
+                    if (uList != null && uList.getUsedPrefixList() != null &&
+                            uList.getUsedPrefixList().contains(prefix)) {
+                        attrNS = null;
+                        break;
+                    }
+                    tmp--;
+                }
+            }
             UsedNSList uList = null;
             
             uList = (UsedNSList)clearDepth.get(nsDepth);

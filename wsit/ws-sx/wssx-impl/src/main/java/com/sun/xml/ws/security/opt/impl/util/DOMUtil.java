@@ -210,7 +210,11 @@ public class DOMUtil {
                         writer.setPrefix(attr.getLocalName(), attr.getNodeValue());
                         writer.writeNamespace(attrPrefix, attrNS);
                     }
-                    writer.writeAttribute(attrPrefix, attrNS, localName, attr.getNodeValue());
+                    if (attr.getNamespaceURI() != null) {
+                        writer.writeAttribute(attrPrefix, attrNS, localName, attr.getNodeValue());
+                    }else {
+                        writer.writeAttribute(localName, attr.getNodeValue());
+                    }
                 }
             }
         }

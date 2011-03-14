@@ -111,18 +111,6 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
         this.forceDefNS = isForce;
     }
     public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
-        if(prefix == null || prefix.length() == 0){
-            String defNS = exC14NContext.getNamespaceURI(prefix);
-            if((defNS == null || defNS.length()== 0) && (namespaceURI == null || namespaceURI.length() ==0)){
-                if(!forceDefNS)
-                    return;
-            }
-            if(namespaceURI == null){
-                namespaceURI = "";
-            }
-            _defURI = namespaceURI;
-            prefix = "";
-        }
         exC14NContext.declareNamespace(prefix,namespaceURI);
     }
     
@@ -146,7 +134,8 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                 if(_elementPrefix != null)
                     visiblyUtilized.add(_elementPrefix);
                 AttributeNS nsDecl = null;
-                if(_elementPrefix != null && _elementPrefix.length() >0){
+                /*
+                if(_elementPrefix != null && _elementPrefix.length() >=0){
                     AttributeNS eDecl = exC14NContext.getNamespaceDeclaration(_elementPrefix);
                     
                     if(eDecl !=null && !eDecl.isWritten()){
@@ -154,7 +143,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                         _nsResult.add(eDecl);
                     }
                     
-                }
+                }*/
                 if(visiblyUtilized.size() > 0){
                     Iterator prefixItr = visiblyUtilized.iterator();
                     populateNamespaceDecl(prefixItr);
@@ -164,16 +153,16 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                 }
 
                  if (forceDefNS) {
-                    if (_defURI != null) {
-                        forceDefNS = false;
-                        //outputAttrToWriter("xmlns", _defURI, _stream);
+                     forceDefNS = false;
+                     if (exC14NContext.getNamespaceDeclaration("") == null
+                             && "".equals(exC14NContext.getNamespaceURI(""))) {
                         AttributeNS ns = new AttributeNS();
                         ns.setPrefix("");
-                        ns.setUri(_defURI);
+                        ns.setUri("");
                         if (!_nsResult.contains(ns)) {
                             _nsResult.add(ns);
                         }
-                    }
+                     }
                 }
 
                 if ( _nsResult.size() > 0) {
@@ -214,7 +203,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
         exC14NContext.push();
         
         
-        
+ 
         try {
             _stream .write('<');
             elemBuffer.reset();

@@ -1377,6 +1377,7 @@ public class DefaultCallbackHandler implements CallbackHandler {
             return;
         } else {
             log.log(Level.SEVERE, LogStringsMessages.WSS_1511_FAILED_LOCATE_PEER_CERTIFICATE());
+            //TODO Localize
             throw new RuntimeException("An Error occurred while locating PEER Entity certificate in TrustStore");
         }
     }
