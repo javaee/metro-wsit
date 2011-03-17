@@ -484,11 +484,6 @@
                 <version>1.5</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>6.0.16</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ejb</groupId>
                 <artifactId>ejb-api</artifactId>
                 <version>3.0</version>
@@ -603,11 +598,6 @@
                 <groupId>com.sun.xml.ws</groupId>
                 <artifactId>jaxws-tools</artifactId>
                 <version>${jaxws.ri.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.servlet</artifactId>
-                <version>${glassfish.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.security.auth.message</groupId>
@@ -782,7 +772,7 @@
     </profiles>
 
     <properties>
-        <glassfish.version>3.1-b31</glassfish.version>
+        <glassfish.version>3.1</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
 
         <jaxb.api.version>2.2.2</jaxb.api.version>
