@@ -81,8 +81,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.transaction</artifactId>
+            <groupId>javax.transaction</groupId>
+            <artifactId>transaction-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
