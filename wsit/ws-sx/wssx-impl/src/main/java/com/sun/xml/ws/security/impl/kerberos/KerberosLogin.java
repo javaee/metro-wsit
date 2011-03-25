@@ -144,7 +144,7 @@ public class KerberosLogin {
         KerberosContext krbContext = new KerberosContext();
         LoginContext lc = null;
         try {
-            lc = new LoginContext(loginModule, new TextCallbackHandler());
+            lc = new LoginContext(loginModule, new com.sun.security.auth.callback.TextCallbackHandler());
         } catch (LoginException le) {
             throw new XWSSecurityException("Cannot create LoginContext. ", le);
         } catch (SecurityException se) {
