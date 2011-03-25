@@ -100,8 +100,8 @@
             <artifactId>jsr181-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.annotation</artifactId>
+            <groupId>javax.annotation</groupId>
+            <artifactId>jsr250-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>

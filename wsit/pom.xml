@@ -419,11 +419,11 @@
             <url>http://download.java.net/maven/2</url>
             <layout>default</layout>
         </repository>
-        <!--repository>
+        <repository>
             <id>m1.dev.java.net</id>
             <url>http://download.java.net/maven/1</url>
             <layout>legacy</layout>
-        </repository-->
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -479,24 +479,14 @@
                 <version>1.8.0</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.annotation</artifactId>
-                <version>${glassfish.version}</version>
+                <groupId>javax.resource</groupId>
+                <artifactId>connector-api</artifactId>
+                <version>1.5</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.ejb</artifactId>
-                <version>${glassfish.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>javax.resource</artifactId>
-                <version>${glassfish.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.transaction</groupId>
-                <artifactId>transaction-api</artifactId>
-                <version>1.1</version>
+                <groupId>javax.ejb</groupId>
+                <artifactId>ejb-api</artifactId>
+                <version>3.0</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.fastinfoset</groupId>
@@ -625,6 +615,11 @@
                 <version>1.0.2</version>
             </dependency>
             <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>jsr250-api</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.jws</groupId>
                 <artifactId>jsr181-api</artifactId>
                 <version>1.0-MR1</version>
@@ -721,6 +716,11 @@
                 <version>1.1</version>
             </dependency>
             <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>transaction-api</artifactId>
+                <version>1.1</version>
+            </dependency>
+            <dependency>
                 <groupId>com.sun.xml.txw2</groupId>
                 <artifactId>txw2</artifactId>
                 <version>20090102</version>
@@ -773,7 +773,6 @@
 
     <properties>
         <glassfish.version>3.1</glassfish.version>
-        <glassfish.ha.api.version></glassfish.ha.api.version>
         <grizzly.version>1.0.31</grizzly.version>
 
         <jaxb.api.version>2.2.2</jaxb.api.version>
