@@ -52,9 +52,9 @@
         <version>2.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>wstx-impl</artifactId>
+    <artifactId>wstx-core</artifactId>
     <packaging>jar</packaging>
-    <name>WS-TX Implementation</name>
+    <name>WS-TX Core</name>
 
     <!-- prerequisites -->
 
@@ -92,11 +92,6 @@
         </dependency>
 
         <!-- Compile scope -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wstx-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wstx-api</artifactId>
