@@ -40,7 +40,6 @@
 
 package com.sun.xml.ws.security.impl.kerberos;
 
-import com.sun.security.auth.callback.TextCallbackHandler;
 import com.sun.xml.wss.XWSSecurityException;
 import java.security.AccessControlContext;
 import java.security.AccessController;
