@@ -76,18 +76,18 @@
     <dependencies>
         <!-- Provided scope -->
         <dependency>
-            <groupId>javax.ejb</groupId>
-            <artifactId>ejb-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.ejb</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>transaction-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.transaction</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.resource</groupId>
-            <artifactId>connector-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.resource</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -133,8 +133,8 @@
             <artifactId>jsr181-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
