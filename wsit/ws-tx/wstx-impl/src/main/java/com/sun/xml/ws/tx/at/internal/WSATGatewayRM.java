@@ -41,6 +41,8 @@
 package com.sun.xml.ws.tx.at.internal;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.LoggingImpl;
+import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.WSATHelper;
 import com.sun.xml.ws.tx.at.WSATXAResource;
@@ -93,10 +95,15 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
     resourceRegistrationName = "RM_NAME_PREFIX" + serverName;
     branches = Collections.synchronizedMap(new HashMap<Xid, BranchRecord>());
     pendingXids = Collections.synchronizedList(new ArrayList<Xid>());
+    injectWSATImpl();
     singleton = this;
   }
 
-  /**
+    private void injectWSATImpl() {
+        WSATImplInjection.getInstance().setLogging(new LoggingImpl());
+    }
+
+    /**
    * called by transaction services for enlistment and used by HA delegation
    * @return
    */
