@@ -41,7 +41,8 @@
 package com.sun.xml.ws.tx.at.common.endpoint;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.WSATImplInjection;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.internal.XidImpl;
 import com.sun.xml.ws.api.SOAPVersion;
 import com.sun.xml.ws.api.addressing.AddressingVersion;
@@ -57,13 +58,15 @@ import com.sun.xml.ws.tx.at.common.WSATVersion;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceContext;
+import java.util.logging.Level;
 
 /**
  *
  * This is the common implementation for wsat10 and wsat11 Coordinators endpoints.
  */
 public class Coordinator<T> implements CoordinatorIF<T> {
-    private static final Logger LOGGER = Logger.getLogger(Coordinator.class);
+    private static final Class LOGGERCLASS = Coordinator.class;
+//    private static final Logger LOGGER = Logger.getLogger(Coordinator.class);
 
     private WebServiceContext context;
     private WSATVersion<T> version;
@@ -80,14 +83,23 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void preparedOperation(T parameters) {
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4509_PREPARED_OPERATION_ENTERED(parameters));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4509_PREPARED_OPERATION_ENTERED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4509_PREPARED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4510_PREPARED_OPERATION(xidFromWebServiceContextHeaderList));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4510_PREPARED_OPERATION", xidFromWebServiceContextHeaderList, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4510_PREPARED_OPERATION(xidFromWebServiceContextHeaderList));
         if (!getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.PREPARED)) {
             //Xid does not exist so must/better be recovery
             replayOperation(parameters);
         }
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4511_PREPARED_OPERATION_EXITED(parameters));
+        if(isDebugEnabled())
+      WSATImplInjection.getInstance().getLogging().log(
+              null, LOGGERCLASS, Level.INFO, "WSAT4511_PREPARED_OPERATION_EXITED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4511_PREPARED_OPERATION_EXITED(parameters));
     }
 
     /**
@@ -96,11 +108,21 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void abortedOperation(T parameters) {
-      if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4512_ABORTED_OPERATION_ENTERED(parameters));
+       if(isDebugEnabled())
+           WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4512_ABORTED_OPERATION_ENTERED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4512_ABORTED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4513_ABORTED_OPERATION(xidFromWebServiceContextHeaderList));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4513_ABORTED_OPERATION",
+                    xidFromWebServiceContextHeaderList, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4513_ABORTED_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.ABORTED);
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4514_ABORTED_OPERATION_EXITED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
     }
 
     /**
@@ -109,11 +131,21 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void readOnlyOperation(T parameters) {
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4515_READ_ONLY_OPERATION_ENTERED(parameters));
+        if(isDebugEnabled())
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4515_READ_ONLY_OPERATION_ENTERED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4515_READ_ONLY_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4516_READ_ONLY_OPERATION(xidFromWebServiceContextHeaderList));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4516_READ_ONLY_OPERATION",
+                    xidFromWebServiceContextHeaderList, null);
+//            LOGGER.info(LocalizationMessages.WSAT_4516_READ_ONLY_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.READONLY);
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4517_READ_ONLY_OPERATION_EXITED(parameters));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4517_READ_ONLY_OPERATION_EXITED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4517_READ_ONLY_OPERATION_EXITED(parameters));
     }
 
     /**
@@ -122,11 +154,21 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters Notification
      */
     public void committedOperation(T parameters) {
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4518_COMMITTED_OPERATION_ENTERED(parameters));
+        if(isDebugEnabled())
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4518_COMMITTED_OPERATION_ENTERED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4518_COMMITTED_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
-        if(isDebugEnabled())  LOGGER.info(LocalizationMessages.WSAT_4519_COMMITTED_OPERATION(xidFromWebServiceContextHeaderList));
+        if(isDebugEnabled())
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4519_COMMITTED_OPERATION",
+              xidFromWebServiceContextHeaderList, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4519_COMMITTED_OPERATION(xidFromWebServiceContextHeaderList));
         getWSATHelper().setDurableParticipantStatus(xidFromWebServiceContextHeaderList, WSATXAResource.COMMITTED);
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4520_COMMITTED_OPERATION_EXITED(parameters));
+        if(isDebugEnabled())
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4520_COMMITTED_OPERATION_EXITED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4520_COMMITTED_OPERATION_EXITED(parameters));
     }
 
     /**
@@ -135,19 +177,31 @@ public class Coordinator<T> implements CoordinatorIF<T> {
      * @param parameters  Notification
      */
     public void replayOperation(T parameters) {
-        if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4521_REPLAY_OPERATION_ENTERED(parameters));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4521_REPLAY_OPERATION_ENTERED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4521_REPLAY_OPERATION_ENTERED(parameters));
         Xid xidFromWebServiceContextHeaderList = getXid();
         String wsatTid = getWSATHelper().getWSATTidFromWebServiceContextHeaderList(context);
-        if(isDebugEnabled())  LOGGER.info(LocalizationMessages.WSAT_4522_REPLAY_OPERATION(xidFromWebServiceContextHeaderList));
+        if(isDebugEnabled())
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4522_REPLAY_OPERATION",
+                    xidFromWebServiceContextHeaderList, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4522_REPLAY_OPERATION(xidFromWebServiceContextHeaderList));
         try {
             getTransactionServices().replayCompletion(
                     wsatTid, createWSATXAResourceForXidFromReplyTo(xidFromWebServiceContextHeaderList));
         } catch (WSATException e) {
-            if(isDebugEnabled())
-                LOGGER.severe(LocalizationMessages.WSAT_4523_REPLAY_OPERATION_SOAPEXCEPTION(xidFromWebServiceContextHeaderList), e);
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.SEVERE, "WSAT4523_REPLAY_OPERATION_SOAPEXCEPTION",
+                    xidFromWebServiceContextHeaderList, null);
+//                LOGGER.severe(LocalizationMessages.WSAT_4523_REPLAY_OPERATION_SOAPEXCEPTION(xidFromWebServiceContextHeaderList), e);
             //there is no consequence, recovery reattempt should be (re)issued by subordinate
         }
-            if(isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
+        if(isDebugEnabled())
+        WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, "WSAT4514_ABORTED_OPERATION_EXITED", parameters, null);
+//              LOGGER.info(LocalizationMessages.WSAT_4514_ABORTED_OPERATION_EXITED(parameters));
     }
 
     /**

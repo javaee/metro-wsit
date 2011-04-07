@@ -40,6 +40,8 @@
 
 package com.sun.xml.ws.tx.coord.common;
 
+import com.sun.xml.ws.tx.at.WSATHelper;
+import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.coord.common.types.BaseRegisterResponseType;
 import com.sun.istack.logging.Logger;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
@@ -49,7 +51,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class PendingRequestManager {
-    private static final Logger LOGGER = Logger.getLogger(PendingRequestManager.class);
+//    private static final Logger LOGGER = Logger.getLogger(PendingRequestManager.class);
+    private static final Class LOGGERCLASS = PendingRequestManager.class;
     static ConcurrentHashMap<String, ResponseBox> pendingRequests = new ConcurrentHashMap<String, ResponseBox>();
 
     public static ResponseBox reqisterRequest(String msgId) {
@@ -64,14 +67,18 @@ public class PendingRequestManager {
 
 
     public static void registryReponse(String msgId, BaseRegisterResponseType repsonse) {
-        if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine(LocalizationMessages.WSAT_4620_GET_RESPONSE_REQUEST("\t" + msgId));
+        if (WSATHelper.isDebugEnabled()) {                             
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.FINE, "WSAT4620_GET_RESPONSE_REQUEST", msgId, null);
+//            LOGGER.fine(LocalizationMessages.WSAT_4620_GET_RESPONSE_REQUEST("\t" + msgId));
         }
         ResponseBox box = pendingRequests.remove(msgId);
         if (box != null) {
             box.put(repsonse);
-        } else if (LOGGER.isLoggable(Level.FINE)) {
-            LOGGER.fine(LocalizationMessages.WSAT_4621_IGNORE_RESPONSE("\t" + msgId));
+        } else if (WSATHelper.isDebugEnabled()) {
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.FINE, "WSAT4621_IGNORE_RESPONSE", msgId, null); 
+//            LOGGER.fine(LocalizationMessages.WSAT_4621_IGNORE_RESPONSE("\t" + msgId));
         }
     }
 

@@ -139,6 +139,11 @@ public class ParticipantTest extends TestCase {
       assertEquals("committedOperationCount after commit exception call", 1, testCoordinator.committedOperationCount); //todo change as we interpret exception beyond nota
    }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
     class TestParticipant extends Participant {
       CoordinatorIF m_coordinatorIF;
       TransactionServices m_transactionServices;
@@ -149,7 +154,12 @@ public class ParticipantTest extends TestCase {
            return true;
        }
 
-       public TestParticipant(WebServiceContext context, WSATVersion version,
+        @Override
+        boolean isDebugEnabled() {
+            return false;
+        }
+
+        public TestParticipant(WebServiceContext context, WSATVersion version,
                              CoordinatorIF coordinatorIF, TransactionServices transactionServices, byte[] tid) {
          super(context, version);
          m_coordinatorIF = coordinatorIF;

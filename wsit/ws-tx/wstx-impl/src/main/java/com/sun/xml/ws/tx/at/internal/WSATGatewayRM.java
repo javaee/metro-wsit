@@ -69,7 +69,8 @@ import javax.xml.ws.WebServiceException;
  * Gateway XAResource for managing outbound WS-AT transaction branches.
  */
 public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEventListener {
-  private static final Logger LOGGER = Logger.getLogger(WSATGatewayRM.class);
+  private static final Class LOGGERCLASS = WSATGatewayRM.class;
+//  private static final Logger LOGGER = Logger.getLogger(WSATGatewayRM.class);
   private static final String WSAT = "wsat";
   private static final String OUTBOUND = "outbound";
   private static final String INBOUND = "inbound";
@@ -564,8 +565,10 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
         }
       }
     } catch(IOException pse) {
-      debug("error persisting branch " + branch + ": " + pse.toString());
-      LOGGER.severe(LocalizationMessages.WSAT_4500_ERROR_PERSISTING_BRANCH_RECORD(branch.toString()), pse);
+      debug("error persisting branch " + branch + ": " + pse.toString());  
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.SEVERE, "WSAT4500_ERROR_PERSISTING_BRANCH_RECORD", branch, pse);
+//      LOGGER.severe(LocalizationMessages.WSAT_4500_ERROR_PERSISTING_BRANCH_RECORD(branch.toString()), pse);
       JTAHelper.throwXAException(XAException.XAER_RMERR, "Error persisting branch " + branch, pse);
     }
   }
@@ -583,7 +586,9 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
       }
     } catch(Exception pse) {
       debug("error deleting branch record " + branch + ": " + pse.toString());
-      LOGGER.severe(LocalizationMessages.WSAT_4501_ERROR_DELETING_BRANCH_RECORD(branch.toString()), pse);
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.SEVERE, "WSAT4501_ERROR_DELETING_BRANCH_RECORD", branch, pse);
+//      LOGGER.severe(LocalizationMessages.WSAT_4501_ERROR_DELETING_BRANCH_RECORD(branch.toString()), pse);
       JTAHelper.throwXAException(XAException.XAER_RMERR, "Error deleting branch record " + branch, pse);
     }
   }
@@ -604,7 +609,9 @@ public class WSATGatewayRM implements XAResource, WSATRuntimeConfig.RecoveryEven
 
   private static void debug(String msg) {
     if (WSATHelper.isDebugEnabled()) {
-        Logger.getLogger(WSATGatewayRM.class).log(Level.INFO, msg);
+      WSATImplInjection.getInstance().getLogging().log(
+                            null, LOGGERCLASS, Level.INFO, null, msg, null);
+//        Logger.getLogger(WSATGatewayRM.class).log(Level.INFO, msg);
     }
   }
 

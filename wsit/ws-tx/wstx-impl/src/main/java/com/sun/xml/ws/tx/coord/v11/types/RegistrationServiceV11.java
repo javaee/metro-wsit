@@ -41,10 +41,12 @@
 package com.sun.xml.ws.tx.coord.v11.types;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.WSATImplInjection;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
@@ -59,6 +61,7 @@ public class RegistrationServiceV11
 
     private final static URL REGISTRATIONSERVICEV11_WSDL_LOCATION;
     private final static Logger LOGGER = Logger.getLogger(com.sun.xml.ws.tx.coord.v11.types.RegistrationServiceV11.class);
+    private final static Class LOGGERCLASS = com.sun.xml.ws.tx.coord.v11.types.RegistrationServiceV11.class;
 
     static {
         URL url = null;
@@ -67,8 +70,13 @@ public class RegistrationServiceV11
             baseUrl = com.sun.xml.ws.tx.coord.v11.types.RegistrationServiceV11 .class.getResource(".");
             url = new URL(baseUrl, "wsdls/wsc11/wstx-wscoor-1.1-wsdl-200702.wsdl");
         } catch (MalformedURLException e) {
-            LOGGER.warning(LocalizationMessages.WSAT_4623_FAILED_TO_CREATE_URL_FOR_WSDL());
-            LOGGER.warning(e.getMessage());
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.WARNING, "WSAT4572_INVALID_TRANSACTION_EXCEPTION_IN_CLIENT_SIDE_HANDLER",
+                    null, null);
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.WARNING, null, e.getMessage(), null);
+//            LOGGER.warning(LocalizationMessages.WSAT_4623_FAILED_TO_CREATE_URL_FOR_WSDL());
+//            LOGGER.warning(e.getMessage());
         }
         REGISTRATIONSERVICEV11_WSDL_LOCATION = url;
     }

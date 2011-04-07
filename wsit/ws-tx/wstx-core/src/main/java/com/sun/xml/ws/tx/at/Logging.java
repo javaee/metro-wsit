@@ -12,6 +12,6 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public interface Logging {
-    public void log(Logger logger, Class loggerClass, Level level, String msgId, Object[] args, Throwable t);
-    public void log(Logger logger, Class loggerClass, Level level, String msgId, Object args, Throwable t);
+    public String log(Logger logger, Class loggerClass, Level level, String msgId, Object[] args, Throwable t);
+    public String log(Logger logger, Class loggerClass, Level level, String msgId, Object args, Throwable t);
 }

@@ -41,10 +41,12 @@
 package com.sun.xml.ws.tx.coord.v10.types;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
+import com.sun.xml.ws.tx.at.WSATImplInjection;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
@@ -58,6 +60,7 @@ public class RegistrationServiceV10
 
     private final static URL REGISTRATIONSERVICEV10_WSDL_LOCATION;
     private final static Logger LOGGER = Logger.getLogger(com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class);
+    private final static Class LOGGERCLASS = com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class;
 
     static {
         URL url = null;
@@ -66,8 +69,12 @@ public class RegistrationServiceV10
             baseUrl = com.sun.xml.ws.tx.coord.v10.types.RegistrationServiceV10 .class.getResource(".");
             url = new URL(baseUrl, "file:wsdls/wsc10/wscoor.wsdl");
         } catch (MalformedURLException e) {
-            LOGGER.warning(LocalizationMessages.WSAT_4622_FAILED_TO_CREATE_URL_FOR_WSDL());
-            LOGGER.warning(e.getMessage());
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.WARNING, "WSAT4522_REPLAY_OPERATION", null, null);
+            WSATImplInjection.getInstance().getLogging().log(
+                    null,LOGGERCLASS, Level.WARNING, null, e.getMessage(), null);
+//            LOGGER.warning(LocalizationMessages.WSAT_4622_FAILED_TO_CREATE_URL_FOR_WSDL());
+//            LOGGER.warning(e.getMessage());
         }
         REGISTRATIONSERVICEV10_WSDL_LOCATION = url;
     }

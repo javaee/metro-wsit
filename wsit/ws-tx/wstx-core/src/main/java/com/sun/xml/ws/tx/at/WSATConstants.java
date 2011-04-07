@@ -95,7 +95,7 @@ public interface WSATConstants {
     static final String REPLAY = "Replay";
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_DURABLE_2PC = WSAT10_NS_URI + "/" + DURABLE_2PC;
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_VOLATILE_2PC = WSAT10_NS_URI + "/" + VOLATILE_2PC;
-    static final String WLA_WSAT_NS_URI = "http://com.sun.xml.ws.tx.at/ws/2008/10/wsat";
+    public String WLA_WSAT_NS_URI = "http://com.sun.xml.ws.tx.at/ws/2008/10/wsat";
     static final String WSAT_WSAT = "wsat-wsat";
     static final String WSAT_CONTEXT_ROOT = "__wstx-services";
     static final String TXID = "txId";

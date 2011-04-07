@@ -41,6 +41,7 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.logging.Logger;
+import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.at.common.TransactionImportManager;
 import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
@@ -68,9 +69,11 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
 import javax.xml.ws.WebServiceException;
+import java.util.logging.Level;
 
 public class WSATServerHelper implements WSATServer {
-    private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
+//    private static final Logger LOGGER = Logger.getLogger(WSATServerHelper.class);
+    private static final Class LOGGERCLASS = WSATServerHelper.class;
     Xid xidToResume; //todo should not rely on tube member vars, use context map instead
 
     public void doHandleRequest(HeaderList headers, TransactionalAttribute tx) {
@@ -173,10 +176,13 @@ public class WSATServerHelper implements WSATServer {
     }
 
     public void log(String message) {
-        LOGGER.info(LocalizationMessages.WSAT_4612_WSAT_SERVERHELPER(message));
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, "WSAT4612_WSAT_SERVERHELPER", message, null);
+//        LOGGER.info(LocalizationMessages.WSAT_4612_WSAT_SERVERHELPER(message));
     }
 
     private void debug(String message) {
-		LOGGER.info(message);
+            WSATImplInjection.getInstance().getLogging().log(
+                    null, LOGGERCLASS, Level.INFO, null, message, null);
     }
 }
