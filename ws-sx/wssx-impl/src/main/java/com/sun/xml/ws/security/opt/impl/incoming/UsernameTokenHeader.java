@@ -132,16 +132,20 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
         if (filter.getSalt() != null) {
             utPolicy.setNoPassword(false);
         }
-        if(filter.getPassword() == null && filter.getCreated() != null  && !MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())){
-                validateNonceOrCreated(context);
-        } else if (filter.getPassword() == null && filter.getCreated() == null) {
-            if (MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())) {
+
+        if (filter.getPassword() == null && filter.getCreated() == null &&
+            MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())) {
                  throw SOAPUtil.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         "Cannot validate Password Digest since Creation Time was not Specified",
                         null);
-            }
-        }else if (MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())) {
+        }
+
+        if(filter.getNonce() != null || filter.getCreated() != null){ //SP1.3
+            validateNonceOrCreated(context);
+        }
+
+        if (MessageConstants.PASSWORD_DIGEST_NS.equals(filter.getPasswordType())) {
             authenticated = context.getSecurityEnvironment().authenticateUser(
                     context.getExtraneousProperties(), filter.getUsername(), filter.getPasswordDigest(),
                     filter.getNonce(), filter.getCreated());
@@ -152,9 +156,6 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                         "Authentication of Username Password Token Failed",
                         null);
             }
-            validateNonceOrCreated(context);
-        } else if(filter.getNonce() != null || filter.getCreated() != null){ //SP1.3
-            validateNonceOrCreated(context);
         } else{
             authenticated = context.getSecurityEnvironment().authenticateUser(context.getExtraneousProperties(),
                     filter.getUsername(), filter.getPassword());
@@ -164,15 +165,15 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                         MessageConstants.WSSE_FAILED_AUTHENTICATION,
                         "Authentication of Username Password Token Failed",
                         null);
-                
+
             }
         }
-        
-        
+
+
         if (MessageConstants.debug) {
             log.log(Level.FINEST, "Password Validated.....");
         }
-        
+
         context.getSecurityEnvironment().updateOtherPartySubject(
                 DefaultSecurityEnvironmentImpl.getSubject((FilterProcessingContext)context),filter.getUsername(), filter.getPassword());
     }
