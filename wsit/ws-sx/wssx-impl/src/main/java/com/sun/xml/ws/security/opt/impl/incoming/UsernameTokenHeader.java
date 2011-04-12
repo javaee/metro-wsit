@@ -156,7 +156,7 @@ public class UsernameTokenHeader implements com.sun.xml.ws.security.opt.api.toke
                         "Authentication of Username Password Token Failed",
                         null);
             }
-        } else{
+        } else if (filter.getPassword() != null) {
             authenticated = context.getSecurityEnvironment().authenticateUser(context.getExtraneousProperties(),
                     filter.getUsername(), filter.getPassword());
             if(!authenticated){
