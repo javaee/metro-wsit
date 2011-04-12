@@ -632,7 +632,7 @@ public abstract class BaseCanonicalizer {
                 }
                 return null;
             }
-            if (attrNS != null && !attrNS.isWritten()) {
+            if (attrNS != null && !attrNS.isWritten() && !isPrefixRedefined(stack, attrNS)) {
                  //now check if at output parents it was written
                 int tmp = nsDepth -1;
                 while (tmp >=0) {
@@ -818,6 +818,17 @@ public abstract class BaseCanonicalizer {
             
             return list.iterator();
             
+        }
+
+        private boolean isPrefixRedefined(Stack stack, AttributeNS attrNS) {
+           Iterator it = stack.iterator();
+           while (it.hasNext()) {
+               AttributeNS aNS = (AttributeNS)it.next();
+               if (!attrNS.getUri().equals(aNS.getUri())) {
+                   return true;
+               }
+           }
+           return false;
         }
     }
     
