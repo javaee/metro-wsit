@@ -38,9 +38,6 @@
  * holder.
  */
 
-/*
- * $Id: DOMSubTreeData.java,v 1.2 2010-10-21 15:37:28 snajper Exp $
- */
 package com.sun.xml.wss.impl.dsig;
 
 import javax.xml.crypto.NodeSetData;
@@ -146,18 +143,18 @@ public class DOMSubTreeData implements NodeSetData {
 	 * @param nodeSet the set of nodes traversed so far
 	 * @param the previous sibling node
 	 */
-        @SuppressWarnings("unchecked")
 	private void nodeSetMinusCommentNodes(Node node, List nodeSet,
             Node prevSibling) {
             switch (node.getNodeType()) {
 		case Node.ELEMENT_NODE :
                     NamedNodeMap attrs = node.getAttributes();
                     if (attrs != null) {
-                        for (int i = 0; i<attrs.getLength(); i++) {
+                        for (int i = 0, len = attrs.getLength(); i < len; i++) {
                             nodeSet.add(attrs.item(i));
                         }
                     }
                     nodeSet.add(node);
+		case Node.DOCUMENT_NODE :
                     Node pSibling = null;
                     for (Node child = node.getFirstChild(); child != null;
                         child = child.getNextSibling()) {

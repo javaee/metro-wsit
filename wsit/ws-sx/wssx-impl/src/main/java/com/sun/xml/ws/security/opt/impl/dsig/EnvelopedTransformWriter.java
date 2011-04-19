@@ -42,11 +42,12 @@ package com.sun.xml.ws.security.opt.impl.dsig;
 
 
 import com.sun.xml.ws.security.opt.crypto.dsig.Reference;
+import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import org.jcp.xml.dsig.internal.DigesterOutputStream;
+
 
 /**
  *

@@ -56,7 +56,6 @@ import java.util.logging.Logger;
 
 public class HmacSHA1 {
     
-    private static Logger log = Logger.getLogger("org.jcp.xml.dsig.internal");
     
     private static final int SHA1_BLOCK = 64;        // 512 bit block in SHA-1
     private byte[] key_opad;
@@ -92,9 +91,6 @@ public class HmacSHA1 {
         else {
             byte_length = -1;
         }
-	if (log.isLoggable(Level.FINE)) {
-            log.log(Level.FINE, "byte_length: " + byte_length);
-	}
         //initialized = true;
     }
     
