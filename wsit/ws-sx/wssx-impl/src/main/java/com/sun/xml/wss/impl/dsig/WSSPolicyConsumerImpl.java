@@ -136,17 +136,49 @@ import java.io.OutputStream;
 public class WSSPolicyConsumerImpl {
     private static Logger logger = Logger.getLogger(LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE,
             LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE);
+    public static final String defaultJSR105Provider = "org.jcp.xml.dsig.internal.dom.XMLDSigRI";
+    public static final String ibmProvider ="com.ibm.xml.crypto.IBMXMLCryptoProvider";
+
+    private String providerName = null;
     private String pMT = null;
     private static volatile WSSPolicyConsumerImpl wpcInstance = null;
     private URIDereferencer externalURIResolver = null;
     private Provider provider = null;
+    private static final String javavendor = System.getProperty("java.vendor");
+    //IBM Corporation
+    private static final boolean vendorIsIBM = javavendor.startsWith("IBM");
+
     /** Creates a new instance of WSSPolicyConsumerImpl */
-    private WSSPolicyConsumerImpl() { //for now.
-        provider = XMLSignatureFactory.getInstance().getProvider();
+    private WSSPolicyConsumerImpl() {
+        //Cannot use XMLSignatureFactory.getInstance().getProvider()
+        //since this code needs to compile with JDK5 and on JDK5
+        // XMLSignatureFactory.getInstance().getProvider() would throw
+        //NoSuchMechanismException: Mechanism type DOM not available
+        providerName = vendorIsIBM ? ibmProvider :  System.getProperty("jsr105Provider", defaultJSR105Provider);
         pMT = System.getProperty("jsr105MechanismType","DOM");
-        
+        /*
+        try{
+            provider = (Provider) Class.forName(providerName).newInstance();
+        }catch(Exception ex){
+            logger.log(Level.SEVERE,"WSS1324.dsig.factory",ex);
+        }
+        */
+        try{
+            ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+            ClassLoader loader = null;
+            if(tccl == null){
+                loader = this.getClass().getClassLoader();
+            }else{
+                loader = tccl;
+            }
+            Class providerClass = Class.forName(providerName,true,loader);
+            provider = (Provider) providerClass.newInstance();
+        }catch(Exception ex){
+            logger.log(Level.SEVERE,LogStringsMessages.WSS_1324_DSIG_FACTORY(),ex);
+        }
+
         if(logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST,"JSR 105 provider is : "+provider.getName());
+            logger.log(Level.FINEST,"JSR 105 provider is : "+providerName);
             logger.log(Level.FINEST,"JSR 105 provider mechanism is : "+pMT);
         }
         AccessController.doPrivileged(new java.security.PrivilegedAction<Object>() {
