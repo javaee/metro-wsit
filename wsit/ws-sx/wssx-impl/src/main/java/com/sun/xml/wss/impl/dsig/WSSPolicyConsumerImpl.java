@@ -137,16 +137,16 @@ public class WSSPolicyConsumerImpl {
     private static Logger logger = Logger.getLogger(LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE,
             LogDomainConstants.IMPL_SIGNATURE_DOMAIN_BUNDLE);
     public static final String defaultJSR105Provider = "org.jcp.xml.dsig.internal.dom.XMLDSigRI";
-    public static final String ibmProvider ="com.ibm.xml.crypto.IBMXMLCryptoProvider";
+    //public static final String ibmProvider ="com.ibm.xml.crypto.IBMXMLCryptoProvider";
 
     private String providerName = null;
     private String pMT = null;
     private static volatile WSSPolicyConsumerImpl wpcInstance = null;
     private URIDereferencer externalURIResolver = null;
     private Provider provider = null;
-    private static final String javavendor = System.getProperty("java.vendor");
+    //private static final String javavendor = System.getProperty("java.vendor");
     //IBM Corporation
-    private static final boolean vendorIsIBM = javavendor.startsWith("IBM");
+    //private static final boolean vendorIsIBM = javavendor.startsWith("IBM");
 
     /** Creates a new instance of WSSPolicyConsumerImpl */
     private WSSPolicyConsumerImpl() {
@@ -154,7 +154,8 @@ public class WSSPolicyConsumerImpl {
         //since this code needs to compile with JDK5 and on JDK5
         // XMLSignatureFactory.getInstance().getProvider() would throw
         //NoSuchMechanismException: Mechanism type DOM not available
-        providerName = vendorIsIBM ? ibmProvider :  System.getProperty("jsr105Provider", defaultJSR105Provider);
+        providerName = /*vendorIsIBM ? ibmProvider :*/
+                System.getProperty("jsr105Provider", defaultJSR105Provider);
         pMT = System.getProperty("jsr105MechanismType","DOM");
         /*
         try{
