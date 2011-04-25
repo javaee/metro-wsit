@@ -50,6 +50,7 @@ import com.sun.xml.ws.security.opt.api.SecurityElementWriter;
 import com.sun.xml.ws.security.opt.api.SecurityHeaderElement;
 import com.sun.xml.ws.security.opt.crypto.dsig.SignatureValue;
 import com.sun.xml.ws.security.opt.crypto.dsig.SignedInfo;
+import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.crypto.jaxb.JAXBValidateContext;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
 import com.sun.xml.ws.security.opt.impl.incoming.processor.KeyInfoProcessor;
@@ -83,7 +84,6 @@ import org.jvnet.staxex.XMLStreamReaderEx;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 
 import java.security.MessageDigest;
-import org.jcp.xml.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.impl.incoming.processor.StreamingPayLoadDigester;
 import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import java.security.NoSuchAlgorithmException;

@@ -47,6 +47,7 @@ import com.sun.xml.ws.security.opt.impl.util.NamespaceContextEx;
 import com.sun.xml.wss.impl.c14n.AttributeNS;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 import com.sun.org.apache.xml.internal.security.utils.UnsyncBufferedOutputStream;
+import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +56,7 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-import org.jcp.xml.dsig.internal.DigesterOutputStream;
+
 
 /**
  *

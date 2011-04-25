@@ -48,6 +48,7 @@ package com.sun.xml.ws.security.opt.crypto.dsig;
 
 import com.sun.org.apache.xml.internal.security.utils.UnsyncBufferedOutputStream;
 import com.sun.xml.security.core.dsig.TransformsType;
+import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import com.sun.xml.wss.logging.impl.opt.signature.LogStringsMessages;
@@ -69,7 +70,7 @@ import javax.xml.crypto.XMLCryptoContext;
 import javax.xml.crypto.dsig.TransformException;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLValidateContext;
-import org.jcp.xml.dsig.internal.DigesterOutputStream;
+
 
 /**
  *

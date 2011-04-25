@@ -40,6 +40,7 @@
 
 package com.sun.xml.ws.security.opt.impl.incoming.processor;
 
+import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 import com.sun.xml.wss.logging.LogDomainConstants;
@@ -54,7 +55,6 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import org.jcp.xml.dsig.internal.DigesterOutputStream;
 import javax.xml.ws.WebServiceException;
 import com.sun.xml.wss.logging.impl.opt.signature.LogStringsMessages;
 /**
