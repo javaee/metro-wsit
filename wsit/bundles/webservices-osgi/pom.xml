@@ -179,6 +179,7 @@
                                     com.sun.security.auth.callback;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
+                                    com.sun.security.jgss;resolution:=optional,
                                     sun.security.jgss.spi;resolution:=optional,
                                     sun.security.krb5;resolution:=optional,
                                     sun.security.krb5.internal.crypto;resolution:=optional,
