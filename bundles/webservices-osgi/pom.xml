@@ -184,6 +184,7 @@
                                     sun.security.krb5.internal.crypto;resolution:=optional,
                                     sun.security.util;resolution:=optional,
                                     sun.security.x509;resolution:=optional,
+                                    com.sun.security.jgss;resolution:=optional,
                                     com.sun.appserv.server;resolution:=optional,
                                     com.sun.enterprise.security.*;resolution:=optional,
                                     com.sun.enterprise.transaction.*;resolution:=optional,
