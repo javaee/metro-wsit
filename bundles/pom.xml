@@ -51,6 +51,7 @@
     </parent>
 
     <artifactId>bundles</artifactId>
+    <classifier>aix</classifier>
     <packaging>pom</packaging>
     <name>Metro Bundles</name>
 
