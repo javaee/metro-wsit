@@ -301,6 +301,7 @@
                             <probe-provider-class-names>com.sun.xml.ws.transport.http.servlet.JAXWSRIDeploymentProbeProvider,com.sun.xml.ws.transport.http.servlet.JAXWSRIServletProbeProvider</probe-provider-class-names>
                         </manifestEntries>
                     </archive>
+                    <classifier>aix</classifier>
                 </configuration>
             </plugin>
             <plugin> <!-- remove the generated src dir-->
