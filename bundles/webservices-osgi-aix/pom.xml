@@ -50,10 +50,10 @@
         <version>2.1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>webservices-osgi</artifactId>
+    <artifactId>webservices-osgi-aix</artifactId>
     <packaging>jar</packaging>
     <name>Metro Web Services Runtime OSGi Bundle</name>
-    <description>Metro Web Services Runtime OSGi Bundle</description>
+    <description>Metro Web Services Runtime OSGi Bundle for AIX</description>
 
     <build>
         <plugins>
