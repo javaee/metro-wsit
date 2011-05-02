@@ -285,7 +285,7 @@
                         <configuration>
                             <excludeTransitive>true</excludeTransitive>
                             <includes>META-INF/services/*, META-INF/metro-default.xml, META-INF/jaxrpc/*</includes>
-                            <excludes>META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.soap.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
+                            <excludes>META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
