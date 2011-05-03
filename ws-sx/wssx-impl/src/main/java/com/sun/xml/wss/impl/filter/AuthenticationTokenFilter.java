@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -330,6 +330,7 @@ public class AuthenticationTokenFilter {
                                 xwse);
                     }
                 } catch (NonceManager.NonceException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1406_NOTMET_NONCE(), ex);
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_FAILED_AUTHENTICATION,
                             "Invalid/Repeated Nonce value for Username Token",

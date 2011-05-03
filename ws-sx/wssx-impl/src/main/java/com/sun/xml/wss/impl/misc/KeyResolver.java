@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -207,7 +207,7 @@ public class KeyResolver {
                 XWSSecurityException xwsse =
                         new XWSSecurityException(
                         "Support for processing information in the given ds:KeyInfo is not present");
-                 log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO(),xwsse);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO(),xwsse);
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         xwsse.getMessage(),

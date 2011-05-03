@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -78,17 +78,35 @@ public class SOAPUtil {
     private static boolean enableFaultDetail = false;
     private static final String WSS_DEBUG_PROPERTY = "com.sun.xml.wss.debug";
     private static final String ENABLE_FAULT_DETAIL = "FaultDetail";
+    protected static final LocalStringManagerImpl localStrings =
+     new LocalStringManagerImpl(SOAPUtil.class);
+    private static final String localizedGenericError;
 
     static {
-        String enableDetailFlag = System.getProperty(WSS_DEBUG_PROPERTY);
-        if (enableDetailFlag != null && enableDetailFlag.contains(ENABLE_FAULT_DETAIL)) {
+        String debugFlag = System.getProperty(WSS_DEBUG_PROPERTY);
+        if (debugFlag != null && debugFlag.contains(ENABLE_FAULT_DETAIL)) {
             enableFaultDetail = true;
-            System.setProperty("com.sun.xml.ws.fault.SOAPFaultBuilder.disableCaptureStackTrace", "true");
         }
+        localizedGenericError = localStrings.getLocalString("generic.validation.error",
+                    "Invalid Security Header");
     }
 
     public static SOAPFaultException getSOAPFaultException(QName faultCode, WSSecureConversationRuntimeException wsre, SOAPFactory soapFactory, SOAPVersion sOAPVersion) {
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    /**
+     * @return the enableFaultDetail
+     */
+    public static boolean isEnableFaultDetail() {
+        return enableFaultDetail;
+    }
+
+    /**
+     * @return the localizedGenericError
+     */
+    public static String getLocalizedGenericError() {
+        return localizedGenericError;
     }
 
     /** Creates a new instance of SOAPUtil */
@@ -145,7 +163,7 @@ public class SOAPUtil {
 
     protected static SOAPFault getSOAPFault(WssSoapFaultException sfe, SOAPFactory soapFactory, SOAPVersion version) {
 
-             SOAPFault fault;
+        SOAPFault fault;
         String reasonText = sfe.getFaultString();
         if (reasonText == null) {
             reasonText = (sfe.getMessage() != null) ? sfe.getMessage() : "";
@@ -181,9 +199,8 @@ public class SOAPUtil {
 
     public static SOAPFaultException getSOAPFaultException(WssSoapFaultException ex, SOAPFactory factory, SOAPVersion version) {
         SOAPFault fault = getSOAPFault(ex, factory, version);
-        if (!enableFaultDetail) {
+        if (!isEnableFaultDetail()) {
            return createSOAPFault(fault,ex);
- 
         }
         Throwable cause = ex.getCause();
         setFaultDetail(fault, cause);
@@ -192,37 +209,35 @@ public class SOAPUtil {
     }
 
      public static SOAPFaultException getSOAPFaultException(QName faultCode, Exception ex, SOAPFactory factory, SOAPVersion version) {
-        String msg = ex.getMessage();
-        if (msg == null) {
-            msg = ex.getClass().getName();
-        }
+        String msg = getExceptionMessage(ex);
         SOAPFault fault = getSOAPFault(faultCode, msg, factory, version);
-        if (!enableFaultDetail) {
+        if (!isEnableFaultDetail()) {
             return createSOAPFault(fault,ex);
-
         }
         setFaultDetail(fault, ex);
         return createSOAPFault(fault,ex);
     }
 
     public static SOAPFaultException getSOAPFaultException(Exception ex, SOAPFactory factory, SOAPVersion version) {
-        String msg = ex.getMessage();
-        if (msg == null) {
-            msg = ex.getClass().getName();
-        }
+        String msg = getExceptionMessage(ex);
+       
         SOAPFault fault = getSOAPFault(MessageConstants.WSSE_INVALID_SECURITY, msg, factory, version);
-        if (!enableFaultDetail) {
+        if (!isEnableFaultDetail()) {
             return createSOAPFault(fault,ex);
-
         }
         setFaultDetail(fault, ex);
         return createSOAPFault(fault,ex);
 
     }
+
     private static SOAPFaultException createSOAPFault(SOAPFault fault, Throwable cause) {
-     SOAPFaultException sfe = new SOAPFaultException(fault);
-       sfe.initCause(cause);
-       return sfe;
+        SOAPFaultException sfe = new SOAPFaultException(fault);
+        if (isEnableFaultDetail()) {
+            sfe.initCause(cause);
+        } else {
+            sfe.initCause(new Exception());
+        }
+        return sfe;
     }
 
     
@@ -244,6 +259,17 @@ public class SOAPUtil {
         } catch (SOAPException ex) {
         //ignore for now
         }
+    }
+
+    private static String getExceptionMessage(Throwable ex) {
+        if (!isEnableFaultDetail()) {
+            return getLocalizedGenericError();
+        }
+        String msg = ex.getMessage();
+        if (msg == null) {
+            msg = ex.getClass().getName();
+        }
+        return msg;
     }
 }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -79,6 +79,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import com.sun.org.apache.xml.internal.security.Init;
+import com.sun.xml.ws.security.opt.impl.util.SOAPUtil;
 import com.sun.xml.wss.impl.policy.mls.Target;
 import com.sun.xml.wss.swa.MimeConstants;
 
@@ -303,6 +304,7 @@ public final class SecurableSoapMessage extends SOAPMessage {
      * This fault stands for An error was discovered processing the
      * wsse:Security header.
      */
+     
     public void generateSecurityHeaderException(String exceptionMessage)
     throws SecurityHeaderException, XWSSecurityException {
         SecurityHeaderException she =
@@ -323,9 +325,13 @@ public final class SecurableSoapMessage extends SOAPMessage {
     public static WssSoapFaultException newSOAPFaultException(
             String faultstring,
             Throwable th) {
+        String fault = SOAPUtil.isEnableFaultDetail() ?
+            faultstring : SOAPUtil.getLocalizedGenericError();
         WssSoapFaultException sfe =
-                new WssSoapFaultException(null, faultstring, null, null);
-        sfe.initCause(th);
+                new WssSoapFaultException(null, fault, null, null);
+        if (SOAPUtil.isEnableFaultDetail()) {
+            sfe.initCause(th);
+        }
         return sfe;
     }
     
@@ -337,10 +343,13 @@ public final class SecurableSoapMessage extends SOAPMessage {
             QName faultCode,
             String faultstring,
             Throwable th) {
-        
+        String fault = SOAPUtil.isEnableFaultDetail() ?
+            faultstring : SOAPUtil.getLocalizedGenericError();
         WssSoapFaultException sfe =
-                new WssSoapFaultException(faultCode, faultstring, null, null);
-        sfe.initCause(th);
+                new WssSoapFaultException(faultCode, fault, null, null);
+        if (SOAPUtil.isEnableFaultDetail()) {
+            sfe.initCause(th);
+        }
         return sfe;
     }
     
@@ -368,8 +377,9 @@ public final class SecurableSoapMessage extends SOAPMessage {
                         faultCode.getPrefix(),
                         faultCode.getNamespaceURI());
             }
-            
-            body.addFault(faultCodeName, sfe.getFaultString());
+            final String msg = (SOAPUtil.isEnableFaultDetail())
+                    ? sfe.getFaultString() : SOAPUtil.getLocalizedGenericError();
+            body.addFault(faultCodeName, msg);
             // TODO RFE add "actor" and throwable info to "detail"
         } catch (SOAPException e) {
             log.log(Level.SEVERE, LogStringsMessages.WSS_0371_ERROR_GENERATE_FAULT(e.getMessage()));
