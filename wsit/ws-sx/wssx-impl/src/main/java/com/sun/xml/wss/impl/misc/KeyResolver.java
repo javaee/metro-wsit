@@ -207,7 +207,7 @@ public class KeyResolver {
                 XWSSecurityException xwsse =
                         new XWSSecurityException(
                         "Support for processing information in the given ds:KeyInfo is not present");
-                 log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO(),xwsse);
+                log.log(Level.SEVERE, LogStringsMessages.WSS_0339_UNSUPPORTED_KEYINFO(),xwsse);
                 throw SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INVALID_SECURITY,
                         xwsse.getMessage(),

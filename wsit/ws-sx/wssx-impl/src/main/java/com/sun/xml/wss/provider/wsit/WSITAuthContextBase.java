@@ -1718,7 +1718,7 @@ public abstract class WSITAuthContextBase  {
         com.sun.xml.wss.impl.WssSoapFaultException wsfe =
                 SecurableSoapMessage.newSOAPFaultException(
                 qname, xwse.getMessage(), xwse);
-        
+        //TODO: MISSING-LOG
         return getSOAPFaultException(wsfe);
     }
     

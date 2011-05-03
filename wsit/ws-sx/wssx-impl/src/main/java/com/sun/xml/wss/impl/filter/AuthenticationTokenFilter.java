@@ -330,6 +330,7 @@ public class AuthenticationTokenFilter {
                                 xwse);
                     }
                 } catch (NonceManager.NonceException ex) {
+                    log.log(Level.SEVERE, LogStringsMessages.WSS_1406_NOTMET_NONCE(), ex);
                     throw SecurableSoapMessage.newSOAPFaultException(
                             MessageConstants.WSSE_FAILED_AUTHENTICATION,
                             "Invalid/Repeated Nonce value for Username Token",

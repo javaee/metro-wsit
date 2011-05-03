@@ -869,9 +869,8 @@ public class KeySelectorImpl extends KeySelector{
                     }
                     
                 } else {
-                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1307_UNSUPPORTED_DIRECTREF_MECHANISM( new Object[] {((DirectReference)refElement).getValueType()}));
-                            
-                            throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
+                    logger.log(Level.SEVERE,LogStringsMessages.WSS_1307_UNSUPPORTED_DIRECTREF_MECHANISM( new Object[] {((DirectReference)refElement).getValueType()}));        
+                    throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                                     "unsupported directreference ValueType "+ ((DirectReference) refElement).getValueType(),null);
                 }
             } else if (refElement instanceof com.sun.xml.wss.core.reference.X509IssuerSerial) {

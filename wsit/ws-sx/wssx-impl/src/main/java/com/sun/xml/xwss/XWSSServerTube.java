@@ -321,7 +321,7 @@ public class XWSSServerTube extends AbstractFilterTubeImpl {
                     SecurableSoapMessage.newSOAPFaultException(
                     qname, xwse.getMessage(), xwse);
             
-            
+            //TODO: MISSING-LOG
             packet.invocationProperties.put(FAILURE, TRUE);
             addFault(wsfe,message,isSOAP12);
             packet.setMessage(Messages.create(message));
@@ -370,6 +370,7 @@ public class XWSSServerTube extends AbstractFilterTubeImpl {
             packet.setMessage(msg);
             return packet;
         } catch (com.sun.xml.wss.XWSSecurityException xwse) {
+            //TODO: MISSING-LOG
             com.sun.xml.wss.impl.WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,

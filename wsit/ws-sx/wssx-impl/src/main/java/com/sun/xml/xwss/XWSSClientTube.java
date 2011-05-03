@@ -266,6 +266,7 @@ public class XWSSClientTube extends AbstractFilterTubeImpl {
             com.sun.xml.wss.impl.WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     qname, xwse.getMessage(), xwse);
+            //TODO: MISSING-LOG
             throw getSOAPFaultException(wsfe, isSOAP12);
         }
     }

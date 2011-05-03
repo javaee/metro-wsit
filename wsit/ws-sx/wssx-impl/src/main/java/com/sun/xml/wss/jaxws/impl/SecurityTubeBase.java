@@ -408,6 +408,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         } catch (WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
         } catch (XWSSecurityException xwse) {
+            //TODO: MISSING-LOG
             WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                     MessageConstants.WSSE_INTERNAL_SERVER_ERROR,
@@ -709,7 +710,7 @@ public abstract class SecurityTubeBase extends AbstractFilterTubeImpl {
         WssSoapFaultException wsfe =
                 SecurableSoapMessage.newSOAPFaultException(
                 qname, xwse.getMessage(), xwse);
-
+        //TODO: MISSING-LOG
         return getSOAPFaultException(wsfe);
     }
 

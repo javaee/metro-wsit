@@ -211,7 +211,7 @@ public class SecurityPluginUtil {
 
         } catch (com.sun.xml.wss.impl.WssSoapFaultException soapFaultException) {
             throw getSOAPFaultException(soapFaultException);
-	    } catch (com.sun.xml.wss.XWSSecurityException xwse) {
+	} catch (com.sun.xml.wss.XWSSecurityException xwse) {
             QName qname = null;
 
             if (xwse.getCause() instanceof PolicyViolationException)
@@ -222,6 +222,7 @@ public class SecurityPluginUtil {
 	        com.sun.xml.wss.impl.WssSoapFaultException wsfe =
 		                SecurableSoapMessage.newSOAPFaultException(
 			                    qname, xwse.getMessage(), xwse);
+                //TODO: MISSING-LOG
 	        throw getSOAPFaultException(wsfe);
      	}
     }
@@ -347,7 +348,7 @@ public class SecurityPluginUtil {
 	        com.sun.xml.wss.impl.WssSoapFaultException wsfe =
 		                 SecurableSoapMessage.newSOAPFaultException(
 			                       qname, xwse.getMessage(), xwse);
-
+            //TODO: MISSING-LOG
             state.getResponse().setFailure(true);
 
             throw getSOAPFaultException(wsfe);
@@ -395,6 +396,7 @@ public class SecurityPluginUtil {
         } catch (com.sun.xml.wss.impl.WssSoapFaultException soapFaultException) {
              throw getSOAPFaultException(soapFaultException);
         } catch (com.sun.xml.wss.XWSSecurityException xwse) {
+             //TODO: MISSING-LOG
              com.sun.xml.wss.impl.WssSoapFaultException wsfe =
                     SecurableSoapMessage.newSOAPFaultException(
                         MessageConstants.WSSE_INTERNAL_SERVER_ERROR,

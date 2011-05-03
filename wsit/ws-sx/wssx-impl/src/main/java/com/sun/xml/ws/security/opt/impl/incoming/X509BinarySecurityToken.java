@@ -183,6 +183,7 @@ public class X509BinarySecurityToken implements com.sun.xml.ws.security.opt.api.
 //        }
         
         if(!context.getSecurityEnvironment().validateCertificate(cert, context.getExtraneousProperties())){
+            //TODO: MISSING-LOG
             throw SecurableSoapMessage.newSOAPFaultException(MessageConstants.WSSE_INVALID_SECURITY_TOKEN,
                     "Certificate validation failed", null);
         }
