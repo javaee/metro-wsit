@@ -127,21 +127,60 @@ public class KerberosLogin {
                     krbContext.setGSSContext(gssContext);
                 }
             }
-            Set<Object> setPrivCred =  loginSubject.getPrivateCredentials();
-            Iterator<Object> iter2 = setPrivCred.iterator();
-            while(iter2.hasNext()){
-                Object privObject = iter2.next();
-                if(privObject instanceof KerberosTicket){
-                    KerberosTicket kerbTicket = (KerberosTicket)privObject;
+            if (!isJava6Or5) {
+                if (gssContext != null && gssContext.isEstablished()) {
+                    /**
+                     *ExtendedGSSContext ex = (ExtendedGSSContext)x;
+                     *Key k = (Key)ex.inquireSecContext(
+                     *InquireType.KRB5_GET_SESSION_KEY);
+                     **/
+                    Class inquireType;
                     try {
-                        if(kerbTicket.getServer().getName().equals(gssContext.getTargName().toString())){
-                            SecretKey sKey = kerbTicket.getSessionKey();
-                            byte[] secret = sKey.getEncoded();
-                            krbContext.setSecretKey(secret);
-                            break;
+                        inquireType = Class.forName("com.sun.security.jgss.InquireType");
+                        Class extendedGSSContext = Class.forName("com.sun.security.jgss.ExtendedGSSContext");
+                        Method inquireSecContext = extendedGSSContext.getMethod("inquireSecContext", inquireType);
+                        Key key = (Key) inquireSecContext.invoke(gssContext, Enum.valueOf(inquireType, "KRB5_GET_SESSION_KEY"));
+                        krbContext.setSecretKey(key.getEncoded());
+                    } catch (IllegalAccessException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    } catch (IllegalArgumentException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    } catch (InvocationTargetException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    } catch (NoSuchMethodException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    } catch (SecurityException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    } catch (ClassNotFoundException ex) {
+                        log.log(Level.SEVERE, null, ex);
+                        throw new XWSSecurityException(ex);
+                    }
+
+                } else {
+                    throw new XWSSecurityException("GSSContext was null in the Login Subject");
+                }
+            } else {
+                Set<Object> setPrivCred = loginSubject.getPrivateCredentials();
+                Iterator<Object> iter2 = setPrivCred.iterator();
+                while (iter2.hasNext()) {
+                    Object privObject = iter2.next();
+                    if (privObject instanceof KerberosTicket) {
+                        KerberosTicket kerbTicket = (KerberosTicket) privObject;
+                        try {
+                            if (kerbTicket.getServer().getName().equals(gssContext.getTargName().toString())) {
+                                SecretKey sKey = kerbTicket.getSessionKey();
+                                byte[] secret = sKey.getEncoded();
+                                krbContext.setSecretKey(secret);
+                                break;
+                            }
+                        } catch (GSSException ex) {
+                            throw new XWSSecurityException(ex);
                         }
-                    } catch (GSSException ex) {
-                        ex.printStackTrace();
                     }
                 }
             }
