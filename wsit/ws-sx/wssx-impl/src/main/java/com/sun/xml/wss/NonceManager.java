@@ -179,7 +179,9 @@ public abstract class NonceManager {
         if (HighAvailabilityProvider.INSTANCE.isHaEnvironmentConfigured()) {
             nonceMgr = new HANonceManager(maxNonceAge);
         } else {
-            nonceMgr = new DefaultNonceManager();
+            if (url == null) {
+                nonceMgr = new DefaultNonceManager();
+            }
         }
 
         //is this check still needed ?
