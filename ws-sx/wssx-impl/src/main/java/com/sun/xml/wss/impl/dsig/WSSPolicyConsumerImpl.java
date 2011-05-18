@@ -146,35 +146,40 @@ public class WSSPolicyConsumerImpl {
     private WSSPolicyConsumerImpl() { //for now.
         providerName = System.getProperty("jsr105Provider", defaultJSR105Provider);
         pMT = System.getProperty("jsr105MechanismType","DOM");
-        /*
-        try{
-            provider = (Provider) Class.forName(providerName).newInstance();
-        }catch(Exception ex){
-            logger.log(Level.SEVERE,"WSS1324.dsig.factory",ex);
-        }
-        */
-        try{
+        final Provider prov = Security.getProvider("XMLDSig");
+
+        try {
             ClassLoader tccl = Thread.currentThread().getContextClassLoader();
             ClassLoader loader = null;
-            if(tccl == null){
+            if (tccl == null) {
                 loader = this.getClass().getClassLoader();
-            }else{
+            } else {
                 loader = tccl;
             }
-            Class providerClass = Class.forName(providerName,true,loader);
+            Class providerClass = Class.forName(providerName, true, loader);
             provider = (Provider) providerClass.newInstance();
-        }catch(Exception ex){
-            logger.log(Level.SEVERE,LogStringsMessages.WSS_1324_DSIG_FACTORY(),ex);
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, LogStringsMessages.WSS_1324_DSIG_FACTORY(), ex);
         }
 
-        if(logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST,"JSR 105 provider is : "+providerName);
-            logger.log(Level.FINEST,"JSR 105 provider mechanism is : "+pMT);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "JSR 105 provider is : " + providerName);
+            logger.log(Level.FINEST, "JSR 105 provider mechanism is : " + pMT);
         }
+
         AccessController.doPrivileged(new java.security.PrivilegedAction<Object>() {
             public Object run() {
-                Security.addProvider(provider);
-                Security.addProvider(new WSSProvider());
+                try {
+                    if (prov == null) {
+                        Security.insertProviderAt(provider, 5);
+                    }
+                    Security.insertProviderAt(new WSSProvider(), 6);
+                } catch (SecurityException ex) {
+                    if (prov == null) {
+                        Security.addProvider(provider);
+                    }
+                    Security.addProvider(new WSSProvider());
+                }
                 return null;
             }
         });
