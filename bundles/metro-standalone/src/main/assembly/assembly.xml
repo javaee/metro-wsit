@@ -74,6 +74,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <outputDirectory>metro/lib</outputDirectory>
+            <directoryMode>0755</directoryMode>
 
             <includes>
                 <include>javax.xml.stream:stax-api</include>
@@ -90,6 +91,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <outputDirectory>metro/osgi</outputDirectory>
+            <directoryMode>0755</directoryMode>
 
             <includes>
                 <include>javax.xml.bind:jaxb-api-osgi</include>
@@ -97,7 +99,8 @@
                 <include>${project.groupId}:webservices-api-osgi</include>
                 <include>${project.groupId}:webservices-extra-jdk-packages</include>
                 <include>${project.groupId}:webservices-osgi</include>
-                <include>com.ctc.wstx:woodstox-osgi</include>
+                <include>org.codehaus.woodstox:woodstox-core-asl</include>
+                <include>org.codehaus.woodstox:stax2-api</include>
             </includes>
         </dependencySet>
         <!--dependencySet>

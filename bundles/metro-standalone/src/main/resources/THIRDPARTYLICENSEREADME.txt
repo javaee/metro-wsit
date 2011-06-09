@@ -23,7 +23,7 @@ licensors listed.
 ****************************************
                        
 ---------------------------------------------------
-Woodstox 3.2.1
+Woodstox 4.1.1
 Apache Commons Jelly 1.0 
 Apache Commons Jelly tags define 1.0
 Apache Commons Jelly tags XML 1.1
