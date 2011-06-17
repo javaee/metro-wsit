@@ -382,11 +382,13 @@
             <artifactId>jaxrpc-api-osgi</artifactId>
             <version>1.1-b01</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>webservices-extra-jdk-packages</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>com.ctc.wstx</groupId>
             <artifactId>woodstox-osgi</artifactId>
