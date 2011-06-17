@@ -672,7 +672,7 @@
             <dependency>
                 <groupId>com.sun.xml.messaging.saaj</groupId>
                 <artifactId>saaj-impl</artifactId>
-                <version>1.3.8</version>
+                <version>1.3.10</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.security</groupId>
@@ -725,15 +725,19 @@
                 <artifactId>txw2</artifactId>
                 <version>20090102</version>
             </dependency>
+
+            <!-- Runtime -->
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
-                <artifactId>wstx-asl</artifactId>
-                <version>3.2.1</version>
+                <artifactId>woodstox-core-asl</artifactId>
+                <version>4.1.1</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
-                <groupId>com.ctc.wstx</groupId>
-                <artifactId>woodstox-osgi</artifactId>
-                <version>3.2.1.1</version>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>3.1.1</version>
+                <scope>runtime</scope>
             </dependency>
 
             <!-- Testing -->
@@ -772,17 +776,17 @@
     </profiles>
 
     <properties>
-        <glassfish.version>3.1</glassfish.version>
+        <glassfish.version>3.2-b06</glassfish.version>
         <grizzly.version>1.0.31</grizzly.version>
 
-        <jaxb.api.version>2.2.2</jaxb.api.version>
-        <jaxb.ri.version>2.2.3-1</jaxb.ri.version>
-        <jaxb.ri.release.version>2.2.3-1</jaxb.ri.release.version>
-        <jaxb.spec.version>2.2.2</jaxb.spec.version>
+        <jaxb.api.version>2.2.3</jaxb.api.version>
+        <jaxb.ri.version>2.2.4</jaxb.ri.version>
+        <jaxb.ri.release.version>2.2.4</jaxb.ri.release.version>
+        <jaxb.spec.version>2.2</jaxb.spec.version>
 
-        <jaxws.api.version>2.2.5-promoted-b01</jaxws.api.version>
+        <jaxws.api.version>2.2.3</jaxws.api.version>
+        <jaxws.ri.version>2.2.5-promoted-b02</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.5</jaxws.ri.release.version>
-        <jaxws.ri.version>2.2.5-promoted-b01</jaxws.ri.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
         <metro.release.version>2.2</metro.release.version>

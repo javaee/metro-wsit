@@ -93,7 +93,8 @@
                                     <include>com.sun.xml.ws.security.kerb:kerberos-wss-extension</include>
                                     <include>com.sun.xml.wss.core.reference:keyidspi-ibm-impl</include>
                                     <include>net.java.dev.stax-utils:stax-utils</include>
-                                    <include>org.codehaus.woodstox:wstx-asl</include>
+                                    <include>org.codehaus.woodstox:woodstox-core-asl</include>
+                                    <include>org.codehaus.woodstox:stax2-api</include>
                                     <include>org.glassfish.external:management-api</include>
                                     <include>org.glassfish.gmbal:gmbal</include>
                                     <include>org.glassfish.ha:ha-api</include>
@@ -254,7 +255,7 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>wstx-asl</artifactId>
+            <artifactId>woodstox-core-asl</artifactId>
         </dependency>
 
         <!-- Non-shaded dependencies -->

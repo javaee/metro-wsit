@@ -62,6 +62,7 @@
         <module>webservices-extra-api</module>
         <module>webservices-api-osgi</module>
         <module>webservices-osgi</module>
+        <module>webservices-osgi-aix</module>
         <module>webservices-extra-jdk-packages</module>
 
         <module>wsit-api</module>
