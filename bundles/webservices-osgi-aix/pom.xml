@@ -179,6 +179,7 @@
                                 </Export-Package>
                                 <Import-Package>
                                     com.sun.security.auth.callback;resolution:=optional,
+                                    com.sun.security.jgss;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
                                     sun.security.jgss.spi;resolution:=optional,
@@ -381,11 +382,13 @@
             <artifactId>jaxrpc-api-osgi</artifactId>
             <version>1.1-b01</version>
         </dependency>
+        <!-- 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>webservices-extra-jdk-packages</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>woodstox-core-asl</artifactId>
