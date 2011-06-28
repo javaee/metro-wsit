@@ -784,7 +784,7 @@
         <jaxb.ri.release.version>2.2.4-1</jaxb.ri.release.version>
         <jaxb.spec.version>2.2</jaxb.spec.version>
 
-        <jaxws.api.version>2.2.6-promoted-b01</jaxws.api.version>
+        <jaxws.api.version>2.2.5-promoted-b01</jaxws.api.version>
         <jaxws.ri.version>2.2.6-promoted-b01</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.6</jaxws.ri.release.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
