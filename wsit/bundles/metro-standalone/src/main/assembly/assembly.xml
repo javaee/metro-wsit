@@ -103,22 +103,16 @@
                 <include>org.codehaus.woodstox:stax2-api</include>
             </includes>
         </dependencySet>
-        <!--dependencySet>
+        <dependencySet>
+            <outputFileNameMapping>webservices-osgi.jar</outputFileNameMapping>
             <useProjectArtifact>false</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
-            <outputDirectory>test</outputDirectory>
+            <outputDirectory>metro/aix</outputDirectory>
+            <directoryMode>0755</directoryMode>
 
             <includes>
-                <include>com.sun.xml.ws:jaxws-ri</include>
+                <include>${project.groupId}:webservices-osgi-aix</include>
             </includes>
-            <unpack>true</unpack>
-            <unpackOptions>
-                <includes>
-                    <include>jaxws-ri/bin</include>
-                    <include>jaxws-ri/samples</include>
-                </includes>
-                <filtered>true</filtered>
-            </unpackOptions>
-        </dependencySet-->
+        </dependencySet>
     </dependencySets>
 </assembly>
