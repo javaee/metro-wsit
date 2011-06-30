@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+
+    Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
+
+    The contents of this file are subject to the terms of either the GNU
+    General Public License Version 2 only ("GPL") or the Common Development
+    and Distribution License("CDDL") (collectively, the "License").  You
+    may not use this file except in compliance with the License.  You can
+    obtain a copy of the License at
+    http://glassfish.java.net/public/CDDL+GPL_1_1.html
+    or packager/legal/LICENSE.txt.  See the License for the specific
+    language governing permissions and limitations under the License.
+
+    When distributing the software, include this License Header Notice in each
+    file and include the License file at packager/legal/LICENSE.txt.
+
+    GPL Classpath Exception:
+    Oracle designates this particular file as subject to the "Classpath"
+    exception as provided by Oracle in the GPL Version 2 section of the License
+    file that accompanied this code.
+
+    Modifications:
+    If applicable, add the following below the License Header, with the fields
+    enclosed by brackets [] replaced by your own identifying information:
+    "Portions Copyright [year] [name of copyright owner]"
+
+    Contributor(s):
+    If you wish your version of this file to be governed by only the CDDL or
+    only the GPL Version 2, indicate your decision by adding "[Contributor]
+    elects to include this software in this distribution under the [CDDL or GPL
+    Version 2] license."  If you don't indicate a single choice of license, a
+    recipient has the option to distribute your version of this file under
+    either the CDDL, the GPL Version 2 or to extend the choice of license to
+    its licensees as provided above.  However, if you add GPL Version 2 code
+    and therefore, elected the GPL Version 2 license, then the option applies
+    only if the new code is made subject to such option by the copyright
+    holder.
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>org.glassfish.metro</groupId>
+        <artifactId>metro-base-deps</artifactId>
+        <version>2.2-SNAPSHOT</version>
+        <relativePath>../../pom-base.xml</relativePath>
+    </parent>
+
+    <artifactId>metro-base-deps</artifactId>
+    <packaging>pom</packaging>
+    <name>Metro Web Services Base Dependencies</name>
+
+    <description>
+        Metro is a high-performance, extensible, easy-to-use web service stack.
+        It is a one-stop shop for all your web service needs, from the simplest
+        hello world web service to reliable, secured, and transacted web service
+        that involves .NET services.
+
+        Metro consists of JAX-WS Reference Implementation project and
+        Web Services Interoperability Technology project.
+
+        JAX-WS Reference Implementation (JAX-WS RI) provides core web servicing
+        support and the base framework for extensions provided by the WSIT layer.
+
+        Web Services Interoperability Technologies (WSIT) (previously known as
+        Project Tango) includes implementations of:
+        - SOAP over TCP
+        - WS-AtomicTransactions/Coordination
+        - WS-MetadataExchange
+        - WS-Policy (policy.dev.java.net)
+        - WS-ReliableMessaging
+        - WS-SecureConversation
+        - WS-Security
+        - WS-SecurityPolicy
+        - WS-Trust
+
+        This POM lists all Metro Base modules as dependencies. That allows Metro
+        Base consumers to simply depend on this POM instead of micro-managing the
+        dependencies of the Base artifacts itself.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish.metro</groupId>
+            <artifactId>wstx-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.metro</groupId>
+            <artifactId>wstx-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.metro</groupId>
+            <artifactId>wstx-services</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
