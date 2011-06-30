@@ -70,6 +70,6 @@
 
         <module>metro-standalone</module>
 
-        <module>metro-base-deps</module>
+        <module>metro-base-dependencies</module>
     </modules>
 </project>

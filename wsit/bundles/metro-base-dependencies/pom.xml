@@ -53,7 +53,7 @@
         <relativePath>../../pom-base.xml</relativePath>
     </parent>
 
-    <artifactId>metro-base-deps</artifactId>
+    <artifactId>metro-base-dependencies</artifactId>
     <packaging>pom</packaging>
     <name>Metro Web Services Base Dependencies</name>
 
