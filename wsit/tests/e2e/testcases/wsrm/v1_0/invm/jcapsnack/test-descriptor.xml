@@ -41,7 +41,7 @@
 
 -->
 
-<descriptor>
+<descriptor skip="true">
     <description>Test for RM_ACK private contract with JCaps</description>
     <service basedir="./server">
         <wsdl href="PingService.wsdl"/>
