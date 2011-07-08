@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.opt.impl.incoming.processor;
 
 import com.sun.xml.ws.security.opt.crypto.dsig.internal.DigesterOutputStream;
 import com.sun.xml.ws.security.opt.impl.util.StreamUtil;
+import com.sun.xml.wss.impl.MessageConstants;
 import com.sun.xml.wss.impl.c14n.StAXEXC14nCanonicalizerImpl;
 import com.sun.xml.wss.logging.LogDomainConstants;
 import java.io.ByteArrayOutputStream;
@@ -123,10 +124,15 @@ public class StreamingPayLoadDigester implements StreamFilter{
                             byte[] canonicalizedData = ((ByteArrayOutputStream)canonicalizer.getOutputStream()).toByteArray();
                             byte [] calculatedDigest = null;
                             MessageDigest  md = null;
+                            String algo= null;
                             try {
-                                md = MessageDigest.getInstance("SHA-1");
+                                algo = (ref != null) ?
+                                    StreamUtil.convertDigestAlgorithm(ref.getDigestMethod().getAlgorithm())
+                                    : MessageConstants.SHA_1;
+                                md = MessageDigest.getInstance(algo);
+
                             } catch (NoSuchAlgorithmException nsae) {
-                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1705_INVALID_DIGEST_ALGORITHM("SHA-1"),nsae);
+                                logger.log(Level.SEVERE, LogStringsMessages.WSS_1705_INVALID_DIGEST_ALGORITHM(algo),nsae);
                                 throw new WebServiceException(nsae);
                             }
                             calculatedDigest = md.digest(canonicalizedData);
