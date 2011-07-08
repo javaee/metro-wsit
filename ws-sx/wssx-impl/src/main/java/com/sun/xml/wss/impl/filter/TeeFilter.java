@@ -207,9 +207,9 @@ public class TeeFilter {
             } else {
                 if (templates == null) {
                     // Use identity transform
-                    transformer =
-                    new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl()
-                    .newTransformer();
+                    transformer = TransformerFactory.newInstance().newTransformer();
+                    //new com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl()
+                    //.newTransformer();
                 } else {
                     // Use supplied stylesheet via Templates object
                     transformer = templates.newTransformer();
