@@ -42,6 +42,7 @@ package com.sun.xml.ws.security.impl.kerberos;
 
 import com.sun.xml.wss.XWSSecurityException;
 import com.sun.xml.wss.logging.LogDomainConstants;
+import com.sun.xml.wss.logging.LogStringsMessages;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessControlContext;
@@ -177,6 +178,10 @@ public class KerberosLogin {
                                 byte[] secret = sKey.getEncoded();
                                 krbContext.setSecretKey(secret);
                                 break;
+                            } else {
+                                log.log(Level.WARNING, LogStringsMessages.WSS_1650_KERBEROS_KEY_WARNING(
+                                        kerbTicket.getServer().getName(),
+                                        gssContext.getTargName().toString()));
                             }
                         } catch (GSSException ex) {
                             throw new XWSSecurityException(ex);
