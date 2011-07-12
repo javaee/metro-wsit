@@ -48,9 +48,8 @@
     
     <parent>
         <groupId>org.glassfish.metro</groupId>
-        <artifactId>metro-base</artifactId>
+        <artifactId>bundles</artifactId>
         <version>2.2-SNAPSHOT</version>
-        <relativePath>../../pom-base.xml</relativePath>
     </parent>
 
     <artifactId>metro-base-dependencies</artifactId>
@@ -58,29 +57,6 @@
     <name>Metro Web Services Base Dependencies</name>
 
     <description>
-        Metro is a high-performance, extensible, easy-to-use web service stack.
-        It is a one-stop shop for all your web service needs, from the simplest
-        hello world web service to reliable, secured, and transacted web service
-        that involves .NET services.
-
-        Metro consists of JAX-WS Reference Implementation project and
-        Web Services Interoperability Technology project.
-
-        JAX-WS Reference Implementation (JAX-WS RI) provides core web servicing
-        support and the base framework for extensions provided by the WSIT layer.
-
-        Web Services Interoperability Technologies (WSIT) (previously known as
-        Project Tango) includes implementations of:
-        - SOAP over TCP
-        - WS-AtomicTransactions/Coordination
-        - WS-MetadataExchange
-        - WS-Policy (policy.dev.java.net)
-        - WS-ReliableMessaging
-        - WS-SecureConversation
-        - WS-Security
-        - WS-SecurityPolicy
-        - WS-Trust
-
         This POM lists all Metro Base modules as dependencies. That allows Metro
         Base consumers to simply depend on this POM instead of micro-managing the
         dependencies of the Base artifacts itself.
