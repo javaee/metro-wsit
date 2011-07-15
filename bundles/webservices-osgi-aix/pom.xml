@@ -174,7 +174,6 @@
                                     com.sun.xml.ws.transport.tcp.*;version=${metro.release.version},
                                     com.sun.xml.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.xml.wss.*;version=${metro.release.version},
-                                    javax.xml.registry.*;version=1.0,
                                     org.jcp.xml.dsig.internal.*;version=1.0.2,
                                 </Export-Package>
                                 <Import-Package>
