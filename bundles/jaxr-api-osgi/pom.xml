@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -48,9 +48,9 @@
     <artifactId>jaxr-api-osgi</artifactId>
     <version>1.0-b01</version>
     <packaging>bundle</packaging>
-    <name>JAX-RPC API OSGi Bundle</name>
+    <name>JAX-R API OSGi Bundle</name>
 
-    <description>JAX-RPC API OSGi Bundle</description>
+    <description>JAX-R API OSGi Bundle</description>
 
     <build>
         <pluginManagement>
@@ -145,9 +145,34 @@
             <uniqueVersion>false</uniqueVersion>
             <id>java.net-m2-dist-repository</id>
             <name>java.net-m2-repository</name>
-            <url>java-net:/maven2-repository/trunk/repository</url>
+            <url>svn:https://svn.java.net/svn/maven2-repository~svn/trunk/repository</url>
         </repository>
     </distributionManagement>
+    
+    <profiles>
+        <profile>
+            <id>local-deployment</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>java.net-m2-dist-repository</id>
+                    <name>java.net-m2-repository</name>
+                    <url>file:///${user.home}/local-javanet-repo/</url>
+                </repository>
+            </distributionManagement>            
+        </profile>
+
+        <profile>
+            <id>glassfish-repository-deployment</id>
+            <distributionManagement>
+                <repository>
+                    <uniqueVersion>false</uniqueVersion>
+                    <id>rator.sfbay</id>
+                    <url>dav:http://glassfish-maven-repository.us.oracle.com/maven/repositories/glassfish/</url> 
+                </repository>
+            </distributionManagement>            
+        </profile>
+    </profiles>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
