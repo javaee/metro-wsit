@@ -135,7 +135,9 @@ public class AsymmetricBindingProcessor extends BindingProcessor {
             if(logger.isLoggable(Level.FINEST)){
                 logger.log(Level.FINEST,"Token reference by primary signature with ID "+primarySP.getUUID()+" will be Integrity protected");
             }
-            protectToken((WSSPolicy) primarySP.getKeyBinding());
+            if (primarySP != null) {
+                protectToken((WSSPolicy) primarySP.getKeyBinding());
+            }
         }
         
     }
