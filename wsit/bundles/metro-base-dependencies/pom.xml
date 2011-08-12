@@ -106,6 +106,7 @@
         <dependency>
             <groupId>org.glassfish.metro</groupId>
             <artifactId>wstx-services</artifactId>
+            <type>war</type>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

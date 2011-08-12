@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -44,6 +44,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>net.java</groupId>
+        <artifactId>jvnet-parent</artifactId>
+        <version>1</version>
+    </parent>
+
     <groupId>javax.xml</groupId>
     <artifactId>jaxrpc-api-osgi</artifactId>
     <version>1.1-b01</version>
@@ -79,58 +85,16 @@
                 </configuration>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.jvnet.wagon-svn</groupId>
-                <artifactId>wagon-svn</artifactId>
-                <version>1.8</version>
-            </extension>
-        </extensions>
     </build>
 
     <repositories>
-        <repository>
-            <id>glassfish.dev.java.net</id>
-            <url>http://download.java.net/maven/glassfish</url>
-            <layout>default</layout>
-        </repository>
         <repository>
             <id>m2.dev.java.net</id>
             <url>http://download.java.net/maven/2</url>
             <layout>default</layout>
         </repository>
-        <repository>
-            <id>m1.dev.java.net</id>
-            <url>http://download.java.net/maven/1</url>
-            <layout>legacy</layout>
-        </repository>
     </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>maven-repository.dev.java.net</id>
-            <name>Java.net Maven 1 Repository (legacy)</name>
-            <url>http://download.java.net/maven/1</url>
-            <layout>legacy</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>glassfish.dev.java.net</id>
-            <name>GlassFish Maven Repository</name>
-            <url>http://download.java.net/maven/glassfish</url>
-            <layout>default</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache.snapshots</id>
-            <url>http://repository.apache.org/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
-    
     <dependencies>
         <dependency>
             <groupId>javax.xml</groupId>
@@ -140,15 +104,6 @@
         </dependency>
     </dependencies>
 
-    <distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>java.net-m2-dist-repository</id>
-            <name>java.net-m2-repository</name>
-            <url>java-net:/maven2-repository/trunk/repository</url>
-        </repository>
-    </distributionManagement>
-    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
