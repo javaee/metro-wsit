@@ -75,7 +75,7 @@
         - SOAP over TCP
         - WS-AtomicTransactions/Coordination
         - WS-MetadataExchange
-        - WS-Policy (policy.dev.java.net)
+        - WS-Policy (policy.java.net)
         - WS-ReliableMessaging
         - WS-SecureConversation
         - WS-Security
@@ -83,7 +83,7 @@
         - WS-Trust
 
         Note:
-        - WS-Policy (policy.dev.java.net)
+        - WS-Policy (policy.java.net)
         has its own codebase however WS-Policy related issues can be submitted into
         the Metro (WSIT) Issue tracker
     </description>
@@ -160,7 +160,7 @@
             <name>
                 CDDL+GPL License
             </name>
-            <url>https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html</url>
+            <url>https://glassfish.java.net/public/CDDL+GPL_1_1.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -375,8 +375,6 @@
         </plugins>
     </build>
 
-    <!-- profiles /-->
-
     <modules>
         <module>metro-cm</module>
         <module>metro-commons</module>
@@ -391,32 +389,6 @@
         <module>bundles</module>
         <!-- module>contribs</module -->
     </modules>
-
-    <repositories>
-        <repository>
-            <id>glassfish.legacy.java.net</id>
-            <name>GlassFish Maven Repository (legacy)</name>            
-            <url>http://download.java.net/maven/glassfish</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>m2.legacy.java.net</id>
-            <name>Java.net Maven 2 Repository (legacy)</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-        </repository>
-   </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>m2.legacy.java.net</id>
-            <name>Java.net Maven 2 Repository (legacy)</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <!--dependencies></dependencies-->
 
     <reporting>
         <plugins>
@@ -434,11 +406,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>activation</artifactId>
-                <version>1.1.1</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant</artifactId>
                 <version>1.8.0</version>
@@ -446,10 +413,10 @@
             <dependency>
                 <groupId>javax.resource</groupId>
                 <artifactId>connector-api</artifactId>
-                <version>1.6-alpha-1</version>
+                <version>1.5</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish</groupId>
                 <artifactId>javax.ejb</artifactId>
                 <version>3.0</version>
             </dependency>
@@ -459,27 +426,27 @@
                 <version>1.2.11</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.gmbal</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish.gmbal</groupId>
                 <artifactId>gmbal</artifactId>
-                <version>3.1.0-b001</version>
+                <version>${gmbal.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.gmbal</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish.gmbal</groupId>
                 <artifactId>gmbal-api-only</artifactId>
-                <version>3.1.0-b001</version>
+                <version>${gmbal.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.grizzly</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.grizzly</groupId>
                 <artifactId>grizzly-framework-http</artifactId>
-                <version>${grizzly.version}</version>
+                <version>1.0.40</version><!-- TODO - check with Alexey ? -->
             </dependency>
             <dependency>
-                <groupId>org.glassfish.ha</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish.ha</groupId>
                 <artifactId>ha-api</artifactId>
                 <version>3.1.8</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.net.httpserver</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.net.httpserver</groupId>
                 <artifactId>http</artifactId>
                 <version>20070405</version>
             </dependency>
@@ -519,12 +486,12 @@
                 <version>${jaxb.ri.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>javax.xml</groupId>
                 <artifactId>jaxr-api</artifactId>
                 <version>1.0_04</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.registry</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.xml.registry</groupId>
                 <artifactId>jaxr-impl</artifactId>
                 <version>1.0.8</version>
             </dependency>
@@ -565,17 +532,17 @@
                 <version>${jaxws.ri.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.security.auth.message</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>javax.security.auth.message</groupId>
                 <artifactId>jmac</artifactId>
                 <version>1.0-rev-1</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.crypto</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>javax.xml.crypto</groupId>
                 <artifactId>jsr105-api</artifactId>
                 <version>1.0.1</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.security</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.xml.security</groupId>
                 <artifactId>jsr105-impl</artifactId>
                 <version>1.0.2</version>
             </dependency>
@@ -595,7 +562,7 @@
                 <version>1.0-2</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.ws.security.kerb</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.xml.ws.security.kerb</groupId>
                 <artifactId>kerberos-wss-extension</artifactId>
                 <version>1.0</version>
             </dependency>
@@ -605,19 +572,19 @@
                 <version>1.0</version>
             </dependency>
             <dependency>
-                <groupId>javax.mail</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
                 <version>1.4.3</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.external</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish.external</groupId>
                 <artifactId>management-api</artifactId>
-                <version>3.0.0-b012</version>
+                <version>3.1.0-b001</version>
             </dependency>
             <dependency>
-                <groupId>org.jvnet</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.jvnet</groupId>
                 <artifactId>mimepull</artifactId>
-                <version>1.5</version>
+                <version>1.6</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
@@ -630,22 +597,22 @@
                 <version>20050927</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.soap</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>javax.xml.soap</groupId>
                 <artifactId>saaj-api</artifactId>
-                <version>1.3.3</version>
+                <version>1.3.4</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.messaging.saaj</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.xml.messaging.saaj</groupId>
                 <artifactId>saaj-impl</artifactId>
-                <version>1.3.10</version>
+                <version>1.3.12</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.security</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>com.sun.xml.security</groupId>
                 <artifactId>saml-jaxb10-bindings</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.security</groupId><!-- TODO - missing from Sonatype -->
+                <groupId>org.glassfish.security</groupId>
                 <artifactId>security</artifactId>
                 <version>${glassfish.version}</version>
             </dependency>
@@ -742,7 +709,8 @@
 
     <properties>
         <glassfish.version>3.2-b06</glassfish.version>
-        <grizzly.version>1.0.31</grizzly.version>
+        <grizzly.version>1.9.36</grizzly.version>
+        <gmbal.version>3.2.0-b003</gmbal.version>
 
         <jaxb.api.version>2.2.3</jaxb.api.version>
         <jaxb.ri.version>2.2.4-1</jaxb.ri.version>
@@ -758,7 +726,7 @@
         
         <policy.version>2.3</policy.version>
         
-        <java.net.m2.repository.metroRootUrl>http://download.java.net/maven/2/org/glassfish/metro</java.net.m2.repository.metroRootUrl>
+        <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
