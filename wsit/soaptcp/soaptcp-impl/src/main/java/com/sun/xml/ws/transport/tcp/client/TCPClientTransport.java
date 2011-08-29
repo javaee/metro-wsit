@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -53,6 +53,8 @@ import com.sun.xml.ws.transport.tcp.util.WSTCPException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 
 /**
  * @author Alexey Stashok
@@ -171,7 +173,7 @@ public class TCPClientTransport extends DistributedPropertySet {
         return TCPConstants.OK;
     }
     
-    @Property(TCPConstants.CHANNEL_CONTEXT)
+    @com.sun.xml.ws.api.PropertySet.Property(TCPConstants.CHANNEL_CONTEXT)
     public ChannelContext getConnectionContext() {
         return channelContext;
     }
@@ -184,4 +186,14 @@ public class TCPClientTransport extends DistributedPropertySet {
     public DistributedPropertySet.PropertyMap getPropertyMap() {
         return model;
     }
+
+    // TODO - remove when these are added to DistributedPropertySet
+    public SOAPMessage getSOAPMessage() throws SOAPException {
+       throw new UnsupportedOperationException();
+    }
+
+    public void setSOAPMessage(SOAPMessage soap) {
+       throw new UnsupportedOperationException();
+    }
+    
 }
