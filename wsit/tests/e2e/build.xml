@@ -391,4 +391,25 @@
             </arguments>
         </run-tests>
     </target>
+
+    <target name="main-jdk6"
+            description="Runs the e2e tests on the entire workspace"
+            depends="setup-emma-local, get-metro-local">
+
+        <mkdir dir="metro-image/endorsed" />
+        <copy file="metro-image/metro/lib/webservices-api.jar" todir="metro-image/endorsed"/>
+        
+        <run-tests>
+            <arguments>
+                <jvmarg value="-Djava.endorsed.dirs=metro-image/endorsed"/>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${metro.image}" />
+                <arg value="-transport" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
 </project>
