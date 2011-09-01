@@ -710,7 +710,7 @@
     <properties>
         <glassfish.version>3.2-b06</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
-        <gmbal.version>3.2.0-b003</gmbal.version>
+        <gmbal.version>3.1.0-b001</gmbal.version>
 
         <jaxb.api.version>2.2.3</jaxb.api.version>
         <jaxb.ri.version>2.2.4-1</jaxb.ri.version>
