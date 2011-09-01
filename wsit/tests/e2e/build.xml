@@ -3,7 +3,7 @@
 
     DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-    Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+    Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
 
     The contents of this file are subject to the terms of either the GNU
     General Public License Version 2 only ("GPL") or the Common Development
@@ -297,6 +297,25 @@
 
         <run-tests>
             <arguments>
+                <arg value="-r" />
+                <arg path="${testcases}" />
+                <arg value="-cp:wsit-image" />
+                <arg path="${metro.image}" />
+                <arg value="-transport" />
+                <arg path="${test.lib.dir}/jaxws-local-transport.jar" />
+            </arguments>
+        </run-tests>
+    </target>
+
+    <target name="main-hudson-jdk6" description="Invoke Metro E2E tests based on a last successful Metro build from Hudson."
+            depends="setup-emma-remote, get-metro-hudson">
+
+        <mkdir dir="metro-image/endorsed" />
+        <copy file="metro-image/metro/lib/webservices-api.jar" todir="metro-image/endorsed"/>
+
+        <run-tests>
+            <arguments>
+                <jvmarg value="-Djava.endorsed.dirs=metro-image/endorsed"/>
                 <arg value="-r" />
                 <arg path="${testcases}" />
                 <arg value="-cp:wsit-image" />

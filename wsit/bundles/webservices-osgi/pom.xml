@@ -173,6 +173,9 @@
                                     com.sun.xml.ws.transport.tcp.*;version=${metro.release.version},
                                     com.sun.xml.ws.*;version=${jaxws.ri.release.version},
                                     com.sun.xml.wss.*;version=${metro.release.version},
+                                    org.jvnet.ws.databinding.*;version=${jaxws.ri.release.version},
+                                    org.jvnet.ws.message.*;version=${jaxws.ri.release.version},
+                                    org.jvnet.ws.*;version=${jaxws.ri.release.version},
                                     javax.xml.registry.*;version=1.0,
                                 </Export-Package>
                                 <Import-Package>
