@@ -423,7 +423,7 @@
             <dependency>
                 <groupId>com.sun.xml.fastinfoset</groupId>
                 <artifactId>FastInfoset</artifactId>
-                <version>1.2.12-SNAPSHOT</version><!-- TODO - replace with release version when the build fully passes-->
+                <version>1.2.12</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.gmbal</groupId>
@@ -438,7 +438,7 @@
             <dependency>
                 <groupId>com.sun.grizzly</groupId>
                 <artifactId>grizzly-framework-http</artifactId>
-                <version>1.0.40</version><!-- TODO - check with Alexey ? -->
+                <version>1.0.40</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.ha</groupId>
@@ -584,7 +584,7 @@
             <dependency>
                 <groupId>org.jvnet</groupId>
                 <artifactId>mimepull</artifactId>
-                <version>1.6</version>
+                <version>1.7</version>
             </dependency>
             <dependency>
                 <groupId>com.sun.xml.ws</groupId>
@@ -713,8 +713,8 @@
         <gmbal.version>3.1.0-b001</gmbal.version>
 
         <jaxb.api.version>2.2.3</jaxb.api.version>
-        <jaxb.ri.version>2.2.4-1</jaxb.ri.version>
-        <jaxb.ri.release.version>2.2.4-1</jaxb.ri.release.version>
+        <jaxb.ri.version>2.2.5-SNAPSHOT</jaxb.ri.version>
+        <jaxb.ri.release.version>2.2.5</jaxb.ri.release.version>
         <jaxb.spec.version>2.2</jaxb.spec.version>
 
         <jaxws.api.version>2.2.6</jaxws.api.version>
