@@ -99,7 +99,7 @@
                                     <include>org.glassfish.gmbal:gmbal</include>
                                     <include>org.glassfish.ha:ha-api</include>
                                     <include>org.jvnet.staxex:stax-ex</include>
-                                    <include>org.jvnet:mimepull</include>
+                                    <include>org.jvnet.mimepull:mimepull</include>
                                 </includes>
                             </artifactSet>
                             <createSourcesJar>true</createSourcesJar>
@@ -255,7 +255,7 @@
             <artifactId>resolver</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jvnet</groupId>
+            <groupId>org.jvnet.mimepull</groupId>
             <artifactId>mimepull</artifactId>
         </dependency>
         <dependency>

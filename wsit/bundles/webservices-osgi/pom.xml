@@ -389,7 +389,7 @@
             <artifactId>woodstox-core-asl</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jvnet</groupId>
+            <groupId>org.jvnet.mimepull</groupId>
             <artifactId>mimepull</artifactId>
         </dependency>
     </dependencies>
