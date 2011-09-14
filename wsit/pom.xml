@@ -724,7 +724,7 @@
         
         <metro.release.version>2.2</metro.release.version>
         
-        <policy.version>2.3</policy.version>
+        <policy.version>2.3.1</policy.version>
         
         <release.repository.url>https://maven.java.net/content/repositories/releases/</release.repository.url>
 
