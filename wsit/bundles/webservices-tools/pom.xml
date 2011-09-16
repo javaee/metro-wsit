@@ -123,6 +123,7 @@
                                     <include>com.sun.xml.bind:jaxb-xjc</include>
                                 </includes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>
                             <filters>
                                 <filter>
                                     <artifact>com.sun.xml.bind:jaxb-xjc</artifact>

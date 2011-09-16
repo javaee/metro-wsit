@@ -249,6 +249,7 @@
                                     <include>org.jvnet.mimepull:mimepull</include>
                                 </includes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>
                             <filters>
                                 <filter>
                                     <artifact>com.sun.xml.stream:sjsxp</artifact>

@@ -148,6 +148,7 @@
                                     <include>javax.mail:mail</include>
                                 </includes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>                            
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>

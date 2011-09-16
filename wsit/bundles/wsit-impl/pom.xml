@@ -216,6 +216,7 @@
                                     <exclude>${project.groupId}:*-api</exclude>
                                 </excludes>
                             </artifactSet>
+                            <createSourcesJar>true</createSourcesJar>
                             <!--minimizeJar>true</minimizeJar-->
                             <promoteTransitiveDependencies>true</promoteTransitiveDependencies>
                             <transformers>
