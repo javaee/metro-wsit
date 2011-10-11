@@ -192,7 +192,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
                 binding,
                 container,
                 ((BindingImpl)binding).createCodec(),
-                null);
+                null, null);
         final Tube tubeline = getAssembler(bindingId).createClient(context);
         assertNotNull(tubeline);
     }
@@ -314,7 +314,7 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
                 binding,
                 container,
                 ((BindingImpl)binding).createCodec(),
-                null);
+                null, null);
 
         return getAssembler(bindingId).createClient(context);
     }
