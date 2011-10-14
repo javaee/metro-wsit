@@ -80,13 +80,6 @@
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.sun.net.httpserver</groupId>
-                                    <artifactId>http</artifactId>
-                                    <classifier>sources</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>javax.security.auth.message</groupId>
                                     <artifactId>jmac</artifactId>
                                     <classifier>sources</classifier>
@@ -142,7 +135,6 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.sun.grizzly:grizzly-framework-http</include>
-                                    <include>com.sun.net.httpserver:http</include>
                                     <include>javax.security.auth.message:jmac</include>
                                     <include>javax.annotation:jsr250-api</include>
                                     <include>javax.mail:mail</include>
@@ -212,10 +204,6 @@
         <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-framework-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.net.httpserver</groupId>
-            <artifactId>http</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.security.auth.message</groupId>
