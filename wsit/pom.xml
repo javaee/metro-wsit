@@ -710,6 +710,19 @@
         </profile>
     </profiles>
 
+    <repositories>
+        <repository>
+            <id>releases.java.net</id>
+            <url>https://maven.java.net/content/repositories/releases/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>staging.java.net</id>
+            <url>https://maven.java.net/content/groups/staging/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+  
     <properties>
         <glassfish.version>3.2-b06</glassfish.version>
         <grizzly.version>1.9.36</grizzly.version>
