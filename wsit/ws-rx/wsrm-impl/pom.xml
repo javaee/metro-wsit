@@ -108,10 +108,6 @@
             <artifactId>saaj-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.stream.buffer</groupId>
             <artifactId>streambuffer</artifactId>
         </dependency>

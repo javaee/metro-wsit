@@ -100,8 +100,8 @@
             <artifactId>policy</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.stream.buffer</groupId>

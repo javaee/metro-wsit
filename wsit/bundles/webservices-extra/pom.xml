@@ -87,13 +87,6 @@
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>javax.annotation</groupId>
-                                    <artifactId>jsr250-api</artifactId>
-                                    <classifier>sources</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>javax.mail</groupId>
                                     <artifactId>mail</artifactId>
                                     <classifier>sources</classifier>
@@ -210,8 +203,8 @@
             <artifactId>jmac</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>

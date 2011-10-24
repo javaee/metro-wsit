@@ -86,13 +86,6 @@
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.sun.org.apache.xml.internal</groupId>
-                                    <artifactId>resolver</artifactId>
-                                    <classifier>sources</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.jvnet.staxex</groupId>
                                     <artifactId>stax-ex</artifactId>
                                     <classifier>sources</classifier>
@@ -166,13 +159,6 @@
                                 <artifactItem>
                                     <groupId>com.sun.xml.registry</groupId>
                                     <artifactId>jaxr-impl</artifactId>
-                                    <classifier>sources</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>javax.xml.stream</groupId>
-                                    <artifactId>stax-api</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -373,10 +359,6 @@
             <artifactId>jaxr-impl</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>jaxrpc-api</artifactId>
         </dependency>
@@ -431,10 +413,6 @@
         <dependency>
             <groupId>org.jvnet.staxex</groupId>
             <artifactId>stax-ex</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.org.apache.xml.internal</groupId>
-            <artifactId>resolver</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jvnet.mimepull</groupId>

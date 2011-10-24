@@ -167,10 +167,6 @@
             <artifactId>saml-jaxb10-bindings</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.jvnet.staxex</groupId>
             <artifactId>stax-ex</artifactId>
         </dependency>

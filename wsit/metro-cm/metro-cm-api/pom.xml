@@ -113,11 +113,6 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>policy</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.xml.stream</groupId>
-            <artifactId>stax-api</artifactId>
-        </dependency>
-
 
         <!-- Test scope -->
         <dependency>

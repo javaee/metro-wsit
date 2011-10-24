@@ -135,6 +135,7 @@
                                 <excludes>
                                     <exclude>javax.xml.stream:stax-api</exclude>
                                     <exclude>javax.annotation:jsr250-api</exclude>
+                                    <exclude>org.glassfish:javax.annotation</exclude>
                                     <!--exclude>junit:junit</exclude-->
                                 </excludes>
                             </artifactSet>
