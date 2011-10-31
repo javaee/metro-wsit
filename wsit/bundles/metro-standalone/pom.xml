@@ -342,10 +342,10 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-eclipselink-plugin</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>sdo-eclipselink-plugin</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
