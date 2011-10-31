@@ -79,13 +79,26 @@
             <outputDirectory>metro/lib</outputDirectory>
 
             <includes>
-                <include>javax.xml.stream:stax-api</include>
                 <include>${project.groupId}:webservices-api</include>
                 <include>${project.groupId}:webservices-extra-api</include>
                 <include>${project.groupId}:webservices-extra</include>
                 <include>${project.groupId}:webservices-rt</include>
                 <include>${project.groupId}:webservices-tools</include>
                 <include>${project.groupId}:wstx-services</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+            <useProjectArtifact>false</useProjectArtifact>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <outputDirectory>metro/lib/databinding</outputDirectory>
+            <directoryMode>0755</directoryMode>
+
+            <includes>
+                <include>com.sun.xml.ws:jaxws-eclipselink-plugin</include>
+                <include>com.sun.xml.ws:sdo-eclipselink-plugin</include>
+                <include>org.eclipse.persistence:eclipselink</include>
+                <!--include>commonj.sdo:commonj.sdo</include-->
             </includes>
         </dependencySet>
         <dependencySet>
@@ -102,6 +115,8 @@
                 <include>${project.groupId}:webservices-osgi</include>
                 <include>org.codehaus.woodstox:woodstox-core-asl</include>
                 <include>org.codehaus.woodstox:stax2-api</include>
+                <include>com.sun.xml.ws:jaxws-eclipselink-plugin</include>
+                <include>com.sun.xml.ws:sdo-eclipselink-plugin</include>
             </includes>
         </dependencySet>
         <dependencySet>
