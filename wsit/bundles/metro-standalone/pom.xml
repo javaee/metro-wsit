@@ -342,20 +342,18 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-eclipselink-plugin</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>com.sun.xml.ws</groupId>
-            <artifactId>sdo-eclipselink-plugin</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
         </dependency>
-        
-<!--    Eclipse maven repository unusable - the artifact is getting to metro through jaxws-ri.zip instead
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>sdo-eclipselink-plugin</artifactId>
+        </dependency>
         <dependency>
             <groupId>commonj.sdo</groupId>
             <artifactId>commonj.sdo</artifactId>
-        </dependency>--> 
+        </dependency>
     </dependencies>
 
     <properties>

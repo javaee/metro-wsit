@@ -89,8 +89,6 @@
                                 <artifactItem>
                                     <groupId>javax.xml</groupId>
                                     <artifactId>jaxr-api</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -98,8 +96,6 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-rt</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -107,8 +103,6 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-extra</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -116,8 +110,20 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-tools</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.ws</groupId>
+                                    <artifactId>jaxws-eclipselink-plugin</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.ws</groupId>
+                                    <artifactId>sdo-eclipselink-plugin</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -224,12 +230,22 @@
                                     javax.ejb;resolution:=optional;version=3.0,
                                     javax.jws;version=2.0,
                                     javax.jws.soap;version=2.0,
+                                    javax.mail.internet;resolution:=optional,
+                                    javax.xml.namespace,
+                                    javax.xml.parsers,
+                                    javax.xml.stream,
+                                    javax.xml.transform.*,
                                     javax.xml.ws.*;version=${jaxws.spec.version},
                                     javax.xml.bind.*;version=${jaxb.spec.version},
                                     org.apache.coyote;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
+                                    commonj.sdo.*;resolution:=optional,
+                                    org.eclipse.persistence.*;resolution:=optional
+                                    org.jvnet.staxex;resolution:=optional,
+                                    org.w3c.dom;resolution:=optional,
+                                    org.xml.sax;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
                                     *
                                 </Import-Package>
@@ -241,52 +257,6 @@
                                 <DynamicImport-Package>
                                     org.glassfish.flashlight.provider
                                 </DynamicImport-Package>
-                                <!--
-                                    Missing exports compared to old:
-                                        com.sun.istack.ws; version=0.0.0
-                                        com.sun.tools.resourcegen; version=0.0.0
-                                        com.sun.tools.ws; version=0.0.0
-                                        com.sun.tools.ws.ant; version=0.0.0
-                                        com.sun.tools.ws.api; version=0.0.0
-                                        com.sun.tools.ws.api.wsdl; version=0.0.0
-                                        com.sun.tools.ws.processor; version=0.0.0
-                                        com.sun.tools.ws.processor.generator; version=0.0.0
-                                        com.sun.tools.ws.processor.model; version=0.0.0
-                                        com.sun.tools.ws.processor.model.exporter; version=0.0.0
-                                        com.sun.tools.ws.processor.model.java; version=0.0.0
-                                        com.sun.tools.ws.processor.model.jaxb; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler.annotation; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler.wsdl; version=0.0.0
-                                        com.sun.tools.ws.processor.util; version=0.0.0
-                                        com.sun.tools.ws.resources; version=0.0.0
-                                        com.sun.tools.ws.util; version=0.0.0
-                                        com.sun.tools.ws.wscompile; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.http; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.jaxws; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.mime; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.schema; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.soap; version=0.0.0
-                                        com.sun.tools.ws.wsdl.framework; version=0.0.0
-                                        com.sun.tools.ws.wsdl.parser; version=0.0.0
-                                        com.sun.xml.registry; version=0.0.0
-                                        com.sun.xml.registry.common; version=0.0.0
-                                        com.sun.xml.registry.common.tools; version=0.0.0
-                                        com.sun.xml.registry.common.tools.bindings_v3; version=0.0.0
-                                        com.sun.xml.registry.common.tools.resources; version=0.0.0
-                                        com.sun.xml.registry.common.util; version=0.0.0
-                                        com.sun.xml.registry.service; version=0.0.0
-                                        com.sun.xml.registry.uddi; version=0.0.0
-                                        com.sun.xml.registry.uddi.bindings_v2_2; version=0.0.0
-                                        com.sun.xml.registry.uddi.infomodel; version=0.0.0
-                                        WEB-INF.wsdl; version=0.0.0
-                                        WEB-INF.wsdls; version=0.0.0
-                                        WEB-INF.wsdls.wsat10; version=0.0.0
-                                        WEB-INF.wsdls.wsat11; version=0.0.0
-                                        WEB-INF.wsdls.wsc10; version=0.0.0
-                                        WEB-INF.wsdls.wsc11; version=0.0.0
-                                -->
                             </instructions>
                             <unpackBundle>true</unpackBundle>
                         </configuration>
@@ -306,7 +276,7 @@
                         <configuration>
                             <excludeTransitive>true</excludeTransitive>
                             <includes>META-INF/services/*, META-INF/metro-default.xml, META-INF/jaxrpc/*</includes>
-                            <excludes>META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
+                            <excludes>META-INF/services/com.sun.xml.ws.spi.db.*, META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
@@ -408,6 +378,54 @@
         <dependency>
             <groupId>org.jvnet.mimepull</groupId>
             <artifactId>mimepull</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-eclipselink-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-rt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.persistence</groupId>
+                    <artifactId>eclipselink</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jvnet.staxex</groupId>
+                    <artifactId>stax-ex</artifactId>
+                </exclusion>                
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-tools</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>sdo-eclipselink-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-rt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.persistence</groupId>
+                    <artifactId>eclipselink</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commonj.sdo</groupId>
+                    <artifactId>commonj.sdo</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jvnet.staxex</groupId>
+                    <artifactId>stax-ex</artifactId>
+                </exclusion>                
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <properties>

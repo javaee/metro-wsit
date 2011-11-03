@@ -97,8 +97,6 @@
             <includes>
                 <include>com.sun.xml.ws:jaxws-eclipselink-plugin</include>
                 <include>com.sun.xml.ws:sdo-eclipselink-plugin</include>
-                <include>org.eclipse.persistence:eclipselink</include>
-                <!--include>commonj.sdo:commonj.sdo</include-->
             </includes>
         </dependencySet>
         <dependencySet>
@@ -115,8 +113,6 @@
                 <include>${project.groupId}:webservices-osgi</include>
                 <include>org.codehaus.woodstox:woodstox-core-asl</include>
                 <include>org.codehaus.woodstox:stax2-api</include>
-                <include>com.sun.xml.ws:jaxws-eclipselink-plugin</include>
-                <include>com.sun.xml.ws:sdo-eclipselink-plugin</include>
             </includes>
         </dependencySet>
         <dependencySet>
