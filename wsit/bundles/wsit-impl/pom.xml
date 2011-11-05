@@ -268,6 +268,14 @@
     </build>
 
     <dependencies>
+
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>transaction-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Shaded dependencies -->
         <dependency>
             <groupId>${project.groupId}</groupId>
