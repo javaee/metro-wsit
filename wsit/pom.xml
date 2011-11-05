@@ -388,6 +388,14 @@
 
     <dependencyManagement>
         <dependencies>
+    
+            <!-- provided dependencies -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>gfv2-deployment</artifactId>
+                <version>2.1</version>
+                <scope>provided</scope>
+            </dependency>
             
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
@@ -585,6 +593,12 @@
                 <groupId>javax.transaction</groupId>
                 <artifactId>transaction-api</artifactId>
                 <version>1.1</version>
+            </dependency>
+
+            <dependency><!-- temporary -->
+                <groupId>commonj.sdo</groupId>
+                <artifactId>commonj.sdo</artifactId>
+                <version>2.1.1.v200905221342</version>
             </dependency>
 
             <!-- Testing -->
