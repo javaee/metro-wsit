@@ -396,7 +396,14 @@
                 <version>2.1</version>
                 <scope>provided</scope>
             </dependency>
-            
+            <dependency>
+                <groupId>com.sun.org.apache.xml.internal</groupId>
+                <artifactId>resolver</artifactId>
+                <scope>provided</scope>
+                <version>20050927</version>
+            </dependency>
+
+            <!-- required dependencies -->
             <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb1-impl</artifactId>
