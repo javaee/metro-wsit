@@ -648,18 +648,6 @@
         </profile>
 
         <profile>
-            <id>local-deployment</id>
-            <distributionManagement>
-                <repository>
-                    <uniqueVersion>false</uniqueVersion>
-                    <id>java.net-m2-dist-repository</id>
-                    <name>java.net-m2-repository</name>
-                    <url>file:///${user.home}/local-javanet-repo/</url>
-                </repository>
-            </distributionManagement>            
-        </profile>
-
-        <profile>
             <id>glassfish-repository-deployment</id>
             <distributionManagement>
                 <repository>
@@ -671,6 +659,14 @@
         </profile>
     </profiles>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>jvnet-nexus-snapshots</id>
+            <uniqueVersion>false</uniqueVersion>
+            <url>https://maven.java.net/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
     <repositories>
         <repository>
             <id>releases.java.net</id>
