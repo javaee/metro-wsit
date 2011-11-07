@@ -64,21 +64,41 @@ import javax.xml.stream.XMLStreamException;
  * @author K.Venugopal@sun.com
  */
 public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
-    
+
     private List inclusivePrefixList = null;
-    private HashSet visiblyUtilized = new HashSet();    
-    
+    private HashSet visiblyUtilized = new HashSet();
+
     private UnsyncByteArrayOutputStream tmpBuffer = null;
-       
+
     NamespaceContextImpl exC14NContext = new NamespaceContextImpl();
+
+    // Since the StreamMessage is leaving out the white spaces around message payload,
+    // it must be handled specially to allow message signature verification
+
+    // flag if it is time to write the prolog
+    private boolean bodyPrologueTime = false;
+    private String bodyPrologue;
+    private String bodyEpilogue;
+
     private boolean forceDefNS  =false;
     /** Creates a new instance of StAXEC14nCanonicalizerImpl */
     public StAXEXC14nCanonicalizerImpl() {
         super();
         tmpBuffer = new UnsyncByteArrayOutputStream();
-        
-    }        
-    
+    }
+
+    public void setBodyPrologueTime(boolean bodyPrologueTime) {
+        this.bodyPrologueTime = bodyPrologueTime;
+    }
+
+    public void setBodyEpilogue(String bodyEpilogue) {
+        this.bodyEpilogue = bodyEpilogue;
+    }
+
+    public void setBodyPrologue(String bodyPrologue) {
+        this.bodyPrologue = bodyPrologue;
+    }
+
     public boolean isParentToParentAdvice(){
         if(_depth > 2){
             ElementName qname = elementNames[_depth - 2];
@@ -91,18 +111,18 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                 return false;
             }
         }
-        return false;        
+        return false;
     }
-    
+
     public void reset(){
         super.reset();
         exC14NContext.reset();
-        
     }
+
     public void setInclusivePrefixList(List values){
         this.inclusivePrefixList = values;
     }
-    
+
     public List getInclusivePrefixList(){
         return inclusivePrefixList;
     }
@@ -113,7 +133,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
     public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
         exC14NContext.declareNamespace(prefix,namespaceURI);
     }
-    
+
     public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
         String pf = prefix;
         if(prefix == null){
@@ -122,10 +142,10 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
         super.writeStartElement(pf,localName,namespaceURI);
         _elementPrefix = pf;
         exC14NContext.push();
-        
     }
+
     @SuppressWarnings("unchecked")
-    protected void closeStartTag() throws XMLStreamException{        
+    protected void closeStartTag() throws XMLStreamException{
         try{
             if(closeStartTag){
                 if(_attrResult.size() >0){
@@ -169,15 +189,24 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                     BaseCanonicalizer.sort(_nsResult);
                     writeAttributesNS(_nsResult);
                 }
-                
+
                 if  ( _attrResult.size() > 0 ) {
                     BaseCanonicalizer.sort(_attrResult);
                     writeAttributes(_attrResult);
-                }               
+                }
                 visiblyUtilized.clear();
                 _nsResult.clear();
                 _attrResult.clear();
                 _stream .write('>');
+
+                // write the message body prolog leaved out be StreamMessage, if necessary
+                if (bodyPrologueTime) {
+                    if (bodyPrologue != null) {
+                        _stream.write(bodyPrologue.getBytes());
+                    }
+                    bodyPrologueTime = false;
+                }
+
                 closeStartTag = false;
                 _elementPrefix = null;
                 _defURI = null;
@@ -186,24 +215,22 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             throw new RuntimeException(ex);
         }
     }
-    
-    
-    
+
     public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
        /* String prefix = nsContext.getPrefix (namespaceURI);
         writeEmptyElement (prefix,localName,namespaceURI);*/
         //TODO
         throw new UnsupportedOperationException();
     }
-    
+
     @SuppressWarnings("unchecked")
     public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
-        
+
         closeStartTag();
         exC14NContext.push();
-        
-        
- 
+
+
+
         try {
             _stream .write('<');
             elemBuffer.reset();
@@ -213,14 +240,14 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                 writeStringToUtf8(prefix,elemBuffer);
                 writeStringToUtf8(":",elemBuffer);
                 writeStringToUtf8(localName,elemBuffer);
-                
+
             }
             byte [] endElem = elemBuffer.getBytes();
             int len = elemBuffer.getLength();
             visiblyUtilized.add(prefix);
             AttributeNS nsDecl = null;
             _stream.write(endElem, 0, len);
-            
+
             if ( visiblyUtilized.size() > 0 ) {
                 Iterator prefixItr = visiblyUtilized.iterator();
                 populateNamespaceDecl(prefixItr);
@@ -228,18 +255,18 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             if(inclusivePrefixList != null){
                 populateNamespaceDecl(inclusivePrefixList.iterator());
             }
-            
+
             if ( _nsResult.size() > 0 ) {
                 BaseCanonicalizer.sort(_nsResult);
                 writeAttributesNS(_nsResult);
             }
-            
+
             if ( _attrResult.size() > 0 ) {
                 BaseCanonicalizer.sort(_attrResult);
                 writeAttributes(_attrResult);
             }
-            
-            
+
+
             visiblyUtilized.clear();
             _nsResult.clear();
             _attrResult.clear();
@@ -247,7 +274,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             closeStartTag = false;
             _elementPrefix = "";
             _defURI = null;
-            
+
             _stream .write('>');
             _stream .write(_END_TAG);
             //writeStringToUtf8(name,_stream);
@@ -258,24 +285,35 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             throw new RuntimeException(ex);
         }
     }
-    
+
     public void writeEndDocument() throws XMLStreamException {
         while(_depth > 0){
             writeEndElement();
         }
     }
-    
-    
+
+
     public void writeEndElement() throws XMLStreamException {
-        closeStartTag();        
+        closeStartTag();
         if(_depth ==0 ){
             return;
         }
         ElementName qname =  elementNames[--_depth];
-        
+
         exC14NContext.pop();
-        
+
         try {
+
+            // if it is a soap:Body to be closed, write original spaces left out by StreamMessage
+            // before closing element, if necessary
+            if (_depth == 0) {
+                String toBeClosed = new String(qname.getUtf8Data().getBytes());
+                // is this condition enough?
+                if (toBeClosed.contains(":Body") && bodyEpilogue != null) {
+                    _stream.write(bodyEpilogue.getBytes());
+                }
+            }
+
             _stream .write(_END_TAG);
             //writeStringToUtf8(qname,_stream);
             _stream.write(qname.getUtf8Data().getBytes(), 0, qname.getUtf8Data().getLength());
@@ -285,6 +323,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             throw new RuntimeException(ex);
         }
     }
+
     @SuppressWarnings("unchecked")
     protected void collectVisiblePrefixes(Iterator itr) throws IOException {
         while(itr.hasNext()){
@@ -295,6 +334,7 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             }
         }
     }
+
     @SuppressWarnings("unchecked")
     private void populateNamespaceDecl(Iterator prefixItr){
 
@@ -305,16 +345,15 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
                 continue;
             }
             nsDecl = exC14NContext.getNamespaceDeclaration(prefix);
-            
+
             if(nsDecl !=null && !nsDecl.isWritten()){
                 nsDecl.setWritten(true);
                 _nsResult.add(nsDecl);
             }
         }
     }
-    
+
     protected void writeAttributesNS(List itr) throws IOException {
-        
         AttributeNS attr = null;
         int size = itr.size();
         for ( int i=0; i<size; i++) {
@@ -322,9 +361,8 @@ public class StAXEXC14nCanonicalizerImpl extends StAXC14nCanonicalizerImpl  {
             tmpBuffer.reset();
             _stream.write(attr.getUTF8Data(tmpBuffer));
         }
-        
     }
-    
+
     public NamespaceContext getNamespaceContext() {
         return exC14NContext;
     }

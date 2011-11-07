@@ -529,6 +529,26 @@ public class LazyStreamBasedMessage extends Message{
             cacheMessage();
         }
         return message.readPayloadAsJAXB(bridge);
-	}    
+	}
+
+    /**
+     * Since the StreamMessage is leaving out the white spaces around message payload,
+     * it must be handled specially to allow message signature verification
+     * @return white space prolog of the SOAP message body
+     */
+    public String getBodyEpilogue() {
+        return message instanceof StreamMessage ?
+                    ((StreamMessage) message).getBodyEpilogue(): null;
+    }
+
+    /**
+     * Since the StreamMessage is leaving out the white spaces around message payload,
+     * it must be handled specially to allow message signature verification
+     * @return white space epilog of the SOAP message body
+     */
+    public String getBodyPrologue() {
+        return message instanceof StreamMessage ?
+                ((StreamMessage) message).getBodyPrologue() : null;
+    }
 }
 

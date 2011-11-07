@@ -163,6 +163,14 @@ public final class SecurityRecipient {
     private HashMap<String, String> edAlgos = new HashMap<String, String>();
     //used for bsp checks
     private BasicSecurityProfile bspContext = new BasicSecurityProfile();
+
+    /**
+     * Since the StreamMessage is leaving out the white spaces around message payload,
+     * it must be handled specially to allow message signature verification
+     */
+    private String bodyPrologue;
+    private String bodyEpilogue;
+
     //private boolean isBSP = false;
 
     public SecurityRecipient(XMLStreamReader reader, SOAPVersion soapVersion) {
@@ -176,6 +184,14 @@ public final class SecurityRecipient {
     public SecurityRecipient(XMLStreamReader reader, SOAPVersion soapVersion, AttachmentSet attachSet) {
         this(reader, soapVersion);
         securityContext.setAttachmentSet(attachSet);
+    }
+
+    public void setBodyPrologue(String bodyPrologue) {
+        this.bodyPrologue = bodyPrologue;
+    }
+
+    public void setBodyEpilogue(String bodyEpilogue) {
+        this.bodyEpilogue = bodyEpilogue;
     }
 
     public Message validateMessage(JAXBFilterProcessingContext ctx) throws XWSSecurityException {
@@ -1287,9 +1303,9 @@ public final class SecurityRecipient {
             }
         } else {
             if (bodyRef != null) {
-                message = sig.wrapWithDigester(bodyRef, message, bodyTag, parentNSOnEnvelope, false);
+                message = sig.wrapWithDigester(bodyRef, message, bodyPrologue, bodyEpilogue, bodyTag, parentNSOnEnvelope, false);
             } else if (payLoadRef != null) {
-                message = sig.wrapWithDigester(payLoadRef, message, bodyTag, bodyENVNS, true);
+                message = sig.wrapWithDigester(payLoadRef, message, bodyPrologue, bodyEpilogue, bodyTag, bodyENVNS, true);
             }
         }
     }

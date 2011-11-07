@@ -497,7 +497,7 @@ public class Signature implements SecurityHeaderElement,NamespaceContextInfo, Se
     }
     
     
-    public XMLStreamReader wrapWithDigester(Reference ref,XMLStreamReader message,TagInfoset bodyTag,HashMap<String,String>parentNS,boolean payLoad)throws XWSSecurityException{
+    public XMLStreamReader wrapWithDigester(Reference ref,XMLStreamReader message, String bodyPrologue, String bodyEpilogue, TagInfoset bodyTag,HashMap<String,String>parentNS,boolean payLoad)throws XWSSecurityException{
         
         MessageDigest  md = null;
         try {
@@ -517,6 +517,8 @@ public class Signature implements SecurityHeaderElement,NamespaceContextInfo, Se
         dos = new DigesterOutputStream(md);
         // OutputStream os = new UnsyncBufferedOutputStream(dos);
         StAXEXC14nCanonicalizerImpl canonicalizer = new StAXEXC14nCanonicalizerImpl();
+        canonicalizer.setBodyPrologue(bodyPrologue);
+        canonicalizer.setBodyEpilogue(bodyEpilogue);
         //TODO:share canonicalizers .
         canonicalizer.setStream(dos);
         if(logger.isLoggable(Level.FINEST)){
@@ -550,6 +552,9 @@ public class Signature implements SecurityHeaderElement,NamespaceContextInfo, Se
         try {
             if(!payLoad){
                 bodyTag.writeStart(canonicalizer);
+
+                // the space characters between soap:Body and payload element must be preserved for payload signature!
+                canonicalizer.setBodyPrologueTime(true);
             }
         } catch (XMLStreamException ex) {
             logger.log(Level.SEVERE, LogStringsMessages.WSS_1715_ERROR_CANONICALIZING_BODY(), ex);

@@ -68,6 +68,7 @@ import com.sun.xml.ws.runtime.dev.SessionManager;
 import com.sun.xml.ws.security.IssuedTokenContext;
 import com.sun.xml.ws.security.SecurityContextToken;
 import com.sun.xml.ws.security.impl.IssuedTokenContextImpl;
+import com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient;
 import com.sun.xml.ws.security.policy.Token;
 import com.sun.xml.ws.security.impl.policyconv.SecurityPolicyHolder;
 import com.sun.xml.ws.security.opt.impl.JAXBFilterProcessingContext;
@@ -575,14 +576,15 @@ public class WSITServerAuthContext extends WSITAuthContextBase implements Server
         //  context.setJAXWSMessage(message, soapVersion);
         LazyStreamBasedMessage lazyStreamMessage = (LazyStreamBasedMessage)message;
         AttachmentSet attachSet = lazyStreamMessage.getAttachments();
-        com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient recipient = null;
+        SecurityRecipient recipient = null;
         if(attachSet == null || attachSet.isEmpty()){
-            recipient =
-                      new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion);
+            recipient = new SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion);
         } else{
-            recipient = new com.sun.xml.ws.security.opt.impl.incoming.SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion, attachSet);
+            recipient = new SecurityRecipient(lazyStreamMessage.readMessage(),soapVersion, attachSet);
         }
-        
+        recipient.setBodyPrologue(lazyStreamMessage.getBodyPrologue());
+        recipient.setBodyEpilogue(lazyStreamMessage.getBodyEpilogue());
+
         return recipient.validateMessage(context);
     }
 
