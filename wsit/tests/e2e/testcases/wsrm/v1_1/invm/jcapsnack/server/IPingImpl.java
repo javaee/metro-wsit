@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -71,6 +71,7 @@ public class IPingImpl {
             } else {
                 LOGGER.log(Level.ALL, String.format("Detected resent message '%s' with message number %d", message, msgNumber));
                 FIRST_MESSAGE_RESEND_DETECTED.set(true);
+                msgCtx.put("RM_ACK", "true");
             }
         } else if (!FIRST_MESSAGE_RESEND_DETECTED.get()) {
             String errorMessage = String.format("Received message '%s' with message number %d without detecting a resend of rejected message.", message, msgNumber);
