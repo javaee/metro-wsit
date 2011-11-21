@@ -242,7 +242,9 @@
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
                                     commonj.sdo.*;resolution:=optional,
-                                    org.eclipse.persistence.*;resolution:=optional
+                                    org.eclipse.persistence.*;resolution:=optional,
+                                    javax.persistence.*;resolution:=optional,
+                                    commonj.sdo.*;resolution:=optional,
                                     org.jvnet.staxex;resolution:=optional,
                                     org.w3c.dom;resolution:=optional,
                                     org.xml.sax;resolution:=optional,
