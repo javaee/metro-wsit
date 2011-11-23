@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -116,7 +116,7 @@ public final class Converter {
                 writer = xmlOutputFactory.createXMLStreamWriter(stringOut);
                 writer = createIndenter(writer);
                 message.copy().writeTo(writer);
-            } catch (XMLStreamException e) {
+            } catch (Exception e) { // WSIT-1596 - Message Dumping should not affect other processing
                 LOGGER.log(Level.WARNING, "Unexpected exception occured while dumping message", e);
             } finally {
                 if (writer != null) {
