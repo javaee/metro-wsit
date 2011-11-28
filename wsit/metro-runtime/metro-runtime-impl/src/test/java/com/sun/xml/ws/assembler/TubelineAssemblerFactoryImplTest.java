@@ -41,6 +41,7 @@
 package com.sun.xml.ws.assembler;
 
 import com.sun.xml.ws.api.BindingID;
+import com.sun.xml.ws.api.Component;
 import com.sun.xml.ws.api.EndpointAddress;
 import com.sun.xml.ws.api.WSBinding;
 import com.sun.xml.ws.api.WSService;
@@ -63,6 +64,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Binding;
 import javax.xml.ws.EndpointReference;
@@ -182,6 +184,14 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
             public ManagedObjectManager getManagedObjectManager() {
                 return null;
+            }
+
+            public Set<Component> getComponents() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <S> S getSPI(Class<S> type) {
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         };
 
@@ -304,6 +314,14 @@ public class TubelineAssemblerFactoryImplTest extends TestCase {
 
             public ManagedObjectManager getManagedObjectManager() {
                 return null;
+            }
+
+            public Set<Component> getComponents() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public <S> S getSPI(Class<S> type) {
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         };
 
