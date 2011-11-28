@@ -59,7 +59,7 @@
                     <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="in-vm://wstrust.scenario5n8.sts/" wsdlLocation="file:/scratch/arjdesai/svn/metro/wsit/tests/e2e/testcases/wstrust/scenario5n8/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="local://C:/Tango/wsit/wsit/test/e2e/testcases/wstrust/scenario5n8/work/services/sts/war/" wsdlLocation="file:/C:/Tango/wsit/wsit/test/e2e/testcases/wstrust/scenario5n8/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/">
                 </tc:PreconfiguredSTS>
 
                 <!--endpoint="http://localhost:8080/jaxws-s5-sts/sts?wsdl"-->
