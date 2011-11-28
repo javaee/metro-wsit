@@ -80,7 +80,7 @@ public final class WSATRuntimeConfig {
                 WSATRuntimeConfig.httpsPort = Integer.parseInt(value.trim());
             } else {
                 LOGGER.config(String.format("Could not set HTTPS port value to '%1s'. Rolling back to default: %2d", value, WSATRuntimeConfig.httpsPort));
-            }
+        }
 
             return this;
         }

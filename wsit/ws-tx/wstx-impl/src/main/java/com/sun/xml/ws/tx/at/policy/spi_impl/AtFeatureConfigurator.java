@@ -53,12 +53,10 @@ import com.sun.xml.ws.api.tx.at.Transactional;
 import com.sun.xml.ws.api.tx.at.Transactional.TransactionFlowType;
 import com.sun.xml.ws.api.tx.at.TransactionalFeature;
 import com.sun.xml.ws.api.tx.at.WsatNamespace;
-import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.policy.AtAssertion;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.logging.Level;
 import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 
@@ -69,8 +67,7 @@ import javax.xml.ws.WebServiceFeature;
 public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
     // TODO implement PolicyMapConfigurator as well
 
-//    private static final Logger LOGGER = Logger.getLogger(AtFeatureConfigurator.class);
-    private static final Class LOGGERCLASS = AtFeatureConfigurator.class;
+    private static final Logger LOGGER = Logger.getLogger(AtFeatureConfigurator.class);
 
     /**
      * Process WS-RM policy assertions and if found and is not optional then RM is enabled on the
@@ -106,11 +103,7 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
                 endpointFeature = feature;
                 features.add(endpointFeature);
             } else if (endpointFeature.getVersion() != feature.getVersion()) {
-            String msg = WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.SEVERE, "WSAT1004_ENDPOINT_AND_OPERATION_POLICIES_DONT_MATCH",
-                    endpointKey, null);
-            throw new WebServiceException(msg);
-//                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1004_ENDPOINT_AND_OPERATION_POLICIES_DONT_MATCH(endpointKey, key)));
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1004_ENDPOINT_AND_OPERATION_POLICIES_DONT_MATCH(endpointKey, key)));
             }
 
             endpointFeature.setExplicitMode(true);
@@ -136,10 +129,7 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
             if (resultFeature == null) {
                 resultFeature = feature;
             } else if (!areCompatible(resultFeature, feature)) { // Multiple Transactional features in a single effective policy must be compatible
-            String msg = WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.SEVERE, "WSAT1003_INCOMPATIBLE_FEATURES_DETECTED", policy, null);
-                throw new WebServiceException(msg);
-//                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1003_INCOMPATIBLE_FEATURES_DETECTED(policy.toString())));
+                throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1003_INCOMPATIBLE_FEATURES_DETECTED(policy.toString())));
             }
         } // end for all alternatives in policy
 
@@ -151,12 +141,7 @@ public class AtFeatureConfigurator implements PolicyFeatureConfigurator {
         for (PolicyAssertion assertion : alternative) {
             if (assertion instanceof AtAssertion) {
                 if (feature != null) {
-                    String msg = WSATImplInjection.getInstance().getLogging().log(
-                            null, LOGGERCLASS, Level.SEVERE, "WSAT1001_DUPLICATE_ASSERTION_IN_POLICY",
-                            alternative, null);
-                    throw new WebServiceException(msg);
-//                    throw LOGGER.logSevereException(
-//                            new WebServiceException(LocalizationMessages.WSAT_1001_DUPLICATE_ASSERTION_IN_POLICY(alternative.toString())));
+                    throw LOGGER.logSevereException(new WebServiceException(LocalizationMessages.WSAT_1001_DUPLICATE_ASSERTION_IN_POLICY(alternative.toString())));
                 }
 
                 feature = new TransactionalFeature(true);

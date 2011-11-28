@@ -80,8 +80,7 @@ import javax.transaction.Transaction;
 public class WSATHelper<T> {
 
 
-    private static final Class LOGGERCLASS = WSATHelper.class;
-//    private static final Logger LOGGER = Logger.getLogger(WSATHelper.class);
+    private static final Logger LOGGER = Logger.getLogger(WSATHelper.class);
 
     public final static WSATHelper V10 = new WSATHelper().WSATVersion(WSATVersion.v10);
     public final static WSATHelper V11 = new WSATHelper() {
@@ -205,9 +204,7 @@ public class WSATHelper<T> {
         }
         if (wsatSynchronization == null) {
             if (isDebugEnabled())
-                WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                        "WSAT_4581_XID_NOT_IN_DURABLE_RESOURCE_MAP", new Object[]{xid, status}, null);
-//                LOGGER.info(LocalizationMessages.WSAT_4581_XID_NOT_IN_DURABLE_RESOURCE_MAP(xid, status));
+                LOGGER.info(LocalizationMessages.WSAT_4581_XID_NOT_IN_DURABLE_RESOURCE_MAP(xid, status));
             return false;
         }
         synchronized (wsatSynchronization) {
@@ -226,19 +223,13 @@ public class WSATHelper<T> {
         synchronized (m_durableParticipantPortMapLock) {
             if (getDurableParticipantPortMap().containsKey(wsatXAResource)) {
                 m_durableParticipantPortMap.remove(wsatXAResource);
-                if (isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                            "WSAT_4583_DURABLE_PORT_REMOVED", wsatXAResource, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4583_DURABLE_PORT_REMOVED(wsatXAResource));
+                if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4583_DURABLE_PORT_REMOVED(wsatXAResource));
             }
         }
         synchronized (m_durableParticipantXAResourceMapLock) {
             if (getDurableParticipantXAResourceMap().containsKey(wsatXAResource.getXid())) {
                 getDurableParticipantXAResourceMap().remove(wsatXAResource.getXid());
-                if (isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                            "WSAT_4584_DURABLE_XARESOURCE_REMOVED", wsatXAResource, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4584_DURABLE_XARESOURCE_REMOVED(wsatXAResource));
+                if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4584_DURABLE_XARESOURCE_REMOVED(wsatXAResource));
             }
         }
     }
@@ -252,19 +243,13 @@ public class WSATHelper<T> {
         synchronized (m_volatileParticipantPortMapLock) {
             if (m_volatileParticipantPortMap.containsKey(new BranchXidImpl(xid))) {
                 m_volatileParticipantPortMap.remove(new BranchXidImpl(xid));
-                if (isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                            "WSAT_4585_VOLATILE_PORT_REMOVED", new BranchXidImpl(xid), null);
-//              LOGGER.info(LocalizationMessages.WSAT_4585_VOLATILE_PORT_REMOVED(new BranchXidImpl(xid)));
+                if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4585_VOLATILE_PORT_REMOVED(new BranchXidImpl(xid)));
             }
         }
         synchronized (m_volatileParticipantSynchronizationMapLock) {
             if (m_volatileParticipantSynchronizationMap.containsKey(new BranchXidImpl(xid))) {
                 m_volatileParticipantSynchronizationMap.remove(new BranchXidImpl(xid));
-                if (isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                            "WSAT_4586_VOLATILE_SYNCHRONIZATION_REMOVED", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4586_VOLATILE_SYNCHRONIZATION_REMOVED(xid));
+                if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4586_VOLATILE_SYNCHRONIZATION_REMOVED(xid));
             }
         }
     }
@@ -279,24 +264,15 @@ public class WSATHelper<T> {
      */
     public void prepare(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4587_ABOUT_TO_SEND_PREPARE", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4587_ABOUT_TO_SEND_PREPARE(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4587_ABOUT_TO_SEND_PREPARE(xid, Thread.currentThread()));
         synchronized (m_durableParticipantXAResourceMapLock) {
             putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4589_DURABLE_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE_FROM_PREPARE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4589_DURABLE_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE_FROM_PREPARE(xid));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4589_DURABLE_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE_FROM_PREPARE(xid));
         ParticipantIF<T> port = getDurableParticipantPort(epr, xid, wsatXAResource);
         T notification = builderFactory.newNotificationBuilder().build();
         port.prepare(notification);
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log( null, LOGGERCLASS, Level.INFO, "WSAT_4588_PREPARE_SENT",
-                    new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4588_PREPARE_SENT(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4588_PREPARE_SENT(xid, Thread.currentThread()));
     }
 
     private void putInDurableParticipantXAResourceMap(WSATXAResource wsatXAResource, Xid xid) {
@@ -321,16 +297,10 @@ public class WSATHelper<T> {
      */
     public void commit(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4590_ABOUT_TO_SEND_COMMIT", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4590_ABOUT_TO_SEND_COMMIT(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4590_ABOUT_TO_SEND_COMMIT(xid, Thread.currentThread()));
         T notification = builderFactory.newNotificationBuilder().build();
         getDurableParticipantPort(epr, xid, wsatXAResource).commit(notification);
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4591_COMMIT_SENT", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4591_COMMIT_SENT(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4591_COMMIT_SENT(xid, Thread.currentThread()));
     }
 
     /**
@@ -344,23 +314,14 @@ public class WSATHelper<T> {
      */
     public void rollback(EndpointReference epr, Xid xid,WSATXAResource wsatXAResource)
             throws XAException {
-      if (isDebugEnabled())
-          WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                  "WSAT_4592_ABOUT_TO_SEND_ROLLBACK", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4592_ABOUT_TO_SEND_ROLLBACK(xid, Thread.currentThread()));
+      if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4592_ABOUT_TO_SEND_ROLLBACK(xid, Thread.currentThread()));
         synchronized (m_durableParticipantXAResourceMapLock) {
             putInDurableParticipantXAResourceMap(wsatXAResource, xid);
         }
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4594_ROLLBACK_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4594_ROLLBACK_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE(xid));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4594_ROLLBACK_PARTICIPANT_XARESOURCE_PLACED_IN_CACHE(xid));
         T notification = builderFactory.newNotificationBuilder().build();
         getDurableParticipantPort(epr, xid, wsatXAResource).rollback(notification); //place in map first
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4593_ROLLBACK_SENT", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4593_ROLLBACK_SENT(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4593_ROLLBACK_SENT(xid, Thread.currentThread()));
     }
 
     /**
@@ -374,24 +335,16 @@ public class WSATHelper<T> {
     public void beforeCompletion(
             EndpointReference epr, Xid xid, WSATSynchronization wsatSynchronization)
             throws SOAPException {
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4595_ABOUT_TO_SEND_PREPARE_VOLATILE", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4595_ABOUT_TO_SEND_PREPARE_VOLATILE(
-//            xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4595_ABOUT_TO_SEND_PREPARE_VOLATILE(
+            xid, Thread.currentThread()));
         T notification = builderFactory.newNotificationBuilder().build();
         getVolatileParticipantPort(epr, xid).prepare(notification);
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4596_PREPARE_VOLATILE_SENT", new Object[]{xid, Thread.currentThread()}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4596_PREPARE_VOLATILE_SENT(xid, Thread.currentThread()));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4596_PREPARE_VOLATILE_SENT(xid, Thread.currentThread()));
         synchronized (m_volatileParticipantSynchronizationMapLock) {
             m_volatileParticipantSynchronizationMap.put(new BranchXidImpl(xid), wsatSynchronization);
         }
         if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4597_PREPARE_PARTICIPANT_SYNCHRONIZATION_PLACED_IN_CACHE", xid, null);
-//            LOGGER.info(LocalizationMessages.WSAT_4597_PREPARE_PARTICIPANT_SYNCHRONIZATION_PLACED_IN_CACHE(xid));
+            LOGGER.info(LocalizationMessages.WSAT_4597_PREPARE_PARTICIPANT_SYNCHRONIZATION_PLACED_IN_CACHE(xid));
     }
 
     /**
@@ -409,20 +362,14 @@ public class WSATHelper<T> {
             participantPort = m_volatileParticipantPortMap.get(new BranchXidImpl(xid));
         }
         if (participantPort != null) {
-            if (isDebugEnabled())
-                WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                        "WSAT_4598_VOLATILE_PARTICIPANT_RETRIEVED_FROM_CACHE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4598_VOLATILE_PARTICIPANT_RETRIEVED_FROM_CACHE(xid));
+            if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4598_VOLATILE_PARTICIPANT_RETRIEVED_FROM_CACHE(xid));
             return participantPort;
         }
         participantPort = getParticipantPort(epr, xid, null);
         synchronized (m_volatileParticipantPortMapLock) {
             m_volatileParticipantPortMap.put(new BranchXidImpl(xid), participantPort);
         }
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4599_VOLATILE_PARTICIPANT_PORT_PLACED_IN_CACHE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4599_VOLATILE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4599_VOLATILE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
         return participantPort;
     }
 
@@ -442,19 +389,13 @@ public class WSATHelper<T> {
             participantPort = getDurableParticipantPortMap().get(wsatXAResource);
         }
         if (participantPort != null) {
-            if (isDebugEnabled())
-                WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                        "WSAT_4600_DURABLE_PARTICIPANT_PORT_RETREIVED_FROM_CACHE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4600_DURABLE_PARTICIPANT_PORT_RETREIVED_FROM_CACHE(xid));
+            if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4600_DURABLE_PARTICIPANT_PORT_RETREIVED_FROM_CACHE(xid));
             return participantPort;
         }
         try {
             participantPort = getParticipantPort(epr, xid, new String(wsatXAResource.getXid().getBranchQualifier()));
         } catch (SOAPException e) {
-            if (isDebugEnabled())
-                WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                        "WSAT_4601_CANNOT_CREATE_DURABLE_PARTICIPANT_PORT", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4601_CANNOT_CREATE_DURABLE_PARTICIPANT_PORT(xid));
+            if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4601_CANNOT_CREATE_DURABLE_PARTICIPANT_PORT(xid));
             e.printStackTrace();
             XAException xaException = new XAException("Unable to create durable participant port:" + e);
             xaException.initCause(e);
@@ -467,10 +408,7 @@ public class WSATHelper<T> {
 	    synchronized (m_durableParticipantPortMapLock) {
             getDurableParticipantPortMap().put(wsatXAResource, participantPort);
         }
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4602_DURABLE_PARTICIPANT_PORT_PLACED_IN_CACHE", xid, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4602_DURABLE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4602_DURABLE_PARTICIPANT_PORT_PLACED_IN_CACHE(xid));
         return participantPort;
     }
 
@@ -490,10 +428,7 @@ public class WSATHelper<T> {
         String txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         ParticipantProxyBuilder<T> proxyBuilder = builderFactory.newParticipantProxyBuilder();
         ParticipantIF<T> participantProxyIF = proxyBuilder.to(epr).txIdForReference(txId, bqual).build();
-        if (isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4603_SUCCESSFULLY_CREATED_PARTICIPANT_PORT", new Object[]{participantProxyIF, xid}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4603_SUCCESSFULLY_CREATED_PARTICIPANT_PORT(participantProxyIF, xid));
+        if (isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4603_SUCCESSFULLY_CREATED_PARTICIPANT_PORT(participantProxyIF, xid));
         return participantProxyIF;
     }
 
@@ -639,8 +574,7 @@ public class WSATHelper<T> {
     }
 
     private void debug(String msg) {
-        WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO, null, msg, null);
-//        LOGGER.log(Level.INFO, msg);
+        LOGGER.log(Level.INFO, msg);
     }
 
     public static String assignUUID(){

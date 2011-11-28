@@ -52,8 +52,6 @@ import com.sun.xml.ws.policy.PolicySubject;
 import com.sun.xml.ws.policy.jaxws.spi.PolicyMapConfigurator;
 import com.sun.xml.ws.policy.subject.WsdlBindingSubject;
 import com.sun.xml.ws.api.tx.at.Transactional;
-import com.sun.xml.ws.tx.at.WSATHelper;
-import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import com.sun.xml.ws.tx.at.policy.AtPolicyCreator;
 import com.sun.xml.ws.tx.at.policy.EjbTransactionType;
@@ -71,8 +69,7 @@ import java.util.logging.Level;
  */
 public class AtPolicyMapConfigurator implements PolicyMapConfigurator {
 
-//    private static final Logger LOGGER = Logger.getLogger(AtPolicyMapConfigurator.class);
-    private static final Class LOGGERCLASS = AtPolicyMapConfigurator.class;
+    private static final Logger LOGGER = Logger.getLogger(AtPolicyMapConfigurator.class);
 
     /**
      * Update policy map with operation scope of correct WS-AT policy assertions.
@@ -115,24 +112,15 @@ public class AtPolicyMapConfigurator implements PolicyMapConfigurator {
                 final WsdlBindingSubject wsdlSubject = WsdlBindingSubject.createBindingOperationSubject(model.getBoundPortTypeName(),
                         new QName(model.getTargetNamespace(), method.getOperationName()));
                 final PolicySubject generatedWsatPolicySubject = new PolicySubject(wsdlSubject, policy);
-                if (WSATHelper.isDebugEnabled()) {
-                WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.FINE, "WSAT1002_ADD_AT_POLICY_ASSERTION",
-                    new Object[]{model.getPortName().toString(),
+                if (LOGGER.isLoggable(Level.FINE)) {
+                    LOGGER.fine(LocalizationMessages.WSAT_1002_ADD_AT_POLICY_ASSERTION(
+                            model.getPortName().toString(),
                             method.getOperationName(),
                             seiClass.getName(),
                             method.getSEIMethod().getName(),
                             effectiveFeature.value().toString(),
                             effectiveEjbTxType.toString(),
-                            policy.toString()}, null);
-//                    LOGGER.fine(LocalizationMessages.WSAT_1002_ADD_AT_POLICY_ASSERTION(
-//                            model.getPortName().toString(),
-//                            method.getOperationName(),
-//                            seiClass.getName(),
-//                            method.getSEIMethod().getName(),
-//                            effectiveFeature.value().toString(),
-//                            effectiveEjbTxType.toString(),
-//                            policy.toString()));
+                            policy.toString()));
                 }
                 subjects.add(generatedWsatPolicySubject);
             }

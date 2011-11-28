@@ -59,7 +59,7 @@
                     <!--<sc:CallbackHandler  name="passwordHandler"  default="abcd!1234"/>-->
                 </sc:CallbackHandlerConfiguration>
                 
-                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="in-vm://wstrust.lifetime_renew.sts/" wsdlLocation="file:/C:/metro/WSIT/wsit/wsit/test/e2e/testcases/wstrust/lifetime_renew/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/" shareToken="true" renewExpiredToken="true">
+                <tc:PreconfiguredSTS xmlns:tc="http://schemas.sun.com/ws/2006/05/trust/client" endpoint="in-vm://wstrust.lifetime_renew.sts/" wsdlLocation="file:/scratch/arjdesai/svn/metro/wsit/tests/e2e/testcases/wstrust/lifetime_renew/./sts/sts.wsdl" serviceName="SecurityTokenService" portName="CustomBinding_ISecurityTokenService" namespace="http://tempuri.org/" shareToken="true" renewExpiredToken="true">
                     <tc:LifeTime>900</tc:LifeTime>
                 </tc:PreconfiguredSTS>
 

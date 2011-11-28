@@ -41,7 +41,6 @@
 package com.sun.xml.ws.tx.at.tube;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.WSATImplInjection;
 import com.sun.xml.ws.tx.at.internal.WSATGatewayRM;
 import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
 import java.util.ArrayList;
@@ -71,8 +70,7 @@ import javax.transaction.xa.Xid;
 
 public class WSATClientHelper implements WSATClient {
     private volatile int counter = 0;
-//    private static final Logger LOGGER = Logger.getLogger(WSATClientHelper.class);
-    private static final Class LOGGERCLASS = WSATClientHelper.class;
+    private static final Logger LOGGER = Logger.getLogger(WSATClientHelper.class);
 
     /**
      * For outbound case, if transaction exists, suspend and store it and attach CoordinationContext to SOAP Header
@@ -97,17 +95,13 @@ public class WSATClientHelper implements WSATClient {
     }
 
     public void doHandleException(Map<String, Object> map) {
-       WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4569_INBOUND_APPLICATION_MESSAGE", null, null);
-//          LOGGER.info(LocalizationMessages.WSAT_4569_INBOUND_APPLICATION_MESSAGE());
+          LOGGER.info(LocalizationMessages.WSAT_4569_INBOUND_APPLICATION_MESSAGE());
        resumeAndClearXidTxMap(map);
     }
 
     private boolean resumeAndClearXidTxMap(Map<String, Object> map) {
         if (WSATHelper.isDebugEnabled()) 
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4569_INBOUND_APPLICATION_MESSAGE", null, null);
-//            LOGGER.info(LocalizationMessages.WSAT_4569_INBOUND_APPLICATION_MESSAGE());
+            LOGGER.info(LocalizationMessages.WSAT_4569_INBOUND_APPLICATION_MESSAGE());
         Xid xid = getWSATXidFromMap(map);
         if (xid != null) {
             WSATHelper.getInstance().removeFromXidToTransactionMap(xid);
@@ -133,25 +127,16 @@ public class WSATClientHelper implements WSATClient {
      */
    private boolean resume(Transaction transaction) {
        if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4570_WILL_RESUME_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{transaction, Thread.currentThread()}, null);
-//           LOGGER.info(LocalizationMessages.WSAT_4570_WILL_RESUME_IN_CLIENT_SIDE_HANDLER(transaction, Thread.currentThread()));
+           LOGGER.info(LocalizationMessages.WSAT_4570_WILL_RESUME_IN_CLIENT_SIDE_HANDLER(transaction, Thread.currentThread()));
        try {
            TransactionManagerImpl.getInstance().getTransactionManager().resume(transaction);
            if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4571_RESUMED_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{transaction, Thread.currentThread()}, null);
-//               LOGGER.info(LocalizationMessages.WSAT_4571_RESUMED_IN_CLIENT_SIDE_HANDLER(transaction, Thread.currentThread()));
+               LOGGER.info(LocalizationMessages.WSAT_4571_RESUMED_IN_CLIENT_SIDE_HANDLER(transaction, Thread.currentThread()));
            return true;
        } catch (InvalidTransactionException e) {
            if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4572_INVALID_TRANSACTION_EXCEPTION_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{transaction, Thread.currentThread()}, null);
-//               LOGGER.severe(LocalizationMessages.WSAT_4572_INVALID_TRANSACTION_EXCEPTION_IN_CLIENT_SIDE_HANDLER(
-//                       transaction, Thread.currentThread()), e);
+               LOGGER.severe(LocalizationMessages.WSAT_4572_INVALID_TRANSACTION_EXCEPTION_IN_CLIENT_SIDE_HANDLER(
+                       transaction, Thread.currentThread()), e);
            try {
                transaction.setRollbackOnly();
            } catch (IllegalStateException ex) {
@@ -164,11 +149,8 @@ public class WSATClientHelper implements WSATClient {
            return false;
        } catch (SystemException e) {
            if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.SEVERE, "WSAT4573_SYSTEM_EXCEPTION_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{transaction, Thread.currentThread()}, null);
-//               LOGGER.severe(LocalizationMessages.WSAT_4573_SYSTEM_EXCEPTION_IN_CLIENT_SIDE_HANDLER(
-//                       transaction, Thread.currentThread()), e);
+               LOGGER.severe(LocalizationMessages.WSAT_4573_SYSTEM_EXCEPTION_IN_CLIENT_SIDE_HANDLER(
+                       transaction, Thread.currentThread()), e);
            try {
                transaction.setRollbackOnly();
                return false;
@@ -197,45 +179,27 @@ public class WSATClientHelper implements WSATClient {
     private List<Header> processTransactionalRequest(
             TransactionalAttribute transactionalAttribute, Map<String, Object> map) {
         while (!WSATGatewayRM.isReadyForRuntime) {
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, null,
-                    "WS-AT recovery is enabled but WS-AT is not ready for runtime.  Processing WS-AT recovery log files.",
-                    null);
-//            LOGGER.info("WS-AT recovery is enabled but WS-AT is not ready for runtime.  Processing WS-AT recovery log files...");
+            LOGGER.info("WS-AT recovery is enabled but WS-AT is not ready for runtime.  Processing WS-AT recovery log files...");
             WSATGatewayRM.getInstance().recover();
         }
         List<Header> headers = new ArrayList<Header>();
         String txId;
-        Xid xid = null; // (Xid)
-        Object obj = (Boolean)map.get("wsat.isColoc")?TransactionManagerImpl.getInstance().getResource("wsat.xid"):null;
-        if(obj!=null)xid=(Xid)obj;
-        if(xid==null) {
-            xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
-            TransactionManagerImpl.getInstance().putResource("wsat.xid", xid);
-        }
-        WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.FINE, null, "WS-AT activityId:" + new String(xid.getBranchQualifier()), null);
-//        LOGGER.info("WS-AT activityId:" + new String(xid.getBranchQualifier()));
+        byte[] activityId = WSATHelper.assignUUID().getBytes();
+        LOGGER.info("WS-AT activityId:" + activityId);
+        Xid xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
         txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         long ttl = 0;
         try {
             ttl = TransactionImportManager.getInstance().getTransactionRemainingTimeout();
             if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{txId, ttl, "suspendedTransaction", Thread.currentThread()}, null);
-//                LOGGER.info(LocalizationMessages.WSAT_4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER(
-//                        txId, ttl, "suspendedTransaction", Thread.currentThread()));
+                LOGGER.info(LocalizationMessages.WSAT_4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER(
+                        txId, ttl, "suspendedTransaction", Thread.currentThread()));
         } catch (SystemException ex) {
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.SEVERE, null, ex, ex);
-//            Logger.getLogger(WSATClientHelper.class).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WSATClientHelper.class).log(Level.SEVERE, null, ex);
         }
         if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{txId, ttl, "suspendedTransaction", Thread.currentThread()}, null);
-//            LOGGER.info(LocalizationMessages.WSAT_4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER(
-//                    txId, ttl, "suspendedTransaction", Thread.currentThread()));
+            LOGGER.info(LocalizationMessages.WSAT_4575_WSAT_INFO_IN_CLIENT_SIDE_HANDLER(
+                    txId, ttl, "suspendedTransaction", Thread.currentThread()));
         WSCBuilderFactory builderFactory =
                 WSCBuilderFactory.newInstance(transactionalAttribute.getVersion());
         WSATCoordinationContextBuilder builder  =
@@ -247,11 +211,8 @@ public class WSATClientHelper implements WSATClient {
                 Headers.create(cc.getJAXBRIContext(),cc.getDelegate());
         headers.add(coordinationHeader);
        if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO,
-                    "WSAT4568_OUTBOUND_APPLICATION_MESSAGE_TRANSACTION_AFTER_ADDING_CONTEXT", "suspendedTransaction", null);
-//           LOGGER.info(LocalizationMessages.WSAT_4568_OUTBOUND_APPLICATION_MESSAGE_TRANSACTION_AFTER_ADDING_CONTEXT(
-//                                                                                                    "suspendedTransaction"));
+           LOGGER.info(LocalizationMessages.WSAT_4568_OUTBOUND_APPLICATION_MESSAGE_TRANSACTION_AFTER_ADDING_CONTEXT(
+                                                                                                    "suspendedTransaction"));
         Transaction suspendedTransaction = suspend(map); //note suspension moved after context creation
         map.put(WSATConstants.WSAT_TRANSACTION_XID, xid);
         WSATHelper.getInstance().putToXidToTransactionMap(xid, suspendedTransaction);
@@ -267,19 +228,13 @@ public class WSATClientHelper implements WSATClient {
         Transaction suspendedTransaction = null;
        try {
            suspendedTransaction = TransactionManagerImpl.getInstance().getTransactionManager().suspend();
-           if (WSATHelper.isDebugEnabled()) 
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4577_ABOUT_TO_SUSPEND_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{suspendedTransaction, Thread.currentThread()}, null);
-//               LOGGER.info(LocalizationMessages.WSAT_4577_ABOUT_TO_SUSPEND_IN_CLIENT_SIDE_HANDLER(
-//                   suspendedTransaction, Thread.currentThread()));
+           if (WSATHelper.isDebugEnabled())
+               LOGGER.info(LocalizationMessages.WSAT_4577_ABOUT_TO_SUSPEND_IN_CLIENT_SIDE_HANDLER(
+                   suspendedTransaction, Thread.currentThread()));
            map.put(WSATConstants.WSAT_TRANSACTION, suspendedTransaction);
            if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.INFO, "WSAT4578_SUSPENDED_IN_CLIENT_SIDE_HANDLER",
-                    new Object[]{suspendedTransaction, Thread.currentThread()}, null);
-//               LOGGER.info(LocalizationMessages.WSAT_4578_SUSPENDED_IN_CLIENT_SIDE_HANDLER(
-//                   suspendedTransaction, Thread.currentThread()));
+               LOGGER.info(LocalizationMessages.WSAT_4578_SUSPENDED_IN_CLIENT_SIDE_HANDLER(
+                   suspendedTransaction, Thread.currentThread()));
          } catch (SystemException e) {
             //tx should always be null here as suspend would either work or not
             return null;

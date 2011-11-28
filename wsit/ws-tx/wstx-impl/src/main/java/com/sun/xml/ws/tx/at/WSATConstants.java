@@ -95,7 +95,7 @@ public interface WSATConstants {
     static final String REPLAY = "Replay";
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_DURABLE_2PC = WSAT10_NS_URI + "/" + DURABLE_2PC;
     static final String HTTP_SCHEMAS_XMLSOAP_ORG_WS_2004_10_WSAT_VOLATILE_2PC = WSAT10_NS_URI + "/" + VOLATILE_2PC;
-    public String WLA_WSAT_NS_URI = "http://com.sun.xml.ws.tx.at/ws/2008/10/wsat";
+    static final String WLA_WSAT_NS_URI = "http://com.sun.xml.ws.tx.at/ws/2008/10/wsat";
     static final String WSAT_WSAT = "wsat-wsat";
     static final String WSAT_CONTEXT_ROOT = "__wstx-services";
     static final String TXID = "txId";
@@ -111,7 +111,7 @@ public interface WSATConstants {
     public static final String WSAT_REGISTRATIONREQUESTERPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/RegistrationRequesterPortType";
     //RegistrationRequesterPortTypeRPC";
     public static final String WSAT_PARTICIPANTPORTTYPEPORT = "/"+ WSAT_CONTEXT_ROOT +"/ParticipantPortType";
-    // logger
+    // logger                                                     
     public static final String DEBUG_WSAT = "DebugWSAT";
 
     static final String WSAT11_NS_URI = "http://docs.oasis-open.org/ws-tx/wsat/2006/06";

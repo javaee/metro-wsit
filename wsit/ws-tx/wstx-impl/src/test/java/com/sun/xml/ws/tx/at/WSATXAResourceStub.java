@@ -54,11 +54,6 @@ public class WSATXAResourceStub extends WSATXAResource {
     public int m_prepareReturn = XAResource.XA_OK;
     public String m_status;
 
-    @Override
-    boolean isDebugEnabled() {
-        return false;
-    }
-
     public WSATXAResourceStub(EndpointReference epr, Xid xid) {
         super(epr, xid);
     }

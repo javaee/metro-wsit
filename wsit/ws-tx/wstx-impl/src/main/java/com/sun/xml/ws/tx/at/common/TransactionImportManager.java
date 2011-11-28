@@ -41,13 +41,11 @@
 package com.sun.xml.ws.tx.at.common;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.WSATImplInjection;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.logging.Level;
 import javax.resource.spi.XATerminator;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
@@ -124,8 +122,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
             }
         }
     }
-    private static final Class LOGGERCLASS = TransactionImportManager.class;
-//    private static final Logger LOGGER = Logger.getLogger(TransactionImportManager.class);
+    private static final Logger LOGGER = Logger.getLogger(TransactionImportManager.class);
     private static TransactionImportManager INSTANCE;
 
     public static TransactionImportManager getInstance() {
@@ -208,8 +205,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
                     sb.append(mi.methodName).append("\n");
                 }
             }
-            WSATImplInjection.getInstance().getLogging().log(
-                            null, LOGGERCLASS, Level.INFO, null, sb.toString(), null);
+            LOGGER.info(sb.toString());
         }
     }
 
@@ -243,9 +239,7 @@ public class TransactionImportManager implements TransactionImportWrapper {
         try {
             result = getTransactionRemainingTimeout.invoke(javaeeTM);
         } catch (IllegalStateException ise) {
-          WSATImplInjection.getInstance().getLogging().log(
-                            null, LOGGERCLASS, Level.FINE, "WSAT4617_TXN_MGR_LOOKUP_TXN_TIMEOUT", null, ise);
-//            LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
+            LOGGER.finest(METHOD + " " + LocalizationMessages.WSAT_4617_TXN_MGR_LOOKUP_TXN_TIMEOUT(), ise);
         }
         return result;
     }

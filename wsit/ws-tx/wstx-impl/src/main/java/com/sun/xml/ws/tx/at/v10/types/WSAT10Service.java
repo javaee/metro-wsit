@@ -41,11 +41,9 @@
 package com.sun.xml.ws.tx.at.v10.types;
 
 import com.sun.istack.logging.Logger;
-import com.sun.xml.ws.tx.at.WSATImplInjection;
-import com.sun.xml.ws.tx.at.localization.LocalizationMessages;
+import com.sun.xml.ws.tx.at.localization.LocalizationMessages; 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
@@ -59,8 +57,7 @@ public class WSAT10Service
 {
 
     private final static URL WSAT10SERVICE_WSDL_LOCATION;
-//    private final static Logger LOGGER = Logger.getLogger(com.sun.xml.ws.tx.at.v10.types.WSAT10Service.class);
-    private final static Class LOGGERCLASS = com.sun.xml.ws.tx.at.v10.types.WSAT10Service.class;
+    private final static Logger LOGGER = Logger.getLogger(com.sun.xml.ws.tx.at.v10.types.WSAT10Service.class);
 
     static {
         URL url = null;
@@ -69,10 +66,8 @@ public class WSAT10Service
             baseUrl = com.sun.xml.ws.tx.at.v10.types.WSAT10Service.class.getResource(".");
             url = new URL(baseUrl, "file:wsdls/wsat10/wsat.wsdl");
         } catch (MalformedURLException e) {
-            WSATImplInjection.getInstance().getLogging().log(
-                    null, LOGGERCLASS, Level.WARNING, "WSAT4618_FAILED_TO_CREATE_URL_FOR_WSDL", null, e);
-//            LOGGER.warning(LocalizationMessages.WSAT_4618_FAILED_TO_CREATE_URL_FOR_WSDL());
-//            LOGGER.warning(e.getMessage());
+            LOGGER.warning(LocalizationMessages.WSAT_4618_FAILED_TO_CREATE_URL_FOR_WSDL());
+            LOGGER.warning(e.getMessage());
         }
         WSAT10SERVICE_WSDL_LOCATION = url;
     }

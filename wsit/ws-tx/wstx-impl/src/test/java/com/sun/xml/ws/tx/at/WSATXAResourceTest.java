@@ -75,25 +75,25 @@ public class WSATXAResourceTest extends TestCase {
         MemberSubmissionEndpointReference epr0_3= EndpointReferenceBuilder.MemberSubmission().address(address0).referenceParameter(node3).build();
         MemberSubmissionEndpointReference epr1_1 = EndpointReferenceBuilder.MemberSubmission().address(address1).referenceParameter(node1).build();
         //test equal
-        WSATXAResource testWSATXAResource = new WSATXAResource(epr0_0, xid0){boolean isDebugEnabled() {return false;}};
-        WSATXAResource testWSATXAResource2 = new WSATXAResource(epr0_1, xid1){boolean isDebugEnabled() {return false;}};
+        WSATXAResource testWSATXAResource = new WSATXAResource(epr0_0, xid0);
+        WSATXAResource testWSATXAResource2 = new WSATXAResource(epr0_1, xid1);
         assertTrue("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
         //test address not equal
-        testWSATXAResource2 = new WSATXAResource(epr1_1, xid1){boolean isDebugEnabled() {return false;}};
+        testWSATXAResource2 = new WSATXAResource(epr1_1, xid1);
         assertFalse("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
         //test equal again
-        testWSATXAResource2 = new WSATXAResource(epr0_1, xid1){boolean isDebugEnabled() {return false;}};
+        testWSATXAResource2 = new WSATXAResource(epr0_1, xid1);
         assertTrue("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
         //test xid not equal
-        testWSATXAResource = new WSATXAResource(epr0_0, xid2){boolean isDebugEnabled() {return false;}};
-        testWSATXAResource2 = new WSATXAResource(epr0_1, xid3){boolean isDebugEnabled() {return false;}};
+        testWSATXAResource = new WSATXAResource(epr0_0, xid2);
+        testWSATXAResource2 = new WSATXAResource(epr0_1, xid3);
         assertFalse("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
         //test equal again
-        testWSATXAResource2 = new WSATXAResource(epr0_1, xid1){boolean isDebugEnabled() {return false;}};
+        testWSATXAResource2 = new WSATXAResource(epr0_1, xid1);
         assertTrue("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
         //test node/ref-param not equal
-        testWSATXAResource = new WSATXAResource(epr0_2, xid0){boolean isDebugEnabled() {return false;}};
-        testWSATXAResource2 = new WSATXAResource(epr0_3, xid1){boolean isDebugEnabled() {return false;}};
+        testWSATXAResource = new WSATXAResource(epr0_2, xid0);
+        testWSATXAResource2 = new WSATXAResource(epr0_3, xid1);
         assertFalse("WSATResources", testWSATXAResource.equals(testWSATXAResource2));
     }
 
@@ -110,8 +110,6 @@ public class WSATXAResourceTest extends TestCase {
             int getWaitForReplyTimeout() {
                 return 1;
             }
-
-            boolean isDebugEnabled() {return false;}
         };
         //first test scenario where reply is received before wait...
         testWSATXAResource.setStatus(WSATConstants.READONLY);
@@ -147,8 +145,6 @@ public class WSATXAResourceTest extends TestCase {
             int getWaitForReplyTimeout() {
                 return 1;
             }
-
-            boolean isDebugEnabled(){return false;}
         };
         //first test scenario where reply is received before wait...
         testWSATXAResource.setStatus(WSATConstants.ABORTED);
@@ -190,8 +186,6 @@ public class WSATXAResourceTest extends TestCase {
             int getWaitForReplyTimeout() {
                 return 1;
             }
-
-            boolean isDebugEnabled(){ return false;}
         };
         //first test scenario where reply is received before wait...
         wsatXAResourceTest.setStatus(WSATConstants.COMMITTED);
@@ -245,16 +239,8 @@ public class WSATXAResourceTest extends TestCase {
         Node[] node0 = new Node[]{createElement("test")};
         MemberSubmissionEndpointReference epr0_0 =
                 EndpointReferenceBuilder.MemberSubmission().address(address).referenceParameter(node0).build();
-        WSATXAResource wsatXAResource =
-                b?new WSATXAResource(epr0_0, xid){boolean isDebugEnabled() {return false;}}:new WSATXAResourceStub(epr0_0, xid);
+        WSATXAResource wsatXAResource = b?new WSATXAResource(epr0_0, xid):new WSATXAResourceStub(epr0_0, xid);
         return wsatXAResource;
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        if(WSATImplInjection.getInstance().getLogging()==null)
-            WSATImplInjection.getInstance().setLogging(new LoggingImpl());
     }
 }
 

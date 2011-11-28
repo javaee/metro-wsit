@@ -49,14 +49,12 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.Xid;
 import javax.xml.ws.EndpointReference;
-import java.util.logging.Level;
 
 /**
  * Volatile WS-AT Participant
  */
 public class WSATSynchronization implements Synchronization {
-    private static final Class LOGGERCLASS = WSATSynchronization.class;
-//    private static final Logger LOGGER = Logger.getLogger(WSATSynchronization.class);
+    private static final Logger LOGGER = Logger.getLogger(WSATSynchronization.class);
     Xid m_xid;
     String m_status = UNKNOWN;
     private static final String UNKNOWN = "UNKNOWN";
@@ -73,9 +71,7 @@ public class WSATSynchronization implements Synchronization {
         m_xid = xid;
         m_epr = epr;
        if (WSATHelper.isDebugEnabled())
-           WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                   "WSAT_4526_WSAT_SYNCHRONIZATION", new Object[]{m_epr.toString(), m_xid, ""}, null);
-//           LOGGER.info(LocalizationMessages.WSAT_4526_WSAT_SYNCHRONIZATION(m_epr.toString(), m_xid, ""));
+           LOGGER.info(LocalizationMessages.WSAT_4526_WSAT_SYNCHRONIZATION(m_epr.toString(), m_xid, ""));
     }
 
     public void setStatus(String status) {
@@ -83,58 +79,33 @@ public class WSATSynchronization implements Synchronization {
     }
 
     public void beforeCompletion() {
-        if (WSATHelper.isDebugEnabled())
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                    "WSAT_4527_BEFORE_COMPLETION_ENTERED", new Object[]{m_epr.toString(), m_xid}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4527_BEFORE_COMPLETION_ENTERED(m_epr.toString(), m_xid));
+        if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4527_BEFORE_COMPLETION_ENTERED(m_epr.toString(), m_xid));
         try {
             WSATHelper.getInstance().beforeCompletion( m_epr, m_xid, this);
             synchronized (this) {
                 if (m_status.equals(WSATConstants.COMMITTED)) { // we received a reply from call already
-                    if (WSATHelper.isDebugEnabled())
-                        WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                                "WSAT_4528_BEFORE_COMPLETION_COMMITTED_BEFORE_WAIT",
-                                new Object[]{m_epr.toString(), m_xid}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4528_BEFORE_COMPLETION_COMMITTED_BEFORE_WAIT(
-//                        m_epr.toString(), m_xid));
+                    if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4528_BEFORE_COMPLETION_COMMITTED_BEFORE_WAIT(
+                        m_epr.toString(), m_xid));
                     return;
                 }
-                if (WSATHelper.isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(
-                            null, LOGGERCLASS, Level.INFO, "WSAT_4529_BEFORE_COMPLETION_WAITING_FOR_REPLY",
-                            new Object[]{m_epr.toString(), m_xid}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4529_BEFORE_COMPLETION_WAITING_FOR_REPLY(
-//                    m_epr.toString(), m_xid));
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4529_BEFORE_COMPLETION_WAITING_FOR_REPLY(
+                    m_epr.toString(), m_xid));
                 this.wait(WSATHelper.getInstance().getWaitForReplyTimeout());
-                if (WSATHelper.isDebugEnabled())
-                    WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.INFO,
-                            "WSAT_4530_BEFORE_COMPLETION_FINISHED_WAITING_FOR_REPLY",
-                            new Object[]{m_epr.toString(), m_xid}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4530_BEFORE_COMPLETION_FINISHED_WAITING_FOR_REPLY(
-//                    m_epr.toString(), m_xid));
+                if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4530_BEFORE_COMPLETION_FINISHED_WAITING_FOR_REPLY(
+                    m_epr.toString(), m_xid));
             }
-            WSATImplInjection.getInstance().getLogging().log( null, LOGGERCLASS, Level.INFO,
-                    "WSAT4531_BEFORE_COMPLETION_RECEIVED_REPLY_WITH_STATUS",
-                    new Object[]{m_status, m_epr.toString(), m_xid}, null);
-//            LOGGER.info(LocalizationMessages.WSAT_4531_BEFORE_COMPLETION_RECEIVED_REPLY_WITH_STATUS(
-//                m_status, m_epr.toString(), m_xid));
+            LOGGER.info(LocalizationMessages.WSAT_4531_BEFORE_COMPLETION_RECEIVED_REPLY_WITH_STATUS(
+                m_status, m_epr.toString(), m_xid));
             if (!m_status.equals(WSATConstants.COMMITTED)) {
-                WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.SEVERE,
-                        "WSAT4532_BEFORE_COMPLETION_UNEXCEPTED_STATUS",
-                        new Object[]{m_status, m_epr.toString(), m_xid}, null);
-//                LOGGER.severe(LocalizationMessages.WSAT_4532_BEFORE_COMPLETION_UNEXCEPTED_STATUS(
-//                    m_status, m_epr.toString(), m_xid));
+                LOGGER.severe(LocalizationMessages.WSAT_4532_BEFORE_COMPLETION_UNEXCEPTED_STATUS(
+                    m_status, m_epr.toString(), m_xid));
                 setRollbackOnly();
             }
         } catch (InterruptedException e) {
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.SEVERE,
-                    "WSAT4533_BEFORE_COMPLETION_INTERRUPTED_EXCEPTION", new Object[]{m_epr.toString(), m_xid}, null);
-//            LOGGER.severe(LocalizationMessages.WSAT_4533_BEFORE_COMPLETION_INTERRUPTED_EXCEPTION(m_epr.toString(), m_xid), e);
+            LOGGER.severe(LocalizationMessages.WSAT_4533_BEFORE_COMPLETION_INTERRUPTED_EXCEPTION(m_epr.toString(), m_xid), e);
             setRollbackOnly();
         } catch (Exception e) {
-            WSATImplInjection.getInstance().getLogging().log(null, LOGGERCLASS, Level.SEVERE,
-                    "WSAT4534_BEFORE_COMPLETION_EXCEPTION", new Object[]{m_epr.toString(), m_xid}, null);
-//            LOGGER.severe(LocalizationMessages.WSAT_4534_BEFORE_COMPLETION_EXCEPTION(m_epr.toString(), m_xid), e);
+            LOGGER.severe(LocalizationMessages.WSAT_4534_BEFORE_COMPLETION_EXCEPTION(m_epr.toString(), m_xid), e);
             setRollbackOnly();
         } finally {
             WSATHelper.getInstance().removeVolatileParticipant(m_xid);
@@ -148,27 +119,16 @@ public class WSATSynchronization implements Synchronization {
             if (transaction != null) {
                 transaction.setRollbackOnly();
             } else
-                WSATImplInjection.getInstance().getLogging().log(
-                        null, LOGGERCLASS, Level.INFO,
-                        "WSAT4536_BEFORE_COMPLETION_TRANSACTION_NULL_DURING_SET_ROLLBACK_ONLY",
-                        new Object[]{m_epr.toString(), m_xid}, null);
-//                LOGGER.info(LocalizationMessages.WSAT_4536_BEFORE_COMPLETION_TRANSACTION_NULL_DURING_SET_ROLLBACK_ONLY(
-//                        m_epr.toString(), m_xid));
+                LOGGER.info(LocalizationMessages.WSAT_4536_BEFORE_COMPLETION_TRANSACTION_NULL_DURING_SET_ROLLBACK_ONLY(
+                        m_epr.toString(), m_xid));
         } catch (SystemException e) {
-            WSATImplInjection.getInstance().getLogging().log(
-              null, LOGGERCLASS, Level.WARNING, "WSAT4535_BEFORE_COMPLETION_SYSTEM_EXCEPTION_DURING_SET_ROLLBACK_ONLY",
-                    new Object[]{e, m_epr.toString(), m_xid}, null);
-//            LOGGER.info(LocalizationMessages.WSAT_4535_BEFORE_COMPLETION_SYSTEM_EXCEPTION_DURING_SET_ROLLBACK_ONLY(
-//                    e, m_epr.toString(), m_xid));
+            LOGGER.info(LocalizationMessages.WSAT_4535_BEFORE_COMPLETION_SYSTEM_EXCEPTION_DURING_SET_ROLLBACK_ONLY(
+                    e, m_epr.toString(), m_xid));
         }
     }
 
     public void afterCompletion(int status) {
-      if (WSATHelper.isDebugEnabled())
-      WSATImplInjection.getInstance().getLogging().log(
-              null, LOGGERCLASS, Level.INFO, "WSAT4537_AFTER_COMPLETION_STATUS",
-              new Object[]{m_epr.toString(), m_xid, "" + status}, null);
-//              LOGGER.info(LocalizationMessages.WSAT_4537_AFTER_COMPLETION_STATUS(m_epr.toString(), m_xid, "" + status));
+      if (WSATHelper.isDebugEnabled()) LOGGER.info(LocalizationMessages.WSAT_4537_AFTER_COMPLETION_STATUS(m_epr.toString(), m_xid, "" + status));
         //no-op
     }
 
