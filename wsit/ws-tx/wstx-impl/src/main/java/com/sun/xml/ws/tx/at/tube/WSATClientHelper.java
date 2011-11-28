@@ -186,7 +186,16 @@ public class WSATClientHelper implements WSATClient {
         String txId;
         byte[] activityId = WSATHelper.assignUUID().getBytes();
         LOGGER.info("WS-AT activityId:" + activityId);
-        Xid xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
+        //Xid xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
+
+        Xid xid = null; // (Xid)
+        Object obj = TransactionManagerImpl.getInstance().getResource("wsat.xid");
+        if(obj!=null)xid=(Xid)obj;
+        if(xid==null) {
+            xid = new XidImpl(1234, new String(System.currentTimeMillis() + "-" + counter++).getBytes(), new byte[]{});
+            TransactionManagerImpl.getInstance().putResource("wsat.xid", xid);
+        }
+
         txId = TransactionIdHelper.getInstance().xid2wsatid(xid);
         long ttl = 0;
         try {

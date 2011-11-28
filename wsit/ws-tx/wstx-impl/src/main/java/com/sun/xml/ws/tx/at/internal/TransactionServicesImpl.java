@@ -111,8 +111,8 @@ public class TransactionServicesImpl implements TransactionServices {
     //returns null if not infected previously or xid if it has
     public Xid importTransaction(int timeout, byte[] tId) throws WSATException {
         final XidImpl xidImpl = new XidImpl(tId);
-        if(importedXids.contains(xidImpl)) return xidImpl;
         TransactionImportManager.getInstance().recreate(xidImpl, timeout);
+        if(importedXids.contains(xidImpl)) return xidImpl;
         importedXids.add(xidImpl);
         return null;
     }
