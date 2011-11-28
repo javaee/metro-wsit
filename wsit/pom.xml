@@ -698,7 +698,7 @@
         <jaxb.spec.version>2.2</jaxb.spec.version><!-- webservices-(api-)osgi(-aix)/pom.xml -->
 
         <jaxws.api.version>2.2.6</jaxws.api.version>
-        <jaxws.ri.version>2.2.6-promoted-b10</jaxws.ri.version>
+        <jaxws.ri.version>2.2.6-promoted-b11</jaxws.ri.version>
         <jaxws.ri.release.version>2.2.6</jaxws.ri.release.version>
         <jaxws.spec.version>2.2</jaxws.spec.version>
         
