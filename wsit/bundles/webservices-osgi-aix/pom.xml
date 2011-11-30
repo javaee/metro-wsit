@@ -89,8 +89,6 @@
                                 <artifactItem>
                                     <groupId>javax.xml</groupId>
                                     <artifactId>jaxr-api</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -98,8 +96,6 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-rt</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -107,8 +103,6 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-extra</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -116,8 +110,20 @@
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
                                     <artifactId>webservices-tools</artifactId>
-                                    <!--version>${project.version}</version-->
-                                    <!--type>jar</type-->
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.ws</groupId>
+                                    <artifactId>jaxws-eclipselink-plugin</artifactId>
+                                    <classifier>sources</classifier>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${generated.sources.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.ws</groupId>
+                                    <artifactId>sdo-eclipselink-plugin</artifactId>
                                     <classifier>sources</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${generated.sources.dir}</outputDirectory>
@@ -199,7 +205,6 @@
                                 </Export-Package>
                                 <Import-Package>
                                     com.sun.security.auth.callback;resolution:=optional,
-                                    com.sun.security.jgss;resolution:=optional,
                                     sun.security.action;resolution:=optional,
                                     sun.security.jgss;resolution:=optional,
                                     sun.security.jgss.spi;resolution:=optional,
@@ -207,6 +212,7 @@
                                     sun.security.krb5.internal.crypto;resolution:=optional,
                                     sun.security.util;resolution:=optional,
                                     sun.security.x509;resolution:=optional,
+                                    com.sun.security.jgss;resolution:=optional,
                                     com.sun.appserv.server;resolution:=optional,
                                     com.sun.enterprise.security.*;resolution:=optional,
                                     com.sun.enterprise.transaction.*;resolution:=optional,
@@ -224,12 +230,154 @@
                                     javax.ejb;resolution:=optional;version=3.0,
                                     javax.jws;version=2.0,
                                     javax.jws.soap;version=2.0,
+                                    javax.mail.internet;resolution:=optional,
+                                    javax.xml.namespace,
+                                    javax.xml.parsers,
+                                    javax.xml.stream,
+                                    javax.xml.transform.*,
                                     javax.xml.ws.*;version=${jaxws.spec.version},
                                     javax.xml.bind.*;version=${jaxb.spec.version},
                                     org.apache.coyote;resolution:=optional,
                                     org.apache.tomcat.util.buf;resolution:=optional,
                                     org.iso_relax.verifier.impl;resolution:=optional,
                                     org.jvnet.mimepull;resolution:=optional,
+                                    javax.persistence;resolution:=optional,
+                                    javax.persistence.criteria;resolution:=optional,
+                                    javax.persistence.metamodel;resolution:=optional,
+                                    javax.persistence.spi;resolution:=optional,
+                                    org.eclipse.persistence.annotations;resolution:=optional,
+                                    org.eclipse.persistence.config;resolution:=optional,
+                                    org.eclipse.persistence.dbws;resolution:=optional,
+                                    org.eclipse.persistence.descriptors;resolution:=optional,
+                                    org.eclipse.persistence.descriptors.changetracking;resolution:=optional,
+                                    org.eclipse.persistence.descriptors.copying;resolution:=optional,
+                                    org.eclipse.persistence.descriptors.invalidation;resolution:=optional,
+                                    org.eclipse.persistence.descriptors.partitioning;resolution:=optional,
+                                    org.eclipse.persistence.dynamic;resolution:=optional,
+                                    org.eclipse.persistence.eis.adapters;resolution:=optional,
+                                    org.eclipse.persistence.eis.adapters.aq;resolution:=optional,
+                                    org.eclipse.persistence.eis.adapters.jms;resolution:=optional,
+                                    org.eclipse.persistence.eis.adapters.xmlfile;resolution:=optional,
+                                    org.eclipse.persistence.eis.interactions;resolution:=optional,
+                                    org.eclipse.persistence.eis.mappings;resolution:=optional,
+                                    org.eclipse.persistence.exceptions;resolution:=optional,
+                                    org.eclipse.persistence.exceptions.i18n;resolution:=optional,
+                                    org.eclipse.persistence.expressions;resolution:=optional,
+                                    org.eclipse.persistence.expressions.spatial;resolution:=optional,
+                                    org.eclipse.persistence.history;resolution:=optional,
+                                    org.eclipse.persistence.indirection;resolution:=optional,
+                                    org.eclipse.persistence.internal;resolution:=optional,
+                                    org.eclipse.persistence.internal.codegen;resolution:=optional,
+                                    org.eclipse.persistence.internal.databaseaccess;resolution:=optional,
+                                    org.eclipse.persistence.internal.dbws;resolution:=optional,
+                                    org.eclipse.persistence.internal.descriptors;resolution:=optional,
+                                    org.eclipse.persistence.internal.changetracking;resolution:=optional,
+                                    org.eclipse.persistence.internal.dynamic;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.adapters;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.adapters.aq;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.adapters.jms;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.adapters.xmlfile;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.cobol;resolution:=optional,
+                                    org.eclipse.persistence.internal.eis.cobol.helper;resolution:=optional,
+                                    org.eclipse.persistence.internal.expressions;resolution:=optional,
+                                    org.eclipse.persistence.internal.helper;resolution:=optional,
+                                    org.eclipse.persistence.internal.helper.linkedlist;resolution:=optional,
+                                    org.eclipse.persistence.internal.history;resolution:=optional,
+                                    org.eclipse.persistence.internal.identitymaps;resolution:=optional,
+                                    org.eclipse.persistence.internal.indirection;resolution:=optional,
+                                    org.eclipse.persistence.internal.jaxb;resolution:=optional,
+                                    org.eclipse.persistence.internal.jaxb.many;resolution:=optional,
+                                    org.eclipse.persistence.internal.localization;resolution:=optional,
+                                    org.eclipse.persistence.internal.localization.i18n;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.accessor;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.conversion;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.documentpreservation;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.record;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.record.deferred;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.record.namespaces;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.schema;resolution:=optional,
+                                    org.eclipse.persistence.internal.oxm.schema.model;resolution:=optional,
+                                    org.eclipse.persistence.internal.platform;resolution:=optional,
+                                    org.eclipse.persistence.internal.platform.database;resolution:=optional,
+                                    org.eclipse.persistence.internal.platform.database.oracle;resolution:=optional,
+                                    org.eclipse.persistence.internal.platform.database.oracle.xdb;resolution:=optional,
+                                    org.eclipse.persistence.internal.queries;resolution:=optional,
+                                    org.eclipse.persistence.internal.security;resolution:=optional,
+                                    org.eclipse.persistence.internal.sequencing;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.broadcast;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.corba;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.corba.sun;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.jms;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.rmi;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.rmi.iiop;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.factories;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.coordination.model;resolution:=optional,
+                                    org.eclipse.persistence.internal.sessions.remote;resolution:=optional,
+                                    org.eclipse.persistence.internal.weaving;resolution:=optional,
+                                    org.eclipse.persistence.internal.xr;resolution:=optional,
+                                    org.eclipse.persistence.internal.xr.sxf;resolution:=optional,
+                                    org.eclipse.persistence.jaxb;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.attachment;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.compiler;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.dynamic;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.dynamic.metadata;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.javamodel;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.javamodel.oxm;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.javamodel.reflection;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.javamodel.xjc;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.metadata;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.xjc;resolution:=optional,
+                                    org.eclipse.persistence.jaxb.xmlmodel;resolution:=optional,
+                                    org.eclipse.persistence.logging;resolution:=optional,
+                                    org.eclipse.persistence.mappings;resolution:=optional,
+                                    org.eclipse.persistence.mappings.converters;resolution:=optional,
+                                    org.eclipse.persistence.mappings.foundation;resolution:=optional,
+                                    org.eclipse.persistence.mappings.querykeys;resolution:=optional,
+                                    org.eclipse.persistence.mappings.structures;resolution:=optional,
+                                    org.eclipse.persistence.mappings.transformers;resolution:=optional,
+                                    org.eclipse.persistence.mappings.xdb;resolution:=optional,
+                                    org.eclipse.persistence.oxm;resolution:=optional,
+                                    org.eclipse.persistence.oxm.annotations;resolution:=optional,
+                                    org.eclipse.persistence.oxm.attachment;resolution:=optional,
+                                    org.eclipse.persistence.oxm.documentpreservation;resolution:=optional,
+                                    org.eclipse.persistence.oxm.mappings;resolution:=optional,
+                                    org.eclipse.persistence.oxm.mappings.converters;resolution:=optional,
+                                    org.eclipse.persistence.oxm.mappings.nullpolicy;resolution:=optional,
+                                    org.eclipse.persistence.oxm.platform;resolution:=optional,
+                                    org.eclipse.persistence.oxm.record;resolution:=optional,
+                                    org.eclipse.persistence.oxm.schema;resolution:=optional,
+                                    org.eclipse.persistence.oxm.sequenced;resolution:=optional,
+                                    org.eclipse.persistence.oxm.unmapped;resolution:=optional,
+                                    org.eclipse.persistence.platform.*;resolution:=optional,
+                                    org.eclipse.persistence.platform;resolution:=optional,
+                                    org.eclipse.persistence.platform.database;resolution:=optional,
+                                    org.eclipse.persistence.platform.server;resolution:=optional,
+                                    org.eclipse.persistence.platform.xml;resolution:=optional,
+                                    org.eclipse.persistence.queries;resolution:=optional,
+                                    org.eclipse.persistence.sdo;resolution:=optional,
+                                    org.eclipse.persistence.sdo.dataobjects;resolution:=optional,
+                                    org.eclipse.persistence.sdo.helper;resolution:=optional,
+                                    org.eclipse.persistence.sdo.helper.delegates;resolution:=optional,
+                                    org.eclipse.persistence.sdo.helper.extension;resolution:=optional,
+                                    org.eclipse.persistence.sdo.helper.jaxb;resolution:=optional,
+                                    org.eclipse.persistence.sdo.helper.metadata;resolution:=optional,
+                                    org.eclipse.persistence.sdo.types;resolution:=optional,
+                                    org.eclipse.persistence.sequencing;resolution:=optional,
+                                    org.eclipse.persistence.services;resolution:=optional,
+                                    org.eclipse.persistence.services.glassfish;resolution:=optional,
+                                    org.eclipse.persistence.tools;resolution:=optional,
+                                    org.eclipse.persistence.tools.file;resolution:=optional,
+                                    org.eclipse.persistence.tools.profiler;resolution:=optional,
+                                    org.eclipse.persistence.tools.schemaframework;resolution:=optional,
+                                    org.eclipse.persistence.tools.weaving.jpa;resolution:=optional,
+                                    commonj.sdo.*;resolution:=optional,
+                                    org.jvnet.staxex;resolution:=optional,
+                                    org.w3c.dom;resolution:=optional,
+                                    org.xml.sax;resolution:=optional,
                                     org.relaxng.datatype;resolution:=optional,
                                     *
                                 </Import-Package>
@@ -241,52 +389,6 @@
                                 <DynamicImport-Package>
                                     org.glassfish.flashlight.provider
                                 </DynamicImport-Package>
-                                <!--
-                                    Missing exports compared to old:
-                                        com.sun.istack.ws; version=0.0.0
-                                        com.sun.tools.resourcegen; version=0.0.0
-                                        com.sun.tools.ws; version=0.0.0
-                                        com.sun.tools.ws.ant; version=0.0.0
-                                        com.sun.tools.ws.api; version=0.0.0
-                                        com.sun.tools.ws.api.wsdl; version=0.0.0
-                                        com.sun.tools.ws.processor; version=0.0.0
-                                        com.sun.tools.ws.processor.generator; version=0.0.0
-                                        com.sun.tools.ws.processor.model; version=0.0.0
-                                        com.sun.tools.ws.processor.model.exporter; version=0.0.0
-                                        com.sun.tools.ws.processor.model.java; version=0.0.0
-                                        com.sun.tools.ws.processor.model.jaxb; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler.annotation; version=0.0.0
-                                        com.sun.tools.ws.processor.modeler.wsdl; version=0.0.0
-                                        com.sun.tools.ws.processor.util; version=0.0.0
-                                        com.sun.tools.ws.resources; version=0.0.0
-                                        com.sun.tools.ws.util; version=0.0.0
-                                        com.sun.tools.ws.wscompile; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.http; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.jaxws; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.mime; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.schema; version=0.0.0
-                                        com.sun.tools.ws.wsdl.document.soap; version=0.0.0
-                                        com.sun.tools.ws.wsdl.framework; version=0.0.0
-                                        com.sun.tools.ws.wsdl.parser; version=0.0.0
-                                        com.sun.xml.registry; version=0.0.0
-                                        com.sun.xml.registry.common; version=0.0.0
-                                        com.sun.xml.registry.common.tools; version=0.0.0
-                                        com.sun.xml.registry.common.tools.bindings_v3; version=0.0.0
-                                        com.sun.xml.registry.common.tools.resources; version=0.0.0
-                                        com.sun.xml.registry.common.util; version=0.0.0
-                                        com.sun.xml.registry.service; version=0.0.0
-                                        com.sun.xml.registry.uddi; version=0.0.0
-                                        com.sun.xml.registry.uddi.bindings_v2_2; version=0.0.0
-                                        com.sun.xml.registry.uddi.infomodel; version=0.0.0
-                                        WEB-INF.wsdl; version=0.0.0
-                                        WEB-INF.wsdls; version=0.0.0
-                                        WEB-INF.wsdls.wsat10; version=0.0.0
-                                        WEB-INF.wsdls.wsat11; version=0.0.0
-                                        WEB-INF.wsdls.wsc10; version=0.0.0
-                                        WEB-INF.wsdls.wsc11; version=0.0.0
-                                -->
                             </instructions>
                             <unpackBundle>true</unpackBundle>
                         </configuration>
@@ -306,7 +408,7 @@
                         <configuration>
                             <excludeTransitive>true</excludeTransitive>
                             <includes>META-INF/services/*, META-INF/metro-default.xml, META-INF/jaxrpc/*</includes>
-                            <excludes>META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
+                            <excludes>META-INF/services/com.sun.xml.ws.spi.db.*, META-INF/services/com.sun.tools.*, META-INF/services/javax.xml.bind.*, META-INF/services/javax.xml.stream.*, META-INF/services/org.*</excludes>
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
@@ -402,13 +504,6 @@
             <artifactId>jaxrpc-api-osgi</artifactId>
             <version>1.1-b01</version>
         </dependency>
-        <!-- 
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>webservices-extra-jdk-packages</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>woodstox-core-asl</artifactId>
@@ -416,6 +511,54 @@
         <dependency>
             <groupId>org.jvnet.mimepull</groupId>
             <artifactId>mimepull</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-eclipselink-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-rt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.persistence</groupId>
+                    <artifactId>eclipselink</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jvnet.staxex</groupId>
+                    <artifactId>stax-ex</artifactId>
+                </exclusion>                
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-tools</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>sdo-eclipselink-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-rt</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.persistence</groupId>
+                    <artifactId>eclipselink</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commonj.sdo</groupId>
+                    <artifactId>commonj.sdo</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jvnet.staxex</groupId>
+                    <artifactId>stax-ex</artifactId>
+                </exclusion>                
+                <exclusion>
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <properties>
