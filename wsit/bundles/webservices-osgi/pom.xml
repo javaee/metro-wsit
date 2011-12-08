@@ -198,8 +198,7 @@
                                     com.sun.xml.wss.*;version=${metro.release.version},
                                     org.jvnet.ws.databinding.*;version=${jaxws.ri.release.version},
                                     org.jvnet.ws.message.*;version=${jaxws.ri.release.version},
-                                    org.jvnet.ws.*;version=${jaxws.ri.release.version},
-                                    javax.xml.registry.*;version=1.0
+                                    org.jvnet.ws.*;version=${jaxws.ri.release.version}
                                 </Export-Package>
                                 <Import-Package>
                                     com.sun.security.auth.callback;resolution:=optional,
@@ -497,6 +496,11 @@
             <groupId>javax.xml</groupId>
             <artifactId>jaxrpc-api-osgi</artifactId>
             <version>1.1-b01</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>jaxr-api-osgi</artifactId>
+            <version>1.0-b01</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
