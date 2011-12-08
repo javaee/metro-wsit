@@ -200,8 +200,7 @@
                                     org.jvnet.ws.databinding.*;version=${jaxws.ri.release.version},
                                     org.jvnet.ws.message.*;version=${jaxws.ri.release.version},
                                     org.jvnet.ws.*;version=${jaxws.ri.release.version},
-                                    javax.xml.registry.*;version=1.0,
-                                    org.jcp.xml.dsig.internal.*;version=1.0.2,
+                                    org.jcp.xml.dsig.internal.*;version=1.0.2
                                 </Export-Package>
                                 <Import-Package>
                                     com.sun.security.auth.callback;resolution:=optional,
