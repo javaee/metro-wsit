@@ -221,7 +221,7 @@
     
     <target name="get-metro-hudson" description="internal: retrieve last successful build of WSIT from hudson" unless="noget">
         <mkdir dir="metro-image"/>
-        <property name="metro.zip.url" value="http://sysifos-sol.cz.oracle.com/hudson/job/metro-main-trunk/lastSuccessfulBuild/artifact/wsit/bundles/metro-standalone/target/metro.zip"/>
+        <property name="metro.zip.url" value="http://sysifos-sol.cz.oracle.com/hudson/job/metro-2.2/lastSuccessfulBuild/artifact/wsit/bundles/metro-standalone/target/metro.zip"/>
         <get src="${metro.zip.url}"
              dest="metro-image/metro.zip"/>
         <unzip src="metro-image/metro.zip" dest="metro-image"/>
