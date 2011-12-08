@@ -114,6 +114,7 @@
                             javax.xml.bind.*;version=${jaxb.spec.version},
                             *
                         </Import-Package>
+                        <DynamicImport-Package>org.glassfish.hk2.osgiresourcelocator</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
