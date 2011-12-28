@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -228,11 +228,18 @@ public class PolicyResolverImpl implements PolicyResolver {
     private SecurityPolicy getInboundFaultPolicy(SOAPMessage msg) {
         if (cachedOperation != null) {
             WSDLOperation operation = cachedOperation.getOperation();
+            SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);
             try {
                 SOAPBody body = msg.getSOAPBody();
                 NodeList nodes = body.getElementsByTagName("detail");
                 if (nodes.getLength() == 0) {
                     nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Detail");
+                }
+                if(nodes.getLength() == 0) {
+                    nodes = body.getElementsByTagNameNS(SOAPConstants.URI_NS_SOAP_1_1_ENVELOPE, "detail");
+                }
+                if(nodes.getLength() == 0) {
+                    return sph.getMessagePolicy();                    
                 }
                 if (nodes.getLength() > 0) {
                     Node node = nodes.item(0);
@@ -250,8 +257,7 @@ public class PolicyResolverImpl implements PolicyResolver {
                     } else {
                         faultDetail = new QName(faultNode.getLocalName());
                     }
-                    WSDLFault fault = operation.getFault(faultDetail);
-                    SecurityPolicyHolder sph = inMessagePolicyMap.get(cachedOperation);
+                    WSDLFault fault = operation.getFault(faultDetail);                    
                     SecurityPolicyHolder faultPolicyHolder = sph.getFaultPolicy(fault);
                     SecurityPolicy faultPolicy = (faultPolicyHolder == null) ? new MessagePolicy() : faultPolicyHolder.getMessagePolicy();
                     return faultPolicy;
