@@ -236,22 +236,7 @@ public class LazyStreamBasedMessage extends Message{
         }
         return message.hasPayload();
     }
-    
-    /**
-     * Returns true if this message is a fault.
-     *
-     * <p>
-     * Just a convenience method built on {@link #getPayloadNamespaceURI()}
-     * and {@link #getPayloadLocalPart()}.
-     */
-    public boolean isFault() {
-        return false;
-        //        if(!readMessage){
-        //            cacheMessage();
-        //        }
-        //        return message.isFault();
-    }
-    
+        
     /**
      * Consumes this message including the envelope.
      * returns it as a {@link Source} object.
