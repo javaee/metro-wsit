@@ -137,7 +137,7 @@ public class SOAPUtil {
 
     /**
      * Create and initialize a WssSoapFaultException.
-     */
+     
     public static WssSoapFaultException newSOAPFaultException(
             String faultstring,
             Throwable th) {
@@ -145,7 +145,7 @@ public class SOAPUtil {
                 new WssSoapFaultException(null, faultstring, null, null);
         sfe.initCause(th);
         return sfe;
-    }
+    }*/
 
     /**
      * Create and initialize a WssSoapFaultException.
@@ -155,6 +155,9 @@ public class SOAPUtil {
             String faultstring,
             Throwable th) {
 
+        if (!isEnableFaultDetail()) {
+           return new WssSoapFaultException(MessageConstants.WSSE_INVALID_SECURITY, getLocalizedGenericError(), null, null);
+        }
         WssSoapFaultException sfe =
                 new WssSoapFaultException(faultCode, faultstring, null, null);
         sfe.initCause(th);

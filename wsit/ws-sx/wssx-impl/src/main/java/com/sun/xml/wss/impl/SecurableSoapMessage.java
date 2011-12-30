@@ -345,8 +345,9 @@ public final class SecurableSoapMessage extends SOAPMessage {
             Throwable th) {
         String fault = SOAPUtil.isEnableFaultDetail() ?
             faultstring : SOAPUtil.getLocalizedGenericError();
+        QName fc = SOAPUtil.isEnableFaultDetail() ? faultCode : MessageConstants.WSSE_INVALID_SECURITY;
         WssSoapFaultException sfe =
-                new WssSoapFaultException(faultCode, fault, null, null);
+                new WssSoapFaultException(fc, fault, null, null);
         if (SOAPUtil.isEnableFaultDetail()) {
             sfe.initCause(th);
         }
