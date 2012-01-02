@@ -1,3 +1,2 @@
 com.sun.xml.ws.db.glassfish.JAXBRIContextFactory
 com.sun.xml.ws.db.toplink.JAXBContextFactory
-com.sun.xml.ws.db.sdo.SDOContextFactory
